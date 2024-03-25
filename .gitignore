@@ -1,0 +1,5 @@
+.vscode
+source/.vs
+source/obj
+*.pdb
+output/
