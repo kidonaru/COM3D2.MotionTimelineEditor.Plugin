@@ -48,6 +48,7 @@ https://ux.getuploader.com/com3d2_mod_kyouyu/download/181
 
 
 詳細な操作方法については、Twitterに上げている動画などを参照してください。
+https://twitter.com/kidonaru/status/1775174898111091134
 
 
 ## キーボード操作
