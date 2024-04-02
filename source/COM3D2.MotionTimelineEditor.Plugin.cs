@@ -291,6 +291,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        void OnApplicationQuit()
+        {
+            SaveConfigXml();
+        }
+
         public void OnRefresh()
         {
             UpdateTexture();
@@ -415,6 +420,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             GUI.skin.customStyles = customStyles.ToArray();
+
+            if (config.windowPosX != -1 && config.windowPosY != -1)
+            {
+                rc_stgw.x = config.windowPosX;
+                rc_stgw.y = config.windowPosY;
+            }
         }
 
         GameObject gearMenuIcon = null;
@@ -465,11 +476,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             subWindow.subWindowType = subWindowType;
             SH.UIResume();
 
-            var newTexture = texture.ResizeTexture(width, height);
-            UTY.SaveImage(newTexture, filePath);
+            texture.ResizeTexture(width, height);
+            UTY.SaveImage(texture, filePath);
 
             UnityEngine.Object.Destroy(texture);
-            UnityEngine.Object.Destroy(newTexture);
 
             yield break;
         }
@@ -495,13 +505,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     ScHeight = Screen.height;
                 }
 
-                if (config.windowPosX == -1 && config.windowPosY == -1)
-                {
-                    rc_stgw.x = Screen.width + WIDTH_DPOS;
-                    rc_stgw.y = Screen.height + HEIGHT_DPOS;
-                    Extensions.AdjustWindowPosition(ref rc_stgw);
-                }
-
                 if (prevWindowPos != rc_stgw.position)
                 {
                     subWindow.ResetPosition();
@@ -517,7 +520,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     config.windowPosX = (int)rc_stgw.x;
                     config.windowPosY = (int)rc_stgw.y;
-                    config.dirty = true;
                 }
 
                 if (config.dirty && Input.GetMouseButtonUp(0))

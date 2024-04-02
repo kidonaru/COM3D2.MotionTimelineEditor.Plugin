@@ -640,7 +640,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     else if (boneType == IKManager.BoneType.Spine0)
                     {
                         newEulerAngles.x = 270f - (eulerAngles.x - 270f);
-                        newEulerAngles.z = 90f - (eulerAngles.z - 90f);
+                        //newEulerAngles.z = 90f - (eulerAngles.z - 90f);
                     }
                     else
                     {

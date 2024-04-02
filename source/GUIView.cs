@@ -80,7 +80,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             fontSize = 12,
             alignment = TextAnchor.MiddleCenter,
             normal = {
-                background = CreateColorTexture(new Color(0, 0, 0, 0.8f))
+                background = CreateColorTexture(new Color(0, 0, 0, 0.5f))
             }
         };
 
@@ -531,7 +531,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             bool isClicked = GUI.Button(drawRect, "", gsTile);
 
             var thumb = content.thum == null ? dummyTexture : content.thum;
-            var imageRect = new Rect(drawRect.x, drawRect.y, drawRect.width, drawRect.height - 20);
+            float aspect = (float)thumb.width / thumb.height;
+
+            float drawWidth = drawRect.width;
+            float drawHeight = drawWidth / aspect;
+
+            if (drawHeight > drawRect.height - 20) {
+                drawHeight = drawRect.height - 20;
+                drawWidth = drawHeight * aspect;
+            }
+
+            float x = drawRect.x + (drawRect.width - drawWidth) / 2;
+            float y = drawRect.y + (drawRect.height - 20 - drawHeight) / 2;
+
+            var imageRect = new Rect(x, y, drawWidth, drawHeight);
             GUI.DrawTexture(imageRect, thumb);
 
             var labelRect = new Rect(drawRect.x, drawRect.y + drawRect.height - 20, drawRect.width, 20);

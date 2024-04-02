@@ -87,7 +87,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return Path.ChangeExtension(path, ".png");
         }
 
-        public static Texture2D ResizeTexture(
+        public static void ResizeTexture(
+            this Texture2D sourceTexture,
+            int targetWidth,
+            int targetHeight)
+        {
+            float sourceAspect = (float)sourceTexture.width / sourceTexture.height;
+            float targetAspect = (float)targetWidth / targetHeight;
+
+            int width, height;
+            if (sourceAspect > targetAspect)
+            {
+                width = targetWidth;
+                height = (int)(width / sourceAspect);
+            }
+            else
+            {
+                height = targetHeight;
+                width = (int)(height * sourceAspect);
+            }
+			TextureScale.Bilinear(sourceTexture, width, height);
+        }
+
+        public static Texture2D ResizeAndCropTexture(
             this Texture2D sourceTexture,
             int targetWidth,
             int targetHeight)

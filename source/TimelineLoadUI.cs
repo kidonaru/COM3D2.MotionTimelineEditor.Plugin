@@ -91,9 +91,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         -1,
                         -1,
                         ref scrollPosition,
-                        80,
-                        80 * config.thumHeight / config.thumWidth + 20,
-                        3);
+                        120,
+                        120 * config.thumHeight / config.thumWidth + 20,
+                        2);
                     if (index != -1)
                     {
                         timelineManager.LoadTimeline(fileList[index].name);

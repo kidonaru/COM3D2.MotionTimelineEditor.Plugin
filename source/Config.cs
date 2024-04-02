@@ -29,7 +29,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int frameHeight = 20;
         public int frameNoInterval = 5;
         public int thumWidth = 256;
-        public int thumHeight = 256;
+        public int thumHeight = 192;
         public int windowPosX = -1;
         public int windowPosY = -1;
 
