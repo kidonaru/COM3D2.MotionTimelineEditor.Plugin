@@ -208,3 +208,26 @@ https://github.com/kidonaru/COM3D2.MotionTimelineEditor.Plugin
 
 質問、要望などは@kidonaruまで (可能な範囲で対応します)
 https://twitter.com/kidonaru
+
+
+### プラグイン開発者向け
+
+このプラグインの開発に手伝っていただける場合、下記手順でプルリクエストを送信してください。
+
+1. このリポジトリをフォークします
+
+2. フォークしたリポジトリを、ローカルの`COM3D2\Sybaris`以下にクローン
+```bash
+cd [COM3D2のインストールディレクトリ]\Sybaris
+git clone https://github.com/[自分のユーザー名]/COM3D2.MotionTimelineEditor.Plugin.git
+```
+
+3. クローンしたディレクトリをVS Codeなどで開く
+
+4. コード修正後、デバッグ用ビルドスクリプトを実行し動作確認
+(自動でUnityInjector内にコピーされます)
+```bash
+.\debug.bat
+```
+
+5. 差分をリモートにプッシュして、フォーク元に対してプルリクエストを送信
