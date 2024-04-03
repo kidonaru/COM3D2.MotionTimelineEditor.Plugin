@@ -13,7 +13,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using SH = StudioHack;
 
-    [PluginFilter( "COM3D2x64" ), PluginName("COM3D2.MotionTimelineEditor.Plugin"), PluginVersion( "1.0.0.0" )]
+    [PluginFilter( "COM3D2x64" ), PluginName("COM3D2.MotionTimelineEditor.Plugin"), PluginVersion( "1.0.0.1" )]
     public class MotionTimelineEditor : PluginBase
     {
         public readonly static int WINDOW_ID = 615814;

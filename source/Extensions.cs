@@ -12,7 +12,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public static class Extensions
     {
         public static readonly string PluginName = "MotionTimelineEditor";
-        public static readonly string PluginVersion = "1.0.0.0";
+        public static readonly string PluginVersion = "1.0.0.1";
         public static readonly string WindowName = PluginName + " " + PluginVersion;
 
         public static readonly string UserDataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Config");
