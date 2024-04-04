@@ -25,6 +25,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool pluginEnabled = true;
         public bool isEasyEdit = false;
         public bool isAutoScroll = false;
+        public TangentType defaultTangentType = TangentType.EaseInOut;
         public int frameWidth = 11;
         public int frameHeight = 20;
         public int frameNoInterval = 5;
@@ -42,5 +43,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Color timelineMenuSelectBgColor = new Color(255 / 255f, 0 / 255f, 0 / 255f, 0.2f);
         public Color timelineMenuSelectTextColor = new Color(249 / 255f, 193 / 255f, 207/ 255f);
         public float timelineBgAlpha = 0.5f;
+        public Color curveLineColor = new Color(101 / 255f, 154 / 255f, 210 / 255f);
+        public Color curveBgColor = new Color(0 / 255f, 0 / 255f, 0 / 255f, 0.3f);
     }
 }

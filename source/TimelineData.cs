@@ -164,6 +164,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return null;
         }
 
+        public FrameData GetOrCreateFrame(int frameNo)
+        {
+            var frame = GetFrame(frameNo);
+            if (frame != null)
+            {
+                return frame;
+            }
+
+            frame = new FrameData(frameNo);
+            keyFrames.Add(frame);
+            keyFrames.Sort((a, b) => a.frameNo - b.frameNo);
+            return frame;
+        }
+
         public void RemoveFrame(int frameNo)
         {
             var frame = GetFrame(frameNo);
@@ -175,32 +189,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void UpdateFrame(int frameNo, CacheBoneDataArray boneDataArray)
         {
-            var frame = GetFrame(frameNo);
-            if (frame != null)
-            {
-                frame.SetCacheBoneDataArray(boneDataArray);
-                return;
-            }
-
-            frame = new FrameData(frameNo);
+            var frame = GetOrCreateFrame(frameNo);
             frame.SetCacheBoneDataArray(boneDataArray);
-            keyFrames.Add(frame);
-            keyFrames.Sort((a, b) => a.frameNo - b.frameNo);
+        }
+
+        public void SetBone(int frameNo, BoneData bone)
+        {
+            var frame = GetOrCreateFrame(frameNo);
+            frame.SetBone(bone);
+        }
+
+        public void SetBones(int frameNo, IEnumerable<BoneData> bones)
+        {
+            var frame = GetOrCreateFrame(frameNo);
+            frame.SetBones(bones);
+        }
+        
+        public void UpdateBone(int frameNo, BoneData bone)
+        {
+            var frame = GetOrCreateFrame(frameNo);
+            frame.UpdateBone(bone);
         }
 
         public void UpdateBones(int frameNo, IEnumerable<BoneData> bones)
         {
-            var frame = GetFrame(frameNo);
-            if (frame != null)
-            {
-                frame.UpdateBones(bones);
-                return;
-            }
-
-            frame = new FrameData(frameNo);
+            var frame = GetOrCreateFrame(frameNo);
             frame.UpdateBones(bones);
-            keyFrames.Add(frame);
-            keyFrames.Sort((a, b) => a.frameNo - b.frameNo);
         }
 
         public void CleanFrames()
@@ -241,9 +255,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return keyFrames.First(f => f.frameNo > frameNo);
         }
 
-        public BoneData GetPrevBone(int frameNo, string path)
+        public BoneData GetPrevBone(int frameNo, string path, out int prevFrameNo)
         {
             BoneData prevBone = null;
+            prevFrameNo = -1;
             foreach (var frame in keyFrames)
             {
                 if (frame.frameNo >= frameNo)
@@ -255,10 +270,57 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (bone != null)
                 {
                     prevBone = bone;
+                    prevFrameNo = frame.frameNo;
                 }
             }
 
+            if (prevBone == null && isLoopAnm && frameNo <= maxFrameNo)
+            {
+                prevBone = GetPrevBone(maxFrameNo + 1, path, out prevFrameNo);
+                prevFrameNo -= maxFrameNo;
+            }
+
             return prevBone;
+        }
+
+        public BoneData GetPrevBone(int frameNo, string path)
+        {
+            int prevFrameNo;
+            return GetPrevBone(frameNo, path, out prevFrameNo);
+        }
+
+        public BoneData GetPrevBone(BoneData bone)
+        {
+            return GetPrevBone(bone.frameNo, bone.bonePath);
+        }
+
+        public BoneData GetNextBone(int frameNo, string path, out int nextFrameNo)
+        {
+            BoneData nextBone = null;
+            nextFrameNo = -1;
+            foreach (var frame in keyFrames)
+            {
+                if (frame.frameNo <= frameNo)
+                {
+                    continue;
+                }
+
+                var bone = frame.GetBone(path);
+                if (bone != null)
+                {
+                    nextBone = bone;
+                    nextFrameNo = frame.frameNo;
+                    break;
+                }
+            }
+
+            if (nextBone == null && isLoopAnm && frameNo >= 0)
+            {
+                nextBone = GetNextBone(-1, path, out nextFrameNo);
+                nextFrameNo += maxFrameNo;
+            }
+
+            return nextBone;
         }
 
         public FrameData GetActiveFrame(float frameNo)
@@ -311,6 +373,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public void UpdateTangent()
+        {
+            foreach (var frame in keyFrames)
+            {
+                var currentTime = GetFrameTimeSecond(frame.frameNo);
+                foreach (var bone in frame.bones)
+                {
+                    if (!bone.transform.NeedsTangentUpdate()) 
+                    {
+                        continue;
+                    }
+
+                    int prevFrameNo;
+                    var prevBone = GetPrevBone(frame.frameNo, bone.bonePath, out prevFrameNo);
+
+                    int nextFrameNo;
+                    var nextBone = GetNextBone(frame.frameNo, bone.bonePath, out nextFrameNo);
+
+                    var prevTime = GetFrameTimeSecond(prevFrameNo);
+                    var nextTime = GetFrameTimeSecond(nextFrameNo);
+
+                    bone.transform.UpdateTangent(
+                        prevBone != null ? prevBone.transform : null,
+                        nextBone != null ? nextBone.transform : null,
+                        currentTime,
+                        prevTime,
+                        nextTime);
+                }
+            }
+        }
+
         public byte[] GetAnmBinary(out string message)
         {
             if (!IsValidData(out message))
@@ -320,13 +413,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var maxSecond = GetFrameTimeSecond(maxFrameNo);
 
+            var times = new List<float>(keyFrames.Count);
+            var valuesList = new List<float[]>(keyFrames.Count);
+            var inTangentsList = new List<float[]>(keyFrames.Count);
+            var outTangentsList = new List<float[]>(keyFrames.Count);
+
             Action<BinaryWriter, BoneData> write_bone_data = delegate (BinaryWriter w, BoneData first_bone_data)
             {
                 w.Write((byte)1);
                 w.Write(first_bone_data.bonePath);
 
-                var times = new List<float>(keyFrames.Count);
-                var valuesList = new List<float[]>(keyFrames.Count);
+                times.Clear();
+                valuesList.Clear();
+                inTangentsList.Clear();
+                outTangentsList.Clear();
+
                 bool hasLastKey = false;
                 foreach (var frame in keyFrames)
                 {
@@ -335,6 +436,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         times.Add(GetFrameTimeSecond(frame.frameNo));
                         valuesList.Add(bone.transform.values);
+                        inTangentsList.Add(bone.transform.inTangents);
+                        outTangentsList.Add(bone.transform.outTangents);
                         hasLastKey = frame.frameNo == maxFrameNo;
                     }
                 }
@@ -346,12 +449,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         // ループアニメーションの場合は最終フレームに最初のフレームを追加
                         times.Add(maxSecond);
                         valuesList.Add(valuesList[0]);
+                        inTangentsList.Add(inTangentsList[0]);
+                        outTangentsList.Add(outTangentsList[0]);
                     }
                     else
                     {
                         // ループアニメーションでない場合は最終フレームに最後のフレームを追加
                         times.Add(maxSecond);
                         valuesList.Add(valuesList.Last());
+                        inTangentsList.Add(inTangentsList.Last());
+                        outTangentsList.Add(outTangentsList.Last());
                     }
                 }
 
@@ -363,8 +470,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         w.Write(times[j]);
                         w.Write(valuesList[j][i]);
-                        w.Write(0);
-                        w.Write(0);
+                        w.Write(inTangentsList[j][i]);
+                        w.Write(outTangentsList[j][i]);
                     }
                 }
             };
@@ -460,6 +567,55 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             tex.SetPixels(pixels);
             tex.Apply();
             return tex;
+        }
+
+        public static void ClearTexture(Texture2D texture, Color color)
+        {
+            var pixels = new Color[texture.width * texture.height];
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                pixels[i] = color;
+            }
+            texture.SetPixels(pixels);
+            texture.Apply();
+        }
+
+        // ヘルミート曲線の計算
+        private static float Hermite(
+            float t,
+            float outTangent,
+            float inTangent)
+        {
+            float t2 = t * t;
+            float t3 = t2 * t;
+            return (2 * t3 - 3 * t2 + 1) * 0 + (t3 - 2 * t2 + t) * outTangent + (-2 * t3 + 3 * t2) * 1 + (t3 - t2) * inTangent;
+        }
+
+        public static void UpdateCurveTexture(
+            Texture2D texture,
+            float outTangent,
+            float inTangent,
+            Color lineColor,
+            int lineWidth)
+        {
+            var width = texture.width;
+            var height = texture.height;
+            var halfLineWidth = lineWidth / 2;
+
+            for (int x = 0; x < width; x++)
+            {
+                float t = x / (float)width;
+                int y = (int)(Hermite(t, outTangent, inTangent) * height);
+
+                y -= halfLineWidth;
+                for (int i = 0; i < lineWidth; i++)
+                {
+                    var yy = Mathf.Clamp(y + i, 0, height - 1);
+                    texture.SetPixel(x, yy, lineColor);
+                }
+            }
+
+            texture.Apply();
         }
     }
 }

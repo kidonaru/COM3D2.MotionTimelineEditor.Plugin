@@ -24,8 +24,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public List<TimelineFile> timelineFileList = new List<TimelineFile>(64);
         private long playingAnmId = -1;
         public HashSet<FrameData> selectedRefFrames = new HashSet<FrameData>();
-        public Dictionary<int, FrameData> selectedTmpFrames = new Dictionary<int, FrameData>();
-        private float prevMotionSliderRate = -1f;
+        public HashSet<BoneData> selectedBones = new HashSet<BoneData>();        private float prevMotionSliderRate = -1f;
         public string errorMessage = "";
         public Action onRefresh = null;
         public FrameData initialEditFrame;
@@ -339,6 +338,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool CreateAndApplyAnm()
         {
             timeline.FixRotation();
+            timeline.UpdateTangent();
 
             var anmData = GetAnmBinary();
             if (anmData == null)
@@ -449,24 +449,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyCurrentFrame(true);
         }
 
-        public FrameData GetSelectedTmpFrame(int frameNo)
-        {
-            FrameData tmpFrame = null;
-            selectedTmpFrames.TryGetValue(frameNo, out tmpFrame);
-            return tmpFrame;
-        }
-
-        public FrameData GetOrCreateSelectedTmpFrame(int frameNo)
-        {
-            var tmpFrame = GetSelectedTmpFrame(frameNo);
-            if (tmpFrame == null)
-            {
-                tmpFrame = new FrameData(frameNo);
-                selectedTmpFrames[frameNo] = tmpFrame;
-            }
-            return tmpFrame;
-        }
-
         public bool IsSelectedFrame(FrameData frame)
         {
             return selectedRefFrames.Contains(frame);
@@ -474,17 +456,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool IsSelectedBone(FrameData frame, BoneData bone)
         {
-            if (bone == null)
-            {
-                return false;
-            }
-
-            var tmpFrame = GetSelectedTmpFrame(frame.frameNo);
-            if (tmpFrame != null && tmpFrame.GetBone(bone.bonePath) != null)
-            {
-                return true;
-            }
-            return false;
+            return selectedBones.Contains(bone);
         }
 
         public void SelectFrame(FrameData frame, bool isMultiSelect)
@@ -540,7 +512,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var frame = timeline.GetFrame(i);
                     if (frame != null)
                     {
-                        var selectedBones = new List<BoneData>();
                         foreach (var bone in frame.bones)
                         {
                             foreach (var boneMenuItem in selectedMenuItems)
@@ -551,12 +522,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                     break;
                                 }
                             }
-                        }
-
-                        if (selectedBones.Count > 0)
-                        {
-                            var tmpFrame = GetOrCreateSelectedTmpFrame(frame.frameNo);
-                            tmpFrame.UpdateBones(selectedBones);
                         }
                     }
                 }
@@ -570,43 +535,51 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var tmpFrame = GetOrCreateSelectedTmpFrame(frame.frameNo);
+            bool hasSelected = false;
+            foreach (var bone in bones)
+            {
+                if (selectedBones.Contains(bone))
+                {
+                    hasSelected = true;
+                    break;
+                }
+            }
 
             // 通常選択動作
             if (!isMultiSelect)
             {
-                if (!tmpFrame.HasAnyBones(bones))
+                if (!hasSelected)
                 {
-                    tmpFrame.ClearBones();
-                    tmpFrame.UpdateBones(bones);
-
-                    selectedTmpFrames.Clear();
-                    selectedTmpFrames[tmpFrame.frameNo] = tmpFrame;
+                    selectedBones.Clear();
+                    selectedBones.UnionWith(bones);
                 }
             }
             // 複数選択動作
             else
             {
-                if (tmpFrame.HasAnyBones(bones))
+                if (hasSelected)
                 {
-                    tmpFrame.RemoveBones(bones);
+                    foreach (var bone in bones)
+                    {
+                        selectedBones.Remove(bone);
+                    }
                 }
                 else
                 {
-                    tmpFrame.UpdateBones(bones);
+                    selectedBones.UnionWith(bones);
                 }
             }
         }
 
         public bool HasSelected()
         {
-            return selectedRefFrames.Count > 0 || selectedTmpFrames.Count > 0;
+            return selectedRefFrames.Count > 0 || selectedBones.Count > 0;
         }
 
         public void UnselectAll()
         {
             selectedRefFrames.Clear();
-            selectedTmpFrames.Clear();
+            selectedBones.Clear();
         }
 
         public void SelectAllFrames()
@@ -621,12 +594,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             else
             {
-                selectedTmpFrames.Clear();
+                selectedBones.Clear();
                 foreach (var frame in timeline.keyFrames)
                 {
-                    var tmpFrame = new FrameData(frame.frameNo);
-                    tmpFrame.UpdateBones(frame.bones);
-                    selectedTmpFrames[tmpFrame.frameNo] = tmpFrame;
+                    selectedBones.UnionWith(frame.bones);
                 }
             }
         }
@@ -638,13 +609,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            foreach (var tmpFrame in selectedTmpFrames.Values)
+            var frames = new HashSet<FrameData>();
+            foreach (var bone in selectedBones)
             {
-                var frame = timeline.GetFrame(tmpFrame.frameNo);
+                var frame = bone.parentFrame;
                 if (frame != null)
                 {
-                    tmpFrame.UpdateBones(frame.bones);
+                    frames.Add(frame);
                 }
+            }
+
+            foreach (var frame in frames)
+            {
+                selectedBones.UnionWith(frame.bones);
             }
         }
 
@@ -660,13 +637,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             else
             {
-                foreach (var tmpFrame in selectedTmpFrames.Values)
+                foreach (var bone in selectedBones)
                 {
-                    var frame = timeline.GetFrame(tmpFrame.frameNo);
-                    frame.RemoveBones(tmpFrame.bones);
+                    var frame = bone.parentFrame;
+                    if (frame != null)
+                    {
+                        frame.RemoveBone(bone);
+                    }
                 }
                 timeline.CleanFrames();
-                selectedTmpFrames.Clear();
+                selectedBones.Clear();
             }
 
             ApplyCurrentFrame(true);
@@ -680,7 +660,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             else
             {
-                MoveSelectedTmpFrames(delta);
+                MoveSelectedBones(delta);
             }
         }
 
@@ -719,19 +699,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyCurrentFrame(true);
         }
 
-        private void MoveSelectedTmpFrames(int delta)
+        private void MoveSelectedBones(int delta)
         {
-            foreach (var tmpFrame in selectedTmpFrames.Values)
+            foreach (var selectedBone in selectedBones)
             {
-                var targetFrame = timeline.GetFrame(tmpFrame.frameNo + delta);
+                var selectedFrame = selectedBone.parentFrame;
+                var targetFrame = timeline.GetFrame(selectedFrame.frameNo + delta);
 
                 // 移動先のボーンが重複していたら移動しない
                 if (targetFrame != null)
                 {
-                    var targetBone = targetFrame.FindBone(bone =>
-                    {
-                        return tmpFrame.GetBone(bone.bonePath) != null;
-                    });
+                    var targetBone = targetFrame.GetBone(selectedBone.bonePath);
                     if (targetBone != null && !IsSelectedBone(targetFrame, targetBone))
                     {
                         return;
@@ -739,38 +717,36 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 // マイナスフレームに移動しようとしたら移動しない
-                if (tmpFrame.frameNo + delta < 0)
+                if (selectedFrame.frameNo + delta < 0)
                 {
                     return;
                 }
 
                 // 移動先のフレーム番号が最大フレーム番号を超えたら移動しない
-                if (tmpFrame.frameNo + delta > timeline.maxFrameNo)
+                if (selectedFrame.frameNo + delta > timeline.maxFrameNo)
                 {
                     return;
                 }
             }
 
-            var tmpFrames = selectedTmpFrames.Values.ToList();
+            var sortedBones = selectedBones.ToList();
             if (delta < 0)
             {
-                tmpFrames.Sort((a, b) => a.frameNo - b.frameNo);
+                sortedBones.Sort((a, b) => a.frameNo - b.frameNo);
             }
             else
             {
-                tmpFrames.Sort((a, b) => b.frameNo - a.frameNo);
+                sortedBones.Sort((a, b) => b.frameNo - a.frameNo);
             }
 
-            foreach (var tmpFrame in tmpFrames)
+            foreach (var selectedBone in sortedBones)
             {
-                var sourceFrame = timeline.GetFrame(tmpFrame.frameNo);
-                sourceFrame.RemoveBones(tmpFrame.bones);
+                var targetFrameNo = selectedBone.frameNo + delta;
+                var sourceFrame = selectedBone.parentFrame;
+                sourceFrame.RemoveBone(selectedBone);
 
-                tmpFrame.frameNo += delta;
-                timeline.UpdateBones(tmpFrame.frameNo, tmpFrame.bones);
+                timeline.SetBone(targetFrameNo, selectedBone);
             }
-
-            selectedTmpFrames = tmpFrames.ToDictionary(tmpFrame => tmpFrame.frameNo, tmpFrame => tmpFrame);
 
             timeline.CleanFrames();
 
@@ -834,23 +810,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             else
             {
-                // 選択済みボーン情報を更新
-                foreach (var tmpFrame in selectedTmpFrames.Values)
+                var tmpFrames = new Dictionary<int, FrameData>();
+                foreach (var bone in selectedBones)
                 {
-                    var frame = timeline.GetFrame(tmpFrame.frameNo);
-                    if (frame != null)
+                    FrameData tmpFrame;
+                    if (!tmpFrames.TryGetValue(bone.frameNo, out tmpFrame))
                     {
-                        foreach (var tmpBone in tmpFrame.bones)
-                        {
-                            var bone = frame.GetBone(tmpBone.bonePath);
-                            if (bone != null)
-                            {
-                                tmpBone.transform = bone.transform;
-                            }
-                        }
+                        tmpFrame = new FrameData(bone.frameNo);
+                        tmpFrames[bone.frameNo] = tmpFrame;
                     }
+
+                    tmpFrame.UpdateBone(bone);
                 }
-                copyFrameData.frames = selectedTmpFrames.Values.ToList();
+                copyFrameData.frames = tmpFrames.Values.ToList();
             }
 
             try

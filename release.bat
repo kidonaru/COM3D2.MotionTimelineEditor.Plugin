@@ -3,7 +3,7 @@ chcp 65001
 
 call build.bat
 
-set VERSION=1.0.0.1
+set VERSION=1.0.1.0
 set PLUGIN_NAME=COM3D2.MotionTimelineEditor.Plugin
 
 if exist output rmdir /s /q output

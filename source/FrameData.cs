@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -9,6 +10,82 @@ using UnityEngine;
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using SH = StudioHack;
+
+    public enum TangentValueType
+    {
+        X,
+        Y,
+        Z,
+        Rotation,
+        All,
+        Max,
+    }
+
+    public enum TangentType
+    {
+        EaseInOut,
+        EaseIn,
+        EaseOut,
+        Linear,
+        Max,
+    }
+
+    public class TangentData
+    {
+        private float _value;
+        private float _normalizedValue;
+
+        public static readonly string[] tangentValueTypeNames = new string[] {
+            "X移動", "Y移動", "Z移動", "回転", "すべて" };
+
+        public static readonly string[] tangentTypeNames = new string[] {
+            "EaseInOut", "EaseIn", "EaseOut", "線形補完" };
+
+        public float value
+        {
+            get
+            {
+                return _value;
+            }
+        }
+
+        public float normalizedValue
+        {
+            get
+            {
+                return _normalizedValue;
+            }
+            set
+            {
+                if (_normalizedValue == value)
+                {
+                    return;
+                }
+
+                _value = _normalizedValue = value;
+            }
+        }
+
+        public bool isZero
+        {
+            get
+            {
+                return _normalizedValue == 0f;
+            }
+        }
+
+        public void UpdateDiff(
+            float diffTime,
+            float diffValue)
+        {
+            if (isZero || diffValue == 0f || diffTime == 0f)
+            {
+                _value = 0f;
+                return;
+            }
+            _value = _normalizedValue * diffValue / diffTime;
+        }
+    }
 
     public class TransformData
     {
@@ -24,14 +101,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set
             {
                 _name = value;
-                UpdateFlags();
+                Initialize();
             }
         }
 
         [XmlIgnore]
-        public Vector3 localPosition;
+        public Vector3 localPosition = Vector3.zero;
         [XmlIgnore]
-        public Quaternion localRotation;
+        public Quaternion localRotation = Quaternion.identity;
 
         [XmlIgnore]
         public bool isBipRoot { get; private set; }
@@ -42,19 +119,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlIgnore]
         public bool isHead { get; private set; }
 
+        [XmlIgnore]
+        private float[] _values = new float[0];
+
         [XmlElement("Value")]
         public float[] values
         {
             get
             {
+                _values[0] = localRotation.x;
+                _values[1] = localRotation.y;
+                _values[2] = localRotation.z;
+                _values[3] = localRotation.w;
+
                 if (isBipRoot)
                 {
-                    return new float[7] { localRotation.x, localRotation.y, localRotation.z, localRotation.w, localPosition.x, localPosition.y, localPosition.z };
+                    _values[4] = localPosition.x;
+                    _values[5] = localPosition.y;
+                    _values[6] = localPosition.z;
                 }
-                else
-                {
-                    return new float[4] { localRotation.x, localRotation.y, localRotation.z, localRotation.w };
-                }
+
+                return _values;
             }
             set
             {
@@ -63,6 +148,99 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (isBipRoot)
                 {
                     localPosition = new Vector3(value[4], value[5], value[6]);
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public TangentData[] inTangentDataList = new TangentData[0];
+        [XmlIgnore]
+        public TangentData[] outTangentDataList = new TangentData[0];
+
+        [XmlIgnore]
+        private float[] _inTangents = new float[0];
+
+        [XmlIgnore]
+        public float[] inTangents
+        {
+            get
+            {
+                for (int i = 0; i < inTangentDataList.Length; i++)
+                {
+                    _inTangents[i] = inTangentDataList[i].value;
+                }
+                return _inTangents;
+            }
+        }
+
+        [XmlElement("InTangent")]
+        public float[] normalizedInTangents
+        {
+            get
+            {
+                var result = new float[inTangentDataList.Length];
+                for (int i = 0; i < inTangentDataList.Length; i++)
+                {
+                    result[i] = inTangentDataList[i].normalizedValue;
+                }
+                return result;
+            }
+            set
+            {
+                for (int i = 0; i < inTangentDataList.Length; i++)
+                {
+                    if (value != null && i < value.Length)
+                    {
+                        inTangentDataList[i].normalizedValue = value[i];
+                    }
+                    else
+                    {
+                        inTangentDataList[i].normalizedValue = 0.0f;
+                    }
+                }
+            }
+        }
+
+        [XmlIgnore]
+        private float[] _outTangents = new float[0];
+
+        [XmlIgnore]
+        public float[] outTangents
+        {
+            get
+            {
+                for (int i = 0; i < outTangentDataList.Length; i++)
+                {
+                    _outTangents[i] = outTangentDataList[i].value;
+                }
+                return _outTangents;
+            }
+        }
+
+        [XmlElement("OutTangent")]
+        public float[] normalizedOutTangents
+        {
+            get
+            {
+                var result = new float[outTangentDataList.Length];
+                for (int i = 0; i < outTangentDataList.Length; i++)
+                {
+                    result[i] = outTangentDataList[i].normalizedValue;
+                }
+                return result;
+            }
+            set
+            {
+                for (int i = 0; i < outTangentDataList.Length; i++)
+                {
+                    if (value != null && i < value.Length)
+                    {
+                        outTangentDataList[i].normalizedValue = value[i];
+                    }
+                    else
+                    {
+                        outTangentDataList[i].normalizedValue = 0.0f;
+                    }
                 }
             }
         }
@@ -90,8 +268,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public TransformData(string name)
         {
             this.name = name;
-            localPosition = Vector3.zero;
-            localRotation = Quaternion.identity;
         }
 
         public TransformData(Transform transform)
@@ -100,12 +276,88 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             FromTransform(transform);
         }
 
-        private void UpdateFlags()
+        public TransformData(TransformData transform)
+        {
+            this.name = transform.name;
+            FromTransformData(transform);
+        }
+
+        private void Initialize()
         {
             isBipRoot = name == "Bip01";
             isBustL = name == "Mune_L";
             isBustR = name == "Mune_R";
             isHead = name == "Bip01 Head";
+
+            var length = valueCount;
+            if (_values.Length != length)
+            {
+                _values = new float[length];
+                _inTangents = new float[length];
+                _outTangents = new float[length];
+                inTangentDataList = new TangentData[length];
+                outTangentDataList = new TangentData[length];
+
+                for (int i = 0; i < length; i++)
+                {
+                    inTangentDataList[i] = new TangentData();
+                    outTangentDataList[i] = new TangentData();
+                }
+            }
+        }
+
+        public bool NeedsTangentUpdate()
+        {
+            for (int i = 0; i < inTangentDataList.Length; i++)
+            {
+                if (!inTangentDataList[i].isZero)
+                {
+                    return true;
+                }
+            }
+
+            for (int i = 0; i < outTangentDataList.Length; i++)
+            {
+                if (!outTangentDataList[i].isZero)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public void UpdateTangent(
+            TransformData prevTransform,
+            TransformData nextTransform,
+            float currentTime,
+            float prevTime,
+            float nextTime)
+        {
+            var values = this.values;
+            if (prevTransform != null)
+            {
+                var prevValues = prevTransform.values;
+                var diffTime = prevTime - currentTime;
+
+                for (int i = 0; i < inTangentDataList.Length; i++)
+                {
+                    var diffValue = prevValues[i] - values[i];
+                    inTangentDataList[i].UpdateDiff(diffTime, diffValue);
+                }
+            }
+
+            if (nextTransform != null)
+            {
+                var nextValues = nextTransform.values;
+                var diffTime = nextTime - currentTime;
+
+                for (int i = 0; i < outTangentDataList.Length; i++)
+                {
+                    var diffValue = nextValues[i] - values[i];
+                    outTangentDataList[i].UpdateDiff(diffTime, diffValue);
+                }
+            }
         }
 
         public void FromTransform(Transform transform)
@@ -115,6 +367,75 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 localPosition = transform.localPosition;
             }
+        }
+
+        public void FromTransformData(TransformData transform)
+        {
+            localRotation = transform.localRotation;
+            if (isBipRoot)
+            {
+                localPosition = transform.localPosition;
+            }
+        }
+
+        public TangentData[] GetInTangentDataList(TangentValueType valueType)
+        {
+            switch (valueType)
+            {
+                case TangentValueType.X:
+                    if (isBipRoot)
+                    {
+                        return new TangentData[] { inTangentDataList[4] };
+                    }
+                    return new TangentData[0];
+                case TangentValueType.Y:
+                    if (isBipRoot)
+                    {
+                        return new TangentData[] { inTangentDataList[5] };
+                    }
+                    return new TangentData[0];
+                case TangentValueType.Z:
+                    if (isBipRoot)
+                    {
+                        return new TangentData[] { inTangentDataList[6] };
+                    }
+                    return new TangentData[0];
+                case TangentValueType.Rotation:
+                    return new TangentData[] { inTangentDataList[0], inTangentDataList[1], inTangentDataList[2], inTangentDataList[3] };
+                case TangentValueType.All:
+                    return inTangentDataList;
+            }
+            return new TangentData[0];
+        }
+
+        public TangentData[] GetOutTangentDataList(TangentValueType valueType)
+        {
+            switch (valueType)
+            {
+                case TangentValueType.X:
+                    if (isBipRoot)
+                    {
+                        return new TangentData[] { outTangentDataList[4] };
+                    }
+                    return new TangentData[0];
+                case TangentValueType.Y:
+                    if (isBipRoot)
+                    {
+                        return new TangentData[] { outTangentDataList[5] };
+                    }
+                    return new TangentData[0];
+                case TangentValueType.Z:
+                    if (isBipRoot)
+                    {
+                        return new TangentData[] { outTangentDataList[6] };
+                    }
+                    return new TangentData[0];
+                case TangentValueType.Rotation:
+                    return new TangentData[] { outTangentDataList[0], outTangentDataList[1], outTangentDataList[2], outTangentDataList[3] };
+                case TangentValueType.All:
+                    return outTangentDataList;
+            }
+            return new TangentData[0];
         }
 
         public override bool Equals(object obj)
@@ -140,6 +461,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return false;
             }
 
+            if (inTangentDataList.Length != other.inTangentDataList.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < inTangentDataList.Length; i++)
+            {
+                if (inTangentDataList[i].value != other.inTangentDataList[i].value)
+                {
+                    return false;
+                }
+            }
+
+            if (outTangentDataList.Length != other.outTangentDataList.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < outTangentDataList.Length; i++)
+            {
+                if (outTangentDataList[i].value != other.outTangentDataList[i].value)
+                {
+                    return false;
+                }
+            }
+
             return true;
         }
 
@@ -151,6 +498,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 hash = hash * 23 + name.GetHashCode();
                 hash = hash * 23 + localPosition.GetHashCode();
                 hash = hash * 23 + localRotation.GetHashCode();
+                hash = hash * 23 + inTangents.GetHashCode();
+                hash = hash * 23 + outTangents.GetHashCode();
                 return hash;
             }
         }
@@ -160,6 +509,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         [XmlElement("Transform")]
         public TransformData transform;
+
+        [XmlIgnore]
+        public FrameData parentFrame = null;
 
         public string bonePath
         {
@@ -174,6 +526,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return BoneUtils.GetBoneTypeByName(transform.name);
+            }
+        }
+
+        public int frameNo
+        {
+            get
+            {
+                return parentFrame != null ? parentFrame.frameNo : -1;
             }
         }
 
@@ -196,7 +556,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         /// <param name="prevBone"></param>
         public void FixRotation(BoneData prevBone)
         {
-            if (prevBone == null)
+            if (prevBone == null || prevBone == this)
             {
                 return;
             }
@@ -230,6 +590,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 foreach (var bone in value)
                 {
                     _boneMap[bone.bonePath] = bone;
+                    bone.parentFrame = this;
                 }
             }
         }
@@ -284,12 +645,45 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return bones.Any(HasBone);
         }
 
+        public void SetBone(BoneData bone)
+        {
+            if (bone == null)
+            {
+                return;
+            }
+
+            var path = bone.bonePath;
+            bone.parentFrame = this;
+            _boneMap[path] = bone;
+        }
+
+        public void SetBones(IEnumerable<BoneData> bones)
+        {
+            foreach (var bone in bones)
+            {
+                SetBone(bone);
+            }
+        }
+
         public void UpdateBone(BoneData bone)
         {
-            if (bone != null)
+            if (bone == null)
             {
-                _boneMap[bone.bonePath] = bone;
+                return;
             }
+
+            var path = bone.bonePath;
+
+            BoneData targetBone;
+            if (_boneMap.TryGetValue(path, out targetBone))
+            {
+                targetBone.transform.FromTransformData(bone.transform);
+                return;
+            }
+
+            targetBone = new BoneData(bone.transform);
+            targetBone.parentFrame = this;
+            _boneMap[path] = targetBone;
         }
 
         public void UpdateBones(IEnumerable<BoneData> bones)
@@ -305,6 +699,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (bone != null)
             {
                 _boneMap.Remove(bone.bonePath);
+                bone.parentFrame = null;
             }
         }
 
@@ -463,7 +858,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     boneData.transform.values = values;
                 }
 
-                UpdateBone(boneData);
+                SetBone(boneData);
             }
 
             bool useBustKeyL = false;
@@ -504,7 +899,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (pathDic.TryGetValue(path, out sourceBone))
                 {
                     var bone = new BoneData(sourceBone.transform);
-                    UpdateBone(bone);
+                    SetBone(bone);
                 }
             }
         }
@@ -666,7 +1061,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             ClearBones();
-            UpdateBones(newBones);
+            SetBones(newBones);
         }
     }
 }

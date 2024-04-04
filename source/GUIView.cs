@@ -485,6 +485,71 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public int DrawSelectList(
+            string label,
+            string[] names,
+            float width,
+            float height,
+            int selectedIndex)
+        {
+            var startPos = currentPos;
+            var baseDrawRect = GetDrawRect(width, height);
+
+            if (label != null)
+            {
+                var labelRect = GetDrawRect(labelWidth, height);
+                GUI.Label(labelRect, label, gsLabel);
+                currentPos.x += labelWidth + margin;
+                width -= labelWidth + margin;
+            }
+
+            {
+                var buttonRect = GetDrawRect(20, height);
+                if (GUI.Button(buttonRect, "<", gsButton))
+                {
+                    selectedIndex = selectedIndex - 1;
+                    if (selectedIndex < 0)
+                    {
+                        selectedIndex = names.Length - 1;
+                    }
+                }
+                currentPos.x += 20 + margin;
+            }
+
+            {
+                var drawRect = GetDrawRect(width - (20 + margin) * 2, height);
+                GUI.Label(drawRect, names[selectedIndex], gsLabel);
+                currentPos.x += width - (20 + margin) * 2;
+            }
+
+            {
+                var buttonRect = GetDrawRect(20, height);
+                if (GUI.Button(buttonRect, ">", gsButton))
+                {
+                    selectedIndex = selectedIndex + 1;
+                    if (selectedIndex >= names.Length)
+                    {
+                        selectedIndex = 0;
+                    }
+                }
+                currentPos.x += 20 + margin;
+            }
+
+            currentPos = startPos;
+            NextElement(baseDrawRect);
+
+            return selectedIndex;
+        }
+
+        public int DrawSelectList(
+            string[] names,
+            float width,
+            float height,
+            int selectedIndex)
+        {
+            return DrawSelectList(null, names, width, height, selectedIndex);
+        }
+
         public int DrawListView(
             string[] names,
             float width,
