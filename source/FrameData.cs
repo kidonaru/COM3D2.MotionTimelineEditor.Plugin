@@ -340,7 +340,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (pathDic.TryGetValue(path, out sourceBone))
                 {
                     var bone = new BoneData(sourceBone.transform);
-                    SetBone(bone);
+                    UpdateBone(bone);
                 }
             }
         }

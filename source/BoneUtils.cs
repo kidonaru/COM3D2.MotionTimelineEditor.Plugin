@@ -471,20 +471,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static readonly Dictionary<IKManager.BoneType, Vector3> InitialRotationMap = new Dictionary<IKManager.BoneType, Vector3>
         {
             {IKManager.BoneType.Root, new Vector3(270f, 180f, 270f)},
-            {IKManager.BoneType.Spine3, new Vector3(270f, 90f, 0f)},
+            {IKManager.BoneType.Spine3, new Vector3(0f, 0f, 0f)},
             {IKManager.BoneType.Spine2, new Vector3(0f, 0f, 0f)},
             {IKManager.BoneType.Spine1, new Vector3(0f, 0f, 0f)},
-            {IKManager.BoneType.Spine0, new Vector3(0f, 0f, 0f)},
+            {IKManager.BoneType.Spine0, new Vector3(270f, 90f, 0f)},
             {IKManager.BoneType.Neck, new Vector3(0f, 0f, 0f)},
             {IKManager.BoneType.Head, new Vector3(0f, 0f, 0f)},
             {IKManager.BoneType.Clavicle_L, new Vector3(0f, 270f, 180f)},
-            {IKManager.BoneType.UpperArm_L, new Vector3(90f, 0f, 0f)},
+            {IKManager.BoneType.UpperArm_L, new Vector3(90f, 300f, 0f)},
             {IKManager.BoneType.Forearm_L, new Vector3(0f, 0f, 0f)},
             {IKManager.BoneType.Hand_L, new Vector3(180f, 0f, 0f)},
             {IKManager.BoneType.Clavicle_R, new Vector3(0f, 90f, 180f)},
-            {IKManager.BoneType.UpperArm_R, new Vector3(-90f, 0f, 0f)},
+            {IKManager.BoneType.UpperArm_R, new Vector3(-90f, 60f, 0f)},
             {IKManager.BoneType.Forearm_R, new Vector3(0f, 0f, 0f)},
             {IKManager.BoneType.Hand_R, new Vector3(180f, 0f, 0f)},
+            {IKManager.BoneType.Pelvis, new Vector3(270f, 90f, 0f)},
+            {IKManager.BoneType.Thigh_L, new Vector3(0f, 180f, 0f)},
+            {IKManager.BoneType.Calf_L, new Vector3(0f, 0f, 0f)},
+            {IKManager.BoneType.Foot_L, new Vector3(0f, 0f, 0f)},
+            {IKManager.BoneType.Thigh_R, new Vector3(0f, 180f, 0f)},
+            {IKManager.BoneType.Calf_R, new Vector3(0f, 0f, 0f)},
+            {IKManager.BoneType.Foot_R, new Vector3(0f, 0f, 0f)},
         };
+
+        public static Vector3 GetInitialRotation(IKManager.BoneType boneType)
+        {
+            Vector3 initialRotation;
+            if (InitialRotationMap.TryGetValue(boneType, out initialRotation))
+            {
+                return initialRotation;
+            }
+            return Vector3.zero;
+        }
     }
 }

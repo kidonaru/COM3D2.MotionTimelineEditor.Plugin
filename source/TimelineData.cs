@@ -120,10 +120,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool isLoopAnm = true;
 
         [XmlElement("MinTangent")]
-        public float minTangent = 0f;
+        public float minTangent = -1f;
 
         [XmlElement("MaxTangent")]
-        public float maxTangent = 2f;
+        public float maxTangent = 5f;
 
         public int maxFrameCount
         {

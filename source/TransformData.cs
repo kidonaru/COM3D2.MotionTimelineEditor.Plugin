@@ -580,6 +580,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return new TangentData[0];
         }
 
+        public void Reset()
+        {
+            var boneType = BoneUtils.GetBoneTypeByName(name);
+            var initialRotation = BoneUtils.GetInitialRotation(boneType);
+            localRotation = Quaternion.Euler(initialRotation);
+
+            if (isBipRoot)
+            {
+                localPosition = new Vector3(0f, 0.9f, 0f);
+            }
+        }
+
         public override bool Equals(object obj)
         {
             var other = obj as TransformData;

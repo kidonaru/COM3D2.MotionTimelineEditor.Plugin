@@ -581,7 +581,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.BeginLayout(GUIView.LayoutDirection.Horizontal);
                 {
-                    float buttonWidth = 100;
+                    float buttonWidth = 80;
 
                     if (view.DrawButton("新規作成", buttonWidth, 20))
                     {
@@ -603,8 +603,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         timelineManager.OutputAnm();
                     }
 
-                    var isColor = timelneEnabled && timeline.isHoldActive ? Color.green : Color.white;
-                    if (view.DrawButton("IK固定", buttonWidth, 20, timelneEnabled, isColor))
+                    if (view.DrawButton("キーフレーム", buttonWidth, 20, timelneEnabled))
+                    {
+                        subWindow.ToggleSubWindow(SubWindowType.KeyFrame);
+                    }
+
+                    var ikColor = timelneEnabled && timeline.isHoldActive ? Color.green : Color.white;
+                    if (view.DrawButton("IK固定", buttonWidth, 20, timelneEnabled, ikColor))
                     {
                         subWindow.ToggleSubWindow(SubWindowType.IKHold);
                     }

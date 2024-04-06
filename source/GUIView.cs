@@ -11,6 +11,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Texture2D thum { get; }
     }
 
+    public class FloatFieldValue
+    {
+        public string label = null;
+        public string text = "";
+        public string format = "F2";
+
+        private float _value = float.NaN;
+        public float value
+        {
+            get
+            {
+                return _value;
+            }
+        }
+
+        public void UpdateValue(float value, bool updateText)
+        {
+            if (value == _value)
+            {
+                return;
+            }
+
+            _value = value;
+
+            if (updateText)
+            {
+                text = float.IsNaN(_value) ? "" : value.ToString(format);
+            }
+        }
+    }
+
     public class GUIView
     {
         public Vector2 currentPos;
@@ -347,6 +378,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int DrawIntField(int value, float width, float height)
         {
             return DrawIntField(null, value, width, height);
+        }
+
+        public float DrawFloatFieldValue(
+            FloatFieldValue fieldValue,
+            float width,
+            float height)
+        {
+            var newText = DrawTextField(fieldValue.label, fieldValue.text, width, height);
+            if (newText != fieldValue.text)
+            {
+                fieldValue.text = newText;
+
+                float newValue;
+                if (float.TryParse(newText, out newValue))
+                {
+                    fieldValue.UpdateValue(newValue, false);
+                }
+            }
+            return fieldValue.value;
         }
 
         public float DrawFloatField(string label, float value, float width, float height)

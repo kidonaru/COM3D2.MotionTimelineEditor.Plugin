@@ -339,6 +339,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool CreateAndApplyAnm()
         {
+            Extensions.LogDebug("CreateAndApplyAnm");
+
             timeline.FixRotation();
             timeline.UpdateTangent();
             timeline.UpdateDummyLastFrame();

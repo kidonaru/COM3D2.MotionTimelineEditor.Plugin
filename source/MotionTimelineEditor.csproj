@@ -94,6 +94,7 @@
     <Compile Include="GUIView.cs" />
     <Compile Include="IBoneMenuItem.cs" />
     <Compile Include="IKHoldUI.cs" />
+    <Compile Include="KeyFrameUI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
