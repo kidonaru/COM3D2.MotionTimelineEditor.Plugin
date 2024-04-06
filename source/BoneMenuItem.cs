@@ -121,7 +121,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool IsSelectedFrame(FrameData frame)
         {
             var bone = frame.GetBone(bonePath);
-            return timelineManager.IsSelectedBone(frame, bone);
+            return timelineManager.IsSelectedBone(bone);
         }
 
         public void SelectFrame(FrameData frame, bool isMultiSelect)
@@ -133,7 +133,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var bones = new List<BoneData> { bone };
-            timelineManager.SelectBones(frame, bones, isMultiSelect);
+            timelineManager.SelectBones(bones, isMultiSelect);
         }
     }
 }

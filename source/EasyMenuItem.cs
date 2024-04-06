@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class EasyMenuItem : IBoneMenuItem
@@ -83,12 +85,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool IsSelectedFrame(FrameData frame)
         {
-            return timelineManager.IsSelectedFrame(frame);
+            return frame.bones.Any(bone => timelineManager.IsSelectedBone(bone));
         }
 
         public void SelectFrame(FrameData frame, bool isMultiSelect)
         {
-            timelineManager.SelectFrame(frame, isMultiSelect);
+            timelineManager.SelectBones(frame.bones.ToList(), isMultiSelect);
         }
     }
 }

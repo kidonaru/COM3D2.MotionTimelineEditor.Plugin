@@ -348,7 +348,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             config = new Config();
             SaveConfigXml();
-            timelineManager.Refresh();
         }
 
         public void UpdateTexture()
@@ -778,7 +777,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     selectStartFrameNo = view.DrawIntField(selectStartFrameNo, 50, 20);
 
-                    view.DrawLabel("～", 20, 20);
+                    view.DrawLabel("～", 15, 20);
 
                     selectEndFrameNo = view.DrawIntField(selectEndFrameNo, 50, 20);
 
@@ -988,7 +987,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     if (Mathf.Abs(frameDragDelta.x) > frameWidth)
                     {
                         var deltaFrameNo = (int) (frameDragDelta.x / frameWidth);
-                        timelineManager.MoveSelectedFrames(deltaFrameNo);
+                        timelineManager.MoveSelectedBones(deltaFrameNo);
                         frameDragDelta.x -= deltaFrameNo * frameWidth;
                     }
                     //Extensions.LogInfo(String.Format("Mouse Drag: {0}, {1}", Event.current.delta.x, Event.current.delta.y));

@@ -130,24 +130,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var view = new GUIView(0, 20, WINDOW_WIDTH, WINDOW_HEIGHT - 20);
 
-                HashSet<BoneData> selectedBones;
-
-                if (config.isEasyEdit)
-                {
-                    selectedBones = new HashSet<BoneData>();
-                    var selectedFrames = timelineManager.selectedRefFrames;
-                    foreach (var selectedFrame in selectedFrames)
-                    {
-                        foreach (var bone in selectedFrame.bones)
-                        {
-                            selectedBones.Add(bone);
-                        }
-                    }
-                }
-                else
-                {
-                    selectedBones = timelineManager.selectedBones;
-                }
+                HashSet<BoneData> selectedBones = timelineManager.selectedBones;
 
                 var values = new float[6]
                 {
@@ -157,6 +140,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var includePos = false;
                 var includeRot = false;
 
+                var boneIndex = 0;
                 foreach (var bone in selectedBones)
                 {
                     var transform = bone.transform;
@@ -192,13 +176,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         }
                     }
 
-                    if (nanCount == 3)
+                    boneIndex++;
+
+                    if (boneIndex >= config.detailTransformCount || nanCount == 3)
                     {
                         break;
                     }
                 }
 
-                var boneIndex = 0;
+                boneIndex = 0;
                 foreach (var bone in selectedBones)
                 {
                     var transform = bone.transform;
@@ -233,7 +219,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     boneIndex++;
 
-                    if (boneIndex > 10 || nanCount == 3)
+                    if (boneIndex >= config.detailTransformCount || nanCount == 3)
                     {
                         break;
                     }
@@ -306,7 +292,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     GUI.enabled = true;
                 }
 
-                if (view.DrawButton("初期化", 80, 20))
+                if (view.DrawButton("初期化", 80, 20, includePos || includeRot))
                 {
                     foreach (var selectedBone in selectedBones)
                     {
@@ -332,9 +318,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                         if (i < 3)
                         {
-                            var pos = transform.localPosition;
-                            pos[i] += diffValue;
-                            transform.localPosition = pos;
+                            if (transform.isBipRoot)
+                            {
+                                var pos = transform.localPosition;
+                                pos[i] += diffValue;
+                                transform.localPosition = pos;
+                            }
                         }
                         else
                         {
@@ -363,9 +352,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                         if (i < 3)
                         {
-                            var pos = transform.localPosition;
-                            pos[i] = newValue;
-                            transform.localPosition = pos;
+                            if (transform.isBipRoot)
+                            {
+                                var pos = transform.localPosition;
+                                pos[i] = newValue;
+                                transform.localPosition = pos;
+                            }
                         }
                         else
                         {
@@ -404,6 +396,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                 inTangent = inTangentData.normalizedValue,
                                 isSmooth = outTangentData.isSmooth && inTangentData.isSmooth,
                             });
+
+                            if (tangents.Count >= config.detailTangentCount)
+                            {
+                                break;
+                            }
+                        }
+
+                        if (tangents.Count >= config.detailTangentCount)
+                        {
+                            break;
                         }
                     }
                 }

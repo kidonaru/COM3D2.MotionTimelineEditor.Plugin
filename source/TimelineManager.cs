@@ -25,7 +25,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public TimelineData timeline = null;
         public List<TimelineFile> timelineFileList = new List<TimelineFile>(64);
         private long playingAnmId = -1;
-        public HashSet<FrameData> selectedRefFrames = new HashSet<FrameData>();
         public HashSet<BoneData> selectedBones = new HashSet<BoneData>();        private float prevMotionSliderRate = -1f;
         public string errorMessage = "";
         public Action onRefresh = null;
@@ -187,6 +186,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             timeline.UpdateFrame(0, SH.ikManager.cache_bone_data);
 
             CreateAndApplyAnm();
+            UnselectAll();
             Refresh();
         }
 
@@ -207,6 +207,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             CreateAndApplyAnm();
+            UnselectAll();
             Refresh();
 
             // Extensions.ShowDialog("タイムライン「" + anmName + "」を読み込みました");
@@ -454,45 +455,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyCurrentFrame(true);
         }
 
-        public bool IsSelectedFrame(FrameData frame)
-        {
-            return selectedRefFrames.Contains(frame);
-        }
-
-        public bool IsSelectedBone(FrameData frame, BoneData bone)
+        public bool IsSelectedBone(BoneData bone)
         {
             return selectedBones.Contains(bone);
         }
 
-        public void SelectFrame(FrameData frame, bool isMultiSelect)
-        {
-            // 通常選択動作
-            if (!isMultiSelect)
-            {
-                if (!selectedRefFrames.Contains(frame))
-                {
-                    selectedRefFrames.Clear();
-                    selectedRefFrames.Add(frame);
-                }
-            }
-            // 複数選択動作
-            else
-            {
-                if (selectedRefFrames.Contains(frame))
-                {
-                    selectedRefFrames.Remove(frame);
-                }
-                else
-                {
-                    selectedRefFrames.Add(frame);
-                }
-            }
-        }
-
         public void SelectFramesRange(int startFrameNo, int endFrameNo)
         {
-            var selectedMenuItems = boneMenuManager.GetSelectedItems();
-            
             if (config.isEasyEdit)
             {
                 for (int i = startFrameNo; i <= endFrameNo; i++)
@@ -500,18 +469,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var frame = timeline.GetFrame(i);
                     if (frame != null)
                     {
-                        foreach (var boneMenuItem in selectedMenuItems)
+                        foreach (var bone in frame.bones)
                         {
-                            if (boneMenuItem.HasBone(frame))
-                            {
-                                selectedRefFrames.Add(frame);
-                            }
+                            selectedBones.Add(bone);
                         }
                     }
                 }
             }
             else
             {
+                var selectedMenuItems = boneMenuManager.GetSelectedItems();
                 for (int i = startFrameNo; i <= endFrameNo; i++)
                 {
                     var frame = timeline.GetFrame(i);
@@ -533,7 +500,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void SelectBones(FrameData frame, List<BoneData> bones, bool isMultiSelect)
+        public void SelectBones(List<BoneData> bones, bool isMultiSelect)
         {
             if (bones.Count == 0)
             {
@@ -578,32 +545,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool HasSelected()
         {
-            return selectedRefFrames.Count > 0 || selectedBones.Count > 0;
+            return selectedBones.Count > 0;
         }
 
         public void UnselectAll()
         {
-            selectedRefFrames.Clear();
             selectedBones.Clear();
         }
 
         public void SelectAllFrames()
         {
-            if (config.isEasyEdit)
+            selectedBones.Clear();
+            foreach (var frame in timeline.keyFrames)
             {
-                selectedRefFrames.Clear();
-                foreach (var frame in timeline.keyFrames)
-                {
-                    selectedRefFrames.Add(frame);
-                }
-            }
-            else
-            {
-                selectedBones.Clear();
-                foreach (var frame in timeline.keyFrames)
-                {
-                    selectedBones.UnionWith(frame.bones);
-                }
+                selectedBones.UnionWith(frame.bones);
             }
         }
 
@@ -632,79 +587,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void RemoveSelectedFrame()
         {
-            if (config.isEasyEdit)
+            foreach (var bone in selectedBones)
             {
-                foreach (var selectedFrame in selectedRefFrames)
+                var frame = bone.parentFrame;
+                if (frame != null)
                 {
-                    timeline.RemoveFrame(selectedFrame.frameNo);
+                    frame.RemoveBone(bone);
                 }
-                selectedRefFrames.Clear();
             }
-            else
-            {
-                foreach (var bone in selectedBones)
-                {
-                    var frame = bone.parentFrame;
-                    if (frame != null)
-                    {
-                        frame.RemoveBone(bone);
-                    }
-                }
-                timeline.CleanFrames();
-                selectedBones.Clear();
-            }
+            timeline.CleanFrames();
+            selectedBones.Clear();
 
             ApplyCurrentFrame(true);
         }
 
-        public void MoveSelectedFrames(int delta)
-        {
-            if (config.isEasyEdit)
-            {
-                MoveSelectedRefFrames(delta);
-            }
-            else
-            {
-                MoveSelectedBones(delta);
-            }
-        }
-
-        private void MoveSelectedRefFrames(int delta)
-        {
-            var otherFrameMap = timeline.keyFrames
-                    .Except(selectedRefFrames)
-                    .ToDictionary(frame => frame.frameNo);
-
-            foreach (var frame in selectedRefFrames)
-            {
-                // 移動先のフレームが重複していたら移動しない
-                if (otherFrameMap.ContainsKey(frame.frameNo + delta))
-                {
-                    return;
-                }
-
-                // マイナスフレームに移動しようとしたら移動しない
-                if (frame.frameNo + delta < 0)
-                {
-                    return;
-                }
-
-                // 移動先のフレーム番号が最大フレーム番号を超えたら移動しない
-                if (frame.frameNo + delta > timeline.maxFrameNo)
-                {
-                    return;
-                }
-            }
-
-            foreach (var frame in selectedRefFrames)
-            {
-                frame.frameNo += delta;
-            }
-
-            ApplyCurrentFrame(true);
-        }
-
-        private void MoveSelectedBones(int delta)
+        public void MoveSelectedBones(int delta)
         {
             foreach (var selectedBone in selectedBones)
             {
@@ -715,7 +612,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (targetFrame != null)
                 {
                     var targetBone = targetFrame.GetBone(selectedBone.bonePath);
-                    if (targetBone != null && !IsSelectedBone(targetFrame, targetBone))
+                    if (targetBone != null && !IsSelectedBone(targetBone))
                     {
                         return;
                     }
@@ -768,8 +665,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Refresh()
         {
-            UnselectAll();
-
             if (onRefresh != null)
             {
                 onRefresh();
@@ -809,26 +704,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var copyFrameData = new CopyFrameData();
 
-            if (config.isEasyEdit)
+            var tmpFrames = new Dictionary<int, FrameData>();
+            foreach (var bone in selectedBones)
             {
-                copyFrameData.frames = selectedRefFrames.ToList();
-            }
-            else
-            {
-                var tmpFrames = new Dictionary<int, FrameData>();
-                foreach (var bone in selectedBones)
+                FrameData tmpFrame;
+                if (!tmpFrames.TryGetValue(bone.frameNo, out tmpFrame))
                 {
-                    FrameData tmpFrame;
-                    if (!tmpFrames.TryGetValue(bone.frameNo, out tmpFrame))
-                    {
-                        tmpFrame = new FrameData(bone.frameNo);
-                        tmpFrames[bone.frameNo] = tmpFrame;
-                    }
-
-                    tmpFrame.UpdateBone(bone);
+                    tmpFrame = new FrameData(bone.frameNo);
+                    tmpFrames[bone.frameNo] = tmpFrame;
                 }
-                copyFrameData.frames = tmpFrames.Values.ToList();
+
+                tmpFrame.UpdateBone(bone);
             }
+            copyFrameData.frames = tmpFrames.Values.ToList();
 
             try
             {

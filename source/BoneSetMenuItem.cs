@@ -167,7 +167,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            timelineManager.SelectBones(frame, bones, isMultiSelect);
+            timelineManager.SelectBones(bones, isMultiSelect);
         }
     }
 }

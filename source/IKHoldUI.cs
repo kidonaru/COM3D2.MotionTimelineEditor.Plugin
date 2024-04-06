@@ -66,13 +66,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public bool isDrag 
-        {
-            get
-            {
-                return IKDragPoint.IsDrag;
-            }
-        }
+        public bool isDrag = false;
 
         private static TimelineManager timelineManager
         {
@@ -113,6 +107,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Update()
         {
+            UpdateDrag(IKDragPoint.IsDrag);
+        }
+
+        public void UpdateDrag(bool isDrag)
+        {
+            this.isDrag = isDrag;
+
             if (!isPrevDrag && isDrag)
             {
                 OnDragStart();

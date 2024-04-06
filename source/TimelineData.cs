@@ -12,6 +12,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public class TimelineData
     {
         public static readonly int CurrentVersion = 2;
+        public static readonly TimelineData DefaultTimeline = new TimelineData();
 
         [XmlAttribute("version")]
         public int version = 0;
@@ -63,7 +64,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         [XmlElement("AnmName")]
-        public string anmName;
+        public string anmName = "";
 
         [XmlElement("IsHold")]
         public bool[] isHoldList = new bool[(int) IKHoldType.Max]
@@ -303,7 +304,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public BoneData GetPrevBone(int frameNo, string path, out int prevFrameNo)
         {
-            return GetPrevBone(frameNo, path, out prevFrameNo, isLoopAnm);
+            return GetPrevBone(frameNo, path, out prevFrameNo, true);
         }
 
         public BoneData GetPrevBone(int frameNo, string path)
@@ -367,7 +368,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public BoneData GetNextBone(int frameNo, string path, out int nextFrameNo)
         {
-            return GetNextBone(frameNo, path, out nextFrameNo, isLoopAnm);
+            return GetNextBone(frameNo, path, out nextFrameNo, true);
         }
 
         public FrameData GetActiveFrame(float frameNo)
@@ -431,7 +432,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     int nextFrameNo;
                     var nextBone = GetNextBone(frame.frameNo, bone.bonePath, out nextFrameNo);
 
-                    if (prevBone == null && nextBone == null)
+                    if (prevBone == null || nextBone == null)
                     {
                         Extensions.LogError("前後のキーフレームがないので補完処理をスキップしました：" + bone.bonePath);
                         continue;
@@ -734,6 +735,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float ClampTangent(float tangent)
         {
             return Mathf.Clamp(tangent, minTangent, maxTangent);
+        }
+
+        public void ResetSettings()
+        {
+            //maxFrameNo = DefaultTimeline.maxFrameNo;
+            frameRate = DefaultTimeline.frameRate;
+            isHoldList = DefaultTimeline.isHoldList.ToArray();
+            useMuneKeyL = DefaultTimeline.useMuneKeyL;
+            useMuneKeyR = DefaultTimeline.useMuneKeyR;
+            isLoopAnm = DefaultTimeline.isLoopAnm;
+            minTangent = DefaultTimeline.minTangent;
+            maxTangent = DefaultTimeline.maxTangent;
         }
     }
 }

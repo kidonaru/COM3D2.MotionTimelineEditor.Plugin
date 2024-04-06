@@ -28,6 +28,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool isEasyEdit = false;
         public bool isAutoScroll = false;
         public TangentType defaultTangentType = TangentType.Smooth;
+        public int detailTransformCount = 16;
+        public int detailTangentCount = 32;
 
         // 表示設定
         public int frameWidth = 11;
