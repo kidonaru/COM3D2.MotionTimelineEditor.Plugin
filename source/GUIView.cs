@@ -336,8 +336,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int DrawIntField(string label, int value, float width, float height)
         {
             var text = value.ToString();
-            text = DrawTextField(label, text, width, height);
-            int.TryParse(text, out value);
+            var newText = DrawTextField(label, text, width, height);
+            if (newText != text)
+            {
+                int.TryParse(newText, out value);
+            }
             return value;
         }
 
@@ -349,14 +352,57 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float DrawFloatField(string label, float value, float width, float height)
         {
             var text = value.ToString("F2");
-            text = DrawTextField(label, text, width, height);
-            float.TryParse(text, out value);
+            var newText = DrawTextField(label, text, width, height);
+            if (newText != text)
+            {
+                float.TryParse(newText, out value);
+            }
             return value;
         }
 
         public float DrawFloatField(float value, float width, float height)
         {
             return DrawFloatField(null, value, width, height);
+        }
+
+        public float DrawSelectFloatField(
+            float value, float diffValue, float width, float height)
+        {
+            var startPos = currentPos;
+            var baseDrawRect = GetDrawRect(width, height);
+
+            {
+                var buttonRect = GetDrawRect(20, height);
+                if (GUI.Button(buttonRect, "<", gsButton))
+                {
+                    value -= diffValue;
+                }
+                currentPos.x += 20 + margin;
+            }
+
+            var text = value.ToString("F2");
+            var drawRect = GetDrawRect(width - (20 + margin) * 2, height);
+            var newText = GUI.TextField(drawRect, text, gsTextField);
+            if (newText != text)
+            {
+                float.TryParse(newText, out value);
+            }
+
+            currentPos.x += width - (20 + margin) * 2;
+
+            {
+                var buttonRect = GetDrawRect(20, height);
+                if (GUI.Button(buttonRect, ">", gsButton))
+                {
+                    value += diffValue;
+                }
+                currentPos.x += 20 + margin;
+            }
+
+            currentPos = startPos;
+            NextElement(baseDrawRect);
+
+            return value;
         }
 
         public float DrawSlider(

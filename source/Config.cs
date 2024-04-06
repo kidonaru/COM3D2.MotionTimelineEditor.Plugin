@@ -5,8 +5,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class Config
     {
-        [XmlIgnore]
-        public bool dirty = false;
+        public static readonly int CurrentVersion = 1;
+
+        [XmlAttribute]
+        public int version = 0;
 
         // キーバインド
         public KeyCode keyPluginToggle = KeyCode.M;
@@ -21,11 +23,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public KeyCode keyMultiSelect1 = KeyCode.LeftShift;
         public KeyCode keyMultiSelect2 = KeyCode.RightShift;
 
-        // 設定
+        // 動作設定
         public bool pluginEnabled = true;
         public bool isEasyEdit = false;
         public bool isAutoScroll = false;
-        public TangentType defaultTangentType = TangentType.EaseInOut;
+        public TangentType defaultTangentType = TangentType.Smooth;
+
+        // 表示設定
         public int frameWidth = 11;
         public int frameHeight = 20;
         public int frameNoInterval = 5;
@@ -44,6 +48,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Color timelineMenuSelectTextColor = new Color(249 / 255f, 193 / 255f, 207/ 255f);
         public float timelineBgAlpha = 0.5f;
         public Color curveLineColor = new Color(101 / 255f, 154 / 255f, 210 / 255f);
+        public Color curveLineSmoothColor = new Color(90 / 255f, 255 / 255f, 25 / 255f);
         public Color curveBgColor = new Color(0 / 255f, 0 / 255f, 0 / 255f, 0.3f);
+
+        [XmlIgnore]
+        public bool dirty = false;
+
+        public TangentPair defaultTangentPair
+        {
+            get
+            {
+                return TangentPair.GetDefault(defaultTangentType);
+            }
+        }
+
+        public void ConvertVersion()
+        {
+            version = CurrentVersion;
+        }
     }
 }

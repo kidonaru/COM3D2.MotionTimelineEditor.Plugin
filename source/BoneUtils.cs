@@ -59,7 +59,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return boneNameToPathMap.ContainsKey(boneName);
         }
 
-        public static Dictionary<IKManager.BoneType, string> boneTypeToJpNameMap = new Dictionary<IKManager.BoneType, string>
+        public static readonly Dictionary<IKManager.BoneType, string> BoneTypeToJpNameMap = new Dictionary<IKManager.BoneType, string>
         {
             {IKManager.BoneType.Root, "中心"},
             {IKManager.BoneType.TopFixed, "足元"},
@@ -133,7 +133,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static string GetBoneJpName(IKManager.BoneType boneType)
         {
             string japaneseName;
-            if (boneTypeToJpNameMap.TryGetValue(boneType, out japaneseName))
+            if (BoneTypeToJpNameMap.TryGetValue(boneType, out japaneseName))
             {
                 return japaneseName;
             }
@@ -141,7 +141,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return "";
         }
 
-        public static readonly Dictionary<IKManager.BoneType, string> boneTypeToNameMap = new Dictionary<IKManager.BoneType, string>
+        public static readonly Dictionary<IKManager.BoneType, string> BoneTypeToNameMap = new Dictionary<IKManager.BoneType, string>
         {
             {IKManager.BoneType.Root, "Bip01"},
             {IKManager.BoneType.TopFixed, "Bip01 Footsteps"}, // 違うけど一旦アサインしておく
@@ -215,7 +215,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static string GetBoneName(IKManager.BoneType boneType)
         {
             string boneName;
-            if (boneTypeToNameMap.TryGetValue(boneType, out boneName))
+            if (BoneTypeToNameMap.TryGetValue(boneType, out boneName))
             {
                 return boneName;
             }
@@ -235,7 +235,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_boneNameToTypeMap == null)
                 {
-                    _boneNameToTypeMap = boneTypeToNameMap.ToDictionary(kv => kv.Value, kv => kv.Key);
+                    _boneNameToTypeMap = BoneTypeToNameMap.ToDictionary(kv => kv.Value, kv => kv.Key);
                 }
                 return _boneNameToTypeMap;
             }
@@ -252,7 +252,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return IKManager.BoneType.TopFixed;
         }
 
-        public static Dictionary<IKManager.BoneType, IKManager.BoneSetType> boneTypeToSetTypeMap = new Dictionary<IKManager.BoneType, IKManager.BoneSetType>
+        public static readonly Dictionary<IKManager.BoneType, IKManager.BoneSetType> BoneTypeToSetTypeMap = new Dictionary<IKManager.BoneType, IKManager.BoneSetType>
         {
             {IKManager.BoneType.Root, IKManager.BoneSetType.Body},
             {IKManager.BoneType.TopFixed, IKManager.BoneSetType.Body},
@@ -326,7 +326,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static IKManager.BoneSetType GetBoneSetType(IKManager.BoneType boneType)
         {
             IKManager.BoneSetType boneSetType;
-            if (boneTypeToSetTypeMap.TryGetValue(boneType, out boneSetType))
+            if (BoneTypeToSetTypeMap.TryGetValue(boneType, out boneSetType))
             {
                 return boneSetType;
             }
@@ -334,7 +334,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return IKManager.BoneSetType.Body;
         }
 
-        public static Dictionary<IKManager.BoneSetType, string> boneSetTypeToJpNameMap = new Dictionary<IKManager.BoneSetType, string>
+        public static readonly Dictionary<IKManager.BoneSetType, string> BoneSetTypeToJpNameMap = new Dictionary<IKManager.BoneSetType, string>
         {
             {IKManager.BoneSetType.Body, "体"},
             {IKManager.BoneSetType.LeftArmFinger, "左手指"},
@@ -346,7 +346,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static string GetBoneSetJpName(IKManager.BoneSetType boneSetType)
         {
             string japaneseName;
-            if (boneSetTypeToJpNameMap.TryGetValue(boneSetType, out japaneseName))
+            if (BoneSetTypeToJpNameMap.TryGetValue(boneSetType, out japaneseName))
             {
                 return japaneseName;
             }
@@ -354,7 +354,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return "";
         }
 
-        public static Dictionary<IKManager.BoneType, BoneSetMenuType> boneTypeToSetMenuTypeMap = new Dictionary<IKManager.BoneType, BoneSetMenuType>
+        public static readonly Dictionary<IKManager.BoneType, BoneSetMenuType> BoneTypeToSetMenuTypeMap = new Dictionary<IKManager.BoneType, BoneSetMenuType>
         {
             {IKManager.BoneType.Root, BoneSetMenuType.Body},
             {IKManager.BoneType.TopFixed, BoneSetMenuType.Body},
@@ -436,7 +436,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static BoneSetMenuType GetBoneSetMenuType(IKManager.BoneType boneType)
         {
             BoneSetMenuType boneSetMenuType;
-            if (boneTypeToSetMenuTypeMap.TryGetValue(boneType, out boneSetMenuType))
+            if (BoneTypeToSetMenuTypeMap.TryGetValue(boneType, out boneSetMenuType))
             {
                 return boneSetMenuType;
             }
@@ -444,7 +444,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return BoneSetMenuType.Body;
         }
 
-        public static Dictionary<BoneSetMenuType, string> boneSetMenuTypeToJpNameMap = new Dictionary<BoneSetMenuType, string>
+        public static readonly Dictionary<BoneSetMenuType, string> BoneSetMenuTypeToJpNameMap = new Dictionary<BoneSetMenuType, string>
         {
             {BoneSetMenuType.Body, "体"},
             {BoneSetMenuType.LeftArm, "左腕"},
@@ -460,7 +460,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static string GetBoneSetMenuJpName(BoneSetMenuType boneSetMenuType)
         {
             string japaneseName;
-            if (boneSetMenuTypeToJpNameMap.TryGetValue(boneSetMenuType, out japaneseName))
+            if (BoneSetMenuTypeToJpNameMap.TryGetValue(boneSetMenuType, out japaneseName))
             {
                 return japaneseName;
             }
@@ -468,7 +468,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return "";
         }
 
-        public static Dictionary<IKManager.BoneType, Vector3> initialRotationMap = new Dictionary<IKManager.BoneType, Vector3>
+        public static readonly Dictionary<IKManager.BoneType, Vector3> InitialRotationMap = new Dictionary<IKManager.BoneType, Vector3>
         {
             {IKManager.BoneType.Root, new Vector3(270f, 180f, 270f)},
             {IKManager.BoneType.Spine3, new Vector3(270f, 90f, 0f)},

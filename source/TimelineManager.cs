@@ -20,6 +20,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class TimelineManager
     {
+        public static readonly long TimelineAnmId = 26925014;
+
         public TimelineData timeline = null;
         public List<TimelineFile> timelineFileList = new List<TimelineFile>(64);
         private long playingAnmId = -1;
@@ -29,8 +31,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Action onRefresh = null;
         public FrameData initialEditFrame;
         private bool isPrevPoseEditing;
-
-        public static readonly long timelineAnmId = 26925014;
 
         public Vector3[] initialEditIkPositions = new Vector3[(int) IKHoldType.Max]
         {
@@ -67,7 +67,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return IsValidData() && playingAnmId == timelineAnmId;
+                return IsValidData() && playingAnmId == TimelineAnmId;
             }
         }
 
@@ -183,6 +183,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             timeline = new TimelineData();
             timeline.anmName = "テスト";
+            timeline.version = TimelineData.CurrentVersion;
             timeline.UpdateFrame(0, SH.ikManager.cache_bone_data);
 
             CreateAndApplyAnm();
@@ -202,6 +203,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var serializer = new XmlSerializer(typeof(TimelineData));
                 timeline = (TimelineData)serializer.Deserialize(stream);
                 timeline.anmName = anmName;
+                timeline.ConvertVersion();
             }
 
             CreateAndApplyAnm();
@@ -339,6 +341,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             timeline.FixRotation();
             timeline.UpdateTangent();
+            timeline.UpdateDummyLastFrame();
 
             var anmData = GetAnmBinary();
             if (anmData == null)
@@ -346,7 +349,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return false;
             }
 
-            ApplyAnm(timelineAnmId, anmData);
+            ApplyAnm(TimelineAnmId, anmData);
 
             return true;
         }
@@ -784,7 +787,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void ApplyCurrentFrame(bool motionUpdate)
         {
-            if (playingAnmId != timelineAnmId || motionUpdate)
+            if (playingAnmId != TimelineAnmId || motionUpdate)
             {
                 CreateAndApplyAnm();
             }

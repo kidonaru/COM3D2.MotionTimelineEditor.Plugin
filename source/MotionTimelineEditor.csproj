@@ -80,6 +80,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BoneData.cs" />
     <Compile Include="BoneMenuItem.cs" />
     <Compile Include="BoneMenuManager.cs" />
     <Compile Include="BoneSetMenuItem.cs" />
@@ -101,10 +102,13 @@
     </Compile>
     <Compile Include="StudioHack.cs" />
     <Compile Include="SubWindow.cs" />
+    <Compile Include="TangentData.cs" />
+    <Compile Include="TangentPair.cs" />
     <Compile Include="TimelineData.cs" />
     <Compile Include="TimelineLoadUI.cs" />
     <Compile Include="TimelineManager.cs" />
     <Compile Include="TimelineSettingUI.cs" />
+    <Compile Include="TransformData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\Settings.settings">

@@ -2,6 +2,10 @@
 chcp 65001
 
 call build.bat
+if %ERRORLEVEL% neq 0 (
+    echo ビルドに失敗しました
+    exit /b 1
+)
 
 set VERSION=1.0.1.0
 set PLUGIN_NAME=COM3D2.MotionTimelineEditor.Plugin

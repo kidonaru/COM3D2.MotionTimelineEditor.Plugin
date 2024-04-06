@@ -23,5 +23,10 @@ echo %CSC_PATH% /t:library %LIB_PATHS% %REFERENCES% %DEBUG_OPTION% %SOURCES%
 %CSC_PATH% /t:library %LIB_PATHS% %REFERENCES% %DEBUG_OPTION% %SOURCES%
 
 copy *.dll ..\UnityInjector
+if %ERRORLEVEL% neq 0 (
+    echo Failed to copy dlls
+    exit /b 1
+)
+
 move *.dll UnityInjector
 del *.pdb

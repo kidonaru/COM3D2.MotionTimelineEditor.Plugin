@@ -56,7 +56,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 new List<BoneMenuItem>(8),
             };
 
-            foreach (var pair in BoneUtils.boneTypeToSetMenuTypeMap)
+            foreach (var pair in BoneUtils.BoneTypeToSetMenuTypeMap)
             {
                 var boneType = pair.Key;
                 var boneSetType = pair.Value;

@@ -7,61 +7,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     using SH = StudioHack;
     using MTE = MotionTimelineEditor;
 
-    public struct TangentPair
-    {
-        public float outTangent;
-        public float inTangent;
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null || GetType() != obj.GetType())
-            {
-                return false;
-            }
-
-            var other = (TangentPair)obj;
-            return outTangent == other.outTangent && inTangent == other.inTangent;
-        }
-
-        public override int GetHashCode()
-        {
-            return outTangent.GetHashCode() ^ inTangent.GetHashCode();
-        }
-
-        public static TangentPair GetDefault(TangentType tangentType)
-        {
-            switch (tangentType)
-            {
-                case TangentType.EaseInOut:
-                    return new TangentPair
-                    {
-                        outTangent = 0f,
-                        inTangent = 0f,
-                    };
-                case TangentType.EaseIn:
-                    return new TangentPair
-                    {
-                        outTangent = 1f,
-                        inTangent = 0f,
-                    };
-                case TangentType.EaseOut:
-                    return new TangentPair
-                    {
-                        outTangent = 0f,
-                        inTangent = 1f,
-                    };
-                case TangentType.Linear:
-                    return new TangentPair
-                    {
-                        outTangent = 1f,
-                        inTangent = 1f,
-                    };
-            }
-
-            return new TangentPair();
-        }
-    }
-
     public class TimelineSettingUI : ISubWindowUI
     {
         public string title
@@ -115,7 +60,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (tangentTextures == null)
             {
-                tangentTextures = new Texture2D[(int) TangentType.Max];
+                tangentTextures = new Texture2D[(int) TangentType.Smooth];
 
                 for (var i = 0; i < tangentTextures.Length; i++)
                 {
@@ -211,7 +156,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     timeline.isLoopAnm = newIsLoopAnm;
                 }
 
-                var newDefaultTangentType = (TangentType) view.DrawSelectList("初期補正曲線", TangentData.tangentTypeNames, 250, 20, (int) config.defaultTangentType);
+                var newDefaultTangentType = (TangentType) view.DrawSelectList("初期補正曲線", TangentData.TangentTypeNames, 250, 20, (int) config.defaultTangentType);
                 if (newDefaultTangentType != config.defaultTangentType)
                 {
                     config.defaultTangentType = newDefaultTangentType;
@@ -241,8 +186,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
                 view.EndLayout();
 
-                view.AddSpace(10);
-
                 if (view.DrawButton("設定初期化", 100, 20))
                 {
                     Extensions.ShowConfirmDialog("設定を初期化しますか？", () =>
@@ -255,12 +198,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.AddSpace(10);
 
                 var tangents = new HashSet<TangentPair>();
-                var selectedBones = timelineManager.selectedBones;
+
+                HashSet<BoneData> selectedBones;
+
+                if (config.isEasyEdit)
+                {
+                    selectedBones = new HashSet<BoneData>();
+                    var selectedFrames = timelineManager.selectedRefFrames;
+                    foreach (var selectedFrame in selectedFrames)
+                    {
+                        foreach (var bone in selectedFrame.bones)
+                        {
+                            selectedBones.Add(bone);
+                        }
+                    }
+                }
+                else
+                {
+                    selectedBones = timelineManager.selectedBones;
+                }
+
                 if (selectedBones.Count > 0)
                 {
                     foreach (var bone in selectedBones)
                     {
-                        var prevBone = timeline.GetPrevBone(bone.frameNo, bone.bonePath);
+                        var prevBone = timeline.GetPrevBone(bone);
+                        if (prevBone == null)
+                        {
+                            continue;
+                        }
                         var outTangentDataList = prevBone.transform.GetOutTangentDataList(tangentValueType);
                         var inTangentDataList = bone.transform.GetInTangentDataList(tangentValueType);
 
@@ -272,7 +238,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             tangents.Add(new TangentPair
                             {
                                 outTangent = outTangentData.normalizedValue,
-                                inTangent = inTangentData.normalizedValue
+                                inTangent = inTangentData.normalizedValue,
+                                isSmooth = outTangentData.isSmooth && inTangentData.isSmooth,
                             });
                         }
                     }
@@ -304,11 +271,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     foreach (var tangent in tangents)
                     {
+                        var color = tangent.isSmooth ? config.curveLineSmoothColor : config.curveLineColor;
                         TimelineData.UpdateCurveTexture(
                             curveTex,
                             tangent.outTangent,
                             tangent.inTangent,
-                            config.curveLineColor,
+                            color,
                             1
                         );
                     }
@@ -320,6 +288,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.DrawTexture(curveTex);
 
+                view.currentPos.x += curveTex.width + 10;
+
+                tangentValueType = (TangentValueType) view.DrawSelectList(
+                    TangentData.TangentValueTypeNames,
+                    110, 20, (int) tangentValueType);
+
+                view.currentPos.y += 25;
+
                 float outTangent = float.MinValue;
                 float inTangent = float.MinValue;
 
@@ -329,33 +305,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     outTangent = tangentPair.outTangent;
                     inTangent = tangentPair.inTangent;
 
-                    view.currentPos.x += curveTex.width + 10;
-
-                    view.DrawLabel("対象", 100, 20);
-
-                    view.currentPos.y += 20;
-
-                    tangentValueType = (TangentValueType) view.DrawSelectList(TangentData.tangentValueTypeNames, 100, 20, (int) tangentValueType);
-
-                    view.currentPos.y += 25;
-
                     view.DrawLabel("OutTangent", 100, 20);
 
                     view.currentPos.y += 20; 
 
-                    var newOutTangent = view.DrawFloatField(
-                        outTangent,
-                        100, 20);
+                    var newOutTangent = view.DrawSelectFloatField(
+                        outTangent, 0.1f, 110, 20);
+
                     if (!Mathf.Approximately(newOutTangent, outTangent))
                     {
-                        foreach (var selectedBone in selectedBones)
+                        newOutTangent = timeline.ClampTangent(newOutTangent);
+                        foreach (var prevBone in timeline.GetPrevBones(selectedBones))
                         {
-                            var prevBone = timeline.GetPrevBone(selectedBone.frameNo, selectedBone.bonePath);
                             var outTangentDataList = prevBone.transform.GetOutTangentDataList(tangentValueType);
 
                             foreach (var outTangentData in outTangentDataList)
                             {
                                 outTangentData.normalizedValue = newOutTangent;
+                                outTangentData.isSmooth = false;
                             }
                         }
                         timelineManager.ApplyCurrentFrame(true);
@@ -367,11 +334,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     view.currentPos.y += 20;
 
-                    var newInTangent = view.DrawFloatField(
-                        inTangent,
-                        100, 20);
+                    var newInTangent = view.DrawSelectFloatField(
+                        inTangent, 0.1f, 110, 20);
+                    
                     if (!Mathf.Approximately(newInTangent, inTangent))
                     {
+                        newInTangent = timeline.ClampTangent(newInTangent);
                         foreach (var selectedBone in selectedBones)
                         {
                             var inTangentDataList = selectedBone.transform.GetInTangentDataList(tangentValueType);
@@ -379,8 +347,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             foreach (var inTangentData in inTangentDataList)
                             {
                                 inTangentData.normalizedValue = newInTangent;
+                                inTangentData.isSmooth = false;
                             }
                         }
+                        timelineManager.ApplyCurrentFrame(true);
+                    }
+
+                    view.currentPos.y += 25;
+
+                    var isSmooth = tangents.All(tangent => tangent.isSmooth);
+                    var newIsSmooth = view.DrawToggle("自動補完", isSmooth, 100, 20);
+                    if (newIsSmooth != isSmooth)
+                    {
+                        foreach (var prevBone in timeline.GetPrevBones(selectedBones))
+                        {
+                            var outTangentDataList = prevBone.transform.GetOutTangentDataList(tangentValueType);
+
+                            foreach (var outTangentData in outTangentDataList)
+                            {
+                                outTangentData.isSmooth = newIsSmooth;
+                            }
+                        }
+                        foreach (var selectedBone in selectedBones)
+                        {
+                            var inTangentDataList = selectedBone.transform.GetInTangentDataList(tangentValueType);
+
+                            foreach (var inTangentData in inTangentDataList)
+                            {
+                                inTangentData.isSmooth = newIsSmooth;
+                            }
+                        }
+
                         timelineManager.ApplyCurrentFrame(true);
                     }
                 }
@@ -388,6 +385,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.EndLayout();
 
                 view.currentPos.y += curveTex.height + view.margin;
+
+                view.DrawLabel("プリセット反映", 100, 20);
 
                 view.BeginLayout(GUIView.LayoutDirection.Horizontal);
 
@@ -405,19 +404,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                         var tangentPair = TangentPair.GetDefault(tangentType);
 
+                        foreach (var prevBone in timeline.GetPrevBones(selectedBones))
+                        {
+                            var outTangentDataList = prevBone.transform.GetOutTangentDataList(tangentValueType);
+                            foreach (var outTangentData in outTangentDataList)
+                            {
+                                outTangentData.normalizedValue = tangentPair.outTangent;
+                                outTangentData.isSmooth = false;
+                            }
+                        }
                         foreach (var selectedBone in selectedBones)
                         {
-                            var prevBone = timeline.GetPrevBone(selectedBone.frameNo, selectedBone.bonePath);
-                            var outTangentDataList = prevBone.transform.GetOutTangentDataList(tangentValueType);
                             var inTangentDataList = selectedBone.transform.GetInTangentDataList(tangentValueType);
-
-                            for (var j = 0; j < outTangentDataList.Length && j < inTangentDataList.Length; j++)
+                            foreach (var inTangentData in inTangentDataList)
                             {
-                                var outTangentData = outTangentDataList[j];
-                                var inTangentData = inTangentDataList[j];
-
-                                outTangentData.normalizedValue = tangentPair.outTangent;
                                 inTangentData.normalizedValue = tangentPair.inTangent;
+                                inTangentData.isSmooth = false;
                             }
                         }
 

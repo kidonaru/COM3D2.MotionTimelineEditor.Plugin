@@ -315,6 +315,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 using (var stream = new FileStream(path, FileMode.Open))
                 {
                     config = (Config)serializer.Deserialize(stream);
+                    config.ConvertVersion();
                 }
             }
             catch (Exception e)
