@@ -121,7 +121,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool isLoopAnm = true;
 
         [XmlElement("MinTangent")]
-        public float minTangent = -1f;
+        public float minTangent = -5f;
 
         [XmlElement("MaxTangent")]
         public float maxTangent = 5f;
@@ -719,14 +719,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (version < 2)
             {
                 // Smoothを無効にする
-                foreach (var frame in keyFrames)
+                /*foreach (var frame in keyFrames)
                 {
                     foreach (var bone in frame.bones)
                     {
                         bone.transform.inSmoothBit = 0;
                         bone.transform.outSmoothBit = 0;
                     }
-                }
+                }*/
             }
 
             version = CurrentVersion;
