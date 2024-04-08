@@ -63,6 +63,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public float frameDuration
+        {
+            get
+            {
+                return _frameDuration;
+            }
+        }
+
         [XmlElement("AnmName")]
         public string anmName = "";
 
@@ -125,6 +133,39 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         [XmlElement("MaxTangent")]
         public float maxTangent = 5f;
+
+        [XmlElement("VideoEnabled")]
+        public bool videoEnabled = true;
+
+        [XmlElement("VideoDisplayOnGUI")]
+        public bool videoDisplayOnGUI = true;
+
+        [XmlElement("VideoPath")]
+        public string videoPath = "";
+
+        [XmlElement("VideoPosition")]
+        public Vector3 videoPosition = new Vector3(0, 0, 0);
+
+        [XmlElement("VideoRotation")]
+        public Vector3 videoRotation = new Vector3(0, 0, 0);
+
+        [XmlElement("VideoScale")]
+        public float videoScale = 1f;
+
+        [XmlElement("VideoStartTime")]
+        public float videoStartTime = 0f;
+
+        [XmlElement("VideoVolume")]
+        public float videoVolume = 0.5f;
+
+        [XmlElement("VideoGUIPosition")]
+        public Vector2 videoGUIPosition = new Vector2(0, 0);
+
+        [XmlElement("VideoGUIScale")]
+        public float videoGUIScale = 1f;
+
+        [XmlElement("VideoGUIAlpha")]
+        public float videoGUIAlpha = 0.5f;
 
         public int maxFrameCount
         {

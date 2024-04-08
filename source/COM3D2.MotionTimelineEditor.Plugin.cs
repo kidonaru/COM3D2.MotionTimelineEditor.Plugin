@@ -13,7 +13,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using SH = StudioHack;
 
-    [PluginFilter( "COM3D2x64" ), PluginName("COM3D2.MotionTimelineEditor.Plugin"), PluginVersion( "1.1.0.0" )]
+    [PluginFilter( "COM3D2x64" ), PluginName("COM3D2.MotionTimelineEditor.Plugin"), PluginVersion( "1.1.1.0" )]
     public class MotionTimelineEditor : PluginBase
     {
         public readonly static int WINDOW_ID = 615814;
@@ -79,7 +79,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private int selectEndFrameNo = 0;
 
         public bool isMultiSelect = false;
-        public float anmSpeed = 1.0f;
 
         private Texture2D texWhite = null;
         private Texture2D texTimelineBG = null;
@@ -230,11 +229,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     if (Input.GetKey(config.keyMultiSelect1) || Input.GetKey(config.keyMultiSelect2))
                     {
                         isMultiSelect = true;
-                    }
-
-                    if (!Mathf.Approximately(anmSpeed, SH.anmSpeed))
-                    {
-                        SH.anmSpeed = anmSpeed;
                     }
 
                     timelineManager.Update();
@@ -580,7 +574,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.BeginLayout(GUIView.LayoutDirection.Horizontal);
                 {
-                    float buttonWidth = 80;
+                    float buttonWidth = 70;
 
                     if (view.DrawButton("新規作成", buttonWidth, 20))
                     {
@@ -602,7 +596,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         timelineManager.OutputAnm();
                     }
 
-                    if (view.DrawButton("キーフレーム", buttonWidth, 20, timelneEnabled))
+                    if (view.DrawButton("ｷｰﾌﾚｰﾑ", buttonWidth, 20, timelneEnabled))
                     {
                         subWindow.ToggleSubWindow(SubWindowType.KeyFrame);
                     }
@@ -611,6 +605,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     if (view.DrawButton("IK固定", buttonWidth, 20, timelneEnabled, ikColor))
                     {
                         subWindow.ToggleSubWindow(SubWindowType.IKHold);
+                    }
+
+                    if (view.DrawButton("動画再生", buttonWidth, 20, timelneEnabled))
+                    {
+                        subWindow.ToggleSubWindow(SubWindowType.MoviePlayer);
                     }
 
                     if (view.DrawButton("設定", buttonWidth, 20, timelneEnabled))
@@ -723,6 +722,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     view.DrawLabel("再生速度", 60, 20);
 
+                    var anmSpeed = timelineManager.anmSpeed;
+
                     anmSpeed = view.DrawFloatField(anmSpeed, 50, 20);
 
                     if (view.DrawButton("R", 20, 20))
@@ -731,6 +732,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
 
                     anmSpeed = view.DrawSlider(anmSpeed, 0f, 2.0f, 100, 20);
+
+                    if (!Mathf.Approximately(anmSpeed, timelineManager.anmSpeed))
+                    {
+                        timelineManager.anmSpeed = anmSpeed;
+                    }
                 }
 
                 view.EndLayout();

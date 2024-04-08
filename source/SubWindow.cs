@@ -18,6 +18,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         TimelineSetting,
         IKHold,
         KeyFrame,
+        MoviePlayer,
     }
 
     public class SubWindow
@@ -61,6 +62,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static TimelineSettingUI timelineSettingUI = new TimelineSettingUI();
         public static IKHoldUI ikHoldUI = new IKHoldUI();
         public static KeyFrameUI keyFrameUI = new KeyFrameUI();
+        public static MoviePlayerUI moviePlayerUI = new MoviePlayerUI();
 
         private SubWindowType _subWindowType = SubWindowType.None;
         public SubWindowType subWindowType
@@ -115,6 +117,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     return ikHoldUI;
                 case SubWindowType.KeyFrame:
                     return keyFrameUI;
+                case SubWindowType.MoviePlayer:
+                    return moviePlayerUI;
                 default:
                     return null;
             }
@@ -126,6 +130,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             timelineSettingUI.Update();
             ikHoldUI.Update();
             keyFrameUI.Update();
+            moviePlayerUI.Update();
         }
 
         public void OnGUI()

@@ -92,6 +92,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public float currentTime
+        {
+            get
+            {
+                return currentFrameNo * timeline.frameDuration;
+            }
+        }
+
+        public float _anmSpeed = 1.0f;
+        public float anmSpeed
+        {
+            get
+            {
+                return _anmSpeed;
+            }
+            set
+            {
+                if (_anmSpeed == value)
+                {
+                    return;
+                }
+
+                _anmSpeed = value;
+                moviePlayer.UpdateSpeed();
+            }
+        }
+
         private static TimelineManager _instance;
         public static TimelineManager instance
         {
@@ -129,6 +156,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public static MoviePlayer moviePlayer
+        {
+            get
+            {
+                return MoviePlayer.instance;
+            }
+        }
+
         private TimelineManager()
         {
         }
@@ -146,6 +181,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 currentFrameNo = playingFrameNo;
             }
             prevMotionSliderRate = SH.motionSliderRate;
+
+            if (isAnmPlaying && !Mathf.Approximately(anmSpeed, SH.anmSpeed))
+            {
+                SH.anmSpeed = anmSpeed;
+            }
 
             var isPoseEditing = SH.isPoseEditing;
             if (isPrevPoseEditing != isPoseEditing)
@@ -678,6 +718,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
             this.currentFrameNo = frameNo;
+
+            moviePlayer.UpdateSeekTime();
 
             ApplyCurrentFrame(false);
         }

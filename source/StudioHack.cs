@@ -132,6 +132,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public static CameraMain mainCamera
+        {
+            get
+            {
+                return GameMain.Instance.MainCamera;
+            }
+        }
+
         public static AnimationState animeState
         {
             get
@@ -367,13 +375,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static void UIHide()
         {
             var methodInfo = typeof(CameraMain).GetMethod("UIHide", BindingFlags.NonPublic | BindingFlags.Instance);
-            methodInfo.Invoke(GameMain.Instance.MainCamera, null);
+            methodInfo.Invoke(mainCamera, null);
         }
 
         public static void UIResume()
         {
             var methodInfo = typeof(CameraMain).GetMethod("UIResume", BindingFlags.NonPublic | BindingFlags.Instance);
-            methodInfo.Invoke(GameMain.Instance.MainCamera, null);
+            methodInfo.Invoke(mainCamera, null);
         }
 
         public static void Init()

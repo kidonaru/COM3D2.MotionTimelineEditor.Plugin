@@ -40,6 +40,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 text = float.IsNaN(_value) ? "" : value.ToString(format);
             }
         }
+
+        public static FloatFieldValue[] CreateArray(int count)
+        {
+            var array = new FloatFieldValue[count];
+            for (int i = 0; i < count; i++)
+            {
+                array[i] = new FloatFieldValue();
+            }
+            return array;
+        }
     }
 
     public class GUIView
