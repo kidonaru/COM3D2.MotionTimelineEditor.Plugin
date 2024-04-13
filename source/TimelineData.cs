@@ -482,7 +482,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     if (prevBone == null || nextBone == null)
                     {
-                        Extensions.LogError("前後のキーフレームがないので補完処理をスキップしました：" + bone.bonePath);
+                        PluginUtils.LogError("前後のキーフレームがないので補完処理をスキップしました：" + bone.bonePath);
                         continue;
                     }
 
@@ -623,12 +623,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
             binaryWriter.Write("CM3D2_ANIM");
             binaryWriter.Write(1001);
-            foreach (var path in Extensions.saveBonePaths)
+            foreach (var path in PluginUtils.saveBonePaths)
             {
                 var bone = firstFrame.GetBone(path);
                 if (bone == null)
                 {
-                    Extensions.LogError("ボーンがないのでスキップしました：" + path);
+                    PluginUtils.LogError("ボーンがないのでスキップしました：" + path);
                     continue;
                 }
                 write_bone_data(binaryWriter, bone);

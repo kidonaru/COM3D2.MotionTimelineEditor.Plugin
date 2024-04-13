@@ -206,14 +206,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public string GetTimelinePath(string anmName)
         {
-            return Extensions.CombinePaths(Extensions.TimelineDirPath, anmName + ".xml");
+            return PluginUtils.CombinePaths(PluginUtils.TimelineDirPath, anmName + ".xml");
         }
 
         public void CreateNewTimeline()
         {
             if (!maidHack.IsValid())
             {
-                Extensions.ShowDialog(maidHack.errorMessage);
+                PluginUtils.ShowDialog(maidHack.errorMessage);
                 return;
             }
 
@@ -231,7 +231,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!maidHack.IsValid())
             {
-                Extensions.ShowDialog(maidHack.errorMessage);
+                PluginUtils.ShowDialog(maidHack.errorMessage);
                 return;
             }
 
@@ -260,7 +260,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!timeline.IsValidData(out errorMessage))
             {
-                Extensions.ShowDialog(errorMessage);
+                PluginUtils.ShowDialog(errorMessage);
                 return;
             }
 
@@ -271,10 +271,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 serializer.Serialize(stream, timeline);
             }
 
-            var thumPath = Extensions.ConvertThumPath(path);
+            var thumPath = PluginUtils.ConvertThumPath(path);
             MTE.instance.SaveScreenShot(thumPath, config.thumWidth, config.thumHeight);
 
-            Extensions.ShowDialog("タイムライン「" + timeline.anmName + "」を保存しました");
+            PluginUtils.ShowDialog("タイムライン「" + timeline.anmName + "」を保存しました");
         }
 
         public void UpdateTimelineFileList(bool reload)
@@ -292,7 +292,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timelineFileList.Clear();
             }
 
-            var paths = Directory.GetFiles(Extensions.TimelineDirPath, "*.xml");
+            var paths = Directory.GetFiles(PluginUtils.TimelineDirPath, "*.xml");
             foreach (var path in paths)
             {
                 var anmName = Path.GetFileNameWithoutExtension(path);
@@ -301,8 +301,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     continue;
                 }
 
-                var thumPath = Extensions.ConvertThumPath(path);
-                var thum = Extensions.LoadTexture(thumPath);
+                var thumPath = PluginUtils.ConvertThumPath(path);
+                var thum = PluginUtils.LoadTexture(thumPath);
 
                 var file = new TimelineFile
                 {
@@ -372,7 +372,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool CreateAndApplyAnm()
         {
-            Extensions.LogDebug("CreateAndApplyAnm");
+            PluginUtils.LogDebug("CreateAndApplyAnm");
 
             timeline.FixRotation();
             timeline.UpdateTangent();
@@ -396,7 +396,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var anmData = GetAnmBinary();
                 if (anmData == null)
                 {
-                    Extensions.ShowDialog(errorMessage);
+                    PluginUtils.ShowDialog(errorMessage);
                     return;
                 }
                 var anmPath = timeline.anmPath;
@@ -407,12 +407,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 maidHack.OnUpdateMyPose(anmPath, isExist);
 
-                Extensions.ShowDialog("モーション「" + timeline.anmName + "」を生成しました");
+                PluginUtils.ShowDialog("モーション「" + timeline.anmName + "」を生成しました");
             }
             catch (Exception e)
             {
-                Extensions.LogException(e);
-                Extensions.ShowDialog("モーションの出力に失敗しました");
+                PluginUtils.LogException(e);
+                PluginUtils.ShowDialog("モーションの出力に失敗しました");
             }
         }
 
@@ -420,14 +420,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (maid == null)
             {
-                Extensions.LogError("メイドが配置されていません");
+                PluginUtils.LogError("メイドが配置されていません");
                 return null;
             }
 
             var cacheBoneData = maidHack.cacheBoneData;
             if (cacheBoneData == null)
             {
-                Extensions.LogError("ボーンデータが取得できませんでした");
+                PluginUtils.LogError("ボーンデータが取得できませんでした");
                 return null;
             }
 
@@ -461,7 +461,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (initialEditFrame == null)
             {
-                Extensions.Log("ポーズ編集中のみキーフレームの登録ができます");
+                PluginUtils.Log("ポーズ編集中のみキーフレームの登録ができます");
                 return;
             }
 
@@ -484,7 +484,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timeline.useMuneKeyR);
             if (diffBones.Count == 0)
             {
-                Extensions.Log("変更がないのでキーフレームの登録をスキップしました");
+                PluginUtils.Log("変更がないのでキーフレームの登録をスキップしました");
                 return;
             }
 
@@ -770,8 +770,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                Extensions.LogException(e);
-                Extensions.ShowDialog("コピーに失敗しました");
+                PluginUtils.LogException(e);
+                PluginUtils.ShowDialog("コピーに失敗しました");
             }
         }
 
@@ -806,8 +806,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                Extensions.LogException(e);
-                Extensions.ShowDialog("貼り付けに失敗しました");
+                PluginUtils.LogException(e);
+                PluginUtils.ShowDialog("貼り付けに失敗しました");
             }
         }
 
@@ -859,7 +859,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var cacheBoneData = maidHack.cacheBoneData;
             if (cacheBoneData == null)
             {
-                Extensions.LogError("ボーンデータが取得できませんでした");
+                PluginUtils.LogError("ボーンデータが取得できませんでした");
                 return;
             }
 

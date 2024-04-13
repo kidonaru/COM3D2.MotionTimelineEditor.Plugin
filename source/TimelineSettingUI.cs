@@ -112,7 +112,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (view.DrawButton("初期化", 100, 20))
                 {
-                    Extensions.ShowConfirmDialog("個別設定を初期化しますか？", () =>
+                    PluginUtils.ShowConfirmDialog("個別設定を初期化しますか？", () =>
                     {
                         GameMain.Instance.SysDlg.Close();
                         timeline.ResetSettings();
@@ -173,7 +173,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (view.DrawButton("初期化", 100, 20))
                 {
-                    Extensions.ShowConfirmDialog("共通設定を初期化しますか？", () =>
+                    PluginUtils.ShowConfirmDialog("共通設定を初期化しますか？", () =>
                     {
                         GameMain.Instance.SysDlg.Close();
                         MTE.ResetConfig();

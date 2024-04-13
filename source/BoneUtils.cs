@@ -27,8 +27,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_boneNameToPathMap == null)
                 {
-                    _boneNameToPathMap = new Dictionary<string, string>(Extensions.saveBonePaths.Length + 2);
-                    foreach (var bonePath in Extensions.saveBonePaths)
+                    _boneNameToPathMap = new Dictionary<string, string>(PluginUtils.saveBonePaths.Length + 2);
+                    foreach (var bonePath in PluginUtils.saveBonePaths)
                     {
                         _boneNameToPathMap[ConvertBoneName(bonePath)] = bonePath;
                     }
@@ -138,7 +138,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return japaneseName;
             }
-            Extensions.LogError("無効なBoneType：" + boneType);
+            PluginUtils.LogError("無効なBoneType：" + boneType);
             return "";
         }
 
@@ -223,7 +223,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return boneName;
             }
-            Extensions.LogError("無効なBoneType：" + boneType);
+            PluginUtils.LogError("無効なBoneType：" + boneType);
             return "";
         }
 
@@ -252,7 +252,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return boneType;
             }
-            Extensions.LogError("無効なBoneName：" + boneName);
+            PluginUtils.LogError("無効なBoneName：" + boneName);
             return IKManager.BoneType.TopFixed;
         }
 
@@ -334,7 +334,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return boneSetType;
             }
-            Extensions.LogError("無効なBoneType：" + boneType);
+            PluginUtils.LogError("無効なBoneType：" + boneType);
             return IKManager.BoneSetType.Body;
         }
 
@@ -354,7 +354,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return japaneseName;
             }
-            Extensions.LogError("無効なBoneSetType：" + boneSetType);
+            PluginUtils.LogError("無効なBoneSetType：" + boneSetType);
             return "";
         }
 
@@ -444,7 +444,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return boneSetMenuType;
             }
-            Extensions.LogError("無効なBoneType：" + boneType);
+            PluginUtils.LogError("無効なBoneType：" + boneType);
             return BoneSetMenuType.Body;
         }
 
@@ -468,7 +468,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return japaneseName;
             }
-            Extensions.LogError("無効なBoneSetMenuType：" + boneSetMenuType);
+            PluginUtils.LogError("無効なBoneSetMenuType：" + boneSetMenuType);
             return "";
         }
 

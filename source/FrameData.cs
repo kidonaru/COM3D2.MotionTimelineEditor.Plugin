@@ -50,7 +50,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return _boneMap.Count == Extensions.saveBonePaths.Length;
+                return _boneMap.Count == PluginUtils.saveBonePaths.Length;
             }
         }
 
@@ -64,7 +64,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public FrameData()
         {
-            _boneMap = new Dictionary<string, BoneData>(Extensions.saveBonePaths.Length);
+            _boneMap = new Dictionary<string, BoneData>(PluginUtils.saveBonePaths.Length);
         }
 
         public FrameData(int frameNo) : this()
@@ -244,12 +244,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
             binaryWriter.Write("CM3D2_ANIM");
             binaryWriter.Write(1001);
-            foreach (var path in Extensions.saveBonePaths)
+            foreach (var path in PluginUtils.saveBonePaths)
             {
                 var bone = GetBone(path);
                 if (bone == null)
                 {
-                    Extensions.LogError("ボーンがないのでスキップしました：" + path);
+                    PluginUtils.LogError("ボーンがないのでスキップしました：" + path);
                     continue;
                 }
                 write_bone_data(binaryWriter, bone);
@@ -274,7 +274,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 binaryReader.Close();
                 memoryStream.Close();
                 memoryStream.Dispose();
-                Extensions.LogError("SetAnmBinary：ヘッダが不正です。");
+                PluginUtils.LogError("SetAnmBinary：ヘッダが不正です。");
                 return new KeyValuePair<bool, bool>(false, false);
             }
 
@@ -352,14 +352,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void SetCacheBoneDataArray(CacheBoneDataArray cacheBoneData)
         {
             var pathDic = cacheBoneData.GetPathDic();
-            foreach (var path in Extensions.saveBonePaths)
+            foreach (var path in PluginUtils.saveBonePaths)
             {
                 CacheBoneDataArray.BoneData sourceBone;
                 if (pathDic.TryGetValue(path, out sourceBone))
                 {
                     if (sourceBone == null || sourceBone.transform == null)
                     {
-                        Extensions.LogError("SetCacheBoneDataArray：ボーンがnullです Maidを読み込み直してください：" + path);
+                        PluginUtils.LogError("SetCacheBoneDataArray：ボーンがnullです Maidを読み込み直してください：" + path);
                         break;
                     }
 
@@ -392,7 +392,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             initializedBoneTypes = true;
 
-            Extensions.LogDebug("ボーンタイプの初期化");
+            PluginUtils.LogDebug("ボーンタイプの初期化");
 
             notFlipTypes = new HashSet<IKManager.BoneType>
             {
@@ -514,7 +514,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         newEulerAngles.y = -eulerAngles.y;
                     }
 
-                    Extensions.LogDebug("Flip Bone：" + boneType + " " + eulerAngles + " -> " + newEulerAngles);
+                    PluginUtils.LogDebug("Flip Bone：" + boneType + " " + eulerAngles + " -> " + newEulerAngles);
 
                     var newTransform = new TransformData(BoneUtils.GetBoneName(boneType));
                     newTransform.localRotation = Quaternion.Euler(newEulerAngles);

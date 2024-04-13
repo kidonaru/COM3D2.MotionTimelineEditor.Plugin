@@ -36,7 +36,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (tangentTextures == null)
             {
-                Extensions.LogDebug("補完曲線プリセット画像を生成します");
+                PluginUtils.LogDebug("補完曲線プリセット画像を生成します");
 
                 tangentTextures = new Texture2D[(int) TangentType.Smooth];
 
@@ -252,7 +252,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         selectedBone.transform.Reset();
                     }
 
-                    Extensions.LogDebug("初期化します");
+                    PluginUtils.LogDebug("初期化します");
                     timelineManager.ApplyCurrentFrame(true);
                 }
 
@@ -286,7 +286,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         }
                     }
 
-                    Extensions.LogDebug("差分を適用します：" + diffValue);
+                    PluginUtils.LogDebug("差分を適用します：" + diffValue);
                     timelineManager.ApplyCurrentFrame(true);
                 }
 
@@ -320,7 +320,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         }
                     }
 
-                    Extensions.LogDebug("新値を適用します：" + newValue);
+                    PluginUtils.LogDebug("新値を適用します：" + newValue);
                     timelineManager.ApplyCurrentFrame(true);
                 }
 
@@ -383,7 +383,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (isUpdated)
                 {
-                    Extensions.LogDebug("補完曲線画像を更新します：" + tangents.Count);
+                    PluginUtils.LogDebug("補完曲線画像を更新します：" + tangents.Count);
 
                     cachedTangents = tangents;
 
@@ -537,7 +537,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             outTangentData.isSmooth = false;
                         });
 
-                        Extensions.LogDebug("OutTangentを適用します：" + newOutTangent);
+                        PluginUtils.LogDebug("OutTangentを適用します：" + newOutTangent);
                         timelineManager.ApplyCurrentFrame(true);
                     }
 
@@ -551,7 +551,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             inTangentData.isSmooth = false;
                         });
 
-                        Extensions.LogDebug("InTangentを適用します：" + newInTangent);
+                        PluginUtils.LogDebug("InTangentを適用します：" + newInTangent);
                         timelineManager.ApplyCurrentFrame(true);
                     }
 
@@ -566,7 +566,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             outTangentData.isSmooth = false;
                         });
 
-                        Extensions.LogDebug("OutTangentの差分を適用します：" + diffOutTangent);
+                        PluginUtils.LogDebug("OutTangentの差分を適用します：" + diffOutTangent);
                         timelineManager.ApplyCurrentFrame(true);
                     }
 
@@ -580,7 +580,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             inTangentData.isSmooth = false;
                         });
 
-                        Extensions.LogDebug("InTangentの差分を適用します：" + diffInTangent);
+                        PluginUtils.LogDebug("InTangentの差分を適用します：" + diffInTangent);
                         timelineManager.ApplyCurrentFrame(true);
                     }
 
@@ -598,7 +598,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             inTangentData.isSmooth = newIsSmooth;
                         });
 
-                        Extensions.LogDebug("自動補完を適用します：" + newIsSmooth);
+                        PluginUtils.LogDebug("自動補完を適用します：" + newIsSmooth);
                         timelineManager.ApplyCurrentFrame(true);
                     }
                 }
@@ -635,7 +635,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             inTangentData.isSmooth = tangentPair.isSmooth;
                         });
 
-                        Extensions.LogDebug("プリセットを適用します：" + tangentType);
+                        PluginUtils.LogDebug("プリセットを適用します：" + tangentType);
                         timelineManager.ApplyCurrentFrame(true);
                     });
                 }

@@ -328,11 +328,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             MediaPlayerEvent.EventType et,
             ErrorCode errorCode)
         {
-            Extensions.LogDebug("MoviePlayer：EventType：" + et.ToString() + "  ErrorCode：" + errorCode.ToString());
+            PluginUtils.LogDebug("MoviePlayer：EventType：" + et.ToString() + "  ErrorCode：" + errorCode.ToString());
 
             if (errorCode != ErrorCode.None)
             {
-                Extensions.LogError("MoviePlayer：エラー EventType：" + et.ToString() + "  ErrorCode：" + errorCode.ToString());
+                PluginUtils.LogError("MoviePlayer：エラー EventType：" + et.ToString() + "  ErrorCode：" + errorCode.ToString());
                 return;
             }
 

@@ -37,7 +37,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (value)
                 {
-                    Extensions.LogError("SubWindow.isShowWnd = true is not supported");
+                    PluginUtils.LogError("SubWindow.isShowWnd = true is not supported");
                     return;
                 }
 

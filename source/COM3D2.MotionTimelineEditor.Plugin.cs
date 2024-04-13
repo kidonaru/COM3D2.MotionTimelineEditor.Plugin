@@ -12,7 +12,11 @@ using UnityEngine.AI;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    [PluginFilter( "COM3D2x64" ), PluginName("COM3D2.MotionTimelineEditor.Plugin"), PluginVersion( "1.1.2.0" )]
+    [
+        PluginFilter("COM3D2x64"),
+        PluginName(PluginUtils.PluginFullName),
+        PluginVersion(PluginUtils.PluginVersion)
+    ]
     public class MotionTimelineEditor : PluginBase
     {
         public readonly static int WINDOW_ID = 615814;
@@ -171,7 +175,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                Extensions.LogException(e);
+                PluginUtils.LogException(e);
             }
         }
 
@@ -274,7 +278,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                Extensions.LogException(e);
+                PluginUtils.LogException(e);
             }
         }
 
@@ -357,7 +361,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             try
             {
-                var path = Extensions.ConfigPath;
+                var path = PluginUtils.ConfigPath;
                 if (!File.Exists(path))
                 {
                     return;
@@ -372,7 +376,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                Extensions.LogException(e);
+                PluginUtils.LogException(e);
             }
         }
 
@@ -380,10 +384,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             config.dirty = false;
 
-            Extensions.Log("設定保存中...");
+            PluginUtils.Log("設定保存中...");
             try
             {
-                var path = Extensions.ConfigPath;
+                var path = PluginUtils.ConfigPath;
                 var serializer = new XmlSerializer(typeof(Config));
                 using (var stream = new FileStream(path, FileMode.Create))
                 {
@@ -392,7 +396,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                Extensions.LogException(e);
+                PluginUtils.LogException(e);
             }
         }
 
@@ -432,7 +436,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void Initialize()
         {
-            Extensions.Log("初期化中...");
+            PluginUtils.Log("初期化中...");
 
             texWhite = GUIView.CreateColorTexture(Color.white);
 
@@ -498,9 +502,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private void AddGearMenu()
         {
             gearMenuIcon = GUIExtBase.GUIExt.Add(
-                Extensions.PluginName,
-                Extensions.PluginName,
-                Extensions.icon,
+                PluginUtils.PluginName,
+                PluginUtils.PluginName,
+                PluginUtils.icon,
                 (go) => {
                     if (!isPluginActive)
                     {
@@ -535,7 +539,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected IEnumerator SaveScreenShotInternal(string filePath, int width, int height)
         {
-            Extensions.UIHide();
+            PluginUtils.UIHide();
             var subWindowType = subWindow.subWindowType;
             isShowWnd = false;
             yield return new WaitForEndOfFrame();
@@ -544,7 +548,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             yield return new WaitForEndOfFrame();
             isShowWnd = true;
             subWindow.subWindowType = subWindowType;
-            Extensions.UIResume();
+            PluginUtils.UIResume();
 
             texture.ResizeTexture(width, height);
             UTY.SaveImage(texture, filePath);
@@ -562,7 +566,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (WINDOW_HEIGHT != windowHeight)
                 {
-                    Extensions.AdjustWindowPosition(ref rc_stgw);
+                    PluginUtils.AdjustWindowPosition(ref rc_stgw);
                     WINDOW_HEIGHT = windowHeight;
                     rc_stgw.height = WINDOW_HEIGHT;
                 }
@@ -570,7 +574,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 bool isScreenSizeChanged = ScWidth != Screen.width || ScHeight != Screen.height;
                 if (isScreenSizeChanged)
                 {
-                    Extensions.AdjustWindowPosition(ref rc_stgw);
+                    PluginUtils.AdjustWindowPosition(ref rc_stgw);
                     ScWidth = Screen.width;
                     ScHeight = Screen.height;
                 }
@@ -581,7 +585,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     prevWindowPos = rc_stgw.position;
                 }
 
-                rc_stgw = GUI.Window(WINDOW_ID, rc_stgw, DrawWindow, Extensions.WindowName, gsWin);
+                rc_stgw = GUI.Window(WINDOW_ID, rc_stgw, DrawWindow, PluginUtils.WindowName, gsWin);
 
                 subWindow.OnGUI();
 

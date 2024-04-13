@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Reflection;
 using CM3D2.MultipleMaids.Plugin;
+using RootMotion.FinalIK;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
@@ -76,6 +78,106 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public abstract bool useMuneKeyR { get; set; }
 
+        protected IKManager _ikManager = null;
+        public IKManager ikManager
+        {
+            get
+            {
+                return _ikManager;
+            }
+        }
+
+        private FieldInfo fieldLimbControlList = null;
+
+        public List<LimbControl> limbControlList
+        {
+            get
+            {
+                if (_ikManager == null)
+                {
+                    return new List<LimbControl>();
+                }
+                if (fieldLimbControlList == null)
+                {
+                    fieldLimbControlList = typeof(IKManager).GetField("limb_control_list_", BindingFlags.NonPublic | BindingFlags.Instance);
+                    PluginUtils.AssertNull(fieldLimbControlList != null);
+                }
+                return (List<LimbControl>) fieldLimbControlList.GetValue(_ikManager);
+            }
+        }
+
+        public LimbControl GetLimbControl(LimbControl.Type type)
+        {
+            return limbControlList.Find(l => l.type == type);
+        }
+
+        public FABRIK GetIkFabrik(IKHoldType type)
+        {
+            switch (type)
+            {
+                case IKHoldType.Arm_R_Joint:
+                case IKHoldType.Arm_R_Tip:
+                    return GetLimbControl(LimbControl.Type.Arm_R).GetIkFabrik();
+                case IKHoldType.Arm_L_Joint:
+                case IKHoldType.Arm_L_Tip:
+                    return GetLimbControl(LimbControl.Type.Arm_L).GetIkFabrik();
+                case IKHoldType.Foot_R_Joint:
+                case IKHoldType.Foot_R_Tip:
+                    return GetLimbControl(LimbControl.Type.Foot_R).GetIkFabrik();
+                case IKHoldType.Foot_L_Joint:
+                case IKHoldType.Foot_L_Tip:
+                    return GetLimbControl(LimbControl.Type.Foot_L).GetIkFabrik();
+            }
+            return null;
+        }
+
+        public IKDragPoint GetDragPoint(IKHoldType type)
+        {
+            switch (type)
+            {
+                case IKHoldType.Arm_R_Joint:
+                    return GetLimbControl(LimbControl.Type.Arm_R).GetJointDragPoint();
+                case IKHoldType.Arm_R_Tip:
+                    return GetLimbControl(LimbControl.Type.Arm_R).GetTipDragPoint();
+                case IKHoldType.Arm_L_Joint:
+                    return GetLimbControl(LimbControl.Type.Arm_L).GetJointDragPoint();
+                case IKHoldType.Arm_L_Tip:
+                    return GetLimbControl(LimbControl.Type.Arm_L).GetTipDragPoint();
+                case IKHoldType.Foot_R_Joint:
+                    return GetLimbControl(LimbControl.Type.Foot_R).GetJointDragPoint();
+                case IKHoldType.Foot_R_Tip:
+                    return GetLimbControl(LimbControl.Type.Foot_R).GetTipDragPoint();
+                case IKHoldType.Foot_L_Joint:
+                    return GetLimbControl(LimbControl.Type.Foot_L).GetJointDragPoint();
+                case IKHoldType.Foot_L_Tip:
+                    return GetLimbControl(LimbControl.Type.Foot_L).GetTipDragPoint();
+            }
+            return null;
+        }
+
+        public Vector3 GetIkPosition(IKHoldType holdType)
+        {
+            var dragPoint = GetDragPoint(holdType);
+            if (dragPoint != null)
+            {
+                return dragPoint.target_ik_point_trans.position;
+            }
+            return Vector3.zero;
+        }
+
+        public void UpdateIkPosition(IKHoldType holdType, Vector3 targetPosition)
+        {
+            var ikFabrik = GetIkFabrik(holdType);
+            var dragPoint = GetDragPoint(holdType);
+            if (ikFabrik != null && dragPoint != null)
+            {
+                dragPoint.drag_start_event.Invoke();
+                dragPoint.transform.position = targetPosition;
+                ikFabrik.solver.Update();
+                dragPoint.drag_end_event.Invoke();
+            }
+        }
+
         public abstract void Init();
 
         public abstract bool IsValid();
@@ -85,7 +187,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         protected virtual void OnMaidChanged(Maid maid)
         {
             _maid = maid;
-            Extensions.LogDebug("Maid changed: " + (_maid != null ? _maid.name : "null"));
+            PluginUtils.LogDebug("Maid changed: " + (_maid != null ? _maid.name : "null"));
 
             if (_maid != null)
             {
@@ -98,6 +200,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _cacheBoneData = maid.gameObject.AddComponent<CacheBoneDataArray>();
                     _cacheBoneData.CreateCache(maid.body0.GetBone("Bip01"));
                 }
+                _ikManager = PoseEditWindow.GetMaidIKManager(maid);
             }
             else
             {
@@ -105,12 +208,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _annName = "";  
                 _animationState = null;
                 _cacheBoneData = null;
+                _ikManager = null;
             }
         }
 
         protected virtual void OnAnmChanged(string anmName)
         {
-            Extensions.LogDebug("Animation changed: " + anmName);
+            PluginUtils.LogDebug("Animation changed: " + anmName);
             _annName = anmName;
             _animationState = _animation[_annName.ToLower()];
         }
@@ -135,10 +239,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 OnAnmChanged(currentAnmName);
             }
         }
-
-        public abstract Vector3 GetIkPosition(IKHoldType holdType);
-
-        public abstract void UpdateIkPosition(IKHoldType holdType, Vector3 targetPosition);
 
         public virtual bool HasBoneRotateVisible(IKManager.BoneType boneType)
         {

@@ -365,7 +365,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (prevTransform == null || nextTransform == null)
             {
-                Extensions.LogError("UpdateTangent：前後のTransformが見つかりません。");
+                PluginUtils.LogError("UpdateTangent：前後のTransformが見つかりません。");
                 return;
             }
 
@@ -378,7 +378,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (dt0 <= 0f || dt1 <= 0f)
             {
-                Extensions.LogError("UpdateTangent：フレーム時間が不正です。");
+                PluginUtils.LogError("UpdateTangent：フレーム時間が不正です。");
                 return;
             }
 
@@ -439,7 +439,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (prevTransform == null)
             {
-                Extensions.LogError("UpdateTangent：前のTransformが見つかりません。");
+                PluginUtils.LogError("UpdateTangent：前のTransformが見つかりません。");
                 return;
             }
 
@@ -449,7 +449,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (dt0 <= 0f)
             {
-                Extensions.LogError("UpdateTangent：フレーム時間が不正です。");
+                PluginUtils.LogError("UpdateTangent：フレーム時間が不正です。");
                 return;
             }
 

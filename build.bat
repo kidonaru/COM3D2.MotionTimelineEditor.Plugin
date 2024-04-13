@@ -19,6 +19,8 @@ for %%f in (%SOURCE_DIR%\*.cs) do (
     if not "%%f"=="%MAIN_FILE%" set SOURCES=!SOURCES! "%%f"
 )
 
+set SOURCES=!SOURCES! "source\Properties\AssemblyInfo.cs"
+
 echo %CSC_PATH% /t:library %LIB_PATHS% %REFERENCES% %DEBUG_OPTION% %SOURCES%
 %CSC_PATH% /t:library %LIB_PATHS% %REFERENCES% %DEBUG_OPTION% %SOURCES%
 
