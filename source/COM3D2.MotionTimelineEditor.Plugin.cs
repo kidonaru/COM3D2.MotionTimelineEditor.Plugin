@@ -206,8 +206,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     return;
                 }
 
-                if ((Input.GetKey(config.keyPluginToggleSub1) || Input.GetKey(config.keyPluginToggleSub2)) &&
-                    Input.GetKeyDown(config.keyPluginToggle))
+                if (config.GetKeyDown(KeyBindType.PluginToggle))
                 {
                     isShowWnd = !isShowWnd;
                 }
@@ -219,23 +218,39 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (isShowWnd)
                 {
-                    if (Input.GetKeyDown(config.keyAddKeyFrame))
+                    if (config.GetKeyDown(KeyBindType.AddKeyFrame))
                     {
                         timelineManager.AddKeyFrameDiff();
                     }
-                    if (Input.GetKeyDown(config.keyRemoveKeyFrame))
+                    if (config.GetKeyDown(KeyBindType.RemoveKeyFrame))
                     {
                         timelineManager.RemoveSelectedFrame();
                     }
-                    if (Input.GetKeyDown(config.keyPrevFrame))
+                    if (config.GetKeyDown(KeyBindType.PrevFrame))
                     {
                         timelineManager.SetCurrentFrame(timelineManager.currentFrameNo - 1);
                     }
-                    if (Input.GetKeyDown(config.keyNextFrame))
+                    if (config.GetKeyDown(KeyBindType.NextFrame))
                     {
                         timelineManager.SetCurrentFrame(timelineManager.currentFrameNo + 1);
                     }
-                    if (Input.GetKeyDown(config.keyPlay))
+                    if (config.GetKeyDown(KeyBindType.PrevKeyFrame))
+                    {
+                        var prevFrame = timelineManager.GetPrevFrame(timelineManager.currentFrameNo);
+                        if (prevFrame != null)
+                        {
+                            timelineManager.SetCurrentFrame(prevFrame.frameNo);
+                        }
+                    }
+                    if (config.GetKeyDown(KeyBindType.NextKeyFrame))
+                    {
+                        var nextFrame = timelineManager.GetNextFrame(timelineManager.currentFrameNo);
+                        if (nextFrame != null)
+                        {
+                            timelineManager.SetCurrentFrame(nextFrame.frameNo);
+                        }
+                    }
+                    if (config.GetKeyDown(KeyBindType.Play))
                     {
                         if (timelineManager.isAnmPlaying)
                         {
@@ -246,13 +261,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             timelineManager.Play();
                         }
                     }
-                    if (Input.GetKeyDown(config.keyEditMode))
+                    if (config.GetKeyDown(KeyBindType.EditMode))
                     {
                         maidHack.isPoseEditing = !maidHack.isPoseEditing;
                     }
+                    if (config.GetKeyDown(KeyBindType.Copy))
+                    {
+                        timelineManager.CopyFramesToClipboard();
+                    }
+                    if (config.GetKeyDown(KeyBindType.Paste))
+                    {
+                        timelineManager.PasteFramesFromClipboard(false);
+                    }
+                    if (config.GetKeyDown(KeyBindType.FlipPaste))
+                    {
+                        timelineManager.PasteFramesFromClipboard(true);
+                    }
 
                     isMultiSelect = false;
-                    if (Input.GetKey(config.keyMultiSelect1) || Input.GetKey(config.keyMultiSelect2))
+                    if (config.GetKey(KeyBindType.MultiSelect))
                     {
                         isMultiSelect = true;
                     }
@@ -643,12 +670,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var message = "";
                     if (!maidHack.isPoseEditing)
                     {
-                        var keyName = config.keyEditMode.GetKeyName();
+                        var keyName = config.GetKeyName(KeyBindType.EditMode);
                         message = "[" + keyName + "]キーでポーズ編集モードに切り替えます";
                     }
                     else
                     {
-                        var keyName = config.keyAddKeyFrame.GetKeyName();
+                        var keyName = config.GetKeyName(KeyBindType.AddKeyFrame);
                         message = "[" + keyName + "]キーでキーフレームを追加します";
                     }
 
@@ -762,9 +789,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     var newFrameNo = timelineManager.currentFrameNo;
 
-                    if (view.DrawButton(".<", 30, 20))
+                    if (view.DrawButton("|<", 25, 20))
                     {
                         newFrameNo = 0;
+                    }
+                    if (view.DrawButton(".<", 25, 20))
+                    {
+                        var prevFrame = timelineManager.GetPrevFrame(newFrameNo);
+                        if (prevFrame != null)
+                        {
+                            newFrameNo = prevFrame.frameNo;
+                        }
                     }
                     if (view.DrawButton("<", 20, 20))
                     {
@@ -777,14 +812,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         newFrameNo++;
                     }
-                    if (view.DrawButton(">.", 30, 20))
+                    if (view.DrawButton(">.", 25, 20))
+                    {
+                        var nextFrame = timelineManager.GetNextFrame(newFrameNo);
+                        if (nextFrame != null)
+                        {
+                            newFrameNo = nextFrame.frameNo;
+                        }
+                    }
+                    if (view.DrawButton(">|", 25, 20))
                     {
                         newFrameNo = timeline.maxFrameNo;
                     }
 
                     if (newFrameNo != timelineManager.currentFrameNo)
                     {
-                        maidHack.isMotionPlaying = false;
                         timelineManager.SetCurrentFrame(newFrameNo);
                     }
                 }
@@ -820,7 +862,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         anmSpeed = 1.0f;
                     }
 
-                    anmSpeed = view.DrawSlider(anmSpeed, 0f, 2.0f, 100, 20);
+                    anmSpeed = view.DrawSlider(anmSpeed, 0f, 2.0f, 90, 20);
 
                     if (!Mathf.Approximately(anmSpeed, timelineManager.anmSpeed))
                     {
@@ -1174,7 +1216,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     (pos) =>
                     {
                         var frameNo = (int) ((scrollPosition.x + pos.x) / frameWidth);
-                        maidHack.isMotionPlaying = false;
                         timelineManager.SetCurrentFrame(frameNo);
                     });
 

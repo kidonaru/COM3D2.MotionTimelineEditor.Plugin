@@ -1,17 +1,18 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using COM3D2.MotionTimelineEditor.Plugin;
 
 // アセンブリに関する一般情報は以下の属性セットをとおして制御されます。
 // アセンブリに関連付けられている情報を変更するには、
 // これらの属性値を変更してください。
-[assembly: AssemblyTitle("MotionTimelineEditor")]
-[assembly: AssemblyDescription("MotionTimelineEditor")]
+[assembly: AssemblyTitle(PluginUtils.PluginFullName)]
+[assembly: AssemblyDescription(PluginUtils.PluginFullName)]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("MotionTimelineEditor")]
-[assembly: AssemblyProduct("MotionTimelineEditor")]
-[assembly: AssemblyCopyright("MotionTimelineEditor")]
-[assembly: AssemblyTrademark("MotionTimelineEditor")]
+[assembly: AssemblyCompany(PluginUtils.PluginFullName)]
+[assembly: AssemblyProduct(PluginUtils.PluginFullName)]
+[assembly: AssemblyCopyright(PluginUtils.PluginFullName)]
+[assembly: AssemblyTrademark(PluginUtils.PluginFullName)]
 [assembly: AssemblyCulture("")]
 
 // ComVisible を false に設定すると、その型はこのアセンブリ内で COM コンポーネントから 
@@ -32,5 +33,5 @@ using System.Runtime.InteropServices;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.1.2.0")]
-[assembly: AssemblyFileVersion("1.1.2.0")]
+[assembly: AssemblyVersion(PluginUtils.PluginVersion)]
+[assembly: AssemblyFileVersion(PluginUtils.PluginVersion)]

@@ -538,6 +538,59 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private FrameData FindFrame(int start, int step)
+        {
+            if (config.isEasyEdit)
+            {
+                for (int i = start; i >= 0 && i <= timeline.maxFrameNo; i += step)
+                {
+                    var frame = timeline.GetFrame(i);
+                    if (frame != null)
+                    {
+                        return frame;
+                    }
+                }
+                return null;
+            }
+            else
+            {
+                var selectedMenuItems = boneMenuManager.GetSelectedItems();
+                for (int i = start; i >= 0 && i <= timeline.maxFrameNo; i += step)
+                {
+                    var frame = timeline.GetFrame(i);
+                    if (frame != null)
+                    {
+                        if (selectedMenuItems.Count == 0)
+                        {
+                            return frame;
+                        }
+
+                        foreach (var bone in frame.bones)
+                        {
+                            foreach (var boneMenuItem in selectedMenuItems)
+                            {
+                                if (boneMenuItem.IsTargetBone(bone))
+                                {
+                                    return frame;
+                                }
+                            }
+                        }
+                    }
+                }
+                return null;
+            }
+        }
+
+        public FrameData GetPrevFrame(int frameNo)
+        {
+            return FindFrame(frameNo - 1, -1);
+        }
+
+        public FrameData GetNextFrame(int frameNo)
+        {
+            return FindFrame(frameNo + 1, 1);
+        }
+
         public void SelectBones(List<BoneData> bones, bool isMultiSelect)
         {
             if (bones.Count == 0)
@@ -711,6 +764,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void SetCurrentFrame(int frameNo)
         {
+            maidHack.isMotionPlaying = false;
+
             if (this.currentFrameNo == frameNo)
             {
                 return;
@@ -742,6 +797,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void CopyFramesToClipboard()
         {
+            if (selectedBones.Count == 0)
+            {
+                PluginUtils.LogWarning("コピーするキーフレームが選択されていません");
+                return;
+            }
+
             var copyFrameData = new CopyFrameData();
 
             var tmpFrames = new Dictionary<int, FrameData>();
@@ -767,6 +828,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var framesXml = writer.ToString();
                     GUIUtility.systemCopyBuffer = framesXml;
                 }
+
+                PluginUtils.Log("クリップボードにコピーしました");
             }
             catch (Exception e)
             {
@@ -777,14 +840,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void PasteFramesFromClipboard(bool flip)
         {
-            var framesXml = GUIUtility.systemCopyBuffer;
-            if (framesXml.Length == 0)
-            {
-                return;
-            }
-
             try
             {
+                var framesXml = GUIUtility.systemCopyBuffer;
                 var serializer = new XmlSerializer(typeof(CopyFrameData));
                 using (var reader = new StringReader(framesXml))
                 {

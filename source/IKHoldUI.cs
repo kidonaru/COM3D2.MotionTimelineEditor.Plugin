@@ -124,7 +124,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (resetPositionRequested)
             {
-                PluginUtils.LogDebug("IKHoldUI：ResetPosition");
+                //PluginUtils.LogDebug("IKHoldUI：ResetPosition");
 
                 for (int i = 0; i < initialEditIkPositions.Length; i++)
                 {

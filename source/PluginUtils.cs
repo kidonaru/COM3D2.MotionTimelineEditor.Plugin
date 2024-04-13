@@ -108,6 +108,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             UnityEngine.Debug.Log(PluginName + "：" + message);
         }
 
+        public static void LogWarning(string message)
+        {
+            UnityEngine.Debug.LogWarning(PluginName + "：" + message);
+        }
+        
         public static void LogError(string message)
         {
             UnityEngine.Debug.LogError(PluginName + "：" + message);

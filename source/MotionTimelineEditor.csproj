@@ -93,6 +93,7 @@
     <Compile Include="Config.cs" />
     <Compile Include="EasyMenuItem.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="KeyBind.cs" />
     <Compile Include="PluginUtils.cs" />
     <Compile Include="FrameData.cs" />
     <Compile Include="GUIView.cs" />
