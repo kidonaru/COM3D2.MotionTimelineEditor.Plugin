@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -34,6 +35,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public event UnityAction onRefresh;
         public event UnityAction onEditPoseUpdated;
+        public event UnityAction onAnmSpeedChanged;
+        public event UnityAction onSeekCurrentFrame;
 
         public int playingFrameNo
         {
@@ -107,7 +110,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 _anmSpeed = value;
-                moviePlayer.UpdateSpeed();
+
+                if (onAnmSpeedChanged != null)
+                {
+                    onAnmSpeedChanged();
+                }
             }
         }
 
@@ -156,16 +163,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static MoviePlayer moviePlayer
-        {
-            get
-            {
-                return MoviePlayer.instance;
-            }
-        }
-
         private TimelineManager()
         {
+            MaidHackBase.onMaidChanged += OnMaidChanged;
         }
 
         public void Update()
@@ -762,7 +762,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void SetCurrentFrame(int frameNo)
+        public void SeekCurrentFrame(int frameNo)
         {
             maidHack.isMotionPlaying = false;
 
@@ -772,9 +772,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             this.currentFrameNo = frameNo;
 
-            moviePlayer.UpdateSeekTime();
-
             ApplyCurrentFrame(false);
+
+            if (onSeekCurrentFrame != null)
+            {
+                onSeekCurrentFrame();
+            }
         }
 
         public void ApplyCurrentFrame(bool motionUpdate)
@@ -898,6 +901,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Play()
         {
+            maidHack.isPoseEditing = false;
+
             var success = CreateAndApplyAnm();
             if (success)
             {
@@ -943,6 +948,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 initialEditFrame = null;
                 maid.transform.position = initialEditPosition;
+            }
+        }
+
+
+        private void OnMaidChanged(Maid maid)
+        {
+            if (IsValidData())
+            {
+                maidHack.useMuneKeyL = timeline.useMuneKeyL;
+                maidHack.useMuneKeyR = timeline.useMuneKeyR;
             }
         }
     }

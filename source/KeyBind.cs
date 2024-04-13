@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Xml.Serialization;
 using UnityEngine;
 
@@ -25,6 +26,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void FromString(string data)
         {
+            keyCode = KeyCode.None;
+            ctrl = false;
+            shift = false;
+            alt = false;
+
             string[] parts = data.Split('+');
             foreach (string part in parts)
             {
@@ -42,6 +48,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     case "Enter":
                         keyCode = KeyCode.Return;
                         break;
+                    case "":
+                        keyCode = KeyCode.None;
+                        break;
                     default:
                         keyCode = (KeyCode)System.Enum.Parse(typeof(KeyCode), part);
                         break;
@@ -51,29 +60,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override string ToString()
         {
-            string result = "";
-            if (ctrl)
+            var parts = new List<string>();
+
+            if (ctrl) parts.Add("Ctrl");
+            if (shift) parts.Add("Shift");
+            if (alt) parts.Add("Alt");
+
+            switch (keyCode)
             {
-                result += "Ctrl+";
-            }
-            if (shift)
-            {
-                result += "Shift+";
-            }
-            if (alt)
-            {
-                result += "Alt+";
+                case KeyCode.Return:
+                    parts.Add("Enter");
+                    break;
+                case KeyCode.None:
+                    break;
+                default:
+                    parts.Add(keyCode.ToString());
+                    break;
             }
 
-            if (keyCode == KeyCode.Return)
-            {
-                result += "Enter";
-            }
-            else
-            {
-                result += keyCode.ToString();
-            }
-            return result;
+            return string.Join("+", parts.ToArray());
         }
 
         private bool IsModifierKeyPressed()

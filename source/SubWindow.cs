@@ -167,7 +167,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            if (!MTE.instance.isPluginActive)
+            if (!MTE.instance.isSceneActive)
             {
                 return;
             }

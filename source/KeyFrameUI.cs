@@ -23,7 +23,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private TangentValueType tangentValueType = TangentValueType.All;
         private HashSet<TangentPair> cachedTangents = new HashSet<TangentPair>();
         private Texture2D[] tangentTextures = null;
-        private FloatFieldValue[] transFieldValues = null;
+        private FloatFieldValue[] transFieldValues = FloatFieldValue.CreateArray(6);
         private FloatFieldValue outTangentFieldValue = new FloatFieldValue();
         private FloatFieldValue inTangentFieldValue = new FloatFieldValue();
 
@@ -36,7 +36,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (tangentTextures == null)
             {
-                PluginUtils.LogDebug("補完曲線プリセット画像を生成します");
+                PluginUtils.LogDebug("補間曲線プリセット画像を生成します");
 
                 tangentTextures = new Texture2D[(int) TangentType.Smooth];
 
@@ -64,17 +64,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 curveTex = new Texture2D(150, 150);
 
                 TimelineData.ClearTexture(curveTex, config.curveBgColor);
-            }
-
-            if (transFieldValues == null)
-            {
-                transFieldValues = new FloatFieldValue[6];
-
-                for (var i = 0; i < transFieldValues.Length; i++)
-                {
-                    var fieldValue = new FloatFieldValue();
-                    transFieldValues[i] = fieldValue;
-                }
             }
         }
 
@@ -383,7 +372,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (isUpdated)
                 {
-                    PluginUtils.LogDebug("補完曲線画像を更新します：" + tangents.Count);
+                    PluginUtils.LogDebug("補間曲線画像を更新します：" + tangents.Count);
 
                     cachedTangents = tangents;
 
@@ -428,7 +417,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.AddSpace(10);
 
-                view.DrawLabel("補完曲線", 100, 20);
+                view.DrawLabel("補間曲線", 100, 20);
 
                 {
                     var subView = new GUIView(
@@ -585,7 +574,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
 
                     var isSmooth = tangents.All(tangent => tangent.isSmooth);
-                    var newIsSmooth = subView.DrawToggle("自動補完", isSmooth, 100, 20);
+                    var newIsSmooth = subView.DrawToggle("自動補間", isSmooth, 100, 20);
                     if (newIsSmooth != isSmooth)
                     {
                         foreachOutTangent((outTangentData) =>
@@ -598,7 +587,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             inTangentData.isSmooth = newIsSmooth;
                         });
 
-                        PluginUtils.LogDebug("自動補完を適用します：" + newIsSmooth);
+                        PluginUtils.LogDebug("自動補間を適用します：" + newIsSmooth);
                         timelineManager.ApplyCurrentFrame(true);
                     }
                 }

@@ -138,14 +138,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (bodyBoneCheckBox != null)
+                if (_maid != null)
                 {
-                    return bodyBoneCheckBox.CheckBoxMuneLPhysics.check;
+                    return !_maid.body0.jbMuneL.enabled;
                 }
                 return false;
             }
             set
             {
+                if (_maid != null)
+                {
+                    _maid.body0.jbMuneL.enabled = !value;
+                    _maid.body0.MuneYureL(_maid.body0.jbMuneL.enabled ? 1 : 0);
+                    maidStoreData["use_mune_key_l"] = value.ToString();
+                }
                 if (bodyBoneCheckBox != null)
                 {
                     bodyBoneCheckBox.CheckBoxMuneLPhysics.check = value;
@@ -158,14 +164,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (bodyBoneCheckBox != null)
+                if (_maid != null)
                 {
-                    return bodyBoneCheckBox.CheckBoxMuneRPhysics.check;
+                    return !_maid.body0.jbMuneR.enabled;
                 }
                 return false;
             }
             set
             {
+                if (_maid != null)
+                {
+                    _maid.body0.jbMuneR.enabled = !value;
+                    _maid.body0.MuneYureR(_maid.body0.jbMuneR.enabled ? 1 : 0);
+                    maidStoreData["use_mune_key_r"] = value.ToString();
+                }
                 if (bodyBoneCheckBox != null)
                 {
                     bodyBoneCheckBox.CheckBoxMuneRPhysics.check = value;
@@ -242,9 +254,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             _errorMessage = "";
 
-            if (GetMaid() == null)
+            if (GameMain.Instance.CharacterMgr.IsBusy())
+            {
+                _errorMessage = "メイド処理中です";
+                return false;
+            }
+
+            var maid = GetMaid();
+            if (maid == null)
             {
                 _errorMessage = "メイドを配置してください";
+                return false;
+            }
+
+            if (maid.body0 == null || maid.body0.m_Bones == null)
+            {
+                _errorMessage = "メイド生成中です";
                 return false;
             }
 

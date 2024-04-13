@@ -88,28 +88,44 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             false,
         };
 
+        private bool _useMuneKeyL = false;
+
         [XmlElement("UseMuneKeyL")]
         public bool useMuneKeyL
         {
             get
             {
-                return maidHack.useMuneKeyL;
+                return _useMuneKeyL;
             }
             set
             {
+                if (_useMuneKeyL == value)
+                {
+                    return;
+                }
+
+                _useMuneKeyL = value;
                 maidHack.useMuneKeyL = value;
             }
         }
+
+        private bool _useMuneKeyR = false;
 
         [XmlElement("UseMuneKeyR")]
         public bool useMuneKeyR
         {
             get
             {
-                return maidHack.useMuneKeyR;
+                return _useMuneKeyR;
             }
             set
             {
+                if (_useMuneKeyR == value)
+                {
+                    return;
+                }
+
+                _useMuneKeyR = value;
                 maidHack.useMuneKeyR = value;
             }
         }
@@ -482,7 +498,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     if (prevBone == null || nextBone == null)
                     {
-                        PluginUtils.LogError("前後のキーフレームがないので補完処理をスキップしました：" + bone.bonePath);
+                        PluginUtils.LogError("前後のキーフレームがないので補間処理をスキップしました：" + bone.bonePath);
                         continue;
                     }
 

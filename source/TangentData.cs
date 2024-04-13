@@ -34,7 +34,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             "X移動", "Y移動", "Z移動", "X回転", "Y回転", "Z回転", "W回転", "移動", "回転", "すべて" };
 
         public static readonly string[] TangentTypeNames = new string[] {
-            "EaseInOut", "EaseIn", "EaseOut", "線形補完", "自動補完" };
+            "EaseInOut", "EaseIn", "EaseOut", "線形補間", "自動補間" };
 
         private float _value;
         private float _normalizedValue;

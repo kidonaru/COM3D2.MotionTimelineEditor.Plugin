@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Reflection;
-using CM3D2.MultipleMaids.Plugin;
 using RootMotion.FinalIK;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -14,6 +14,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         protected AnimationState _animationState = null;
         protected CacheBoneDataArray _cacheBoneData = null;
         protected string _errorMessage = "";
+
+        public static event UnityAction<Maid> onMaidChanged;
 
         public Maid maid
         {
@@ -186,14 +188,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected virtual void OnMaidChanged(Maid maid)
         {
-            _maid = maid;
-            PluginUtils.LogDebug("Maid changed: " + (_maid != null ? _maid.name : "null"));
+            PluginUtils.LogDebug("Maid changed: " + (maid != null ? maid.name : "null"));
 
-            if (_maid != null)
+            _maid = maid;
+            _annName = "";
+            _animationState = null;
+
+            if (maid != null)
             {
-                _animation = _maid.body0.m_Bones.GetComponent<Animation>();
-                _annName = _maid.body0.LastAnimeFN;
-                _animationState = _animation[annName.ToLower()];
+                _animation = maid.body0.m_Bones.GetComponent<Animation>();
                 _cacheBoneData = maid.gameObject.GetComponent<CacheBoneDataArray>();
                 if (_cacheBoneData == null)
                 {
@@ -205,10 +208,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             else
             {
                 _animation = null;
-                _annName = "";  
-                _animationState = null;
                 _cacheBoneData = null;
                 _ikManager = null;
+            }
+
+            if (onMaidChanged != null)
+            {
+                onMaidChanged(maid);
             }
         }
 
@@ -221,6 +227,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public virtual void Update()
         {
+            if (!IsValid())
+            {
+                return;
+            }
+
             var currentMaid = GetMaid();
             if (_maid != currentMaid)
             {
@@ -234,6 +245,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             // アニメ名更新
             var currentAnmName = _maid.body0.LastAnimeFN;
+            if (string.IsNullOrEmpty(currentAnmName))
+            {
+                return;
+            }
+
             if (_annName != currentAnmName)
             {
                 OnAnmChanged(currentAnmName);

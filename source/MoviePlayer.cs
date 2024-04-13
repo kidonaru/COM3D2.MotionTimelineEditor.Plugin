@@ -1,25 +1,17 @@
 using UnityEngine;
-using RenderHeads.Media.AVProVideo;
 using UnityEngine.AI;
+using UnityEngine.Events;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using SH = StudioHack;
-    using MTE = MotionTimelineEditor;
 
     public class MoviePlayer
     {
-        private GameObject _gameObject = null;
-        private MediaPlayer _mediaPlayer = null;
-        private DisplayIMGUI _displayIMGUI = null;
-        private string _loadedVideoPath = "";
-        private bool _isAnmPlaying = false;
-        private float _prevTime = 0f;
-        private float _aspectRatio = 1f;
-        private float _duration = 0f;
-        private float _frameRate = 60f;
+        private MoviePlayerImpl _moviePlayerImpl = null;
+
         private bool _isDisplayOnGUI = false;
-        private bool _metaUpdated = false;
+        private string _loadedVideoPath = "";
 
         private static MoviePlayer _instance;
         public static MoviePlayer instance
@@ -47,14 +39,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return timelineManager.timeline;
-            }
-        }
-
-        private static Config config
-        {
-            get
-            {
-                return MTE.config;
             }
         }
 
@@ -91,7 +75,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return timelineManager.currentTime;
+                return _moviePlayerImpl != null ? _moviePlayerImpl.currentTime : 0f;
             }
         }
 
@@ -99,7 +83,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return _duration;
+                return _moviePlayerImpl != null ? _moviePlayerImpl.duration : 0f;
             }
         }
 
@@ -107,173 +91,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return _frameRate;
+                return _moviePlayerImpl != null ? _moviePlayerImpl.frameRate : 0f;
             }
         }
 
         private MoviePlayer()
         {
+            timelineManager.onRefresh += ReloadMovie;
+            timelineManager.onAnmSpeedChanged += UpdateSpeed;
+            timelineManager.onSeekCurrentFrame += UpdateSeekTime;
         }
 
-        private void Setup()
+        private void SetupImpl()
         {
             if (_isDisplayOnGUI != timeline.videoDisplayOnGUI)
             {
-                if (_gameObject != null)
-                {
-                    Object.Destroy(_gameObject);
-                    _gameObject = null;
-                    _mediaPlayer = null;
-                    _displayIMGUI = null;
-                }
+                UnloadMovie();
                 _isDisplayOnGUI = timeline.videoDisplayOnGUI;
             }
 
-            if (_gameObject != null)
-            {
-                return;
-            }
-
-            _gameObject = new GameObject("MoviePlayer");
-            _mediaPlayer = _gameObject.AddComponent<MediaPlayer>();
-            _mediaPlayer.Events.AddListener(OnVideoEvent);
-
-            if (_isDisplayOnGUI)
-            {
-                _displayIMGUI = _gameObject.AddComponent<DisplayIMGUI>();
-                _displayIMGUI._mediaPlayer = _mediaPlayer;
-                _displayIMGUI._scaleMode = ScaleMode.ScaleToFit;
-                _displayIMGUI._fullScreen = false;
-            }
-            else
-            {
-                MeshRenderer meshRenderer = this._gameObject.AddComponent<MeshRenderer>();
-                MeshFilter meshFilter = this._gameObject.AddComponent<MeshFilter>();
-                meshFilter.mesh = CreateQuadMesh();
-
-                Material videoMaterial = new Material(Shader.Find("Unlit/Texture"));
-                meshRenderer.material = videoMaterial;
-
-                ApplyToMaterial applyToMaterial = _gameObject.AddComponent<ApplyToMaterial>();
-                applyToMaterial.Material = videoMaterial;
-                applyToMaterial.Player = _mediaPlayer;
-            }
-        }
-
-        public void Update()
-        {
             if (!isEnabled)
             {
                 return;
             }
 
-            if (_mediaPlayer == null || _mediaPlayer.Control == null)
+            if (_moviePlayerImpl == null)
             {
-                return;
-            }
-
-            if (_metaUpdated)
-            {
-                UpdateTransform();
-                _metaUpdated = false;
-            }
-
-            if (currentTime < _prevTime)
-            {
-                UpdateSeekTime();
-            }
-            _prevTime = currentTime;
-
-            var newIsAnmPlaying = timelineManager.isAnmPlaying;
-            if (_isAnmPlaying != newIsAnmPlaying)
-            {
-                _isAnmPlaying = newIsAnmPlaying;
-                UpdateSpeed();
-            }
-        }
-
-        public void UpdateTransform()
-        {
-            if (_gameObject != null && _mediaPlayer != null && _mediaPlayer.Info != null)
-            {
-                if (_isDisplayOnGUI)
-                {
-                    // 位置調整
-                    _displayIMGUI._x = timeline.videoGUIPosition.x;
-                    _displayIMGUI._y = timeline.videoGUIPosition.y;
-
-                    // アスペクト比調整
-                    if (_aspectRatio > 1f)
-                    {
-                        _displayIMGUI._width = timeline.videoGUIScale;
-                        _displayIMGUI._height = timeline.videoGUIScale / _aspectRatio;
-                    }
-                    else
-                    {
-                        _displayIMGUI._width = timeline.videoGUIScale * _aspectRatio;
-                        _displayIMGUI._height = timeline.videoGUIScale;
-                    }
-                }
-                else
-                {
-                    // 位置調整
-                    _gameObject.transform.position = timeline.videoPosition;
-
-                    // アスペクト比調整
-                    var scale = Vector3.one * timeline.videoScale;
-                    scale.x = scale.y * _aspectRatio;
-                    _gameObject.transform.localScale = scale;
-
-                    // ビルボード補正
-                    /*var cameraTransform = SH.mainCamera.transform;
-                    _gameObject.transform.LookAt(
-                        _gameObject.transform.position + cameraTransform.rotation * Vector3.forward,
-                        cameraTransform.rotation * Vector3.up);*/
-
-                    var rotation = timeline.videoRotation;
-                    _gameObject.transform.rotation = Quaternion.Euler(rotation.x, rotation.y, rotation.z);
-                }
-                
-            }
-        }
-
-        public void UpdateVolume()
-        {
-            if (_mediaPlayer != null && _mediaPlayer.Control != null)
-            {
-                _mediaPlayer.Control.SetVolume(timeline.videoVolume);
-                _mediaPlayer.m_Muted = timeline.videoVolume == 0f;
-            }
-        }
-
-        public void UpdateSpeed()
-        {
-            if (_mediaPlayer != null && _mediaPlayer.Control != null)
-            {
-                var playbackRate = _isAnmPlaying ? timelineManager.anmSpeed : 0f;
-                _mediaPlayer.Control.SetPlaybackRate(playbackRate);
-            }
-        }
-
-        public void UpdateSeekTime()
-        {
-            if (_mediaPlayer != null && _mediaPlayer.Control != null)
-            {
-                var seekTime = currentTime + timeline.videoStartTime;
-                _mediaPlayer.Control.Seek(seekTime * 1000f);
-
-                _prevTime = currentTime;
-            }
-        }
-
-        public void UpdateColor()
-        {
-            if (_displayIMGUI != null)
-            {
-                var color = Color.white;
-                color.a = timeline.videoGUIAlpha;
-                _displayIMGUI._alphaBlend = color.a != 1f;
-                _displayIMGUI._color = color;
+                var guid = System.Guid.NewGuid().ToString();
+                var gameObject = new GameObject("MoviePlayer_" + guid);
+                _moviePlayerImpl = gameObject.AddComponent<MoviePlayerImpl>();
             }
         }
 
@@ -290,31 +136,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             _loadedVideoPath = videoPath;
 
-            Setup();
+            SetupImpl();
 
-            //_mediaPlayer.PlatformOptionsWindows.videoApi = Windows.VideoApi.MediaFoundation;
-            _mediaPlayer.OpenVideoFromFile(
-                MediaPlayer.FileLocation.AbsolutePathOrURL,
-                videoPath,
-                true);
-
-            _mediaPlayer.m_Loop = true;
-
-            UpdateSeekTime();
-            UpdateVolume();
-            UpdateTransform();
-            UpdateColor();
-            UpdateSpeed();
+            if (_moviePlayerImpl != null)
+            {
+                _moviePlayerImpl.LoadMovie(videoPath);
+            }
         }
 
         public void UnloadMovie()
         {
-            if (_mediaPlayer != null)
+            if (_moviePlayerImpl != null)
             {
-                _mediaPlayer.CloseVideo();
-                _loadedVideoPath = "";
-                _isAnmPlaying = false;
+                Object.Destroy(_moviePlayerImpl.gameObject);
+                _moviePlayerImpl = null;
             }
+            _loadedVideoPath = "";
         }
 
         public void ReloadMovie()
@@ -323,45 +160,57 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             LoadMovie();
         }
 
-        private void OnVideoEvent(
-            MediaPlayer mp,
-            MediaPlayerEvent.EventType et,
-            ErrorCode errorCode)
+        public void Update()
         {
-            //PluginUtils.LogDebug("MoviePlayer：EventType：" + et.ToString() + "  ErrorCode：" + errorCode.ToString());
-
-            if (errorCode != ErrorCode.None)
+            if (!isEnabled)
             {
-                PluginUtils.LogError("MoviePlayer：エラー EventType：" + et.ToString() + "  ErrorCode：" + errorCode.ToString());
                 return;
             }
 
-            if (et == MediaPlayerEvent.EventType.MetaDataReady)
+            if (_moviePlayerImpl != null)
             {
-                _aspectRatio = (float)_mediaPlayer.Info.GetVideoWidth() / _mediaPlayer.Info.GetVideoHeight();
-                _duration = _mediaPlayer.Info.GetDurationMs() / 1000f;
-                _frameRate = _mediaPlayer.Info.GetVideoFrameRate();
-                _metaUpdated = true;
+                _moviePlayerImpl.Update();
             }
         }
 
-        private Mesh CreateQuadMesh()
+        public void UpdateTransform()
         {
-            Mesh mesh = new Mesh();
-            mesh.vertices = new Vector3[] {
-                new Vector3(-0.5f, 0.0f, 0),
-                new Vector3(0.5f, 0.0f, 0),
-                new Vector3(-0.5f, 1.0f, 0),
-                new Vector3(0.5f, 1.0f, 0),
-            };
-            mesh.uv = new Vector2[] {
-                new Vector2(0, 0),
-                new Vector2(1, 0),
-                new Vector2(0, 1),
-                new Vector2(1, 1),
-            };
-            mesh.triangles = new int[] { 0, 1, 2, 2, 1, 3 };
-            return mesh;
+            if (_moviePlayerImpl != null)
+            {
+                _moviePlayerImpl.UpdateTransform();
+            }
+        }
+
+        public void UpdateVolume()
+        {
+            if (_moviePlayerImpl != null)
+            {
+                _moviePlayerImpl.UpdateVolume();
+            }
+        }
+
+        public void UpdateSpeed()
+        {
+            if (_moviePlayerImpl != null)
+            {
+                _moviePlayerImpl.UpdateSpeed();
+            }
+        }
+
+        public void UpdateSeekTime()
+        {
+            if (_moviePlayerImpl != null)
+            {
+                _moviePlayerImpl.UpdateSeekTime();
+            }
+        }
+
+        public void UpdateColor()
+        {
+            if (_moviePlayerImpl != null)
+            {
+                _moviePlayerImpl.UpdateColor();
+            }
         }
     }
 }

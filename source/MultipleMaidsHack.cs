@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Reflection;
 using CM3D2.MultipleMaids.Plugin;
@@ -346,15 +347,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             _errorMessage = "";
 
+            if (GameMain.Instance.CharacterMgr.IsBusy())
+            {
+                _errorMessage = "メイド処理中です";
+                return false;
+            }
+
             if (!okFlg)
             {
                 _errorMessage = "複数メイドを有効化してください";
                 return false;
             }
 
-            if (GetMaid() == null)
+            var maid = GetMaid();
+            if (maid == null)
             {
                 _errorMessage = "メイドを配置してください";
+                return false;
+            }
+
+            if (maid.body0 == null || maid.body0.m_Bones == null)
+            {
+                _errorMessage = "メイド生成中です";
                 return false;
             }
 
