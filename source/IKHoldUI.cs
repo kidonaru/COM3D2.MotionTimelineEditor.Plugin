@@ -7,6 +7,7 @@ using UnityEngine;
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using SH = StudioHack;
+    using MTE = MotionTimelineEditor;
 
     public enum IKHoldType
     {
@@ -21,28 +22,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Max,
     }
 
-    public class IKHoldUI : ISubWindowUI
+    public class IKHoldUI : SubWindowUIBase
     {
-        public string title
+        public override string title
         {
             get
             {
                 return "IK固定";
-            }
-        }
-
-        public static int WINDOW_WIDTH
-        {
-            get
-            {
-                return SubWindow.WINDOW_WIDTH;
-            }
-        }
-        public static int WINDOW_HEIGHT
-        {
-            get
-            {
-                return SubWindow.WINDOW_HEIGHT;
             }
         }
 
@@ -58,29 +44,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             "足首(左)",
         };
 
-        private Vector3[] initialEditIkPositions 
+        public Vector3[] initialEditIkPositions = new Vector3[(int) IKHoldType.Max]
+        {
+            Vector3.zero,
+            Vector3.zero,
+            Vector3.zero,
+            Vector3.zero,
+            Vector3.zero,
+            Vector3.zero,
+            Vector3.zero,
+            Vector3.zero,
+        };
+
+        private bool resetPositionRequested = false;
+        private bool positionUpdated = false;
+
+        private static MaidHackBase maidHack
         {
             get
             {
-                return timelineManager.initialEditIkPositions;
-            }
-        }
-
-        public bool isDrag = false;
-
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
-
-        private static TimelineData timeline
-        {
-            get
-            {
-                return timelineManager.timeline;
+                return MTE.maidHack;
             }
         }
 
@@ -92,105 +75,78 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void OnOpen()
+        private Vector3[] prevIkPositions = new Vector3[(int) IKHoldType.Max]
         {
+            Vector3.zero,
+            Vector3.zero,
+            Vector3.zero,
+            Vector3.zero,
+            Vector3.zero,
+            Vector3.zero,
+            Vector3.zero,
+            Vector3.zero,
+        };
+
+        public override void Init()
+        {
+            timelineManager.onEditPoseUpdated += OnEditPoseUpdated;
         }
 
-        public void OnClose()
+        public override void Update()
         {
-            if (isPrevDrag)
+            if (!maidHack.isPoseEditing)
             {
-                OnDragEnd();
-                isPrevDrag = false;
+                return;
+            }
+
+            if (resetPositionRequested)
+            {
+                return;
+            }
+
+            for (int i = 0; i < isHoldList.Length; i++)
+            {
+                if (isHoldList[i])
+                {
+                    var ikPosition = maidHack.GetIkPosition((IKHoldType) i);
+                    if (prevIkPositions[i] != ikPosition)
+                    {
+                        Extensions.LogDebug("IKHoldUI：UpdateIkPosition: " + (IKHoldType) i);
+                        Extensions.LogDebug("  current: " + ikPosition + "  target: " + initialEditIkPositions[i]);
+                        maidHack.UpdateIkPosition((IKHoldType) i, initialEditIkPositions[i]);
+                        positionUpdated = true;
+                    }
+                }
             }
         }
 
-        public void Update()
+        public override void LateUpdate()
         {
-            UpdateDrag(IKDragPoint.IsDrag);
-        }
-
-        public void UpdateDrag(bool isDrag)
-        {
-            this.isDrag = isDrag;
-
-            if (!isPrevDrag && isDrag)
+            if (resetPositionRequested)
             {
-                OnDragStart();
-            }
-            if (isPrevDrag && !isDrag)
-            {
-                OnDragEnd();
+                Extensions.LogDebug("IKHoldUI：ResetPosition");
+
+                for (int i = 0; i < initialEditIkPositions.Length; i++)
+                {
+                    prevIkPositions[i] = initialEditIkPositions[i] = maidHack.GetIkPosition((IKHoldType)i);
+                }
+                resetPositionRequested = false;
             }
 
-            isPrevDrag = isDrag;
-
-            if (isDrag)
+            if (positionUpdated)
             {
                 for (int i = 0; i < isHoldList.Length; i++)
                 {
                     if (isHoldList[i])
                     {
-                        var dragPoint = SH.GetDragPoint((IKHoldType)i);
-                        if (dragPoint != null)
-                        {
-                            dragPoint.transform.position = initialEditIkPositions[i];
-                        }
+                        prevIkPositions[i] = maidHack.GetIkPosition((IKHoldType) i);
                     }
                 }
+                positionUpdated = false;
             }
         }
 
-        public void SetHold(IKHoldType type, bool hold)
-        {
-            isHoldList[(int)type] = hold;
-        }
-
-        public bool IsHold(IKHoldType type)
-        {
-            return isHoldList[(int)type];
-        }
-
-        public string GetHoldTypeName(IKHoldType type)
-        {
-            return IKHoldTypeNames[(int)type];
-        }
-
-        bool isPrevDrag = false;
-
-        public void OnDragStart()
-        {
-            //Extensions.Log("IKHoldUI：OnDragStart");
-            for (int i = 0; i < isHoldList.Length; i++)
-            {
-                if (isHoldList[i])
-                {
-                    var dragPoint = SH.GetDragPoint((IKHoldType)i);
-                    if (dragPoint != null)
-                    {
-                        dragPoint.drag_start_event.Invoke();
-                    }
-                }
-            }
-        }
-
-        public void OnDragEnd()
-        {
-            //Extensions.Log("IKHoldUI：OnDragEnd");
-            for (int i = 0; i < isHoldList.Length; i++)
-            {
-                if (isHoldList[i])
-                {
-                    var dragPoint = SH.GetDragPoint((IKHoldType)i);
-                    if (dragPoint != null)
-                    {
-                        dragPoint.drag_end_event.Invoke();
-                    }
-                }
-            }
-        }
-
-        public void DrawWindow(int id)
+        public override void DrawWindow(int id)
         {
             {
                 var view = new GUIView(0, 20, WINDOW_WIDTH, WINDOW_HEIGHT - 20);
@@ -269,6 +225,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             GUI.DragWindow();
+        }
+
+        private void OnEditPoseUpdated()
+        {
+            resetPositionRequested = true;
+        }
+
+        private void SetHold(IKHoldType type, bool hold)
+        {
+            if (isHoldList[(int)type] == hold)
+            {
+                return;
+            }
+
+            isHoldList[(int)type] = hold;
+            if (hold)
+            {
+                initialEditIkPositions[(int)type] = maidHack.GetIkPosition(type);
+            }
+        }
+
+        private bool IsHold(IKHoldType type)
+        {
+            return isHoldList[(int)type];
+        }
+
+        private string GetHoldTypeName(IKHoldType type)
+        {
+            return IKHoldTypeNames[(int)type];
         }
     }
 }

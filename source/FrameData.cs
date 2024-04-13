@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using SH = StudioHack;
+    using MTE = MotionTimelineEditor;
 
     public class FrameData
     {
@@ -50,13 +50,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return _boneMap.Count == SH.saveBonePaths.Length;
+                return _boneMap.Count == Extensions.saveBonePaths.Length;
+            }
+        }
+
+        private static MaidHackBase maidHack
+        {
+            get
+            {
+                return MTE.maidHack;
             }
         }
 
         public FrameData()
         {
-            _boneMap = new Dictionary<string, BoneData>(SH.saveBonePaths.Length);
+            _boneMap = new Dictionary<string, BoneData>(Extensions.saveBonePaths.Length);
         }
 
         public FrameData(int frameNo) : this()
@@ -72,6 +80,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return bone;
             }
             return null;
+        }
+
+        public BoneData GetBone(IKManager.BoneType boneType)
+        {
+            return GetBone(BoneUtils.GetBonePath(boneType));
         }
 
         public bool HasBone(BoneData bone)
@@ -94,6 +107,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _boneMap[path] = bone;
             }
             return bone;
+        }
+
+        public BoneData GetOrCreateBone(IKManager.BoneType boneType)
+        {
+            return GetOrCreateBone(BoneUtils.GetBonePath(boneType));
         }
 
         public void SetBone(BoneData bone)
@@ -226,7 +244,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
             binaryWriter.Write("CM3D2_ANIM");
             binaryWriter.Write(1001);
-            foreach (var path in SH.saveBonePaths)
+            foreach (var path in Extensions.saveBonePaths)
             {
                 var bone = GetBone(path);
                 if (bone == null)
@@ -331,18 +349,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return new KeyValuePair<bool, bool>(useBustKeyL, useBustKeyR);
         }
 
-        public void SetCacheBoneDataArray(CacheBoneDataArray dataArray)
+        public void SetCacheBoneDataArray(CacheBoneDataArray cacheBoneData)
         {
-            var pathDic = SH.GetBonePathDic(dataArray);
-            foreach (var path in SH.saveBonePaths)
+            var pathDic = cacheBoneData.GetPathDic();
+            foreach (var path in Extensions.saveBonePaths)
             {
                 CacheBoneDataArray.BoneData sourceBone;
                 if (pathDic.TryGetValue(path, out sourceBone))
                 {
+                    if (sourceBone == null || sourceBone.transform == null)
+                    {
+                        Extensions.LogError("SetCacheBoneDataArray：ボーンがnullです Maidを読み込み直してください：" + path);
+                        break;
+                    }
+
                     var bone = new BoneData(sourceBone.transform);
                     UpdateBone(bone);
                 }
             }
+        }
+
+        public void AddRootPosition(Vector3 position)
+        {
+            var rootBone = GetOrCreateBone(IKManager.BoneType.Root);
+            rootBone.transform.localPosition += position;
         }
 
         private static bool initializedBoneTypes = false;

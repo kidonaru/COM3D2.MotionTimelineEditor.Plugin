@@ -1,8 +1,8 @@
 @echo off
 setlocal enabledelayedexpansion
 set CSC_PATH="C:\Windows\Microsoft.NET\Framework\v3.5\csc"
-set LIB_PATHS="/lib:..\..\COM3D2x64_Data\Managed" "/lib:.." "/lib:..\lib"
-set REFERENCES="/r:UnityEngine.dll" "/r:UnityInjector.dll" "/r:Assembly-CSharp.dll" "/r:Assembly-CSharp-firstpass.dll" "/r:ExIni.dll"
+set LIB_PATHS="/lib:..\..\COM3D2x64_Data\Managed" "/lib:.." "/lib:..\lib" "/lib:..\UnityInjector"
+set REFERENCES="/r:UnityEngine.dll" "/r:UnityInjector.dll" "/r:Assembly-CSharp.dll" "/r:Assembly-CSharp-firstpass.dll" "/r:ExIni.dll" "/r:COM3D2.MultipleMaids.Plugin.dll"
 set SOURCE_DIR=source
 set MAIN_FILE=%SOURCE_DIR%\COM3D2.MotionTimelineEditor.Plugin.cs
 

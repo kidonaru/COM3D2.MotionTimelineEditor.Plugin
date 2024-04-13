@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class MoviePlayerUI : ISubWindowUI
+    public class MoviePlayerUI : SubWindowUIBase
     {
-        public string title
+        public override string title
         {
             get
             {
@@ -14,49 +14,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static int WINDOW_WIDTH
-        {
-            get
-            {
-                return SubWindow.WINDOW_WIDTH;
-            }
-        }
-        public static int WINDOW_HEIGHT
-        {
-            get
-            {
-                return SubWindow.WINDOW_HEIGHT;
-            }
-        }
-
         private FloatFieldValue[] positionFieldValues = FloatFieldValue.CreateArray(3);
         private FloatFieldValue[] rotationFieldValues = FloatFieldValue.CreateArray(3);
         private FloatFieldValue[] guiPositionFieldValues = FloatFieldValue.CreateArray(2);
         private FloatFieldValue startTimeFieldValue = new FloatFieldValue();
-
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
-
-        private static TimelineData timeline
-        {
-            get
-            {
-                return timelineManager.timeline;
-            }
-        }
-
-        private static Config config
-        {
-            get
-            {
-                return MotionTimelineEditor.config;
-            }
-        }
 
         private static MoviePlayer moviePlayer
         {
@@ -66,21 +27,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void OnOpen()
+        public override void OnOpen()
         {
             moviePlayer.LoadMovie();
         }
 
-        public void OnClose()
-        {
-        }
-
-        public void Update()
+        public override void Update()
         {
             moviePlayer.Update();
         }
 
-        public void DrawWindow(int id)
+        public override void DrawWindow(int id)
         {
             {
                 var view = new GUIView(0, 20, WINDOW_WIDTH, WINDOW_HEIGHT - 20);
@@ -356,11 +313,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                         if (view.DrawButton("<<", 25, 20))
                         {
-                            diffValue = -1f;
+                            diffValue = -10f;
                         }
                         if (view.DrawButton("<", 20, 20))
                         {
-                            diffValue = -10f;
+                            diffValue = -1f;
                         }
 
                         var newValue = view.DrawFloatFieldValue(fieldValue, 50, 20);

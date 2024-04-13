@@ -52,6 +52,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Color curveLineColor = new Color(101 / 255f, 154 / 255f, 210 / 255f);
         public Color curveLineSmoothColor = new Color(90 / 255f, 255 / 255f, 25 / 255f);
         public Color curveBgColor = new Color(0 / 255f, 0 / 255f, 0 / 255f, 0.3f);
+        public Color windowHoverColor = new Color(48 / 255f, 48 / 255f, 48 / 255f, 224 / 255f);
 
         [XmlIgnore]
         public bool dirty = false;

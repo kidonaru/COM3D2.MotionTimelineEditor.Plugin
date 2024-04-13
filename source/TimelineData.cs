@@ -8,6 +8,7 @@ using UnityEngine;
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using SH = StudioHack;
+    using MTE = MotionTimelineEditor;
 
     public class TimelineData
     {
@@ -92,11 +93,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return SH.useMuneKeyL;
+                return maidHack.useMuneKeyL;
             }
             set
             {
-                SH.useMuneKeyL = value;
+                maidHack.useMuneKeyL = value;
             }
         }
 
@@ -105,11 +106,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return SH.useMuneKeyR;
+                return maidHack.useMuneKeyR;
             }
             set
             {
-                SH.useMuneKeyR = value;
+                maidHack.useMuneKeyR = value;
             }
         }
 
@@ -187,9 +188,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                var mode_folder_path = PhotoModePoseSave.folder_path;
-                var path = mode_folder_path + "\\" + anmFileName;
-                return path;
+                return maidHack.outputAnmPath + "\\" + anmFileName;
             }
         }
 
@@ -206,6 +205,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return isHoldList.Any(b => b);
+            }
+        }
+
+        private static MaidHackBase maidHack
+        {
+            get
+            {
+                return MTE.maidHack;
             }
         }
 
@@ -247,10 +254,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void UpdateFrame(int frameNo, CacheBoneDataArray boneDataArray)
+        public void UpdateFrame(int frameNo, CacheBoneDataArray cacheBoneData)
         {
             var frame = GetOrCreateFrame(frameNo);
-            frame.SetCacheBoneDataArray(boneDataArray);
+            frame.SetCacheBoneDataArray(cacheBoneData);
         }
 
         public void SetBone(int frameNo, BoneData bone)
@@ -421,7 +428,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             message = "";
 
-            if (SH.maid == null)
+            if (maidHack.maid == null)
             {
                 message = "メイドを配置してください";
                 return false;
@@ -616,7 +623,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
             binaryWriter.Write("CM3D2_ANIM");
             binaryWriter.Write(1001);
-            foreach (var path in SH.saveBonePaths)
+            foreach (var path in Extensions.saveBonePaths)
             {
                 var bone = firstFrame.GetBone(path);
                 if (bone == null)

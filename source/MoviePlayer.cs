@@ -62,7 +62,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return timeline.videoPath;
+                return timeline != null ? timeline.videoPath : "";
             }
         }
 

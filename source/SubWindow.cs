@@ -1,15 +1,9 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public interface ISubWindowUI
-    {
-        string title { get; }
-        void OnOpen();
-        void OnClose();
-        void Update();
-        void DrawWindow(int id);
-    }
+    using MTE = MotionTimelineEditor;
 
     public enum SubWindowType
     {
@@ -52,17 +46,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        GUIStyle gsWin = new GUIStyle("box")
+        public static SubWindowUIBase[] uiList = new SubWindowUIBase[]
         {
-            fontSize = 12,
-            alignment = TextAnchor.UpperLeft
+            null,
+            new TimelineLoadUI(),
+            new TimelineSettingUI(),
+            new IKHoldUI(),
+            new KeyFrameUI(),
+            new MoviePlayerUI(),
         };
-
-        public static TimelineLoadUI timelineLoadUI = new TimelineLoadUI();
-        public static TimelineSettingUI timelineSettingUI = new TimelineSettingUI();
-        public static IKHoldUI ikHoldUI = new IKHoldUI();
-        public static KeyFrameUI keyFrameUI = new KeyFrameUI();
-        public static MoviePlayerUI moviePlayerUI = new MoviePlayerUI();
 
         private SubWindowType _subWindowType = SubWindowType.None;
         public SubWindowType subWindowType
@@ -84,7 +76,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public ISubWindowUI ui
+        public SubWindowUIBase ui
         {
             get
             {
@@ -100,43 +92,62 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static MaidHackBase maidHack
+        {
+            get
+            {
+                return MTE.maidHack;
+            }
+        }
+
         public void ToggleSubWindow(SubWindowType type)
         {
             subWindowType = subWindowType == type ? SubWindowType.None : type;
         }
 
-        public ISubWindowUI GetSubWindowUI(SubWindowType type)
+        public SubWindowUIBase GetSubWindowUI(SubWindowType type)
         {
-            switch (type)
+            return uiList[(int) type];
+        }
+
+        public void Init()
+        {
+            foreach (var ui in uiList)
             {
-                case SubWindowType.TimelineLoad:
-                    return timelineLoadUI;
-                case SubWindowType.TimelineSetting:
-                    return timelineSettingUI;
-                case SubWindowType.IKHold:
-                    return ikHoldUI;
-                case SubWindowType.KeyFrame:
-                    return keyFrameUI;
-                case SubWindowType.MoviePlayer:
-                    return moviePlayerUI;
-                default:
-                    return null;
+                if (ui != null)
+                {
+                    ui.Init();
+                }
             }
         }
 
         public void Update()
         {
-            timelineLoadUI.Update();
-            timelineSettingUI.Update();
-            ikHoldUI.Update();
-            keyFrameUI.Update();
-            moviePlayerUI.Update();
+            foreach (var ui in uiList)
+            {
+                if (ui != null)
+                {
+                    ui.Update();
+                }
+            }
+        }
+
+        public void LateUpdate()
+        {
+            foreach (var ui in uiList)
+            {
+                if (ui != null)
+                {
+                    ui.LateUpdate();
+                }
+            }
         }
 
         public void OnGUI()
         {
             if (isShowWnd)
             {
+                var gsWin = MTE.instance.gsWin;
                 rc_stgw = GUI.Window(WINDOW_ID, rc_stgw, DrawWindow, ui != null ? ui.title : "", gsWin);
             }
         }
@@ -154,6 +165,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     isShowWnd = false;
                 }
+            }
+
+            if (!MTE.instance.isPluginActive)
+            {
+                return;
+            }
+            if (!maidHack.IsValid())
+            {
+                return;
             }
 
             if (ui != null) ui.DrawWindow(id);

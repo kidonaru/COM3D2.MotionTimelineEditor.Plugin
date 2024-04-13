@@ -4,8 +4,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using SH = StudioHack;
-
     public enum BoneSetMenuType
     {
         Body,
@@ -29,11 +27,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_boneNameToPathMap == null)
                 {
-                    _boneNameToPathMap = new Dictionary<string, string>(SH.saveBonePaths.Length);
-                    foreach (var bonePath in SH.saveBonePaths)
+                    _boneNameToPathMap = new Dictionary<string, string>(Extensions.saveBonePaths.Length + 2);
+                    foreach (var bonePath in Extensions.saveBonePaths)
                     {
                         _boneNameToPathMap[ConvertBoneName(bonePath)] = bonePath;
                     }
+
+                    _boneNameToPathMap["Hip_L"] = "Bip01/Bip01 Pelvis/Hip_L";
+                    _boneNameToPathMap["Hip_R"] = "Bip01/Bip01 Pelvis/Hip_R";
                 }
                 return _boneNameToPathMap;
             }
@@ -210,6 +211,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {IKManager.BoneType.Finger4_1_R, "Bip01 R Finger42"},
             {IKManager.BoneType.Bust_L, "Mune_L"},
             {IKManager.BoneType.Bust_R, "Mune_R"},
+
+            {IKManager.BoneType.Hip_L, "Hip_L"},
+            {IKManager.BoneType.Hip_R, "Hip_R"},
         };
 
         public static string GetBoneName(IKManager.BoneType boneType)

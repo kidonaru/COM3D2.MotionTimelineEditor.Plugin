@@ -7,9 +7,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     using SH = StudioHack;
     using MTE = MotionTimelineEditor;
 
-    public class TimelineSettingUI : ISubWindowUI
+    public class TimelineSettingUI : SubWindowUIBase
     {
-        public string title
+        public override string title
         {
             get
             {
@@ -17,48 +17,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static int WINDOW_WIDTH
-        {
-            get
-            {
-                return SubWindow.WINDOW_WIDTH;
-            }
-        }
-        public static int WINDOW_HEIGHT
-        {
-            get
-            {
-                return SubWindow.WINDOW_HEIGHT;
-            }
-        }
-
         private Texture2D texWhite = null;
 
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
-
-        private static TimelineData timeline
-        {
-            get
-            {
-                return timelineManager.timeline;
-            }
-        }
-
-        public static Config config
-        {
-            get
-            {
-                return MTE.config;
-            }
-        }
-
-        public void OnOpen()
+        public override void OnOpen()
         {
             if (texWhite == null)
             {
@@ -66,15 +27,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void OnClose()
-        {
-        }
-
-        public void Update()
-        {
-        }
-
-        public void DrawWindow(int id)
+        public override void DrawWindow(int id)
         {
             {
                 var view = new GUIView(0, 20, WINDOW_WIDTH, WINDOW_HEIGHT - 20);

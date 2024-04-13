@@ -1,7 +1,8 @@
+using System.Collections.Generic;
+
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using System.Collections.Generic;
-    using SH = StudioHack;
+    using MTE = MotionTimelineEditor;
 
     public class BoneMenuItem : IBoneMenuItem
     {
@@ -13,20 +14,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (!SH.HasBoneRotateVisible(boneType))
+                if (!maidHack.HasBoneRotateVisible(boneType))
                 {
                     return _isSelectedMenu;
                 }
-                return SH.IsBoneRotateVisible(boneType);
+                return maidHack.IsBoneRotateVisible(boneType);
             }
             set
             {
-                if (!SH.HasBoneRotateVisible(boneType))
+                if (!maidHack.HasBoneRotateVisible(boneType))
                 {
                     _isSelectedMenu = value;
                     return;
                 }
-                SH.SetBoneRotateVisible(boneType, value);
+                maidHack.SetBoneRotateVisible(boneType, value);
             }
         }
 
@@ -65,6 +66,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return BoneUtils.GetBoneJpName(boneType);
+            }
+        }
+
+        private static MaidHackBase maidHack
+        {
+            get
+            {
+                return MTE.maidHack;
             }
         }
 

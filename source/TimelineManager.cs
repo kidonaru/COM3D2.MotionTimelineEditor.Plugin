@@ -6,6 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml.Serialization;
 using Accessibility;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -27,27 +28,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private long playingAnmId = -1;
         public HashSet<BoneData> selectedBones = new HashSet<BoneData>();        private float prevMotionSliderRate = -1f;
         public string errorMessage = "";
-        public Action onRefresh = null;
         public FrameData initialEditFrame;
+        public Vector3 initialEditPosition = Vector3.zero;
         private bool isPrevPoseEditing;
 
-        public Vector3[] initialEditIkPositions = new Vector3[(int) IKHoldType.Max]
-        {
-            Vector3.zero,
-            Vector3.zero,
-            Vector3.zero,
-            Vector3.zero,
-            Vector3.zero,
-            Vector3.zero,
-            Vector3.zero,
-            Vector3.zero,
-        };
+        public event UnityAction onRefresh;
+        public event UnityAction onEditPoseUpdated;
 
         public int playingFrameNo
         {
             get
             {
-                var rate = SH.motionSliderRate;
+                var rate = maidHack.motionSliderRate;
                 return (int) Math.Round(rate * timeline.maxFrameNo);
             }
             set
@@ -55,7 +47,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (timeline.maxFrameNo > 0)
                 {
                     var rate = Mathf.Clamp01((float) value / timeline.maxFrameNo);
-                    SH.motionSliderRate = rate;
+                    maidHack.motionSliderRate = rate;
                     prevMotionSliderRate = rate;
                 }
             }
@@ -75,7 +67,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return SH.isMotionPlaying && isAnmSyncing;
+                return maidHack.isMotionPlaying && isAnmSyncing;
             }
         }
 
@@ -132,15 +124,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static Maid maid
+        private static MaidHackBase maidHack
         {
             get
             {
-                return SH.maid;
+                return MTE.maidHack;
             }
         }
 
-        public static Config config
+        private static Maid maid
+        {
+            get
+            {
+                return maidHack.maid;
+            }
+        }
+
+        private static Config config
         {
             get
             {
@@ -148,7 +148,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static BoneMenuManager boneMenuManager
+        private static BoneMenuManager boneMenuManager
         {
             get
             {
@@ -156,7 +156,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static MoviePlayer moviePlayer
+        private static MoviePlayer moviePlayer
         {
             get
             {
@@ -170,40 +170,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Update()
         {
-            if (SH.animeState != null)
-            {
-                long.TryParse(SH.animeState.name, out playingAnmId);
-            }
+            long.TryParse(maidHack.annName, out playingAnmId);
 
-            var motionSliderRate = SH.motionSliderRate;
+            var motionSliderRate = maidHack.motionSliderRate;
             if (isAnmSyncing && !Mathf.Approximately(motionSliderRate, prevMotionSliderRate))
             {
                 currentFrameNo = playingFrameNo;
             }
-            prevMotionSliderRate = SH.motionSliderRate;
+            prevMotionSliderRate = maidHack.motionSliderRate;
 
-            if (isAnmPlaying && !Mathf.Approximately(anmSpeed, SH.anmSpeed))
+            if (isAnmPlaying && !Mathf.Approximately(anmSpeed, maidHack.anmSpeed))
             {
-                SH.anmSpeed = anmSpeed;
+                maidHack.anmSpeed = anmSpeed;
             }
 
-            var isPoseEditing = SH.isPoseEditing;
+            var isPoseEditing = maidHack.isPoseEditing;
             if (isPrevPoseEditing != isPoseEditing)
             {
                 if (isPoseEditing)
                 {
-                    OnStartPoseEditing();
+                    OnStartPoseEdit();
                 }
                 else
                 {
-                    OnEndPoseEditing();
+                    OnEndPoseEdit();
                 }
                 isPrevPoseEditing = isPoseEditing;
             }
 
             if (initialEditFrame != null && initialEditFrame.frameNo != currentFrameNo)
             {
-                OnStartPoseEditing();
+                OnEditPoseUpdated();
             }
         }
 
@@ -214,16 +211,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void CreateNewTimeline()
         {
-            if (maid == null)
+            if (!maidHack.IsValid())
             {
-                Extensions.ShowDialog("先にメイドを配置してください");
+                Extensions.ShowDialog(maidHack.errorMessage);
                 return;
             }
 
             timeline = new TimelineData();
             timeline.anmName = "テスト";
             timeline.version = TimelineData.CurrentVersion;
-            timeline.UpdateFrame(0, SH.ikManager.cache_bone_data);
+            timeline.UpdateFrame(0, maidHack.cacheBoneData);
 
             CreateAndApplyAnm();
             UnselectAll();
@@ -232,6 +229,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void LoadTimeline(string anmName)
         {
+            if (!maidHack.IsValid())
+            {
+                Extensions.ShowDialog(maidHack.errorMessage);
+                return;
+            }
+
             var path = GetTimelinePath(anmName);
             if (!File.Exists(path))
             {
@@ -310,20 +313,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static readonly Maid.AutoTwist[] autoTwists = new Maid.AutoTwist[]
-        {
-            Maid.AutoTwist.ShoulderL,
-            Maid.AutoTwist.ShoulderR,
-            Maid.AutoTwist.WristL,
-            Maid.AutoTwist.WristR,
-            Maid.AutoTwist.ThighL,
-            Maid.AutoTwist.ThighR,
-        };
-
         public void ApplyAnm(long id, byte[] anmData)
         {
-            var maid = SH.maid;
-            var motionRate = SH.motionSliderRate;
+            var maid = maidHack.maid;
+
+            float motionRate;
+            if (isAnmSyncing)
+            {
+                motionRate = maidHack.motionSliderRate;
+            }
+            else
+            {
+                motionRate = Mathf.Clamp01((float) currentFrameNo / timeline.maxFrameNo);
+            }
 
             GameMain.Instance.ScriptMgr.StopMotionScript();
 
@@ -336,11 +338,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             maid.body0.CrossFade(id.ToString(), anmData, false, false, false, 0f, 1f);
-
-            for (int i = 0; i < autoTwists.Length; i++)
-            {
-                maid.SetAutoTwist(autoTwists[i], true);
-            }
+            maid.SetAutoTwistAll(true);
 
             if (timeline.isLoopAnm)
             {
@@ -358,24 +356,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            OnMotionUpdated(motionRate);
-        }
+            maidHack.OnMotionUpdated(maid);
 
-        public void OnMotionUpdated()
-        {
-            var motionRate = SH.motionSliderRate;
-            OnMotionUpdated(motionRate);
-        }
-
-        public void OnMotionUpdated(float motionRate)
-        {
-            SH.motionWindow.UpdateAnimationData(maid);
-            SH.poseEditWindow.OnMotionUpdate(maid);
-            if (SH.isMotionPlaying)
+            if (maidHack.isMotionPlaying)
             {
                 motionRate += 0.01f; // モーション再生中は再生位置に差分がないと反映されない
             }
-            SH.motionSliderRate = motionRate;
+            maidHack.motionSliderRate = motionRate;
+
+            if (initialEditFrame != null)
+            {
+                OnEditPoseUpdated();
+            }
         }
 
         public bool CreateAndApplyAnm()
@@ -413,15 +405,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 bool isExist = File.Exists(anmPath);
                 File.WriteAllBytes(anmPath, anmData);
 
-                var motionWindow = SH.motionWindow;
-                if (!isExist)
-                {
-                    motionWindow.AddMyPose(anmPath);
-                }
-                else
-                {
-                    motionWindow.OnUpdateMyPose(anmPath);
-                }
+                maidHack.OnUpdateMyPose(anmPath, isExist);
 
                 Extensions.ShowDialog("モーション「" + timeline.anmName + "」を生成しました");
             }
@@ -440,18 +424,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return null;
             }
 
-            var boneDataArray = SH.ikManager.cache_bone_data;
-            if (boneDataArray == null)
+            var cacheBoneData = maidHack.cacheBoneData;
+            if (cacheBoneData == null)
             {
                 Extensions.LogError("ボーンデータが取得できませんでした");
                 return null;
             }
 
-            return boneDataArray;
+            return cacheBoneData;
         }
 
-        public void AddKeyFrame()
+        public void AddKeyFrameAll()
         {
+            maidHack.isMotionPlaying = false;
+
             var boneDataArray = GetCacheBoneDataArray();
             if (boneDataArray == null)
             {
@@ -459,6 +445,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             timeline.UpdateFrame(currentFrameNo, boneDataArray);
+
+            // ポーズ編集中の移動は中心ボーンに反映  
+            if (initialEditFrame != null)
+            {
+                var diffPosition = maid.transform.position - initialEditPosition;
+                timeline.GetFrame(currentFrameNo).AddRootPosition(diffPosition);
+                maid.transform.position = initialEditPosition;
+            }
 
             ApplyCurrentFrame(true);
         }
@@ -479,6 +473,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var tmpFrame = new FrameData(currentFrameNo);
             tmpFrame.SetCacheBoneDataArray(boneDataArray);
+
+            var diffPosition = maid.transform.position - initialEditPosition;
+            tmpFrame.AddRootPosition(diffPosition);
+            maid.transform.position = initialEditPosition;
 
             var diffBones = tmpFrame.GetDiffBones(
                 initialEditFrame,
@@ -845,48 +843,49 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var success = CreateAndApplyAnm();
             if (success)
             {
-                SH.isMotionPlaying = true;
+                maidHack.isMotionPlaying = true;
             }
         }
 
         public void Stop()
         {
-            SH.isMotionPlaying = false;
+            maidHack.isMotionPlaying = false;
         }
 
-        public void OnStartPoseEditing()
+        private void OnEditPoseUpdated()
         {
-            if (maid == null)
-            {
-                Extensions.LogError("メイドが配置されていません");
-                return;
-            }
+            OnEndPoseEdit();
 
-            ApplyCurrentFrame(false);
-
-            var boneDataArray = SH.ikManager.cache_bone_data;
-            if (boneDataArray == null)
+            var cacheBoneData = maidHack.cacheBoneData;
+            if (cacheBoneData == null)
             {
                 Extensions.LogError("ボーンデータが取得できませんでした");
                 return;
             }
 
             initialEditFrame = new FrameData(currentFrameNo);
-            initialEditFrame.SetCacheBoneDataArray(boneDataArray);
+            initialEditFrame.SetCacheBoneDataArray(cacheBoneData);
+            initialEditPosition = maid.transform.position;
 
-            for (int i = 0; i < initialEditIkPositions.Length; i++)
+            if (onEditPoseUpdated != null)
             {
-                var dragPoint = SH.GetDragPoint((IKHoldType)i);
-                if (dragPoint != null)
-                {
-                    initialEditIkPositions[i] = dragPoint.transform.position;
-                }
+                onEditPoseUpdated();
             }
         }
 
-        public void OnEndPoseEditing()
+        private void OnStartPoseEdit()
         {
-            initialEditFrame = null;
+            ApplyCurrentFrame(false);
+            OnEditPoseUpdated();
+        }
+
+        private void OnEndPoseEdit()
+        {
+            if (initialEditFrame != null)
+            {
+                initialEditFrame = null;
+                maid.transform.position = initialEditPosition;
+            }
         }
     }
 }

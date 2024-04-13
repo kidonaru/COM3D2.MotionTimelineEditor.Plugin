@@ -8,12 +8,11 @@ using UnityInjector.Attributes;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
+using UnityEngine.AI;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using SH = StudioHack;
-
-    [PluginFilter( "COM3D2x64" ), PluginName("COM3D2.MotionTimelineEditor.Plugin"), PluginVersion( "1.1.1.0" )]
+    [PluginFilter( "COM3D2x64" ), PluginName("COM3D2.MotionTimelineEditor.Plugin"), PluginVersion( "1.1.2.0" )]
     public class MotionTimelineEditor : PluginBase
     {
         public readonly static int WINDOW_ID = 615814;
@@ -66,7 +65,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         private bool isOnStateStudioMode = false;
-        private bool isOldStateStudioMode = false;
+        private bool isOnStateEdit = false;
         private bool initializedGUI = false;
         private bool isFrameDragging = false;
         private Vector2 frameDragDelta = Vector2.zero;
@@ -77,8 +76,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private Vector2 menuScrollPosition = Vector2.zero;
         private int selectStartFrameNo = 0;
         private int selectEndFrameNo = 0;
-
-        public bool isMultiSelect = false;
+        private bool isMultiSelect = false;
 
         private Texture2D texWhite = null;
         private Texture2D texTimelineBG = null;
@@ -104,11 +102,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static SubWindow subWindow = new SubWindow();
         public static Config config = new Config();
+        public static MaidHackBase maidHack = null;
 
-        private GUIStyle gsWin = new GUIStyle("box")
+        public GUIStyle gsWin = new GUIStyle("box")
         {
             fontSize = 12,
-            alignment = TextAnchor.UpperLeft
+            alignment = TextAnchor.UpperLeft,
         };
 
         private GUIStyle gsFrameLabel = new GUIStyle("label")
@@ -176,11 +175,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public bool isPluginActive
+        {
+            get
+            {
+                if (!isOnStateStudioMode && !isOnStateEdit)
+                {
+                    return false;
+                }
+
+                if (GameMain.Instance.CharacterMgr.IsBusy())
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
         public void Update()
         {
             try
             {
-                if (!config.pluginEnabled || !isOnStateStudioMode)
+                if (!isPluginActive)
                 {
                     return;
                 }
@@ -189,6 +206,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     Input.GetKeyDown(config.keyPluginToggle))
                 {
                     isShowWnd = !isShowWnd;
+                }
+
+                if (!maidHack.IsValid())
+                {
+                    return;
                 }
 
                 if (isShowWnd)
@@ -222,7 +244,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                     if (Input.GetKeyDown(config.keyEditMode))
                     {
-                        SH.isPoseEditing = !SH.isPoseEditing;
+                        maidHack.isPoseEditing = !maidHack.isPoseEditing;
                     }
 
                     isMultiSelect = false;
@@ -231,13 +253,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         isMultiSelect = true;
                     }
 
+                    maidHack.Update();
                     timelineManager.Update();
                     subWindow.Update();
 
                     // 自動スクロール
                     if (config.isAutoScroll &&
                         timelineManager.isAnmSyncing &&
-                        SH.isMotionPlaying &&
+                        maidHack.isMotionPlaying &&
                         !Input.GetMouseButton(0))
                     {
                         var contentWidth = timeline.maxFrameCount * config.frameWidth;
@@ -255,6 +278,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public void LateUpdate()
+        {
+            if (!isPluginActive)
+            {
+                return;
+            }
+            if (!maidHack.IsValid())
+            {
+                return;
+            }
+
+            if (isShowWnd)
+            {
+                subWindow.LateUpdate();
+            }
+        }
+
         public void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)
         {
             if (!config.pluginEnabled)
@@ -267,21 +307,39 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 this.isShowWnd = false;
             }
 
-            this.isOldStateStudioMode = this.isOnStateStudioMode;
+            var isOldStateStudioMode = this.isOnStateStudioMode;
+            var isOldStateEdit = this.isOnStateEdit;
             this.isOnStateStudioMode = sceneName.name == "ScenePhotoMode";
+            this.isOnStateEdit = sceneName.name == "SceneEdit" || sceneName.name == "SceneDaily";
 
             if (this.isOnStateStudioMode)
             {
-                SH.Init();
+                maidHack = new StudioHack();
+                maidHack.Init();
+                boneMenuManager.Init();
+                AddGearMenu();
+                return;
+            }
+            if (this.isOnStateEdit)
+            {
+                maidHack = new MultipleMaidsHack();
+                maidHack.Init();
                 boneMenuManager.Init();
                 AddGearMenu();
                 return;
             }
 
-            if (this.isOldStateStudioMode && !this.isOnStateStudioMode)
+            if (isOldStateStudioMode && !this.isOnStateStudioMode)
             {
                 this.isShowWnd = false;
                 RemoveGearMenu();
+                return;
+            }
+            if (isOldStateEdit && !this.isOnStateEdit)
+            {
+                this.isShowWnd = false;
+                RemoveGearMenu();
+                return;
             }
         }
 
@@ -378,8 +436,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             texWhite = GUIView.CreateColorTexture(Color.white);
 
+            var windowHoverColor = config.windowHoverColor;
+            var hoverTex = GUIView.CreateColorTexture(windowHoverColor);
+            gsWin.onHover.background = hoverTex;
+            gsWin.hover.background = hoverTex;
+			gsWin.onFocused.background = hoverTex;
+			gsWin.focused.background = hoverTex;
+            gsWin.onHover.textColor = Color.white;
+			gsWin.hover.textColor = Color.white;
+			gsWin.onFocused.textColor = Color.white;
+			gsWin.focused.textColor = Color.white;
+
             LoadConfigXml();
             SaveConfigXml();
+
+            subWindow.Init();
         }
 
         private void InitGUI()
@@ -431,6 +502,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 Extensions.PluginName,
                 Extensions.icon,
                 (go) => {
+                    if (!isPluginActive)
+                    {
+                        return;
+                    }
+
                     isShowWnd = !isShowWnd;
                 });
         }
@@ -459,7 +535,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected IEnumerator SaveScreenShotInternal(string filePath, int width, int height)
         {
-            SH.UIHide();
+            Extensions.UIHide();
             var subWindowType = subWindow.subWindowType;
             isShowWnd = false;
             yield return new WaitForEndOfFrame();
@@ -468,7 +544,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             yield return new WaitForEndOfFrame();
             isShowWnd = true;
             subWindow.subWindowType = subWindowType;
-            SH.UIResume();
+            Extensions.UIResume();
 
             texture.ResizeTexture(width, height);
             UTY.SaveImage(texture, filePath);
@@ -525,6 +601,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void DrawWindow(int id)
         {
+            if (maidHack == null)
+            {
+                return;
+            }
+
+            var isMaidHackValid = maidHack.IsValid();
+            var isTimelineValid = timelineManager.IsValidData();
+
             {
                 var view = new GUIView(0, 0, WINDOW_WIDTH, 20);
                 view.padding.y = 0;
@@ -541,9 +625,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.currentPos.x = WINDOW_WIDTH - 400;
 
-                timelineManager.IsValidData();
-
-                if (timelineManager.errorMessage.Length > 0)
+                if (!isMaidHackValid)
+                {
+                    view.DrawLabel(maidHack.errorMessage, 400 - 20, 20, Color.yellow);
+                }
+                else if (!isTimelineValid)
                 {
                     view.DrawLabel(timelineManager.errorMessage, 400 - 20, 20, Color.yellow);
                 }
@@ -551,8 +637,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     // TIPSを表示したい
                     var message = "";
-
-                    if (!SH.isPoseEditing)
+                    if (!maidHack.isPoseEditing)
                     {
                         var keyName = config.keyEditMode.GetKeyName();
                         message = "[" + keyName + "]キーでポーズ編集モードに切り替えます";
@@ -567,7 +652,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            bool timelneEnabled = timeline != null && SH.maid != null;
+            bool editEnabled = isMaidHackValid && isTimelineValid;
 
             {
                 var view = new GUIView(0, 20, WINDOW_WIDTH, HEADER_HEIGHT);
@@ -586,40 +671,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         subWindow.ToggleSubWindow(SubWindowType.TimelineLoad);
                     }
                     
-                    if (view.DrawButton("セーブ", buttonWidth, 20, timelneEnabled))
+                    if (view.DrawButton("セーブ", buttonWidth, 20, editEnabled))
                     {
                         timelineManager.SaveTimeline();
                     }
 
-                    if (view.DrawButton("アニメ出力", buttonWidth, 20, timelneEnabled))
+                    if (view.DrawButton("アニメ出力", buttonWidth, 20, editEnabled))
                     {
                         timelineManager.OutputAnm();
                     }
 
-                    if (view.DrawButton("ｷｰﾌﾚｰﾑ", buttonWidth, 20, timelneEnabled))
+                    if (view.DrawButton("ｷｰﾌﾚｰﾑ", buttonWidth, 20, editEnabled))
                     {
                         subWindow.ToggleSubWindow(SubWindowType.KeyFrame);
                     }
 
-                    var ikColor = timelneEnabled && timeline.isHoldActive ? Color.green : Color.white;
-                    if (view.DrawButton("IK固定", buttonWidth, 20, timelneEnabled, ikColor))
+                    var ikColor = editEnabled && timeline.isHoldActive ? Color.green : Color.white;
+                    if (view.DrawButton("IK固定", buttonWidth, 20, editEnabled, ikColor))
                     {
                         subWindow.ToggleSubWindow(SubWindowType.IKHold);
                     }
 
-                    if (view.DrawButton("動画再生", buttonWidth, 20, timelneEnabled))
+                    if (view.DrawButton("動画再生", buttonWidth, 20, editEnabled))
                     {
                         subWindow.ToggleSubWindow(SubWindowType.MoviePlayer);
                     }
 
-                    if (view.DrawButton("設定", buttonWidth, 20, timelneEnabled))
+                    if (view.DrawButton("設定", buttonWidth, 20, editEnabled))
                     {
                         subWindow.ToggleSubWindow(SubWindowType.TimelineSetting);
                     }
                 }
                 view.EndLayout();
 
-                if (!timelneEnabled)
+                if (!editEnabled)
                 {
                     GUI.DragWindow();
                     return;
@@ -695,7 +780,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     if (newFrameNo != timelineManager.currentFrameNo)
                     {
-                        SH.isMotionPlaying = false;
+                        maidHack.isMotionPlaying = false;
                         timelineManager.SetCurrentFrame(newFrameNo);
                     }
                 }
@@ -745,14 +830,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     view.DrawLabel("キーフレーム", 100, 20);
 
-                    if (view.DrawButton("追加", 50, 20, SH.isPoseEditing))
+                    if (view.DrawButton("追加", 50, 20, maidHack.isPoseEditing))
                     {
                         timelineManager.AddKeyFrameDiff();
                     }
 
-                    if (view.DrawButton("全追加", 70, 20, SH.isPoseEditing))
+                    if (view.DrawButton("全追加", 70, 20))
                     {
-                        timelineManager.AddKeyFrame();
+                        timelineManager.AddKeyFrameAll();
                     }
 
                     if (view.DrawButton("削除", 50, 20, timelineManager.HasSelected()))
@@ -809,22 +894,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         timelineManager.Refresh();
                     }
 
-                    var isPoseEditing = view.DrawToggle("ポーズ編集", SH.isPoseEditing, 100, 20);
-                    if (isPoseEditing != SH.isPoseEditing)
+                    var isPoseEditing = view.DrawToggle("ポーズ編集", maidHack.isPoseEditing, 100, 20);
+                    if (isPoseEditing != maidHack.isPoseEditing)
                     {
-                        SH.isPoseEditing = isPoseEditing;
+                        maidHack.isPoseEditing = isPoseEditing;
                     }
 
-                    var newIsIkBoxVisibleRoot = view.DrawToggle("中心点IK表示", SH.isIkBoxVisibleRoot, 100, 20, isPoseEditing);
-                    if (newIsIkBoxVisibleRoot != SH.isIkBoxVisibleRoot)
+                    if (isOnStateStudioMode)
                     {
-                        SH.isIkBoxVisibleRoot = newIsIkBoxVisibleRoot;
-                    }
+                        var newIsIkBoxVisibleRoot = view.DrawToggle("中心点IK表示", maidHack.isIkBoxVisibleRoot, 100, 20, isPoseEditing);
+                        if (newIsIkBoxVisibleRoot != maidHack.isIkBoxVisibleRoot)
+                        {
+                            maidHack.isIkBoxVisibleRoot = newIsIkBoxVisibleRoot;
+                        }
 
-                    var newIsIkBoxVisibleBody = view.DrawToggle("関節IK表示", SH.isIkBoxVisibleBody, 100, 20, isPoseEditing);
-                    if (newIsIkBoxVisibleBody != SH.isIkBoxVisibleBody)
-                    {
-                        SH.isIkBoxVisibleBody = newIsIkBoxVisibleBody;
+                        var newIsIkBoxVisibleBody = view.DrawToggle("関節IK表示", maidHack.isIkBoxVisibleBody, 100, 20, isPoseEditing);
+                        if (newIsIkBoxVisibleBody != maidHack.isIkBoxVisibleBody)
+                        {
+                            maidHack.isIkBoxVisibleBody = newIsIkBoxVisibleBody;
+                        }
                     }
                 }
                 view.EndLayout();
@@ -1082,7 +1170,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     (pos) =>
                     {
                         var frameNo = (int) ((scrollPosition.x + pos.x) / frameWidth);
-                        SH.isMotionPlaying = false;
+                        maidHack.isMotionPlaying = false;
                         timelineManager.SetCurrentFrame(frameNo);
                     });
 

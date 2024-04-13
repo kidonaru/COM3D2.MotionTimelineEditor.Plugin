@@ -12,7 +12,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public static class Extensions
     {
         public static readonly string PluginName = "MotionTimelineEditor";
-        public static readonly string PluginVersion = "1.1.1.0";
+        public static readonly string PluginVersion = "1.1.2.0";
         public static readonly string WindowName = PluginName + " " + PluginVersion;
 
         public static readonly string UserDataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Config");
@@ -36,6 +36,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 return text;
+            }
+        }
+
+        public static CameraMain mainCamera
+        {
+            get
+            {
+                return GameMain.Instance.MainCamera;
             }
         }
 
@@ -210,6 +218,67 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             return key.ToString();
+        }
+
+        public static void UIHide()
+        {
+            var methodInfo = typeof(CameraMain).GetMethod("UIHide", BindingFlags.NonPublic | BindingFlags.Instance);
+            methodInfo.Invoke(mainCamera, null);
+        }
+
+        public static void UIResume()
+        {
+            var methodInfo = typeof(CameraMain).GetMethod("UIResume", BindingFlags.NonPublic | BindingFlags.Instance);
+            methodInfo.Invoke(mainCamera, null);
+        }
+
+        private static string[] _saveBonePaths = null;
+        public static string[] saveBonePaths
+        {
+            get
+            {
+                if (_saveBonePaths == null)
+                {
+                    var methodInfo = typeof(CacheBoneDataArray).GetMethod("GetSaveBonePathArray", BindingFlags.NonPublic | BindingFlags.Static);
+                    _saveBonePaths = (string[]) methodInfo.Invoke(null, null);
+                    Extensions.AssertNull(saveBonePaths != null);
+                }
+                return _saveBonePaths;
+            }
+        }
+
+        private static FieldInfo fieldPathDic = null;
+
+        public static Dictionary<string, CacheBoneDataArray.BoneData> GetPathDic(
+            this CacheBoneDataArray cacheBoneDataArray)
+        {
+            if (fieldPathDic == null)
+            {
+                BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.InvokeMethod;
+                fieldPathDic = typeof(CacheBoneDataArray).GetField("path_dic_", bindingAttr);
+                Extensions.AssertNull(fieldPathDic != null);
+            }
+            return (Dictionary<string, CacheBoneDataArray.BoneData>) fieldPathDic.GetValue(cacheBoneDataArray);
+        }
+
+        public static CacheBoneDataArray.BoneData GetBoneData(
+            this CacheBoneDataArray cacheBoneDataArray,
+            string path)
+        {
+            var pathDic = cacheBoneDataArray.GetPathDic();
+            CacheBoneDataArray.BoneData boneData;
+            if (pathDic.TryGetValue(path, out boneData))
+            {
+                return boneData;
+            }
+            return null;
+        }
+
+        public static CacheBoneDataArray.BoneData GetBoneData(
+            this CacheBoneDataArray cacheBoneDataArray,
+            IKManager.BoneType boneType)
+        {
+            return cacheBoneDataArray.GetBoneData(BoneUtils.GetBonePath(boneType));
         }
 
         public static byte[] icon = Convert.FromBase64String(

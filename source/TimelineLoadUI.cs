@@ -5,9 +5,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using SH = StudioHack;
 
-    public class TimelineLoadUI : ISubWindowUI
+    public class TimelineLoadUI : SubWindowUIBase
     {
-        public string title
+        public override string title
         {
             get
             {
@@ -15,53 +15,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static int WINDOW_WIDTH
-        {
-            get
-            {
-                return SubWindow.WINDOW_WIDTH;
-            }
-        }
-        public static int WINDOW_HEIGHT
-        {
-            get
-            {
-                return SubWindow.WINDOW_HEIGHT;
-            }
-        }
-
         private Vector2 scrollPosition = Vector2.zero;
 
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
-
-        public static Config config
-        {
-            get
-            {
-                return MotionTimelineEditor.config;
-            }
-        }
-
-        public void OnOpen()
+        public override void OnOpen()
         {
             timelineManager.UpdateTimelineFileList(false);
         }
 
-        public void OnClose()
-        {
-        }
-
-        public void Update()
-        {
-        }
-
-        public void DrawWindow(int id)
+        public override void DrawWindow(int id)
         {
             {
                 var view = new GUIView(0, 0, WINDOW_WIDTH, 20);

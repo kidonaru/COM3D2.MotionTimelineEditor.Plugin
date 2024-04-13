@@ -6,6 +6,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class BoneMenuManager
     {
+        private bool initialized = false;
         private List<IBoneMenuItem> easyMenuItems = new List<IBoneMenuItem>();
         private List<IBoneMenuItem> allMenuItems = new List<IBoneMenuItem>();
         private List<IBoneMenuItem> allSetMenuItems = new List<IBoneMenuItem>();
@@ -37,6 +38,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Init()
         {
+            if (initialized)
+            {
+                return;
+            }
+            initialized = true;
+
             easyMenuItems = new List<IBoneMenuItem>(1);
             allMenuItems = new List<IBoneMenuItem>(128);
             allSetMenuItems = new List<IBoneMenuItem>(9);
