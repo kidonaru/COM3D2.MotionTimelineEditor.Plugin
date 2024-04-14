@@ -208,7 +208,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         for (int i = 0; i < isHoldList.Length; i++)
                         {
-                            isHoldList[i] = false;
+                            SetHold((IKHoldType) i, false);
                         }
                     }
                 }
@@ -218,7 +218,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         for (int i = 0; i < isHoldList.Length; i++)
                         {
-                            isHoldList[i] = true;
+                            SetHold((IKHoldType) i, true);
                         }
                     }
                 }

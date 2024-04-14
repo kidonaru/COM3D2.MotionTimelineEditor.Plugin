@@ -231,7 +231,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                         if (view.DrawButton("R", 20, 20))
                         {
-                            newAlpha = 0.5f;
+                            newAlpha = 1f;
                         }
 
                         newAlpha = view.DrawSlider(newAlpha, 0f, 1.0f, 100, 20);

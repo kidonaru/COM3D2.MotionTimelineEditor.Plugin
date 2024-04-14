@@ -182,7 +182,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float videoGUIScale = 1f;
 
         [XmlElement("VideoGUIAlpha")]
-        public float videoGUIAlpha = 0.5f;
+        public float videoGUIAlpha = 1f;
 
         public int maxFrameCount
         {

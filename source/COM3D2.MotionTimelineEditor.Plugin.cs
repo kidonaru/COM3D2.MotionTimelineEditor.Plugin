@@ -639,7 +639,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var isMaidHackValid = maidHack.IsValid();
-            var isTimelineValid = timelineManager.IsValidData();
+            var isTimelineLoaded = timeline != null;
 
             {
                 var view = new GUIView(0, 0, WINDOW_WIDTH, 20);
@@ -661,7 +661,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     view.DrawLabel(maidHack.errorMessage, 400 - 20, 20, Color.yellow);
                 }
-                else if (!isTimelineValid)
+                else if (!timelineManager.IsValidData())
                 {
                     view.DrawLabel(timelineManager.errorMessage, 400 - 20, 20, Color.yellow);
                 }
@@ -684,7 +684,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            bool editEnabled = isMaidHackValid && isTimelineValid;
+            bool editEnabled = isMaidHackValid && isTimelineLoaded;
 
             {
                 var view = new GUIView(0, 20, WINDOW_WIDTH, HEADER_HEIGHT);
@@ -700,6 +700,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     
                     if (view.DrawButton("ロード", buttonWidth, 20))
                     {
+                        if (!isMaidHackValid)
+                        {
+                            PluginUtils.ShowDialog(maidHack.errorMessage);
+                            return;
+                        }
                         subWindow.ToggleSubWindow(SubWindowType.TimelineLoad);
                     }
                     
