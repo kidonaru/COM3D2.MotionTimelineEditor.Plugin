@@ -396,6 +396,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 float x2 = nextValues[i];
                 float dx0 = x1 - x0;
                 float dx1 = x2 - x1;
+
+                if (dx0 == 0f && dx1 == 0f)
+                {
+                    // do nothing
+                }
+                else if (dx0 == 0f)
+                {
+                    dx0 = Mathf.Sign(dx1) * 0.01f;
+                }
+                else if (dx1 == 0f)
+                {
+                    dx1 = Mathf.Sign(dx0) * 0.01f;
+                }
+
                 float v0 = dx0 * dt0_inv;
                 float v1 = dx1 * dt1_inv;
 
@@ -413,11 +427,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     if (inTangent.isSmooth)
                     {
-                        inTangent.normalizedValue = timeline.ClampTangent(tan0);
+                        inTangent.normalizedValue = tan0;
                     }
                     if (outTangent.isSmooth)
                     {
-                        outTangent.normalizedValue = timeline.ClampTangent(tan1);
+                        outTangent.normalizedValue = tan1;
                     }
                 }
 

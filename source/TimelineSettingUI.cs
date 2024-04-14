@@ -86,30 +86,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     timelineManager.ApplyCurrentFrame(true);
                 }
 
-                view.BeginLayout(GUIView.LayoutDirection.Horizontal);
-                {
-                    view.DrawLabel("Tangent範囲", 100, 20);
-
-                    var newMinTangent = view.DrawFloatField(timeline.minTangent, 50, 20);
-
-                    view.DrawLabel("～", 15, 20);
-
-                    var newMaxTangent = view.DrawFloatField(timeline.maxTangent, 50, 20);
-
-                    if (newMinTangent != timeline.minTangent)
-                    {
-                        timeline.minTangent = newMinTangent;
-                        timelineManager.ApplyCurrentFrame(true);
-                    }
-
-                    if (newMaxTangent != timeline.maxTangent)
-                    {
-                        timeline.maxTangent = newMaxTangent;
-                        timelineManager.ApplyCurrentFrame(true);
-                    }
-                }
-                view.EndLayout();
-
                 if (view.DrawButton("初期化", 100, 20))
                 {
                     PluginUtils.ShowConfirmDialog("個別設定を初期化しますか？", () =>

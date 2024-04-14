@@ -518,8 +518,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     // 新値の適用
                     if (!float.IsNaN(newOutTangent) && newOutTangent != outTangent)
                     {
-                        newOutTangent = timeline.ClampTangent(newOutTangent);
-
                         foreachOutTangent((outTangentData) =>
                         {
                             outTangentData.normalizedValue = newOutTangent;
@@ -532,8 +530,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     if (!float.IsNaN(newInTangent) && newInTangent != inTangent)
                     {
-                        newInTangent = timeline.ClampTangent(newInTangent);
-
                         foreachInTangent((inTangentData) =>
                         {
                             inTangentData.normalizedValue = newInTangent;
@@ -550,7 +546,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         foreachOutTangent((outTangentData) =>
                         {
                             var value = outTangentData.normalizedValue;
-                            value = timeline.ClampTangent(value + diffOutTangent);
+                            value = value + diffOutTangent;
                             outTangentData.normalizedValue = value;
                             outTangentData.isSmooth = false;
                         });
@@ -564,7 +560,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         foreachInTangent((inTangentData) =>
                         {
                             var value = inTangentData.normalizedValue;
-                            value = timeline.ClampTangent(value + diffInTangent);
+                            value = value + diffInTangent;
                             inTangentData.normalizedValue = value;
                             inTangentData.isSmooth = false;
                         });

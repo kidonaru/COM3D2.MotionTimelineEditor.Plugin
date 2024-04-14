@@ -53,7 +53,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         [XmlElement("keyBind")]
-        public List<KeyBindPair> keyBindsXml
+        public KeyBindPair[] keyBindsXml
         {
             get
             {
@@ -62,12 +62,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     result.Add(new KeyBindPair { key = pair.Key, value = pair.Value.ToString() });
                 }
-                return result;
+                return result.ToArray();
             }
             set
             {
                 foreach (var pair in value)
                 {
+                    //PluginUtils.LogDebug("keyBind: " + pair.key + " = " + pair.value);
                     keyBinds[pair.key] = new KeyBind(pair.value);
                 }
             }

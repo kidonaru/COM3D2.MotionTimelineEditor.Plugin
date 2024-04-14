@@ -206,14 +206,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     isShowWnd = !isShowWnd;
                 }
 
-                if (!maidHack.IsValid())
-                {
-                    return;
-                }
-
                 if (isShowWnd)
                 {
                     maidHack.Update();
+
+                    if (!maidHack.IsValid())
+                    {
+                        return;
+                    }
 
                     if (!timelineManager.IsValidData())
                     {
@@ -684,7 +684,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            bool editEnabled = isMaidHackValid && isTimelineLoaded;
+            bool editEnabled = isMaidHackValid
+                            && isTimelineLoaded
+                            && maidHack.maid != null;
 
             {
                 var view = new GUIView(0, 20, WINDOW_WIDTH, HEADER_HEIGHT);

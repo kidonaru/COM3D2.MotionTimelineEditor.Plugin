@@ -229,6 +229,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!IsValid())
             {
+                _maid = null;
+                _animation = null;
+                _cacheBoneData = null;
+                _ikManager = null;
                 return;
             }
 

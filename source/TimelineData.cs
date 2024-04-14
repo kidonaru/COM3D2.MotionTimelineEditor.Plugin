@@ -145,12 +145,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("IsLoopAnm")]
         public bool isLoopAnm = true;
 
-        [XmlElement("MinTangent")]
-        public float minTangent = -5f;
-
-        [XmlElement("MaxTangent")]
-        public float maxTangent = 5f;
-
         [XmlElement("VideoEnabled")]
         public bool videoEnabled = true;
 
@@ -796,11 +790,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             version = CurrentVersion;
         }
 
-        public float ClampTangent(float tangent)
-        {
-            return Mathf.Clamp(tangent, minTangent, maxTangent);
-        }
-
         public void ResetSettings()
         {
             //maxFrameNo = DefaultTimeline.maxFrameNo;
@@ -809,8 +798,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             useMuneKeyL = DefaultTimeline.useMuneKeyL;
             useMuneKeyR = DefaultTimeline.useMuneKeyR;
             isLoopAnm = DefaultTimeline.isLoopAnm;
-            minTangent = DefaultTimeline.minTangent;
-            maxTangent = DefaultTimeline.maxTangent;
         }
     }
 }
