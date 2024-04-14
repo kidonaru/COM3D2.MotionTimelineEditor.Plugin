@@ -352,9 +352,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (prevBone == null && loopSearch)
             {
-                frameNo = (frameNo == 0) ? maxFrameNo : maxFrameNo + 1; // 0Fの場合は最終フレームを除外
-                prevBone = GetPrevBone(frameNo, path, out prevFrameNo, false);
-                prevFrameNo -= maxFrameNo;
+                if (isLoopAnm)
+                {
+                    frameNo = (frameNo == 0) ? maxFrameNo : maxFrameNo + 1; // 0Fの場合は最終フレームを除外
+                    prevBone = GetPrevBone(frameNo, path, out prevFrameNo, false);
+                    prevFrameNo -= maxFrameNo;
+                }
+                else
+                {
+                    prevBone = GetNextBone(-1, path, out prevFrameNo, false);
+                    prevFrameNo = -1;
+                }
             }
 
             return prevBone;
@@ -416,9 +424,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (nextBone == null && loopSearch)
             {
-                frameNo = (frameNo == maxFrameNo) ? 0 : -1; // 最終フレームの場合は0Fを除外
-                nextBone = GetNextBone(frameNo, path, out nextFrameNo, false);
-                nextFrameNo += maxFrameNo;
+                if (isLoopAnm)
+                {
+                    frameNo = (frameNo == maxFrameNo) ? 0 : -1; // 最終フレームの場合は0Fを除外
+                    nextBone = GetNextBone(frameNo, path, out nextFrameNo, false);
+                    nextFrameNo += maxFrameNo;
+                }
+                else
+                {
+                    nextBone = GetPrevBone(maxFrameNo + 1, path, out nextFrameNo, false);
+                    nextFrameNo = maxFrameNo + 1;
+                }
             }
 
             return nextBone;
@@ -427,6 +443,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public BoneData GetNextBone(int frameNo, string path, out int nextFrameNo)
         {
             return GetNextBone(frameNo, path, out nextFrameNo, true);
+        }
+
+        public BoneData GetNextBone(int frameNo, string path)
+        {
+            int nextFrameNo;
+            return GetNextBone(frameNo, path, out nextFrameNo);
         }
 
         public FrameData GetActiveFrame(float frameNo)
@@ -460,6 +482,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return true;
         }
 
+        public void FixRotationFrame(FrameData frame)
+        {
+            foreach (var bone in frame.bones)
+            {
+                var prevBone = GetPrevBone(frame.frameNo, bone.bonePath);
+                bone.FixRotation(prevBone);
+            }
+        }
+
         public void FixRotation()
         {
             foreach (var frame in keyFrames)
@@ -469,11 +500,57 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     continue;
                 }
 
-                foreach (var bone in frame.bones)
+                FixRotationFrame(frame);
+            }
+        }
+
+        public void UpdateTangentFrame(FrameData frame)
+        {
+            var currentTime = GetFrameTimeSeconds(frame.frameNo);
+            foreach (var bone in frame.bones)
+            {
+                int prevFrameNo;
+                var prevBone = GetPrevBone(frame.frameNo, bone.bonePath, out prevFrameNo);
+
+                int nextFrameNo;
+                var nextBone = GetNextBone(frame.frameNo, bone.bonePath, out nextFrameNo);
+
+                // 前後に存在しない場合は自身を使用
+                if (prevBone == null)
                 {
-                    var prevBone = GetPrevBone(frame.frameNo, bone.bonePath);
-                    bone.FixRotation(prevBone);
+                    prevBone = bone;
+                    prevFrameNo = frame.frameNo - 1;
                 }
+                if (nextBone == null)
+                {
+                    nextBone = bone;
+                    nextFrameNo = frame.frameNo + 1;
+                }
+
+                var prevTrans = prevBone.transform;
+                var nextTrans = nextBone.transform;
+
+                // 別ループのキーフレームは回転補正を行う
+                if (prevFrameNo != prevBone.frameNo)
+                {
+                    prevTrans = new TransformData(prevTrans);
+                    prevTrans.FixRotation(bone.transform);
+                }
+                if (nextFrameNo != nextBone.frameNo)
+                {
+                    nextTrans = new TransformData(nextTrans);
+                    nextTrans.FixRotation(bone.transform);
+                }
+
+                var prevTime = GetFrameTimeSeconds(prevFrameNo);
+                var nextTime = GetFrameTimeSeconds(nextFrameNo);
+
+                bone.transform.UpdateTangent(
+                    prevTrans,
+                    nextTrans,
+                    prevTime,
+                    currentTime,
+                    nextTime);
             }
         }
 
@@ -481,46 +558,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             foreach (var frame in keyFrames)
             {
-                var currentTime = GetFrameTimeSeconds(frame.frameNo);
-                foreach (var bone in frame.bones)
-                {
-                    int prevFrameNo;
-                    var prevBone = GetPrevBone(frame.frameNo, bone.bonePath, out prevFrameNo);
-
-                    int nextFrameNo;
-                    var nextBone = GetNextBone(frame.frameNo, bone.bonePath, out nextFrameNo);
-
-                    if (prevBone == null || nextBone == null)
-                    {
-                        PluginUtils.LogError("前後のキーフレームがないので補間処理をスキップしました：" + bone.bonePath);
-                        continue;
-                    }
-
-                    var prevTrans = prevBone.transform;
-                    var nextTrans = nextBone.transform;
-
-                    // 別ループのキーフレームは回転補正を行う
-                    if (prevFrameNo != prevBone.frameNo)
-                    {
-                        prevTrans = new TransformData(prevTrans);
-                        prevTrans.FixRotation(bone.transform);
-                    }
-                    if (nextFrameNo != nextBone.frameNo)
-                    {
-                        nextTrans = new TransformData(nextTrans);
-                        nextTrans.FixRotation(bone.transform);
-                    }
-
-                    var prevTime = GetFrameTimeSeconds(prevFrameNo);
-                    var nextTime = GetFrameTimeSeconds(nextFrameNo);
-
-                    bone.transform.UpdateTangent(
-                        prevTrans,
-                        nextTrans,
-                        prevTime,
-                        currentTime,
-                        nextTime);
-                }
+                UpdateTangentFrame(frame);
             }
         }
 
@@ -528,29 +566,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             _dummyLastFrame.frameNo = maxFrameNo;
 
-            var firstFrame = this.firstFrame;
-            var lastFrame = GetFrame(maxFrameNo);
-            var currentTime = GetFrameTimeSeconds(maxFrameNo);
-
-            foreach (var firstBone in firstFrame.bones)
+            foreach (var path in PluginUtils.saveBonePaths)
             {
-                var path = firstBone.bonePath;
-                var lastBone = lastFrame != null ? lastFrame.GetBone(path) : null;
-                if (lastBone == null)
+                BoneData sourceBone;
+                if (isLoopAnm)
                 {
-                    _dummyLastFrame.UpdateBone(firstBone);
+                    sourceBone = GetNextBone(-1, path);
+                }
+                else
+                {
+                    sourceBone = GetPrevBone(maxFrameNo, path);
+                }
 
-                    var dummyBone = _dummyLastFrame.GetBone(path);
-                    var prevBone = GetPrevBone(maxFrameNo, path);
-                    var prevTime = GetFrameTimeSeconds(prevBone.frameNo);
-
-                    dummyBone.FixRotation(prevBone);
-                    dummyBone.transform.UpdateInTangent(
-                        prevBone.transform,
-                        prevTime,
-                        currentTime);
+                if (sourceBone != null)
+                {
+                   _dummyLastFrame.UpdateBone(sourceBone);
                 }
             }
+
+            FixRotationFrame(_dummyLastFrame);
+            UpdateTangentFrame(_dummyLastFrame);
         }
 
         public byte[] GetAnmBinary(out string message)
@@ -594,25 +629,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (!hasLastKey)
                 {
-                    if (isLoopAnm)
+                    var bone = _dummyLastFrame.GetBone(path);
+                    if (bone != null)
                     {
-                        // ループアニメーションの場合はダミーフレームを参照
-                        var bone = _dummyLastFrame.GetBone(path);
-                        if (bone != null)
-                        {
-                            times.Add(maxSecond);
-                            valuesList.Add(bone.transform.values);
-                            inTangentsList.Add(bone.transform.inTangents);
-                            outTangentsList.Add(bone.transform.outTangents);
-                        }
-                    }
-                    else
-                    {
-                        // ループアニメーションでない場合は最終フレームに最後のフレームを追加
                         times.Add(maxSecond);
-                        valuesList.Add(valuesList.Last());
-                        inTangentsList.Add(inTangentsList.Last());
-                        outTangentsList.Add(outTangentsList.Last());
+                        valuesList.Add(bone.transform.values);
+                        inTangentsList.Add(bone.transform.inTangents);
+                        outTangentsList.Add(bone.transform.outTangents);
                     }
                 }
 

@@ -196,7 +196,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (maid != null)
             {
-                _animation = maid.body0.m_Bones.GetComponent<Animation>();
+                _animation = maid.GetAnimation();
                 _cacheBoneData = maid.gameObject.GetComponent<CacheBoneDataArray>();
                 if (_cacheBoneData == null)
                 {

@@ -440,48 +440,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        /// <summary>
-        /// InTangentのみ更新 (最終フレーム用)
-        /// </summary>
-        /// <param name="prevTransform"></param>
-        /// <param name="prevTime"></param>
-        /// <param name="currentTime"></param>
-        public void UpdateInTangent(
-            TransformData prevTransform,
-            float prevTime,
-            float currentTime)
-        {
-            if (prevTransform == null)
-            {
-                PluginUtils.LogError("UpdateTangent：前のTransformが見つかりません。");
-                return;
-            }
-
-            var prevValues = prevTransform.values;
-            var currentValues = this.values;
-            float dt0 = currentTime - prevTime;
-
-            if (dt0 <= 0f)
-            {
-                PluginUtils.LogError("UpdateTangent：フレーム時間が不正です。");
-                return;
-            }
-
-            float dt0_inv = 1f / dt0;
-
-            for (int i = 0; i < currentValues.Length; i++)
-            {
-                var inTangent = inTangentDataList[i];
-
-                float x0 = prevValues[i];
-                float x1 = currentValues[i];
-                float dx0 = x1 - x0;
-                float v0 = dx0 * dt0_inv;
-
-                inTangent.UpdateValue(v0);
-            }
-        }
-
         public void FromTransform(Transform transform)
         {
             localRotation = transform.localRotation;

@@ -350,6 +350,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             else
             {
+                var animation = maid.GetAnimation();
+                if (animation != null)
+                {
+                    animation.wrapMode = WrapMode.ClampForever;
+                }
                 if (Mathf.Approximately(motionRate, 1f))
                 {
                     motionRate = 0f;
