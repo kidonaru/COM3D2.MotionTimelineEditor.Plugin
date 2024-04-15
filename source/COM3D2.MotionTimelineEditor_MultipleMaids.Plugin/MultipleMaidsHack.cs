@@ -4,8 +4,9 @@ using System.Reflection;
 using CM3D2.MultipleMaids.Plugin;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using COM3D2.MotionTimelineEditor.Plugin;
 
-namespace COM3D2.MotionTimelineEditor.Plugin
+namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 {
     public class MultipleMaidsHack : StudioHackBase
     {

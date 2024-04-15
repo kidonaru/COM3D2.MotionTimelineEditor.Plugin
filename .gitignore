@@ -1,5 +1,7 @@
 .vscode
 source/.vs
-source/obj
+source/*/.vs
+source/*/bin
+source/*/obj
 *.pdb
 output/

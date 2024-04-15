@@ -181,15 +181,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Awake()
         {
-            try
-            {
-                GameObject.DontDestroyOnLoad(this);
-                instance = this;
-            }
-            catch (Exception e)
-            {
-                PluginUtils.LogException(e);
-            }
+            GameObject.DontDestroyOnLoad(this);
+            instance = this;
         }
 
         public void Start()
@@ -510,8 +503,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             SceneManager.sceneLoaded += OnChangedSceneLevel;
             timelineManager.onRefresh += OnRefreshTimeline;
 
-            AddPoseEditorHack(new StudioHack());
-            AddPoseEditorHack(new MultipleMaidsHack());
+            AddStudioHack(new StudioHack());
 
             texWhite = GUIView.CreateColorTexture(Color.white);
 
@@ -607,7 +599,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void AddPoseEditorHack(StudioHackBase studioHack)
+        public void AddStudioHack(StudioHackBase studioHack)
         {
             studioHacks.Add(studioHack);
         }

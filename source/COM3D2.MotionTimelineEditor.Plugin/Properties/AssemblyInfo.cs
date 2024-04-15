@@ -7,12 +7,12 @@ using COM3D2.MotionTimelineEditor.Plugin;
 // アセンブリに関連付けられている情報を変更するには、
 // これらの属性値を変更してください。
 [assembly: AssemblyTitle(PluginUtils.PluginFullName)]
-[assembly: AssemblyDescription(PluginUtils.PluginFullName)]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany(PluginUtils.PluginFullName)]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct(PluginUtils.PluginFullName)]
-[assembly: AssemblyCopyright(PluginUtils.PluginFullName)]
-[assembly: AssemblyTrademark(PluginUtils.PluginFullName)]
+[assembly: AssemblyCopyright("Copyright ©kidonaru 2024")]
+[assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
 // ComVisible を false に設定すると、その型はこのアセンブリ内で COM コンポーネントから 
@@ -21,7 +21,7 @@ using COM3D2.MotionTimelineEditor.Plugin;
 [assembly: ComVisible(false)]
 
 // 次の GUID は、このプロジェクトが COM に公開される場合の、typelib の ID です
-[assembly: Guid("6E576759-4A6F-4C97-A0A8-F50101E5330D")]
+[assembly: Guid("da886c18-b5af-444b-8f3e-05dfd6242f0d")]
 
 // アセンブリのバージョン情報は、以下の 4 つの値で構成されています:
 //

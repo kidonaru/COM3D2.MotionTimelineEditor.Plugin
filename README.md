@@ -1,6 +1,6 @@
 # COM3D2.MotionTimelineEditor.Plugin
 
-v1.2.1.0
+v1.2.2.0
 
 
 ## 概要

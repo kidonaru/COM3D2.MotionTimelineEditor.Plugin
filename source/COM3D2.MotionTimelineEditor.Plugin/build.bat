@@ -1,10 +1,14 @@
 @echo off
 setlocal enabledelayedexpansion
+
+cd /d %~dp0
+
+set PLUGIN_NAME=COM3D2.MotionTimelineEditor.Plugin
 set CSC_PATH="C:\Windows\Microsoft.NET\Framework\v3.5\csc"
-set LIB_PATHS="/lib:..\..\COM3D2x64_Data\Managed" "/lib:.." "/lib:..\lib" "/lib:..\UnityInjector"
-set REFERENCES="/r:UnityEngine.dll" "/r:UnityInjector.dll" "/r:Assembly-CSharp.dll" "/r:Assembly-CSharp-firstpass.dll" "/r:ExIni.dll" "/r:COM3D2.MultipleMaids.Plugin.dll"
-set SOURCE_DIR=source
-set MAIN_FILE=%SOURCE_DIR%\COM3D2.MotionTimelineEditor.Plugin.cs
+set LIB_PATHS="/lib:..\..\..\..\COM3D2x64_Data\Managed" "/lib:..\..\.." "/lib:..\..\..\lib" "/lib:..\..\..\UnityInjector"
+set REFERENCES="/r:UnityEngine.dll" "/r:UnityInjector.dll" "/r:Assembly-CSharp.dll" "/r:Assembly-CSharp-firstpass.dll"
+set SOURCE_DIR=.
+set MAIN_FILE=%SOURCE_DIR%\%PLUGIN_NAME%.cs
 
 set DEBUG_OPTION=
 IF "%~1"=="debug" (
@@ -19,16 +23,16 @@ for %%f in (%SOURCE_DIR%\*.cs) do (
     if not "%%f"=="%MAIN_FILE%" set SOURCES=!SOURCES! "%%f"
 )
 
-set SOURCES=!SOURCES! "source\Properties\AssemblyInfo.cs"
+set SOURCES=!SOURCES! %SOURCE_DIR%\Properties\AssemblyInfo.cs
 
 echo %CSC_PATH% /t:library %LIB_PATHS% %REFERENCES% %DEBUG_OPTION% %SOURCES%
 %CSC_PATH% /t:library %LIB_PATHS% %REFERENCES% %DEBUG_OPTION% %SOURCES%
 
-copy *.dll ..\UnityInjector
+copy *.dll ..\..\..\UnityInjector
 if %ERRORLEVEL% neq 0 (
     echo Failed to copy dlls
     exit /b 1
 )
 
-move *.dll UnityInjector
+move *.dll ..\..\UnityInjector
 del *.pdb
