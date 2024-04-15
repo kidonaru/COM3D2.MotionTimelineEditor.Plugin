@@ -6,16 +6,31 @@ using UnityEngine.Events;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public abstract class MaidHackBase
-    {
-        protected Maid _maid = null;
-        protected string _annName = "";
-        protected Animation _animation = null;
-        protected AnimationState _animationState = null;
-        protected CacheBoneDataArray _cacheBoneData = null;
-        protected string _errorMessage = "";
+    using MTE = MotionTimelineEditor;
 
-        public static event UnityAction<Maid> onMaidChanged;
+    public class MaidManager
+    {
+        private Maid _maid = null;
+        private string _annName = "";
+        private AnimationState _animationState = null;
+        private CacheBoneDataArray _cacheBoneData = null;
+        private string _errorMessage = "";
+
+        public event UnityAction<Maid> onMaidChanged;
+        public event UnityAction<string> onAnmChanged;
+
+        private static MaidManager _instance = null;
+        public static MaidManager instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new MaidManager();
+                }
+                return _instance;
+            }
+        }
 
         public Maid maid
         {
@@ -33,15 +48,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public abstract string outputAnmPath { get; }
+        public Animation animation
+        {
+            get
+            {
+                return _maid != null ? _maid.GetAnimation() : null;
+            }
+        }
 
-        public abstract bool isIkBoxVisibleRoot { get; set; }
-
-        public abstract bool isIkBoxVisibleBody { get; set; }
-
-        public abstract bool isPoseEditing { get; set; }
-
-        public abstract bool isMotionPlaying { get; set; }
+        public AnimationState animationState
+        {
+            get
+            {
+                return _animationState;
+            }
+        }
 
         public string annName
         {
@@ -74,13 +95,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public abstract float motionSliderRate { get; set; }
-
-        public abstract bool useMuneKeyL { get; set; }
-
-        public abstract bool useMuneKeyR { get; set; }
-
-        protected IKManager _ikManager = null;
+        private IKManager _ikManager = null;
         public IKManager ikManager
         {
             get
@@ -105,6 +120,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     PluginUtils.AssertNull(fieldLimbControlList != null);
                 }
                 return (List<LimbControl>) fieldLimbControlList.GetValue(_ikManager);
+            }
+        }
+
+        private static StudioHackBase studioHack
+        {
+            get
+            {
+                return MTE.studioHack;
             }
         }
 
@@ -180,37 +203,98 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public abstract void Init();
+        public bool IsValid()
+        {
+            _errorMessage = "";
 
-        public abstract bool IsValid();
+            if (studioHack == null)
+            {
+                _errorMessage = "シーンが無効です";
+                return false;
+            }
 
-        protected abstract Maid GetMaid();
+            if (GameMain.Instance.CharacterMgr.IsBusy())
+            {
+                _errorMessage = "メイド処理中です";
+                return false;
+            }
 
-        protected virtual void OnMaidChanged(Maid maid)
+            var maid = studioHack.activeMaid;
+            if (maid == null)
+            {
+                _errorMessage = "メイドを配置してください";
+                return false;
+            }
+
+            if (maid.body0 == null || maid.body0.m_Bones == null)
+            {
+                _errorMessage = "メイド生成中です";
+                return false;
+            }
+
+            return true;
+        }
+
+        public void Update()
+        {
+            if (!IsValid())
+            {
+                _maid = null;
+                _annName = "";
+                _animationState = null;
+                _cacheBoneData = null;
+                _ikManager = null;
+                return;
+            }
+
+            var activeMaid = studioHack.activeMaid;
+            if (_maid != activeMaid)
+            {
+                OnMaidChanged(activeMaid);
+            }
+
+            if (_maid == null || animation == null)
+            {
+                return;
+            }
+
+            // アニメ名更新
+            var anmName = _maid.body0.LastAnimeFN;
+            if (_annName != anmName)
+            {
+                OnAnmChanged(anmName);
+            }
+        }
+
+        public void OnMotionUpdated()
+        {
+            _annName = "";
+            _animationState = null;
+            Update();
+        }
+
+        private void OnMaidChanged(Maid maid)
         {
             PluginUtils.LogDebug("Maid changed: " + (maid != null ? maid.name : "null"));
 
             _maid = maid;
             _annName = "";
             _animationState = null;
+            _cacheBoneData = null;
+            _ikManager = null;
 
-            if (maid != null)
+            if (maid == null)
             {
-                _animation = maid.GetAnimation();
-                _cacheBoneData = maid.gameObject.GetComponent<CacheBoneDataArray>();
-                if (_cacheBoneData == null)
-                {
-                    _cacheBoneData = maid.gameObject.AddComponent<CacheBoneDataArray>();
-                    _cacheBoneData.CreateCache(maid.body0.GetBone("Bip01"));
-                }
-                _ikManager = PoseEditWindow.GetMaidIKManager(maid);
+                return;
             }
-            else
+
+            _cacheBoneData = maid.gameObject.GetComponent<CacheBoneDataArray>();
+            if (_cacheBoneData == null)
             {
-                _animation = null;
-                _cacheBoneData = null;
-                _ikManager = null;
+                _cacheBoneData = maid.gameObject.AddComponent<CacheBoneDataArray>();
+                _cacheBoneData.CreateCache(maid.body0.GetBone("Bip01"));
             }
+            _ikManager = PoseEditWindow.GetMaidIKManager(maid);
 
             if (onMaidChanged != null)
             {
@@ -218,78 +302,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        protected virtual void OnAnmChanged(string anmName)
+        private void OnAnmChanged(string anmName)
         {
             PluginUtils.LogDebug("Animation changed: " + anmName);
+
             _annName = anmName;
-            _animationState = _animation[_annName.ToLower()];
-        }
+            _animationState = null;
 
-        public virtual void Update()
-        {
-            if (!IsValid())
-            {
-                _maid = null;
-                _animation = null;
-                _cacheBoneData = null;
-                _ikManager = null;
-                return;
-            }
-
-            var currentMaid = GetMaid();
-            if (_maid != currentMaid)
-            {
-                OnMaidChanged(currentMaid);
-            }
-
-            if (_maid == null || _animation == null)
+            if (string.IsNullOrEmpty(_annName))
             {
                 return;
             }
 
-            // アニメ名更新
-            var currentAnmName = _maid.body0.LastAnimeFN;
-            if (string.IsNullOrEmpty(currentAnmName))
+            _animationState = animation[_annName.ToLower()];
+
+            if (onAnmChanged != null)
             {
-                return;
+                onAnmChanged(anmName);
             }
-
-            if (_annName != currentAnmName)
-            {
-                OnAnmChanged(currentAnmName);
-            }
-        }
-
-        public virtual bool HasBoneRotateVisible(IKManager.BoneType boneType)
-        {
-            return false;
-        }
-
-        public virtual bool IsBoneRotateVisible(IKManager.BoneType boneType)
-        {
-            return false;
-        }
-
-        public virtual void SetBoneRotateVisible(IKManager.BoneType boneType, bool visible)
-        {
-            // do nothing
-        }
-
-        public virtual void ClearBoneRotateVisible()
-        {
-            // do nothing
-        }
-
-        public virtual void OnMotionUpdated(Maid maid)
-        {
-            _annName = "";
-            Update();
-        }
-
-        public virtual void OnUpdateMyPose(string anmPath, bool isExist)
-        {
-            _annName = "";
-            Update();
         }
     }
 }

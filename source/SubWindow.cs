@@ -92,11 +92,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static MaidHackBase maidHack
+        private static StudioHackBase studioHack
         {
             get
             {
-                return MTE.maidHack;
+                return MTE.studioHack;
+            }
+        }
+
+        private static MaidManager maidManager
+        {
+            get
+            {
+                return MaidManager.instance;
+            }
+        }
+
+        private static Maid maid
+        {
+            get
+            {
+                return maidManager.maid;
             }
         }
 
@@ -167,11 +183,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            if (!MTE.instance.isSceneActive)
+            if (studioHack == null || maid == null)
             {
                 return;
             }
-            if (!maidHack.IsValid())
+            if (!studioHack.IsValid())
             {
                 return;
             }

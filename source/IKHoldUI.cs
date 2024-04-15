@@ -59,11 +59,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private bool resetPositionRequested = false;
         private bool positionUpdated = false;
 
-        private static MaidHackBase maidHack
+        private static MaidManager maidManager
         {
             get
             {
-                return MTE.maidHack;
+                return MaidManager.instance;
+            }
+        }
+
+        private static StudioHackBase studioHack
+        {
+            get
+            {
+                return MTE.studioHack;
             }
         }
 
@@ -94,7 +102,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void Update()
         {
-            if (!maidHack.isPoseEditing)
+            if (!studioHack.isPoseEditing)
             {
                 return;
             }
@@ -108,12 +116,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (isHoldList[i])
                 {
-                    var ikPosition = maidHack.GetIkPosition((IKHoldType) i);
+                    var ikPosition = maidManager.GetIkPosition((IKHoldType) i);
                     if (prevIkPositions[i] != ikPosition)
                     {
                         //PluginUtils.LogDebug("IKHoldUI：UpdateIkPosition: " + (IKHoldType) i);
                         //PluginUtils.LogDebug("  current: " + ikPosition + "  target: " + initialEditIkPositions[i]);
-                        maidHack.UpdateIkPosition((IKHoldType) i, initialEditIkPositions[i]);
+                        maidManager.UpdateIkPosition((IKHoldType) i, initialEditIkPositions[i]);
                         positionUpdated = true;
                     }
                 }
@@ -128,7 +136,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 for (int i = 0; i < initialEditIkPositions.Length; i++)
                 {
-                    prevIkPositions[i] = initialEditIkPositions[i] = maidHack.GetIkPosition((IKHoldType)i);
+                    prevIkPositions[i] = initialEditIkPositions[i] = maidManager.GetIkPosition((IKHoldType)i);
                 }
                 resetPositionRequested = false;
             }
@@ -139,7 +147,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     if (isHoldList[i])
                     {
-                        prevIkPositions[i] = maidHack.GetIkPosition((IKHoldType) i);
+                        prevIkPositions[i] = maidManager.GetIkPosition((IKHoldType) i);
                     }
                 }
                 positionUpdated = false;
@@ -242,7 +250,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             isHoldList[(int)type] = hold;
             if (hold)
             {
-                initialEditIkPositions[(int)type] = maidHack.GetIkPosition(type);
+                initialEditIkPositions[(int)type] = maidManager.GetIkPosition(type);
             }
         }
 

@@ -3,10 +3,11 @@ using System.IO;
 using System.Reflection;
 using CM3D2.MultipleMaids.Plugin;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class MultipleMaidsHack : MaidHackBase
+    public class MultipleMaidsHack : StudioHackBase
     {
         private MultipleMaids multipleMaids = null;
 
@@ -108,9 +109,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     isStopArray[selectMaidIndex] = value;
                 }
 
-                if (_animationState != null)
+                if (animationState != null)
                 {
-                    _animationState.enabled = !value;
+                    animationState.enabled = !value;
                 }
             }
         }
@@ -155,6 +156,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public override Maid activeMaid
+        {
+            get
+            {
+                var maidArray = this.maidArray;
+                var selectMaidIndex = this.selectMaidIndex;
+                if (selectMaidIndex < 0 || selectMaidIndex >= maidArray.Length)
+                {
+                    return null;
+                }
+
+                return maidArray[selectMaidIndex];
+            }
+        }
+
         public override string outputAnmPath
         {
             get
@@ -165,6 +181,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     Directory.CreateDirectory(path);
                 }
                 return path;
+            }
+        }
+
+        public override bool hasIkBoxVisible
+        {
+            get
+            {
+                return false;
             }
         }
 
@@ -253,16 +277,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 //Extensions.LogDebug("motionSliderRate update：" + value);
                 _motionSliderRate = value;
 
-                if (_animationState != null)
+                if (animationState != null)
                 {
-                    var maxNum = _animationState.length;
+                    var maxNum = animationState.length;
                     var current = Mathf.Clamp01(value) * maxNum;
-                    _animationState.time = current;
-                    _animationState.enabled = true;
-                    _animation.Sample();
+                    animationState.time = current;
+                    animationState.enabled = true;
+                    animation.Sample();
                     if (isStop)
                     {
-                        _animationState.enabled = false;
+                        animationState.enabled = false;
                     }
                 }
             }
@@ -272,18 +296,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (_maid != null)
+                if (maid != null)
                 {
-                    return !_maid.body0.jbMuneL.enabled;
+                    return !maid.body0.jbMuneL.enabled;
                 }
                 return false;
             }
             set
             {
-                if (_maid != null)
+                if (maid != null)
                 {
-                    _maid.body0.jbMuneL.enabled = !value;
-                    _maid.body0.MuneYureL(_maid.body0.jbMuneL.enabled ? 1 : 0);
+                    maid.body0.jbMuneL.enabled = !value;
+                    maid.body0.MuneYureL(maid.body0.jbMuneL.enabled ? 1 : 0);
                 }
             }
         }
@@ -292,25 +316,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (_maid != null)
+                if (maid != null)
                 {
-                    return !_maid.body0.jbMuneR.enabled;
+                    return !maid.body0.jbMuneR.enabled;
                 }
                 return false;
             }
             set
             {
-                if (_maid != null)
+                if (maid != null)
                 {
-                    _maid.body0.jbMuneR.enabled = !value;
-                    _maid.body0.MuneYureR(_maid.body0.jbMuneR.enabled ? 1 : 0);
+                    maid.body0.jbMuneR.enabled = !value;
+                    maid.body0.MuneYureR(maid.body0.jbMuneR.enabled ? 1 : 0);
                 }
             }
         }
 
-        public override void Init()
+        public MultipleMaidsHack()
         {
             PluginUtils.Log("MultipleMaidsHack初期化中...");
+
             {
                 GameObject gameObject = GameObject.Find("UnityInjector");
                 multipleMaids = gameObject.GetComponent<MultipleMaids>();
@@ -343,13 +368,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public override void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
+        {
+            base.OnChangedSceneLevel(sceneName, sceneMode);
+            isSceneActive = sceneName.name == "SceneEdit" || sceneName.name == "SceneDaily";
+        }
+
         public override bool IsValid()
         {
-            _errorMessage = "";
-
-            if (GameMain.Instance.CharacterMgr.IsBusy())
+            if (!base.IsValid())
             {
-                _errorMessage = "メイド処理中です";
                 return false;
             }
 
@@ -359,32 +387,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return false;
             }
 
-            var maid = GetMaid();
-            if (maid == null)
-            {
-                _errorMessage = "メイドを配置してください";
-                return false;
-            }
-
-            if (maid.body0 == null || maid.body0.m_Bones == null)
-            {
-                _errorMessage = "メイド生成中です";
-                return false;
-            }
-
             return true;
-        }
-
-        protected override Maid GetMaid()
-        {
-            var maidArray = this.maidArray;
-            var selectMaidIndex = this.selectMaidIndex;
-            if (selectMaidIndex < 0 || selectMaidIndex >= maidArray.Length)
-            {
-                return null;
-            }
-
-            return maidArray[selectMaidIndex];
         }
 
         protected override void OnMaidChanged(Maid maid)
@@ -403,27 +406,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Update();
 
-            if (_maid == null)
+            if (maid == null)
             {
                 return;
             }
 
             // 再生位置更新
-            if (_animationState != null && _animationState.enabled && _animationState.length > 0f)
+            var animationState = StudioHackBase.animationState;
+            if (animationState != null && animationState.enabled && animationState.length > 0f)
             {
-                float value = _animationState.time;
-                if (_animationState.length < _animationState.time)
+                float value = animationState.time;
+                if (animationState.length < animationState.time)
                 {
-                    if (_animationState.wrapMode == WrapMode.ClampForever)
+                    if (animationState.wrapMode == WrapMode.ClampForever)
                     {
-                        value = _animationState.length;
+                        value = animationState.length;
                     }
                     else
                     {
-                        value = _animationState.time - _animationState.length * (float)((int)(_animationState.time / _animationState.length));
+                        value = animationState.time - animationState.length * (float)((int)(animationState.time / animationState.length));
                     }
                 }
-                _motionSliderRate = value / _animationState.length;
+                _motionSliderRate = value / animationState.length;
             }
         }
     }

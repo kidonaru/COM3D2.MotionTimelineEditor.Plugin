@@ -105,7 +105,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 _useMuneKeyL = value;
-                maidHack.useMuneKeyL = value;
+                studioHack.useMuneKeyL = value;
             }
         }
 
@@ -126,7 +126,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 _useMuneKeyR = value;
-                maidHack.useMuneKeyR = value;
+                studioHack.useMuneKeyR = value;
             }
         }
 
@@ -198,7 +198,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return maidHack.outputAnmPath + "\\" + anmFileName;
+                return studioHack.outputAnmPath + "\\" + anmFileName;
             }
         }
 
@@ -218,11 +218,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static MaidHackBase maidHack
+        private static MaidManager maidManager
         {
             get
             {
-                return MTE.maidHack;
+                return MaidManager.instance;
+            }
+        }
+
+        private static StudioHackBase studioHack
+        {
+            get
+            {
+                return MTE.studioHack;
             }
         }
 
@@ -460,7 +468,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             message = "";
 
-            if (maidHack.maid == null)
+            if (maidManager.maid == null)
             {
                 message = "メイドを配置してください";
                 return false;

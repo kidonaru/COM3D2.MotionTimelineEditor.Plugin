@@ -54,11 +54,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static MaidHackBase maidHack
+        private static StudioHackBase studioHack
         {
             get
             {
-                return MTE.maidHack;
+                return MTE.studioHack;
             }
         }
 

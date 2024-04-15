@@ -14,20 +14,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (!maidHack.HasBoneRotateVisible(boneType))
+                if (!studioHack.HasBoneRotateVisible(boneType))
                 {
                     return _isSelectedMenu;
                 }
-                return maidHack.IsBoneRotateVisible(boneType);
+                return studioHack.IsBoneRotateVisible(boneType);
             }
             set
             {
-                if (!maidHack.HasBoneRotateVisible(boneType))
+                if (!studioHack.HasBoneRotateVisible(boneType))
                 {
                     _isSelectedMenu = value;
                     return;
                 }
-                maidHack.SetBoneRotateVisible(boneType, value);
+                studioHack.SetBoneRotateVisible(boneType, value);
             }
         }
 
@@ -69,11 +69,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static MaidHackBase maidHack
+        private static StudioHackBase studioHack
         {
             get
             {
-                return MTE.maidHack;
+                return MTE.studioHack;
             }
         }
 

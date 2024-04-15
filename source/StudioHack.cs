@@ -5,10 +5,11 @@ using System.Linq;
 using System.Reflection;
 using RootMotion.FinalIK;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class StudioHack : MaidHackBase
+    public class StudioHack : StudioHackBase
     {
         private PoseEditWindow poseEditWindow = null;
         private MotionWindow motionWindow = null;
@@ -33,6 +34,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     Directory.CreateDirectory(path);
                 }
                 return path;
+            }
+        }
+
+        public override bool hasIkBoxVisible
+        {
+            get
+            {
+                return true;
             }
         }
 
@@ -138,18 +147,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (_maid != null)
+                if (maid != null)
                 {
-                    return !_maid.body0.jbMuneL.enabled;
+                    return !maid.body0.jbMuneL.enabled;
                 }
                 return false;
             }
             set
             {
-                if (_maid != null)
+                if (maid != null)
                 {
-                    _maid.body0.jbMuneL.enabled = !value;
-                    _maid.body0.MuneYureL(_maid.body0.jbMuneL.enabled ? 1 : 0);
+                    maid.body0.jbMuneL.enabled = !value;
+                    maid.body0.MuneYureL(maid.body0.jbMuneL.enabled ? 1 : 0);
                     maidStoreData["use_mune_key_l"] = value.ToString();
                 }
                 if (bodyBoneCheckBox != null)
@@ -164,18 +173,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (_maid != null)
+                if (maid != null)
                 {
-                    return !_maid.body0.jbMuneR.enabled;
+                    return !maid.body0.jbMuneR.enabled;
                 }
                 return false;
             }
             set
             {
-                if (_maid != null)
+                if (maid != null)
                 {
-                    _maid.body0.jbMuneR.enabled = !value;
-                    _maid.body0.MuneYureR(_maid.body0.jbMuneR.enabled ? 1 : 0);
+                    maid.body0.jbMuneR.enabled = !value;
+                    maid.body0.MuneYureR(maid.body0.jbMuneR.enabled ? 1 : 0);
                     maidStoreData["use_mune_key_r"] = value.ToString();
                 }
                 if (bodyBoneCheckBox != null)
@@ -186,9 +195,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void Init()
+        public override void OnSceneActive()
         {
             PluginUtils.Log("StudioHack初期化中...");
+            base.OnSceneActive();
+
             {
                 var gameObject = GameObject.Find("PoseEditWindow");
                 poseEditWindow = gameObject.GetComponent<PoseEditWindow>();
@@ -250,40 +261,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override bool IsValid()
+        public override void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
         {
-            _errorMessage = "";
-
-            if (GameMain.Instance.CharacterMgr.IsBusy())
-            {
-                _errorMessage = "メイド処理中です";
-                return false;
-            }
-
-            var maid = GetMaid();
-            if (maid == null)
-            {
-                _errorMessage = "メイドを配置してください";
-                return false;
-            }
-
-            if (maid.body0 == null || maid.body0.m_Bones == null)
-            {
-                _errorMessage = "メイド生成中です";
-                return false;
-            }
-
-            return true;
+            base.OnChangedSceneLevel(sceneName, sceneMode);
+            isSceneActive = sceneName.name == "ScenePhotoMode";
         }
 
-        protected override Maid GetMaid()
+        public override Maid activeMaid
         {
-            return photoManager.select_maid;
-        }
-
-        public override void Update()
-        {
-            base.Update();
+            get
+            {
+                return photoManager.select_maid;
+            }
         }
 
         public override bool HasBoneRotateVisible(IKManager.BoneType boneType)

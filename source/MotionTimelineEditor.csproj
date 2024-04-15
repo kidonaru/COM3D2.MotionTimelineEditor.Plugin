@@ -95,13 +95,14 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="KeyBind.cs" />
     <Compile Include="MoviePlayerImpl.cs" />
+    <Compile Include="MaidManager.cs" />
     <Compile Include="PluginUtils.cs" />
     <Compile Include="FrameData.cs" />
     <Compile Include="GUIView.cs" />
     <Compile Include="IBoneMenuItem.cs" />
     <Compile Include="IKHoldUI.cs" />
     <Compile Include="KeyFrameUI.cs" />
-    <Compile Include="MaidHackBase.cs" />
+    <Compile Include="StudioHackBase.cs" />
     <Compile Include="MoviePlayer.cs" />
     <Compile Include="MoviePlayerUI.cs" />
     <Compile Include="MultipleMaidsHack.cs" />

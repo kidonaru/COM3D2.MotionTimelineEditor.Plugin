@@ -42,7 +42,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                var rate = maidHack.motionSliderRate;
+                var rate = studioHack.motionSliderRate;
                 return (int) Math.Round(rate * timeline.maxFrameNo);
             }
             set
@@ -50,7 +50,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (timeline.maxFrameNo > 0)
                 {
                     var rate = Mathf.Clamp01((float) value / timeline.maxFrameNo);
-                    maidHack.motionSliderRate = rate;
+                    studioHack.motionSliderRate = rate;
                     prevMotionSliderRate = rate;
                 }
             }
@@ -70,7 +70,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return maidHack.isMotionPlaying && isAnmSyncing;
+                return studioHack.isMotionPlaying && isAnmSyncing;
             }
         }
 
@@ -131,11 +131,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static MaidHackBase maidHack
+        private static StudioHackBase studioHack
         {
             get
             {
-                return MTE.maidHack;
+                return MTE.studioHack;
+            }
+        }
+
+        private static MaidManager maidManager
+        {
+            get
+            {
+                return MaidManager.instance;
             }
         }
 
@@ -143,7 +151,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return maidHack.maid;
+                return maidManager.maid;
             }
         }
 
@@ -165,26 +173,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private TimelineManager()
         {
-            MaidHackBase.onMaidChanged += OnMaidChanged;
+            maidManager.onMaidChanged += OnMaidChanged;
         }
 
         public void Update()
         {
-            long.TryParse(maidHack.annName, out playingAnmId);
+            long.TryParse(maidManager.annName, out playingAnmId);
 
-            var motionSliderRate = maidHack.motionSliderRate;
+            var motionSliderRate = studioHack.motionSliderRate;
             if (isAnmSyncing && !Mathf.Approximately(motionSliderRate, prevMotionSliderRate))
             {
                 currentFrameNo = playingFrameNo;
             }
-            prevMotionSliderRate = maidHack.motionSliderRate;
+            prevMotionSliderRate = studioHack.motionSliderRate;
 
-            if (isAnmPlaying && !Mathf.Approximately(anmSpeed, maidHack.anmSpeed))
+            if (isAnmPlaying && !Mathf.Approximately(anmSpeed, maidManager.anmSpeed))
             {
-                maidHack.anmSpeed = anmSpeed;
+                maidManager.anmSpeed = anmSpeed;
             }
 
-            var isPoseEditing = maidHack.isPoseEditing;
+            var isPoseEditing = studioHack.isPoseEditing;
             if (isPrevPoseEditing != isPoseEditing)
             {
                 if (isPoseEditing)
@@ -211,16 +219,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void CreateNewTimeline()
         {
-            if (!maidHack.IsValid())
+            if (!studioHack.IsValid())
             {
-                PluginUtils.ShowDialog(maidHack.errorMessage);
+                PluginUtils.ShowDialog(studioHack.errorMessage);
+                return;
+            }
+            if (maid == null)
+            {
+                PluginUtils.ShowDialog("メイドが配置されていません");
                 return;
             }
 
             timeline = new TimelineData();
             timeline.anmName = "テスト";
             timeline.version = TimelineData.CurrentVersion;
-            timeline.UpdateFrame(0, maidHack.cacheBoneData);
+            timeline.UpdateFrame(0, maidManager.cacheBoneData);
 
             CreateAndApplyAnm();
             UnselectAll();
@@ -229,9 +242,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void LoadTimeline(string anmName)
         {
-            if (!maidHack.IsValid())
+            if (!studioHack.IsValid())
             {
-                PluginUtils.ShowDialog(maidHack.errorMessage);
+                PluginUtils.ShowDialog(studioHack.errorMessage);
+                return;
+            }
+            if (maid == null)
+            {
+                PluginUtils.ShowDialog("メイドが配置されていません");
                 return;
             }
 
@@ -315,12 +333,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void ApplyAnm(long id, byte[] anmData)
         {
-            var maid = maidHack.maid;
+            var maid = maidManager.maid;
+            if (maid == null)
+            {
+                PluginUtils.LogError("メイドが配置されていません");
+                return;
+            }
 
             float motionRate;
             if (isAnmSyncing)
             {
-                motionRate = maidHack.motionSliderRate;
+                motionRate = studioHack.motionSliderRate;
             }
             else
             {
@@ -361,13 +384,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            maidHack.OnMotionUpdated(maid);
+            studioHack.OnMotionUpdated(maid);
+            maidManager.OnMotionUpdated();
 
-            if (maidHack.isMotionPlaying)
+            if (studioHack.isMotionPlaying)
             {
                 motionRate += 0.01f; // モーション再生中は再生位置に差分がないと反映されない
             }
-            maidHack.motionSliderRate = motionRate;
+            studioHack.motionSliderRate = motionRate;
 
             if (initialEditFrame != null)
             {
@@ -410,7 +434,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 bool isExist = File.Exists(anmPath);
                 File.WriteAllBytes(anmPath, anmData);
 
-                maidHack.OnUpdateMyPose(anmPath, isExist);
+                studioHack.OnUpdateMyPose(anmPath, isExist);
 
                 PluginUtils.ShowDialog("モーション「" + timeline.anmName + "」を生成しました");
             }
@@ -429,7 +453,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return null;
             }
 
-            var cacheBoneData = maidHack.cacheBoneData;
+            var cacheBoneData = maidManager.cacheBoneData;
             if (cacheBoneData == null)
             {
                 PluginUtils.LogError("ボーンデータが取得できませんでした");
@@ -441,7 +465,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void AddKeyFrameAll()
         {
-            maidHack.isMotionPlaying = false;
+            studioHack.isMotionPlaying = false;
 
             var boneDataArray = GetCacheBoneDataArray();
             if (boneDataArray == null)
@@ -769,7 +793,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void SeekCurrentFrame(int frameNo)
         {
-            maidHack.isMotionPlaying = false;
+            studioHack.isMotionPlaying = false;
 
             if (this.currentFrameNo == frameNo)
             {
@@ -906,25 +930,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Play()
         {
-            maidHack.isPoseEditing = false;
+            studioHack.isPoseEditing = false;
 
             var success = CreateAndApplyAnm();
             if (success)
             {
-                maidHack.isMotionPlaying = true;
+                studioHack.isMotionPlaying = true;
             }
         }
 
         public void Stop()
         {
-            maidHack.isMotionPlaying = false;
+            studioHack.isMotionPlaying = false;
         }
 
         private void OnEditPoseUpdated()
         {
             OnEndPoseEdit();
 
-            var cacheBoneData = maidHack.cacheBoneData;
+            var cacheBoneData = maidManager.cacheBoneData;
             if (cacheBoneData == null)
             {
                 PluginUtils.LogError("ボーンデータが取得できませんでした");
@@ -961,8 +985,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (IsValidData())
             {
-                maidHack.useMuneKeyL = timeline.useMuneKeyL;
-                maidHack.useMuneKeyR = timeline.useMuneKeyR;
+                studioHack.useMuneKeyL = timeline.useMuneKeyL;
+                studioHack.useMuneKeyR = timeline.useMuneKeyR;
             }
         }
     }

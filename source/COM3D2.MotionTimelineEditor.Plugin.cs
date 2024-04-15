@@ -68,8 +68,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private bool isOnStateStudioMode = false;
-        private bool isOnStateEdit = false;
         private bool initializedGUI = false;
         private bool isFrameDragging = false;
         private Vector2 frameDragDelta = Vector2.zero;
@@ -81,12 +79,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private int selectStartFrameNo = 0;
         private int selectEndFrameNo = 0;
         private bool isMultiSelect = false;
+        private List<StudioHackBase> studioHacks = new List<StudioHackBase>();
+        private List<StudioHackBase> activeStudioHacks = new List<StudioHackBase>();
 
         private Texture2D texWhite = null;
         private Texture2D texTimelineBG = null;
         private Texture2D texKeyFrame = null;
 
         public static MotionTimelineEditor instance { get; private set; }
+
+        private static MaidManager maidManager
+        {
+            get
+            {
+                return MaidManager.instance;
+            }
+        }
+
+        private static Maid maid
+        {
+            get
+            {
+                return maidManager.maid;
+            }
+        }
 
         private static TimelineManager timelineManager
         {
@@ -106,7 +122,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static SubWindow subWindow = new SubWindow();
         public static Config config = new Config();
-        public static MaidHackBase maidHack = null;
+        public static StudioHackBase studioHack = null;
 
         public GUIStyle gsWin = new GUIStyle("box")
         {
@@ -168,9 +184,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             try
             {
                 GameObject.DontDestroyOnLoad(this);
-                SceneManager.sceneLoaded += OnChangedSceneLevel;
-                timelineManager.onRefresh += OnRefresh;
                 instance = this;
+            }
+            catch (Exception e)
+            {
+                PluginUtils.LogException(e);
+            }
+        }
+
+        public void Start()
+        {
+            try
+            {
                 Initialize();
             }
             catch (Exception e)
@@ -179,24 +204,45 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public bool isSceneActive
-        {
-            get
-            {
-                if (!isOnStateStudioMode && !isOnStateEdit)
-                {
-                    return false;
-                }
-
-                return true;
-            }
-        }
-
         public void Update()
         {
             try
             {
-                if (!isSceneActive)
+                if (!config.pluginEnabled)
+                {
+                    return;
+                }
+                if (studioHacks.Count == 0)
+                {
+                    return;
+                }
+
+                studioHack = null;
+                activeStudioHacks.Clear();
+
+                foreach (var hack in studioHacks)
+                {
+                    if (hack.isSceneActive)
+                    {
+                        activeStudioHacks.Add(hack);
+                    }
+                }
+
+                foreach (var hack in activeStudioHacks)
+                {
+                    if (hack.IsValid())
+                    {
+                        studioHack = hack;
+                        break;
+                    }
+                }
+
+                if (studioHack == null && activeStudioHacks.Count > 0)
+                {
+                    studioHack = activeStudioHacks[0];
+                }
+
+                if (studioHack == null)
                 {
                     return;
                 }
@@ -208,13 +254,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (isShowWnd)
                 {
-                    maidHack.Update();
-
-                    if (!maidHack.IsValid())
+                    if (!studioHack.IsValid())
                     {
                         return;
                     }
 
+                    maidManager.Update();
+
+                    if (maid == null)
+                    {
+                        return;
+                    }
                     if (!timelineManager.IsValidData())
                     {
                         return;
@@ -265,7 +315,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                     if (config.GetKeyDown(KeyBindType.EditMode))
                     {
-                        maidHack.isPoseEditing = !maidHack.isPoseEditing;
+                        studioHack.isPoseEditing = !studioHack.isPoseEditing;
                     }
                     if (config.GetKeyDown(KeyBindType.Copy))
                     {
@@ -286,13 +336,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         isMultiSelect = true;
                     }
 
+                    studioHack.Update();
                     timelineManager.Update();
                     subWindow.Update();
 
                     // 自動スクロール
                     if (config.isAutoScroll &&
                         timelineManager.isAnmSyncing &&
-                        maidHack.isMotionPlaying &&
+                        studioHack.isMotionPlaying &&
                         !Input.GetMouseButton(0))
                     {
                         var contentWidth = timeline.maxFrameCount * config.frameWidth;
@@ -312,22 +363,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void LateUpdate()
         {
-            if (!isSceneActive)
+            try
             {
-                return;
-            }
-            if (!maidHack.IsValid())
-            {
-                return;
-            }
+                if (!config.pluginEnabled)
+                {
+                    return;
+                }
+                if (studioHack == null || maid == null)
+                {
+                    return;
+                }
+                if (!studioHack.IsValid())
+                {
+                    return;
+                }
 
-            if (isShowWnd)
+                if (isShowWnd)
+                {
+                    subWindow.LateUpdate();
+                }
+            }
+            catch (Exception e)
             {
-                subWindow.LateUpdate();
+                PluginUtils.LogException(e);
             }
         }
 
-        public void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)
+        public void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
         {
             if (!config.pluginEnabled)
             {
@@ -339,39 +401,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 this.isShowWnd = false;
             }
 
-            var isOldStateStudioMode = this.isOnStateStudioMode;
-            var isOldStateEdit = this.isOnStateEdit;
-            this.isOnStateStudioMode = sceneName.name == "ScenePhotoMode";
-            this.isOnStateEdit = sceneName.name == "SceneEdit" || sceneName.name == "SceneDaily";
-
-            if (this.isOnStateStudioMode)
+            foreach (var studioHack in studioHacks)
             {
-                maidHack = new StudioHack();
-                maidHack.Init();
-                boneMenuManager.Init();
-                AddGearMenu();
-                return;
-            }
-            if (this.isOnStateEdit)
-            {
-                maidHack = new MultipleMaidsHack();
-                maidHack.Init();
-                boneMenuManager.Init();
-                AddGearMenu();
-                return;
-            }
-
-            if (isOldStateStudioMode && !this.isOnStateStudioMode)
-            {
-                this.isShowWnd = false;
-                RemoveGearMenu();
-                return;
-            }
-            if (isOldStateEdit && !this.isOnStateEdit)
-            {
-                this.isShowWnd = false;
-                RemoveGearMenu();
-                return;
+                studioHack.OnChangedSceneLevel(sceneName, sceneMode);
             }
         }
 
@@ -380,7 +412,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             SaveConfigXml();
         }
 
-        public void OnRefresh()
+        public void OnRefreshTimeline()
         {
             UpdateTexture();
         }
@@ -466,6 +498,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             PluginUtils.Log("初期化中...");
 
+            LoadConfigXml();
+            SaveConfigXml();
+
+            if (!config.pluginEnabled)
+            {
+                PluginUtils.Log("プラグインが無効になっています");
+                return;
+            }
+
+            SceneManager.sceneLoaded += OnChangedSceneLevel;
+            timelineManager.onRefresh += OnRefreshTimeline;
+
+            AddPoseEditorHack(new StudioHack());
+            AddPoseEditorHack(new MultipleMaidsHack());
+
             texWhite = GUIView.CreateColorTexture(Color.white);
 
             var windowHoverColor = config.windowHoverColor;
@@ -479,10 +526,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			gsWin.onFocused.textColor = Color.white;
 			gsWin.focused.textColor = Color.white;
 
-            LoadConfigXml();
-            SaveConfigXml();
-
             subWindow.Init();
+            boneMenuManager.Init();
+
+            AddGearMenu();
         }
 
         private void InitGUI()
@@ -527,14 +574,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         GameObject gearMenuIcon = null;
 
-        private void AddGearMenu()
+        public void AddGearMenu()
         {
             gearMenuIcon = GUIExtBase.GUIExt.Add(
                 PluginUtils.PluginName,
                 PluginUtils.PluginName,
                 PluginUtils.icon,
                 (go) => {
-                    if (!isSceneActive)
+                    if (studioHack == null)
                     {
                         return;
                     }
@@ -543,7 +590,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 });
         }
 
-        private void RemoveGearMenu()
+        public void RemoveGearMenu()
         {
             if (gearMenuIcon != null)
             {
@@ -558,6 +605,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 GUIExtBase.GUIExt.SetFrameColor(gearMenuIcon, isShowWnd ? Color.blue : Color.white);
             }
+        }
+
+        public void AddPoseEditorHack(StudioHackBase studioHack)
+        {
+            studioHacks.Add(studioHack);
         }
 
         public void SaveScreenShot(string filePath, int width, int height)
@@ -633,13 +685,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void DrawWindow(int id)
         {
-            if (maidHack == null)
+            if (studioHack == null)
             {
                 return;
             }
 
-            var isMaidHackValid = maidHack.IsValid();
-            var isTimelineLoaded = timeline != null;
+            var isEditorHackValid = studioHack.IsValid();
+            var isMaidValid = maidManager.IsValid();
 
             {
                 var view = new GUIView(0, 0, WINDOW_WIDTH, 20);
@@ -657,11 +709,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.currentPos.x = WINDOW_WIDTH - 400;
 
-                if (!isMaidHackValid)
+                if (!isEditorHackValid)
                 {
-                    view.DrawLabel(maidHack.errorMessage, 400 - 20, 20, Color.yellow);
+                    view.DrawLabel(studioHack.errorMessage, 400 - 20, 20, Color.yellow);
                 }
-                else if (!timelineManager.IsValidData())
+                else if (!isMaidValid)
+                {
+                    view.DrawLabel(maidManager.errorMessage, 400 - 20, 20, Color.yellow);
+                } else if (!timelineManager.IsValidData())
                 {
                     view.DrawLabel(timelineManager.errorMessage, 400 - 20, 20, Color.yellow);
                 }
@@ -669,7 +724,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     // TIPSを表示したい
                     var message = "";
-                    if (!maidHack.isPoseEditing)
+                    if (!studioHack.isPoseEditing)
                     {
                         var keyName = config.GetKeyName(KeyBindType.EditMode);
                         message = "[" + keyName + "]キーでポーズ編集モードに切り替えます";
@@ -684,9 +739,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            bool editEnabled = isMaidHackValid
-                            && isTimelineLoaded
-                            && maidHack.maid != null;
+            bool editEnabled = isMaidValid
+                            && isEditorHackValid
+                            && timeline != null
+                            && maidManager.maid != null;
 
             {
                 var view = new GUIView(0, 20, WINDOW_WIDTH, HEADER_HEIGHT);
@@ -702,9 +758,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     
                     if (view.DrawButton("ロード", buttonWidth, 20))
                     {
-                        if (!isMaidHackValid)
+                        if (!isEditorHackValid)
                         {
-                            PluginUtils.ShowDialog(maidHack.errorMessage);
+                            PluginUtils.ShowDialog(studioHack.errorMessage);
                             return;
                         }
                         subWindow.ToggleSubWindow(SubWindowType.TimelineLoad);
@@ -884,7 +940,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     view.DrawLabel("キーフレーム", 100, 20);
 
-                    if (view.DrawButton("追加", 50, 20, maidHack.isPoseEditing))
+                    if (view.DrawButton("追加", 50, 20, studioHack.isPoseEditing))
                     {
                         timelineManager.AddKeyFrameDiff();
                     }
@@ -948,24 +1004,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         timelineManager.Refresh();
                     }
 
-                    var isPoseEditing = view.DrawToggle("ポーズ編集", maidHack.isPoseEditing, 100, 20);
-                    if (isPoseEditing != maidHack.isPoseEditing)
+                    var isPoseEditing = view.DrawToggle("ポーズ編集", studioHack.isPoseEditing, 100, 20);
+                    if (isPoseEditing != studioHack.isPoseEditing)
                     {
-                        maidHack.isPoseEditing = isPoseEditing;
+                        studioHack.isPoseEditing = isPoseEditing;
                     }
 
-                    if (isOnStateStudioMode)
+                    if (studioHack.hasIkBoxVisible)
                     {
-                        var newIsIkBoxVisibleRoot = view.DrawToggle("中心点IK表示", maidHack.isIkBoxVisibleRoot, 100, 20, isPoseEditing);
-                        if (newIsIkBoxVisibleRoot != maidHack.isIkBoxVisibleRoot)
+                        var newIsIkBoxVisibleRoot = view.DrawToggle("中心点IK表示", studioHack.isIkBoxVisibleRoot, 100, 20);
+                        if (newIsIkBoxVisibleRoot != studioHack.isIkBoxVisibleRoot)
                         {
-                            maidHack.isIkBoxVisibleRoot = newIsIkBoxVisibleRoot;
+                            studioHack.isIkBoxVisibleRoot = newIsIkBoxVisibleRoot;
                         }
 
-                        var newIsIkBoxVisibleBody = view.DrawToggle("関節IK表示", maidHack.isIkBoxVisibleBody, 100, 20, isPoseEditing);
-                        if (newIsIkBoxVisibleBody != maidHack.isIkBoxVisibleBody)
+                        var newIsIkBoxVisibleBody = view.DrawToggle("関節IK表示", studioHack.isIkBoxVisibleBody, 100, 20);
+                        if (newIsIkBoxVisibleBody != studioHack.isIkBoxVisibleBody)
                         {
-                            maidHack.isIkBoxVisibleBody = newIsIkBoxVisibleBody;
+                            studioHack.isIkBoxVisibleBody = newIsIkBoxVisibleBody;
                         }
                     }
                 }
