@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COM3D2.MotionTimelineEditor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COM3D2.MotionTimelineEditor_MultipleMaids.Plugin", "COM3D2.MotionTimelineEditor_MultipleMaids.Plugin\COM3D2.MotionTimelineEditor_MultipleMaids.Plugin.csproj", "{5FE928AC-BB09-42AB-9521-AB2D2A77F6B0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin", "COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin\COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin.csproj", "{B81F4496-31A5-4AAF-918A-C8C8BCAC0E37}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{5FE928AC-BB09-42AB-9521-AB2D2A77F6B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FE928AC-BB09-42AB-9521-AB2D2A77F6B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5FE928AC-BB09-42AB-9521-AB2D2A77F6B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B81F4496-31A5-4AAF-918A-C8C8BCAC0E37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B81F4496-31A5-4AAF-918A-C8C8BCAC0E37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B81F4496-31A5-4AAF-918A-C8C8BCAC0E37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B81F4496-31A5-4AAF-918A-C8C8BCAC0E37}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

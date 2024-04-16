@@ -1,11 +1,14 @@
 using System;
 using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using MeidoPhotoStudio.Plugin;
 
-namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
+namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 {
     public static class PluginUtils
     {
-        public const string PluginName = "MotionTimelineEditor_MultipleMaids";
+        public const string PluginName = "MotionTimelineEditor_MeidoPhotoStudio";
         public const string PluginFullName = "COM3D2." + PluginName + ".Plugin";
         public const string PluginVersion = "1.2.3.0";
         public const string WindowName = PluginName + " " + PluginVersion;
@@ -46,6 +49,21 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         public static void LogException(Exception e)
         {
             UnityEngine.Debug.LogException(e);
+        }
+
+        private static FieldInfo fieldToggleValue = null;
+
+        public static void SetValueOnly(
+            this Toggle toggle,
+            bool value
+        )
+        {
+            if (fieldToggleValue == null)
+            {
+                fieldToggleValue = typeof(Toggle).GetField("value", BindingFlags.NonPublic | BindingFlags.Instance);
+                PluginUtils.AssertNull(fieldToggleValue != null, "fieldToggleValue is null");
+            }
+            fieldToggleValue.SetValue(toggle, value);
         }
     }
 }

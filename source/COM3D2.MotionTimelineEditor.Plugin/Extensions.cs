@@ -78,7 +78,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (fieldPathDic == null)
             {
                 fieldPathDic = typeof(CacheBoneDataArray).GetField("path_dic_", BindingFlags.Instance | BindingFlags.NonPublic);
-                PluginUtils.AssertNull(fieldPathDic != null);
+                PluginUtils.AssertNull(fieldPathDic != null, "fieldPathDic is null");
             }
             return (Dictionary<string, CacheBoneDataArray.BoneData>) fieldPathDic.GetValue(cacheBoneDataArray);
         }
@@ -114,7 +114,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (fieldIkFabrik == null)
             {
                 fieldIkFabrik = typeof(LimbControl).GetField("ik_fabrik_", BindingFlags.NonPublic | BindingFlags.Instance);
-                PluginUtils.AssertNull(fieldIkFabrik != null);
+                PluginUtils.AssertNull(fieldIkFabrik != null, "fieldIkFabrik is null");
             }
             return (FABRIK) fieldIkFabrik.GetValue(limbControl);
         }
@@ -127,7 +127,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (fieldJointDragPoint == null)
             {
                 fieldJointDragPoint = typeof(LimbControl).GetField("joint_drag_point_", BindingFlags.NonPublic | BindingFlags.Instance);
-                PluginUtils.AssertNull(fieldJointDragPoint != null);
+                PluginUtils.AssertNull(fieldJointDragPoint != null, "fieldJointDragPoint is null");
             }
             return (IKDragPoint) fieldJointDragPoint.GetValue(limbControl);
         }
@@ -140,7 +140,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (fieldTipDragPoint == null)
             {
                 fieldTipDragPoint = typeof(LimbControl).GetField("tip_drag_point_", BindingFlags.NonPublic | BindingFlags.Instance);
-                PluginUtils.AssertNull(fieldTipDragPoint != null);
+                PluginUtils.AssertNull(fieldTipDragPoint != null, "fieldTipDragPoint is null");
             }
             return (IKDragPoint) fieldTipDragPoint.GetValue(limbControl);
         }

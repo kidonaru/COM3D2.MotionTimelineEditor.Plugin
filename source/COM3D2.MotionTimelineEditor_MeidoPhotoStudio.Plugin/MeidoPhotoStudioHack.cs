@@ -1,90 +1,157 @@
 using System;
 using System.IO;
 using System.Reflection;
-using CM3D2.MultipleMaids.Plugin;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using COM3D2.MotionTimelineEditor.Plugin;
+using MeidoPhotoStudio.Plugin;
 
-namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
+namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 {
-    public class MultipleMaidsHack : StudioHackBase
+    using MPS = MeidoPhotoStudio.Plugin.MeidoPhotoStudio;
+
+    public class MeidoPhotoStudioHack : StudioHackBase
     {
-        private MultipleMaids multipleMaids = null;
+        private MPS meidoPhotoStudio = null;
 
-        private FieldInfo fieldMaidArray = null;
-        private FieldInfo fieldSelectMaidIndex = null;
-        private FieldInfo fieldIsLock = null;
-        private FieldInfo fieldUnLockFlg = null;
-        private FieldInfo fieldIsStop = null;
-        private FieldInfo fieldIsBone = null;
-        private FieldInfo fieldOkFlg = null;
+        private FieldInfo fieldActive = null;
+        private FieldInfo fieldMeidoManager = null;
+        private FieldInfo fieldWindowManager = null;
+        private FieldInfo fieldMaidIKPane = null;
+        private FieldInfo fieldReleaseIKToggle = null;
+        private FieldInfo fieldBoneIKToggle = null;
 
-        private Maid[] maidArray
+        private bool isActive
         {
             get
             {
-                return (Maid[])fieldMaidArray.GetValue(multipleMaids);
+                return (bool)fieldActive.GetValue(meidoPhotoStudio);
             }
         }
 
-        private int selectMaidIndex
+        private MeidoManager meidoManager
         {
             get
             {
-                return (int)fieldSelectMaidIndex.GetValue(multipleMaids);
+                return (MeidoManager)fieldMeidoManager.GetValue(meidoPhotoStudio);
             }
         }
 
-        private bool[] isLockArray
+        private WindowManager windowManager
         {
             get
             {
-                return (bool[])fieldIsLock.GetValue(multipleMaids);
+                return (WindowManager)fieldWindowManager.GetValue(meidoPhotoStudio);
             }
         }
 
-        private bool isLock
+        private MainWindow mainWindow
         {
             get
             {
-                var isLockArray = this.isLockArray;
-                var selectMaidIndex = this.selectMaidIndex;
-                if (selectMaidIndex >= 0 && selectMaidIndex < isLockArray.Length)
+                if (windowManager == null)
                 {
-                    return isLockArray[selectMaidIndex];
+                    return null;
+                }
+                return windowManager[Constants.Window.Main] as MainWindow;
+            }
+        }
+
+        private PoseWindowPane poseWindowPane
+        {
+            get
+            {
+                if (mainWindow == null)
+                {
+                    return null;
+                }
+                return mainWindow[Constants.Window.Pose] as PoseWindowPane;
+            }
+        }
+
+        private MaidIKPane maidIKPane
+        {
+            get
+            {
+                return (MaidIKPane)fieldMaidIKPane.GetValue(poseWindowPane);
+            }
+        }
+
+        private Toggle releaseIKToggle
+        {
+            get
+            {
+                return (Toggle)fieldReleaseIKToggle.GetValue(maidIKPane);
+            }
+        }
+
+        private Toggle boneIKToggle
+        {
+            get
+            {
+                return (Toggle)fieldBoneIKToggle.GetValue(maidIKPane);
+            }
+        }
+
+        private bool isReleaseIK
+        {
+            get
+            {
+                var toggle = this.releaseIKToggle;
+                if (toggle == null)
+                {
+                    return false;
                 }
 
-                return false;
+                return toggle.Value;
             }
             set
             {
-                var isLockArray = this.isLockArray;
-                var selectMaidIndex = this.selectMaidIndex;
-                if (selectMaidIndex >= 0 && selectMaidIndex < isLockArray.Length)
+                var toggle = this.releaseIKToggle;
+                if (toggle == null)
                 {
-                    isLockArray[selectMaidIndex] = value;
+                    return;
                 }
+
+                toggle.SetValueOnly(value);
             }
         }
 
-        private bool unLockFlg
+        private bool isBoneIK
         {
             get
             {
-                return (bool)fieldUnLockFlg.GetValue(multipleMaids);
+                var toggle = this.boneIKToggle;
+                if (toggle == null)
+                {
+                    return false;
+                }
+
+                return toggle.Value;
             }
             set
             {
-                fieldUnLockFlg.SetValue(multipleMaids, value);
+                var toggle = this.boneIKToggle;
+                if (toggle == null)
+                {
+                    return;
+                }
+
+                toggle.Value = value;
             }
         }
 
-        private bool[] isStopArray
+        private Meido activeMeido
         {
             get
             {
-                return (bool[])fieldIsStop.GetValue(multipleMaids);
+                var meidoManager = this.meidoManager;
+                if (meidoManager == null)
+                {
+                    return null;
+                }
+
+                return meidoManager.ActiveMeido;
             }
         }
 
@@ -92,24 +159,14 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         {
             get
             {
-                var isStopArray = this.isStopArray;
-                var selectMaidIndex = this.selectMaidIndex;
-                if (selectMaidIndex >= 0 && selectMaidIndex < isStopArray.Length)
+                if (animationState != null)
                 {
-                    return isStopArray[selectMaidIndex];
+                    return !animationState.enabled;
                 }
-
                 return false;
             }
             set
             {
-                var isStopArray = this.isStopArray;
-                var selectMaidIndex = this.selectMaidIndex;
-                if (selectMaidIndex >= 0 && selectMaidIndex < isStopArray.Length)
-                {
-                    isStopArray[selectMaidIndex] = value;
-                }
-
                 if (animationState != null)
                 {
                     animationState.enabled = !value;
@@ -117,51 +174,11 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
         }
 
-        private bool[] isBoneArray
-        {
-            get
-            {
-                return (bool[])fieldIsBone.GetValue(multipleMaids);
-            }
-        }
-
-        private bool isBone
-        {
-            get
-            {
-                var isBoneArray = this.isBoneArray;
-                var selectMaidIndex = this.selectMaidIndex;
-                if (selectMaidIndex >= 0 && selectMaidIndex < isBoneArray.Length)
-                {
-                    return isBoneArray[selectMaidIndex];
-                }
-
-                return false;
-            }
-            set
-            {
-                var isBoneArray = this.isBoneArray;
-                var selectMaidIndex = this.selectMaidIndex;
-                if (selectMaidIndex >= 0 && selectMaidIndex < isBoneArray.Length)
-                {
-                    isBoneArray[selectMaidIndex] = value;
-                }
-            }
-        }
-
-        private bool okFlg
-        {
-            get
-            {
-                return (bool)fieldOkFlg.GetValue(multipleMaids);
-            }
-        }
-
         public override int priority
         {
             get
             {
-                return 100;
+                return 50;
             }
         }
 
@@ -169,14 +186,13 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         {
             get
             {
-                var maidArray = this.maidArray;
-                var selectMaidIndex = this.selectMaidIndex;
-                if (selectMaidIndex < 0 || selectMaidIndex >= maidArray.Length)
+                var activeMeido = this.activeMeido;
+                if (activeMeido == null)
                 {
                     return null;
                 }
 
-                return maidArray[selectMaidIndex];
+                return activeMeido.Maid;
             }
         }
 
@@ -184,7 +200,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         {
             get
             {
-                var path = Path.GetFullPath(".\\") + "Mod\\MultipleMaidsPose\\";
+                var path = Path.GetFullPath(".\\") + "BepInEx\\config\\MeidoPhotoStudio\\Presets\\Custom Poses\\";
                 if (!Directory.Exists(path))
                 {
                     Directory.CreateDirectory(path);
@@ -229,7 +245,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         {
             get
             {
-                return isLock;
+                return isReleaseIK;
             }
             set
             {
@@ -243,9 +259,8 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                     isStop = true;
                 }
 
-                isLock = value;
-                isBone = value;
-                unLockFlg = value;
+                isBoneIK = value;
+                isReleaseIK = value;
             }
         }
 
@@ -264,9 +279,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
                 if (value && isPoseEditing)
                 {
-                    isLock = false;
-                    isBone = false;
-                    unLockFlg = false;
+                    isPoseEditing = false;
                 }
 
                 isStop = !value;
@@ -288,6 +301,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
                 if (animationState != null)
                 {
+                    var isStop = this.isStop;
                     var maxNum = animationState.length;
                     var current = Mathf.Clamp01(value) * maxNum;
                     animationState.time = current;
@@ -341,7 +355,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
         }
 
-        public MultipleMaidsHack()
+        public MeidoPhotoStudioHack()
         {
         }
 
@@ -355,40 +369,37 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
 
             {
-                GameObject gameObject = GameObject.Find("UnityInjector");
-                multipleMaids = gameObject.GetComponent<MultipleMaids>();
-                PluginUtils.AssertNull(multipleMaids != null, "multipleMaids is null");
+                GameObject gameObject = GameObject.Find("BepInEx_Manager");
+                meidoPhotoStudio = gameObject.GetComponentInChildren<MPS>(true);
+                PluginUtils.AssertNull(meidoPhotoStudio != null, "meidoPhotoStudio is null");
             }
 
-            if (multipleMaids == null)
+            if (meidoPhotoStudio == null)
             {
-                PluginUtils.LogError("複数メイドプラグインが見つかりませんでした");
+                PluginUtils.LogError("MeidoPhotoStudioが見つかりませんでした");
                 return false;
             }
 
             {
                 BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.InvokeMethod;
 
-                fieldMaidArray = typeof(MultipleMaids).GetField("maidArray", bindingAttr);
-                PluginUtils.AssertNull(fieldMaidArray != null, "fieldMaidArray is null");
+                fieldActive = typeof(MPS).GetField("active", bindingAttr);
+                PluginUtils.AssertNull(fieldActive != null, "fieldActive is null");
 
-                fieldSelectMaidIndex = typeof(MultipleMaids).GetField("selectMaidIndex", bindingAttr);
-                PluginUtils.AssertNull(fieldSelectMaidIndex != null, "fieldSelectMaidIndex is null");
+                fieldMeidoManager = typeof(MPS).GetField("meidoManager", bindingAttr);
+                PluginUtils.AssertNull(fieldMeidoManager != null, "fieldMeidoManager is null");
 
-                fieldIsLock = typeof(MultipleMaids).GetField("isLock", bindingAttr);
-                PluginUtils.AssertNull(fieldIsLock != null, "fieldIsLock is null");
+                fieldWindowManager = typeof(MPS).GetField("windowManager", bindingAttr);
+                PluginUtils.AssertNull(fieldWindowManager != null, "fieldWindowManager is null");
 
-                fieldUnLockFlg = typeof(MultipleMaids).GetField("unLockFlg", bindingAttr);
-                PluginUtils.AssertNull(fieldUnLockFlg != null, "fieldUnLockFlg is null");
+                fieldMaidIKPane = typeof(PoseWindowPane).GetField("maidIKPane", bindingAttr);
+                PluginUtils.AssertNull(fieldMaidIKPane != null, "fieldMaidIKPane is null");
 
-                fieldIsStop = typeof(MultipleMaids).GetField("isStop", bindingAttr);
-                PluginUtils.AssertNull(fieldIsStop != null, "fieldIsStop is null");
+                fieldReleaseIKToggle = typeof(MaidIKPane).GetField("releaseIKToggle", bindingAttr);
+                PluginUtils.AssertNull(fieldReleaseIKToggle != null, "fieldReleaseIKToggle is null");
 
-                fieldIsBone = typeof(MultipleMaids).GetField("isBone", bindingAttr);
-                PluginUtils.AssertNull(fieldIsBone != null, "fieldIsBone is null");
-
-                fieldOkFlg = typeof(MultipleMaids).GetField("okFlg", bindingAttr);
-                PluginUtils.AssertNull(fieldOkFlg != null, "fieldOkFlg is null");
+                fieldBoneIKToggle = typeof(MaidIKPane).GetField("boneIKToggle", bindingAttr);
+                PluginUtils.AssertNull(fieldBoneIKToggle != null, "fieldBoneIKToggle is null");
             }
 
             return true;
@@ -407,9 +418,9 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                 return false;
             }
 
-            if (!okFlg)
+            if (!isActive)
             {
-                _errorMessage = "複数メイドを有効化してください";
+                _errorMessage = "MeidoPhotoStudioを有効化してください";
                 return false;
             }
 

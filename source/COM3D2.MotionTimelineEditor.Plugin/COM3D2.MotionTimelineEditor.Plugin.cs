@@ -601,7 +601,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void AddStudioHack(StudioHackBase studioHack)
         {
+            if (studioHack == null || !studioHack.Init())
+            {
+                return;
+            }
+
             studioHacks.Add(studioHack);
+            studioHacks.Sort((a, b) => b.priority - a.priority);
         }
 
         public void SaveScreenShot(string filePath, int width, int height)

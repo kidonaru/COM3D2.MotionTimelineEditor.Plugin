@@ -24,6 +24,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public WFCheckBox ikBoxVisibleRoot = null;
         public WFCheckBox ikBoxVisibleBody = null;
 
+        public override int priority
+        {
+            get
+            {
+                return 0;
+            }
+        }
+
+        public override Maid activeMaid
+        {
+            get
+            {
+                return photoManager.select_maid;
+            }
+        }
+
         public override string outputAnmPath
         {
             get
@@ -195,38 +211,49 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void OnSceneActive()
+        public override bool Init()
         {
             PluginUtils.Log("StudioHack初期化中...");
-            base.OnSceneActive();
 
+            if (!base.Init())
             {
-                var gameObject = GameObject.Find("PoseEditWindow");
-                poseEditWindow = gameObject.GetComponent<PoseEditWindow>();
-                PluginUtils.AssertNull(poseEditWindow != null);
+                return false;
             }
-
-            {
-                var gameObject = GameObject.Find("MotionWindow");
-                motionWindow = gameObject.GetComponent<MotionWindow>();
-                PluginUtils.AssertNull(motionWindow != null);
-            }
-
-            photoManager = poseEditWindow.mgr;
-            PluginUtils.AssertNull(photoManager != null);
 
             {
                 BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.InvokeMethod;
 
                 fieldDataDic = typeof(WindowPartsBoneCheckBox).GetField("data_dic_", bindingAttr);
-                PluginUtils.AssertNull(fieldDataDic != null);
+                PluginUtils.AssertNull(fieldDataDic != null, "fieldDataDic is null");
 
                 fieldBoneDic = typeof(IKManager).GetField("bone_dic_", bindingAttr);
-                PluginUtils.AssertNull(fieldBoneDic != null);
+                PluginUtils.AssertNull(fieldBoneDic != null, "fieldBoneDic is null");
 
                 fieldIkboxVisibleDic = typeof(PoseEditWindow).GetField("ikbox_visible_dic_", bindingAttr);
-                PluginUtils.AssertNull(fieldIkboxVisibleDic != null);
+                PluginUtils.AssertNull(fieldIkboxVisibleDic != null, "fieldIkboxVisibleDic is null");
             }
+
+            return true;
+        }
+
+        public override void OnSceneActive()
+        {
+            base.OnSceneActive();
+
+            {
+                var gameObject = GameObject.Find("PoseEditWindow");
+                poseEditWindow = gameObject.GetComponent<PoseEditWindow>();
+                PluginUtils.AssertNull(poseEditWindow != null, "poseEditWindow is null");
+            }
+
+            {
+                var gameObject = GameObject.Find("MotionWindow");
+                motionWindow = gameObject.GetComponent<MotionWindow>();
+                PluginUtils.AssertNull(motionWindow != null, "motionWindow is null");
+            }
+
+            photoManager = poseEditWindow.mgr;
+            PluginUtils.AssertNull(photoManager != null, "photoManager is null");
 
             foreach (var boneCheckBox in poseEditWindow.RotateCheckBoxArray)
             {
@@ -247,17 +274,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            PluginUtils.AssertNull(bodyBoneCheckBox != null);
+            PluginUtils.AssertNull(bodyBoneCheckBox != null, "bodyBoneCheckBox is null");
 
             {
                 var ikboxVisibleDic = (Dictionary<string, WFCheckBox>) fieldIkboxVisibleDic.GetValue(poseEditWindow);
-                PluginUtils.AssertNull(ikboxVisibleDic != null);
+                PluginUtils.AssertNull(ikboxVisibleDic != null, "ikboxVisibleDic is null");
 
                 ikBoxVisibleRoot = ikboxVisibleDic["ik_box_visible_Root"];
-                PluginUtils.AssertNull(ikBoxVisibleRoot != null);
+                PluginUtils.AssertNull(ikBoxVisibleRoot != null, "ikBoxVisibleRoot is null");
 
                 ikBoxVisibleBody = ikboxVisibleDic["ik_box_visible_Body"];
-                PluginUtils.AssertNull(ikBoxVisibleBody != null);
+                PluginUtils.AssertNull(ikBoxVisibleBody != null, "ikBoxVisibleBody is null");
             }
         }
 
@@ -265,14 +292,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.OnChangedSceneLevel(sceneName, sceneMode);
             isSceneActive = sceneName.name == "ScenePhotoMode";
-        }
-
-        public override Maid activeMaid
-        {
-            get
-            {
-                return photoManager.select_maid;
-            }
         }
 
         public override bool HasBoneRotateVisible(IKManager.BoneType boneType)

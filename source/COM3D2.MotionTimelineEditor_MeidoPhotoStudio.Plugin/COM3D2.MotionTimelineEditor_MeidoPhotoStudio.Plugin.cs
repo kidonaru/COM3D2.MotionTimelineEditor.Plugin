@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityInjector;
 using UnityInjector.Attributes;
 
-namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
+namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 {
     using MTE = MotionTimelineEditor.Plugin.MotionTimelineEditor;
 
@@ -12,7 +12,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         PluginName(PluginUtils.PluginFullName),
         PluginVersion(PluginUtils.PluginVersion)
     ]
-    public class MotionTimelineEditor_MultipleMaids : PluginBase
+    public class MotionTimelineEditor_MeidoPhotoStudio : PluginBase
     {
         public void Awake()
         {
@@ -33,7 +33,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         private void Initialize()
         {
-            MTE.instance.AddStudioHack(new MultipleMaidsHack());
+            MTE.instance.AddStudioHack(new MeidoPhotoStudioHack());
         }
     }
 }

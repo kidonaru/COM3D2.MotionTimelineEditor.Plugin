@@ -13,7 +13,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public const string PluginName = "MotionTimelineEditor";
         public const string PluginFullName = "COM3D2." + PluginName + ".Plugin";
-        public const string PluginVersion = "1.2.2.0";
+        public const string PluginVersion = "1.2.3.0";
         public const string WindowName = PluginName + " " + PluginVersion;
 
         public static readonly string UserDataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Config");
@@ -48,22 +48,47 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static string Asciify(this string s)
+        [Conditional("DEBUG")]
+        public static void LogDebug(string message)
         {
-            return Regex.Replace(s, "[^0-9A-Za-z]", "_");
+            UnityEngine.Debug.Log("[Debug] " + PluginName + "：" + message);
+        }
+
+        public static void Log(string message)
+        {
+            UnityEngine.Debug.Log(PluginName + "：" + message);
+        }
+
+        public static void LogWarning(string message)
+        {
+            UnityEngine.Debug.LogWarning(PluginName + "：" + message);
+        }
+        
+        public static void LogError(string message)
+        {
+            UnityEngine.Debug.LogError(PluginName + "：" + message);
+        }
+
+        public static void AssertNull(bool condition, string message)
+        {
+            if (!condition)
+            {
+                StackFrame stackFrame = new StackFrame(1, true);
+                string fileName = stackFrame.GetFileName();
+                int fileLineNumber = stackFrame.GetFileLineNumber();
+                string f_strMsg = fileName + "(" + fileLineNumber + ") \nNullPointerException：" + message;
+                LogError(f_strMsg);
+            }
+        }
+
+        public static void LogException(Exception e)
+        {
+            UnityEngine.Debug.LogException(e);
         }
 
         public static string CombinePaths(params string[] parts)
         {
             return parts.Aggregate(Path.Combine);
-        }
-
-        public static void ForEach<T>(this IEnumerable<T> tees, Action<T> action)
-        {
-            foreach (T tee in tees)
-            {
-                action(tee);
-            }
         }
 
         public static void ShowDialog(string message)
@@ -94,44 +119,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static string ConvertThumPath(string path)
         {
             return Path.ChangeExtension(path, ".png");
-        }
-
-        [Conditional("DEBUG")]
-        public static void LogDebug(string message)
-        {
-            UnityEngine.Debug.Log("[Debug] " + PluginName + "：" + message);
-        }
-
-        public static void Log(string message)
-        {
-            UnityEngine.Debug.Log(PluginName + "：" + message);
-        }
-
-        public static void LogWarning(string message)
-        {
-            UnityEngine.Debug.LogWarning(PluginName + "：" + message);
-        }
-        
-        public static void LogError(string message)
-        {
-            UnityEngine.Debug.LogError(PluginName + "：" + message);
-        }
-
-        public static void AssertNull(bool condition)
-        {
-            if (!condition)
-            {
-                StackFrame stackFrame = new StackFrame(1, true);
-                string fileName = stackFrame.GetFileName();
-                int fileLineNumber = stackFrame.GetFileLineNumber();
-                string f_strMsg = fileName + "(" + fileLineNumber + ") \nNullPointerException";
-                LogError(f_strMsg);
-            }
-        }
-
-        public static void LogException(Exception e)
-        {
-            UnityEngine.Debug.LogException(e);
         }
 
         public static void AdjustWindowPosition(ref Rect rect)
@@ -184,7 +171,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var methodInfo = typeof(CacheBoneDataArray).GetMethod("GetSaveBonePathArray", BindingFlags.NonPublic | BindingFlags.Static);
                     _saveBonePaths = (string[]) methodInfo.Invoke(null, null);
-                    PluginUtils.AssertNull(saveBonePaths != null);
+                    PluginUtils.AssertNull(saveBonePaths != null, "saveBonePaths is null");
                 }
                 return _saveBonePaths;
             }

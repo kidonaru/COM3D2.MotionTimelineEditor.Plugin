@@ -13,7 +13,13 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-set VERSION=1.2.2.0
+call .\source\COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin\build.bat
+if %ERRORLEVEL% neq 0 (
+    echo ビルドに失敗しました
+    exit /b 1
+)
+
+set VERSION=1.2.3.0
 set PLUGIN_NAME=COM3D2.MotionTimelineEditor.Plugin
 
 if exist output rmdir /s /q output
@@ -32,3 +38,6 @@ type README.md >> %README_TXT%
 powershell Compress-Archive -Path "output\%PLUGIN_NAME%" -DestinationPath "output\%PLUGIN_NAME%-v%VERSION%.zip" -Force
 
 rmdir /s /q output\%PLUGIN_NAME%
+
+echo ビルドに成功しました
+exit /b 0

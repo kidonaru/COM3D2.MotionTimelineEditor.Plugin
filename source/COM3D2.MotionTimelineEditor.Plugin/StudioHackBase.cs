@@ -7,6 +7,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public abstract class StudioHackBase
     {
+        public abstract int priority { get; }
         public abstract Maid activeMaid { get; }
         public abstract string outputAnmPath { get; }
         public abstract bool hasIkBoxVisible { get; }
@@ -95,8 +96,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public StudioHackBase()
         {
+        }
+
+        public virtual bool Init()
+        {
             maidManager.onMaidChanged += OnMaidChanged;
             maidManager.onAnmChanged += OnAnmChanged;
+            return true;
         }
 
         public virtual void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)

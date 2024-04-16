@@ -117,7 +117,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (fieldLimbControlList == null)
                 {
                     fieldLimbControlList = typeof(IKManager).GetField("limb_control_list_", BindingFlags.NonPublic | BindingFlags.Instance);
-                    PluginUtils.AssertNull(fieldLimbControlList != null);
+                    PluginUtils.AssertNull(fieldLimbControlList != null, "fieldLimbControlList is null");
                 }
                 return (List<LimbControl>) fieldLimbControlList.GetValue(_ikManager);
             }
