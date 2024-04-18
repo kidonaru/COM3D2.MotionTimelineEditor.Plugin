@@ -486,6 +486,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             texTimelineBG = timelineManager.timeline.CreateBGTexture(
                 config.frameWidth,
                 config.frameHeight,
+                WINDOW_WIDTH - 100 + config.frameWidth * config.frameNoInterval,
                 timelineViewHeight + config.frameHeight * 2,
                 config.timelineBgColor1,
                 config.timelineBgColor2,
@@ -1094,7 +1095,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         continue;
                     }
 
-                    view.DrawTexture(texTimelineBG, bgColor);
+                    for (var j = 0; j < timeline.maxFrameCount; j += config.frameNoInterval)
+                    {
+                        view.currentPos.x = j * frameWidth;
+                        if (view.currentPos.x < scrollPosition.x - frameWidth * config.frameNoInterval)
+                        {
+                            continue;
+                        }
+
+                        view.DrawTexture(texTimelineBG, bgColor);
+                        break;
+                    }
+
                     break;
                 }
 

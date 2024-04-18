@@ -687,6 +687,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Texture2D CreateBGTexture(
             int frameWidth,
             int frameHeight,
+            int width,
             int height,
             Color bgColor1,
             Color bgColor2,
@@ -694,7 +695,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Color frameLineColor2,
             int frameNoInterval)
         {
-            var width = maxFrameCount * frameWidth;
             var tex = new Texture2D(width, height);
             var pixels = new Color[width * height];
 
