@@ -656,29 +656,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return DrawSelectList(null, names, width, height, selectedIndex);
         }
 
-        public int DrawListView(
-            string[] names,
+        public int DrawListView<T>(
+            List<T> items,
+            Func<T, string> getName,
             float width,
             float height,
             ref Vector2 scrollPosition,
+            int currentIndex,
             float buttonHeight)
         {
             int selectedIndex = -1;
-            var contentHeight = (buttonHeight + margin) * names.Length;
+            var contentHeight = (buttonHeight + margin) * items.Count;
             var contentRect = GetDrawRect(0, 0, width, height);
             contentRect.width -= 20; // スクロールバーの幅分狭める
             contentRect.height = contentHeight;
             scrollPosition = BeginScrollView(width, height, contentRect, scrollPosition, false, true);
 
             var buttonWidth = contentRect.width;
-            padding.x = 10;
-            padding.y = 10;
 
             BeginLayout(LayoutDirection.Vertical);
 
-            for (int i = 0; i < names.Length; i++)
+            for (int i = 0; i < items.Count; i++)
             {
-                if (DrawButton(names[i], buttonWidth, buttonHeight))
+                var color =i == currentIndex ? Color.green : Color.white;
+                if (DrawButton(getName(items[i]), buttonWidth, buttonHeight, true, color))
                 {
                     selectedIndex = i;
                     break;
@@ -787,30 +788,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             EndScrollView();
 
             return selectedIndex;
-        }
-
-        public void DrawTabs(
-            string[] tabNames,
-            ref int selectedIndex,
-            float width,
-            float height,
-            Action<int> onClickAction)
-        {
-            BeginLayout(LayoutDirection.Horizontal);
-            for (int i = 0; i < tabNames.Length; i++)
-            {
-                var isSelected = i == selectedIndex;
-                var tabStyle = isSelected ? gsSelectedButton : gsButton;
-
-                if (DrawButton(tabNames[i], width, height, tabStyle))
-                {
-                    selectedIndex = i;
-                    if (onClickAction != null) {
-                        onClickAction(i);
-                    }
-                }
-            }
-            EndLayout();
         }
 
         public void AddSpace(float width, float height)

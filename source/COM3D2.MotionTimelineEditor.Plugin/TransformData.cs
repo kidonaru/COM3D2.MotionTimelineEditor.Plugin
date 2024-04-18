@@ -629,5 +629,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return hash;
             }
         }
+
+        public TransformData DeepCopy()
+        {
+            var transform = new TransformData(name);
+            transform.localPosition = localPosition;
+            transform.localRotation = localRotation;
+
+            for (int i = 0; i < valueCount; i++)
+            {
+                transform.inTangentDataList[i].FromTangentData(inTangentDataList[i]);
+                transform.outTangentDataList[i].FromTangentData(outTangentDataList[i]);
+            }
+
+            return transform;
+        }
     }
 }

@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using SH = StudioHack;
 
     public class TimelineLoadUI : SubWindowUIBase
     {

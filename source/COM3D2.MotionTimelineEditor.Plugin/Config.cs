@@ -19,6 +19,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         PrevKeyFrame,
         NextKeyFrame,
         MultiSelect,
+        Undo,
+        Redo,
     }
 
     public class Config
@@ -44,6 +46,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             { KeyBindType.PrevKeyFrame, new KeyBind("Ctrl+A") },
             { KeyBindType.NextKeyFrame, new KeyBind("Ctrl+D") },
             { KeyBindType.MultiSelect, new KeyBind("Shift") },
+            { KeyBindType.Undo, new KeyBind("Ctrl+Z") },
+            { KeyBindType.Redo, new KeyBind("Ctrl+X") },
         };
 
         public struct KeyBindPair
@@ -81,6 +85,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public TangentType defaultTangentType = TangentType.Smooth;
         public int detailTransformCount = 16;
         public int detailTangentCount = 32;
+        public bool disablePoseHistory = true;
+        public int historyLimit = 20;
 
         // 表示設定
         public int frameWidth = 11;

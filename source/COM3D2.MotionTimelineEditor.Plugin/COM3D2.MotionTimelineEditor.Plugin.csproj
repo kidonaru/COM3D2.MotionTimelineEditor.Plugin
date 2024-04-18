@@ -85,6 +85,8 @@
     <Compile Include="TangentData.cs" />
     <Compile Include="TangentPair.cs" />
     <Compile Include="TimelineData.cs" />
+    <Compile Include="TimelineHistoryManager.cs" />
+    <Compile Include="TimelineHistoryUI.cs" />
     <Compile Include="TimelineLoadUI.cs" />
     <Compile Include="TimelineManager.cs" />
     <Compile Include="TimelineSettingUI.cs" />

@@ -351,6 +351,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public override void ClearPoseHistory()
+        {
+            maidManager.ikManager.HistoryClear();
+        }
+
         public override void OnMotionUpdated(Maid maid)
         {
             motionWindow.UpdateAnimationData(maid);

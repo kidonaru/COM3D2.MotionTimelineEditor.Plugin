@@ -534,5 +534,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ClearBones();
             SetBones(newBones);
         }
+
+        public FrameData DeepCopy()
+        {
+            var frame = new FrameData(frameNo);
+            foreach (var bone in bones)
+            {
+                frame.SetBone(bone.DeepCopy());
+            }
+            return frame;
+        }
     }
 }

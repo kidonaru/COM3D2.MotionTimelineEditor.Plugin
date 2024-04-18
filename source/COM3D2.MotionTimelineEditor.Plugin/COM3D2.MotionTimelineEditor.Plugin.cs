@@ -112,6 +112,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static TimelineHistoryManager historyManager
+        {
+            get
+            {
+                return TimelineHistoryManager.instance;
+            }
+        }
+
         private static BoneMenuManager boneMenuManager
         {
             get
@@ -321,6 +329,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     if (config.GetKeyDown(KeyBindType.FlipPaste))
                     {
                         timelineManager.PasteFramesFromClipboard(true);
+                    }
+                    if (config.GetKeyDown(KeyBindType.Undo))
+                    {
+                        historyManager.Undo();
+                    }
+                    if (config.GetKeyDown(KeyBindType.Redo))
+                    {
+                        historyManager.Redo();
                     }
 
                     isMultiSelect = false;
@@ -747,7 +763,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.BeginLayout(GUIView.LayoutDirection.Horizontal);
                 {
-                    float buttonWidth = 70;
+                    float buttonWidth = 60;
 
                     if (view.DrawButton("新規作成", buttonWidth, 20))
                     {
@@ -769,7 +785,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         timelineManager.SaveTimeline();
                     }
 
-                    if (view.DrawButton("アニメ出力", buttonWidth, 20, editEnabled))
+                    if (view.DrawButton("ｱﾆﾒ出力", buttonWidth, 20, editEnabled))
                     {
                         timelineManager.OutputAnm();
                     }
@@ -788,6 +804,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     if (view.DrawButton("動画再生", buttonWidth, 20, editEnabled))
                     {
                         subWindow.ToggleSubWindow(SubWindowType.MoviePlayer);
+                    }
+
+                    if (view.DrawButton("履歴", buttonWidth, 20, editEnabled))
+                    {
+                        subWindow.ToggleSubWindow(SubWindowType.History);
                     }
 
                     if (view.DrawButton("設定", buttonWidth, 20, editEnabled))

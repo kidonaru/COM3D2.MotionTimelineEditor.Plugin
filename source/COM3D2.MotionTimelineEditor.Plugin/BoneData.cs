@@ -56,5 +56,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             transform.FixRotation(prevBone.transform);
         }
+
+        public BoneData DeepCopy()
+        {
+            var bone = new BoneData();
+            bone.transform = transform.DeepCopy();
+            return bone;
+        }
     }
 }

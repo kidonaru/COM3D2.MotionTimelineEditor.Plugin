@@ -27,7 +27,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public TimelineData timeline = null;
         public List<TimelineFile> timelineFileList = new List<TimelineFile>(64);
         private long playingAnmId = -1;
-        public HashSet<BoneData> selectedBones = new HashSet<BoneData>();        private float prevMotionSliderRate = -1f;
+        public HashSet<BoneData> selectedBones = new HashSet<BoneData>();
+        private float prevMotionSliderRate = -1f;
         public string errorMessage = "";
         public FrameData initialEditFrame;
         public Vector3 initialEditPosition = Vector3.zero;
@@ -171,6 +172,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static TimelineHistoryManager historyManager
+        {
+            get
+            {
+                return TimelineHistoryManager.instance;
+            }
+        }
+
         private TimelineManager()
         {
             maidManager.onMaidChanged += OnMaidChanged;
@@ -206,9 +215,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 isPrevPoseEditing = isPoseEditing;
             }
 
+            if (isPoseEditing && config.disablePoseHistory)
+            {
+                studioHack.ClearPoseHistory();
+            }
+
             if (initialEditFrame != null && initialEditFrame.frameNo != currentFrameNo)
             {
                 OnEditPoseUpdated();
+            }
+
+            if (requestedHistoryDesc.Length > 0 && !Input.GetMouseButton(0))
+            {
+                historyManager.AddHistory(timeline, requestedHistoryDesc);
+                requestedHistoryDesc = "";
             }
         }
 
@@ -238,6 +258,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             CreateAndApplyAnm();
             UnselectAll();
             Refresh();
+
+            RequestHistory("タイムライン新規作成");
         }
 
         public void LoadTimeline(string anmName)
@@ -271,7 +293,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             UnselectAll();
             Refresh();
 
+            RequestHistory("「" + anmName + "」読み込み");
             // Extensions.ShowDialog("タイムライン「" + anmName + "」を読み込みました");
+        }
+
+        public void UpdateTimeline(TimelineData timeline)
+        {
+            this.timeline = timeline;
+            CreateAndApplyAnm();
+            UnselectAll();
+            Refresh();
         }
 
         public void SaveTimeline()
@@ -484,6 +515,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             ApplyCurrentFrame(true);
+
+            RequestHistory("キーフレーム全追加");
         }
 
         public void AddKeyFrameDiff()
@@ -520,6 +553,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             timeline.UpdateBones(currentFrameNo, diffBones);
 
             ApplyCurrentFrame(true);
+
+            RequestHistory("キーフレーム追加");
         }
 
         public bool IsSelectedBone(BoneData bone)
@@ -707,6 +742,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void RemoveSelectedFrame()
         {
+            if (selectedBones.Count == 0)
+            {
+                PluginUtils.LogWarning("削除するキーフレームが選択されていません");
+                return;
+            }
+
             foreach (var bone in selectedBones)
             {
                 var frame = bone.parentFrame;
@@ -719,10 +760,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             selectedBones.Clear();
 
             ApplyCurrentFrame(true);
+
+            RequestHistory("キーフレーム削除");
         }
 
         public void MoveSelectedBones(int delta)
         {
+            if (selectedBones.Count == 0)
+            {
+                PluginUtils.LogWarning("移動するキーフレームが選択されていません");
+                return;
+            }
+
             foreach (var selectedBone in selectedBones)
             {
                 var selectedFrame = selectedBone.parentFrame;
@@ -773,6 +822,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             timeline.CleanFrames();
 
             ApplyCurrentFrame(true);
+
+            RequestHistory("キーフレーム移動");
         }
 
         public void SetMaxFrameNo(int maxFrameNo)
@@ -879,6 +930,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 using (var reader = new StringReader(framesXml))
                 {
                     var copyFrameData = (CopyFrameData) serializer.Deserialize(reader);
+
+                    if (copyFrameData.frames.Count == 0)
+                    {
+                        PluginUtils.LogWarning("ペーストするキーフレームがありません");
+                        return;
+                    }
+
                     var tmpFrames = copyFrameData.frames;
                     var minFrameNo = tmpFrames.Min(frame => frame.frameNo);
                     foreach (var tmpFrame in tmpFrames)
@@ -890,6 +948,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         var frameNo = currentFrameNo + tmpFrame.frameNo - minFrameNo;
                         timeline.UpdateBones(frameNo, tmpFrame.bones);
                     }
+
+                    if (flip)
+                    {
+                        RequestHistory("反転ペースト");
+                    }
+                    else
+                    {
+                        RequestHistory("ペースト");
+                    }
                 }
 
                 ApplyCurrentFrame(true);
@@ -897,7 +964,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             catch (Exception e)
             {
                 PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("貼り付けに失敗しました");
+                PluginUtils.ShowDialog("ペーストに失敗しました");
             }
         }
 
@@ -942,6 +1009,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void Stop()
         {
             studioHack.isMotionPlaying = false;
+        }
+
+        private string requestedHistoryDesc = "";
+
+        public void RequestHistory(string description)
+        {
+            requestedHistoryDesc = description;
         }
 
         private void OnEditPoseUpdated()

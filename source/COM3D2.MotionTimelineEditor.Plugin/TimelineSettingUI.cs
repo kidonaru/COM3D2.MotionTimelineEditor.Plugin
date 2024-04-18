@@ -124,12 +124,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     config.dirty = true;
                 }
 
-                var newIsAutoScroll = view.DrawToggle("自動スクロール", config.isAutoScroll, 100, 20);
-                if (newIsAutoScroll != config.isAutoScroll)
+                view.BeginLayout(GUIView.LayoutDirection.Horizontal);
                 {
-                    config.isAutoScroll = newIsAutoScroll;
-                    config.dirty = true;
+                    var newIsAutoScroll = view.DrawToggle("自動スクロール", config.isAutoScroll, 120, 20);
+                    if (newIsAutoScroll != config.isAutoScroll)
+                    {
+                        config.isAutoScroll = newIsAutoScroll;
+                        config.dirty = true;
+                    }
+
+                    var newDisablePoseHistory = view.DrawToggle("ポーズ履歴無効", config.disablePoseHistory, 120, 20);
+                    if (newDisablePoseHistory != config.disablePoseHistory)
+                    {
+                        config.disablePoseHistory = newDisablePoseHistory;
+                        config.dirty = true;
+                    }
                 }
+                view.EndLayout();
 
                 view.BeginLayout(GUIView.LayoutDirection.Horizontal);
                 {

@@ -151,6 +151,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // do nothing
         }
 
+        public virtual void ClearPoseHistory()
+        {
+            // do nothing
+        }
+
         protected virtual void OnMaidChanged(Maid maid)
         {
             // do nothing

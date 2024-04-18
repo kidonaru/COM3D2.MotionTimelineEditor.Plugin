@@ -13,6 +13,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         IKHold,
         KeyFrame,
         MoviePlayer,
+        History,
     }
 
     public class SubWindow
@@ -54,6 +55,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             new IKHoldUI(),
             new KeyFrameUI(),
             new MoviePlayerUI(),
+            new TimelineHistoryUI(),
         };
 
         private SubWindowType _subWindowType = SubWindowType.None;

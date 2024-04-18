@@ -830,5 +830,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             useMuneKeyR = DefaultTimeline.useMuneKeyR;
             isLoopAnm = DefaultTimeline.isLoopAnm;
         }
+
+        public TimelineData DeepCopy()
+        {
+            var timeline = MemberwiseClone() as TimelineData;
+
+            timeline.keyFrames = new List<FrameData>();
+            foreach (var frame in keyFrames)
+            {
+                timeline.keyFrames.Add(frame.DeepCopy());
+            }
+
+            timeline.isHoldList = (bool[]) this.isHoldList.Clone();
+
+            timeline._dummyLastFrame = new FrameData(0);
+
+            return timeline;
+        }
     }
 }
