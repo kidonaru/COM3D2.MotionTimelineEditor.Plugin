@@ -6,7 +6,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using SH = StudioHack;
     using MTE = MotionTimelineEditor;
 
     public enum IKHoldType
@@ -114,16 +113,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             for (int i = 0; i < isHoldList.Length; i++)
             {
-                if (isHoldList[i])
+                if (!isHoldList[i])
                 {
-                    var ikPosition = maidManager.GetIkPosition((IKHoldType) i);
-                    if (prevIkPositions[i] != ikPosition)
-                    {
-                        //PluginUtils.LogDebug("IKHoldUI：UpdateIkPosition: " + (IKHoldType) i);
-                        //PluginUtils.LogDebug("  current: " + ikPosition + "  target: " + initialEditIkPositions[i]);
-                        maidManager.UpdateIkPosition((IKHoldType) i, initialEditIkPositions[i]);
-                        positionUpdated = true;
-                    }
+                    continue;
+                }
+
+                var ikPosition = maidManager.GetIkPosition((IKHoldType) i);
+                if (prevIkPositions[i] != ikPosition)
+                {
+                    //PluginUtils.LogDebug("IKHoldUI：UpdateIkPosition: " + (IKHoldType) i);
+                    //PluginUtils.LogDebug("  current: " + ikPosition + "  target: " + initialEditIkPositions[i]);
+                    maidManager.UpdateIkPosition((IKHoldType) i, initialEditIkPositions[i]);
+                    positionUpdated = true;
                 }
             }
         }

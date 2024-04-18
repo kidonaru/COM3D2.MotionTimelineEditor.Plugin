@@ -144,6 +144,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             return (IKDragPoint) fieldTipDragPoint.GetValue(limbControl);
         }
+
+        private static FieldInfo fieldBackupLocalPos = null;
+
+        public static Vector3 GetBackupLocalPos(
+            this IKDragPoint ikDragPoint)
+        {
+            if (fieldBackupLocalPos == null)
+            {
+                fieldBackupLocalPos = typeof(IKDragPoint).GetField("backup_local_pos_", BindingFlags.NonPublic | BindingFlags.Instance);
+                PluginUtils.AssertNull(fieldBackupLocalPos != null, "fieldBackupLocalPos is null");
+            }
+            return (Vector3) fieldBackupLocalPos.GetValue(ikDragPoint);
+        }
+
+        public static void PositonCorrection(this IKDragPoint ikDragPoint)
+        {
+            if (ikDragPoint.PositonCorrectionEnabled)
+            {
+                ikDragPoint.target_ik_point_trans.localPosition = ikDragPoint.GetBackupLocalPos();
+            }
+        }
     }
 
 }

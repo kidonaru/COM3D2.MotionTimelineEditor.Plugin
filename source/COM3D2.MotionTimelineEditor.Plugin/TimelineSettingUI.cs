@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using SH = StudioHack;
     using MTE = MotionTimelineEditor;
 
     public class TimelineSettingUI : SubWindowUIBase

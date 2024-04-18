@@ -3,6 +3,7 @@ using System.Reflection;
 using RootMotion.FinalIK;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -131,6 +132,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private MaidManager()
+        {
+            SceneManager.sceneLoaded += OnChangedSceneLevel;
+        }
+
         public LimbControl GetLimbControl(LimbControl.Type type)
         {
             return limbControlList.Find(l => l.type == type);
@@ -190,6 +196,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return Vector3.zero;
         }
 
+        public bool IsIkDragging(IKHoldType holdType)
+        {
+            var dragPoint = GetDragPoint(holdType);
+            if (dragPoint != null && dragPoint.axis_obj != null)
+            {
+                return dragPoint.axis_obj.is_drag || dragPoint.axis_obj.is_grip;
+            }
+            return false;
+        }
+
         public void UpdateIkPosition(IKHoldType holdType, Vector3 targetPosition)
         {
             var ikFabrik = GetIkFabrik(holdType);
@@ -200,6 +216,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 dragPoint.transform.position = targetPosition;
                 ikFabrik.solver.Update();
                 dragPoint.drag_end_event.Invoke();
+                dragPoint.PositonCorrection();
             }
         }
 
@@ -235,15 +252,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return true;
         }
 
+        public void Reset()
+        {
+            _maid = null;
+            _annName = "";
+            _animationState = null;
+            _cacheBoneData = null;
+            _ikManager = null;
+        }
+
         public void Update()
         {
             if (!IsValid())
             {
-                _maid = null;
-                _annName = "";
-                _animationState = null;
-                _cacheBoneData = null;
-                _ikManager = null;
+                Reset();
                 return;
             }
 
@@ -320,6 +342,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 onAnmChanged(anmName);
             }
+        }
+
+        private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)
+        {
+            Reset();
         }
     }
 }

@@ -11,7 +11,6 @@ using UnityEngine.Events;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using SH = StudioHack;
     using MTE = MotionTimelineEditor;
 
     public class TimelineFile : ITileViewContent
