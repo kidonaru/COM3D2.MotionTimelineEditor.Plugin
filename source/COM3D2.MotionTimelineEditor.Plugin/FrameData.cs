@@ -375,6 +375,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             rootBone.transform.localPosition += position;
         }
 
+        public void AddRootRotation(Quaternion rotation)
+        {
+            var rootBone = GetOrCreateBone(IKManager.BoneType.Root);
+            rootBone.transform.localRotation *= rotation;
+        }
+
         private static bool initializedBoneTypes = false;
         private static HashSet<IKManager.BoneType> notFlipTypes = null;
         private static Dictionary<IKManager.BoneType, IKManager.BoneType> swapFlipDic = null;

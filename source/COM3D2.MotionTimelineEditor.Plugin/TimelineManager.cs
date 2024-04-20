@@ -24,6 +24,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string errorMessage = "";
         public FrameData initialEditFrame;
         public Vector3 initialEditPosition = Vector3.zero;
+        public Quaternion initialEditRotation = Quaternion.identity;
         private bool isPrevPoseEditing;
 
         public event UnityAction onRefresh;
@@ -411,6 +412,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 motionRate = Mathf.Clamp01((float) currentFrameNo / timeline.maxFrameNo);
             }
 
+            var isMotionPlaying = studioHack.isMotionPlaying;
+            if (isMotionPlaying)
+            {
+                motionRate += 0.01f; // モーション再生中は再生位置に差分がないと反映されない
+            }
+
             GameMain.Instance.ScriptMgr.StopMotionScript();
 
             if (!maid.boMAN)
@@ -448,10 +455,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             studioHack.OnMotionUpdated(maid);
             maidManager.OnMotionUpdated();
 
-            if (studioHack.isMotionPlaying)
-            {
-                motionRate += 0.01f; // モーション再生中は再生位置に差分がないと反映されない
-            }
+            studioHack.isMotionPlaying = isMotionPlaying;
             studioHack.motionSliderRate = motionRate;
 
             if (initialEditFrame != null)
@@ -542,6 +546,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var diffPosition = maid.transform.position - initialEditPosition;
                 timeline.GetFrame(currentFrameNo).AddRootPosition(diffPosition);
                 maid.transform.position = initialEditPosition;
+
+                var diffRotation = maid.transform.rotation * Quaternion.Inverse(initialEditRotation);
+                timeline.GetFrame(currentFrameNo).AddRootRotation(diffRotation);
+
+                maid.transform.rotation = initialEditRotation;
             }
 
             ApplyCurrentFrame(true);
@@ -990,6 +999,63 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 ApplyCurrentFrame(true);
+            }
+            catch (Exception e)
+            {
+                PluginUtils.LogException(e);
+                PluginUtils.ShowDialog("ペーストに失敗しました");
+            }
+        }
+
+        public void PastePoseFromClipboard()
+        {
+            try
+            {
+                if (!studioHack.isPoseEditing)
+                {
+                    PluginUtils.LogWarning("ポーズ編集中のみペーストできます");
+                    return;
+                }
+
+                var boneDataArray = GetCacheBoneDataArray();
+                if (boneDataArray == null)
+                {
+                    PluginUtils.LogError("現在のボーンデータの取得に失敗しました");
+                    return;
+                }
+
+                var pathDic = boneDataArray.GetPathDic();
+
+                var framesXml = GUIUtility.systemCopyBuffer;
+                var serializer = new XmlSerializer(typeof(CopyFrameData));
+                using (var reader = new StringReader(framesXml))
+                {
+                    var copyFrameData = (CopyFrameData) serializer.Deserialize(reader);
+
+                    if (copyFrameData.frames.Count == 0)
+                    {
+                        PluginUtils.LogWarning("ペーストするキーフレームがありません");
+                        return;
+                    }
+
+                    var tmpFrames = copyFrameData.frames;
+                    foreach (var tmpFrame in tmpFrames)
+                    {
+                        foreach (var tmpBone in tmpFrame.bones)
+                        {
+                            CacheBoneDataArray.BoneData bone;
+                            if (pathDic.TryGetValue(tmpBone.bonePath, out bone))
+                            {
+                                bone.transform.localRotation = tmpBone.transform.localRotation;
+
+                                if (tmpBone.transform.isBipRoot)
+                                {
+                                     bone.transform.localPosition = tmpBone.transform.localPosition;
+                                }
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception e)
             {

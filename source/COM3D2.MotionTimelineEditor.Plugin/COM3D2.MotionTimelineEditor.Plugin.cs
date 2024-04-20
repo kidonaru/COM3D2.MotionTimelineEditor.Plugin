@@ -330,6 +330,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         timelineManager.PasteFramesFromClipboard(true);
                     }
+                    if (config.GetKeyDown(KeyBindType.PosePaste))
+                    {
+                        timelineManager.PastePoseFromClipboard();
+                    }
                     if (config.GetKeyDown(KeyBindType.Undo))
                     {
                         historyManager.Undo();
@@ -477,16 +481,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void UpdateTexture()
         {
-            //Extensions.Log("テクスチャ作成中...");
+            PluginUtils.LogDebug("テクスチャ作成中...");
             if (texTimelineBG != null)
             {
                 UnityEngine.Object.Destroy(texTimelineBG);
                 texTimelineBG = null;
             }
+
+            var bgWidth = WINDOW_WIDTH - 100 + config.frameWidth * config.frameNoInterval;
+            bgWidth = Mathf.Min(bgWidth, config.frameWidth * timeline.maxFrameCount);
+
             texTimelineBG = timelineManager.timeline.CreateBGTexture(
                 config.frameWidth,
                 config.frameHeight,
-                WINDOW_WIDTH - 100 + config.frameWidth * config.frameNoInterval,
+                bgWidth,
                 timelineViewHeight + config.frameHeight * 2,
                 config.timelineBgColor1,
                 config.timelineBgColor2,
@@ -988,6 +996,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     if (view.DrawButton("反転P", 70, 20))
                     {
                         timelineManager.PasteFramesFromClipboard(true);
+                    }
+
+                    if (view.DrawButton("ポーズP", 70, 20, studioHack.isPoseEditing))
+                    {
+                        timelineManager.PastePoseFromClipboard();
                     }
                 }
                 view.EndLayout();

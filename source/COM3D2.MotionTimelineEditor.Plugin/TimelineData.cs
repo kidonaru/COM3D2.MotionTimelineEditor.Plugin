@@ -775,7 +775,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             float t2 = t * t;
             float t3 = t2 * t;
-            return (2 * t3 - 3 * t2 + 1) * 0 + (t3 - 2 * t2 + t) * outTangent + (-2 * t3 + 3 * t2) * 1 + (t3 - t2) * inTangent;
+            return (t3 - 2 * t2 + t) * outTangent + (-2 * t3 + 3 * t2) * 1 + (t3 - t2) * inTangent;
         }
 
         public static void UpdateCurveTexture(
