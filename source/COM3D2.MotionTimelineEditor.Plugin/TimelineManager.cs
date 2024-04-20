@@ -13,7 +13,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using MTE = MotionTimelineEditor;
 
-    public class TimelineManager
+    public partial class TimelineManager
     {
         public static readonly long TimelineAnmId = 26925014;
 
@@ -26,6 +26,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Vector3 initialEditPosition = Vector3.zero;
         public Quaternion initialEditRotation = Quaternion.identity;
         private bool isPrevPoseEditing;
+        public int anmStartFrameNo = 0;
+        public int anmEndFrameNo = 0;
 
         public event UnityAction onRefresh;
         public event UnityAction onEditPoseUpdated;
@@ -37,13 +39,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 var rate = studioHack.motionSliderRate;
-                return (int) Math.Round(rate * timeline.maxFrameNo);
+                var anmLength = anmEndFrameNo - anmStartFrameNo;
+                return anmStartFrameNo + (int) Math.Round(rate * anmLength);
             }
             set
             {
-                if (timeline.maxFrameNo > 0)
+                var anmLength = anmEndFrameNo - anmStartFrameNo;
+                if (anmLength > 0)
                 {
-                    var rate = Mathf.Clamp01((float) value / timeline.maxFrameNo);
+                    var rate = Mathf.Clamp01((float) (value - anmStartFrameNo) / anmLength);
                     studioHack.motionSliderRate = rate;
                     prevMotionSliderRate = rate;
                 }
@@ -182,12 +186,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             long.TryParse(maidManager.annName, out playingAnmId);
 
-            var motionSliderRate = studioHack.motionSliderRate;
-            if (isAnmSyncing && !Mathf.Approximately(motionSliderRate, prevMotionSliderRate))
+            if (isAnmSyncing)
             {
-                currentFrameNo = playingFrameNo;
+                var motionSliderRate = studioHack.motionSliderRate;
+                if (!Mathf.Approximately(motionSliderRate, prevMotionSliderRate))
+                {
+                    currentFrameNo = playingFrameNo;
+                }
+                prevMotionSliderRate = studioHack.motionSliderRate;
+
+                var activeTrack = timeline.activeTrack;
+                if (timeline.IsValidTrack(activeTrack))
+                {
+                    if (currentFrameNo < activeTrack.startFrameNo)
+                    {
+                        playingFrameNo = activeTrack.startFrameNo;
+                    }
+                    if (currentFrameNo > activeTrack.endFrameNo)
+                    {
+                        playingFrameNo = activeTrack.startFrameNo;
+                    }
+                }
             }
-            prevMotionSliderRate = studioHack.motionSliderRate;
 
             if (isAnmPlaying && !Mathf.Approximately(anmSpeed, maidManager.anmSpeed))
             {
@@ -468,11 +488,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             PluginUtils.LogDebug("CreateAndApplyAnm");
 
-            timeline.FixRotation();
-            timeline.UpdateTangent();
-            timeline.UpdateDummyLastFrame();
+            var anmData = GetAnmBinary(false);
 
-            var anmData = GetAnmBinary();
             if (anmData == null)
             {
                 return false;
@@ -487,7 +504,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             try
             {
-                var anmData = GetAnmBinary();
+                var anmData = GetAnmBinary(true);
                 if (anmData == null)
                 {
                     PluginUtils.ShowDialog(errorMessage);
@@ -885,6 +902,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             studioHack.isMotionPlaying = false;
 
+            int startFrameNo = 0;
+            int endFrameNo = timeline.maxFrameNo;
+
+            var activeTrack = timeline.activeTrack;
+            if (timeline.IsValidTrack(activeTrack))
+            {
+                startFrameNo = activeTrack.startFrameNo;
+                endFrameNo = activeTrack.endFrameNo;
+            }
+
+            frameNo = Mathf.Clamp(frameNo, startFrameNo, endFrameNo);
+
             if (this.currentFrameNo == frameNo)
             {
                 return;
@@ -909,6 +938,79 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 playingFrameNo = currentFrameNo;
             }
+        }
+
+        public void AddTrack()
+        {
+            var trackName = "";
+            for (var i = 1; i < 50; ++i)
+            {
+                trackName = "トラック" + i;
+                if (timeline.tracks.All(track => track.name != trackName))
+                {
+                    break;
+                }
+            }
+
+            timeline.tracks.Add(new TrackData
+            {
+                name = trackName,
+                startFrameNo = 0,
+                endFrameNo = timeline.maxFrameNo,
+            });
+        }
+
+        public int GetTrackIndex(TrackData track)
+        {
+            return timeline.tracks.IndexOf(track);
+        }
+
+        public void SetActiveTrack(TrackData track, bool isActive)
+        {
+            var index = GetTrackIndex(track);
+            timeline.activeTrackIndex = index >= 0 && isActive ? index : -1;
+
+            ApplyCurrentFrame(true);
+        }
+
+        public void RemoveTrack(TrackData track)
+        {
+            var activeTrack = timeline.activeTrack;
+            timeline.tracks.Remove(track);
+
+            SetActiveTrack(activeTrack, true);
+
+            RequestHistory("トラック削除");
+        }
+
+        public void MoveUpTrack(TrackData track)
+        {
+            var index = GetTrackIndex(track);
+            if (index <= 0)
+            {
+                return;
+            }
+
+            var activeTrack = timeline.activeTrack;
+            timeline.tracks.RemoveAt(index);
+            timeline.tracks.Insert(index - 1, track);
+
+            SetActiveTrack(activeTrack, true);
+        }
+
+        public void MoveDownTrack(TrackData track)
+        {
+            var index = GetTrackIndex(track);
+            if (index < 0 || index >= timeline.tracks.Count - 1)
+            {
+                return;
+            }
+
+            var activeTrack = timeline.activeTrack;
+            timeline.tracks.RemoveAt(index);
+            timeline.tracks.Insert(index + 1, track);
+
+            SetActiveTrack(activeTrack, true);
         }
 
         public class CopyFrameData
@@ -1086,14 +1188,47 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return timeline.IsValidData(out errorMessage);
         }
 
-        public byte[] GetAnmBinary()
+        public byte[] GetAnmBinary(bool forOutput)
         {
-            if (timeline == null)
+            if (!IsValidData())
             {
                 return null;
             }
 
-            return timeline.GetAnmBinary(out errorMessage);
+            var startFrameNo = 0;
+            var endFrameNo = timeline.maxFrameNo;
+
+            var activeTrack = timeline.activeTrack;
+            if (activeTrack != null && !forOutput)
+            {
+                startFrameNo = timeline.GetStartFrameNo(activeTrack.startFrameNo);
+                endFrameNo = timeline.GetEndFrameNo(activeTrack.endFrameNo);
+
+                PluginUtils.LogDebug("startFrameNo: " + startFrameNo);
+                PluginUtils.LogDebug("endFrameNo: " + endFrameNo);
+            }
+
+            var stopwatch = new StopwatchDebug();
+
+            timeline.FixRotation(startFrameNo, endFrameNo);
+            stopwatch.ProcessEnd("FixRotation");
+
+            timeline.UpdateTangent(startFrameNo, endFrameNo);
+            stopwatch.ProcessEnd("UpdateTangent");
+
+            timeline.UpdateDummyLastFrame();
+            stopwatch.ProcessEnd("UpdateDummyLastFrame");
+
+            var anmData = timeline.GetAnmBinary(startFrameNo, endFrameNo);
+            stopwatch.ProcessEnd("GetAnmBinary");
+
+            if (!forOutput)
+            {
+                anmStartFrameNo = startFrameNo;
+                anmEndFrameNo = endFrameNo;
+            }
+
+            return anmData;
         }
 
         public void Play()

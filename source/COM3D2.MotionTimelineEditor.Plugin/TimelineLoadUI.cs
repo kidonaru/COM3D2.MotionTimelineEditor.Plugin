@@ -178,7 +178,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             foreach (var path in files)
             {
                 var anmName = Path.GetFileNameWithoutExtension(path);
-                if (item.children.Exists(t => t.name == anmName))
+                if (item.children.Exists(t => t.name == anmName && !t.isDir))
                 {
                     continue;
                 }
@@ -198,7 +198,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             foreach (var path in dirs)
             {
                 var dirName = Path.GetFileName(path);
-                var dirItem = item.children.Find(t => t.name == dirName) as TimelineLoadItem;
+                var dirItem = item.children.Find(t => t.name == dirName && t.isDir) as TimelineLoadItem;
                 if (dirItem == null)
                 {
                     dirItem = new TimelineLoadItem

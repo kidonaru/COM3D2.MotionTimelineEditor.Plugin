@@ -773,6 +773,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.BeginLayout(GUIView.LayoutDirection.Horizontal);
                 {
                     float buttonWidth = 60;
+                    view.margin = 0;
 
                     if (view.DrawButton("新規作成", buttonWidth, 20))
                     {
@@ -810,6 +811,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         subWindow.ToggleSubWindow(SubWindowType.IKHold);
                     }
 
+                    var trackColor = editEnabled && timeline.activeTrack != null ? Color.green : Color.white;
+                    if (view.DrawButton("トラック", buttonWidth, 20, editEnabled, trackColor))
+                    {
+                        subWindow.ToggleSubWindow(SubWindowType.Track);
+                    }
+
                     if (view.DrawButton("動画再生", buttonWidth, 20, editEnabled))
                     {
                         subWindow.ToggleSubWindow(SubWindowType.MoviePlayer);
@@ -824,6 +831,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         subWindow.ToggleSubWindow(SubWindowType.TimelineSetting);
                     }
+
+                    view.margin = GUIView.defaultMargin;
                 }
                 view.EndLayout();
 
@@ -1073,6 +1082,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var frameWidth = config.frameWidth;
                 var frameHeight = config.frameHeight;
+                var halfFrameWidth = frameWidth * 0.5f;
 
                 var menuItems = boneMenuManager.GetVisibleItems();
 
@@ -1146,8 +1156,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
+                // トラック範囲表示
+                var activeTrack = timeline.activeTrack;
+                if (activeTrack != null)
+                {
+                    view.currentPos.x = activeTrack.startFrameNo * frameWidth + halfFrameWidth;
+                    view.currentPos.y = 0;
+                    view.DrawTexture(texWhite, 2, -1, Color.red);
+
+                    view.currentPos.x = activeTrack.endFrameNo * frameWidth + halfFrameWidth;
+                    view.currentPos.y = 0;
+                    view.DrawTexture(texWhite, 2, -1, Color.red);
+                }
+
                 // 現在のフレーム表示
-                view.currentPos.x = timelineManager.currentFrameNo * frameWidth + frameWidth / 2;
+                view.currentPos.x = timelineManager.currentFrameNo * frameWidth + halfFrameWidth;
                 view.currentPos.y = 0;
                 view.DrawTexture(texWhite, 2, -1, Color.green);
 
@@ -1297,7 +1320,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     view.currentPos = areaDragRect.position;
                     view.DrawRect(
-                        texWhite,
                         areaDragRect.width,
                         areaDragRect.height,
                         new Color(1, 1, 1, 0.5f),
@@ -1328,24 +1350,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     });
 
                 // フレーム番号表示
-                var frameNoWidth = 50;
-                var adjustX = -frameNoWidth / 2 + frameWidth / 2;
+                var frameLabelWidth = 50;
+                var halfFrameLabelWidth = frameLabelWidth / 2;
+                var adjustX = -halfFrameLabelWidth + halfFrameWidth;
                 for (int frameNo = 0; frameNo < timeline.maxFrameCount; frameNo++)
                 {
                     view.currentPos.x = 100 + frameNo * frameWidth - scrollPosition.x + adjustX;
-                    if (view.currentPos.x < 100 - frameNoWidth / 2 ||
-                        view.currentPos.x > WINDOW_WIDTH - frameNoWidth / 2)
+                    if (view.currentPos.x < 100 - halfFrameLabelWidth ||
+                        view.currentPos.x > WINDOW_WIDTH - halfFrameLabelWidth)
                     {
                         continue;
                     }
 
                     if (frameNo == timelineManager.currentFrameNo)
                     {
-                        view.DrawLabel(frameNo.ToString(), frameNoWidth, 20, Color.green, gsFrameLabel);
+                        view.DrawLabel(frameNo.ToString(), frameLabelWidth, 20, Color.green, gsFrameLabel);
                     }
                     else if (frameNo % config.frameNoInterval == 0)
                     {
-                        view.DrawLabel(frameNo.ToString(), frameNoWidth, 20, Color.white, gsFrameLabel);
+                        view.DrawLabel(frameNo.ToString(), frameLabelWidth, 20, Color.white, gsFrameLabel);
                     }
                 }
 

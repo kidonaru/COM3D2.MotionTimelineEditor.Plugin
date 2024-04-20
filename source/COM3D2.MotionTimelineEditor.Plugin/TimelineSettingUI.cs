@@ -16,16 +16,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Texture2D texWhite = null;
-
-        public override void OnOpen()
-        {
-            if (texWhite == null)
-            {
-                texWhite = GUIView.CreateColorTexture(Color.white);
-            }
-        }
-
         public override void DrawWindow(int id)
         {
             {
@@ -33,7 +23,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.DrawLabel("個別設定", 200, 20);
 
-                view.DrawTexture(texWhite, -1, 1, Color.gray);
+                view.DrawHorizontalLine(Color.gray);
 
                 view.DrawLabel("格納ディレクトリ名", -1, 20);
                 timeline.directoryName = view.DrawTextField(timeline.directoryName, -1, 20);
@@ -103,7 +93,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.DrawLabel("共通設定", 200, 20);
 
-                view.DrawTexture(texWhite, -1, 1, Color.gray);
+                view.DrawHorizontalLine(Color.gray);
 
                 var newDefaultTangentType = (TangentType) view.DrawSelectList("初期補正曲線", TangentData.TangentTypeNames, 250, 20, (int) config.defaultTangentType);
                 if (newDefaultTangentType != config.defaultTangentType)

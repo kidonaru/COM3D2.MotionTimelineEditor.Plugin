@@ -133,8 +133,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         };
 
         public static Vector2 defaultPadding = new Vector2(10, 10);
-
-        public static Texture2D dummyTexture = new Texture2D(1, 1);
+        public static float defaultMargin = 5;
+        public static Texture2D texDummy = new Texture2D(1, 1);
+        public static Texture2D texWhite = CreateColorTexture(Color.white);
 
         public enum LayoutDirection
         {
@@ -145,17 +146,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public GUIView(float x, float y, float width, float height)
         {
-            this._viewRect = new Rect(x, y, width, height);
+            Init(new Rect(x, y, width, height));
+        }
+
+        public void Init(Rect viewRect)
+        {
+            this._viewRect = viewRect;
             this.labelWidth = 100;
             this.padding = defaultPadding;
-            this.margin = 5;
-            this.layoutDirection = LayoutDirection.Vertical;
+            this.margin = defaultMargin;
 
             ResetLayout();
         }
 
         private void ResetLayout()
         {
+            this.layoutDirection = LayoutDirection.Vertical;
             this.currentPos.x = 0;
             this.currentPos.y = 0;
             this.layoutMaxX = 0;
@@ -557,8 +563,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             DrawTexture(texture, texture.width, texture.height, color);
         }
 
+        public void DrawHorizontalLine(Color color)
+        {
+            DrawTexture(texWhite, -1, 1, color);
+        }
+
         public void DrawRect(
-            Texture2D texture,
             float width,
             float height,
             Color color,
@@ -568,13 +578,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             BeginColor(color);
 
             // 上
-            GUI.DrawTexture(new Rect(drawRect.x, drawRect.y, drawRect.width, borderSize), texture);
+            GUI.DrawTexture(new Rect(drawRect.x, drawRect.y, drawRect.width, borderSize), texWhite);
             // 下
-            GUI.DrawTexture(new Rect(drawRect.x, drawRect.y + drawRect.height - borderSize, drawRect.width, borderSize), texture);
+            GUI.DrawTexture(new Rect(drawRect.x, drawRect.y + drawRect.height - borderSize, drawRect.width, borderSize), texWhite);
             // 左
-            GUI.DrawTexture(new Rect(drawRect.x, drawRect.y, borderSize, drawRect.height), texture);
+            GUI.DrawTexture(new Rect(drawRect.x, drawRect.y, borderSize, drawRect.height), texWhite);
             // 右
-            GUI.DrawTexture(new Rect(drawRect.x + drawRect.width - borderSize, drawRect.y, borderSize, drawRect.height), texture);
+            GUI.DrawTexture(new Rect(drawRect.x + drawRect.width - borderSize, drawRect.y, borderSize, drawRect.height), texWhite);
 
             EndColor();
             NextElement(drawRect);
@@ -685,7 +695,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             for (int i = 0; i < items.Count; i++)
             {
-                var color =i == currentIndex ? Color.green : Color.white;
+                var color = i == currentIndex ? Color.green : Color.white;
                 if (DrawButton(getName(items[i]), buttonWidth, buttonHeight, true, color))
                 {
                     selectedIndex = i;
@@ -697,6 +707,42 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             EndScrollView();
             return selectedIndex;
+        }
+
+        public void DrawContentListView<T>(
+            List<T> items,
+            Action<GUIView, T> drawContent,
+            float width,
+            float height,
+            ref Vector2 scrollPosition,
+            float itemHeight)
+        {
+            var contentHeight = (itemHeight + margin) * items.Count;
+            var contentRect = GetDrawRect(0, 0, width, height);
+            contentRect.width -= 20; // スクロールバーの幅分狭める
+            contentRect.height = contentHeight;
+            scrollPosition = BeginScrollView(width, height, contentRect, scrollPosition, false, true);
+
+            var itemWidth = contentRect.width;
+
+            BeginLayout(LayoutDirection.Vertical);
+
+            var itemView = new GUIView(0, 0, itemWidth, itemHeight);
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                var drawRect = GetDrawRect(itemWidth, itemHeight);
+                itemView.Init(drawRect);
+
+                var item = items[i];
+                drawContent(itemView, item);
+
+                NextElement(drawRect);
+            }
+
+            EndLayout();
+
+            EndScrollView();
         }
 
         public void DrawTileThumb(

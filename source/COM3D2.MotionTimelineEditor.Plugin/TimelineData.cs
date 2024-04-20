@@ -9,6 +9,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using MTE = MotionTimelineEditor;
 
+    public class TrackData
+    {
+        [XmlElement("Name")]
+        public string name;
+        [XmlElement("StartFrameNo")]
+        public int startFrameNo;
+        [XmlElement("EndFrameNo")]
+        public int endFrameNo;
+    }
+
     public class TimelineData
     {
         public static readonly int CurrentVersion = 2;
@@ -147,6 +157,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("IsLoopAnm")]
         public bool isLoopAnm = true;
 
+        [XmlArray("Tracks")]
+        [XmlArrayItem("Track")]
+        public List<TrackData> tracks = new List<TrackData>();
+
+        [XmlElement("ActiveTrackIndex")]
+        public int activeTrackIndex = -1;
+
         [XmlElement("VideoEnabled")]
         public bool videoEnabled = true;
 
@@ -233,6 +250,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return MTE.studioHack;
+            }
+        }
+
+        public TrackData activeTrack
+        {
+            get
+            {
+                if (activeTrackIndex < 0 || activeTrackIndex >= tracks.Count)
+                {
+                    return null;
+                }
+                return tracks[activeTrackIndex];
             }
         }
 
@@ -489,6 +518,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return false;
             }
 
+            var activeTrack = this.activeTrack;
+            if (activeTrack != null && !IsValidTrack(activeTrack))
+            {
+                message = "トラックの範囲が不正です";
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool IsValidTrack(TrackData track)
+        {
+            if (track == null)
+            {
+                return false;
+            }
+
+            if (track.startFrameNo < 0 ||
+                track.endFrameNo > maxFrameNo ||
+                track.startFrameNo >= activeTrack.endFrameNo - 1)
+            {
+                return false;
+            }
+
             return true;
         }
 
@@ -501,11 +554,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void FixRotation()
+        public void FixRotation(int startFrameNo, int endFrameNo)
         {
             foreach (var frame in keyFrames)
             {
-                if (frame.frameNo == 0)
+                if (frame.frameNo <= startFrameNo || frame.frameNo > endFrameNo)
                 {
                     continue;
                 }
@@ -564,10 +617,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void UpdateTangent()
+        public void UpdateTangent(int startFrameNo, int endFrameNo)
         {
             foreach (var frame in keyFrames)
             {
+                if (frame.frameNo < startFrameNo || frame.frameNo > endFrameNo)
+                {
+                    continue;
+                }
                 UpdateTangentFrame(frame);
             }
         }
@@ -598,23 +655,81 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             UpdateTangentFrame(_dummyLastFrame);
         }
 
-        public byte[] GetAnmBinary(out string message)
+        /// <summary>
+        /// 指定したフレームの再生に必要な開始フレーム番号を取得
+        /// </summary>
+        /// <param name="frameNo"></param>
+        /// <returns></returns>
+        public int GetStartFrameNo(int frameNo)
         {
-            if (!IsValidData(out message))
+            if (frameNo == 0)
             {
-                return null;
+                return 0;
             }
 
-            var maxSecond = GetFrameTimeSeconds(maxFrameNo);
+            var startFrameNo = frameNo;
+
+            foreach (var firstBone in firstFrame.bones)
+            {
+                var path = firstBone.bonePath;
+                int prevFrameNo;
+                var bone = GetPrevBone(frameNo + 1, path, out prevFrameNo, false);
+                if (bone != null)
+                {
+                    startFrameNo = Math.Min(startFrameNo, bone.frameNo);
+                }
+            }
+
+            return startFrameNo;
+        }
+
+        /// <summary>
+        /// 指定したフレームの再生に必要な終了フレーム番号を取得
+        /// </summary>
+        /// <param name="frameNo"></param>
+        /// <returns></returns>
+        public int GetEndFrameNo(int frameNo)
+        {
+            if (frameNo == maxFrameNo)
+            {
+                return maxFrameNo;
+            }
+
+            var endFrameNo = frameNo;
+
+            foreach (var firstBone in firstFrame.bones)
+            {
+                var path = firstBone.bonePath;
+                int nextFrameNo;
+                var bone = GetNextBone(frameNo - 1, path, out nextFrameNo, false);
+                if (bone != null)
+                {
+                    endFrameNo = Math.Max(endFrameNo, bone.frameNo);
+                }
+            }
+
+            return endFrameNo;
+        }
+
+        public byte[] GetAnmBinary(
+            int startFrameNo,
+            int endFrameNo)
+        {
+            var startSecond = GetFrameTimeSeconds(startFrameNo);
+            var endSecond = GetFrameTimeSeconds(endFrameNo);
 
             var times = new List<float>(keyFrames.Count);
             var valuesList = new List<float[]>(keyFrames.Count);
             var inTangentsList = new List<float[]>(keyFrames.Count);
             var outTangentsList = new List<float[]>(keyFrames.Count);
 
-            Action<BinaryWriter, BoneData> write_bone_data = delegate (BinaryWriter w, BoneData first_bone_data)
+            int _startFrameNo = startFrameNo;
+            int _endFrameNo = endFrameNo;
+            Action<BinaryWriter, BoneData> write_bone_data = delegate (
+                BinaryWriter w,
+                BoneData firstBone)
             {
-                var path = first_bone_data.bonePath;
+                var path = firstBone.bonePath;
                 w.Write((byte)1);
                 w.Write(path);
 
@@ -626,14 +741,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 bool hasLastKey = false;
                 foreach (var frame in keyFrames)
                 {
+                    if (frame.frameNo < _startFrameNo || frame.frameNo > _endFrameNo)
+                    {
+                        continue;
+                    }
+
                     var bone = frame.GetBone(path);
                     if (bone != null)
                     {
-                        times.Add(GetFrameTimeSeconds(frame.frameNo));
+                        times.Add(GetFrameTimeSeconds(frame.frameNo) - startSecond);
                         valuesList.Add(bone.transform.values);
                         inTangentsList.Add(bone.transform.inTangents);
                         outTangentsList.Add(bone.transform.outTangents);
-                        hasLastKey = frame.frameNo == maxFrameNo;
+                        hasLastKey = frame.frameNo == _endFrameNo;
                     }
                 }
 
@@ -642,14 +762,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var bone = _dummyLastFrame.GetBone(path);
                     if (bone != null)
                     {
-                        times.Add(maxSecond);
+                        times.Add(endSecond - startSecond);
                         valuesList.Add(bone.transform.values);
                         inTangentsList.Add(bone.transform.inTangents);
                         outTangentsList.Add(bone.transform.outTangents);
                     }
                 }
 
-                for (int i = 0; i < first_bone_data.transform.valueCount; i++)
+                for (int i = 0; i < firstBone.transform.valueCount; i++)
                 {
                     w.Write((byte)(100 + i));
                     w.Write(times.Count);
