@@ -35,6 +35,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.DrawTexture(texWhite, -1, 1, Color.gray);
 
+                view.DrawLabel("格納ディレクトリ名", -1, 20);
+                timeline.directoryName = view.DrawTextField(timeline.directoryName, -1, 20);
+
                 view.BeginLayout(GUIView.LayoutDirection.Horizontal);
                 {
                     var newFrameRate = view.DrawFloatField("フレームレート", timeline.frameRate, 150, 20);

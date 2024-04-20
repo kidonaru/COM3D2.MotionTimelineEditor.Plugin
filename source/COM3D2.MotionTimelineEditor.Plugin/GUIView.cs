@@ -9,6 +9,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         string name { get; }
         Texture2D thum { get; }
+        bool isDir { get; }
+        List<ITileViewContent> children { get; }
     }
 
     public class FloatFieldValue
@@ -123,6 +125,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             normal = {
                 background = CreateColorTexture(new Color(0, 0, 0, 0.5f))
             }
+        };
+        public static GUIStyle gsBox = new GUIStyle("box")
+        {
+            fontSize = 12,
+            alignment = TextAnchor.MiddleCenter
         };
 
         public static Vector2 defaultPadding = new Vector2(10, 10);
@@ -498,11 +505,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return DrawSlider(null, value, min, max, width, height);
         }
 
-        public void DrawBox(float width, float height, GUIStyle style)
+        public void DrawBox(float width, float height)
         {
             var drawRect = GetDrawRect(width, height);
-            GUI.Box(drawRect, GUIContent.none, style);
-            NextElement(drawRect);
+            GUI.Box(drawRect, GUIContent.none, gsBox);
+            //NextElement(drawRect);
         }
 
         public static Texture2D CreateColorTexture(Color color)
@@ -692,6 +699,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return selectedIndex;
         }
 
+        public void DrawTileThumb(
+            Texture2D thumb,
+            float x,
+            float y,
+            float width,
+            float height)
+        {
+            if (thumb == null)
+            {
+                return;
+            }
+
+            var drawRect = GetDrawRect(currentPos.x + x, currentPos.y + y, width, height);
+
+            float aspect = (float)thumb.width / thumb.height;
+
+            float thmbWidth = drawRect.width;
+            float thmbHeight = thmbWidth / aspect;
+
+            if (thmbHeight > drawRect.height) {
+                thmbHeight = drawRect.height;
+                thmbWidth = thmbHeight * aspect;
+            }
+
+            float thumbX = drawRect.x + (drawRect.width - thmbWidth) / 2;
+            float thumbY = drawRect.y + (drawRect.height - thmbHeight) / 2;
+
+            var imageRect = new Rect(thumbX, thumbY, thmbWidth, thmbHeight);
+            GUI.DrawTexture(imageRect, thumb);
+        }
+
         public bool DrawTile(
             ITileViewContent content,
             float width,
@@ -702,22 +740,52 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             bool isClicked = GUI.Button(drawRect, "", gsTile);
 
-            var thumb = content.thum == null ? dummyTexture : content.thum;
-            float aspect = (float)thumb.width / thumb.height;
+            DrawTileThumb(content.thum, 0, 0, drawRect.width, drawRect.height - 20);
 
-            float drawWidth = drawRect.width;
-            float drawHeight = drawWidth / aspect;
+            var labelRect = new Rect(drawRect.x, drawRect.y + drawRect.height - 20, drawRect.width, 20);
+            GUI.Label(labelRect, content.name, gsTile);
 
-            if (drawHeight > drawRect.height - 20) {
-                drawHeight = drawRect.height - 20;
-                drawWidth = drawHeight * aspect;
+            if (onMouseOver != null)
+            {
+                if (drawRect.Contains(Event.current.mousePosition))
+                {
+                    onMouseOver(content);
+                }
             }
 
-            float x = drawRect.x + (drawRect.width - drawWidth) / 2;
-            float y = drawRect.y + (drawRect.height - 20 - drawHeight) / 2;
+            NextElement(drawRect);
+            return isClicked;
+        }
 
-            var imageRect = new Rect(x, y, drawWidth, drawHeight);
-            GUI.DrawTexture(imageRect, thumb);
+        public bool DrawTileChildren(
+            ITileViewContent content,
+            float width,
+            float height,
+            Action<ITileViewContent> onMouseOver)
+        {
+            var drawRect = GetDrawRect(width, height);
+
+            bool isClicked = GUI.Button(drawRect, "", gsTile);
+
+            var thumbWidth = drawRect.width / 2;
+            var thumbHeight = (drawRect.height - 20) / 2;
+
+            var children = content.children;
+            for (int i = 0; i < children.Count; i++)
+            {
+                if (i >= 4)
+                {
+                    break;
+                }
+
+                var child = children[i];
+                DrawTileThumb(
+                    child.thum,
+                    (i % 2) * thumbWidth,
+                    (i / 2) * thumbHeight,
+                    thumbWidth,
+                    thumbHeight);
+            }
 
             var labelRect = new Rect(drawRect.x, drawRect.y + drawRect.height - 20, drawRect.width, 20);
             GUI.Label(labelRect, content.name, gsTile);
@@ -741,7 +809,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ref Vector2 scrollPosition,
             float tileWidth,
             float tileHeight,
-            int columns)
+            int columns,
+            Action<ITileViewContent> onMouseOver)
         {
             int selectedIndex = -1;
             var contentsCount = contents.Count();
@@ -754,12 +823,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             BeginLayout(LayoutDirection.Horizontal);
 
-            ITileViewContent mouseOverContent = null;
-            Action<ITileViewContent> onMouseOver = (content) =>
-            {
-                mouseOverContent = content;
-            };
-
             var index = 0;
             foreach (var content in contents)
             {
@@ -769,19 +832,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     BeginLayout(LayoutDirection.Horizontal);
                 }
 
-                if (DrawTile(content, tileWidth, tileHeight, onMouseOver))
+                if (content.isDir)
                 {
-                    selectedIndex = index;
-                    break;
+                    if (DrawTileChildren(content, tileWidth, tileHeight, onMouseOver))
+                    {
+                        selectedIndex = index;
+                        break;
+                    }
+                }
+                else
+                {
+                    if (DrawTile(content, tileWidth, tileHeight, onMouseOver))
+                    {
+                        selectedIndex = index;
+                        break;
+                    }
                 }
 
                 index++;
-            }
-
-            if (mouseOverContent != null)
-            {
-                var tooltipRect = new Rect(0, Event.current.mousePosition.y + 30, viewRect.width, 20);
-                GUI.Box(tooltipRect, mouseOverContent.name, gsTooltip);
             }
 
             EndLayout();

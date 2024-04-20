@@ -13,18 +13,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using MTE = MotionTimelineEditor;
 
-    public class TimelineFile : ITileViewContent
-    {
-        public string name { get; set; }
-        public Texture2D thum { get; set; }
-    }
-
     public class TimelineManager
     {
         public static readonly long TimelineAnmId = 26925014;
 
         public TimelineData timeline = null;
-        public List<TimelineFile> timelineFileList = new List<TimelineFile>(64);
         private long playingAnmId = -1;
         public HashSet<BoneData> selectedBones = new HashSet<BoneData>();
         private float prevMotionSliderRate = -1f;
@@ -231,9 +224,70 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public string GetTimelinePath(string anmName)
+        public bool IsValidFileName(string fileName)
         {
-            return PluginUtils.CombinePaths(PluginUtils.TimelineDirPath, anmName + ".xml");
+            errorMessage = "";
+
+            if (fileName.Length == 0)
+            {
+                errorMessage = "ファイル名が入力されていません";
+                return false;
+            }
+
+            if (fileName.Contains(Path.DirectorySeparatorChar.ToString()))
+            {
+                errorMessage = "パス区切り文字は使用できません";
+                return false;
+            }
+
+            if (fileName.Contains(".."))
+            {
+                errorMessage = "'..'は使用できません";
+                return false;
+            }
+
+            if (fileName.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
+            {
+                errorMessage = "無効な文字が含まれています";
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool IsValidDirName(string dirName)
+        {
+            errorMessage = "";
+
+            if (dirName.Length == 0)
+            {
+                return true;
+            }
+
+            if (Path.IsPathRooted(dirName))
+            {
+                errorMessage = "フルパスは使用できません";
+                return false;
+            }
+
+            if (dirName.Contains(".."))
+            {
+                errorMessage = "'..'は使用できません";
+                return false;
+            }
+
+            if (dirName.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
+            {
+                errorMessage = "無効な文字が含まれています";
+                return false;
+            }
+
+            return true;
+        }
+
+        public string GetTimelinePath(string anmName, string directoryName)
+        {
+            return PluginUtils.CombinePaths(PluginUtils.TimelineDirPath, directoryName, anmName + ".xml");
         }
 
         public void CreateNewTimeline()
@@ -261,7 +315,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             RequestHistory("タイムライン新規作成");
         }
 
-        public void LoadTimeline(string anmName)
+        public void LoadTimeline(string anmName, string directoryName)
         {
             if (!studioHack.IsValid())
             {
@@ -273,8 +327,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 PluginUtils.ShowDialog("メイドが配置されていません");
                 return;
             }
+            if (!IsValidFileName(anmName) || !IsValidDirName(directoryName))
+            {
+                PluginUtils.ShowDialog(errorMessage);
+                return;
+            }
 
-            var path = GetTimelinePath(anmName);
+            var path = GetTimelinePath(anmName, directoryName);
             if (!File.Exists(path))
             {
                 return;
@@ -285,6 +344,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var serializer = new XmlSerializer(typeof(TimelineData));
                 timeline = (TimelineData)serializer.Deserialize(stream);
                 timeline.anmName = anmName;
+                timeline.directoryName = directoryName;
                 timeline.ConvertVersion();
             }
 
@@ -306,13 +366,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void SaveTimeline()
         {
-            if (!timeline.IsValidData(out errorMessage))
+            if (!IsValidData())
             {
                 PluginUtils.ShowDialog(errorMessage);
                 return;
             }
 
-            var path = GetTimelinePath(timeline.anmName);
+            var path = GetTimelinePath(timeline.anmName, timeline.directoryName);
+
+            var dirPath = Path.GetDirectoryName(path);
+            if (!Directory.Exists(dirPath))
+            {
+                Directory.CreateDirectory(dirPath);
+            }
+
             using (var stream = new FileStream(path, FileMode.Create))
             {
                 var serializer = new XmlSerializer(typeof(TimelineData));
@@ -323,42 +390,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             MTE.instance.SaveScreenShot(thumPath, config.thumWidth, config.thumHeight);
 
             PluginUtils.ShowDialog("タイムライン「" + timeline.anmName + "」を保存しました");
-        }
-
-        public void UpdateTimelineFileList(bool reload)
-        {
-            if (reload)
-            {
-                foreach (var file in timelineFileList)
-                {
-                    if (file.thum != null)
-                    {
-                        UnityEngine.Object.Destroy(file.thum);
-                        file.thum = null;
-                    }
-                }
-                timelineFileList.Clear();
-            }
-
-            var paths = Directory.GetFiles(PluginUtils.TimelineDirPath, "*.xml");
-            foreach (var path in paths)
-            {
-                var anmName = Path.GetFileNameWithoutExtension(path);
-                if (timelineFileList.Exists(t => t.name == anmName))
-                {
-                    continue;
-                }
-
-                var thumPath = PluginUtils.ConvertThumPath(path);
-                var thum = PluginUtils.LoadTexture(thumPath);
-
-                var file = new TimelineFile
-                {
-                    name = anmName,
-                    thum = thum,
-                };
-                timelineFileList.Add(file);
-            }
         }
 
         public void ApplyAnm(long id, byte[] anmData)
@@ -978,6 +1009,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (timeline == null)
             {
                 errorMessage = "新規作成かロードをしてください";
+                return false;
+            }
+
+            if (!IsValidFileName(timeline.anmName) || !IsValidDirName(timeline.directoryName))
+            {
                 return false;
             }
 

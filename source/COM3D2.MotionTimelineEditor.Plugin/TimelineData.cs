@@ -74,6 +74,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("AnmName")]
         public string anmName = "";
 
+        [XmlElement("DirectoryName")]
+        public string directoryName = "";
+
         [XmlElement("IsHold")]
         public bool[] isHoldList = new bool[(int) IKHoldType.Max]
         {
