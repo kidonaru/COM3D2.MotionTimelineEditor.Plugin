@@ -265,6 +265,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public string timelinePath
+        {
+            get
+            {
+                return PluginUtils.GetTimelinePath(anmName, directoryName);
+            }
+        }
+
+        public string thumPath
+        {
+            get
+            {
+                return PluginUtils.ConvertThumPath(timelinePath);
+            }
+        }
+
         // ループ補正用の最終フレーム
         private FrameData _dummyLastFrame = new FrameData(0);
 
@@ -412,6 +428,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return GetPrevBone(frameNo, path, out prevFrameNo, true);
         }
 
+        public BoneData GetPrevBone(int frameNo, string path, bool loopSearch)
+        {
+            int prevFrameNo;
+            return GetPrevBone(frameNo, path, out prevFrameNo, loopSearch);
+        }
+
         public BoneData GetPrevBone(int frameNo, string path)
         {
             int prevFrameNo;
@@ -482,6 +504,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public BoneData GetNextBone(int frameNo, string path, out int nextFrameNo)
         {
             return GetNextBone(frameNo, path, out nextFrameNo, true);
+        }
+
+        public BoneData GetNextBone(int frameNo, string path, bool loopSearch)
+        {
+            int nextFrameNo;
+            return GetNextBone(frameNo, path, out nextFrameNo, loopSearch);
         }
 
         public BoneData GetNextBone(int frameNo, string path)
@@ -672,8 +700,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             foreach (var firstBone in firstFrame.bones)
             {
                 var path = firstBone.bonePath;
-                int prevFrameNo;
-                var bone = GetPrevBone(frameNo + 1, path, out prevFrameNo, false);
+                var bone = GetPrevBone(frameNo + 1, path, false);
                 if (bone != null)
                 {
                     startFrameNo = Math.Min(startFrameNo, bone.frameNo);
@@ -700,8 +727,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             foreach (var firstBone in firstFrame.bones)
             {
                 var path = firstBone.bonePath;
-                int nextFrameNo;
-                var bone = GetNextBone(frameNo - 1, path, out nextFrameNo, false);
+                var bone = GetNextBone(frameNo - 1, path, false);
                 if (bone != null)
                 {
                     endFrameNo = Math.Max(endFrameNo, bone.frameNo);
@@ -747,6 +773,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
 
                     var bone = frame.GetBone(path);
+                    if (bone == null && frame.frameNo == _startFrameNo)
+                    {
+                        bone = GetPrevBone(frame.frameNo, path, false);
+                    }
+
+                    if (bone == null && frame.frameNo == _endFrameNo)
+                    {
+                        bone = GetNextBone(frame.frameNo, path, false);
+                    }
+
                     if (bone != null)
                     {
                         times.Add(GetFrameTimeSeconds(frame.frameNo) - startSecond);

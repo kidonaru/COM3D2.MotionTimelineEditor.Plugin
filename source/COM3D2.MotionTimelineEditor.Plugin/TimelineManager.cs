@@ -306,11 +306,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return true;
         }
 
-        public string GetTimelinePath(string anmName, string directoryName)
-        {
-            return PluginUtils.CombinePaths(PluginUtils.TimelineDirPath, directoryName, anmName + ".xml");
-        }
-
         public void CreateNewTimeline()
         {
             if (!studioHack.IsValid())
@@ -354,7 +349,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var path = GetTimelinePath(anmName, directoryName);
+            var path = PluginUtils.GetTimelinePath(anmName, directoryName);
             if (!File.Exists(path))
             {
                 return;
@@ -393,7 +388,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var path = GetTimelinePath(timeline.anmName, timeline.directoryName);
+            var path = timeline.timelinePath;
 
             var dirPath = Path.GetDirectoryName(path);
             if (!Directory.Exists(dirPath))
@@ -408,9 +403,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var thumPath = PluginUtils.ConvertThumPath(path);
-            MTE.instance.SaveScreenShot(thumPath, config.thumWidth, config.thumHeight);
+            if (!File.Exists(thumPath))
+            {
+                MTE.instance.SaveScreenShot(thumPath, config.thumWidth, config.thumHeight);
+            }
 
             PluginUtils.ShowDialog("タイムライン「" + timeline.anmName + "」を保存しました");
+        }
+
+        public void SaveThumbnail()
+        {
+            if (!IsValidData())
+            {
+                PluginUtils.ShowDialog(errorMessage);
+                return;
+            }
+
+            MTE.instance.SaveScreenShot(timeline.thumPath, config.thumWidth, config.thumHeight);
+
+            PluginUtils.ShowDialog("サムネイルを更新しました");
         }
 
         public void ApplyAnm(long id, byte[] anmData)
@@ -555,20 +566,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            timeline.UpdateFrame(currentFrameNo, boneDataArray);
+            var rootBone = boneDataArray.GetBoneData("Bip01");
+            if (rootBone == null)
+            {
+                PluginUtils.LogError("中心ボーンが取得できませんでした");
+                return;
+            }
 
             // ポーズ編集中の移動は中心ボーンに反映  
             if (initialEditFrame != null)
             {
-                var diffPosition = maid.transform.position - initialEditPosition;
-                timeline.GetFrame(currentFrameNo).AddRootPosition(diffPosition);
+                var targetPosition = rootBone.transform.position;
+                var targetRotation = rootBone.transform.rotation;
+
                 maid.transform.position = initialEditPosition;
-
-                var diffRotation = maid.transform.rotation * Quaternion.Inverse(initialEditRotation);
-                timeline.GetFrame(currentFrameNo).AddRootRotation(diffRotation);
-
                 maid.transform.rotation = initialEditRotation;
+
+                rootBone.transform.position = targetPosition;
+                rootBone.transform.rotation = targetRotation;
             }
+
+            timeline.UpdateFrame(currentFrameNo, boneDataArray);
 
             ApplyCurrentFrame(true);
 
@@ -589,12 +607,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
+            var rootBone = boneDataArray.GetBoneData("Bip01");
+            if (rootBone == null)
+            {
+                PluginUtils.LogError("中心ボーンが取得できませんでした");
+                return;
+            }
+
+            // ポーズ編集中の移動は中心ボーンに反映
+            {
+                var targetPosition = rootBone.transform.position;
+                var targetRotation = rootBone.transform.rotation;
+
+                maid.transform.position = initialEditPosition;
+                maid.transform.rotation = initialEditRotation;
+
+                rootBone.transform.position = targetPosition;
+                rootBone.transform.rotation = targetRotation;
+            }
+
             var tmpFrame = new FrameData(currentFrameNo);
             tmpFrame.SetCacheBoneDataArray(boneDataArray);
-
-            var diffPosition = maid.transform.position - initialEditPosition;
-            tmpFrame.AddRootPosition(diffPosition);
-            maid.transform.position = initialEditPosition;
 
             var diffBones = tmpFrame.GetDiffBones(
                 initialEditFrame,
@@ -1268,6 +1301,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             initialEditFrame = new FrameData(currentFrameNo);
             initialEditFrame.SetCacheBoneDataArray(cacheBoneData);
             initialEditPosition = maid.transform.position;
+            initialEditRotation = maid.transform.rotation;
 
             if (onEditPoseUpdated != null)
             {
@@ -1287,6 +1321,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 initialEditFrame = null;
                 maid.transform.position = initialEditPosition;
+                maid.transform.rotation = initialEditRotation;
             }
         }
 

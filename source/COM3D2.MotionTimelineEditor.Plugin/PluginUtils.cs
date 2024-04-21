@@ -116,6 +116,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return texture2D;
         }
 
+        public static string GetTimelinePath(string anmName, string directoryName)
+        {
+            return CombinePaths(TimelineDirPath, directoryName, anmName + ".xml");
+        }
+
         public static string ConvertThumPath(string path)
         {
             return Path.ChangeExtension(path, ".png");

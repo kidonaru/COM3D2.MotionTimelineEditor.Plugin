@@ -109,7 +109,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static GUIStyle gsTile = new GUIStyle("button")
         {
             normal = {
-                background = CreateColorTexture(new Color(0, 0, 0, 0))
+                background = CreateColorTexture(new Color(0, 0, 0, 0.5f))
             },
             hover = {
                 background = CreateColorTexture(new Color(0.75f, 0.75f, 0.75f, 0.5f))
@@ -117,6 +117,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             active = {
                 background = CreateColorTexture(new Color(0.5f, 0.5f, 0.5f, 0.5f))
             }
+        };
+        public static GUIStyle gsTileLabel = new GUIStyle("button")
+        {
+            normal = {
+                background = CreateColorTexture(new Color(0, 0, 0, 0))
+            },
         };
         public static GUIStyle gsTooltip = new GUIStyle("box")
         {
@@ -789,7 +795,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             DrawTileThumb(content.thum, 0, 0, drawRect.width, drawRect.height - 20);
 
             var labelRect = new Rect(drawRect.x, drawRect.y + drawRect.height - 20, drawRect.width, 20);
-            GUI.Label(labelRect, content.name, gsTile);
+            GUI.Label(labelRect, content.name, gsTileLabel);
 
             if (onMouseOver != null)
             {
@@ -834,7 +840,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var labelRect = new Rect(drawRect.x, drawRect.y + drawRect.height - 20, drawRect.width, 20);
-            GUI.Label(labelRect, content.name, gsTile);
+            GUI.Label(labelRect, content.name, gsTileLabel);
 
             if (onMouseOver != null)
             {

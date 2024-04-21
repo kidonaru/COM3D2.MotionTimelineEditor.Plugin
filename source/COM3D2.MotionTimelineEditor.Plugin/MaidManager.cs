@@ -189,7 +189,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Vector3 GetIkPosition(IKHoldType holdType)
         {
             var dragPoint = GetDragPoint(holdType);
-            if (dragPoint != null)
+            if (dragPoint != null && dragPoint.target_ik_point_trans != null)
             {
                 return dragPoint.target_ik_point_trans.position;
             }

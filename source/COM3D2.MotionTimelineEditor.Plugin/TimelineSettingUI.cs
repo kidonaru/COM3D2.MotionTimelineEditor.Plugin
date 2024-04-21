@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 
@@ -78,16 +79,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     timelineManager.ApplyCurrentFrame(true);
                 }
 
-                if (view.DrawButton("初期化", 100, 20))
+                view.BeginLayout(GUIView.LayoutDirection.Horizontal);
                 {
-                    PluginUtils.ShowConfirmDialog("個別設定を初期化しますか？", () =>
+                    if (view.DrawButton("初期化", 100, 20))
                     {
-                        GameMain.Instance.SysDlg.Close();
-                        timeline.ResetSettings();
-                        timelineManager.Refresh();
-                        timelineManager.ApplyCurrentFrame(true);
-                    }, null);
+                        PluginUtils.ShowConfirmDialog("個別設定を初期化しますか？", () =>
+                        {
+                            GameMain.Instance.SysDlg.Close();
+                            timeline.ResetSettings();
+                            timelineManager.Refresh();
+                            timelineManager.ApplyCurrentFrame(true);
+                        }, null);
+                    }
+
+                    view.AddSpace(10);
+
+                    var thumPath = timeline.thumPath;
+                    if (view.DrawButton("サムネ更新", 100, 20, File.Exists(thumPath)))
+                    {
+                        timelineManager.SaveThumbnail();
+                    }
                 }
+                view.EndLayout();
 
                 view.AddSpace(10);
 

@@ -282,10 +282,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     if (config.GetKeyDown(KeyBindType.PrevFrame))
                     {
                         timelineManager.SeekCurrentFrame(timelineManager.currentFrameNo - 1);
+                        FixScrollPosition();
                     }
                     if (config.GetKeyDown(KeyBindType.NextFrame))
                     {
                         timelineManager.SeekCurrentFrame(timelineManager.currentFrameNo + 1);
+                        FixScrollPosition();
                     }
                     if (config.GetKeyDown(KeyBindType.PrevKeyFrame))
                     {
@@ -293,6 +295,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         if (prevFrame != null)
                         {
                             timelineManager.SeekCurrentFrame(prevFrame.frameNo);
+                            FixScrollPosition();
                         }
                     }
                     if (config.GetKeyDown(KeyBindType.NextKeyFrame))
@@ -301,6 +304,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         if (nextFrame != null)
                         {
                             timelineManager.SeekCurrentFrame(nextFrame.frameNo);
+                            FixScrollPosition();
                         }
                     }
                     if (config.GetKeyDown(KeyBindType.Play))
@@ -640,7 +644,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             StartCoroutine(SaveScreenShotInternal(filePath, width, height));
         }
 
-        protected IEnumerator SaveScreenShotInternal(string filePath, int width, int height)
+        private void FixScrollPosition()
+        {
+            var viewWidth = WINDOW_WIDTH - 100;
+            var frameWidth = config.frameWidth;
+
+            var minScrollX = timelineManager.currentFrameNo * frameWidth - (viewWidth - 20 - frameWidth);
+            var maxScrollX = timelineManager.currentFrameNo * frameWidth;
+            scrollPosition.x = Mathf.Clamp(scrollPosition.x, minScrollX, maxScrollX);
+        }
+
+        private IEnumerator SaveScreenShotInternal(string filePath, int width, int height)
         {
             PluginUtils.UIHide();
             var subWindowType = subWindow.subWindowType;
@@ -929,6 +943,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     if (newFrameNo != timelineManager.currentFrameNo)
                     {
                         timelineManager.SeekCurrentFrame(newFrameNo);
+                        FixScrollPosition();
                     }
                 }
 
