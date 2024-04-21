@@ -100,8 +100,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public virtual bool Init()
         {
-            maidManager.onMaidChanged += OnMaidChanged;
-            maidManager.onAnmChanged += OnAnmChanged;
             return true;
         }
 
@@ -112,11 +110,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public virtual void OnSceneActive()
         {
-            // do nothing
+            maidManager.onMaidChanged += OnMaidChanged;
+            maidManager.onAnmChanged += OnAnmChanged;
         }
 
         public virtual void OnSceneDeactive()
         {
+            maidManager.onMaidChanged -= OnMaidChanged;
+            maidManager.onAnmChanged -= OnAnmChanged;
             MTE.instance.isShowWnd = false;
         }
 

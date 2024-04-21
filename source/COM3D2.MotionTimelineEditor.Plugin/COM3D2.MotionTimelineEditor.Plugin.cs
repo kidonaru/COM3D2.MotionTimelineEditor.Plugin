@@ -334,6 +334,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         timelineManager.PasteFramesFromClipboard(true);
                     }
+                    if (config.GetKeyDown(KeyBindType.PoseCopy))
+                    {
+                        timelineManager.CopyPoseToClipboard();
+                    }
                     if (config.GetKeyDown(KeyBindType.PosePaste))
                     {
                         timelineManager.PastePoseFromClipboard();
@@ -997,7 +1001,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         timelineManager.AddKeyFrameDiff();
                     }
 
-                    if (view.DrawButton("全登録", 70, 20))
+                    if (view.DrawButton("全登録", 60, 20))
                     {
                         timelineManager.AddKeyFrameAll();
                     }
@@ -1007,22 +1011,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         timelineManager.RemoveSelectedFrame();
                     }
 
-                    if (view.DrawButton("コピー", 70, 20, timelineManager.HasSelected()))
+                    if (view.DrawButton("コピー", 60, 20, timelineManager.HasSelected()))
                     {
                         timelineManager.CopyFramesToClipboard();
                     }
 
-                    if (view.DrawButton("ペースト", 70, 20))
+                    if (view.DrawButton("ペースト", 60, 20))
                     {
                         timelineManager.PasteFramesFromClipboard(false);
                     }
 
-                    if (view.DrawButton("反転P", 70, 20))
+                    if (view.DrawButton("反転P", 60, 20))
                     {
                         timelineManager.PasteFramesFromClipboard(true);
                     }
 
-                    if (view.DrawButton("ポーズP", 70, 20, studioHack.isPoseEditing))
+                    if (view.DrawButton("ポーズC", 60, 20))
+                    {
+                        timelineManager.CopyPoseToClipboard();
+                    }
+
+                    if (view.DrawButton("ポーズP", 60, 20, studioHack.isPoseEditing))
                     {
                         timelineManager.PastePoseFromClipboard();
                     }

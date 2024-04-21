@@ -1100,6 +1100,43 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public void CopyPoseToClipboard()
+        {
+            var boneDataArray = GetCacheBoneDataArray();
+            if (boneDataArray == null)
+            {
+                PluginUtils.LogError("現在のボーンデータの取得に失敗しました");
+                return;
+            }
+
+            var tmpFrame = new FrameData(currentFrameNo);
+            tmpFrame.SetCacheBoneDataArray(boneDataArray);
+
+            var copyFrameData = new CopyFrameData
+            {
+                frames = new List<FrameData> { tmpFrame }
+            };
+
+            try
+            {
+                var serializer = new XmlSerializer(typeof(CopyFrameData));
+                using (var writer = new StringWriter())
+                {
+                    serializer.Serialize(writer, copyFrameData);
+                    var framesXml = writer.ToString();
+                    GUIUtility.systemCopyBuffer = framesXml;
+                }
+
+                PluginUtils.Log("クリップボードにコピーしました");
+            }
+            catch (Exception e)
+            {
+                PluginUtils.LogException(e);
+                PluginUtils.ShowDialog("コピーに失敗しました");
+            }
+        }
+
+
         public void PasteFramesFromClipboard(bool flip)
         {
             try
