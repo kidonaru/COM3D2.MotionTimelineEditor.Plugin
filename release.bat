@@ -19,7 +19,7 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-set VERSION=1.2.6.0
+set VERSION=1.3.0.0
 set PLUGIN_NAME=COM3D2.MotionTimelineEditor.Plugin
 
 if exist output rmdir /s /q output

@@ -1004,6 +1004,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             timeline.activeTrackIndex = index >= 0 && isActive ? index : -1;
 
             ApplyCurrentFrame(true);
+
+            if (timeline.activeTrackIndex >= 0)
+            {
+                currentFrameNo = playingFrameNo = track.startFrameNo;
+            }
         }
 
         public void RemoveTrack(TrackData track)

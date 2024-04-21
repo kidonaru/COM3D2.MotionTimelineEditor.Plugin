@@ -9,7 +9,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return "トラック管理";
+                return "トラック設定";
             }
         }
 
