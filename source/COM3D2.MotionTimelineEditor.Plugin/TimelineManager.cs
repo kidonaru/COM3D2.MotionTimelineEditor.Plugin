@@ -590,7 +590,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             ApplyCurrentFrame(true);
 
-            RequestHistory("キーフレーム全追加");
+            RequestHistory("キーフレーム全登録");
         }
 
         public void AddKeyFrameDiff()
@@ -643,7 +643,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             ApplyCurrentFrame(true);
 
-            RequestHistory("キーフレーム追加");
+            RequestHistory("キーフレーム登録");
         }
 
         public bool IsSelectedBone(BoneData bone)

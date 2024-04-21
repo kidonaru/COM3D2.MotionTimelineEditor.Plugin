@@ -769,7 +769,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     else
                     {
                         var keyName = config.GetKeyName(KeyBindType.AddKeyFrame);
-                        message = "[" + keyName + "]キーでキーフレームを追加します";
+                        message = "[" + keyName + "]キーでキーフレームを登録します";
                     }
 
                     view.DrawLabel(message, 400 - 20, 20, Color.white);
@@ -992,12 +992,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     view.DrawLabel("キーフレーム", 100, 20);
 
-                    if (view.DrawButton("追加", 50, 20, studioHack.isPoseEditing))
+                    if (view.DrawButton("登録", 50, 20, studioHack.isPoseEditing))
                     {
                         timelineManager.AddKeyFrameDiff();
                     }
 
-                    if (view.DrawButton("全追加", 70, 20))
+                    if (view.DrawButton("全登録", 70, 20))
                     {
                         timelineManager.AddKeyFrameAll();
                     }
