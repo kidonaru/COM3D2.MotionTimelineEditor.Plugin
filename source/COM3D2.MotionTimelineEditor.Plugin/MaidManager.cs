@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.Reflection;
-using RootMotion.FinalIK;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -11,14 +9,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class MaidManager
     {
-        private Maid _maid = null;
-        private string _annName = "";
-        private AnimationState _animationState = null;
-        private CacheBoneDataArray _cacheBoneData = null;
+        public List<MaidCache> maidCaches = new List<MaidCache>();
+        public int maidSlotNo { get; private set; }
         private string _errorMessage = "";
 
-        public event UnityAction<Maid> onMaidChanged;
-        public event UnityAction<string> onAnmChanged;
+        public static event UnityAction<int> onMaidSlotNoChanged;
 
         private static MaidManager _instance = null;
         public static MaidManager instance
@@ -33,11 +28,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public MaidCache cache
+        {
+            get
+            {
+                if (maidSlotNo < 0 || maidSlotNo >= maidCaches.Count)
+                {
+                    return null;
+                }
+                return maidCaches[maidSlotNo];
+            }
+        }
+
         public Maid maid
         {
             get
             {
-                return _maid;
+                if (cache != null)
+                {
+                    return cache.maid;
+                }
+                return null;
             }
         }
 
@@ -53,7 +64,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return _maid != null ? _maid.GetAnimation() : null;
+                if (cache != null)
+                {
+                    return cache.animation;
+                }
+                return null;
             }
         }
 
@@ -61,7 +76,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return _animationState;
+                if (cache != null)
+                {
+                    return cache.animationState;
+                }
+                return null;
             }
         }
 
@@ -69,7 +88,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return _annName;
+                if (cache != null)
+                {
+                    return cache.annName;
+                }
+                return "";
             }
         }
 
@@ -77,14 +100,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return _animationState != null ? _animationState.speed : 0;
-            }
-            set
-            {
-                if (_animationState != null)
+                if (cache != null)
                 {
-                    _animationState.speed = value;
+                    return cache.anmSpeed;
                 }
+                return 0;
+            }
+        }
+
+        public IKManager ikManager
+        {
+            get
+            {
+                if (cache != null)
+                {
+                    return cache.ikManager;
+                }
+                return null;
             }
         }
 
@@ -92,35 +124,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return _cacheBoneData;
-            }
-        }
-
-        private IKManager _ikManager = null;
-        public IKManager ikManager
-        {
-            get
-            {
-                return _ikManager;
-            }
-        }
-
-        private FieldInfo fieldLimbControlList = null;
-
-        public List<LimbControl> limbControlList
-        {
-            get
-            {
-                if (_ikManager == null)
+                if (cache != null)
                 {
-                    return new List<LimbControl>();
+                    return cache.cacheBoneData;
                 }
-                if (fieldLimbControlList == null)
-                {
-                    fieldLimbControlList = typeof(IKManager).GetField("limb_control_list_", BindingFlags.NonPublic | BindingFlags.Instance);
-                    PluginUtils.AssertNull(fieldLimbControlList != null, "fieldLimbControlList is null");
-                }
-                return (List<LimbControl>) fieldLimbControlList.GetValue(_ikManager);
+                return null;
             }
         }
 
@@ -135,89 +143,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private MaidManager()
         {
             SceneManager.sceneLoaded += OnChangedSceneLevel;
+            TimelineManager.onRefresh += OnRefresh;
         }
 
-        public LimbControl GetLimbControl(LimbControl.Type type)
+        public Maid GetMaid(int slotNo)
         {
-            return limbControlList.Find(l => l.type == type);
-        }
-
-        public FABRIK GetIkFabrik(IKHoldType type)
-        {
-            switch (type)
+            if (slotNo < 0 || slotNo >= studioHack.allMaids.Count)
             {
-                case IKHoldType.Arm_R_Joint:
-                case IKHoldType.Arm_R_Tip:
-                    return GetLimbControl(LimbControl.Type.Arm_R).GetIkFabrik();
-                case IKHoldType.Arm_L_Joint:
-                case IKHoldType.Arm_L_Tip:
-                    return GetLimbControl(LimbControl.Type.Arm_L).GetIkFabrik();
-                case IKHoldType.Foot_R_Joint:
-                case IKHoldType.Foot_R_Tip:
-                    return GetLimbControl(LimbControl.Type.Foot_R).GetIkFabrik();
-                case IKHoldType.Foot_L_Joint:
-                case IKHoldType.Foot_L_Tip:
-                    return GetLimbControl(LimbControl.Type.Foot_L).GetIkFabrik();
+                return null;
             }
-            return null;
-        }
-
-        public IKDragPoint GetDragPoint(IKHoldType type)
-        {
-            switch (type)
-            {
-                case IKHoldType.Arm_R_Joint:
-                    return GetLimbControl(LimbControl.Type.Arm_R).GetJointDragPoint();
-                case IKHoldType.Arm_R_Tip:
-                    return GetLimbControl(LimbControl.Type.Arm_R).GetTipDragPoint();
-                case IKHoldType.Arm_L_Joint:
-                    return GetLimbControl(LimbControl.Type.Arm_L).GetJointDragPoint();
-                case IKHoldType.Arm_L_Tip:
-                    return GetLimbControl(LimbControl.Type.Arm_L).GetTipDragPoint();
-                case IKHoldType.Foot_R_Joint:
-                    return GetLimbControl(LimbControl.Type.Foot_R).GetJointDragPoint();
-                case IKHoldType.Foot_R_Tip:
-                    return GetLimbControl(LimbControl.Type.Foot_R).GetTipDragPoint();
-                case IKHoldType.Foot_L_Joint:
-                    return GetLimbControl(LimbControl.Type.Foot_L).GetJointDragPoint();
-                case IKHoldType.Foot_L_Tip:
-                    return GetLimbControl(LimbControl.Type.Foot_L).GetTipDragPoint();
-            }
-            return null;
-        }
-
-        public Vector3 GetIkPosition(IKHoldType holdType)
-        {
-            var dragPoint = GetDragPoint(holdType);
-            if (dragPoint != null && dragPoint.target_ik_point_trans != null)
-            {
-                return dragPoint.target_ik_point_trans.position;
-            }
-            return Vector3.zero;
-        }
-
-        public bool IsIkDragging(IKHoldType holdType)
-        {
-            var dragPoint = GetDragPoint(holdType);
-            if (dragPoint != null && dragPoint.axis_obj != null)
-            {
-                return dragPoint.axis_obj.is_drag || dragPoint.axis_obj.is_grip;
-            }
-            return false;
-        }
-
-        public void UpdateIkPosition(IKHoldType holdType, Vector3 targetPosition)
-        {
-            var ikFabrik = GetIkFabrik(holdType);
-            var dragPoint = GetDragPoint(holdType);
-            if (ikFabrik != null && dragPoint != null)
-            {
-                dragPoint.drag_start_event.Invoke();
-                dragPoint.transform.position = targetPosition;
-                ikFabrik.solver.Update();
-                dragPoint.drag_end_event.Invoke();
-                dragPoint.PositonCorrection();
-            }
+            return studioHack.allMaids[slotNo];
         }
 
         public bool IsValid()
@@ -236,17 +171,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return false;
             }
 
-            var maid = studioHack.activeMaid;
+            var maid = studioHack.selectedMaid;
             if (maid == null)
             {
                 _errorMessage = "メイドを配置してください";
                 return false;
             }
 
-            if (maid.body0 == null || maid.body0.m_Bones == null)
+            var maids = studioHack.allMaids;
+            foreach (var m in maids)
             {
-                _errorMessage = "メイド生成中です";
-                return false;
+                if (m.body0 == null || m.body0.m_Bones == null)
+                {
+                    _errorMessage = "メイド生成中です";
+                    return false;
+                }
             }
 
             return true;
@@ -254,11 +193,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Reset()
         {
-            _maid = null;
-            _annName = "";
-            _animationState = null;
-            _cacheBoneData = null;
-            _ikManager = null;
+            foreach (var cache in maidCaches)
+            {
+                cache.Reset();
+            }
+        }
+
+        public void ResetAnm()
+        {
+            foreach (var cache in maidCaches)
+            {
+                cache.ResetAnm();
+            }
         }
 
         public void Update()
@@ -269,84 +215,146 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var activeMaid = studioHack.activeMaid;
-            if (_maid != activeMaid)
+            var maids = studioHack.allMaids;
+            for (int i = maidCaches.Count; i < maids.Count; i++)
             {
-                OnMaidChanged(activeMaid);
+                maidCaches.Add(new MaidCache(i));
+            }
+            if (maidCaches.Count > maids.Count)
+            {
+                maidCaches.RemoveRange(maids.Count, maidCaches.Count - maids.Count);
             }
 
-            if (_maid == null || animation == null)
+            for (int i = 0; i < maids.Count; i++)
+            {
+                var maid = maids[i];
+                var cache = maidCaches[i];
+                cache.Update(maid);
+            }
+
+            var selectedMaidSlotNo = studioHack.selectedMaidSlotNo;
+            if (selectedMaidSlotNo != maidSlotNo)
+            {
+                maidSlotNo = selectedMaidSlotNo;
+
+                if (onMaidSlotNoChanged != null)
+                {
+                    onMaidSlotNoChanged(maidSlotNo);
+                }
+            }
+        }
+
+        public Vector3 GetIkPosition(IKHoldType holdType)
+        {
+            var cache = this.cache;
+            if (cache != null)
+            {
+                return cache.GetIkPosition(holdType);
+            }
+            return Vector3.zero;
+        }
+
+        public void UpdateIkPosition(IKHoldType holdType, Vector3 targetPosition)
+        {
+            var cache = this.cache;
+            if (cache != null)
+            {
+                cache.UpdateIkPosition(holdType, targetPosition);
+            }
+        }
+
+        public void PositonCorrection(IKHoldType holdType)
+        {
+            var cache = this.cache;
+            if (cache != null)
+            {
+                cache.PositonCorrection(holdType);
+            }
+        }
+
+        public MaidCache GetMaidCache(int slotNo)
+        {
+            if (slotNo < 0 || slotNo >= maidCaches.Count)
+            {
+                return null;
+            }
+            return maidCaches[slotNo];
+        }
+
+        public MaidCache GetMaidCache(Maid maid)
+        {
+            foreach (var cache in maidCaches)
+            {
+                if (cache.maid == maid)
+                {
+                    return cache;
+                }
+            }
+            return null;
+        }
+
+        public void SetMotionPlayingAll(bool isPlaying)
+        {
+            foreach (var cache in maidCaches)
+            {
+                var animationState = cache.animationState;
+                if (animationState != null)
+                {
+                    animationState.enabled = isPlaying;
+                }
+            }
+        }
+
+        public void SetPlayingFrameNoAll(int frameNo)
+        {
+            foreach (var cache in maidCaches)
+            {
+                cache.playingFrameNo = frameNo;
+            }
+        }
+
+        public void SetAnmSpeedAll(float speed)
+        {
+            foreach (var cache in maidCaches)
+            {
+                cache.anmSpeed = speed;
+            }
+        }
+
+        public void ChangeMaid(Maid maid)
+        {
+            if (maid == null || maid == studioHack.selectedMaid)
             {
                 return;
             }
 
-            // アニメ名更新
-            var anmName = _maid.body0.LastAnimeFN;
-            if (_annName != anmName)
-            {
-                OnAnmChanged(anmName);
-            }
+            PluginUtils.LogDebug("ChangeMaid: " + maid.name);
+
+            var isMotionPlaying = studioHack.isMotionPlaying;
+            studioHack.isPoseEditing = false;
+            studioHack.ChangeMaid(maid);
+            studioHack.isMotionPlaying = isMotionPlaying;
         }
 
-        public void OnMotionUpdated()
+        public void OnMotionUpdated(Maid maid)
         {
-            _annName = "";
-            _animationState = null;
-            Update();
-        }
-
-        private void OnMaidChanged(Maid maid)
-        {
-            PluginUtils.LogDebug("Maid changed: " + (maid != null ? maid.name : "null"));
-
-            _maid = maid;
-            _annName = "";
-            _animationState = null;
-            _cacheBoneData = null;
-            _ikManager = null;
-
-            if (maid == null)
+            var cache = GetMaidCache(maid);
+            if (cache != null)
             {
-                return;
-            }
-
-            _cacheBoneData = maid.gameObject.GetComponent<CacheBoneDataArray>();
-            if (_cacheBoneData == null)
-            {
-                _cacheBoneData = maid.gameObject.AddComponent<CacheBoneDataArray>();
-                _cacheBoneData.CreateCache(maid.body0.GetBone("Bip01"));
-            }
-            _ikManager = PoseEditWindow.GetMaidIKManager(maid);
-
-            if (onMaidChanged != null)
-            {
-                onMaidChanged(maid);
-            }
-        }
-
-        private void OnAnmChanged(string anmName)
-        {
-            PluginUtils.LogDebug("Animation changed: " + anmName);
-
-            _annName = anmName;
-            _animationState = null;
-
-            if (string.IsNullOrEmpty(_annName))
-            {
-                return;
-            }
-
-            _animationState = animation[_annName.ToLower()];
-
-            if (onAnmChanged != null)
-            {
-                onAnmChanged(anmName);
+                cache.ResetAnm();
+                cache.Update(maid);
             }
         }
 
         private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)
         {
             Reset();
+        }
+
+        private void OnRefresh()
+        {
+            ResetAnm();
+            Update();
         }
     }
 }

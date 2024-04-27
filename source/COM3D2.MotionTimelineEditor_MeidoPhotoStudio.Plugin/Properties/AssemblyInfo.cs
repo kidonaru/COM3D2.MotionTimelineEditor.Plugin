@@ -21,7 +21,7 @@ using COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin;
 [assembly: ComVisible(false)]
 
 // このプロジェクトが COM に公開される場合、次の GUID が typelib の ID になります
-[assembly: Guid("5fe928ac-bb09-42ab-9521-ab2d2a77f6b0")]
+[assembly: Guid("9E746E00-9BE7-499F-AAC8-82B0B26363E7")]
 
 // アセンブリのバージョン情報は、以下の 4 つの値で構成されています:
 //

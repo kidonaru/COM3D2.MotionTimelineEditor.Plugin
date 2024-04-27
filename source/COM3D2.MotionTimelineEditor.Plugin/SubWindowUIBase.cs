@@ -1,5 +1,6 @@
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+    using UnityEngine;
     using MTE = MotionTimelineEditor;
 
     public abstract class SubWindowUIBase
@@ -38,11 +39,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static MaidManager maidManager
+        {
+            get
+            {
+                return MaidManager.instance;
+            }
+        }
+        
+        protected static ITimelineLayer currentLayer
+        {
+            get
+            {
+                return timelineManager.currentLayer;
+            }
+        }
+
         protected static Config config
         {
             get
             {
                 return MTE.config;
+            }
+        }
+
+        protected static Rect rc_stgw
+        {
+            get
+            {
+                return SubWindow.rc_stgw;
             }
         }
 

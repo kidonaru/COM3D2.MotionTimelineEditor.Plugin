@@ -7,6 +7,12 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
+call .\source\COM3D2.MotionTimelineEditor_DCM.Plugin\build.bat
+if %ERRORLEVEL% neq 0 (
+    echo ビルドに失敗しました
+    exit /b 1
+)
+
 call .\source\COM3D2.MotionTimelineEditor_MultipleMaids.Plugin\build.bat
 if %ERRORLEVEL% neq 0 (
     echo ビルドに失敗しました
@@ -19,13 +25,13 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-set VERSION=1.3.0.1
+set VERSION=2.0.0.0
 set PLUGIN_NAME=COM3D2.MotionTimelineEditor.Plugin
 
 if exist output rmdir /s /q output
 md output\%PLUGIN_NAME%
 
-xcopy img output\%PLUGIN_NAME% /E /I
+xcopy img output\%PLUGIN_NAME%\img /E /I
 xcopy UnityInjector output\%PLUGIN_NAME%\UnityInjector /E /I
 
 set README_TXT=output\%PLUGIN_NAME%\README.txt

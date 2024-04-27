@@ -1,9 +1,8 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MTE = MotionTimelineEditor;
-
     public enum TangentValueType
     {
         X,
@@ -30,45 +29,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class TangentData
     {
-        public static readonly string[] TangentValueTypeNames = new string[] {
-            "X移動", "Y移動", "Z移動", "X回転", "Y回転", "Z回転", "W回転", "移動", "回転", "すべて" };
+        public static readonly List<string> TangentValueTypeNames = new List<string>
+        {
+            "X移動",
+            "Y移動",
+            "Z移動",
+            "X回転",
+            "Y回転",
+            "Z回転",
+            "W回転",
+            "移動",
+            "回転",
+            "すべて",
+        };
 
-        public static readonly string[] TangentTypeNames = new string[] {
+        public static readonly List<string> TangentTypeNames = new List<string> {
             "EaseInOut", "EaseIn", "EaseOut", "線形補間", "自動補間" };
 
-        private float _value;
-        private float _normalizedValue;
-        private bool _isSmooth;
+        public float value { get; private set; }
+        public float normalizedValue { get; set; }
+        public bool isSmooth { get; set; }
 
-        public float value
+        public bool shouldSerialize
         {
             get
             {
-                return _value;
-            }
-        }
-
-        public float normalizedValue
-        {
-            get
-            {
-                return _normalizedValue;
-            }
-            set
-            {
-                _normalizedValue = value;
-            }
-        }
-
-        public bool isSmooth
-        {
-            get
-            {
-                return _isSmooth;
-            }
-            set
-            {
-                _isSmooth = value;
+                return !isSmooth && normalizedValue != 0.0f;
             }
         }
 
@@ -83,14 +69,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void UpdateValue(float baseTangent)
         {
-            _value = _normalizedValue * baseTangent;
+            value = normalizedValue * baseTangent;
         }
 
         public void FromTangentData(TangentData tangent)
         {
-            _value = tangent._value;
-            _normalizedValue = tangent._normalizedValue;
-            _isSmooth = tangent._isSmooth;
+            value = tangent.value;
+            normalizedValue = tangent.normalizedValue;
+            isSmooth = tangent.isSmooth;
         }
     }
 }

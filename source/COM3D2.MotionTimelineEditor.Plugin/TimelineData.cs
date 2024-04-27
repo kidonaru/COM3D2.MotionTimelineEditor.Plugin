@@ -1,38 +1,24 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Xml.Serialization;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using MTE = MotionTimelineEditor;
 
-    public class TrackData
-    {
-        [XmlElement("Name")]
-        public string name;
-        [XmlElement("StartFrameNo")]
-        public int startFrameNo;
-        [XmlElement("EndFrameNo")]
-        public int endFrameNo;
-    }
-
     public class TimelineData
     {
-        public static readonly int CurrentVersion = 2;
+        public static readonly int CurrentVersion = 4;
         public static readonly TimelineData DefaultTimeline = new TimelineData();
 
-        [XmlAttribute("version")]
         public int version = 0;
 
-        [XmlElement("Frame")]
-        public List<FrameData> keyFrames = new List<FrameData>();
+        public List<ITimelineLayer> layers = new List<ITimelineLayer>();
 
-        [XmlIgnore]
+        public List<TrackData> tracks = new List<TrackData>();
+
         private int _maxFrameNo = 30;
-        [XmlElement("MaxFrameNo")]
         public int maxFrameNo
         {
             get
@@ -50,12 +36,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        [XmlIgnore]
         private float _frameRate = 30f;
-        [XmlIgnore]
         private float _frameDuration = 1f / 30f;
 
-        [XmlElement("FrameRate")]
         public float frameRate
         {
             get
@@ -81,13 +64,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        [XmlElement("AnmName")]
         public string anmName = "";
 
-        [XmlElement("DirectoryName")]
         public string directoryName = "";
 
-        [XmlElement("IsHold")]
         public bool[] isHoldList = new bool[(int) IKHoldType.Max]
         {
             false,
@@ -101,8 +81,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         };
 
         private bool _useMuneKeyL = false;
-
-        [XmlElement("UseMuneKeyL")]
         public bool useMuneKeyL
         {
             get
@@ -122,8 +100,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         private bool _useMuneKeyR = false;
-
-        [XmlElement("UseMuneKeyR")]
         public bool useMuneKeyR
         {
             get
@@ -146,56 +122,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (keyFrames.Count == 0)
+                var frameNo = 0;
+                foreach (var layer in layers)
                 {
-                    return 0;
+                    frameNo = Math.Max(frameNo, layer.maxExistFrameNo);
                 }
-                return keyFrames[keyFrames.Count - 1].frameNo;
+                return frameNo;
             }
         }
 
-        [XmlElement("IsLoopAnm")]
         public bool isLoopAnm = true;
+        public float startOffsetTime = 0.5f;
+        public float endOffsetTime = 0.5f;
+        public float startFadeTime = 0.1f;
+        public float endFadeTime = 0f;
+        public Maid.EyeMoveType eyeMoveType = Maid.EyeMoveType.無し;
 
-        [XmlArray("Tracks")]
-        [XmlArrayItem("Track")]
-        public List<TrackData> tracks = new List<TrackData>();
-
-        [XmlElement("ActiveTrackIndex")]
         public int activeTrackIndex = -1;
 
-        [XmlElement("VideoEnabled")]
+        public string bgmPath = "";
+
         public bool videoEnabled = true;
-
-        [XmlElement("VideoDisplayOnGUI")]
-        public bool videoDisplayOnGUI = true;
-
-        [XmlElement("VideoPath")]
+        public VideoDisplayType videoDisplayType = VideoDisplayType.GUI;
         public string videoPath = "";
-
-        [XmlElement("VideoPosition")]
         public Vector3 videoPosition = new Vector3(0, 0, 0);
-
-        [XmlElement("VideoRotation")]
         public Vector3 videoRotation = new Vector3(0, 0, 0);
-
-        [XmlElement("VideoScale")]
         public float videoScale = 1f;
-
-        [XmlElement("VideoStartTime")]
         public float videoStartTime = 0f;
-
-        [XmlElement("VideoVolume")]
         public float videoVolume = 0.5f;
-
-        [XmlElement("VideoGUIPosition")]
         public Vector2 videoGUIPosition = new Vector2(0, 0);
-
-        [XmlElement("VideoGUIScale")]
         public float videoGUIScale = 1f;
-
-        [XmlElement("VideoGUIAlpha")]
         public float videoGUIAlpha = 1f;
+        public Vector2 videoBackmostPosition = new Vector2(0, 0);
 
         public int maxFrameCount
         {
@@ -205,35 +163,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public String anmFileName
-        {
-            get
-            {
-                return anmName + ".anm";
-            }
-        }
-
-        public String anmPath
-        {
-            get
-            {
-                return studioHack.outputAnmPath + "\\" + anmFileName;
-            }
-        }
-
-        public FrameData firstFrame
-        {
-            get
-            {
-                return keyFrames.Count > 0 ? keyFrames[0] : null;
-            }
-        }
-
         public bool isHoldActive
         {
             get
             {
                 return isHoldList.Any(b => b);
+            }
+        }
+
+        private static TimelineManager timelineManager
+        {
+            get
+            {
+                return TimelineManager.instance;
             }
         }
 
@@ -265,6 +207,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public ITimelineLayer defaultLayer { get; private set; }
+
         public string timelinePath
         {
             get
@@ -281,246 +225,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        // ループ補正用の最終フレーム
-        private FrameData _dummyLastFrame = new FrameData(0);
-
-        public FrameData GetFrame(int frameNo)
+        public string dcmSongName
         {
-            foreach (var frame in keyFrames)
+            get
             {
-                if (frame.frameNo == frameNo)
-                {
-                    return frame;
-                }
-            }
-            return null;
-        }
-
-        public FrameData GetOrCreateFrame(int frameNo)
-        {
-            var frame = GetFrame(frameNo);
-            if (frame != null)
-            {
-                return frame;
-            }
-
-            frame = new FrameData(frameNo);
-            keyFrames.Add(frame);
-            keyFrames.Sort((a, b) => a.frameNo - b.frameNo);
-            return frame;
-        }
-
-        public void RemoveFrame(int frameNo)
-        {
-            var frame = GetFrame(frameNo);
-            if (frame != null)
-            {
-                keyFrames.Remove(frame);
+                return "【MTE】" + anmName;
             }
         }
 
-        public void UpdateFrame(int frameNo, CacheBoneDataArray cacheBoneData)
+        public string dcmSongListPath
         {
-            var frame = GetOrCreateFrame(frameNo);
-            frame.SetCacheBoneDataArray(cacheBoneData);
-        }
-
-        public void SetBone(int frameNo, BoneData bone)
-        {
-            var frame = GetOrCreateFrame(frameNo);
-            frame.SetBone(bone);
-        }
-
-        public void SetBones(int frameNo, IEnumerable<BoneData> bones)
-        {
-            var frame = GetOrCreateFrame(frameNo);
-            frame.SetBones(bones);
-        }
-        
-        public void UpdateBone(int frameNo, BoneData bone)
-        {
-            var frame = GetOrCreateFrame(frameNo);
-            frame.UpdateBone(bone);
-        }
-
-        public void UpdateBones(int frameNo, IEnumerable<BoneData> bones)
-        {
-            var frame = GetOrCreateFrame(frameNo);
-            frame.UpdateBones(bones);
-        }
-
-        public void CleanFrames()
-        {
-            var removeFrames = new List<FrameData>();
-
-            foreach (var key in keyFrames)
+            get
             {
-                if (!key.HasBones())
-                {
-                    removeFrames.Add(key);
-                }
+                return PluginUtils.GetDcmSongListFilePath(dcmSongName);
             }
+        }
 
-            foreach (var key in removeFrames)
+        public TimelineData()
+        {
+        }
+
+        public void Dispose()
+        {
+            foreach (var layer in layers)
             {
-                keyFrames.Remove(key);
+                layer.Dispose();
             }
+            layers.Clear();
         }
 
         public float GetFrameTimeSeconds(int frameNo)
         {
             return frameNo * _frameDuration;
-        }
-
-        public FrameData GetPrevFrame(int frameNo)
-        {
-            return keyFrames.LastOrDefault(f => f.frameNo < frameNo);
-        }
-
-        public FrameData GetNextFrame(int frameNo)
-        {
-            return keyFrames.First(f => f.frameNo > frameNo);
-        }
-
-        public BoneData GetPrevBone(
-            int frameNo,
-            string path,
-            out int prevFrameNo,
-            bool loopSearch)
-        {
-            BoneData prevBone = null;
-            prevFrameNo = -1;
-            foreach (var frame in keyFrames)
-            {
-                if (frame.frameNo >= frameNo)
-                {
-                    break;
-                }
-
-                var bone = frame.GetBone(path);
-                if (bone != null)
-                {
-                    prevBone = bone;
-                    prevFrameNo = frame.frameNo;
-                }
-            }
-
-            if (prevBone == null && loopSearch)
-            {
-                if (isLoopAnm)
-                {
-                    frameNo = (frameNo == 0) ? maxFrameNo : maxFrameNo + 1; // 0Fの場合は最終フレームを除外
-                    prevBone = GetPrevBone(frameNo, path, out prevFrameNo, false);
-                    prevFrameNo -= maxFrameNo;
-                }
-                else
-                {
-                    prevBone = GetNextBone(-1, path, out prevFrameNo, false);
-                    prevFrameNo = -1;
-                }
-            }
-
-            return prevBone;
-        }
-
-        public BoneData GetPrevBone(int frameNo, string path, out int prevFrameNo)
-        {
-            return GetPrevBone(frameNo, path, out prevFrameNo, true);
-        }
-
-        public BoneData GetPrevBone(int frameNo, string path, bool loopSearch)
-        {
-            int prevFrameNo;
-            return GetPrevBone(frameNo, path, out prevFrameNo, loopSearch);
-        }
-
-        public BoneData GetPrevBone(int frameNo, string path)
-        {
-            int prevFrameNo;
-            return GetPrevBone(frameNo, path, out prevFrameNo);
-        }
-
-        public BoneData GetPrevBone(BoneData bone)
-        {
-            return GetPrevBone(bone.frameNo, bone.bonePath);
-        }
-
-        public List<BoneData> GetPrevBones(IEnumerable<BoneData> bones)
-        {
-            var prevBones = new List<BoneData>();
-            foreach (var bone in bones)
-            {
-                var prevBone = GetPrevBone(bone);
-                if (prevBone != null)
-                {
-                    prevBones.Add(prevBone);
-                }
-            }
-            return prevBones;
-        }
-
-        public BoneData GetNextBone(
-            int frameNo,
-            string path,
-            out int nextFrameNo,
-            bool loopSearch)
-        {
-            BoneData nextBone = null;
-            nextFrameNo = -1;
-            foreach (var frame in keyFrames)
-            {
-                if (frame.frameNo <= frameNo)
-                {
-                    continue;
-                }
-
-                var bone = frame.GetBone(path);
-                if (bone != null)
-                {
-                    nextBone = bone;
-                    nextFrameNo = frame.frameNo;
-                    break;
-                }
-            }
-
-            if (nextBone == null && loopSearch)
-            {
-                if (isLoopAnm)
-                {
-                    frameNo = (frameNo == maxFrameNo) ? 0 : -1; // 最終フレームの場合は0Fを除外
-                    nextBone = GetNextBone(frameNo, path, out nextFrameNo, false);
-                    nextFrameNo += maxFrameNo;
-                }
-                else
-                {
-                    nextBone = GetPrevBone(maxFrameNo + 1, path, out nextFrameNo, false);
-                    nextFrameNo = maxFrameNo + 1;
-                }
-            }
-
-            return nextBone;
-        }
-
-        public BoneData GetNextBone(int frameNo, string path, out int nextFrameNo)
-        {
-            return GetNextBone(frameNo, path, out nextFrameNo, true);
-        }
-
-        public BoneData GetNextBone(int frameNo, string path, bool loopSearch)
-        {
-            int nextFrameNo;
-            return GetNextBone(frameNo, path, out nextFrameNo, loopSearch);
-        }
-
-        public BoneData GetNextBone(int frameNo, string path)
-        {
-            int nextFrameNo;
-            return GetNextBone(frameNo, path, out nextFrameNo);
-        }
-
-        public FrameData GetActiveFrame(float frameNo)
-        {
-            return keyFrames.LastOrDefault(f => f.frameNo <= frameNo);
         }
 
         public bool IsValidData(out string message)
@@ -539,18 +275,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return false;
             }
 
-            var firstFrame = this.firstFrame;
-            if (firstFrame == null || firstFrame.frameNo != 0)
-            {
-                message = "0フレーム目にキーフレームが必要です";
-                return false;
-            }
-
             var activeTrack = this.activeTrack;
             if (activeTrack != null && !IsValidTrack(activeTrack))
             {
                 message = "トラックの範囲が不正です";
                 return false;
+            }
+
+            foreach (var layer in layers)
+            {
+                if (!layer.IsValidData())
+                {
+                    message = layer.errorMessage;
+                    return false;
+                }
             }
 
             return true;
@@ -571,275 +309,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             return true;
-        }
-
-        public void FixRotationFrame(FrameData frame)
-        {
-            foreach (var bone in frame.bones)
-            {
-                var prevBone = GetPrevBone(frame.frameNo, bone.bonePath);
-                bone.FixRotation(prevBone);
-            }
-        }
-
-        public void FixRotation(int startFrameNo, int endFrameNo)
-        {
-            foreach (var frame in keyFrames)
-            {
-                if (frame.frameNo <= startFrameNo || frame.frameNo > endFrameNo)
-                {
-                    continue;
-                }
-
-                FixRotationFrame(frame);
-            }
-        }
-
-        public void UpdateTangentFrame(FrameData frame)
-        {
-            var currentTime = GetFrameTimeSeconds(frame.frameNo);
-            foreach (var bone in frame.bones)
-            {
-                int prevFrameNo;
-                var prevBone = GetPrevBone(frame.frameNo, bone.bonePath, out prevFrameNo);
-
-                int nextFrameNo;
-                var nextBone = GetNextBone(frame.frameNo, bone.bonePath, out nextFrameNo);
-
-                // 前後に存在しない場合は自身を使用
-                if (prevBone == null)
-                {
-                    prevBone = bone;
-                    prevFrameNo = frame.frameNo - 1;
-                }
-                if (nextBone == null)
-                {
-                    nextBone = bone;
-                    nextFrameNo = frame.frameNo + 1;
-                }
-
-                var prevTrans = prevBone.transform;
-                var nextTrans = nextBone.transform;
-
-                // 別ループのキーフレームは回転補正を行う
-                if (prevFrameNo != prevBone.frameNo)
-                {
-                    prevTrans = new TransformData(prevTrans);
-                    prevTrans.FixRotation(bone.transform);
-                }
-                if (nextFrameNo != nextBone.frameNo)
-                {
-                    nextTrans = new TransformData(nextTrans);
-                    nextTrans.FixRotation(bone.transform);
-                }
-
-                var prevTime = GetFrameTimeSeconds(prevFrameNo);
-                var nextTime = GetFrameTimeSeconds(nextFrameNo);
-
-                bone.transform.UpdateTangent(
-                    prevTrans,
-                    nextTrans,
-                    prevTime,
-                    currentTime,
-                    nextTime);
-            }
-        }
-
-        public void UpdateTangent(int startFrameNo, int endFrameNo)
-        {
-            foreach (var frame in keyFrames)
-            {
-                if (frame.frameNo < startFrameNo || frame.frameNo > endFrameNo)
-                {
-                    continue;
-                }
-                UpdateTangentFrame(frame);
-            }
-        }
-
-        public void UpdateDummyLastFrame()
-        {
-            _dummyLastFrame.frameNo = maxFrameNo;
-
-            foreach (var path in PluginUtils.saveBonePaths)
-            {
-                BoneData sourceBone;
-                if (isLoopAnm)
-                {
-                    sourceBone = GetNextBone(-1, path);
-                }
-                else
-                {
-                    sourceBone = GetPrevBone(maxFrameNo, path);
-                }
-
-                if (sourceBone != null)
-                {
-                   _dummyLastFrame.UpdateBone(sourceBone);
-                }
-            }
-
-            FixRotationFrame(_dummyLastFrame);
-            UpdateTangentFrame(_dummyLastFrame);
-        }
-
-        /// <summary>
-        /// 指定したフレームの再生に必要な開始フレーム番号を取得
-        /// </summary>
-        /// <param name="frameNo"></param>
-        /// <returns></returns>
-        public int GetStartFrameNo(int frameNo)
-        {
-            if (frameNo == 0)
-            {
-                return 0;
-            }
-
-            var startFrameNo = frameNo;
-
-            foreach (var firstBone in firstFrame.bones)
-            {
-                var path = firstBone.bonePath;
-                var bone = GetPrevBone(frameNo + 1, path, false);
-                if (bone != null)
-                {
-                    startFrameNo = Math.Min(startFrameNo, bone.frameNo);
-                }
-            }
-
-            return startFrameNo;
-        }
-
-        /// <summary>
-        /// 指定したフレームの再生に必要な終了フレーム番号を取得
-        /// </summary>
-        /// <param name="frameNo"></param>
-        /// <returns></returns>
-        public int GetEndFrameNo(int frameNo)
-        {
-            if (frameNo == maxFrameNo)
-            {
-                return maxFrameNo;
-            }
-
-            var endFrameNo = frameNo;
-
-            foreach (var firstBone in firstFrame.bones)
-            {
-                var path = firstBone.bonePath;
-                var bone = GetNextBone(frameNo - 1, path, false);
-                if (bone != null)
-                {
-                    endFrameNo = Math.Max(endFrameNo, bone.frameNo);
-                }
-            }
-
-            return endFrameNo;
-        }
-
-        public byte[] GetAnmBinary(
-            int startFrameNo,
-            int endFrameNo)
-        {
-            var startSecond = GetFrameTimeSeconds(startFrameNo);
-            var endSecond = GetFrameTimeSeconds(endFrameNo);
-
-            var times = new List<float>(keyFrames.Count);
-            var valuesList = new List<float[]>(keyFrames.Count);
-            var inTangentsList = new List<float[]>(keyFrames.Count);
-            var outTangentsList = new List<float[]>(keyFrames.Count);
-
-            int _startFrameNo = startFrameNo;
-            int _endFrameNo = endFrameNo;
-            Action<BinaryWriter, BoneData> write_bone_data = delegate (
-                BinaryWriter w,
-                BoneData firstBone)
-            {
-                var path = firstBone.bonePath;
-                w.Write((byte)1);
-                w.Write(path);
-
-                times.Clear();
-                valuesList.Clear();
-                inTangentsList.Clear();
-                outTangentsList.Clear();
-
-                bool hasLastKey = false;
-                foreach (var frame in keyFrames)
-                {
-                    if (frame.frameNo < _startFrameNo || frame.frameNo > _endFrameNo)
-                    {
-                        continue;
-                    }
-
-                    var bone = frame.GetBone(path);
-                    if (bone == null && frame.frameNo == _startFrameNo)
-                    {
-                        bone = GetPrevBone(frame.frameNo, path, false);
-                    }
-
-                    if (bone == null && frame.frameNo == _endFrameNo)
-                    {
-                        bone = GetNextBone(frame.frameNo, path, false);
-                    }
-
-                    if (bone != null)
-                    {
-                        times.Add(GetFrameTimeSeconds(frame.frameNo) - startSecond);
-                        valuesList.Add(bone.transform.values);
-                        inTangentsList.Add(bone.transform.inTangents);
-                        outTangentsList.Add(bone.transform.outTangents);
-                        hasLastKey = frame.frameNo == _endFrameNo;
-                    }
-                }
-
-                if (!hasLastKey)
-                {
-                    var bone = _dummyLastFrame.GetBone(path);
-                    if (bone != null)
-                    {
-                        times.Add(endSecond - startSecond);
-                        valuesList.Add(bone.transform.values);
-                        inTangentsList.Add(bone.transform.inTangents);
-                        outTangentsList.Add(bone.transform.outTangents);
-                    }
-                }
-
-                for (int i = 0; i < firstBone.transform.valueCount; i++)
-                {
-                    w.Write((byte)(100 + i));
-                    w.Write(times.Count);
-                    for (int j = 0; j < times.Count; j++)
-                    {
-                        w.Write(times[j]);
-                        w.Write(valuesList[j][i]);
-                        w.Write(inTangentsList[j][i]);
-                        w.Write(outTangentsList[j][i]);
-                    }
-                }
-            };
-            MemoryStream memoryStream = new MemoryStream();
-            BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
-            binaryWriter.Write("CM3D2_ANIM");
-            binaryWriter.Write(1001);
-            foreach (var path in PluginUtils.saveBonePaths)
-            {
-                var bone = firstFrame.GetBone(path);
-                if (bone == null)
-                {
-                    PluginUtils.LogError("ボーンがないのでスキップしました：" + path);
-                    continue;
-                }
-                write_bone_data(binaryWriter, bone);
-            }
-            binaryWriter.Write((byte)0);
-            binaryWriter.Write((byte)(useMuneKeyL ? 1u : 0u));
-            binaryWriter.Write((byte)(useMuneKeyR ? 1u : 0u));
-            binaryWriter.Close();
-            memoryStream.Close();
-            byte[] result = memoryStream.ToArray();
-            memoryStream.Dispose();
-            return result;
         }
 
         public Texture2D CreateBGTexture(
@@ -912,69 +381,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return tex;
         }
 
-        public static void ClearTexture(Texture2D texture, Color color)
+        public void Initialize()
         {
-            var pixels = new Color[texture.width * texture.height];
-            for (int i = 0; i < pixels.Length; i++)
+            if (layers.Count() == 0)
             {
-                pixels[i] = color;
-            }
-            texture.SetPixels(pixels);
-            texture.Apply();
-        }
-
-        // ヘルミート曲線の計算
-        private static float Hermite(
-            float t,
-            float outTangent,
-            float inTangent)
-        {
-            float t2 = t * t;
-            float t3 = t2 * t;
-            return (t3 - 2 * t2 + t) * outTangent + (-2 * t3 + 3 * t2) * 1 + (t3 - t2) * inTangent;
-        }
-
-        public static void UpdateCurveTexture(
-            Texture2D texture,
-            float outTangent,
-            float inTangent,
-            Color lineColor,
-            int lineWidth)
-        {
-            var width = texture.width;
-            var height = texture.height;
-            var halfLineWidth = lineWidth / 2;
-
-            for (int x = 0; x < width; x++)
-            {
-                float t = x / (float)width;
-                int y = (int)(Hermite(t, outTangent, inTangent) * height);
-
-                y -= halfLineWidth;
-                for (int i = 0; i < lineWidth; i++)
-                {
-                    var yy = Mathf.Clamp(y + i, 0, height - 1);
-                    texture.SetPixel(x, yy, lineColor);
-                }
+                var layer = timelineManager.CreateLayer(typeof(MotionTimelineLayer).Name, 0);
+                layers.Add(layer);
+                layer.Init();
             }
 
-            texture.Apply();
-        }
-
-        public void ConvertVersion()
-        {
-            if (version < 2)
-            {
-                // Smoothを無効にする
-                /*foreach (var frame in keyFrames)
-                {
-                    foreach (var bone in frame.bones)
-                    {
-                        bone.transform.inSmoothBit = 0;
-                        bone.transform.outSmoothBit = 0;
-                    }
-                }*/
-            }
+            defaultLayer = layers[0];
 
             version = CurrentVersion;
         }
@@ -987,23 +403,147 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             useMuneKeyL = DefaultTimeline.useMuneKeyL;
             useMuneKeyR = DefaultTimeline.useMuneKeyR;
             isLoopAnm = DefaultTimeline.isLoopAnm;
+            startOffsetTime = DefaultTimeline.startOffsetTime;
+            endOffsetTime = DefaultTimeline.endOffsetTime;
+            startFadeTime = DefaultTimeline.startFadeTime;
+            endFadeTime = DefaultTimeline.endFadeTime;
         }
 
-        public TimelineData DeepCopy()
+        public string GetDcmSongFilePath(string fileName)
         {
-            var timeline = MemberwiseClone() as TimelineData;
+            return PluginUtils.GetDcmSongFilePath(dcmSongName, fileName);
+        }
 
-            timeline.keyFrames = new List<FrameData>();
-            foreach (var frame in keyFrames)
+        public void OnSave()
+        {
+            foreach (var layer in layers)
             {
-                timeline.keyFrames.Add(frame.DeepCopy());
+                layer.OnSave();
+            }
+        }
+
+        public void OnLoad()
+        {
+            foreach (var layer in layers)
+            {
+                layer.OnLoad();
+            }
+        }
+
+        public void OnPluginEnable()
+        {
+            foreach (var layer in layers)
+            {
+                layer.OnPluginEnable();
+            }
+        }
+
+        public void OnPluginDisable()
+        {
+            foreach (var layer in layers)
+            {
+                layer.OnPluginDisable();
+            }
+        }
+
+        public void FromXml(TimelineXml xml)
+        {
+            version = xml.version;
+
+            layers = new List<ITimelineLayer>(xml.layers.Count);
+            foreach (var layerXml in xml.layers)
+            {
+                var layer = timelineManager.CreateLayer(layerXml.className, layerXml.slotNo);
+                if (layer != null)
+                {
+                    layers.Add(layer);
+                    layer.FromXml(layerXml);
+                    layer.Init();
+                }
             }
 
-            timeline.isHoldList = (bool[]) this.isHoldList.Clone();
+            tracks = new List<TrackData>(xml.tracks.Count);
+            foreach (var trackXml in xml.tracks)
+            {
+                var track = new TrackData(trackXml);
+                tracks.Add(track);
+            }
 
-            timeline._dummyLastFrame = new FrameData(0);
+            maxFrameNo = xml.maxFrameNo;
+            frameRate = xml.frameRate;
+            anmName = xml.anmName;
+            directoryName = xml.directoryName;
+            isHoldList = xml.isHoldList;
+            useMuneKeyL = xml.useMuneKeyL;
+            useMuneKeyR = xml.useMuneKeyR;
+            isLoopAnm = xml.isLoopAnm;
+            startOffsetTime = xml.startOffsetTime;
+            endOffsetTime = xml.endOffsetTime;
+            startFadeTime = xml.startFadeTime;
+            endFadeTime = xml.endFadeTime;
+            activeTrackIndex = xml.activeTrackIndex;
+            bgmPath = xml.bgmPath;
+            videoEnabled = xml.videoEnabled;
+            videoDisplayType = xml.videoDisplayType;
+            videoPath = xml.videoPath;
+            videoPosition = xml.videoPosition;
+            videoRotation = xml.videoRotation;
+            videoScale = xml.videoScale;
+            videoStartTime = xml.videoStartTime;
+            videoVolume = xml.videoVolume;
+            videoGUIPosition = xml.videoGUIPosition;
+            videoGUIScale = xml.videoGUIScale;
+            videoGUIAlpha = xml.videoGUIAlpha;
+            videoBackmostPosition = xml.videoBackmostPosition;
+        }
 
-            return timeline;
+        public TimelineXml ToXml()
+        {
+            var xml = new TimelineXml();
+            xml.version = version;
+
+            xml.layers = new List<TimelineLayerXml>(layers.Count);
+            foreach (var layer in layers)
+            {
+                var layerXml = layer.ToXml();
+                xml.layers.Add(layerXml);
+            }
+
+            xml.tracks = new List<TrackXml>(tracks.Count);
+            foreach (var track in tracks)
+            {
+                var trackXml = track.ToXml();
+                xml.tracks.Add(trackXml);
+            }
+
+            xml.maxFrameNo = maxFrameNo;
+            xml.frameRate = frameRate;
+            xml.anmName = anmName;
+            xml.directoryName = directoryName;
+            xml.isHoldList = isHoldList;
+            xml.useMuneKeyL = useMuneKeyL;
+            xml.useMuneKeyR = useMuneKeyR;
+            xml.isLoopAnm = isLoopAnm;
+            xml.startOffsetTime = startOffsetTime;
+            xml.endOffsetTime = endOffsetTime;
+            xml.startFadeTime = startFadeTime;
+            xml.endFadeTime = endFadeTime;
+            xml.activeTrackIndex = activeTrackIndex;
+            xml.bgmPath = bgmPath;
+            xml.videoEnabled = videoEnabled;
+            xml.videoDisplayType = videoDisplayType;
+            xml.videoPath = videoPath;
+            xml.videoPosition = videoPosition;
+            xml.videoRotation = videoRotation;
+            xml.videoScale = videoScale;
+            xml.videoStartTime = videoStartTime;
+            xml.videoVolume = videoVolume;
+            xml.videoGUIPosition = videoGUIPosition;
+            xml.videoGUIScale = videoGUIScale;
+            xml.videoGUIAlpha = videoGUIAlpha;
+            xml.videoBackmostPosition = videoBackmostPosition;
+
+            return xml;
         }
     }
 }

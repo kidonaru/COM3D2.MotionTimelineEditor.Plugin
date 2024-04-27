@@ -6,10 +6,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class BoneMenuManager
     {
-        private bool initialized = false;
-        private List<IBoneMenuItem> easyMenuItems = new List<IBoneMenuItem>();
-        private List<IBoneMenuItem> allMenuItems = new List<IBoneMenuItem>();
-        private List<IBoneMenuItem> allSetMenuItems = new List<IBoneMenuItem>();
+        private List<IBoneMenuItem> easyMenuItems = null;
 
         private static BoneMenuManager _instance = null;
         public static BoneMenuManager Instance
@@ -32,73 +29,54 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static TimelineManager timelineManager
+        {
+            get
+            {
+                return TimelineManager.instance;
+            }
+        }
+
+        private static ITimelineLayer currentLayer
+        {
+            get
+            {
+                return timelineManager.currentLayer;
+            }
+        }
+
+        private List<IBoneMenuItem> allMenuItems
+        {
+            get
+            {
+                return currentLayer.allMenuItems;
+            }
+        }
+
         private BoneMenuManager()
         {
         }
 
         public void Init()
         {
-            if (initialized)
+            if (easyMenuItems == null)
             {
-                return;
-            }
-            initialized = true;
-
-            easyMenuItems = new List<IBoneMenuItem>(1);
-            allMenuItems = new List<IBoneMenuItem>(128);
-            allSetMenuItems = new List<IBoneMenuItem>(9);
-
-            easyMenuItems.Add(new EasyMenuItem());
-
-            var menuItemsList = new List<BoneMenuItem>[9]
-            {
-                new List<BoneMenuItem>(8),
-                new List<BoneMenuItem>(8),
-                new List<BoneMenuItem>(8),
-                new List<BoneMenuItem>(8),
-                new List<BoneMenuItem>(8),
-                new List<BoneMenuItem>(8),
-                new List<BoneMenuItem>(8),
-                new List<BoneMenuItem>(8),
-                new List<BoneMenuItem>(8),
-            };
-
-            foreach (var pair in BoneUtils.BoneTypeToSetMenuTypeMap)
-            {
-                var boneType = pair.Key;
-                var boneSetType = pair.Value;
-                var menuItem = new BoneMenuItem(boneType);
-
-                menuItemsList[(int) boneSetType].Add(menuItem);
-            }
-
-            for (var i = 0; i < menuItemsList.Length; ++i)
-            {
-                var setMenuType = (BoneSetMenuType) i;
-                var menuItems = menuItemsList[i];
-                var menuSetItem = new BoneSetMenuItem(setMenuType, menuItems);
-                allMenuItems.Add(menuSetItem);
-                allSetMenuItems.Add(menuSetItem);
-
-                foreach (var item in menuItems)
+                easyMenuItems = new List<IBoneMenuItem>
                 {
-                    allMenuItems.Add(item);
-                }
+                    new EasyMenuItem()
+                };
             }
-
-            allSetMenuItems[(int)BoneSetMenuType.LeftArmFinger].isOpenMenu = false;
-            allSetMenuItems[(int)BoneSetMenuType.RightArmFinger].isOpenMenu = false;
-            allSetMenuItems[(int)BoneSetMenuType.LeftLegFinger].isOpenMenu = false;
-            allSetMenuItems[(int)BoneSetMenuType.RightLegFinger].isOpenMenu = false;
         }
 
         public void UnselectAll()
         {
-            foreach (var setMenuItem in allSetMenuItems)
+            foreach (var setMenuItem in allMenuItems)
             {
                 setMenuItem.isSelectedMenu = false;
             }
         }
+
+        private List<IBoneMenuItem> _visibleItems = new List<IBoneMenuItem>(128);
 
         public List<IBoneMenuItem> GetVisibleItems()
         {
@@ -107,16 +85,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return easyMenuItems;
             }
 
-            var visibleItems = new List<IBoneMenuItem>(allMenuItems.Count);
-            foreach (var menuItem in allMenuItems)
+            _visibleItems.Clear();
+
+            foreach (var setMenuItem in allMenuItems)
             {
-                if (menuItem.isVisibleMenu)
+                if (setMenuItem.isVisibleMenu)
                 {
-                    visibleItems.Add(menuItem);
+                    _visibleItems.Add(setMenuItem);
+                }
+
+                if (setMenuItem.children == null)
+                {
+                    continue;
+                }
+
+                foreach (var menuItem in setMenuItem.children)
+                {
+                    if (menuItem.isVisibleMenu)
+                    {
+                        _visibleItems.Add(menuItem);
+                    }
                 }
             }
-            return visibleItems;
+            return _visibleItems;
         }
+
+        private List<IBoneMenuItem> _selectedItems = new List<IBoneMenuItem>(128);
 
         public List<IBoneMenuItem> GetSelectedItems()
         {
@@ -125,15 +119,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return easyMenuItems;
             }
 
-            var selectedItems = new List<IBoneMenuItem>(allMenuItems.Count);
-            foreach (var menuItem in allMenuItems)
+            _selectedItems.Clear();
+
+            foreach (var setMenuItem in allMenuItems)
             {
-                if (menuItem.isSelectedMenu)
+                if (setMenuItem.isSelectedMenu)
                 {
-                    selectedItems.Add(menuItem);
+                    _selectedItems.Add(setMenuItem);
+                }
+
+                if (setMenuItem.children == null)
+                {
+                    continue;
+                }
+
+                foreach (var menuItem in setMenuItem.children)
+                {
+                    if (menuItem.isSelectedMenu)
+                    {
+                        _selectedItems.Add(menuItem);
+                    }
                 }
             }
-            return selectedItems;
+            return _selectedItems;
         }
     }
 }

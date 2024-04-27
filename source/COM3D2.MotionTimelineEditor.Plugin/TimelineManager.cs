@@ -1,76 +1,42 @@
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml.Serialization;
-using Accessibility;
 using UnityEngine;
 using UnityEngine.Events;
+using System.Xml.Linq;
+using System.Text;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using MTE = MotionTimelineEditor;
 
+    public class FadeTimeLineRow
+    {
+        public float stTime;
+        public float edTime;
+        public float inTime;
+        public float outTime;
+        public bool isWhite;
+    }
+
     public partial class TimelineManager
     {
-        public static readonly long TimelineAnmId = 26925014;
-
         public TimelineData timeline = null;
-        private long playingAnmId = -1;
         public HashSet<BoneData> selectedBones = new HashSet<BoneData>();
-        private float prevMotionSliderRate = -1f;
+        private int prevPlayingFrameNo = -1;
         public string errorMessage = "";
         public FrameData initialEditFrame;
         public Vector3 initialEditPosition = Vector3.zero;
         public Quaternion initialEditRotation = Quaternion.identity;
         private bool isPrevPoseEditing;
-        public int anmStartFrameNo = 0;
-        public int anmEndFrameNo = 0;
 
-        public event UnityAction onRefresh;
-        public event UnityAction onEditPoseUpdated;
-        public event UnityAction onAnmSpeedChanged;
-        public event UnityAction onSeekCurrentFrame;
-
-        public int playingFrameNo
-        {
-            get
-            {
-                var rate = studioHack.motionSliderRate;
-                var anmLength = anmEndFrameNo - anmStartFrameNo;
-                return anmStartFrameNo + (int) Math.Round(rate * anmLength);
-            }
-            set
-            {
-                var anmLength = anmEndFrameNo - anmStartFrameNo;
-                if (anmLength > 0)
-                {
-                    var rate = Mathf.Clamp01((float) (value - anmStartFrameNo) / anmLength);
-                    studioHack.motionSliderRate = rate;
-                    prevMotionSliderRate = rate;
-                }
-            }
-        }
-
-        // アニメーションと同期しているか
-        public bool isAnmSyncing
-        {
-            get
-            {
-                return IsValidData() && playingAnmId == TimelineAnmId;
-            }
-        }
-
-        // 現在のアニメーションを再生中か
-        public bool isAnmPlaying
-        {
-            get
-            {
-                return studioHack.isMotionPlaying && isAnmSyncing;
-            }
-        }
+        public static event UnityAction onPlay;
+        public static event UnityAction onRefresh;
+        public static event UnityAction onEditPoseUpdated;
+        public static event UnityAction onAnmSpeedChanged;
+        public static event UnityAction onSeekCurrentFrame;
 
         private int _currentFrameNo = 0;
         public int currentFrameNo
@@ -93,26 +59,50 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public float _anmSpeed = 1.0f;
+        private float _anmSpeed = 1.0f;
         public float anmSpeed
         {
             get
             {
                 return _anmSpeed;
             }
-            set
+        }
+
+        public List<ITimelineLayer> layers
+        {
+            get
             {
-                if (_anmSpeed == value)
-                {
-                    return;
-                }
+                return timeline.layers;
+            }
+        }
 
-                _anmSpeed = value;
+        public int currentLayerIndex = 0;
 
-                if (onAnmSpeedChanged != null)
+        public ITimelineLayer currentLayer
+        {
+            get
+            {
+                if (currentLayerIndex < 0 || currentLayerIndex >= layers.Count)
                 {
-                    onAnmSpeedChanged();
+                    return null;
                 }
+                return layers[currentLayerIndex];
+            }
+        }
+
+        public ITimelineLayer defaultLayer
+        {
+            get
+            {
+                return timeline.defaultLayer;
+            }
+        }
+
+        public bool HasCameraLayer
+        {
+            get
+            {
+                return layers.Any(layer => layer.isCameraLayer);
             }
         }
 
@@ -179,39 +169,51 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private TimelineManager()
         {
-            maidManager.onMaidChanged += OnMaidChanged;
+            MaidManager.onMaidSlotNoChanged += OnMaidSlotNoChanged;
         }
 
         public void Update()
         {
-            long.TryParse(maidManager.annName, out playingAnmId);
-
-            if (isAnmSyncing)
+            foreach (var layer in layers)
             {
-                var motionSliderRate = studioHack.motionSliderRate;
-                if (!Mathf.Approximately(motionSliderRate, prevMotionSliderRate))
+                layer.Update();
+            }
+
+            if (defaultLayer.isAnmSyncing)
+            {
+                var playingFrameNo = defaultLayer.playingFrameNo;
+                if (playingFrameNo != prevPlayingFrameNo)
                 {
                     currentFrameNo = playingFrameNo;
                 }
-                prevMotionSliderRate = studioHack.motionSliderRate;
+                prevPlayingFrameNo = playingFrameNo;
 
                 var activeTrack = timeline.activeTrack;
                 if (timeline.IsValidTrack(activeTrack))
                 {
                     if (currentFrameNo < activeTrack.startFrameNo)
                     {
-                        playingFrameNo = activeTrack.startFrameNo;
+                        SetPlayingFrameNoAll(activeTrack.startFrameNo);
                     }
                     if (currentFrameNo > activeTrack.endFrameNo)
                     {
-                        playingFrameNo = activeTrack.startFrameNo;
+                        SetPlayingFrameNoAll(activeTrack.startFrameNo);
                     }
                 }
             }
 
-            if (isAnmPlaying && !Mathf.Approximately(anmSpeed, maidManager.anmSpeed))
+            if (defaultLayer.isAnmPlaying)
             {
-                maidManager.anmSpeed = anmSpeed;
+                var playingFrameNo = defaultLayer.playingFrameNoFloat;
+                if ((int) playingFrameNo == timeline.maxFrameNo)
+                {
+                    SetPlayingFrameNoAll(0);
+                }
+
+                if (!Mathf.Approximately(anmSpeed, maidManager.anmSpeed))
+                {
+                    SetAnmSpeedAll(anmSpeed);
+                }
             }
 
             var isPoseEditing = studioHack.isPoseEditing;
@@ -242,6 +244,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 historyManager.AddHistory(timeline, requestedHistoryDesc);
                 requestedHistoryDesc = "";
+            }
+        }
+
+        public void LateUpdate()
+        {
+            foreach (var layer in layers)
+            {
+                layer.LateUpdate();
             }
         }
 
@@ -306,6 +316,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return true;
         }
 
+        public void ClearTimeline()
+        {
+            UnselectAll();
+
+            if (timeline != null)
+            {
+                timeline.Dispose();
+                timeline = null;
+            }
+        }
+
         public void CreateNewTimeline()
         {
             if (!studioHack.IsValid())
@@ -319,13 +340,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
+            ClearTimeline();
+            currentLayerIndex = 0;
+
             timeline = new TimelineData();
             timeline.anmName = "テスト";
             timeline.version = TimelineData.CurrentVersion;
-            timeline.UpdateFrame(0, maidManager.cacheBoneData);
+            timeline.Initialize();
+            currentLayer.OnActive();
 
-            CreateAndApplyAnm();
-            UnselectAll();
+            CreateAndApplyAnmAll();
             Refresh();
 
             RequestHistory("タイムライン新規作成");
@@ -355,29 +379,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
+            ClearTimeline();
+            currentLayerIndex = 0;
+
             using (var stream = new FileStream(path, FileMode.Open))
             {
-                var serializer = new XmlSerializer(typeof(TimelineData));
-                timeline = (TimelineData)serializer.Deserialize(stream);
+                var serializer = new XmlSerializer(typeof(TimelineXml));
+                var xml = (TimelineXml)serializer.Deserialize(stream);
+                xml.Initialize();
+
+                timeline = new TimelineData();
+                timeline.FromXml(xml);
                 timeline.anmName = anmName;
                 timeline.directoryName = directoryName;
-                timeline.ConvertVersion();
+                timeline.Initialize();
+                timeline.OnLoad();
+                currentLayer.OnActive();
             }
 
-            CreateAndApplyAnm();
-            UnselectAll();
+            maidManager.ChangeMaid(currentLayer.maid);
+
+            CreateAndApplyAnmAll();
+            SeekCurrentFrame(0);
             Refresh();
 
             RequestHistory("「" + anmName + "」読み込み");
             // Extensions.ShowDialog("タイムライン「" + anmName + "」を読み込みました");
-        }
-
-        public void UpdateTimeline(TimelineData timeline)
-        {
-            this.timeline = timeline;
-            CreateAndApplyAnm();
-            UnselectAll();
-            Refresh();
         }
 
         public void SaveTimeline()
@@ -387,6 +414,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 PluginUtils.ShowDialog(errorMessage);
                 return;
             }
+
+            timeline.OnSave();
 
             var path = timeline.timelinePath;
 
@@ -398,8 +427,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             using (var stream = new FileStream(path, FileMode.Create))
             {
-                var serializer = new XmlSerializer(typeof(TimelineData));
-                serializer.Serialize(stream, timeline);
+                var serializer = new XmlSerializer(typeof(TimelineXml));
+                var xml = timeline.ToXml();
+                serializer.Serialize(stream, xml);
             }
 
             var thumPath = PluginUtils.ConvertThumPath(path);
@@ -409,6 +439,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             PluginUtils.ShowDialog("タイムライン「" + timeline.anmName + "」を保存しました");
+        }
+
+        public void UpdateTimeline(TimelineXml xml)
+        {
+            ClearTimeline();
+
+            timeline = new TimelineData();
+            timeline.FromXml(xml);
+            timeline.Initialize();
+
+            if (currentLayerIndex >= layers.Count)
+            {
+                currentLayerIndex = 0;
+            }
+            currentLayer.OnActive();
+
+            CreateAndApplyAnmAll();
+            Refresh();
         }
 
         public void SaveThumbnail()
@@ -422,120 +470,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             MTE.instance.SaveScreenShot(timeline.thumPath, config.thumWidth, config.thumHeight);
 
             PluginUtils.ShowDialog("サムネイルを更新しました");
-        }
-
-        public void ApplyAnm(long id, byte[] anmData)
-        {
-            var maid = maidManager.maid;
-            if (maid == null)
-            {
-                PluginUtils.LogError("メイドが配置されていません");
-                return;
-            }
-
-            float motionRate;
-            if (isAnmSyncing)
-            {
-                motionRate = studioHack.motionSliderRate;
-            }
-            else
-            {
-                motionRate = Mathf.Clamp01((float) currentFrameNo / timeline.maxFrameNo);
-            }
-
-            var isMotionPlaying = studioHack.isMotionPlaying;
-            if (isMotionPlaying)
-            {
-                motionRate += 0.01f; // モーション再生中は再生位置に差分がないと反映されない
-            }
-
-            GameMain.Instance.ScriptMgr.StopMotionScript();
-
-            if (!maid.boMAN)
-            {
-                maid.body0.MuneYureL((float)((!timeline.useMuneKeyL) ? 1 : 0));
-                maid.body0.MuneYureR((float)((!timeline.useMuneKeyR) ? 1 : 0));
-                maid.body0.jbMuneL.enabled = !timeline.useMuneKeyL;
-                maid.body0.jbMuneR.enabled = !timeline.useMuneKeyR;
-            }
-
-            maid.body0.CrossFade(id.ToString(), anmData, false, false, false, 0f, 1f);
-            maid.SetAutoTwistAll(true);
-
-            if (timeline.isLoopAnm)
-            {
-                var animation = maid.GetAnimation();
-                if (animation != null)
-                {
-                    animation.wrapMode = WrapMode.Loop;
-                }
-            }
-            else
-            {
-                var animation = maid.GetAnimation();
-                if (animation != null)
-                {
-                    animation.wrapMode = WrapMode.ClampForever;
-                }
-                if (Mathf.Approximately(motionRate, 1f))
-                {
-                    motionRate = 0f;
-                }
-            }
-
-            studioHack.OnMotionUpdated(maid);
-            maidManager.OnMotionUpdated();
-
-            studioHack.isMotionPlaying = isMotionPlaying;
-            studioHack.motionSliderRate = motionRate;
-
-            if (initialEditFrame != null)
-            {
-                OnEditPoseUpdated();
-            }
-        }
-
-        public bool CreateAndApplyAnm()
-        {
-            PluginUtils.LogDebug("CreateAndApplyAnm");
-
-            var anmData = GetAnmBinary(false);
-
-            if (anmData == null)
-            {
-                return false;
-            }
-
-            ApplyAnm(TimelineAnmId, anmData);
-
-            return true;
-        }
-
-        public void OutputAnm()
-        {
-            try
-            {
-                var anmData = GetAnmBinary(true);
-                if (anmData == null)
-                {
-                    PluginUtils.ShowDialog(errorMessage);
-                    return;
-                }
-                var anmPath = timeline.anmPath;
-                var anmName = timeline.anmName;
-
-                bool isExist = File.Exists(anmPath);
-                File.WriteAllBytes(anmPath, anmData);
-
-                studioHack.OnUpdateMyPose(anmPath, isExist);
-
-                PluginUtils.ShowDialog("モーション「" + timeline.anmName + "」を生成しました");
-            }
-            catch (Exception e)
-            {
-                PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("モーションの出力に失敗しました");
-            }
         }
 
         public CacheBoneDataArray GetCacheBoneDataArray()
@@ -556,96 +490,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return cacheBoneData;
         }
 
-        public void AddKeyFrameAll()
-        {
-            studioHack.isMotionPlaying = false;
-
-            var boneDataArray = GetCacheBoneDataArray();
-            if (boneDataArray == null)
-            {
-                return;
-            }
-
-            var rootBone = boneDataArray.GetBoneData("Bip01");
-            if (rootBone == null)
-            {
-                PluginUtils.LogError("中心ボーンが取得できませんでした");
-                return;
-            }
-
-            // ポーズ編集中の移動は中心ボーンに反映  
-            if (initialEditFrame != null)
-            {
-                var targetPosition = rootBone.transform.position;
-                var targetRotation = rootBone.transform.rotation;
-
-                maid.transform.position = initialEditPosition;
-                maid.transform.rotation = initialEditRotation;
-
-                rootBone.transform.position = targetPosition;
-                rootBone.transform.rotation = targetRotation;
-            }
-
-            timeline.UpdateFrame(currentFrameNo, boneDataArray);
-
-            ApplyCurrentFrame(true);
-
-            RequestHistory("キーフレーム全登録");
-        }
-
-        public void AddKeyFrameDiff()
-        {
-            if (initialEditFrame == null)
-            {
-                PluginUtils.Log("ポーズ編集中のみキーフレームの登録ができます");
-                return;
-            }
-
-            var boneDataArray = GetCacheBoneDataArray();
-            if (boneDataArray == null)
-            {
-                return;
-            }
-
-            var rootBone = boneDataArray.GetBoneData("Bip01");
-            if (rootBone == null)
-            {
-                PluginUtils.LogError("中心ボーンが取得できませんでした");
-                return;
-            }
-
-            // ポーズ編集中の移動は中心ボーンに反映
-            {
-                var targetPosition = rootBone.transform.position;
-                var targetRotation = rootBone.transform.rotation;
-
-                maid.transform.position = initialEditPosition;
-                maid.transform.rotation = initialEditRotation;
-
-                rootBone.transform.position = targetPosition;
-                rootBone.transform.rotation = targetRotation;
-            }
-
-            var tmpFrame = new FrameData(currentFrameNo);
-            tmpFrame.SetCacheBoneDataArray(boneDataArray);
-
-            var diffBones = tmpFrame.GetDiffBones(
-                initialEditFrame,
-                timeline.useMuneKeyL,
-                timeline.useMuneKeyR);
-            if (diffBones.Count == 0)
-            {
-                PluginUtils.Log("変更がないのでキーフレームの登録をスキップしました");
-                return;
-            }
-
-            timeline.UpdateBones(currentFrameNo, diffBones);
-
-            ApplyCurrentFrame(true);
-
-            RequestHistory("キーフレーム登録");
-        }
-
         public bool IsSelectedBone(BoneData bone)
         {
             return selectedBones.Contains(bone);
@@ -657,7 +501,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 for (int i = startFrameNo; i <= endFrameNo; i++)
                 {
-                    var frame = timeline.GetFrame(i);
+                    var frame = currentLayer.GetFrame(i);
                     if (frame != null)
                     {
                         foreach (var bone in frame.bones)
@@ -672,7 +516,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var selectedMenuItems = boneMenuManager.GetSelectedItems();
                 for (int i = startFrameNo; i <= endFrameNo; i++)
                 {
-                    var frame = timeline.GetFrame(i);
+                    var frame = currentLayer.GetFrame(i);
                     if (frame != null)
                     {
                         foreach (var bone in frame.bones)
@@ -697,7 +541,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 for (int i = start; i >= 0 && i <= timeline.maxFrameNo; i += step)
                 {
-                    var frame = timeline.GetFrame(i);
+                    var frame = currentLayer.GetFrame(i);
                     if (frame != null)
                     {
                         return frame;
@@ -710,7 +554,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var selectedMenuItems = boneMenuManager.GetSelectedItems();
                 for (int i = start; i >= 0 && i <= timeline.maxFrameNo; i += step)
                 {
-                    var frame = timeline.GetFrame(i);
+                    var frame = currentLayer.GetFrame(i);
                     if (frame != null)
                     {
                         if (selectedMenuItems.Count == 0)
@@ -800,7 +644,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void SelectAllFrames()
         {
             selectedBones.Clear();
-            foreach (var frame in timeline.keyFrames)
+            foreach (var frame in currentLayer.keyFrames)
             {
                 selectedBones.UnionWith(frame.bones);
             }
@@ -845,7 +689,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     frame.RemoveBone(bone);
                 }
             }
-            timeline.CleanFrames();
+            currentLayer.CleanFrames();
             selectedBones.Clear();
 
             ApplyCurrentFrame(true);
@@ -864,12 +708,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             foreach (var selectedBone in selectedBones)
             {
                 var selectedFrame = selectedBone.parentFrame;
-                var targetFrame = timeline.GetFrame(selectedFrame.frameNo + delta);
+                var targetFrame = currentLayer.GetFrame(selectedFrame.frameNo + delta);
 
                 // 移動先のボーンが重複していたら移動しない
                 if (targetFrame != null)
                 {
-                    var targetBone = targetFrame.GetBone(selectedBone.bonePath);
+                    var targetBone = targetFrame.GetBone(selectedBone.name);
                     if (targetBone != null && !IsSelectedBone(targetBone))
                     {
                         return;
@@ -905,10 +749,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var sourceFrame = selectedBone.parentFrame;
                 sourceFrame.RemoveBone(selectedBone);
 
-                timeline.SetBone(targetFrameNo, selectedBone);
+                currentLayer.SetBone(targetFrameNo, selectedBone);
             }
 
-            timeline.CleanFrames();
+            currentLayer.CleanFrames();
 
             ApplyCurrentFrame(true);
 
@@ -963,14 +807,146 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void ApplyCurrentFrame(bool motionUpdate)
         {
-            if (playingAnmId != TimelineAnmId || motionUpdate)
+            foreach (var layer in layers)
             {
-                CreateAndApplyAnm();
+                layer.ApplyCurrentFrame(motionUpdate);
             }
-            else
+        }
+
+        public void CreateAndApplyAnmAll()
+        {
+            foreach (var layer in layers)
             {
-                playingFrameNo = currentFrameNo;
+                layer.CreateAndApplyAnm();
             }
+
+            if (initialEditFrame != null)
+            {
+                OnEditPoseUpdated();
+            }
+        }
+
+        public void OutputAnm()
+        {
+            if (!IsValidData())
+            {
+                PluginUtils.ShowDialog(errorMessage);
+                return;
+            }
+
+            foreach (var layer in layers)
+            {
+                layer.OutputAnm();
+            }
+
+            PluginUtils.ShowDialog("モーション「" + timeline.anmName + "」を生成しました");
+        }
+
+        public void SaveFadeTimeLine(
+            List<FadeTimeLineRow> rows,
+            string filePath)
+        {
+            var builder = new StringBuilder();
+            builder.Append("stTime,edTime,inTime,outTime,isWhite\r\n");
+            foreach (var row in rows)
+            {
+                builder.Append(row.stTime.ToString("0.000") + ",");
+                builder.Append(row.edTime.ToString("0.000") + ",");
+                builder.Append(row.inTime.ToString("0.000") + ",");
+                builder.Append(row.outTime.ToString("0.000") + ",");
+                builder.Append(row.isWhite ? "1" : "0");
+                builder.Append("\r\n");
+            }
+
+            using (var streamWriter = new StreamWriter(filePath, false))
+            {
+                streamWriter.Write(builder.ToString());
+            }
+        }
+
+        public void OutputDCM()
+        {
+            if (!IsValidData())
+            {
+                PluginUtils.ShowDialog(errorMessage);
+                return;
+            }
+
+            var songName = timeline.dcmSongName;
+            var endTime = timeline.maxFrameNo * timeline.frameDuration + timeline.startOffsetTime + timeline.endOffsetTime;
+
+            XElement songElement = new XElement("song",
+                new XAttribute("label", songName),
+                new XAttribute("type", "song"),
+                new XElement("folder", songName),
+                new XElement("endTime", endTime)
+            );
+
+            // BGMの追加
+            {
+                var bgmName = "song.ogg";
+                var bgmData = PluginUtils.DefaultBgmData;
+
+                if (File.Exists(timeline.bgmPath))
+                {
+                    bgmName = Path.GetFileName(timeline.bgmPath);
+                    bgmData = File.ReadAllBytes(timeline.bgmPath);
+                }
+
+                var outputBgmPath = timeline.GetDcmSongFilePath(bgmName);
+                File.WriteAllBytes(outputBgmPath, bgmData);
+
+                songElement.Add(new XElement("bgm", bgmName));
+            }
+
+            // フェードの追加
+            {
+                var fadeRows = new List<FadeTimeLineRow>();
+
+                var firstFade = new FadeTimeLineRow
+                {
+                    stTime = 0,
+                    edTime = timeline.startOffsetTime,
+                    inTime = 0,
+                    outTime = timeline.startFadeTime,
+                    isWhite = false,
+                };
+                fadeRows.Add(firstFade);
+
+                if (timeline.endFadeTime > 0f)
+                {
+                    var lastFade = new FadeTimeLineRow
+                    {
+                        stTime = endTime - timeline.endOffsetTime - timeline.endFadeTime,
+                        edTime = endTime - timeline.endOffsetTime,
+                        inTime = timeline.endFadeTime,
+                        outTime = 0,
+                        isWhite = false,
+                    };
+                    fadeRows.Add(lastFade);
+                }
+
+                var outputFileName = string.Format("fade.csv");
+                var outputPath = timeline.GetDcmSongFilePath(outputFileName);
+                SaveFadeTimeLine(fadeRows, outputPath);
+
+                songElement.Add(new XElement("changeFade", outputFileName));
+            }
+
+            foreach (var layer in layers)
+            {
+                layer.OutputDCM(songElement);
+            }
+
+            XDocument doc = new XDocument(
+                new XElement("SongList",
+                    songElement
+                )
+            );
+
+            doc.Save(timeline.dcmSongListPath);
+
+            PluginUtils.ShowDialog("「" + songName + "」を生成しました");
         }
 
         public void AddTrack()
@@ -1007,7 +983,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (timeline.activeTrackIndex >= 0)
             {
-                currentFrameNo = playingFrameNo = track.startFrameNo;
+                SetPlayingFrameNoAll(track.startFrameNo);
             }
         }
 
@@ -1051,10 +1027,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             SetActiveTrack(activeTrack, true);
         }
 
-        public class CopyFrameData
+        [XmlRoot("Layer")]
+        public class CopyLayerData
         {
             [XmlElement("Frame")]
-            public List<FrameData> frames;
+            public List<FrameXml> frames;
         }
 
         public void CopyFramesToClipboard()
@@ -1065,7 +1042,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var copyFrameData = new CopyFrameData();
+            var copyFrameData = new CopyLayerData();
 
             var tmpFrames = new Dictionary<int, FrameData>();
             foreach (var bone in selectedBones)
@@ -1073,17 +1050,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 FrameData tmpFrame;
                 if (!tmpFrames.TryGetValue(bone.frameNo, out tmpFrame))
                 {
-                    tmpFrame = new FrameData(bone.frameNo);
+                    tmpFrame = currentLayer.CreateFrame(bone.frameNo);
                     tmpFrames[bone.frameNo] = tmpFrame;
                 }
 
                 tmpFrame.UpdateBone(bone);
             }
-            copyFrameData.frames = tmpFrames.Values.ToList();
+            copyFrameData.frames = tmpFrames.Values
+                .Select(frame => frame.ToXml())
+                .ToList();
 
             try
             {
-                var serializer = new XmlSerializer(typeof(CopyFrameData));
+                var serializer = new XmlSerializer(typeof(CopyLayerData));
                 using (var writer = new StringWriter())
                 {
                     serializer.Serialize(writer, copyFrameData);
@@ -1105,21 +1084,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var boneDataArray = GetCacheBoneDataArray();
             if (boneDataArray == null)
             {
-                PluginUtils.LogError("現在のボーンデータの取得に失敗しました");
                 return;
             }
 
-            var tmpFrame = new FrameData(currentFrameNo);
-            tmpFrame.SetCacheBoneDataArray(boneDataArray);
+            var tmpFrame = currentLayer.CreateFrame(currentFrameNo);
+            currentLayer.UpdateFrameWithCurrentStat(tmpFrame);
 
-            var copyFrameData = new CopyFrameData
+            var copyFrameData = new CopyLayerData
             {
-                frames = new List<FrameData> { tmpFrame }
+                frames = new List<FrameXml> { tmpFrame.ToXml() }
             };
 
             try
             {
-                var serializer = new XmlSerializer(typeof(CopyFrameData));
+                var serializer = new XmlSerializer(typeof(CopyLayerData));
                 using (var writer = new StringWriter())
                 {
                     serializer.Serialize(writer, copyFrameData);
@@ -1136,16 +1114,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-
         public void PasteFramesFromClipboard(bool flip)
         {
             try
             {
-                var framesXml = GUIUtility.systemCopyBuffer;
-                var serializer = new XmlSerializer(typeof(CopyFrameData));
-                using (var reader = new StringReader(framesXml))
+                var data = GUIUtility.systemCopyBuffer;
+                var serializer = new XmlSerializer(typeof(CopyLayerData));
+                using (var reader = new StringReader(data))
                 {
-                    var copyFrameData = (CopyFrameData) serializer.Deserialize(reader);
+                    var copyFrameData = (CopyLayerData) serializer.Deserialize(reader);
 
                     if (copyFrameData.frames.Count == 0)
                     {
@@ -1153,16 +1130,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         return;
                     }
 
-                    var tmpFrames = copyFrameData.frames;
-                    var minFrameNo = tmpFrames.Min(frame => frame.frameNo);
-                    foreach (var tmpFrame in tmpFrames)
+                    var framesXml = copyFrameData.frames;
+                    var minFrameNo = framesXml.Min(frame => frame.frameNo);
+                    foreach (var frameXml in framesXml)
                     {
+                        var tmpFrame = currentLayer.CreateFrame(frameXml);
                         if (flip)
                         {
                             tmpFrame.Flip();
                         }
+
                         var frameNo = currentFrameNo + tmpFrame.frameNo - minFrameNo;
-                        timeline.UpdateBones(frameNo, tmpFrame.bones);
+                        currentLayer.UpdateBones(frameNo, tmpFrame.bones);
                     }
 
                     if (flip)
@@ -1197,17 +1176,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var boneDataArray = GetCacheBoneDataArray();
                 if (boneDataArray == null)
                 {
-                    PluginUtils.LogError("現在のボーンデータの取得に失敗しました");
                     return;
                 }
 
                 var pathDic = boneDataArray.GetPathDic();
 
-                var framesXml = GUIUtility.systemCopyBuffer;
-                var serializer = new XmlSerializer(typeof(CopyFrameData));
-                using (var reader = new StringReader(framesXml))
+                var data = GUIUtility.systemCopyBuffer;
+                var serializer = new XmlSerializer(typeof(CopyLayerData));
+                using (var reader = new StringReader(data))
                 {
-                    var copyFrameData = (CopyFrameData) serializer.Deserialize(reader);
+                    var copyFrameData = (CopyLayerData) serializer.Deserialize(reader);
 
                     if (copyFrameData.frames.Count == 0)
                     {
@@ -1215,19 +1193,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         return;
                     }
 
-                    var tmpFrames = copyFrameData.frames;
-                    foreach (var tmpFrame in tmpFrames)
+                    var framesXml = copyFrameData.frames;
+                    foreach (var frameXml in framesXml)
                     {
+                        var tmpFrame = currentLayer.CreateFrame(frameXml);
+
                         foreach (var tmpBone in tmpFrame.bones)
                         {
+                            var path = BoneUtils.ConvertBonePath(tmpBone.name);
                             CacheBoneDataArray.BoneData bone;
-                            if (pathDic.TryGetValue(tmpBone.bonePath, out bone))
+                            if (pathDic.TryGetValue(path, out bone))
                             {
-                                bone.transform.localRotation = tmpBone.transform.localRotation;
-
-                                if (tmpBone.transform.isBipRoot)
+                                if (tmpBone.transform.hasRotation)
                                 {
-                                     bone.transform.localPosition = tmpBone.transform.localPosition;
+                                    bone.transform.localRotation = tmpBone.transform.rotation;
+                                }
+                                if (tmpBone.transform.hasPosition)
+                                {
+                                     bone.transform.localPosition = tmpBone.transform.position;
                                 }
                             }
                         }
@@ -1238,6 +1221,86 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 PluginUtils.LogException(e);
                 PluginUtils.ShowDialog("ペーストに失敗しました");
+            }
+        }
+
+        public ITimelineLayer GetLayer(string className, int slotNo)
+        {
+            foreach (var layer in layers)
+            {
+                if (layer.className != className)
+                {
+                    continue;
+                }
+
+                if (layer.hasSlotNo && layer.slotNo != slotNo)
+                {
+                    continue;
+                }
+
+                return layer;
+            }
+            return null;
+        }
+
+        public void ChangeActiveLayer(string className, int slotNo)
+        {
+            var layer = GetLayer(className, slotNo);
+
+            if (layer == currentLayer)
+            {
+                return;
+            }
+            if (layer != null)
+            {
+                SetActiveLayer(layer);
+                return;
+            }
+
+            var newLayer = CreateLayer(className, slotNo);
+            if (newLayer == null)
+            {
+                return;
+            }
+
+            layers.Add(newLayer);
+            SetActiveLayer(newLayer);
+            newLayer.Init();
+            newLayer.CreateAndApplyAnm();
+
+            var info = GetLayerInfo(className);
+            RequestHistory("「" + info.displayName + "」レイヤー新規作成");
+        }
+
+        public void SetActiveLayer(ITimelineLayer layer)
+        {
+            UnselectAll();
+
+            studioHack.isPoseEditing = false;
+            OnEndPoseEdit();
+            isPrevPoseEditing = false;
+
+            currentLayerIndex = layers.IndexOf(layer);
+            Refresh();
+
+            layer.OnActive();
+        }
+        
+        public void SetPlayingFrameNoAll(int frameNo)
+        {
+            prevPlayingFrameNo = frameNo;
+            currentFrameNo = frameNo;
+            maidManager.SetPlayingFrameNoAll(frameNo);
+        }
+
+        public void SetAnmSpeedAll(float speed)
+        {
+            _anmSpeed = speed;
+            maidManager.SetAnmSpeedAll(speed);
+
+            if (onAnmSpeedChanged != null)
+            {
+                onAnmSpeedChanged();
             }
         }
 
@@ -1263,57 +1326,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return timeline.IsValidData(out errorMessage);
         }
 
-        public byte[] GetAnmBinary(bool forOutput)
-        {
-            if (!IsValidData())
-            {
-                return null;
-            }
-
-            var startFrameNo = 0;
-            var endFrameNo = timeline.maxFrameNo;
-
-            var activeTrack = timeline.activeTrack;
-            if (activeTrack != null && !forOutput)
-            {
-                startFrameNo = timeline.GetStartFrameNo(activeTrack.startFrameNo);
-                endFrameNo = timeline.GetEndFrameNo(activeTrack.endFrameNo);
-
-                PluginUtils.LogDebug("startFrameNo: " + startFrameNo);
-                PluginUtils.LogDebug("endFrameNo: " + endFrameNo);
-            }
-
-            var stopwatch = new StopwatchDebug();
-
-            timeline.FixRotation(startFrameNo, endFrameNo);
-            stopwatch.ProcessEnd("FixRotation");
-
-            timeline.UpdateTangent(startFrameNo, endFrameNo);
-            stopwatch.ProcessEnd("UpdateTangent");
-
-            timeline.UpdateDummyLastFrame();
-            stopwatch.ProcessEnd("UpdateDummyLastFrame");
-
-            var anmData = timeline.GetAnmBinary(startFrameNo, endFrameNo);
-            stopwatch.ProcessEnd("GetAnmBinary");
-
-            if (!forOutput)
-            {
-                anmStartFrameNo = startFrameNo;
-                anmEndFrameNo = endFrameNo;
-            }
-
-            return anmData;
-        }
-
         public void Play()
         {
             studioHack.isPoseEditing = false;
 
-            var success = CreateAndApplyAnm();
-            if (success)
+            if (this.currentFrameNo >= timeline.maxFrameNo)
             {
-                studioHack.isMotionPlaying = true;
+                SetPlayingFrameNoAll(0);
+            }
+
+            CreateAndApplyAnmAll();
+            studioHack.isMotionPlaying = true;
+
+            if (onPlay != null)
+            {
+                onPlay();
             }
         }
 
@@ -1329,21 +1356,66 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             requestedHistoryDesc = description;
         }
 
-        private void OnEditPoseUpdated()
+        private List<TimelineLayerInfo> layerInfoList
+            = new List<TimelineLayerInfo>();
+
+        public List<TimelineLayerInfo> GetLayerInfoList()
+        {
+            return layerInfoList;
+        }
+
+        public TimelineLayerInfo GetLayerInfo(string className)
+        {
+            foreach (var layerInfo in layerInfoList)
+            {
+                if (layerInfo.className == className)
+                {
+                    return layerInfo;
+                }
+            }
+            return null;
+        }
+
+        public void RegisterLayer(
+            Type layerType,
+            Func<int, ITimelineLayer> createLayer)
+        {
+            var index = layerInfoList.Count;
+            layerInfoList.Add(new TimelineLayerInfo(
+                index,
+                layerType,
+                createLayer
+            ));
+        }
+
+        public ITimelineLayer CreateLayer(string className, int slotNo)
+        {
+            var layerInfo = GetLayerInfo(className);
+            if (layerInfo != null)
+            {
+                return layerInfo.createLayer(slotNo);
+            }
+
+            PluginUtils.LogError("未登録のレイヤークラス: " + className);
+            return null;
+        }
+
+        public void OnEditPoseUpdated()
         {
             OnEndPoseEdit();
 
-            var cacheBoneData = maidManager.cacheBoneData;
-            if (cacheBoneData == null)
-            {
-                PluginUtils.LogError("ボーンデータが取得できませんでした");
-                return;
-            }
+            var frame = currentLayer.CreateFrame(currentFrameNo);
+            currentLayer.UpdateFrameWithCurrentStat(frame);
+            initialEditFrame = frame;
 
-            initialEditFrame = new FrameData(currentFrameNo);
-            initialEditFrame.SetCacheBoneDataArray(cacheBoneData);
-            initialEditPosition = maid.transform.position;
-            initialEditRotation = maid.transform.rotation;
+            if (maid != null)
+            {
+                initialEditPosition = maid.transform.position;
+                initialEditRotation = maid.transform.rotation;
+
+                PluginUtils.LogDebug("Save Maid Position name={0} initialEditPosition={1} initialEditRotation={2}",
+                    maid.name, initialEditPosition, initialEditRotation);
+            }
 
             if (onEditPoseUpdated != null)
             {
@@ -1364,16 +1436,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 initialEditFrame = null;
                 maid.transform.position = initialEditPosition;
                 maid.transform.rotation = initialEditRotation;
+
+                PluginUtils.LogDebug("Restore Maid Position name={0} initialEditPosition={1} initialEditRotation={2}",
+                    maid.name, initialEditPosition, initialEditRotation);
+            }
+
+            foreach (var layer in layers)
+            {
+                layer.OnEndPoseEdit();
             }
         }
 
-
-        private void OnMaidChanged(Maid maid)
+        private void OnMaidSlotNoChanged(int maidSlotNo)
         {
             if (IsValidData())
             {
-                studioHack.useMuneKeyL = timeline.useMuneKeyL;
-                studioHack.useMuneKeyR = timeline.useMuneKeyR;
+                ChangeActiveLayer(currentLayer.className, maidSlotNo);
             }
         }
     }

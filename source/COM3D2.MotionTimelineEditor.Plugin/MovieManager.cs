@@ -1,24 +1,29 @@
 using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.Events;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class MoviePlayer
+    public enum VideoDisplayType
+    {
+        GUI,
+        Mesh,
+        Backmost,
+    }
+
+    public class MovieManager
     {
         private MoviePlayerImpl _moviePlayerImpl = null;
 
-        private bool _isDisplayOnGUI = false;
+        private VideoDisplayType _videoDisplayType = VideoDisplayType.GUI;
         private string _loadedVideoPath = "";
 
-        private static MoviePlayer _instance;
-        public static MoviePlayer instance
+        private static MovieManager _instance;
+        public static MovieManager instance
         {
             get
             {
                 if (_instance == null)
                 {
-                    _instance = new MoviePlayer();
+                    _instance = new MovieManager();
                 }
                 return _instance;
             }
@@ -93,19 +98,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private MoviePlayer()
+        private MovieManager()
         {
-            timelineManager.onRefresh += ReloadMovie;
-            timelineManager.onAnmSpeedChanged += UpdateSpeed;
-            timelineManager.onSeekCurrentFrame += UpdateSeekTime;
+        }
+
+        public void Init()
+        {
+            TimelineManager.onRefresh += ReloadMovie;
+            TimelineManager.onAnmSpeedChanged += UpdateSpeed;
+            TimelineManager.onSeekCurrentFrame += UpdateSeekTime;
         }
 
         private void SetupImpl()
         {
-            if (_isDisplayOnGUI != timeline.videoDisplayOnGUI)
+            if (_videoDisplayType != timeline.videoDisplayType)
             {
                 UnloadMovie();
-                _isDisplayOnGUI = timeline.videoDisplayOnGUI;
+                _videoDisplayType = timeline.videoDisplayType;
             }
 
             if (!isEnabled)
@@ -158,19 +167,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             LoadMovie();
         }
 
-        public void Update()
-        {
-            if (!isEnabled)
-            {
-                return;
-            }
-
-            if (_moviePlayerImpl != null)
-            {
-                _moviePlayerImpl.Update();
-            }
-        }
-
         public void UpdateTransform()
         {
             if (_moviePlayerImpl != null)
@@ -208,6 +204,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (_moviePlayerImpl != null)
             {
                 _moviePlayerImpl.UpdateColor();
+            }
+        }
+
+        public void UpdateMesh()
+        {
+            if (_moviePlayerImpl != null)
+            {
+                _moviePlayerImpl.UpdateMesh();
             }
         }
     }

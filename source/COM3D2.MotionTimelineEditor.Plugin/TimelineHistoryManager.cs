@@ -8,7 +8,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public class TimelineHistoryData
     {
         public string description;
-        public TimelineData timeline;
+        public TimelineXml xml;
         public long timestamp;
     }
 
@@ -86,7 +86,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var now = System.DateTime.Now;
 
             var history = new TimelineHistoryData();
-            history.timeline = timeline.DeepCopy();
+            history.xml = timeline.ToXml();
             history.timestamp = now.Ticks;
             history.description = string.Format("[{0}] {1}", now.ToString("MM/dd HH:mm:ss"), description);
 
@@ -127,8 +127,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             this.historyIndex = historyIndex;
 
-            var timeline = historyList[historyIndex].timeline.DeepCopy();
-            TimelineManager.instance.UpdateTimeline(timeline);
+            var xml = historyList[historyIndex].xml;
+            TimelineManager.instance.UpdateTimeline(xml);
         }
 
         public void ClearHistory()

@@ -1,9 +1,26 @@
+using System.Collections.Generic;
 using System.Linq;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class EasyMenuItem : IBoneMenuItem
     {
+        public string name
+        {
+            get
+            {
+                return "KeyFrame";
+            }
+        }
+
+        public string displayName
+        {
+            get
+            {
+                return "キーフレーム";
+            }
+        }
+
         public bool isSelectedMenu
         {
             get
@@ -39,11 +56,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public string diplayName
+        public List<IBoneMenuItem> children
         {
             get
             {
-                return "キーフレーム";
+                return null;
             }
         }
 

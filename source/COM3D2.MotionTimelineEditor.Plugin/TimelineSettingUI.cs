@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,6 +18,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public static readonly List<string> EyeMoveTypeNames =
+            Enum.GetNames(typeof(Maid.EyeMoveType)).ToList();
+
         public override void DrawWindow(int id)
         {
             {
@@ -32,11 +36,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.BeginLayout(GUIView.LayoutDirection.Horizontal);
                 {
                     var newFrameRate = view.DrawFloatField("フレームレート", timeline.frameRate, 150, 20);
-
-                    if (view.DrawButton("24", 30, 20))
-                    {
-                        newFrameRate = 24;
-                    }
 
                     if (view.DrawButton("30", 30, 20))
                     {
@@ -55,6 +54,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
                 view.EndLayout();
+
+                var newEyeMoveType = (Maid.EyeMoveType) view.DrawSelectList(
+                    "メイド目線",
+                    EyeMoveTypeNames,
+                    (name, index) => name,
+                    250,
+                    20,
+                    (int) timeline.eyeMoveType);
+                if (newEyeMoveType != timeline.eyeMoveType)
+                {
+                    timeline.eyeMoveType = newEyeMoveType;
+                    maidManager.maid.EyeToCamera(newEyeMoveType, 0f);
+                }
 
                 view.BeginLayout(GUIView.LayoutDirection.Horizontal);
                 {
@@ -78,6 +90,46 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     timeline.isLoopAnm = newIsLoopAnm;
                     timelineManager.ApplyCurrentFrame(true);
                 }
+
+                view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+                {
+                    view.DrawLabel("オフセット時間", 70, 20);
+
+                    view.DrawLabel("開始", 30, 20);
+                    var newDcmStartOffset = view.DrawFloatField(timeline.startOffsetTime, 50, 20);
+                    if (newDcmStartOffset != timeline.startOffsetTime)
+                    {
+                        timeline.startOffsetTime = newDcmStartOffset;
+                    }
+
+                    view.DrawLabel("終了", 30, 20);
+                    var newDcmEndOffset = view.DrawFloatField(timeline.endOffsetTime, 50, 20);
+                    if (newDcmEndOffset != timeline.endOffsetTime)
+                    {
+                        timeline.endOffsetTime = newDcmEndOffset;
+                    }
+                }
+                view.EndLayout();
+
+                view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+                {
+                    view.DrawLabel("フェード時間", 70, 20);
+
+                    view.DrawLabel("開始", 30, 20);
+                    var newDcmStartFade = view.DrawFloatField(timeline.startFadeTime, 50, 20);
+                    if (newDcmStartFade != timeline.startFadeTime)
+                    {
+                        timeline.startFadeTime = newDcmStartFade;
+                    }
+
+                    view.DrawLabel("終了", 30, 20);
+                    var newDcmEndFade = view.DrawFloatField(timeline.endFadeTime, 50, 20);
+                    if (newDcmEndFade != timeline.endFadeTime)
+                    {
+                        timeline.endFadeTime = newDcmEndFade;
+                    }
+                }
+                view.EndLayout();
 
                 view.BeginLayout(GUIView.LayoutDirection.Horizontal);
                 {
@@ -108,7 +160,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.DrawHorizontalLine(Color.gray);
 
-                var newDefaultTangentType = (TangentType) view.DrawSelectList("初期補正曲線", TangentData.TangentTypeNames, 250, 20, (int) config.defaultTangentType);
+                var newDefaultTangentType = (TangentType) view.DrawSelectList(
+                    "初期補正曲線",
+                    TangentData.TangentTypeNames,
+                    (name, index) => name,
+                    250,
+                    20,
+                    (int) config.defaultTangentType);
                 if (newDefaultTangentType != config.defaultTangentType)
                 {
                     config.defaultTangentType = newDefaultTangentType;
