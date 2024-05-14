@@ -3,20 +3,22 @@ using System.Linq;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+    using MTE = MotionTimelineEditor;
+
     public class BoneSetMenuItem : IBoneMenuItem
     {
-        public readonly BoneSetMenuType setMenuType;
-        public readonly List<BoneMenuItem> menuItems;
+        public string name { get; private set; }
+        public string displayName { get; private set; }
 
         public bool isSelectedMenu
         {
             get
             {
-                return menuItems.All(item => item.isSelectedMenu);
+                return children.All(item => item.isSelectedMenu);
             }
             set
             {
-                foreach (var menuItem in menuItems)
+                foreach (var menuItem in children)
                 {
                     menuItem.isSelectedMenu = value;
                 }
@@ -51,7 +53,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
                 _isOpenMenu = value;
 
-                foreach (var menuItem in menuItems)
+                config.SetBoneSetMenuOpen(name, value);
+
+                foreach (var menuItem in children)
                 {
                     menuItem.isVisibleMenu = value;
                 }
@@ -66,13 +70,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public string diplayName
-        {
-            get
-            {
-                return BoneUtils.GetBoneSetMenuJpName(setMenuType);
-            }
-        }
+        public List<IBoneMenuItem> children { get; private set; }
 
         private static BoneMenuManager boneMenuManager
         {
@@ -90,12 +88,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public BoneSetMenuItem(
-            BoneSetMenuType setMenuType,
-            List<BoneMenuItem> menuItems)
+        private static Config config
         {
-            this.setMenuType = setMenuType;
-            this.menuItems = menuItems;
+            get
+            {
+                return MTE.config;
+            }
+        }
+
+        public BoneSetMenuItem(string name, string displayName)
+        {
+            this.name = name;
+            this.displayName = displayName;
+            this.children = new List<IBoneMenuItem>(8);
+        }
+
+        public void AddChild(BoneMenuItem menuItem)
+        {
+            children.Add(menuItem);
         }
 
         public void SelectMenu(bool isMultiSelect)
@@ -117,7 +127,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return false;
             }
 
-            return menuItems.Any(item => item.HasBone(frame));
+            return children.Any(item => item.HasBone(frame));
         }
 
         public bool HasFullBone(FrameData frame)
@@ -127,7 +137,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return false;
             }
 
-            return menuItems.All(item => item.HasBone(frame));
+            return children.All(item => item.HasBone(frame));
         }
 
         public bool IsTargetBone(BoneData bone)
@@ -137,7 +147,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return false;
             }
 
-            return menuItems.Any(item => item.IsTargetBone(bone));
+            return children.Any(item => item.IsTargetBone(bone));
         }
 
         public bool IsSelectedFrame(FrameData frame)
@@ -147,7 +157,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return false;
             }
 
-            return menuItems.Any(item => item.IsSelectedFrame(frame));
+            return children.Any(item => item.IsSelectedFrame(frame));
         }
 
         public void SelectFrame(FrameData frame, bool isMultiSelect)
@@ -157,10 +167,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var bones = new List<BoneData>(menuItems.Count);
-            foreach (var menuItem in menuItems)
+            var bones = new List<BoneData>(children.Count);
+            foreach (var menuItem in children)
             {
-                var bone = frame.GetBone(menuItem.bonePath);
+                var bone = frame.GetBone(menuItem.name);
                 if (bone != null)
                 {
                     bones.Add(bone);

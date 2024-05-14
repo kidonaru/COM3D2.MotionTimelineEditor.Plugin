@@ -1,21 +1,19 @@
-using System.Xml.Serialization;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+
     public class BoneData
     {
-        [XmlElement("Transform")]
-        public TransformData transform;
+        public FrameData parentFrame { get; set; }
 
-        [XmlIgnore]
-        public FrameData parentFrame = null;
+        public ITransformData transform { get; private set; }
 
-        public string bonePath
+        public string name
         {
             get
             {
-                return BoneUtils.ConvertBonePath(transform.name);
+                return transform.name;
             }
         }
 
@@ -35,33 +33,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public BoneData()
+        public ITimelineLayer parentLayer
         {
+            get
+            {
+                return parentFrame.parentLayer;
+            }
         }
 
-        public BoneData(TransformData trans)
+        public BoneData(FrameData parentFrame)
         {
-            this.transform = trans;
+            this.parentFrame = parentFrame;
         }
 
-        public BoneData(Transform trans) : this(new TransformData(trans))
+        public BoneData(FrameData parentFrame, ITransformData transform)
         {
+            this.parentFrame = parentFrame;
+            this.transform = transform;
         }
 
-        /// <summary>
-        /// 最短の補間経路に修正
-        /// </summary>
-        /// <param name="prevBone"></param>
-        public void FixRotation(BoneData prevBone)
+        public void FromXml(BoneXml xml)
         {
-            transform.FixRotation(prevBone.transform);
+            transform = parentLayer.CreateTransformData(xml.transform);
         }
 
-        public BoneData DeepCopy()
+        public BoneXml ToXml()
         {
-            var bone = new BoneData();
-            bone.transform = transform.DeepCopy();
-            return bone;
+            var xml = new BoneXml();
+            xml.transform = transform.ToXml();
+            return xml;
         }
     }
 }

@@ -6,32 +6,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class BoneMenuItem : IBoneMenuItem
     {
-        public readonly IKManager.BoneType boneType;
-        public readonly string bonePath;
+        public string name { get; private set; }
+        public string displayName { get; private set; }
 
         private bool _isSelectedMenu = false;
-        public bool isSelectedMenu
+        public virtual bool isSelectedMenu
         {
             get
             {
-                if (!studioHack.HasBoneRotateVisible(boneType))
-                {
-                    return _isSelectedMenu;
-                }
-                return studioHack.IsBoneRotateVisible(boneType);
+                return _isSelectedMenu;
             }
             set
             {
-                if (!studioHack.HasBoneRotateVisible(boneType))
-                {
-                    _isSelectedMenu = value;
-                    return;
-                }
-                studioHack.SetBoneRotateVisible(boneType, value);
+                _isSelectedMenu = value;
             }
         }
 
-        private bool _isVisibleMenu = true;
+        public bool _isVisibleMenu = true;
         public bool isVisibleMenu
         {
             get
@@ -61,15 +52,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public string diplayName
+        public List<IBoneMenuItem> children
         {
             get
             {
-                return BoneUtils.GetBoneJpName(boneType);
+                return null;
             }
         }
 
-        private static StudioHackBase studioHack
+        protected static StudioHackBase studioHack
         {
             get
             {
@@ -77,7 +68,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static BoneMenuManager boneMenuManager
+        protected static BoneMenuManager boneMenuManager
         {
             get
             {
@@ -85,7 +76,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static TimelineManager timelineManager
+        protected static TimelineManager timelineManager
         {
             get
             {
@@ -93,10 +84,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public BoneMenuItem(IKManager.BoneType boneType)
+        public BoneMenuItem(string name, string displayName)
         {
-            this.boneType = boneType;
-            this.bonePath = BoneUtils.GetBonePath(boneType);
+            this.name = name;
+            this.displayName = displayName;
         }
 
         public void SelectMenu(bool isMultiSelect)
@@ -113,7 +104,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool HasBone(FrameData frame)
         {
-            var bone = frame.GetBone(bonePath);
+            var bone = frame.GetBone(name);
             return bone != null;
         }
 
@@ -124,18 +115,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool IsTargetBone(BoneData bone)
         {
-            return bone.bonePath == bonePath;
+            return bone.name == name;
         }
 
         public bool IsSelectedFrame(FrameData frame)
         {
-            var bone = frame.GetBone(bonePath);
+            var bone = frame.GetBone(name);
             return timelineManager.IsSelectedBone(bone);
         }
 
         public void SelectFrame(FrameData frame, bool isMultiSelect)
         {
-            var bone = frame.GetBone(bonePath);
+            var bone = frame.GetBone(name);
             if (bone == null)
             {
                 return;

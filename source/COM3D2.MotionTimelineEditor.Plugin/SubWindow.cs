@@ -10,6 +10,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         None,
         TimelineLoad,
         TimelineSetting,
+        TimelineLayer,
         IKHold,
         KeyFrame,
         MoviePlayer,
@@ -22,7 +23,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public readonly static int WINDOW_ID = 485087;
         public readonly static int WINDOW_WIDTH = 280;
         public readonly static int WINDOW_HEIGHT = 480;
-        public Rect rc_stgw = new Rect(
+        public static Rect rc_stgw = new Rect(
             0,
             0,
             WINDOW_WIDTH,
@@ -53,9 +54,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             null,
             new TimelineLoadUI(),
             new TimelineSettingUI(),
+            new TimelineLayerUI(),
             new IKHoldUI(),
             new KeyFrameUI(),
-            new MoviePlayerUI(),
+            new MediaPlayerUI(),
             new TimelineHistoryUI(),
             new TimelineTrackUI(),
         };
@@ -167,7 +169,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (isShowWnd)
             {
-                var gsWin = MTE.instance.gsWin;
+                var gsWin = MTE.mainWindow.gsWin;
                 rc_stgw = GUI.Window(WINDOW_ID, rc_stgw, DrawWindow, ui != null ? ui.title : "", gsWin);
             }
         }
@@ -201,7 +203,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void ResetPosition()
         {
-            var source = MotionTimelineEditor.instance.rc_stgw;
+            var source = MainWindow.rc_stgw;
             rc_stgw.x = source.x - WINDOW_WIDTH;
             rc_stgw.y = source.y;
         }

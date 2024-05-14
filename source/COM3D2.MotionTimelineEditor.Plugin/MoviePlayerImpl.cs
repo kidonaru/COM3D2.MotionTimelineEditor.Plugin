@@ -3,12 +3,11 @@ using RenderHeads.Media.AVProVideo;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MTE = MotionTimelineEditor;
-
     public class MoviePlayerImpl : MonoBehaviour
     {
         private MediaPlayer _mediaPlayer = null;
         private DisplayIMGUI _displayIMGUI = null;
+        private MeshFilter _meshFilter = null;
         private bool _isAnmPlaying = false;
         private bool _isStarted = false;
         private float _prevTime = 0f;
@@ -33,11 +32,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static ITimelineLayer currentLayer
+        {
+            get
+            {
+                return timelineManager.currentLayer;
+            }
+        }
+
         public bool isDisplayOnGUI
         {
             get
             {
-                return timeline.videoDisplayOnGUI;
+                return timeline.videoDisplayType == VideoDisplayType.GUI;
+            }
+        }
+
+        public bool isDisplayBackmost
+        {
+            get
+            {
+                return timeline.videoDisplayType == VideoDisplayType.Backmost;
             }
         }
 
@@ -80,8 +95,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             else
             {
                 MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
-                MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
-                meshFilter.mesh = CreateQuadMesh();
+                _meshFilter = gameObject.AddComponent<MeshFilter>();
+                _meshFilter.mesh = CreateQuadMesh();
 
                 Material videoMaterial = new Material(Shader.Find("Unlit/Texture"));
                 meshRenderer.material = videoMaterial;
@@ -96,6 +111,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             _mediaPlayer = null;
             _displayIMGUI = null;
+            _meshFilter = null;
         }
 
         public void LoadMovie(string videoPath)
@@ -134,11 +150,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             _prevTime = currentTime;
 
-            var newIsAnmPlaying = timelineManager.isAnmPlaying;
+            var newIsAnmPlaying = currentLayer.isAnmPlaying;
             if (_isAnmPlaying != newIsAnmPlaying)
             {
                 _isAnmPlaying = newIsAnmPlaying;
                 UpdateSpeed();
+            }
+        }
+
+        public void LateUpdate()
+        {
+            if (isDisplayBackmost)
+            {
+                UpdateTransform();
             }
         }
 
@@ -164,24 +188,41 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         _displayIMGUI._height = timeline.videoGUIScale;
                     }
                 }
+                else if (isDisplayBackmost)
+                {
+                    var transform = gameObject.transform;
+                    var camera = Camera.main;
+                    var distanceFromCamera = camera.farClipPlane - 10f;
+
+                    // アスペクト比調整
+                    var scale = Vector3.one;
+                    scale.y = 2f * distanceFromCamera *
+                            Mathf.Tan(camera.fieldOfView * 0.5f * Mathf.Deg2Rad);
+                    scale.x = scale.y * _aspectRatio;
+                    transform.localScale = scale;
+
+                    // 位置調整
+                    var position = camera.transform.position;
+                    position += camera.transform.forward * distanceFromCamera;
+                    transform.position = position;
+
+                    // ビルボード補正
+                    transform.LookAt(camera.transform);
+                }
                 else
                 {
+                    var transform = gameObject.transform;
+
                     // 位置調整
-                    gameObject.transform.position = timeline.videoPosition;
+                    transform.position = timeline.videoPosition;
 
                     // アスペクト比調整
                     var scale = Vector3.one * timeline.videoScale;
                     scale.x = scale.y * _aspectRatio;
-                    gameObject.transform.localScale = scale;
-
-                    // ビルボード補正
-                    /*var cameraTransform = SH.mainCamera.transform;
-                    gameObject.transform.LookAt(
-                        gameObject.transform.position + cameraTransform.rotation * Vector3.forward,
-                        cameraTransform.rotation * Vector3.up);*/
+                    transform.localScale = scale;
 
                     var rotation = timeline.videoRotation;
-                    gameObject.transform.rotation = Quaternion.Euler(rotation.x, rotation.y, rotation.z);
+                    transform.rotation = Quaternion.Euler(rotation.x, rotation.y, rotation.z);
                 }
                 
             }
@@ -214,7 +255,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (_mediaPlayer != null && _mediaPlayer.Control != null)
             {
-                var seekTimeMs = (currentTime + timeline.videoStartTime) * 1000f;
+                var seekTimeMs = (currentTime + timeline.startOffsetTime + timeline.videoStartTime) * 1000f;
                 var playingTimeMs = _mediaPlayer.Control.GetCurrentTimeMs();
                 if (Mathf.Abs(seekTimeMs - playingTimeMs) > 1)
                 {
@@ -233,6 +274,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 color.a = timeline.videoGUIAlpha;
                 _displayIMGUI._alphaBlend = color.a != 1f;
                 _displayIMGUI._color = color;
+            }
+        }
+
+        public void UpdateMesh()
+        {
+            if (_meshFilter != null)
+            {
+                if (_meshFilter.mesh != null)
+                {
+                    Object.Destroy(_meshFilter.mesh);
+                    _meshFilter.mesh = null;
+                }
+                _meshFilter.mesh = CreateQuadMesh();
             }
         }
 
@@ -267,12 +321,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private Mesh CreateQuadMesh()
         {
             Mesh mesh = new Mesh();
-            mesh.vertices = new Vector3[] {
-                new Vector3(-0.5f, 0f, 0),
-                new Vector3(0.5f, 0f, 0),
-                new Vector3(-0.5f, 1f, 0),
-                new Vector3(0.5f, 1f, 0),
-            };
+
+            if (isDisplayBackmost)
+            {
+                var vertices = new Vector3[] {
+                    new Vector3(-0.5f, -0.5f, 0),
+                    new Vector3(0.5f, -0.5f, 0),
+                    new Vector3(-0.5f, 0.5f, 0),
+                    new Vector3(0.5f, 0.5f, 0),
+                };
+
+                for (var i = 0; i < vertices.Length; i++)
+                {
+                    var vertex = vertices[i];
+                    vertex.x -= timeline.videoBackmostPosition.x;
+                    vertex.y += timeline.videoBackmostPosition.y;
+                    vertices[i] = vertex;
+                }
+
+                mesh.vertices = vertices;
+            }
+            else
+            {
+                mesh.vertices = new Vector3[] {
+                    new Vector3(-0.5f, 0f, 0),
+                    new Vector3(0.5f, 0f, 0),
+                    new Vector3(-0.5f, 1f, 0),
+                    new Vector3(0.5f, 1f, 0),
+                };
+            }
             mesh.uv = new Vector2[] {
                 new Vector2(1, 0),
                 new Vector2(0, 0),

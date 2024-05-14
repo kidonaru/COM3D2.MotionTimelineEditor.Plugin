@@ -26,7 +26,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 height = targetHeight;
                 width = (int)(height * sourceAspect);
             }
-			TextureScale.Bilinear(sourceTexture, width, height);
+            TextureScale.Bilinear(sourceTexture, width, height);
         }
 
         public static Texture2D ResizeAndCropTexture(
@@ -48,7 +48,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 width = targetWidth;
                 height = (int)(sourceTexture.height * ((float)targetWidth / sourceTexture.width));
             }
-			TextureScale.Bilinear(sourceTexture, width, height);
+            TextureScale.Bilinear(sourceTexture, width, height);
 
             var pixels = new Color[targetWidth * targetHeight];
 
@@ -164,6 +164,153 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 ikDragPoint.target_ik_point_trans.localPosition = ikDragPoint.GetBackupLocalPos();
             }
+        }
+
+        public static T GetCustomAttribute<T>(
+            this System.Type type)
+            where T : System.Attribute
+        {
+            var attributes = type.GetCustomAttributes(typeof(T), false);
+            if (attributes.Length > 0)
+            {
+                return (T) attributes[0];
+            }
+            return default(T);
+        }
+
+        public static Vector3 ToVector3(this ValueData[] values)
+        {
+            if (values.Length != 3)
+            {
+                PluginUtils.LogError("ToVector3: 不正なValueData配列です length={0}", values.Length);
+                return Vector3.zero;
+            }
+            return new Vector3(values[0].value, values[1].value, values[2].value);
+        }
+
+        public static void FromVector3(this ValueData[] values, Vector3 vector)
+        {
+            if (values.Length != 3)
+            {
+                PluginUtils.LogError("FromVector3: 不正なValueData配列です length={0}", values.Length);
+                return;
+            }
+            values[0].value = vector.x;
+            values[1].value = vector.y;
+            values[2].value = vector.z;
+        }
+
+        public static Quaternion ToQuaternion(this ValueData[] values)
+        {
+            if (values.Length != 4)
+            {
+                PluginUtils.LogError("ToQuaternion: 不正なValueData配列です length={0}", values.Length);
+                return Quaternion.identity;
+            }
+            return new Quaternion(values[0].value, values[1].value, values[2].value, values[3].value);
+        }
+
+        public static void FromQuaternion(this ValueData[] values, Quaternion quaternion)
+        {
+            if (values.Length != 4)
+            {
+                PluginUtils.LogError("FromQuaternion: 不正なValueData配列です length={0}", values.Length);
+                return;
+            }
+            values[0].value = quaternion.x;
+            values[1].value = quaternion.y;
+            values[2].value = quaternion.z;
+            values[3].value = quaternion.w;
+        }
+
+        private static FieldInfo _targetListField = null;
+
+        public static List<PhotoTransTargetObject> GetTargetList(this ObjectManagerWindow self)
+        {
+            if (_targetListField == null)
+            {
+                _targetListField = typeof(ObjectManagerWindow).GetField("target_list_",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+            }
+
+            return (List<PhotoTransTargetObject>) _targetListField.GetValue(self);
+        }
+
+        public static bool IsLock(this FingerBlend.BaseFinger baseFinger, int index)
+        {
+            var armFinger = baseFinger as FingerBlend.ArmFinger;
+            if (armFinger != null)
+            {
+                switch (index)
+                {
+                    case 0:
+                        return armFinger.lock_enabled0;
+                    case 1:
+                        return armFinger.lock_enabled1;
+                    case 2:
+                        return armFinger.lock_enabled2;
+                    case 3:
+                        return armFinger.lock_enabled3;
+                    case 4:
+                        return armFinger.lock_enabled4;
+                }
+            }
+
+            var legFinger = baseFinger as FingerBlend.LegFinger;
+            if (legFinger != null)
+            {
+                switch (index)
+                {
+                    case 0:
+                        return legFinger.lock_enabled0;
+                    case 1:
+                        return legFinger.lock_enabled1;
+                    case 2:
+                        return legFinger.lock_enabled2;
+                }
+            }
+
+            return false;
+        }
+
+        public static void CopyFrom(
+            this FingerBlend.BaseFinger baseFinger,
+            FingerBlend.BaseFinger source)
+        {
+            baseFinger.enabled = source.enabled;
+
+            var armFinger = baseFinger as FingerBlend.ArmFinger;
+            var sourceArmFinger = source as FingerBlend.ArmFinger;
+            if (armFinger != null && sourceArmFinger != null)
+            {
+                armFinger.lock_enabled0 = sourceArmFinger.lock_enabled0;
+                armFinger.lock_enabled1 = sourceArmFinger.lock_enabled1;
+                armFinger.lock_enabled2 = sourceArmFinger.lock_enabled2;
+                armFinger.lock_enabled3 = sourceArmFinger.lock_enabled3;
+                armFinger.lock_enabled4 = sourceArmFinger.lock_enabled4;
+
+                armFinger.lock_value0 = sourceArmFinger.lock_value0;
+                armFinger.lock_value1 = sourceArmFinger.lock_value1;
+                armFinger.lock_value2 = sourceArmFinger.lock_value2;
+                armFinger.lock_value3 = sourceArmFinger.lock_value3;
+                armFinger.lock_value4 = sourceArmFinger.lock_value4;
+            }
+
+            var legFinger = baseFinger as FingerBlend.LegFinger;
+            var sourceLegFinger = source as FingerBlend.LegFinger;
+            if (legFinger != null && sourceLegFinger != null)
+            {
+                legFinger.lock_enabled0 = sourceLegFinger.lock_enabled0;
+                legFinger.lock_enabled1 = sourceLegFinger.lock_enabled1;
+                legFinger.lock_enabled2 = sourceLegFinger.lock_enabled2;
+
+                legFinger.lock_value0 = sourceLegFinger.lock_value0;
+                legFinger.lock_value1 = sourceLegFinger.lock_value1;
+                legFinger.lock_value2 = sourceLegFinger.lock_value2;
+            }
+
+            baseFinger.value_open = source.value_open;
+            baseFinger.value_fist = source.value_fist;
         }
     }
 

@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using COM3D2.MotionTimelineEditor.Plugin;
 using MeidoPhotoStudio.Plugin;
+using System.Collections.Generic;
 
 namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 {
@@ -17,9 +18,12 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
         private FieldInfo fieldActive = null;
         private FieldInfo fieldMeidoManager = null;
         private FieldInfo fieldWindowManager = null;
+        private FieldInfo fieldPropManager = null;
         private FieldInfo fieldMaidIKPane = null;
+        private FieldInfo fieldIKToggle = null;
         private FieldInfo fieldReleaseIKToggle = null;
         private FieldInfo fieldBoneIKToggle = null;
+        private FieldInfo fieldPropList = null;
 
         private bool isActive
         {
@@ -45,7 +49,15 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
         }
 
-        private MainWindow mainWindow
+        private PropManager propManager
+        {
+            get
+            {
+                return (PropManager)fieldPropManager.GetValue(meidoPhotoStudio);
+            }
+        }
+
+        private MeidoPhotoStudio.Plugin.MainWindow mainWindow
         {
             get
             {
@@ -53,7 +65,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                 {
                     return null;
                 }
-                return windowManager[Constants.Window.Main] as MainWindow;
+                return windowManager[Constants.Window.Main] as MeidoPhotoStudio.Plugin.MainWindow;
             }
         }
 
@@ -77,6 +89,14 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
         }
 
+        private Toggle ikToggle
+        {
+            get
+            {
+                return (Toggle)fieldIKToggle.GetValue(maidIKPane);
+            }
+        }
+
         private Toggle releaseIKToggle
         {
             get
@@ -90,6 +110,43 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             get
             {
                 return (Toggle)fieldBoneIKToggle.GetValue(maidIKPane);
+            }
+        }
+
+        private List<DragPointProp> propList
+        {
+            get
+            {
+                return (List<DragPointProp>)fieldPropList.GetValue(propManager);
+            }
+        }
+
+        private bool isIK
+        {
+            get
+            {
+                var toggle = this.ikToggle;
+                if (toggle == null)
+                {
+                    return false;
+                }
+
+                return toggle.Value;
+            }
+            set
+            {
+                var toggle = this.ikToggle;
+                if (toggle == null)
+                {
+                    return;
+                }
+
+                toggle.SetValueOnly(value);
+
+                if (activeMeido != null)
+                {
+                    activeMeido.IK = value;
+                }
             }
         }
 
@@ -137,7 +194,12 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                     return;
                 }
 
-                toggle.Value = value;
+                toggle.SetValueOnly(value);
+
+                if (activeMeido != null)
+                {
+                    activeMeido.Bone = value;
+                }
             }
         }
 
@@ -155,6 +217,20 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
         }
 
+        private List<Meido> activeMeidoList
+        {
+            get
+            {
+                var meidoManager = this.meidoManager;
+                if (meidoManager == null)
+                {
+                    return null;
+                }
+
+                return meidoManager.ActiveMeidoList;
+            }
+        }
+
         private bool isStop
         {
             get
@@ -167,10 +243,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
             set
             {
-                if (animationState != null)
-                {
-                    animationState.enabled = !value;
-                }
+                maidManager.SetMotionPlayingAll(!value);
             }
         }
 
@@ -182,7 +255,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
         }
 
-        public override Maid activeMaid
+        public override Maid selectedMaid
         {
             get
             {
@@ -193,6 +266,60 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                 }
 
                 return activeMeido.Maid;
+            }
+        }
+
+        private List<Maid> _allMaids = new List<Maid>();
+        public override List<Maid> allMaids
+        {
+            get
+            {
+                _allMaids.Clear();
+                foreach (var meido in activeMeidoList)
+                {
+                    if (meido != null)
+                    {
+                        _allMaids.Add(meido.Maid);
+                    }
+                }
+                return _allMaids;
+            }
+        }
+
+        private List<StudioModelStat> _modelList = new List<StudioModelStat>();
+        public override List<StudioModelStat> modelList
+        {
+            get
+            {
+                _modelList.Clear();
+
+                foreach (var prop in propList)
+                {
+                    var displayName = prop.Name;
+                    var fileName = prop.Info.Filename;
+                    var myRoomId = prop.Info.MyRoomID;
+                    var bgObjectId = 0;
+                    var transform = prop.MyObject;
+
+                    var model = modelManager.CreateModelStat(
+                        displayName,
+                        fileName,
+                        myRoomId,
+                        bgObjectId,
+                        transform);
+
+                    _modelList.Add(model);
+                }
+
+                return _modelList;
+            }
+        }
+
+        public override int selectedMaidSlotNo
+        {
+            get
+            {
+                return allMaids.IndexOf(selectedMaid);
             }
         }
 
@@ -249,16 +376,12 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
             set
             {
-                if (value == isPoseEditing)
-                {
-                    return;
-                }
-
                 if (value && isMotionPlaying)
                 {
-                    isStop = true;
+                    isMotionPlaying = false;
                 }
 
+                isIK = value;
                 isBoneIK = value;
                 isReleaseIK = value;
             }
@@ -272,11 +395,6 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
             set
             {
-                if (value == isMotionPlaying)
-                {
-                    return;
-                }
-
                 if (value && isPoseEditing)
                 {
                     isPoseEditing = false;
@@ -286,32 +404,11 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
         }
 
-        private float _motionSliderRate = 0f;
-
         public override float motionSliderRate
         {
-            get
-            {
-                return _motionSliderRate;
-            }
             set
             {
-                //Extensions.LogDebug("motionSliderRate update：" + value);
-                _motionSliderRate = value;
-
-                if (animationState != null)
-                {
-                    var isStop = this.isStop;
-                    var maxNum = animationState.length;
-                    var current = Mathf.Clamp01(value) * maxNum;
-                    animationState.time = current;
-                    animationState.enabled = true;
-                    animation.Sample();
-                    if (isStop)
-                    {
-                        animationState.enabled = false;
-                    }
-                }
+                // do nothing
             }
         }
 
@@ -392,17 +489,33 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                 fieldWindowManager = typeof(MPS).GetField("windowManager", bindingAttr);
                 PluginUtils.AssertNull(fieldWindowManager != null, "fieldWindowManager is null");
 
+                fieldPropManager = typeof(MPS).GetField("propManager", bindingAttr);
+                PluginUtils.AssertNull(fieldPropManager != null, "fieldPropManager is null");
+
                 fieldMaidIKPane = typeof(PoseWindowPane).GetField("maidIKPane", bindingAttr);
                 PluginUtils.AssertNull(fieldMaidIKPane != null, "fieldMaidIKPane is null");
+
+                fieldIKToggle = typeof(MaidIKPane).GetField("ikToggle", bindingAttr);
+                PluginUtils.AssertNull(fieldIKToggle != null, "fieldIKToggle is null");
 
                 fieldReleaseIKToggle = typeof(MaidIKPane).GetField("releaseIKToggle", bindingAttr);
                 PluginUtils.AssertNull(fieldReleaseIKToggle != null, "fieldReleaseIKToggle is null");
 
                 fieldBoneIKToggle = typeof(MaidIKPane).GetField("boneIKToggle", bindingAttr);
                 PluginUtils.AssertNull(fieldBoneIKToggle != null, "fieldBoneIKToggle is null");
+
+                fieldPropList = typeof(PropManager).GetField("propList", bindingAttr);
+                PluginUtils.AssertNull(fieldPropList != null, "fieldPropList is null");
             }
 
             return true;
+        }
+
+        public override void ChangeMaid(Maid maid)
+        {
+            var targetMaidSlotNo = allMaids.IndexOf(maid);
+            PluginUtils.LogDebug("ChangeMaid: " + targetMaidSlotNo);
+            meidoManager.ChangeMaid(targetMaidSlotNo);
         }
 
         public override void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
@@ -427,45 +540,58 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             return true;
         }
 
-        protected override void OnMaidChanged(Maid maid)
+        private readonly static Dictionary<StudioModelType, PropInfo.PropType> propTypeMap =
+            new Dictionary<StudioModelType, PropInfo.PropType>
         {
-            base.OnMaidChanged(maid);
-            motionSliderRate = _motionSliderRate;
+            { StudioModelType.Asset, PropInfo.PropType.Odogu },
+            { StudioModelType.Prefab, PropInfo.PropType.Odogu },
+            { StudioModelType.Mod, PropInfo.PropType.Mod },
+            { StudioModelType.MyRoom, PropInfo.PropType.MyRoom },
+        };
+
+        public override void DeleteAllModels()
+        {
+            propManager.DeleteAllProps();
         }
 
-        protected override void OnAnmChanged(string anmName)
+        public override void DeleteModel(StudioModelStat model)
         {
-            base.OnAnmChanged(anmName);
-            motionSliderRate = _motionSliderRate;
+            var index = propList.FindIndex(p => p.MyObject == model.transform);
+            if (index >= 0)
+            {
+                propManager.RemoveProp(index);
+            }
+        }
+
+        public override void CreateModel(StudioModelStat model)
+        {
+            var propType = propTypeMap[model.info.type];
+            var isMyRoom = model.info.type == StudioModelType.MyRoom;
+            var prop = new PropInfo(propType)
+            {
+                Filename = isMyRoom ? model.info.prefabName : model.info.fileName,
+                MyRoomID = model.info.myRoomId,
+            };
+
+            if (!propManager.AddFromPropInfo(prop))
+            {
+                PluginUtils.LogError("CreateModel: モデルの追加に失敗しました" + model.name);
+            }
+        }
+
+        protected override void OnMaidChanged(int maidSlotNo, Maid maid)
+        {
+            base.OnMaidChanged(maidSlotNo, maid);
+        }
+
+        protected override void OnAnmChanged(int maidSlotNo, string anmName)
+        {
+            base.OnAnmChanged(maidSlotNo, anmName);
         }
 
         public override void Update()
         {
             base.Update();
-
-            if (maid == null)
-            {
-                return;
-            }
-
-            // 再生位置更新
-            var animationState = StudioHackBase.animationState;
-            if (animationState != null && animationState.enabled && animationState.length > 0f)
-            {
-                float value = animationState.time;
-                if (animationState.length < animationState.time)
-                {
-                    if (animationState.wrapMode == WrapMode.ClampForever)
-                    {
-                        value = animationState.length;
-                    }
-                    else
-                    {
-                        value = animationState.time - animationState.length * (float)((int)(animationState.time / animationState.length));
-                    }
-                }
-                _motionSliderRate = value / animationState.length;
-            }
         }
     }
 }

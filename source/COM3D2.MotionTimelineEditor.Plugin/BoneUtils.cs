@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
@@ -19,6 +20,55 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public static class BoneUtils
     {
+        private static string[] _saveBonePaths = null;
+        public static string[] saveBonePaths
+        {
+            get
+            {
+                if (_saveBonePaths == null)
+                {
+                    var methodInfo = typeof(CacheBoneDataArray).GetMethod("GetSaveBonePathArray", BindingFlags.NonPublic | BindingFlags.Static);
+                    _saveBonePaths = (string[]) methodInfo.Invoke(null, null);
+                    PluginUtils.AssertNull(saveBonePaths != null, "saveBonePaths is null");
+                }
+                return _saveBonePaths;
+            }
+        }
+
+        private static List<string> _saveBoneNames = null;
+        public static List<string> saveBoneNames
+        {
+            get
+            {
+                if (_saveBoneNames == null)
+                {
+                    _saveBoneNames = new List<string>(saveBonePaths.Length);
+                    for (int i = 0; i < saveBonePaths.Length; i++)
+                    {
+                        _saveBoneNames.Add(ConvertBoneName(saveBonePaths[i]));
+                    }
+                }
+                return _saveBoneNames;
+            }
+        }
+
+        private static List<IKManager.BoneType> _saveBoneTypes = null;
+        public static List<IKManager.BoneType> saveBoneTypes
+        {
+            get
+            {
+                if (_saveBoneTypes == null)
+                {
+                    _saveBoneTypes = new List<IKManager.BoneType>(saveBoneNames.Count);
+                    for (int i = 0; i < saveBoneNames.Count; i++)
+                    {
+                        _saveBoneTypes.Add(GetBoneTypeByName(saveBoneNames[i]));
+                    }
+                }
+                return _saveBoneTypes;
+            }
+        }
+
         private static Dictionary<string, string> _boneNameToPathMap = null;
 
         public static Dictionary<string, string> boneNameToPathMap
@@ -27,8 +77,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_boneNameToPathMap == null)
                 {
-                    _boneNameToPathMap = new Dictionary<string, string>(PluginUtils.saveBonePaths.Length + 2);
-                    foreach (var bonePath in PluginUtils.saveBonePaths)
+                    _boneNameToPathMap = new Dictionary<string, string>(saveBonePaths.Length + 2);
+                    foreach (var bonePath in saveBonePaths)
                     {
                         _boneNameToPathMap[ConvertBoneName(bonePath)] = bonePath;
                     }

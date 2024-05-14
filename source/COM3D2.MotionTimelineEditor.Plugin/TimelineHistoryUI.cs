@@ -66,7 +66,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     var index = view.DrawListView(
                         historyList,
-                        history => history.description,
+                        (history, _) => history.description,
+                        null,
                         -1,
                         -1,
                         ref scrollPosition,

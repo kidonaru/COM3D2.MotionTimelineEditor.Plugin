@@ -4,6 +4,28 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+    public enum KeyBindType
+    {
+        PluginToggle,
+        Visible,
+        AddKeyFrame,
+        RemoveKeyFrame,
+        Play,
+        EditMode,
+        Copy,
+        Paste,
+        FlipPaste,
+        PoseCopy,
+        PosePaste,
+        PrevFrame,
+        NextFrame,
+        PrevKeyFrame,
+        NextKeyFrame,
+        MultiSelect,
+        Undo,
+        Redo,
+    }
+
     public class KeyBind
     {
         [XmlIgnore]
@@ -124,6 +146,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return true;
             }
             return Input.GetKeyDown(keyCode);
+        }
+
+        private float _keyDownTime = 0f;
+        private bool _keyDownFirst = false;
+
+        public bool GetKeyDownRepeat(float repeatTimeFirst, float repeatTime)
+        {
+            if (GetKeyDown())
+            {
+                _keyDownTime = Time.realtimeSinceStartup;
+                _keyDownFirst = true;
+                return true;
+            }
+
+            if (GetKey())
+            {
+                var diffTime = Time.realtimeSinceStartup - _keyDownTime;
+                if (diffTime > (_keyDownFirst ? repeatTimeFirst : repeatTime))
+                {
+                    _keyDownTime = Time.realtimeSinceStartup;
+                    _keyDownFirst = false;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public bool GetKeyUp()

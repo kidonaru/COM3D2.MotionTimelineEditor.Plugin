@@ -1,40 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Xml.Serialization;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MTE = MotionTimelineEditor;
-
     public class FrameData
     {
-        [XmlElement("FrameNo")]
-        public int frameNo = 0;
+        public ITimelineLayer parentLayer { get; set; }
 
-        [XmlElement("Bone")]
-        public BoneData[] _bones
-        {
-            get
-            {
-                return bones.ToArray();
-            }
-            set
-            {
-                ClearBones();
-                foreach (var bone in value)
-                {
-                    _boneMap[bone.bonePath] = bone;
-                    bone.parentFrame = this;
-                }
-            }
-        }
+        public int frameNo { get; set; }
 
-        [XmlIgnore]
         public Dictionary<string, BoneData>.ValueCollection bones
         {
             get
@@ -43,39 +19,51 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        [XmlIgnore]
+        public Dictionary<string, BoneData>.KeyCollection boneNames
+        {
+            get
+            {
+                return _boneMap.Keys;
+            }
+        }
+
         private Dictionary<string, BoneData> _boneMap = null;
 
         public bool isFullBone
         {
             get
             {
-                return _boneMap.Count == PluginUtils.saveBonePaths.Length;
+                return _boneMap.Count == parentLayer.allBoneNames.Count;
             }
         }
 
-        private static StudioHackBase studioHack
+        public FrameData(ITimelineLayer parentLayer)
         {
-            get
-            {
-                return MTE.studioHack;
-            }
+            this.parentLayer = parentLayer;
+            _boneMap = new Dictionary<string, BoneData>(BoneUtils.saveBoneNames.Count);
         }
 
-        public FrameData()
-        {
-            _boneMap = new Dictionary<string, BoneData>(PluginUtils.saveBonePaths.Length);
-        }
-
-        public FrameData(int frameNo) : this()
+        public FrameData(ITimelineLayer parentLayer, int frameNo) : this(parentLayer)
         {
             this.frameNo = frameNo;
         }
 
-        public BoneData GetBone(string path)
+        public BoneData CreateBone(ITransformData transform)
+        {
+            return new BoneData(this, transform);
+        }
+
+        public BoneData CreateBone(BoneXml xml)
+        {
+            var bone = new BoneData(this);
+            bone.FromXml(xml);
+            return bone;
+        }
+
+        public BoneData GetBone(string name)
         {
             BoneData bone;
-            if (_boneMap.TryGetValue(path, out bone))
+            if (_boneMap.TryGetValue(name, out bone))
             {
                 return bone;
             }
@@ -89,7 +77,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool HasBone(BoneData bone)
         {
-            return bone != null && _boneMap.ContainsKey(bone.bonePath);
+            return bone != null && _boneMap.ContainsKey(bone.name);
         }
 
         public bool HasAnyBones(IEnumerable<BoneData> bones)
@@ -97,14 +85,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return bones.Any(HasBone);
         }
 
-        public BoneData GetOrCreateBone(string path)
+        public BoneData GetOrCreateBone(string name)
         {
             BoneData bone;
-            if (!_boneMap.TryGetValue(path, out bone))
+            if (!_boneMap.TryGetValue(name, out bone))
             {
-                bone = new BoneData(new TransformData(BoneUtils.ConvertBoneName(path)));
-                bone.parentFrame = this;
-                _boneMap[path] = bone;
+                var trans = parentLayer.CreateTransformData(name);
+                bone = CreateBone(trans);
+                _boneMap[name] = bone;
             }
             return bone;
         }
@@ -121,9 +109,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var path = bone.bonePath;
+            var name = bone.name;
             bone.parentFrame = this;
-            _boneMap[path] = bone;
+            _boneMap[name] = bone;
         }
 
         public void SetBones(IEnumerable<BoneData> bones)
@@ -141,7 +129,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var targetBone = GetOrCreateBone(bone.bonePath);
+            var targetBone = GetOrCreateBone(bone.name);
             targetBone.transform.FromTransformData(bone.transform);
         }
 
@@ -157,7 +145,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (bone != null)
             {
-                _boneMap.Remove(bone.bonePath);
+                _boneMap.Remove(bone.name);
                 bone.parentFrame = null;
             }
         }
@@ -185,200 +173,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return _boneMap.Count > 0;
         }
 
-        public List<BoneData> GetDiffBones(
-            FrameData sourceFrame,
-            bool useBustKeyL,
-            bool useBustKeyR)
+        public List<BoneData> GetDiffBones(FrameData sourceFrame)
         {
             var diffBones = new List<BoneData>(_boneMap.Count);
             foreach (var pair in _boneMap)
             {
-                var path = pair.Key;
+                var name = pair.Key;
                 var bone = pair.Value;
 
-                if (bone.transform.isHead)
-                {
-                    continue;
-                }
-                if (bone.transform.isBustL && !useBustKeyL)
-                {
-                    continue;
-                }
-                if (bone.transform.isBustR && !useBustKeyR)
+                if (bone.transform.isHidden)
                 {
                     continue;
                 }
 
-                var sourceBone = sourceFrame.GetBone(path);
+                var sourceBone = sourceFrame.GetBone(name);
                 if (sourceBone == null || !bone.transform.Equals(sourceBone.transform))
                 {
                     diffBones.Add(bone);
                 }
             }
             return diffBones;
-        }
-
-        public byte[] GetAnmBinary(bool use_bust_keyL, bool use_bust_keyR)
-        {
-            Action<BinaryWriter, BoneData> write_bone_data = delegate (BinaryWriter w, BoneData bone)
-            {
-                int num = 2;
-                w.Write((byte)1);
-                w.Write(bone.bonePath);
-                float[] values = bone.transform.values;
-
-                for (int i = 0; i < values.Length; i++)
-                {
-                    w.Write((byte)(100 + i));
-                    w.Write(num);
-                    for (int j = 0; j < num; j++)
-                    {
-                        w.Write((float)j);
-                        w.Write(values[i]);
-                        w.Write(0);
-                        w.Write(0);
-                    }
-                }
-            };
-            MemoryStream memoryStream = new MemoryStream();
-            BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
-            binaryWriter.Write("CM3D2_ANIM");
-            binaryWriter.Write(1001);
-            foreach (var path in PluginUtils.saveBonePaths)
-            {
-                var bone = GetBone(path);
-                if (bone == null)
-                {
-                    PluginUtils.LogError("ボーンがないのでスキップしました：" + path);
-                    continue;
-                }
-                write_bone_data(binaryWriter, bone);
-            }
-            binaryWriter.Write((byte)0);
-            binaryWriter.Write((byte)(use_bust_keyL ? 1u : 0u));
-            binaryWriter.Write((byte)(use_bust_keyR ? 1u : 0u));
-            binaryWriter.Close();
-            memoryStream.Close();
-            byte[] result = memoryStream.ToArray();
-            memoryStream.Dispose();
-            return result;
-        }
-
-        public KeyValuePair<bool, bool> SetAnmBinary(byte[] binary)
-        {
-            MemoryStream memoryStream = new MemoryStream(binary);
-            BinaryReader binaryReader = new BinaryReader(memoryStream);
-            string header = binaryReader.ReadString();
-            if (header != "CM3D2_ANIM")
-            {
-                binaryReader.Close();
-                memoryStream.Close();
-                memoryStream.Dispose();
-                PluginUtils.LogError("SetAnmBinary：ヘッダが不正です。");
-                return new KeyValuePair<bool, bool>(false, false);
-            }
-
-            int version = binaryReader.ReadInt32();
-            bool hasBustKeyInfo = version >= 1001;
-
-            var bustData = new Dictionary<int, KeyValuePair<TransformData, float[]>>();
-            while (binaryReader.ReadByte() != 0)
-            {
-                var path = binaryReader.ReadString();
-                var boneName = BoneUtils.ConvertBoneName(path);
-                var transform = new TransformData(boneName);
-                BoneData boneData = new BoneData(transform);
-                float[] values = new float[boneData != null && boneData.transform.isBipRoot ? 7 : 4];
-
-                for (int i = 0; i < values.Length; i++)
-                {
-                    byte frameInfo = binaryReader.ReadByte();
-                    int numFrames = binaryReader.ReadInt32();
-                    for (int j = 0; j < numFrames; j++)
-                    {
-                        binaryReader.ReadSingle();
-                        var value = binaryReader.ReadSingle();
-                        if (j == 0)
-                        {
-                            values[i] = value;
-                        }
-                        binaryReader.ReadInt32();
-                        binaryReader.ReadInt32();
-                    }
-                }
-
-                if (hasBustKeyInfo && boneData.transform.isBust)
-                {
-                    int key = boneData.transform.isBustR ? 1 : 0;
-                    bustData.Add(key, new KeyValuePair<TransformData, float[]>(boneData.transform, values));
-                }
-                else
-                {
-                    boneData.transform.values = values;
-                }
-
-                SetBone(boneData);
-            }
-
-            bool useBustKeyL = false;
-            bool useBustKeyR = false;
-            if (hasBustKeyInfo)
-            {
-                useBustKeyL = binaryReader.ReadByte() != 0;
-                useBustKeyR = binaryReader.ReadByte() != 0;
-                var list = new List<KeyValuePair<TransformData, float[]>>();
-                if (useBustKeyL)
-                {
-                    list.Add(bustData[0]);
-                }
-
-                if (useBustKeyR)
-                {
-                    list.Add(bustData[1]);
-                }
-
-                foreach (KeyValuePair<TransformData, float[]> item in list)
-                {
-                    item.Key.values = item.Value;
-                }
-            }
-
-            binaryReader.Close();
-            memoryStream.Close();
-            memoryStream.Dispose();
-            return new KeyValuePair<bool, bool>(useBustKeyL, useBustKeyR);
-        }
-
-        public void SetCacheBoneDataArray(CacheBoneDataArray cacheBoneData)
-        {
-            var pathDic = cacheBoneData.GetPathDic();
-            foreach (var path in PluginUtils.saveBonePaths)
-            {
-                CacheBoneDataArray.BoneData sourceBone;
-                if (pathDic.TryGetValue(path, out sourceBone))
-                {
-                    if (sourceBone == null || sourceBone.transform == null)
-                    {
-                        PluginUtils.LogError("SetCacheBoneDataArray：ボーンがnullです Maidを読み込み直してください：" + path);
-                        break;
-                    }
-
-                    var bone = new BoneData(sourceBone.transform);
-                    UpdateBone(bone);
-                }
-            }
-        }
-
-        public void AddRootPosition(Vector3 position)
-        {
-            var rootBone = GetOrCreateBone(IKManager.BoneType.Root);
-            rootBone.transform.localPosition += position;
-        }
-
-        public void AddRootRotation(Quaternion rotation)
-        {
-            var rootBone = GetOrCreateBone(IKManager.BoneType.Root);
-            rootBone.transform.localRotation *= rotation;
         }
 
         private static bool initializedBoneTypes = false;
@@ -473,7 +287,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             InitBoneTypes();
 
             var bones = this.bones;
-            var transformMap = new Dictionary<IKManager.BoneType, TransformData>(bones.Count);
+            var transformMap = new Dictionary<IKManager.BoneType, ITransformData>(bones.Count);
             foreach (var bone in bones)
             {
                 var boneType = bone.boneType;
@@ -495,8 +309,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 else
                 {
                     var transform = bone.transform;
-                    var localRotation = transform.localRotation;
-                    var eulerAngles = localRotation.eulerAngles;
+                    var eulerAngles = transform.eulerAngles;
                     var newEulerAngles = eulerAngles;
 
                     if (swapFlipDic.ContainsKey(boneType))
@@ -522,17 +335,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     PluginUtils.LogDebug("Flip Bone：" + boneType + " " + eulerAngles + " -> " + newEulerAngles);
 
-                    var newTransform = new TransformData(BoneUtils.GetBoneName(boneType));
-                    newTransform.localRotation = Quaternion.Euler(newEulerAngles);
+                    var newTransform = parentLayer.CreateTransformData(BoneUtils.GetBoneName(boneType));
+                    newTransform.eulerAngles = newEulerAngles;
 
                     if (boneType == IKManager.BoneType.Root)
                     {
-                        var localPosition = transform.localPosition;
+                        var localPosition = transform.position;
                         localPosition.x = -localPosition.x;
-                        newTransform.localPosition = localPosition;
+                        newTransform.position = localPosition;
                     }
 
-                    var newBone = new BoneData(newTransform);
+                    var newBone = CreateBone(newTransform);
                     newBones.Add(newBone);
                 }
             }
@@ -541,14 +354,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             SetBones(newBones);
         }
 
-        public FrameData DeepCopy()
+        public void FromXml(FrameXml xml)
         {
-            var frame = new FrameData(frameNo);
+            frameNo = xml.frameNo;
+
+            ClearBones();
+            foreach (var boneXml in xml.bones)
+            {
+                var bone = CreateBone(boneXml);
+                SetBone(bone);
+            }
+        }
+
+        public FrameXml ToXml()
+        {
+            var xml = new FrameXml();
+            xml.frameNo = frameNo;
+            xml.bones = new List<BoneXml>(bones.Count);
             foreach (var bone in bones)
             {
-                frame.SetBone(bone.DeepCopy());
+                xml.bones.Add(bone.ToXml());
             }
-            return frame;
+            return xml;
         }
     }
 }

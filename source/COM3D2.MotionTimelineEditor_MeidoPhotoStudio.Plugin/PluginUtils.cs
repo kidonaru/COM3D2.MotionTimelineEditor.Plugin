@@ -10,28 +10,32 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
     {
         public const string PluginName = "MotionTimelineEditor_MeidoPhotoStudio";
         public const string PluginFullName = "COM3D2." + PluginName + ".Plugin";
-        public const string PluginVersion = "1.3.0.1";
+        public const string PluginVersion = "2.0.0.0";
         public const string WindowName = PluginName + " " + PluginVersion;
 
         [Conditional("DEBUG")]
-        public static void LogDebug(string message)
+        public static void LogDebug(string format, params object[] args)
         {
-            UnityEngine.Debug.Log("[Debug] " + PluginName + "：" + message);
+            string message = string.Format(format, args);
+            UnityEngine.Debug.Log("[Debug] " + PluginName + ": " + message);
         }
 
-        public static void Log(string message)
+        public static void Log(string format, params object[] args)
         {
-            UnityEngine.Debug.Log(PluginName + "：" + message);
+            string message = string.Format(format, args);
+            UnityEngine.Debug.Log(PluginName + ": " + message);
         }
 
-        public static void LogWarning(string message)
+        public static void LogWarning(string format, params object[] args)
         {
-            UnityEngine.Debug.LogWarning(PluginName + "：" + message);
+            string message = string.Format(format, args);
+            UnityEngine.Debug.LogWarning(PluginName + ": " + message);
         }
         
-        public static void LogError(string message)
+        public static void LogError(string format, params object[] args)
         {
-            UnityEngine.Debug.LogError(PluginName + "：" + message);
+            string message = string.Format(format, args);
+            UnityEngine.Debug.LogError(PluginName + ": " + message);
         }
 
         public static void AssertNull(bool condition, string message)

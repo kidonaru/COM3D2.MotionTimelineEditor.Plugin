@@ -58,14 +58,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private bool resetPositionRequested = false;
         private bool positionUpdated = false;
 
-        private static MaidManager maidManager
-        {
-            get
-            {
-                return MaidManager.instance;
-            }
-        }
-
         private static StudioHackBase studioHack
         {
             get
@@ -96,7 +88,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void Init()
         {
-            timelineManager.onEditPoseUpdated += OnEditPoseUpdated;
+            TimelineManager.onEditPoseUpdated += OnEditPoseUpdated;
         }
 
         public override void Update()
@@ -146,6 +138,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 for (int i = 0; i < isHoldList.Length; i++)
                 {
+                    maidManager.PositonCorrection((IKHoldType) i);
                     if (isHoldList[i])
                     {
                         prevIkPositions[i] = maidManager.GetIkPosition((IKHoldType) i);
