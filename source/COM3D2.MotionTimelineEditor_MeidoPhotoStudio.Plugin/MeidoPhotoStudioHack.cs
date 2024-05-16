@@ -414,41 +414,18 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 
         public override bool useMuneKeyL
         {
-            get
-            {
-                if (maid != null)
-                {
-                    return !maid.body0.jbMuneL.enabled;
-                }
-                return false;
-            }
             set
             {
-                if (maid != null)
-                {
-                    maid.body0.jbMuneL.enabled = !value;
-                    maid.body0.MuneYureL(maid.body0.jbMuneL.enabled ? 1 : 0);
-                }
+                // do nothing
             }
         }
 
         public override bool useMuneKeyR
         {
-            get
-            {
-                if (maid != null)
-                {
-                    return !maid.body0.jbMuneR.enabled;
-                }
-                return false;
-            }
+           
             set
             {
-                if (maid != null)
-                {
-                    maid.body0.jbMuneR.enabled = !value;
-                    maid.body0.MuneYureR(maid.body0.jbMuneR.enabled ? 1 : 0);
-                }
+                // do nothing
             }
         }
 

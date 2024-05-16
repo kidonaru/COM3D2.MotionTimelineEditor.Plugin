@@ -109,7 +109,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (isHead)
                 {
-                    return true;
+                    return !timeline.useHeadKey;
                 }
 
                 if (isBustL)
@@ -134,18 +134,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public bool isBipRoot { get; protected set; }
         public bool isBustL { get; protected set; }
         public bool isBustR { get; protected set; }
         public bool isHead { get; protected set; }
-
-        public bool isBust
-        {
-            get
-            {
-                return isBustL || isBustR;
-            }
-        }
 
         protected static Config config
         {
@@ -174,7 +165,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void Initialize(string name)
         {
             this.name = name;
-            isBipRoot = name == "Bip01";
             isBustL = name == "Mune_L";
             isBustR = name == "Mune_R";
             isHead = name == "Bip01 Head";
@@ -554,16 +544,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return new Dictionary<string, int>();
         }
 
-        public ValueData GetCustomValue(string name)
+        public ValueData GetCustomValue(string customName)
         {
             int index;
-            if (GetCustomValueIndexMap().TryGetValue(name, out index))
+            if (GetCustomValueIndexMap().TryGetValue(customName, out index))
             {
                 return values[index];
             }
 
-            PluginUtils.LogError("CustomValueが見つかりません name={0}", name);
+            PluginUtils.LogError("CustomValueが見つかりません customName={0}", customName);
             return new ValueData();
+        }
+
+        public bool HasCustomValue(string customName)
+        {
+            return GetCustomValueIndexMap().ContainsKey(customName);
+        }
+
+        public virtual float GetResetCustomValue(string customName)
+        {
+            return 0f;
         }
 
         public ValueData[] GetValueDataList(TangentValueType valueType)
@@ -676,10 +676,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 easing = 0;
             }
 
-            var indexMap = GetCustomValueIndexMap();
-            foreach (var index in indexMap.Values)
+            foreach (var customName in GetCustomValueIndexMap().Keys)
             {
-                values[index].value = 0f;
+                GetCustomValue(customName).value = GetResetCustomValue(customName);
             }
         }
 

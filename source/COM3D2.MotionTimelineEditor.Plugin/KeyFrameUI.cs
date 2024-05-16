@@ -36,6 +36,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         );
         private FloatFieldValue outTangentFieldValue = new FloatFieldValue();
         private FloatFieldValue inTangentFieldValue = new FloatFieldValue();
+        private FloatFieldValue[] customFieldValues = FloatFieldValue.CreateArray(8);
 
         private static HashSet<BoneData> selectedBones
         {
@@ -60,7 +61,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var tangentPair = TangentPair.GetDefault(tangentType);
 
                     tangentPresetTextures[i] = texture;
-                    ClearTexture(texture, config.curveBgColor);
+                    TextureUtils.ClearTexture(texture, config.curveBgColor);
 
                     UpdateTangentTexture(
                         texture,
@@ -76,14 +77,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 tangentTex = new Texture2D(150, 150);
 
-                ClearTexture(tangentTex, config.curveBgColor);
+                TextureUtils.ClearTexture(tangentTex, config.curveBgColor);
             }
 
             if (easingTex == null)
             {
                 easingTex = new Texture2D(150, 150);
 
-                ClearTexture(easingTex, config.curveBgColor);
+                TextureUtils.ClearTexture(easingTex, config.curveBgColor);
             }
 
             if (easingComboBox == null)
@@ -109,6 +110,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             else
             {
                 DrawTransform(view);
+                DrawCustomValue(view);
+
+                if (view.DrawButton("初期化", 80, 20))
+                {
+                    foreach (var selectedBone in selectedBones)
+                    {
+                        selectedBone.transform.Reset();
+                    }
+
+                    PluginUtils.LogDebug("初期化します");
+                    currentLayer.ApplyCurrentFrame(true);
+                }
+
+                view.DrawHorizontalLine(Color.gray);
+
                 DrawTangent(view);
                 DrawEasing(view);
                 DrawComboBox(view);
@@ -149,19 +165,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 transform => transform.scale,
                 (transform, scale) => transform.scale = scale
             );
+        }
 
-            if (view.DrawButton("初期化", 80, 20))
+        private void DrawCustomValue(GUIView view)
+        {
+            var firstBone = selectedBones.First();
+            var customNames = firstBone.transform.GetCustomValueIndexMap().Keys;
+
+            int index = 0;
+            foreach (var customName in customNames)
             {
-                foreach (var selectedBone in selectedBones)
+                if (index >= customFieldValues.Length)
                 {
-                    selectedBone.transform.Reset();
+                    break;
                 }
+                var fieldValue = customFieldValues[index];
+                fieldValue.label = customName;
 
-                PluginUtils.LogDebug("初期化します");
-                timelineManager.ApplyCurrentFrame(true);
+                var value = firstBone.transform.GetCustomValue(customName);
+
+                DrawValue(
+                    view,
+                    fieldValue,
+                    0.01f,
+                    0.1f,
+                    transform => transform.GetResetCustomValue(customName),
+                    transform => transform.HasCustomValue(customName),
+                    transform => transform.GetCustomValue(customName).value,
+                    (transform, newValue) => transform.GetCustomValue(customName).value = newValue
+                );
+
+                index++;
             }
-
-            view.DrawHorizontalLine(Color.gray);
         }
 
         private void DrawVector3(
@@ -251,7 +286,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 PluginUtils.LogDebug("差分を適用します：" + diffValue);
-                timelineManager.ApplyCurrentFrame(true);
+                currentLayer.ApplyCurrentFrame(true);
             }
 
             // 新値の適用
@@ -275,7 +310,119 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 PluginUtils.LogDebug("新値を適用します：" + newValue);
-                timelineManager.ApplyCurrentFrame(true);
+                currentLayer.ApplyCurrentFrame(true);
+            }
+        }
+
+        private void DrawValue(
+            GUIView view,
+            FloatFieldValue fieldValue,
+            float addedValue1,
+            float addedValue2,
+            Func<ITransformData, float> getResetValue,
+            Func<ITransformData, bool> hasValue,
+            Func<ITransformData, float> getValue,
+            Action<ITransformData, float> setValue)
+        {
+            var value = 0f;
+            var boneCount = 0;
+
+            foreach (var bone in selectedBones)
+            {
+                var transform = bone.transform;
+                var isNan = false;
+
+                if (hasValue(transform))
+                {
+                    var _value = getValue(transform);
+                    if (boneCount == 0)
+                    {
+                        value = _value;
+                    }
+                    else
+                    {
+                        if (_value != value)
+                        {
+                            value = float.NaN;
+                            isNan = true;
+                        }
+                    }
+
+                    boneCount++;
+                    if (boneCount >= config.detailTransformCount || isNan)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if (boneCount == 0)
+            {
+                return;
+            }
+
+            var diffValue = 0f;
+            var newValue = value;
+            bool isReset = false;
+
+            view.DrawValue(
+                fieldValue,
+                addedValue1,
+                addedValue2,
+                () => isReset = true,
+                value,
+                _newValue => newValue = _newValue,
+                _diffValue => diffValue = _diffValue
+            );
+
+            // リセット
+            if (isReset)
+            {
+                foreach (var selectedBone in selectedBones)
+                {
+                    var transform = selectedBone.transform;
+                    if (hasValue(transform))
+                    {
+                        setValue(transform, getResetValue(transform));
+                    }
+                }
+
+                PluginUtils.LogDebug("リセットします");
+                currentLayer.ApplyCurrentFrame(true);
+            }
+
+            // 差分の適用
+            if (diffValue != 0f)
+            {
+                foreach (var selectedBone in selectedBones)
+                {
+                    var transform = selectedBone.transform;
+                    if (hasValue(transform))
+                    {
+                        var _value = getValue(transform);
+                        _value += diffValue;
+                        setValue(transform, _value);
+                    }
+                }
+
+                PluginUtils.LogDebug("差分を適用します：" + diffValue);
+                currentLayer.ApplyCurrentFrame(true);
+            }
+
+            // 新値の適用
+            if (!float.IsNaN(newValue) && newValue != value)
+            {
+                foreach (var selectedBone in selectedBones)
+                {
+                    var transform = selectedBone.transform;
+                    if (hasValue(transform))
+                    {
+                        setValue(transform, newValue);
+                    }
+                }
+
+                PluginUtils.LogDebug("新値を適用します：" + newValue);
+                currentLayer.ApplyCurrentFrame(true);
             }
         }
 
@@ -346,7 +493,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 cachedTangents = tangents;
 
-                ClearTexture(tangentTex, config.curveBgColor);
+                TextureUtils.ClearTexture(tangentTex, config.curveBgColor);
 
                 foreach (var tangent in tangents)
                 {
@@ -501,7 +648,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     });
 
                     PluginUtils.LogDebug("OutTangentを適用します：" + newOutTangent);
-                    timelineManager.ApplyCurrentFrame(true);
+                    currentLayer.ApplyCurrentFrame(true);
                 }
 
                 if (!float.IsNaN(newInTangent) && newInTangent != inTangent)
@@ -513,7 +660,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     });
 
                     PluginUtils.LogDebug("InTangentを適用します：" + newInTangent);
-                    timelineManager.ApplyCurrentFrame(true);
+                    currentLayer.ApplyCurrentFrame(true);
                 }
 
                 // 差分の適用
@@ -528,7 +675,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     });
 
                     PluginUtils.LogDebug("OutTangentの差分を適用します：" + diffOutTangent);
-                    timelineManager.ApplyCurrentFrame(true);
+                    currentLayer.ApplyCurrentFrame(true);
                 }
 
                 if (diffInTangent != 0f)
@@ -542,7 +689,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     });
 
                     PluginUtils.LogDebug("InTangentの差分を適用します：" + diffInTangent);
-                    timelineManager.ApplyCurrentFrame(true);
+                    currentLayer.ApplyCurrentFrame(true);
                 }
 
                 var isSmooth = tangents.All(tangent => tangent.isSmooth);
@@ -560,7 +707,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     });
 
                     PluginUtils.LogDebug("自動補間を適用します：" + newIsSmooth);
-                    timelineManager.ApplyCurrentFrame(true);
+                    currentLayer.ApplyCurrentFrame(true);
                 }
             }
 
@@ -575,7 +722,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var texture = tangentPresetTextures[i];
                 var tangentType = (TangentType)i;
 
-                view.DrawTexture(texture, texture.width, texture.height, Color.white, () =>
+                view.DrawTexture(
+                    texture,
+                    texture.width,
+                    texture.height,
+                    Color.white,
+                    EventType.MouseDown,
+                    _ =>
                 {
                     if (selectedBones.Count == 0)
                     {
@@ -597,7 +750,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     });
 
                     PluginUtils.LogDebug("プリセットを適用します：" + tangentType);
-                    timelineManager.ApplyCurrentFrame(true);
+                    currentLayer.ApplyCurrentFrame(true);
                 });
             }
 
@@ -643,7 +796,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 cachedEasings = easings;
 
-                ClearTexture(easingTex, config.curveBgColor);
+                TextureUtils.ClearTexture(easingTex, config.curveBgColor);
 
                 foreach (var easing in easings)
                 {
@@ -678,7 +831,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 PluginUtils.LogDebug("Easingを適用します: " + easing);
-                timelineManager.ApplyCurrentFrame(true);
+                currentLayer.ApplyCurrentFrame(true);
             };
 
             easingComboBox.onSelected = (easing, index) =>
@@ -750,17 +903,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 100, 100,
                 rc_stgw.width, rc_stgw.height,
                 20);
-        }
-
-        private static void ClearTexture(Texture2D texture, Color color)
-        {
-            var pixels = new Color[texture.width * texture.height];
-            for (int i = 0; i < pixels.Length; i++)
-            {
-                pixels[i] = color;
-            }
-            texture.SetPixels(pixels);
-            texture.Apply();
         }
 
         // ヘルミート曲線の計算

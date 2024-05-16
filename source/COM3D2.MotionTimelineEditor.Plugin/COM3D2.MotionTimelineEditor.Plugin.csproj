@@ -98,6 +98,7 @@
     <Compile Include="SubWindowUIBase.cs" />
     <Compile Include="TangentData.cs" />
     <Compile Include="TangentPair.cs" />
+    <Compile Include="TextureUtils.cs" />
     <Compile Include="TimelineData.cs" />
     <Compile Include="TimelineHistoryManager.cs" />
     <Compile Include="TimelineHistoryUI.cs" />

@@ -9,7 +9,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class TimelineData
     {
-        public static readonly int CurrentVersion = 4;
+        public static readonly int CurrentVersion = 5;
         public static readonly TimelineData DefaultTimeline = new TimelineData();
 
         public int version = 0;
@@ -95,6 +95,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 _useMuneKeyL = value;
+                maidManager.UpdateMuneYure();
                 studioHack.useMuneKeyL = value;
             }
         }
@@ -114,7 +115,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 _useMuneKeyR = value;
+                maidManager.UpdateMuneYure();
                 studioHack.useMuneKeyR = value;
+            }
+        }
+
+        private bool _useHeadKey = false;
+        public bool useHeadKey
+        {
+            get
+            {
+                return _useHeadKey;
+            }
+            set
+            {
+                if (_useHeadKey == value)
+                {
+                    return;
+                }
+
+                _useHeadKey = value;
+                maidManager.UpdateHeadLook();
             }
         }
 
@@ -136,7 +157,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float endOffsetTime = 0.5f;
         public float startFadeTime = 0.1f;
         public float endFadeTime = 0f;
-        public Maid.EyeMoveType eyeMoveType = Maid.EyeMoveType.無し;
+
+        private Maid.EyeMoveType _eyeMoveType = Maid.EyeMoveType.無し;
+        public Maid.EyeMoveType eyeMoveType
+        {
+            get
+            {
+                return _eyeMoveType;
+            }
+            set
+            {
+                if (_eyeMoveType == value)
+                {
+                    return;
+                }
+
+                _eyeMoveType = value;
+                maidManager.UpdateHeadLook();
+            }
+        }
 
         public int activeTrackIndex = -1;
 
@@ -351,36 +390,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return tex;
         }
 
-        // ひし形のテクスチャを作成
-        public static Texture2D CreateKeyFrameTexture(int size, Color color)
-        {
-            var tex = new Texture2D(size, size);
-            var pixels = new Color[size * size];
-            var bgColor = new Color(0, 0, 0, 0);
-            int halfSize = size / 2;
-
-            for (int y = 0; y < size; y++)
-            {
-                for (int x = 0; x < size; x++)
-                {
-                    int distanceX = Math.Abs(x - halfSize);
-                    int distanceY = Math.Abs(y - halfSize);
-                    if (distanceX + distanceY <= halfSize)
-                    {
-                        pixels[y * size + x] = color;
-                    }
-                    else
-                    {
-                        pixels[y * size + x] = bgColor;
-                    }
-                }
-            }
-
-            tex.SetPixels(pixels);
-            tex.Apply();
-            return tex;
-        }
-
         public void Initialize()
         {
             if (layers.Count() == 0)
@@ -476,6 +485,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             isHoldList = xml.isHoldList;
             useMuneKeyL = xml.useMuneKeyL;
             useMuneKeyR = xml.useMuneKeyR;
+            useHeadKey = xml.useHeadKey;
             isLoopAnm = xml.isLoopAnm;
             startOffsetTime = xml.startOffsetTime;
             endOffsetTime = xml.endOffsetTime;
@@ -523,6 +533,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.isHoldList = isHoldList;
             xml.useMuneKeyL = useMuneKeyL;
             xml.useMuneKeyR = useMuneKeyR;
+            xml.useHeadKey = useHeadKey;
             xml.isLoopAnm = isLoopAnm;
             xml.startOffsetTime = startOffsetTime;
             xml.endOffsetTime = endOffsetTime;

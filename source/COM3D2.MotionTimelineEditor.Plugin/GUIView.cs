@@ -251,7 +251,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             bool alwaysShowHorizontal,
             bool alwaysShowVertical)
         {
+            var savedPadding = padding;
+            padding = Vector2.zero;
             scrollViewRect = GetDrawRect(width, height);
+            padding = savedPadding;
+
             var ret = GUI.BeginScrollView(
                 scrollViewRect,
                 scrollPosition,
@@ -601,7 +605,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return texture;
         }
 
-        public void DrawTexture(Texture2D texture, float width, float height, Color color, Action onClickAction)
+        public void DrawTexture(
+            Texture2D texture,
+            float width,
+            float height,
+            Color color,
+            EventType eventType,
+            Action<Vector2> onClickAction)
         {
             var drawRect = GetDrawRect(width, height);
             BeginColor(color);
@@ -611,21 +621,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (onClickAction != null
                 && drawRect.Contains(Event.current.mousePosition)
-                && Event.current.type == EventType.MouseDown
+                && Event.current.type == eventType
                 && Event.current.button == 0)
             {
-                onClickAction();
+                Vector2 pos = Event.current.mousePosition - new Vector2(drawRect.x, drawRect.y);
+                onClickAction(pos);
             }
         }
 
         public void DrawTexture(Texture2D texture, float width, float height, Color color)
         {
-            DrawTexture(texture, width, height, color, null);
+            DrawTexture(texture, width, height, color, EventType.MouseDown, null);
         }
 
         public void DrawTexture(Texture2D texture, float width, float height)
         {
-            DrawTexture(texture, width, height, Color.white, null);
+            DrawTexture(texture, width, height, Color.white, EventType.MouseDown, null);
         }
 
         public void DrawTexture(Texture2D texture)
@@ -678,8 +689,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 && Event.current.type == eventType
                 && Event.current.button == 0)
             {
-                Vector2 localTouchPosition = Event.current.mousePosition - new Vector2(drawRect.x, drawRect.y);
-                onClickAction(localTouchPosition);
+                Vector2 pos = Event.current.mousePosition - new Vector2(drawRect.x, drawRect.y);
+                onClickAction(pos);
             }
         }
 
@@ -1088,6 +1099,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Action<float> updateNewValue,
             Action<float> updateDiffValue)
         {
+            return DrawValue(
+                fieldValue,
+                addedValue1,
+                addedValue2,
+                () => updateNewValue(resetValue),
+                value,
+                updateNewValue,
+                updateDiffValue);
+        }
+
+        public bool DrawValue(
+            FloatFieldValue fieldValue,
+            float addedValue1,
+            float addedValue2,
+            Action resetValueFunc,
+            float value,
+            Action<float> updateNewValue,
+            Action<float> updateDiffValue)
+        {
             fieldValue.UpdateValue(value, true);
 
             var newValue = value;
@@ -1123,7 +1153,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
                 if (DrawButton("R", 20, 20))
                 {
-                    newValue = resetValue;
+                    resetValueFunc();
                 }
             }
             EndLayout();

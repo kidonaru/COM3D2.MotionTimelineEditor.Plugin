@@ -184,7 +184,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 var thumPath = PluginUtils.ConvertThumPath(path);
-                var thum = PluginUtils.LoadTexture(thumPath);
+                var thum = TextureUtils.LoadTexture(thumPath);
 
                 var fileItem = new TimelineLoadItem
                 {

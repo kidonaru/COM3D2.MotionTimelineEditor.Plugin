@@ -56,14 +56,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override bool hasUI
-        {
-            get
-            {
-                return true;
-            }
-        }
-
         public override bool isCameraLayer
         {
             get

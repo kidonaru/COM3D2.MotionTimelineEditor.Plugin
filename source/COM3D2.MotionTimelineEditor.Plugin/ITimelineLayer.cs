@@ -11,7 +11,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         string className { get; }
         int slotNo { get; }
         bool hasSlotNo { get; }
-        bool hasUI { get; }
         bool isCameraLayer { get; }
         List<FrameData> keyFrames { get; }
 
@@ -29,6 +28,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         FrameData firstFrame { get; }
         bool isAnmSyncing { get; }
         bool isAnmPlaying { get; }
+        bool isDragging { get; }
 
         List<IBoneMenuItem> allMenuItems { get; }
 

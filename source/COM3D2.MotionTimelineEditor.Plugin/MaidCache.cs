@@ -147,6 +147,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public bool useHeadKey
+        {
+            get
+            {
+                return maid.body0.trsLookTarget == null;
+            }
+            set
+            {
+                maid.body0.trsLookTarget = value ? null : GameMain.Instance.MainCamera.transform;
+            }
+        }
+
         private static FieldInfo fieldLimbControlList = null;
 
         public List<LimbControl> limbControlList
@@ -171,6 +183,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return TimelineManager.instance;
+            }
+        }
+
+        private static TimelineData timeline
+        {
+            get
+            {
+                return timelineManager.timeline;
             }
         }
 
@@ -331,6 +351,62 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
                 _motionSliderRate = value / animationState.length;
+            }
+        }
+
+        public void PlayAnm(long id, byte[] anmData)
+        {
+            if (anmData == null)
+            {
+                return;
+            }
+            if (maid == null)
+            {
+                return;
+            }
+
+            GameMain.Instance.ScriptMgr.StopMotionScript();
+
+            UpdateMuneYure();
+            UpdateHeadLook();
+
+            maid.body0.CrossFade(id.ToString(), anmData, false, false, false, 0f, 1f);
+            maid.SetAutoTwistAll(true);
+
+            var animation = maid.GetAnimation();
+            if (animation != null)
+            {
+                animation.wrapMode = timeline.isLoopAnm ? WrapMode.Loop : WrapMode.ClampForever;
+            }
+        }
+
+        public void UpdateMuneYure()
+        {
+            if (maid != null && !maid.boMAN)
+            {
+                maid.body0.MuneYureL((float)((!timeline.useMuneKeyL) ? 1 : 0));
+                maid.body0.MuneYureR((float)((!timeline.useMuneKeyR) ? 1 : 0));
+                maid.body0.jbMuneL.enabled = !timeline.useMuneKeyL;
+                maid.body0.jbMuneR.enabled = !timeline.useMuneKeyR;
+            }
+        }
+
+        public void UpdateHeadLook()
+        {
+            if (maid != null)
+            {
+                maid.EyeToCamera(timeline.eyeMoveType, 0f);
+                maid.LockHeadAndEye(timeline.useHeadKey);
+
+                if (timeline.useHeadKey)
+                {
+                    var trsEyeL = maid.body0.trsEyeL;
+                    var trsEyeR = maid.body0.trsEyeR;
+                    trsEyeL.localRotation = maid.body0.quaDefEyeL;
+                    trsEyeR.localRotation = maid.body0.quaDefEyeR;
+                    trsEyeL.localPosition = new Vector3(trsEyeL.localPosition.x, 0, 0);
+                    trsEyeR.localPosition = new Vector3(trsEyeR.localPosition.x, 0, 0);
+                }
             }
         }
 

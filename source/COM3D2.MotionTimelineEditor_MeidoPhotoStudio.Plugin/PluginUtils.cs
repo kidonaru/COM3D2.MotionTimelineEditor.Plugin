@@ -10,7 +10,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
     {
         public const string PluginName = "MotionTimelineEditor_MeidoPhotoStudio";
         public const string PluginFullName = "COM3D2." + PluginName + ".Plugin";
-        public const string PluginVersion = "2.0.0.0";
+        public const string PluginVersion = "2.0.1.0";
         public const string WindowName = PluginName + " " + PluginVersion;
 
         [Conditional("DEBUG")]

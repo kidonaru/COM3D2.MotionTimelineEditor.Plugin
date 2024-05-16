@@ -321,6 +321,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public void UpdateMuneYure()
+        {
+            foreach (var cache in maidCaches)
+            {
+                cache.UpdateMuneYure();
+            }
+        }
+
+        public void UpdateHeadLook()
+        {
+            foreach (var cache in maidCaches)
+            {
+                cache.UpdateHeadLook();
+            }
+        }
+
         public void ChangeMaid(Maid maid)
         {
             if (maid == null || maid == studioHack.selectedMaid)

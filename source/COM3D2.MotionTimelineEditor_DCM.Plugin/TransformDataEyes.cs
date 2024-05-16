@@ -1,16 +1,15 @@
 using System.Collections.Generic;
 using COM3D2.MotionTimelineEditor.Plugin;
-using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
-    public class TransformDataCamera : TransformDataBase
+    public class TransformDataEyes : TransformDataBase
     {
         public override int valueCount
         {
             get
             {
-                return 9;
+                return 3;
             }
         }
 
@@ -18,7 +17,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             get
             {
-                return true;
+                return false;
             }
         }
 
@@ -34,7 +33,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             get
             {
-                return true;
+                return false;
             }
         }
 
@@ -62,13 +61,13 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public TransformDataCamera()
+        public TransformDataEyes()
         {
         }
 
         public override ValueData[] GetPositionValues()
         {
-            return new ValueData[] { values[0], values[1], values[2] };
+            return new ValueData[0];
         }
 
         public override ValueData[] GetRotationValues()
@@ -78,7 +77,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public override ValueData[] GetEulerAnglesValues()
         {
-            return new ValueData[] { values[3], values[4], values[5] };
+            return new ValueData[0];
         }
 
         public override ValueData[] GetScaleValues()
@@ -88,13 +87,13 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public override ValueData GetEasingValue()
         {
-            return values[6];
+            return values[0];
         }
 
         private readonly static Dictionary<string, int> CustomValueIndexMap = new Dictionary<string, int>
         {
-            { "distance", 7 },
-            { "viewAngle", 8 }
+            { "horizon", 1 },
+            { "vertical", 2 },
         };
 
         public override Dictionary<string, int> GetCustomValueIndexMap()
@@ -104,13 +103,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public override float GetResetCustomValue(string customName)
         {
-            if (customName == "distance")
+            if (this.name == "EyesScaL" || this.name == "EyesScaR")
             {
                 return 1f;
-            }
-            if (customName == "viewAngle")
-            {
-                return 35f;
             }
             return 0f;
         }

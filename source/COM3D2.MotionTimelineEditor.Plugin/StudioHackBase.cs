@@ -21,8 +21,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public abstract bool isPoseEditing { get; set; }
         public abstract bool isMotionPlaying { get; set; }
         public abstract float motionSliderRate { set; }
-        public abstract bool useMuneKeyL { get; set; }
-        public abstract bool useMuneKeyR { get; set; }
+        public abstract bool useMuneKeyL { set; }
+        public abstract bool useMuneKeyR { set; }
 
         protected string _errorMessage = "";
         public string errorMessage
@@ -64,14 +64,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return MaidManager.instance;
-            }
-        }
-
-        protected static Maid maid
-        {
-            get
-            {
-                return maidManager.maid;
             }
         }
 

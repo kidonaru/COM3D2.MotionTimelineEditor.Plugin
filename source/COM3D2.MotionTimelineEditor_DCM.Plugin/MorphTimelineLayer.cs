@@ -54,15 +54,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return true;
             }
         }
-
-        public override bool hasUI
-        {
-            get
-            {
-                return false;
-            }
-        }
-
         public override bool isCameraLayer
         {
             get
@@ -405,8 +396,106 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
+        private Rect _contentRect = new Rect(0, 0, SubWindow.WINDOW_WIDTH, SubWindow.WINDOW_HEIGHT);
+        private Vector2 _scrollPosition = Vector2.zero;
+
         public override void DrawWindow(GUIView view)
         {
+            var maid = this.maid;
+            if (maid == null)
+            {
+                return;
+            }
+
+            GUI.enabled = studioHack.isPoseEditing;
+
+            var viewWidth = SubWindow.WINDOW_WIDTH;
+            var viewHeight = SubWindow.WINDOW_HEIGHT;
+
+            _scrollPosition = view.BeginScrollView(
+                viewWidth,
+                viewHeight,
+                _contentRect,
+                _scrollPosition,
+                false,
+                true);
+
+            Action<string> drawMorphSlider = morphName =>
+            {
+                var displayName = MorphUtils.GetMorphJpName(morphName);
+                var morphValue = _faceManager.GetMorphValue(maid, morphName);
+                var newMorphValue = morphValue;
+
+                view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+                view.DrawLabel(displayName, 80, 20);
+
+                newMorphValue = view.DrawFloatField(newMorphValue, 50, 20);
+
+                newMorphValue = view.DrawSlider(newMorphValue, 0f, 1f, 80, 20);
+
+                if (view.DrawButton("R", 20, 20))
+                {
+                    newMorphValue = 0;
+                }
+
+                if (!Mathf.Approximately(newMorphValue, morphValue))
+                {
+                    _applyMorphMap.Clear();
+                    _applyMorphMap[morphName] = newMorphValue;
+                    _faceManager.SetMorphValue(maid, _applyMorphMap);
+                }
+
+                view.EndLayout();
+            };
+
+            Action<string> drawMorphToggle = morphName =>
+            {
+                var displayName = MorphUtils.GetMorphJpName(morphName);
+                var morphValue = _faceManager.GetMorphValue(maid, morphName);
+                var isOn = morphValue >= 1f;
+
+                var newIsOn = view.DrawToggle(displayName, isOn, 150, 20);
+
+                if (newIsOn != isOn)
+                {
+                    _applyMorphMap.Clear();
+                    _applyMorphMap[morphName] = newIsOn ? 1f : 0f;
+                    _faceManager.SetMorphValue(maid, _applyMorphMap);
+                }
+            };
+
+            view.DrawLabel("目", 80, 20);
+            foreach (var morphName in MyConst.EYE_MORPH.Keys)
+            {
+                drawMorphSlider(morphName);
+            }
+            view.DrawHorizontalLine(Color.gray);
+
+            view.DrawLabel("眉", 80, 20);
+            foreach (var morphName in MyConst.MAYU_MORPH.Keys)
+            {
+                drawMorphSlider(morphName);
+            }
+            view.DrawHorizontalLine(Color.gray);
+
+            view.DrawLabel("口", 80, 20);
+            foreach (var morphName in MyConst.MOUTH_MORPH.Keys)
+            {
+                drawMorphSlider(morphName);
+            }
+            view.DrawHorizontalLine(Color.gray);
+
+            view.DrawLabel("オプション", 80, 20);
+            foreach (var morphName in MyConst.FACE_OPTION_MORPH.Keys)
+            {
+                drawMorphToggle(morphName);
+            }
+
+            _contentRect.height = view.currentPos.y + 20;
+
+            view.EndScrollView();
+
+            GUI.enabled = true;
         }
 
         public override ITransformData CreateTransformData(string name)

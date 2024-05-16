@@ -304,7 +304,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 UnityEngine.Object.Destroy(texKeyFrame);
                 texKeyFrame = null;
             }
-            texKeyFrame = TimelineData.CreateKeyFrameTexture(
+            texKeyFrame = TextureUtils.CreateDiamondTexture(
                 config.frameWidth,
                 Color.white);
         }
@@ -515,7 +515,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     subWindow.ToggleSubWindow(SubWindowType.KeyFrame);
                 }
 
-                if (view.DrawButton("情報", 60, 20, editEnabled && currentLayer.hasUI))
+                if (view.DrawButton("情報", 60, 20, editEnabled))
                 {
                     subWindow.ToggleSubWindow(SubWindowType.TimelineLayer);
                 }
@@ -1016,7 +1016,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         frameWidth,
                         frameWidth,
                         keyFrameColor,
-                        () =>
+                        EventType.MouseDown,
+                        _ =>
                         {
                             if (isAreaDragging) return;
                             isFrameDragging = true;

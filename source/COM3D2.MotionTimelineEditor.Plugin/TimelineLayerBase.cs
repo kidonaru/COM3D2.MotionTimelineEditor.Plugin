@@ -17,7 +17,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public abstract string className { get; }
         public int slotNo { get; protected set; }
         public abstract bool hasSlotNo { get; }
-        public abstract bool hasUI { get; }
         public abstract bool isCameraLayer { get; }
 
         protected List<FrameData> _keyFrames = new List<FrameData>();
@@ -160,6 +159,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     return cache.isAnmPlaying;
                 }
+                return false;
+            }
+        }
+
+        public virtual bool isDragging
+        {
+            get
+            {
                 return false;
             }
         }

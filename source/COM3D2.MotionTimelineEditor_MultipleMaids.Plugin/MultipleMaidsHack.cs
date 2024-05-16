@@ -379,41 +379,17 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         public override bool useMuneKeyL
         {
-            get
-            {
-                if (maid != null)
-                {
-                    return !maid.body0.jbMuneL.enabled;
-                }
-                return false;
-            }
             set
             {
-                if (maid != null)
-                {
-                    maid.body0.jbMuneL.enabled = !value;
-                    maid.body0.MuneYureL(maid.body0.jbMuneL.enabled ? 1 : 0);
-                }
+                // do nothing
             }
         }
 
         public override bool useMuneKeyR
         {
-            get
-            {
-                if (maid != null)
-                {
-                    return !maid.body0.jbMuneR.enabled;
-                }
-                return false;
-            }
             set
             {
-                if (maid != null)
-                {
-                    maid.body0.jbMuneR.enabled = !value;
-                    maid.body0.MuneYureR(maid.body0.jbMuneR.enabled ? 1 : 0);
-                }
+                // do nothing
             }
         }
 
@@ -605,8 +581,16 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                 menuBytes = new byte[file.GetSize()];
                 file.Read(ref menuBytes, file.GetSize());
             }
+
+            var maid = selectedMaid;
+            if (maid == null)
+            {
+                PluginUtils.LogError("LoadModObject: maid is null");
+                return null;
+            }
+
             string[] bin = ProcScriptBin(maid, menuBytes, assetName, false);
-            var obj = ImportCM2.LoadSkinMesh_R(bin[0], bin, "", this.maidArray[0].body0.goSlot[8], 1);
+            var obj = ImportCM2.LoadSkinMesh_R(bin[0], bin, "", maid.body0.goSlot[8], 1);
 
             AddDogu(obj, assetName);
 

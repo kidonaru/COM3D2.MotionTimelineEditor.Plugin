@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
@@ -44,7 +45,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         ValueData[] GetEulerAnglesValues();
         ValueData[] GetScaleValues();
         ValueData GetEasingValue();
-        ValueData GetCustomValue(string name);
+        Dictionary<string, int> GetCustomValueIndexMap();
+        ValueData GetCustomValue(string customName);
+        bool HasCustomValue(string customName);
+        float GetResetCustomValue(string customName);
         ValueData[] GetValueDataList(TangentValueType valueType);
         TangentData[] GetInTangentDataList(TangentValueType valueType);
         TangentData[] GetOutTangentDataList(TangentValueType valueType);

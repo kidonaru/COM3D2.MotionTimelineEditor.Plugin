@@ -40,6 +40,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         [XmlElement("UseMuneKeyR")]
         public bool useMuneKeyR;
+    
+        [XmlElement("UseHeadKey")]
+        public bool useHeadKey = false;
 
         [XmlElement("IsLoopAnm")]
         public bool isLoopAnm = true;
@@ -118,7 +121,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _keyFrames = null;
             }
 
-            
             if (version < 4)
             {
                 // 旧バージョンでは動画開始時間にオフセット時間が反映されていない

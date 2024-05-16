@@ -48,14 +48,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override bool hasUI
-        {
-            get
-            {
-                return true;
-            }
-        }
-
         public override bool isCameraLayer
         {
             get
@@ -231,37 +223,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             PluginUtils.LogDebug("playingFrameNoFloat={0}", playingFrameNoFloat);
 
-            GameMain.Instance.ScriptMgr.StopMotionScript();
-
-            if (!maid.boMAN)
-            {
-                maid.body0.MuneYureL((float)((!timeline.useMuneKeyL) ? 1 : 0));
-                maid.body0.MuneYureR((float)((!timeline.useMuneKeyR) ? 1 : 0));
-                maid.body0.jbMuneL.enabled = !timeline.useMuneKeyL;
-                maid.body0.jbMuneR.enabled = !timeline.useMuneKeyR;
-            }
-
-            maid.body0.CrossFade(id.ToString(), anmData, false, false, false, 0f, 1f);
-            maid.SetAutoTwistAll(true);
-            maid.EyeToCamera(timeline.eyeMoveType, 0f);
-
-            if (timeline.isLoopAnm)
-            {
-                var animation = maid.GetAnimation();
-                if (animation != null)
-                {
-                    animation.wrapMode = WrapMode.Loop;
-                }
-            }
-            else
-            {
-                var animation = maid.GetAnimation();
-                if (animation != null)
-                {
-                    animation.wrapMode = WrapMode.ClampForever;
-                }
-            }
-
+            maidCache.PlayAnm(id, anmData);
             studioHack.OnMotionUpdated(maid);
             maidManager.OnMotionUpdated(maid);
 

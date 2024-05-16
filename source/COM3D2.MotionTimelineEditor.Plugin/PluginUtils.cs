@@ -13,7 +13,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public const string PluginName = "MotionTimelineEditor";
         public const string PluginFullName = "COM3D2." + PluginName + ".Plugin";
-        public const string PluginVersion = "2.0.0.0";
+        public const string PluginVersion = "2.0.1.0";
         public const string WindowName = PluginName + " " + PluginVersion;
 
         public static readonly string UserDataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Config");
@@ -113,19 +113,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             GameMain.Instance.SysDlg.Show(
                 message, SystemDialog.TYPE.YES_NO, onYes, onNo);
-        }
-
-        public static Texture2D LoadTexture(string path)
-        {
-            if (!File.Exists(path))
-            {
-                return null;
-            }
-
-            byte[] array = File.ReadAllBytes(path);
-            Texture2D texture2D = new Texture2D(0, 0);
-            texture2D.LoadImage(array);
-            return texture2D;
         }
 
         public static string GetTimelinePath(string anmName, string directoryName)
