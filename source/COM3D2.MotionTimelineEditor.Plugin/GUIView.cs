@@ -1154,6 +1154,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (DrawButton("R", 20, 20))
                 {
                     resetValueFunc();
+                    updated = true;
                 }
             }
             EndLayout();
