@@ -430,12 +430,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var tangents = new HashSet<TangentPair>();
 
+            bool hasTangent = false;
+
             foreach (var bone in selectedBones)
             {
                 if (!bone.transform.hasTangent)
                 {
                     continue;
                 }
+
+                hasTangent = true;
 
                 var prevBone = currentLayer.GetPrevBone(bone);
                 if (prevBone == null)
@@ -467,6 +471,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     break;
                 }
+            }
+
+            if (!hasTangent)
+            {
+                return;
             }
 
             bool isUpdated = false;
@@ -506,11 +515,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         1
                     );
                 }
-            }
-
-            if (cachedTangents.Count == 0)
-            {
-                return;
             }
 
             Action<Action<TangentData>> foreachOutTangent = (callback) =>

@@ -300,7 +300,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 type = StudioModelType.Mod,
                 label = label,
-                fileName = fileName,
+                fileName = string.IsNullOrEmpty(fileName) ? label : fileName,
                 myRoomId = myRoomId,
                 bgObjectId = bgObjectId,
             };
@@ -319,6 +319,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             foreach (var model in models)
             {
+                //PluginUtils.Log("FixGroup: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
+                //        model.info.type, model.displayName, model.name, model.info.label, model.info.fileName, model.info.myRoomId, model.info.bgObjectId);
                 int group = model.group;
                 if (group != 0)
                 {
@@ -332,7 +334,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 model.SetGroup(group);
-                _modelGroupMap[model.displayName] = group;
+                _modelGroupMap[model.info.fileName] = group;
             }
         }
 
@@ -365,6 +367,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     info.fileName = data.create_asset_bundle_name;
                     info.type = StudioModelType.Asset;
+                }
+                else
+                {
+                    info.fileName = data.name;
+                    info.type = StudioModelType.Mod;
                 }
 
                 //PluginUtils.LogDebug("PhotoBGObjectData: label={0} bgObjectId={1} fileName={2} type={3}",

@@ -100,14 +100,5 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             return CustomValueIndexMap;
         }
-
-        public override float GetResetCustomValue(string customName)
-        {
-            if (this.name == "EyesScaL" || this.name == "EyesScaR")
-            {
-                return 1f;
-            }
-            return 0f;
-        }
     }
 }

@@ -12,6 +12,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public int slotNo = 0;
         public Maid maid = null;
+        public MaidInfo info = null;
         public string annName = "";
         public long anmId = 0;
         public AnimationState animationState = null;
@@ -159,6 +160,90 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public Vector3 eyesPosL
+        {
+            get
+            {
+                if (maid != null)
+                {
+                    var initPos = info.initEyesPosL;
+                    return maid.body0.trsEyeL.localPosition - initPos;
+                }
+                return Vector3.zero;
+            }
+            set
+            {
+                if (maid != null)
+                {
+                    var initPos = info.initEyesPosL;
+                    maid.body0.trsEyeL.localPosition = value + initPos;
+                }
+            }
+        }
+
+        public Vector3 eyesPosR
+        {
+            get
+            {
+                if (maid != null)
+                {
+                    var initPos = info.initEyesPosR;
+                    return maid.body0.trsEyeR.localPosition - initPos;
+                }
+                return Vector3.zero;
+            }
+            set
+            {
+                if (maid != null)
+                {
+                    var initPos = info.initEyesPosR;
+                    maid.body0.trsEyeR.localPosition = value + initPos;
+                }
+            }
+        }
+
+        public Vector3 eyesScaL
+        {
+            get
+            {
+                if (maid != null)
+                {
+                    var initSca = info.initEyesScaL;
+                    return maid.body0.trsEyeL.localScale - initSca;
+                }
+                return Vector3.zero;
+            }
+            set
+            {
+                if (maid != null)
+                {
+                    var initSca = info.initEyesScaL;
+                    maid.body0.trsEyeL.localScale = value + initSca;
+                }
+            }
+        }
+
+        public Vector3 eyesScaR
+        {
+            get
+            {
+                if (maid != null)
+                {
+                    var initSca = info.initEyesScaR;
+                    return maid.body0.trsEyeR.localScale - initSca;
+                }
+                return Vector3.zero;
+            }
+            set
+            {
+                if (maid != null)
+                {
+                    var initSca = info.initEyesScaR;
+                    maid.body0.trsEyeR.localScale = value + initSca;
+                }
+            }
+        }
+
         private static FieldInfo fieldLimbControlList = null;
 
         public List<LimbControl> limbControlList
@@ -302,6 +387,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void Reset()
         {
             maid = null;
+            info = null;
             annName = "";
             anmId = 0;
             animationState = null;
@@ -314,6 +400,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             annName = "";
             anmId = 0;
             animationState = null;
+        }
+
+        public void ResetEyes()
+        {
+            eyesPosL = Vector3.zero;
+            eyesPosR = Vector3.zero;
+            eyesScaL = Vector3.zero;
+            eyesScaR = Vector3.zero;
         }
 
         public void Update(Maid maid)
@@ -404,8 +498,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var trsEyeR = maid.body0.trsEyeR;
                     trsEyeL.localRotation = maid.body0.quaDefEyeL;
                     trsEyeR.localRotation = maid.body0.quaDefEyeR;
-                    trsEyeL.localPosition = new Vector3(trsEyeL.localPosition.x, 0, 0);
-                    trsEyeR.localPosition = new Vector3(trsEyeR.localPosition.x, 0, 0);
                 }
             }
         }
@@ -421,6 +513,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return;
             }
+
+            info = MaidInfo.GetOrCreate(maid);
 
             cacheBoneData = maid.gameObject.GetComponent<CacheBoneDataArray>();
             if (cacheBoneData == null)

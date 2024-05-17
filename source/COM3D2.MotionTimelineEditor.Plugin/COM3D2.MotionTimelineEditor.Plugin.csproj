@@ -79,6 +79,7 @@
     <Compile Include="KeyBind.cs" />
     <Compile Include="KeyFrameUI.cs" />
     <Compile Include="MaidCache.cs" />
+    <Compile Include="MaidInfo.cs" />
     <Compile Include="MaidManager.cs" />
     <Compile Include="MainWindow.cs" />
     <Compile Include="MediaPlayerUI.cs" />

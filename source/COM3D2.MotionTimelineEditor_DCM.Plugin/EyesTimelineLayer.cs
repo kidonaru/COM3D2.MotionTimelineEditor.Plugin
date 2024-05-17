@@ -176,27 +176,20 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private void TransformEyes(string eyesName, float horizon, float vertical)
         {
-            var trsEyeL = maid.body0.trsEyeL;
-			var trsEyeR = maid.body0.trsEyeR;
-
             var eyesType = EyesTypeMap[eyesName];
             switch (eyesType)
             {
                 case SongEyesType.EyesPosL:
-                    horizon /= 100f;
-                    vertical /= 100f;
-                    trsEyeL.localPosition = new Vector3(trsEyeL.localPosition.x, vertical, horizon);
+                    maidCache.eyesPosL = new Vector3(0f, vertical / 100f, horizon / 100f);
                     break;
                 case SongEyesType.EyesPosR:
-                    horizon /= 100f;
-                    vertical /= 100f;
-                    trsEyeR.localPosition = new Vector3(trsEyeR.localPosition.x, vertical, horizon);
+                    maidCache.eyesPosR = new Vector3(0f, vertical / 100f, horizon / 100f);
                     break;
                 case SongEyesType.EyesScaL:
-                    trsEyeL.localScale = new Vector3(trsEyeL.localScale.x, vertical, horizon);
+                    maidCache.eyesScaL = new Vector3(0f, vertical, horizon);
                     break;
                 case SongEyesType.EyesScaR:
-                    trsEyeR.localScale = new Vector3(trsEyeR.localScale.x, vertical, horizon);
+                    maidCache.eyesScaR = new Vector3(0f, vertical, horizon);
                     break;
             }
         }
@@ -209,20 +202,29 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return Vector2.zero;
             }
 
-            var trsEyeL = maid.body0.trsEyeL;
-            var trsEyeR = maid.body0.trsEyeR;
-
             var eyesType = EyesTypeMap[eyesName];
             switch (eyesType)
             {
                 case SongEyesType.EyesPosL:
-                    return new Vector2(trsEyeL.localPosition.z * 100f, trsEyeL.localPosition.y * 100f);
+                {
+                    var pos = maidCache.eyesPosL;
+                    return new Vector2(pos.z * 100f, pos.y * 100f);
+                }
                 case SongEyesType.EyesPosR:
-                    return new Vector2(trsEyeR.localPosition.z * 100f, trsEyeR.localPosition.y * 100f);
+                {
+                    var pos = maidCache.eyesPosR;
+                    return new Vector2(pos.z * 100f, pos.y * 100f);
+                }
                 case SongEyesType.EyesScaL:
-                    return new Vector2(trsEyeL.localScale.z, trsEyeL.localScale.y);
+                {
+                    var sca = maidCache.eyesScaL;
+                    return new Vector2(sca.z, sca.y);
+                }
                 case SongEyesType.EyesScaR:
-                    return new Vector2(trsEyeR.localScale.z, trsEyeR.localScale.y);
+                {
+                    var sca = maidCache.eyesScaR;
+                    return new Vector2(sca.z, sca.y);
+                }
             }
 
             return Vector2.zero;
@@ -336,6 +338,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                         stFrame = row.frame,
                         edFrame = row.frame,
 
+                        name = row.name,
                         startHorizon = row.horizon,
                         endHorizon = row.horizon,
                         startVertical = row.vertical,
@@ -604,8 +607,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 TransformEyes("EyesPosL", 0, 0);
                 TransformEyes("EyesPosR", 0, 0);
-                TransformEyes("EyesScaL", 1, 1);
-                TransformEyes("EyesScaR", 1, 1);
+                TransformEyes("EyesScaL", 0, 0);
+                TransformEyes("EyesScaR", 0, 0);
             }
 
             view.currentPos = basePos;

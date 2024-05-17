@@ -181,7 +181,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var maids = studioHack.allMaids;
             foreach (var m in maids)
             {
-                if (m.body0 == null || m.body0.m_Bones == null)
+                if (m.body0 == null || m.body0.m_Bones == null || m.body0.trsEyeL == null || m.body0.trsEyeR == null)
                 {
                     _errorMessage = "メイド生成中です";
                     return false;
@@ -242,6 +242,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     onMaidSlotNoChanged(maidSlotNo);
                 }
             }
+        }
+
+        public void OnPluginDisable()
+        {
+            foreach (var cache in maidCaches)
+            {
+                cache.ResetEyes();
+            }
+
+            Reset();
+        }
+
+        public void OnPluginEnable()
+        {
         }
 
         public Vector3 GetIkPosition(IKHoldType holdType)
@@ -365,6 +379,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)
         {
             Reset();
+            MaidInfo.Reset();
         }
 
         private void OnRefresh()

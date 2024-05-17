@@ -455,8 +455,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void CreateModel(StudioModelStat model)
         {
-            if (model.info.type != StudioModelType.Asset &&
-                model.info.type != StudioModelType.Prefab)
+            if (model.info.type == StudioModelType.MyRoom)
             {
                 return;
             }
