@@ -491,7 +491,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private void DrawHeader(bool editEnabled, bool guiEnabled)
         {
             var view = headerView;
-            view.guiEnabled = guiEnabled;
+            view.SetEnabled(guiEnabled);
             view.ResetLayout();
 
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
@@ -846,8 +846,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var view = new GUIView(0, HEADER_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT - HEADER_HEIGHT);
-            view.guiEnabled = guiEnabled;
-            view.ResetLayout();
+            view.SetEnabled(guiEnabled);
 
             view.BeginLayout(GUIView.LayoutDirection.Free);
             view.padding = Vector2.zero;
@@ -1230,8 +1229,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 maidComboBox.focused = false;
             }
 
-            headerView.guiEnabled = guiEnabled;
-            headerView.ResetLayout();
+            headerView.SetEnabled(guiEnabled);
 
             headerView.DrawComboBoxContent(
                 fileMenuComboBox,

@@ -217,10 +217,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             notFlipTypes = new HashSet<IKManager.BoneType>
             {
                 IKManager.BoneType.TopFixed,
-                IKManager.BoneType.Pelvis,
-                IKManager.BoneType.Head,
-                IKManager.BoneType.Bust_R,
-                IKManager.BoneType.Bust_L,
             };
             for (int i = (int) IKManager.BoneType.Mouth; i <= (int) IKManager.BoneType.Nipple_R; i++)
             {
@@ -260,7 +256,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 { IKManager.BoneType.Thigh_R, IKManager.BoneType.Thigh_L },
                 { IKManager.BoneType.Calf_R, IKManager.BoneType.Calf_L },
                 { IKManager.BoneType.Hand_R, IKManager.BoneType.Hand_L },
-                { IKManager.BoneType.Foot_R, IKManager.BoneType.Foot_L }
+                { IKManager.BoneType.Foot_R, IKManager.BoneType.Foot_L },
+                { IKManager.BoneType.Bust_L, IKManager.BoneType.Bust_R },
             };
 
             var swapList = swapFlipDic.ToList();
@@ -322,10 +319,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         newEulerAngles.y = 180f - (eulerAngles.y - 180f);
                         newEulerAngles.z = 270f - (eulerAngles.z - 270f);
                     }
+                    else if (boneType == IKManager.BoneType.Pelvis)
+                    {
+                        newEulerAngles.y = eulerAngles.y + 180f;
+                        newEulerAngles.z = eulerAngles.z + 180f;
+                    }
                     else if (boneType == IKManager.BoneType.Spine0)
                     {
                         newEulerAngles.x = 270f - (eulerAngles.x - 270f);
                         //newEulerAngles.z = 90f - (eulerAngles.z - 90f);
+                    }
+                    else if (boneType == IKManager.BoneType.Bust_L || boneType == IKManager.BoneType.Bust_R)
+                    {
+                        newEulerAngles.y = 360f - (eulerAngles.y - 180f);
+                        newEulerAngles.z = 270f - (eulerAngles.z - 270f);
                     }
                     else
                     {

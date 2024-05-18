@@ -561,7 +561,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return GetCustomValueIndexMap().ContainsKey(customName);
         }
 
-        public virtual float GetResetCustomValue(string customName)
+        public virtual Vector3 GetInitialPosition()
+        {
+            return Vector3.zero;
+        }
+
+        public virtual Quaternion GetInitialRotation()
+        {
+            return Quaternion.identity;
+        }
+
+        public virtual Vector3 GetInitialEulerAngles()
+        {
+            return Vector3.zero;
+        }
+
+        public virtual Vector3 GetInitialScale()
+        {
+            return Vector3.one;
+        }
+
+        public virtual float GetInitialCustomValue(string customName)
         {
             return 0f;
         }
@@ -657,19 +677,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (hasPosition)
             {
-                position = Vector3.zero;
+                position = GetInitialPosition();
             }
             if (hasRotation)
             {
-                rotation = Quaternion.identity;
+                rotation = GetInitialRotation();
             }
             if (hasEulerAngles)
             {
-                eulerAngles = Vector3.zero;
+                eulerAngles = GetInitialEulerAngles();
             }
             if (hasScale)
             {
-                scale = Vector3.one;
+                scale = GetInitialScale();
             }
             if (hasEasing)
             {
@@ -678,7 +698,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             foreach (var customName in GetCustomValueIndexMap().Keys)
             {
-                GetCustomValue(customName).value = GetResetCustomValue(customName);
+                GetCustomValue(customName).value = GetInitialCustomValue(customName);
             }
         }
 

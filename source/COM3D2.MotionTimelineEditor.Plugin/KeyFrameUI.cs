@@ -100,7 +100,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override void DrawWindow(int id)
         {
             var view = mainView;
-            view.guiEnabled = !easingComboBox.focused;
+            view.SetEnabled(!easingComboBox.focused);
             view.ResetLayout();
 
             if (selectedBones.Count == 0)
@@ -140,7 +140,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 posFieldValues,
                 0.01f,
                 0.1f,
-                0f,
+                transform => transform.GetInitialPosition(),
                 transform => transform.hasPosition,
                 transform => transform.position,
                 (transform, pos) => transform.position = pos
@@ -150,7 +150,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 angleFieldValues,
                 1f,
                 10f,
-                0f,
+                transform => transform.GetInitialEulerAngles(),
                 transform => transform.hasRotation || transform.hasEulerAngles,
                 transform => transform.eulerAngles,
                 (transform, angle) => transform.eulerAngles = angle
@@ -160,7 +160,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 scaleFieldValues,
                 0.01f,
                 0.1f,
-                1f,
+                transform => transform.GetInitialScale(),
                 transform => transform.hasScale,
                 transform => transform.scale,
                 (transform, scale) => transform.scale = scale
@@ -189,7 +189,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     fieldValue,
                     0.01f,
                     0.1f,
-                    transform => transform.GetResetCustomValue(customName),
+                    transform => transform.GetInitialCustomValue(customName),
                     transform => transform.HasCustomValue(customName),
                     transform => transform.GetCustomValue(customName).value,
                     (transform, newValue) => transform.GetCustomValue(customName).value = newValue
@@ -204,7 +204,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             FloatFieldValue[] fieldValues,
             float addedValue1,
             float addedValue2,
-            float resetValue,
+            Func<ITransformData, Vector3> getResetValue,
             Func<ITransformData, bool> hasValue,
             Func<ITransformData, Vector3> getValue,
             Action<ITransformData, Vector3> setValue)
@@ -251,6 +251,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var diffValues = Vector3.zero;
             var newValues = values;
+            int resetIndex = -1;
 
             for (var i = 0; i < 3; i++)
             {
@@ -258,11 +259,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     fieldValues[i],
                     addedValue1,
                     addedValue2,
-                    resetValue,
+                    () => resetIndex = i,
                     values[i],
                     newValue => newValues[i] = newValue,
                     diffValue => diffValues[i] = diffValue
                 );
+            }
+
+            // リセット
+            if (resetIndex >= 0)
+            {
+                foreach (var selectedBone in selectedBones)
+                {
+                    var transform = selectedBone.transform;
+                    if (hasValue(transform))
+                    {
+                        var pos = getValue(transform);
+                        pos[resetIndex] = getResetValue(transform)[resetIndex];
+                        setValue(transform, pos);
+                    }
+                }
+
+                PluginUtils.LogDebug("リセットします");
+                currentLayer.ApplyCurrentFrame(true);
             }
 
             // 差分の適用
@@ -899,8 +918,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void DrawComboBox(GUIView view)
         {
-            view.guiEnabled = true;
-            view.ResetLayout();
+            view.SetEnabled(true);
 
             view.DrawComboBoxContent(
                 easingComboBox,

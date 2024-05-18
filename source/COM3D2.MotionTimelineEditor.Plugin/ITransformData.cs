@@ -48,7 +48,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Dictionary<string, int> GetCustomValueIndexMap();
         ValueData GetCustomValue(string customName);
         bool HasCustomValue(string customName);
-        float GetResetCustomValue(string customName);
+        Vector3 GetInitialPosition();
+        Quaternion GetInitialRotation();
+        Vector3 GetInitialEulerAngles();
+        Vector3 GetInitialScale();
+        float GetInitialCustomValue(string customName);
         ValueData[] GetValueDataList(TangentValueType valueType);
         TangentData[] GetInTangentDataList(TangentValueType valueType);
         TangentData[] GetOutTangentDataList(TangentValueType valueType);

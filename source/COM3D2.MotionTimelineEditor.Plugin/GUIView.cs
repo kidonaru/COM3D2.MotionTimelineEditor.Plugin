@@ -108,8 +108,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Rect scrollViewRect { get; private set; }
         public bool isScrollViewEnabled { get; private set; }
         public float labelWidth { get; private set; }
-        public float layoutMaxX  { get; private set; }
-        public float layoutMaxY  { get; private set; }
+        public float layoutMaxX { get; private set; }
+        public float layoutMaxY { get; private set; }
         public float margin { get; set; }
         public Color defaultColor = Color.white;
         public bool guiEnabled = true;

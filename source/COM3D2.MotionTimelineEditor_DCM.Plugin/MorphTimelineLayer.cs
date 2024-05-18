@@ -407,14 +407,13 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            GUI.enabled = studioHack.isPoseEditing;
+            view.SetEnabled(studioHack.isPoseEditing);
 
-            var viewWidth = SubWindow.WINDOW_WIDTH;
-            var viewHeight = SubWindow.WINDOW_HEIGHT;
+            _contentRect.width = view.viewRect.width - 20;
 
             _scrollPosition = view.BeginScrollView(
-                viewWidth,
-                viewHeight,
+                view.viewRect.width,
+                view.viewRect.height,
                 _contentRect,
                 _scrollPosition,
                 false,
@@ -495,7 +494,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             view.EndScrollView();
 
-            GUI.enabled = true;
+            view.SetEnabled(true);
         }
 
         public override ITransformData CreateTransformData(string name)

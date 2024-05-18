@@ -143,6 +143,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static MaidCache maidCache
+        {
+            get
+            {
+                return maidManager.cache;
+            }
+        }
+
         private static Config config
         {
             get
@@ -1415,6 +1423,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 PluginUtils.LogDebug("Save Maid Position name={0} initialEditPosition={1} initialEditRotation={2}",
                     maid.name, initialEditPosition, initialEditRotation);
+
+                maidCache.SaveInitialEditPosition();
             }
 
             if (onEditPoseUpdated != null)

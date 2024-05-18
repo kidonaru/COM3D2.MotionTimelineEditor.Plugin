@@ -486,6 +486,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             new string[] { "X", "Y", "Z", "RX", "RY", "RZ" }
         );
         private ComboBoxValue<IKManager.BoneType> boneComboBox = new ComboBoxValue<IKManager.BoneType>();
+        private Rect _contentRect = new Rect(0, 0, SubWindow.WINDOW_WIDTH, SubWindow.WINDOW_HEIGHT);
+        private Vector2 _scrollPosition = Vector2.zero;
 
         public override void DrawWindow(GUIView view)
         {
@@ -493,18 +495,45 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (maidCache == null)
             {
+                view.DrawLabel("メイドが配置されていません", 200, 20);
                 return;
             }
+
+            _contentRect.width = view.viewRect.width - 20;
+
+            _scrollPosition = view.BeginScrollView(
+                view.viewRect.width,
+                view.viewRect.height,
+                _contentRect,
+                _scrollPosition,
+                false,
+                true);
 
             DrawTransform(view);
             DrawFingerBlend(
                 view,
+                FingerSlotNames,
                 WindowPartsFingerBlend.Type.RightArm,
                 WindowPartsFingerBlend.Type.LeftArm);
             DrawFingerBlend(
                 view,
+                FingerSlotNames,
                 WindowPartsFingerBlend.Type.LeftArm,
                 WindowPartsFingerBlend.Type.RightArm);
+            DrawFingerBlend(
+                view,
+                LegSlotNames,
+                WindowPartsFingerBlend.Type.RightLeg,
+                WindowPartsFingerBlend.Type.LeftLeg);
+            DrawFingerBlend(
+                view,
+                LegSlotNames,
+                WindowPartsFingerBlend.Type.LeftLeg,
+                WindowPartsFingerBlend.Type.RightLeg);
+
+            _contentRect.height = view.currentPos.y + 20;
+
+            view.EndScrollView();
 
             DrawComboBox(view);
         }
@@ -544,33 +573,39 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (boneType == IKManager.BoneType.Root)
             {
-                updateTransform |= view.DrawValue(_fieldValues[0], 0.01f, 0.1f, 0f,
+                updateTransform |= view.DrawValue(_fieldValues[0], 0.01f, 0.1f,
+                    () => position.x = BoneUtils.GetInitialPosition(boneType).x,
                     position.x,
                     x => position.x = x,
                     x => position.x += x);
 
-                updateTransform |= view.DrawValue(_fieldValues[1], 0.01f, 0.1f, 0f,
+                updateTransform |= view.DrawValue(_fieldValues[1], 0.01f, 0.1f,
+                    () => position.y = BoneUtils.GetInitialPosition(boneType).y,
                     position.y,
                     y => position.y = y,
                     y => position.y += y);
 
-                updateTransform |= view.DrawValue(_fieldValues[2], 0.01f, 0.1f, 0f,
+                updateTransform |= view.DrawValue(_fieldValues[2], 0.01f, 0.1f,
+                    () => position.z = BoneUtils.GetInitialPosition(boneType).z,
                     position.z,
                     z => position.z = z,
                     z => position.z += z);
             }
             {
-                updateTransform |= view.DrawValue(_fieldValues[3], 1f, 10f, 0f,
+                updateTransform |= view.DrawValue(_fieldValues[3], 1f, 10f,
+                    () => angle.x = BoneUtils.GetInitialEulerAngles(boneType).x,
                     angle.x,
                     x => angle.x = x,
                     x => angle.x += x);
 
-                updateTransform |= view.DrawValue(_fieldValues[4], 1f, 10f, 0f,
+                updateTransform |= view.DrawValue(_fieldValues[4], 1f, 10f,
+                    () => angle.y = BoneUtils.GetInitialEulerAngles(boneType).y,
                     angle.y,
                     y => angle.y = y,
                     y => angle.y += y);
 
-                updateTransform |= view.DrawValue(_fieldValues[5], 1f, 10f, 0f,
+                updateTransform |= view.DrawValue(_fieldValues[5], 1f, 10f,
+                    () => angle.z = BoneUtils.GetInitialEulerAngles(boneType).z,
                     angle.z,
                     z => angle.z = z,
                     z => angle.z += z);
@@ -606,11 +641,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static readonly string[] FingerSlotNames = new string[]
         {
-            "親指",
-            "人差",
-            "中指",
-            "薬指",
-            "小指",
+            "親",
+            "人",
+            "中",
+            "薬",
+            "小",
+        };
+
+        private static readonly string[] LegSlotNames = new string[]
+        {
+            "親",
+            "中",
+            "小",
         };
 
         public FingerBlend.BaseFinger GetBaseFingerClass(WindowPartsFingerBlend.Type type)
@@ -638,6 +680,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void DrawFingerBlend(
             GUIView view,
+            string[] slotNames,
             WindowPartsFingerBlend.Type blendType,
             WindowPartsFingerBlend.Type otherBlendType)
         {
@@ -665,14 +708,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.DrawLabel("ロック", 40, 20);
 
-                for (int i = 0; i < 5; i++)
+                bool isAllLock = true;
+                for (int i = 0; i < slotNames.Length; i++)
                 {
                     var isLock = baseFinger.IsLock(i);
-                    if (view.DrawButton(FingerSlotNames[i], 40, 20, true, isLock ? Color.green : Color.white))
+                    isAllLock &= isLock;
+                    if (view.DrawButton(slotNames[i], 25, 20, true, isLock ? Color.green : Color.white))
                     {
                         baseFinger.LockSingleItem(!isLock, i);
                         baseFinger.Apply();
                     }
+                }
+
+                if (view.DrawButton("全", 25, 20, true, isAllLock ? Color.green : Color.white))
+                {
+                    baseFinger.LockAllItems(!isAllLock);
+                    baseFinger.Apply();
+                }
+
+                if (view.DrawButton("反", 25, 20))
+                {
+                    baseFinger.LockReverse();
+                    baseFinger.Apply();
                 }
             }
             view.EndLayout();
@@ -684,7 +741,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var value = baseFinger.value_open;
                 var newValue = view.DrawFloatField(value, 50, 20);
 
-                newValue = view.DrawSlider(newValue, 0f, 1.0f, 120, 20);
+                newValue = view.DrawSlider(newValue, 0f, 1.0f, 100, 20);
+
+                if (view.DrawButton("R", 20, 20))
+                {
+                    newValue = 0;
+                }
 
                 if (newValue != value)
                 {
@@ -701,7 +763,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var value = baseFinger.value_fist;
                 var newValue = view.DrawFloatField(value, 50, 20);
 
-                newValue = view.DrawSlider(newValue, 0f, 1.0f, 120, 20);
+                newValue = view.DrawSlider(newValue, 0f, 1.0f, 100, 20);
+
+                if (view.DrawButton("R", 20, 20))
+                {
+                    newValue = 0;
+                }
 
                 if (newValue != value)
                 {

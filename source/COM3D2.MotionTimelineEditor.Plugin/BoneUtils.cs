@@ -522,7 +522,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return "";
         }
 
-        public static readonly Dictionary<IKManager.BoneType, Vector3> InitialRotationMap = new Dictionary<IKManager.BoneType, Vector3>
+        public static readonly Dictionary<IKManager.BoneType, Vector3> InitialEulerAnglesMap = new Dictionary<IKManager.BoneType, Vector3>
         {
             {IKManager.BoneType.Root, new Vector3(270f, 180f, 270f)},
             {IKManager.BoneType.Spine3, new Vector3(0f, 0f, 0f)},
@@ -532,11 +532,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {IKManager.BoneType.Neck, new Vector3(0f, 0f, 0f)},
             {IKManager.BoneType.Head, new Vector3(0f, 0f, 0f)},
             {IKManager.BoneType.Clavicle_L, new Vector3(0f, 270f, 180f)},
-            {IKManager.BoneType.UpperArm_L, new Vector3(90f, 300f, 0f)},
+            {IKManager.BoneType.UpperArm_L, new Vector3(90f, 280f, 0f)},
             {IKManager.BoneType.Forearm_L, new Vector3(0f, 0f, 0f)},
             {IKManager.BoneType.Hand_L, new Vector3(180f, 0f, 0f)},
             {IKManager.BoneType.Clavicle_R, new Vector3(0f, 90f, 180f)},
-            {IKManager.BoneType.UpperArm_R, new Vector3(-90f, 60f, 0f)},
+            {IKManager.BoneType.UpperArm_R, new Vector3(270f, 80f, 0f)},
             {IKManager.BoneType.Forearm_R, new Vector3(0f, 0f, 0f)},
             {IKManager.BoneType.Hand_R, new Vector3(180f, 0f, 0f)},
             {IKManager.BoneType.Pelvis, new Vector3(270f, 90f, 0f)},
@@ -546,14 +546,31 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {IKManager.BoneType.Thigh_R, new Vector3(0f, 180f, 0f)},
             {IKManager.BoneType.Calf_R, new Vector3(0f, 0f, 0f)},
             {IKManager.BoneType.Foot_R, new Vector3(0f, 0f, 0f)},
+            {IKManager.BoneType.Bust_L, new Vector3(0f, 180f, 270f)},
+            {IKManager.BoneType.Bust_R, new Vector3(0f, 0f, 270f)},
+            {IKManager.BoneType.Toe0_Root_L, new Vector3(0f, 0f, 280f)},
+            {IKManager.BoneType.Toe1_Root_L, new Vector3(0f, 0f, 280f)},
+            {IKManager.BoneType.Toe2_Root_L, new Vector3(0f, 0f, 280f)},
+            {IKManager.BoneType.Toe0_Root_R, new Vector3(0f, 0f, 280f)},
+            {IKManager.BoneType.Toe1_Root_R, new Vector3(0f, 0f, 280f)},
+            {IKManager.BoneType.Toe2_Root_R, new Vector3(0f, 0f, 280f)},
         };
 
-        public static Vector3 GetInitialRotation(IKManager.BoneType boneType)
+        public static Vector3 GetInitialEulerAngles(IKManager.BoneType boneType)
         {
             Vector3 initialRotation;
-            if (InitialRotationMap.TryGetValue(boneType, out initialRotation))
+            if (InitialEulerAnglesMap.TryGetValue(boneType, out initialRotation))
             {
                 return initialRotation;
+            }
+            return Vector3.zero;
+        }
+
+        public static Vector3 GetInitialPosition(IKManager.BoneType boneType)
+        {
+            if (boneType == IKManager.BoneType.Root)
+            {
+                return new Vector3(0f, 0.9f, 0f);
             }
             return Vector3.zero;
         }

@@ -90,12 +90,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return null;
         }
 
-        public override void Reset()
+        public override Vector3 GetInitialPosition()
+        {
+            return new Vector3(0f, 0.9f, 0f);
+        }
+
+        public override Quaternion GetInitialRotation()
+        {
+            return Quaternion.Euler(GetInitialEulerAngles());
+        }
+
+        public override Vector3 GetInitialEulerAngles()
         {
             var boneType = BoneUtils.GetBoneTypeByName(name);
-            var initialRotation = BoneUtils.GetInitialRotation(boneType);
-            rotation = Quaternion.Euler(initialRotation);
-            position = new Vector3(0f, 0.9f, 0f);
+            var angles = BoneUtils.GetInitialEulerAngles(boneType);
+            return angles;
         }
     }
 }

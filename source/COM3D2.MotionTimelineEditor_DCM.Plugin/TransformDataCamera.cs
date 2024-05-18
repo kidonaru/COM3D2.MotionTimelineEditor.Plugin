@@ -102,7 +102,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return CustomValueIndexMap;
         }
 
-        public override float GetResetCustomValue(string customName)
+        public override float GetInitialCustomValue(string customName)
         {
             if (customName == "distance")
             {

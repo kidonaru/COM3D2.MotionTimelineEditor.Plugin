@@ -371,16 +371,56 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 dragPoint.transform.position = targetPosition;
                 ikFabrik.solver.Update();
                 dragPoint.drag_end_event.Invoke();
-                dragPoint.PositonCorrection();
             }
         }
 
         public void PositonCorrection(IKHoldType holdType)
         {
-            var dragPoint = GetDragPoint(holdType);
-            if (dragPoint != null)
+            var boneType = holdType.ConvertBoneType();
+            var bone = ikManager.GetBone(boneType);
+            var pos = GetInitialEditPosition(boneType);
+            bone.transform.localPosition = pos;
+        }
+
+        private Dictionary<IKManager.BoneType, Vector3> _initialEditPositions = new Dictionary<IKManager.BoneType, Vector3>();
+
+        public void SetInitialEditPosition(IKManager.BoneType boneType, Vector3 pos)
+        {
+            _initialEditPositions[boneType] = pos;
+        }
+
+        public Vector3 GetInitialEditPosition(IKManager.BoneType boneType)
+        {
+            Vector3 pos;
+            if (_initialEditPositions.TryGetValue(boneType, out pos))
             {
-                dragPoint.PositonCorrection();
+                return pos;
+            }
+            return Vector3.zero;
+        }
+
+        public void SaveInitialEditPosition()
+        {
+            var boneTypes = new List<IKManager.BoneType>
+            {
+                IKManager.BoneType.UpperArm_L,
+                IKManager.BoneType.Forearm_L,
+                IKManager.BoneType.Thigh_L,
+                IKManager.BoneType.Calf_L,
+
+                IKManager.BoneType.UpperArm_R,
+                IKManager.BoneType.Forearm_R,
+                IKManager.BoneType.Thigh_R,
+                IKManager.BoneType.Calf_R,
+            };
+
+            foreach (var boneType in boneTypes)
+            {
+                var bone = ikManager.GetBone(boneType);
+                if (bone != null)
+                {
+                    SetInitialEditPosition(boneType, bone.transform.localPosition);
+                }
             }
         }
 
@@ -514,8 +554,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            info = MaidInfo.GetOrCreate(maid);
-
             cacheBoneData = maid.gameObject.GetComponent<CacheBoneDataArray>();
             if (cacheBoneData == null)
             {
@@ -523,6 +561,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 cacheBoneData.CreateCache(maid.body0.GetBone("Bip01"));
             }
             ikManager = PoseEditWindow.GetMaidIKManager(maid);
+
+            info = MaidInfo.GetOrCreate(maid, ikManager);
 
             if (onMaidChanged != null)
             {

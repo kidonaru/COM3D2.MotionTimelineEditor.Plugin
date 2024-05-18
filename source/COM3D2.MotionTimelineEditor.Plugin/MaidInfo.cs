@@ -10,13 +10,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Vector3 initEyesScaL = Vector3.one;
         public Vector3 initEyesScaR = Vector3.one;
 
-        public MaidInfo(Maid maid)
+        public MaidInfo(Maid maid, IKManager ikManager)
         {
             if (maid == null || maid.body0 == null || maid.body0.trsEyeL == null || maid.body0.trsEyeR == null)
             {
                 PluginUtils.LogError("MaidInfo: MaidInfoの初期化に失敗しました。");
                 return;
             }
+
             initEyesPosL = maid.body0.trsEyeL.localPosition;
             initEyesPosR = maid.body0.trsEyeR.localPosition;
             initEyesScaL = maid.body0.trsEyeL.localScale;
@@ -25,7 +26,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static Dictionary<Maid, MaidInfo> _maidInfoMap = new Dictionary<Maid, MaidInfo>();
 
-        public static MaidInfo GetOrCreate(Maid maid)
+        public static MaidInfo GetOrCreate(Maid maid, IKManager ikManager)
         {
             if (maid == null)
             {
@@ -38,7 +39,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return info;
             }
 
-            info = new MaidInfo(maid);
+            info = new MaidInfo(maid, ikManager);
+
             _maidInfoMap[maid] = info;
             return info;
         }

@@ -273,6 +273,48 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return false;
         }
 
+        public static void LockAllItems(this FingerBlend.BaseFinger baseFinger, bool isLock)
+        {
+            var armFinger = baseFinger as FingerBlend.ArmFinger;
+            if (armFinger != null)
+            {
+                armFinger.lock_enabled0 = isLock;
+                armFinger.lock_enabled1 = isLock;
+                armFinger.lock_enabled2 = isLock;
+                armFinger.lock_enabled3 = isLock;
+                armFinger.lock_enabled4 = isLock;
+            }
+
+            var legFinger = baseFinger as FingerBlend.LegFinger;
+            if (legFinger != null)
+            {
+                legFinger.lock_enabled0 = isLock;
+                legFinger.lock_enabled1 = isLock;
+                legFinger.lock_enabled2 = isLock;
+            }
+        }
+
+        public static void LockReverse(this FingerBlend.BaseFinger baseFinger)
+        {
+            var armFinger = baseFinger as FingerBlend.ArmFinger;
+            if (armFinger != null)
+            {
+                armFinger.lock_enabled0 = !armFinger.lock_enabled0;
+                armFinger.lock_enabled1 = !armFinger.lock_enabled1;
+                armFinger.lock_enabled2 = !armFinger.lock_enabled2;
+                armFinger.lock_enabled3 = !armFinger.lock_enabled3;
+                armFinger.lock_enabled4 = !armFinger.lock_enabled4;
+            }
+
+            var legFinger = baseFinger as FingerBlend.LegFinger;
+            if (legFinger != null)
+            {
+                legFinger.lock_enabled0 = !legFinger.lock_enabled0;
+                legFinger.lock_enabled1 = !legFinger.lock_enabled1;
+                legFinger.lock_enabled2 = !legFinger.lock_enabled2;
+            }
+        }
+
         public static void CopyFrom(
             this FingerBlend.BaseFinger baseFinger,
             FingerBlend.BaseFinger source)
@@ -311,6 +353,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             baseFinger.value_open = source.value_open;
             baseFinger.value_fist = source.value_fist;
+        }
+
+        public static IKManager.BoneType ConvertBoneType(this IKHoldType holdType)
+        {
+            switch (holdType)
+            {
+                case IKHoldType.Arm_R_Joint:
+                    return IKManager.BoneType.UpperArm_R;
+                case IKHoldType.Arm_R_Tip:
+                    return IKManager.BoneType.Forearm_R;
+                case IKHoldType.Arm_L_Joint:
+                    return IKManager.BoneType.UpperArm_L;
+                case IKHoldType.Arm_L_Tip:
+                    return IKManager.BoneType.Forearm_L;
+                case IKHoldType.Foot_R_Joint:
+                    return IKManager.BoneType.Thigh_R;
+                case IKHoldType.Foot_R_Tip:
+                    return IKManager.BoneType.Calf_R;
+                case IKHoldType.Foot_L_Joint:
+                    return IKManager.BoneType.Thigh_L;
+                case IKHoldType.Foot_L_Tip:
+                    return IKManager.BoneType.Calf_L;
+            }
+
+            PluginUtils.LogError("Invalid IKHoldType: " + holdType);
+            return IKManager.BoneType.UpperArm_R;
         }
     }
 
