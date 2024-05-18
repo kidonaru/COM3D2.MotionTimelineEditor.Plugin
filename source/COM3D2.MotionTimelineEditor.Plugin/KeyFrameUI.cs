@@ -923,7 +923,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     updateEasing(newEasing);
                 }
 
-                subView.DrawComboBoxButton(easingComboBox, 80, 20);
+                subView.DrawComboBoxButton(easingComboBox, 80, 20, false);
             }
 
             view.DrawTexture(easingTex);

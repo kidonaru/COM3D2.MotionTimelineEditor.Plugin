@@ -132,6 +132,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool focused = false;
         public Vector2 scrollPosition;
         public Rect buttonRect;
+
+        public int prevIndex
+        {
+            get
+            {
+                var prevIndex = currentIndex - 1;
+                if (prevIndex < 0)
+                {
+                    prevIndex = items.Count - 1;
+                }
+                return prevIndex;
+            }
+        }
+
+        public int nextIndex
+        {
+            get
+            {
+                var nextIndex = currentIndex + 1;
+                if (nextIndex >= items.Count)
+                {
+                    nextIndex = 0;
+                }
+                return nextIndex;
+            }
+        }
     }
 
     public class GUIView
@@ -235,6 +261,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public GUIView(float x, float y, float width, float height)
         {
             Init(new Rect(x, y, width, height));
+        }
+
+        public GUIView(Rect viewRect)
+        {
+            Init(viewRect);
         }
 
         public void Init(Rect viewRect)
@@ -765,10 +796,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void DrawComboBoxButton<T>(
             ComboBoxValue<T> comboBox,
             float width,
-            float height)
+            float height,
+            bool showArrow)
         {
-            comboBox.buttonRect = GetDrawRect(width, height);
-
             var name = comboBox.label;
             if (name == null)
             {
@@ -779,10 +809,47 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            if (DrawButton(name, width, height))
+            var subViewRect = GetDrawRect(width, height);
+            var subView = new GUIView(subViewRect);
+            subView.margin = 0;
+            subView.padding = Vector2.zero;
+
+            subView.BeginLayout(LayoutDirection.Horizontal);
             {
-                comboBox.focused = !comboBox.focused;
+                if (showArrow)
+                {
+                    if (subView.DrawButton("<", 20, 20))
+                    {
+                        comboBox.onSelected(comboBox.items[comboBox.prevIndex], comboBox.prevIndex);
+                    }
+                }
+
+                var buttonWidth = width;
+                var buttonHeight = height;
+
+                if (showArrow)
+                {
+                    buttonWidth -= 40;
+                }
+
+                comboBox.buttonRect = subView.GetDrawRect(buttonWidth, buttonHeight);
+
+                if (subView.DrawButton(name, buttonWidth, buttonHeight))
+                {
+                    comboBox.focused = !comboBox.focused;
+                }
+
+                if (showArrow)
+                {
+                    if (subView.DrawButton(">", 20, 20))
+                    {
+                        comboBox.onSelected(comboBox.items[comboBox.nextIndex], comboBox.nextIndex);
+                    }
+                }
             }
+            subView.EndLayout();
+
+            NextElement(subViewRect);
         }
 
         public void DrawComboBoxContent<T>(

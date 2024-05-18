@@ -547,7 +547,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.DrawLabel("対象ボーン", 80, 20);
 
                 boneComboBox.currentIndex = _targetBoneIndex;
-                view.DrawComboBoxButton(boneComboBox, 100, 20);
+                view.DrawComboBoxButton(boneComboBox, 140, 20, true);
             }
             view.EndLayout();
 

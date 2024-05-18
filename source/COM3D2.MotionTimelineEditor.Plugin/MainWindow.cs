@@ -498,7 +498,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.margin = 0;
 
-                view.DrawComboBoxButton(fileMenuComboBox, 60, 20);
+                view.DrawComboBoxButton(fileMenuComboBox, 60, 20, false);
 
                 if (view.DrawButton("ロード", 60, 20))
                 {
@@ -764,7 +764,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 layerComboBox.currentIndex = layerInfo.index;
                 layerComboBox.items = timelineManager.GetLayerInfoList();
 
-                view.DrawComboBoxButton(layerComboBox, 100, 20);
+                view.DrawComboBoxButton(layerComboBox, 140, 20, true);
 
                 view.AddSpace(10);
 
@@ -775,7 +775,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     maidComboBox.currentIndex = currentLayer.slotNo;
                     maidComboBox.items = studioHack.allMaids;
 
-                    view.DrawComboBoxButton(maidComboBox, 150, 20);
+                    view.DrawComboBoxButton(maidComboBox, 190, 20, true);
                 }
             }
             view.EndLayout();

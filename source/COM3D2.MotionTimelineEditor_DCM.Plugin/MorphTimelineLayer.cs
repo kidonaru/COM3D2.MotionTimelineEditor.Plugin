@@ -407,8 +407,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            view.SetEnabled(studioHack.isPoseEditing);
-
             _contentRect.width = view.viewRect.width - 20;
 
             _scrollPosition = view.BeginScrollView(
@@ -418,6 +416,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 _scrollPosition,
                 false,
                 true);
+
+            view.SetEnabled(studioHack.isPoseEditing);
 
             Action<string> drawMorphSlider = morphName =>
             {
