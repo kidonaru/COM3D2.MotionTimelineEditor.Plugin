@@ -213,6 +213,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     studioHack.ChangeBackground(motion.name);
                 }
 
+                studioHack.SetBackgroundVisible(timeline.isBackgroundVisible);
+
                 if (bgObject != null)
                 {
                     bgObject.transform.position = motion.myTm.stPos;
@@ -429,7 +431,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
                 SaveBGTimeLine(_outputRows, outputPath);
 
-                songElement.Add(new XElement("changeBg", outputFileName));
+                if (timeline.isBackgroundVisible)
+                {
+                    songElement.Add(new XElement("changeBg", outputFileName));
+                }
             }
             catch (Exception e)
             {

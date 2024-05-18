@@ -214,5 +214,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _moviePlayerImpl.UpdateMesh();
             }
         }
+
+        public void OnPluginDisable()
+        {
+            UnloadMovie();
+        }
+
+        public void OnPluginEnable()
+        {
+            LoadMovie();
+        }
     }
 }

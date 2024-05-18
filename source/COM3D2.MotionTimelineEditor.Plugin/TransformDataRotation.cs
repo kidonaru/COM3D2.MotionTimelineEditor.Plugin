@@ -12,43 +12,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override bool hasPosition
-        {
-            get
-            {
-                return false;
-            }
-        }
-
         public override bool hasRotation
         {
             get
             {
                 return true;
-            }
-        }
-
-        public override bool hasEulerAngles
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        public override bool hasScale
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        public override bool hasEasing
-        {
-            get
-            {
-                return false;
             }
         }
 
@@ -60,45 +28,34 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public override ValueData[] rotationValues
+        {
+            get
+            {
+                return new ValueData[] { values[0], values[1], values[2], values[3] };
+            }
+        }
+
+        public override Quaternion initialRotation
+        {
+            get
+            {
+                return Quaternion.Euler(initialEulerAngles);
+            }
+        }
+
+        public override Vector3 initialEulerAngles
+        {
+            get
+            {
+                var boneType = BoneUtils.GetBoneTypeByName(name);
+                var angles = BoneUtils.GetInitialEulerAngles(boneType);
+                return angles;
+            }
+        }
+
         public TransformDataRotation()
         {
-        }
-
-        public override ValueData[] GetPositionValues()
-        {
-            return new ValueData[0];
-        }
-
-        public override ValueData[] GetRotationValues()
-        {
-            return new ValueData[] { values[0], values[1], values[2], values[3] };
-        }
-
-        public override ValueData[] GetEulerAnglesValues()
-        {
-            return new ValueData[0];
-        }
-
-        public override ValueData[] GetScaleValues()
-        {
-            return new ValueData[0];
-        }
-
-        public override ValueData GetEasingValue()
-        {
-            return null;
-        }
-
-        public override Quaternion GetInitialRotation()
-        {
-            return Quaternion.Euler(GetInitialEulerAngles());
-        }
-
-        public override Vector3 GetInitialEulerAngles()
-        {
-            var boneType = BoneUtils.GetBoneTypeByName(name);
-            var angles = BoneUtils.GetInitialEulerAngles(boneType);
-            return angles;
         }
     }
 }

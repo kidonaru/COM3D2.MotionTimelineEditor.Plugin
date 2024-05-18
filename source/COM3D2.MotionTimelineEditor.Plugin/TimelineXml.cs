@@ -47,6 +47,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("IsLoopAnm")]
         public bool isLoopAnm = true;
 
+        [XmlElement("IsBackgroundVisible")]
+        public bool isBackgroundVisible = true;
+
         [XmlElement("StartOffsetTime")]
         public float startOffsetTime = 0.5f;
 

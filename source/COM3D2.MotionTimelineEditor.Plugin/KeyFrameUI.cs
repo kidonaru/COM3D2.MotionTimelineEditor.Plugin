@@ -34,6 +34,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private FloatFieldValue[] scaleFieldValues = FloatFieldValue.CreateArray(
             new string[] { "SX", "SY", "SZ" }
         );
+        private FloatFieldValue[] colorFieldValues = FloatFieldValue.CreateArray(
+            new string[] { "R", "G", "B", "A" }
+        );
         private FloatFieldValue outTangentFieldValue = new FloatFieldValue();
         private FloatFieldValue inTangentFieldValue = new FloatFieldValue();
         private FloatFieldValue[] customFieldValues = FloatFieldValue.CreateArray(8);
@@ -140,7 +143,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 posFieldValues,
                 0.01f,
                 0.1f,
-                transform => transform.GetInitialPosition(),
+                transform => transform.initialPosition,
                 transform => transform.hasPosition,
                 transform => transform.position,
                 (transform, pos) => transform.position = pos
@@ -150,7 +153,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 angleFieldValues,
                 1f,
                 10f,
-                transform => transform.GetInitialEulerAngles(),
+                transform => transform.initialEulerAngles,
                 transform => transform.hasRotation || transform.hasEulerAngles,
                 transform => transform.eulerAngles,
                 (transform, angle) => transform.eulerAngles = angle
@@ -160,10 +163,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 scaleFieldValues,
                 0.01f,
                 0.1f,
-                transform => transform.GetInitialScale(),
+                transform => transform.initialScale,
                 transform => transform.hasScale,
                 transform => transform.scale,
                 (transform, scale) => transform.scale = scale
+            );
+            DrawVector3(
+                view,
+                colorFieldValues,
+                0.01f,
+                0.1f,
+                transform => transform.initialColor.ToVector3(),
+                transform => transform.hasColor,
+                transform => transform.color.ToVector3(),
+                (transform, color) => transform.color = color.ToColor()
             );
         }
 

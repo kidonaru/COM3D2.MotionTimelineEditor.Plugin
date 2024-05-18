@@ -25,11 +25,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return GetPositionValues().ToVector3();
+                return positionValues.ToVector3();
             }
             set
             {
-                GetPositionValues().FromVector3(value);
+                positionValues.FromVector3(value);
             }
         }
 
@@ -37,11 +37,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return GetRotationValues().ToQuaternion();
+                return rotationValues.ToQuaternion();
             }
             set
             {
-                GetRotationValues().FromQuaternion(value);
+                rotationValues.FromQuaternion(value);
             }
         }
 
@@ -51,7 +51,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (hasEulerAngles)
                 {
-                    return GetEulerAnglesValues().ToVector3();
+                    return eulerAnglesValues.ToVector3();
                 }
                 else if (hasRotation)
                 {
@@ -63,7 +63,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (hasEulerAngles)
                 {
-                    GetEulerAnglesValues().FromVector3(value);
+                    eulerAnglesValues.FromVector3(value);
                 }
                 else if (hasRotation)
                 {
@@ -76,11 +76,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return GetScaleValues().ToVector3();
+                return scaleValues.ToVector3();
             }
             set
             {
-                GetScaleValues().FromVector3(value);
+                scaleValues.FromVector3(value);
+            }
+        }
+
+        public Color color
+        {
+            get
+            {
+                return colorValues.ToColor();
+            }
+            set
+            {
+                colorValues.FromColor(value);
             }
         }
 
@@ -88,20 +100,63 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return GetEasingValue().intValue;
+                return easingValue.intValue;
             }
             set
             {
-                GetEasingValue().intValue = value;
+                easingValue.intValue = value;
             }
         }
 
-        public abstract bool hasPosition { get; }
-        public abstract bool hasRotation { get; }
-        public abstract bool hasEulerAngles { get; }
-        public abstract bool hasScale { get; }
-        public abstract bool hasEasing { get; }
-        public abstract bool hasTangent { get; }
+        public virtual bool hasPosition
+        {
+            get
+            {
+                return false;
+            }
+        }
+        public virtual bool hasRotation
+        {
+            get
+            {
+                return false;
+            }
+        }
+        public virtual bool hasEulerAngles
+        {
+            get
+            {
+                return false;
+            }
+        }
+        public virtual bool hasScale
+        {
+            get
+            {
+                return false;
+            }
+        }
+        public virtual bool hasColor
+        {
+            get
+            {
+                return false;
+            }
+        }
+        public virtual bool hasEasing
+        {
+            get
+            {
+                return false;
+            }
+        }
+        public virtual bool hasTangent
+        {
+            get
+            {
+                return false;
+            }
+        }
 
         public bool isHidden
         {
@@ -123,6 +178,89 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 return false;
+            }
+        }
+
+        public virtual ValueData[] positionValues
+        {
+            get
+            {
+                return new ValueData[0];
+            }
+        }
+        public virtual ValueData[] rotationValues
+        {
+            get
+            {
+                return new ValueData[0];
+            }
+        }
+        public virtual ValueData[] eulerAnglesValues
+        {
+            get
+            {
+                return new ValueData[0];
+            }
+        }
+        public virtual ValueData[] scaleValues
+        {
+            get
+            {
+                return new ValueData[0];
+            }
+        }
+        public virtual ValueData[] colorValues
+        {
+            get
+            {
+                return new ValueData[0];
+            }
+        }
+        public virtual ValueData easingValue
+        {
+            get
+            {
+                return new ValueData();
+            }
+        }
+
+        public virtual Vector3 initialPosition
+        {
+            get
+            {
+                return Vector3.zero;
+            }
+        }
+
+        public virtual Quaternion initialRotation
+        {
+            get
+            {
+                return Quaternion.identity;
+            }
+        }
+
+        public virtual Vector3 initialEulerAngles
+        {
+            get
+            {
+                return Vector3.zero;
+            }
+        }
+
+        public virtual Vector3 initialScale
+        {
+            get
+            {
+                return Vector3.one;
+            }
+        }
+
+        public virtual Color initialColor
+        {
+            get
+            {
+                return Color.white;
             }
         }
 
@@ -523,21 +661,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public TransformXml ToXml()
         {
-            var xml = new TransformXml();
-            xml.name = name;
-            xml.values = _valuesForXml;
-            xml.inTangents = _normalizedInTangents;
-            xml.outTangents = _normalizedOutTangents;
-            xml.inSmoothBit = _inSmoothBit;
-            xml.outSmoothBit = _outSmoothBit;
+            var xml = new TransformXml
+            {
+                name = name,
+                values = _valuesForXml,
+                inTangents = _normalizedInTangents,
+                outTangents = _normalizedOutTangents,
+                inSmoothBit = _inSmoothBit,
+                outSmoothBit = _outSmoothBit,
+            };
             return xml;
         }
-
-        public abstract ValueData[] GetPositionValues();
-        public abstract ValueData[] GetRotationValues();
-        public abstract ValueData[] GetEulerAnglesValues();
-        public abstract ValueData[] GetScaleValues();
-        public abstract ValueData GetEasingValue();
 
         public virtual Dictionary<string, int> GetCustomValueIndexMap()
         {
@@ -561,26 +695,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return GetCustomValueIndexMap().ContainsKey(customName);
         }
 
-        public virtual Vector3 GetInitialPosition()
-        {
-            return Vector3.zero;
-        }
-
-        public virtual Quaternion GetInitialRotation()
-        {
-            return Quaternion.identity;
-        }
-
-        public virtual Vector3 GetInitialEulerAngles()
-        {
-            return Vector3.zero;
-        }
-
-        public virtual Vector3 GetInitialScale()
-        {
-            return Vector3.one;
-        }
-
         public virtual float GetInitialCustomValue(string customName)
         {
             return 0f;
@@ -593,55 +707,55 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 case TangentValueType.X:
                     if (hasPosition)
                     {
-                        return new ValueData[] { GetPositionValues()[0] };
+                        return new ValueData[] { positionValues[0] };
                     }
                     break;
                 case TangentValueType.Y:
                     if (hasPosition)
                     {
-                        return new ValueData[] { GetPositionValues()[1] };
+                        return new ValueData[] { positionValues[1] };
                     }
                     break;
                 case TangentValueType.Z:
                     if (hasPosition)
                     {
-                        return new ValueData[] { GetPositionValues()[2] };
+                        return new ValueData[] { positionValues[2] };
                     }
                     break;
                 case TangentValueType.Move:
                     if (hasPosition)
                     {
-                        return GetPositionValues();
+                        return positionValues;
                     }
                     break;
                 case TangentValueType.RX:
                     if (hasRotation)
                     {
-                        return new ValueData[] { GetRotationValues()[0] };
+                        return new ValueData[] { rotationValues[0] };
                     }
                     break;
                 case TangentValueType.RY:
                     if (hasRotation)
                     {
-                        return new ValueData[] { GetRotationValues()[1] };
+                        return new ValueData[] { rotationValues[1] };
                     }
                     break;
                 case TangentValueType.RZ:
                     if (hasRotation)
                     {
-                        return new ValueData[] { GetRotationValues()[2] };
+                        return new ValueData[] { rotationValues[2] };
                     }
                     break;
                 case TangentValueType.RW:
                     if (hasRotation)
                     {
-                        return new ValueData[] { GetRotationValues()[3] };
+                        return new ValueData[] { rotationValues[3] };
                     }
                     break;
                 case TangentValueType.Rotation:
                     if (hasRotation)
                     {
-                        return GetRotationValues();
+                        return rotationValues;
                     }
                     break;
                 case TangentValueType.All:
@@ -677,19 +791,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (hasPosition)
             {
-                position = GetInitialPosition();
+                position = initialPosition;
             }
             if (hasRotation)
             {
-                rotation = GetInitialRotation();
+                rotation = initialRotation;
             }
             if (hasEulerAngles)
             {
-                eulerAngles = GetInitialEulerAngles();
+                eulerAngles = initialEulerAngles;
             }
             if (hasScale)
             {
-                scale = GetInitialScale();
+                scale = initialScale;
+            }
+            if (hasColor)
+            {
+                color = initialColor;
             }
             if (hasEasing)
             {

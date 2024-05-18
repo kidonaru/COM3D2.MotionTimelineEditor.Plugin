@@ -13,38 +13,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override bool hasPosition
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        public override bool hasRotation
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        public override bool hasEulerAngles
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        public override bool hasScale
-        {
-            get
-            {
-                return false;
-            }
-        }
-
         public override bool hasEasing
         {
             get
@@ -53,41 +21,16 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override bool hasTangent
+        public override ValueData easingValue
         {
             get
             {
-                return false;
+                return values[0];
             }
         }
 
         public TransformDataEyes()
         {
-        }
-
-        public override ValueData[] GetPositionValues()
-        {
-            return new ValueData[0];
-        }
-
-        public override ValueData[] GetRotationValues()
-        {
-            return new ValueData[0];
-        }
-
-        public override ValueData[] GetEulerAnglesValues()
-        {
-            return new ValueData[0];
-        }
-
-        public override ValueData[] GetScaleValues()
-        {
-            return new ValueData[0];
-        }
-
-        public override ValueData GetEasingValue()
-        {
-            return values[0];
         }
 
         private readonly static Dictionary<string, int> CustomValueIndexMap = new Dictionary<string, int>

@@ -12,15 +12,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Quaternion rotation { get; set; }
         Vector3 eulerAngles { get; set; }
         Vector3 scale { get; set; }
+        Color color { get; set; }
         int easing { get; set; }
 
         bool hasPosition { get; }
         bool hasRotation { get; }
         bool hasEulerAngles { get; }
         bool hasScale { get; }
+        bool hasColor { get; }
         bool hasEasing { get; }
         bool hasTangent { get; }
         bool isHidden { get; }
+
+        ValueData[] positionValues { get; }
+        ValueData[] rotationValues { get; }
+        ValueData[] eulerAnglesValues { get; }
+        ValueData[] scaleValues { get; }
+        ValueData[] colorValues { get; }
+        ValueData easingValue { get; }
+
+        Vector3 initialPosition { get; }
+        Quaternion initialRotation { get; }
+        Vector3 initialEulerAngles { get; }
+        Vector3 initialScale { get; }
+        Color initialColor { get; }
 
         ValueData this[string name] { get; }
 
@@ -40,18 +55,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         void FromXml(TransformXml xml);
         TransformXml ToXml();
 
-        ValueData[] GetPositionValues();
-        ValueData[] GetRotationValues();
-        ValueData[] GetEulerAnglesValues();
-        ValueData[] GetScaleValues();
-        ValueData GetEasingValue();
         Dictionary<string, int> GetCustomValueIndexMap();
         ValueData GetCustomValue(string customName);
         bool HasCustomValue(string customName);
-        Vector3 GetInitialPosition();
-        Quaternion GetInitialRotation();
-        Vector3 GetInitialEulerAngles();
-        Vector3 GetInitialScale();
         float GetInitialCustomValue(string customName);
         ValueData[] GetValueDataList(TangentValueType valueType);
         TangentData[] GetInTangentDataList(TangentValueType valueType);

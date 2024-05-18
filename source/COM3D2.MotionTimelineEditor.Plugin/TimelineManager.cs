@@ -941,6 +941,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 songElement.Add(new XElement("changeFade", outputFileName));
             }
 
+            // 背景非表示
+            if (!timeline.isBackgroundVisible)
+            {
+                songElement.Add(new XElement("changeBg", "delete"));
+            }
+
             foreach (var layer in layers)
             {
                 layer.OutputDCM(songElement);

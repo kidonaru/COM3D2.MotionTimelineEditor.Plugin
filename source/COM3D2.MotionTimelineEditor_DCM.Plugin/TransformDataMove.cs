@@ -21,27 +21,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override bool hasRotation
-        {
-            get
-            {
-                return false;
-            }
-        }
-
         public override bool hasEulerAngles
         {
             get
             {
                 return true;
-            }
-        }
-
-        public override bool hasScale
-        {
-            get
-            {
-                return false;
             }
         }
 
@@ -53,41 +37,32 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override bool hasTangent
+        public override ValueData[] positionValues
         {
             get
             {
-                return false;
+                return new ValueData[] { values[0], values[1], values[2] };
+            }
+        }
+
+        public override ValueData[] eulerAnglesValues
+        {
+            get
+            {
+                return new ValueData[] { values[3], values[4], values[5] };
+            }
+        }
+
+        public override ValueData easingValue
+        {
+            get
+            {
+                return values[6];
             }
         }
 
         public TransformDataMove()
         {
-        }
-
-        public override ValueData[] GetPositionValues()
-        {
-            return new ValueData[] { values[0], values[1], values[2] };
-        }
-
-        public override ValueData[] GetRotationValues()
-        {
-            return new ValueData[0];
-        }
-
-        public override ValueData[] GetEulerAnglesValues()
-        {
-            return new ValueData[] { values[3], values[4], values[5] };
-        }
-
-        public override ValueData[] GetScaleValues()
-        {
-            return new ValueData[0];
-        }
-
-        public override ValueData GetEasingValue()
-        {
-            return values[6];
         }
     }
 }

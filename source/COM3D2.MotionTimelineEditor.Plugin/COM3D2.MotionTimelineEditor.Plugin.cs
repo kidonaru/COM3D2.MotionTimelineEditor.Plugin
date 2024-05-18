@@ -597,6 +597,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             maidManager.OnPluginEnable();
             modelManager.OnPluginEnable();
+            movieManager.OnPluginEnable();
 
             if (timeline != null)
             {
@@ -613,6 +614,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             maidManager.OnPluginDisable();
             modelManager.OnPluginDisable();
+            movieManager.OnPluginDisable();
 
             if (timeline != null)
             {

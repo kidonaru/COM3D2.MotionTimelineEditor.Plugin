@@ -223,6 +223,82 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             values[3].value = quaternion.w;
         }
 
+        public static Color ToColor(this ValueData[] values)
+        {
+            if (values.Length == 3)
+            {
+                return new Color(values[0].value, values[1].value, values[2].value);
+            }
+            if (values.Length == 4)
+            {
+                return new Color(values[0].value, values[1].value, values[2].value, values[3].value);
+            }
+
+            PluginUtils.LogError("ToColor: 不正なValueData配列です length={0}", values.Length);
+            return Color.white;
+        }
+
+        public static void FromColor(this ValueData[] values, Color color)
+        {
+            if (values.Length == 3)
+            {
+                values[0].value = color.r;
+                values[1].value = color.g;
+                values[2].value = color.b;
+            }
+            else if (values.Length == 4)
+            {
+                values[0].value = color.r;
+                values[1].value = color.g;
+                values[2].value = color.b;
+                values[3].value = color.a;
+            }
+            else
+            {
+                PluginUtils.LogError("FromColor: 不正なValueData配列です length={0}", values.Length);
+            }
+        }
+
+        public static Vector3 ToVector3(this Color color)
+        {
+            return new Vector3(color.r, color.g, color.b);
+        }
+
+        public static Color ToColor(this Vector3 vector)
+        {
+            return new Color(vector.x, vector.y, vector.z);
+        }
+
+        public static int IntR(this Color color)
+        {
+            return Mathf.Clamp(Mathf.RoundToInt(color.r * 255f), 0, 255);
+        }
+
+        public static int IntG(this Color color)
+        {
+            return Mathf.Clamp(Mathf.RoundToInt(color.g * 255f), 0, 255);
+        }
+
+        public static int IntB(this Color color)
+        {
+            return Mathf.Clamp(Mathf.RoundToInt(color.b * 255f), 0, 255);
+        }
+
+        public static int IntA(this Color color)
+        {
+            return Mathf.Clamp(Mathf.RoundToInt(color.a * 255f), 0, 255);
+        }
+
+        public static string ToHexRGB(this Color color)
+        {
+            return "#" + ColorUtility.ToHtmlStringRGB(color);
+        }
+
+        public static string ToHexRGBA(this Color color)
+        {
+            return "#" + ColorUtility.ToHtmlStringRGBA(color);
+        }
+
         private static FieldInfo _targetListField = null;
 
         public static List<PhotoTransTargetObject> GetTargetList(this ObjectManagerWindow self)

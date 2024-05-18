@@ -241,7 +241,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             // do nothing
         }
 
-        private void AddCameraData(FrameData frame)
+        private void AddTimeLineRow(FrameData frame)
         {
             var bone = frame.GetBone(CameraBoneName);
             if (bone == null)
@@ -321,12 +321,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             foreach (var keyFrame in keyFrames)
             {
-                AddCameraData(keyFrame);
+                AddTimeLineRow(keyFrame);
             }
 
             if (_timelineRows.Count > 0 && _timelineRows.Last().frame != timeline.maxFrameNo)
             {
-                AddCameraData(_dummyLastFrame);
+                AddTimeLineRow(_dummyLastFrame);
             }
 
             BuildPlayData(forOutput);

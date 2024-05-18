@@ -198,7 +198,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public virtual void SetBackgroundVidible(bool visible)
+        public virtual void SetBackgroundVisible(bool visible)
         {
             var bgObject = GameMain.Instance.BgMgr.current_bg_object;
             if (bgObject != null)
@@ -207,7 +207,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public virtual bool IsBackgroundVidible()
+        public virtual bool IsBackgroundVisible()
         {
             var bgObject = GameMain.Instance.BgMgr.current_bg_object;
             return bgObject != null && bgObject.activeSelf;

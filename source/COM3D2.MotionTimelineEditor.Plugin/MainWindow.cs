@@ -803,11 +803,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     maidManager.maid.Visible = newIsMaidVidible;
                 }
 
-                var isBgVidible = studioHack.IsBackgroundVidible();
-                var newIsBgVidible = view.DrawToggle("背景表示", isBgVidible, 80, 20);
-                if (newIsBgVidible != isBgVidible)
+                var newIsBgVidible = view.DrawToggle("背景表示", timeline.isBackgroundVisible, 80, 20);
+                if (newIsBgVidible != timeline.isBackgroundVisible)
                 {
-                    studioHack.SetBackgroundVidible(newIsBgVidible);
+                    timeline.isBackgroundVisible = newIsBgVidible;
                 }
 
                 if (timelineManager.HasCameraLayer)

@@ -58,6 +58,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             timelineManager.RegisterLayer(
                 typeof(BGTimelineLayer), BGTimelineLayer.Create
             );
+            timelineManager.RegisterLayer(
+                typeof(BGColorTimelineLayer), BGColorTimelineLayer.Create
+            );
         }
     }
 }

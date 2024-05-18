@@ -73,6 +73,54 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
     }
 
+    public class ColorFieldValue
+    {
+        public string label = null;
+        public string text = "";
+        public bool hasAlpha = false;
+
+        private Color _color = Color.white;
+        public Color color
+        {
+            get
+            {
+                return _color;
+            }
+        }
+
+        public void UpdateColor(Color color, bool updateText)
+        {
+            if (color == _color && text.Length > 0)
+            {
+                return;
+            }
+
+            _color = color;
+
+            if (updateText)
+            {
+                if (hasAlpha)
+                {
+                    text = color.ToHexRGBA();
+                }
+                else
+                {
+                    text = color.ToHexRGB();
+                }
+            }
+        }
+
+        public ColorFieldValue()
+        {
+        }
+
+        public ColorFieldValue(string label, bool hasAlpha)
+        {
+            this.label = label;
+            this.hasAlpha = hasAlpha;
+        }
+    }
+
     public class ComboBoxValue<T>
     {
         public string label;
@@ -499,6 +547,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
             return fieldValue.value;
+        }
+
+        public Color DrawColorFieldValue(
+            string label,
+            ColorFieldValue fieldValue,
+            float width,
+            float height)
+        {
+            var newText = DrawTextField(label, fieldValue.text, width, height);
+            if (newText != fieldValue.text)
+            {
+                fieldValue.text = newText;
+
+                Color newColor;
+                if (ColorUtility.TryParseHtmlString(newText, out newColor))
+                {
+                    fieldValue.UpdateColor(newColor, false);
+                }
+            }
+            return fieldValue.color;
         }
 
         public float DrawFloatField(string label, float value, float width, float height)
@@ -1167,6 +1235,44 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (diffValue != 0f)
             {
                 updateDiffValue(diffValue);
+                updated = true;
+            }
+
+            return updated;
+        }
+
+        public bool DrawColor(
+            ColorFieldValue fieldValue,
+            Color color,
+            Color resetColor,
+            Action<Color> updateNewValue)
+        {
+            fieldValue.UpdateColor(color, true);
+
+            var newColor = color;
+            var updated = false;
+
+            BeginLayout(LayoutDirection.Horizontal);
+            {
+                if (fieldValue.label != null)
+                {
+                    DrawLabel(fieldValue.label, 50, 20);
+                }
+
+                DrawTexture(texWhite, 20, 20, color);
+
+                newColor = DrawColorFieldValue(null, fieldValue, 120, 20);
+
+                if (DrawButton("R", 20, 20))
+                {
+                    newColor = resetColor;
+                }
+            }
+            EndLayout();
+
+            if (newColor != color)
+            {
+                updateNewValue(newColor);
                 updated = true;
             }
 
