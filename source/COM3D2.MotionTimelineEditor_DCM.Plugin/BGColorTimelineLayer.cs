@@ -328,20 +328,17 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             GUI.enabled = studioHack.isPoseEditing;
 
-            updateTransform |= view.DrawValue(_fieldValues[0], 0.01f, 0.1f, 0f,
+            updateTransform |= view.DrawSliderValue(_fieldValues[0], 0f, 1f, 0f,
                 color.r,
-                x => color.r = x,
-                x => color.r += x);
+                x => color.r = x);
 
-            updateTransform |= view.DrawValue(_fieldValues[1], 0.01f, 0.1f, 0f,
+            updateTransform |= view.DrawSliderValue(_fieldValues[1], 0f, 1f, 0f,
                 color.g,
-                y => color.g = y,
-                y => color.g += y);
+                y => color.g = y);
 
-            updateTransform |= view.DrawValue(_fieldValues[2], 0.01f, 0.1f, 0f,
+            updateTransform |= view.DrawSliderValue(_fieldValues[2], 0f, 1f, 0f,
                 color.b,
-                z => color.b = z,
-                z => color.b += z);
+                z => color.b = z);
 
             updateTransform |= view.DrawColor(
                 _colorFieldValue,

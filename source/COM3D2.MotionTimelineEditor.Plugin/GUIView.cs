@@ -1308,6 +1308,65 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return updated;
         }
 
+        public bool DrawSliderValue(
+            FloatFieldValue fieldValue,
+            float minValue,
+            float maxValue,
+            float resetValue,
+            float value,
+            Action<float> updateNewValue)
+        {
+            return DrawSliderValue(
+                fieldValue,
+                minValue,
+                maxValue,
+                () => updateNewValue(resetValue),
+                value,
+                updateNewValue);
+        }
+
+        public bool DrawSliderValue(
+            FloatFieldValue fieldValue,
+            float minValue,
+            float maxValue,
+            Action resetValueFunc,
+            float value,
+            Action<float> updateNewValue)
+        {
+            fieldValue.UpdateValue(value, true);
+
+            var newValue = value;
+            var updated = false;
+
+            BeginLayout(LayoutDirection.Horizontal);
+            {
+                var label = fieldValue.label;
+                if (label != null)
+                {
+                    DrawLabel(label, 50, 20);
+                }
+
+                newValue = DrawFloatFieldValue(null, fieldValue, 50, 20);
+
+                newValue = DrawSlider(newValue, minValue, maxValue, 100, 20);
+
+                if (DrawButton("R", 20, 20))
+                {
+                    resetValueFunc();
+                    updated = true;
+                }
+            }
+            EndLayout();
+
+            if (!float.IsNaN(newValue) && newValue != value)
+            {
+                updateNewValue(newValue);
+                updated = true;
+            }
+
+            return updated;
+        }
+
         public bool DrawColor(
             ColorFieldValue fieldValue,
             Color color,

@@ -107,7 +107,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timeline.eyeMoveType = newEyeMoveType;
             }
 
-            var newUseHeadKey = view.DrawToggle("顔ボーンの有効化", timeline.useHeadKey, 200, 20);
+            var newUseHeadKey = view.DrawToggle("顔/瞳の固定化", timeline.useHeadKey, 200, 20);
             if (newUseHeadKey != timeline.useHeadKey)
             {
                 timeline.useHeadKey = newUseHeadKey;
