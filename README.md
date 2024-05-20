@@ -1,6 +1,6 @@
 # COM3D2.MotionTimelineEditor.Plugin
 
-v2.1.0.0
+v2.1.1.0
 
 
 ## 概要
@@ -106,6 +106,9 @@ https://twitter.com/kidonaru/status/1775174898111091134
 一度起動すると下記パスに設定ファイルが作成されるので、
 キーを変更したい場合はこちらを編集してください。
 `Sybaris\UnityInjector\Config\MotionTimelineEditor.xml`
+
+UnityのKeyCodeを使用できます。
+https://docs.unity3d.com/ja/560/ScriptReference/KeyCode.html
 
 
 ## 機能
@@ -407,6 +410,14 @@ DCM出力時にBGMは再生できますが、動画は対応していません�
   <UseMuneKeyL>false</UseMuneKeyL>
   <UseMuneKeyR>false</UseMuneKeyR>
 ```
+
+## アニメ出力先
+
+アニメ出力ボタンから出力されるanmファイルの出力先は、使用しているプラグインによって変わります。
+
+- **複数メイド**: Mod\MultipleMaidsPose
+- **MPS**: BepInEx\config\MeidoPhotoStudio\Presets\Custom Poses
+- **スタジオモード**: PhotoModeData\MyPose
 
 
 ## DCM出力形式

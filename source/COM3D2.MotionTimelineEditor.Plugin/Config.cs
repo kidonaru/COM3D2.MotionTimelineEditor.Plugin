@@ -90,6 +90,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             set
             {
+                if (value == null)
+                {
+                    return;
+                }
+
                 foreach (var pair in value)
                 {
                     //PluginUtils.LogDebug("keyBind: " + pair.key + " = " + pair.value);
@@ -99,7 +104,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         [XmlIgnore]
-        private Dictionary<string, bool> boneSetMenuOpenMap = new Dictionary<string, bool>();
+        private Dictionary<string, bool> _boneSetMenuOpenMap = new Dictionary<string, bool>();
 
         public struct SetMenuOpenPair
         {
@@ -112,8 +117,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                var result = new List<SetMenuOpenPair>(boneSetMenuOpenMap.Count);
-                foreach (var pair in boneSetMenuOpenMap)
+                var result = new List<SetMenuOpenPair>(_boneSetMenuOpenMap.Count);
+                foreach (var pair in _boneSetMenuOpenMap)
                 {
                     result.Add(new SetMenuOpenPair { name = pair.Key, value = pair.Value });
                 }
@@ -121,9 +126,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             set
             {
+                if (value == null)
+                {
+                    return;
+                }
                 foreach (var pair in value)
                 {
-                    boneSetMenuOpenMap[pair.name] = pair.value;
+                    _boneSetMenuOpenMap[pair.name] = pair.value;
                 }
             }
         }
@@ -173,7 +182,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool IsBoneSetMenuOpen(string name)
         {
             bool value;
-            if (boneSetMenuOpenMap.TryGetValue(name, out value))
+            if (_boneSetMenuOpenMap.TryGetValue(name, out value))
             {
                 return value;
             }
@@ -182,7 +191,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void SetBoneSetMenuOpen(string name, bool value)
         {
-            boneSetMenuOpenMap[name] = value;
+            _boneSetMenuOpenMap[name] = value;
         }
     }
 }

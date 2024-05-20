@@ -53,30 +53,41 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             shift = false;
             alt = false;
 
-            string[] parts = data.Split('+');
-            foreach (string part in parts)
+            try
             {
-                switch (part)
+                string[] parts = data.Split('+');
+                foreach (string part in parts)
                 {
-                    case "Ctrl":
-                        ctrl = true;
-                        break;
-                    case "Shift":
-                        shift = true;
-                        break;
-                    case "Alt":
-                        alt = true;
-                        break;
-                    case "Enter":
-                        keyCode = KeyCode.Return;
-                        break;
-                    case "":
-                        keyCode = KeyCode.None;
-                        break;
-                    default:
-                        keyCode = (KeyCode)System.Enum.Parse(typeof(KeyCode), part);
-                        break;
+                    switch (part)
+                    {
+                        case "Ctrl":
+                            ctrl = true;
+                            break;
+                        case "Shift":
+                            shift = true;
+                            break;
+                        case "Alt":
+                            alt = true;
+                            break;
+                        case "Enter":
+                            keyCode = KeyCode.Return;
+                            break;
+                        case "":
+                            keyCode = KeyCode.None;
+                            break;
+                        default:
+                            keyCode = (KeyCode)System.Enum.Parse(typeof(KeyCode), part);
+                            break;
+                    }
                 }
+            }
+            catch
+            {
+                PluginUtils.LogDebug("KeyBind: パースに失敗しました data={0}", data);
+                keyCode = KeyCode.None;
+                ctrl = false;
+                shift = false;
+                alt = false;
             }
         }
 
