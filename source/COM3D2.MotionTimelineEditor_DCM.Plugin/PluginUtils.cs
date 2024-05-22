@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
@@ -56,6 +57,18 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             GameMain.Instance.SysDlg.Show(
                 message, SystemDialog.TYPE.OK, null, null);
+        }
+
+        public static float GetRotationZ(this Camera camera)
+        {
+            return camera.transform.eulerAngles.z;
+        }
+
+        public static void SetRotationZ(this Camera camera, float z)
+        {
+            Vector3 eulerAngles = camera.transform.eulerAngles;
+            eulerAngles.z = z;
+            camera.transform.eulerAngles = eulerAngles;
         }
     }
 }

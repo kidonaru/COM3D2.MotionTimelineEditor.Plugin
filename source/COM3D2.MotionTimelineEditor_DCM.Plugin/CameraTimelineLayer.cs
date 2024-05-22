@@ -159,10 +159,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var viewAngle = GetViewAngle();
 
             var uoCamera = MyHelper.GetUOCamera();
-            uoCamera.m_fRotZ = rotation.z;
             uoCamera.SetTargetPos(position);
             uoCamera.SetDistance(distance);
             uoCamera.SetAroundAngle(new Vector2(rotation.y, rotation.x));
+            Camera.main.SetRotationZ(rotation.z);
             if (isViewAngle)
             {
                 Camera.main.fieldOfView = viewAngle;
@@ -197,10 +197,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var uOCamera = MyHelper.GetUOCamera();
             var target = uOCamera.target;
             var angle = uOCamera.GetAroundAngle();
+            var rotZ = Camera.main.GetRotationZ();
 
             var trans = CreateTransformData(CameraBoneName);
             trans.position = target.position;
-            trans.eulerAngles = new Vector3(angle.y, angle.x, uOCamera.m_fRotZ);
+            trans.eulerAngles = new Vector3(angle.y, angle.x, rotZ);
             trans.easing = GetEasing(frame.frameNo, CameraBoneName);
             trans["distance"].value = uOCamera.distance;
             trans["viewAngle"].value = Camera.main.fieldOfView;
@@ -496,7 +497,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var target = uoCamera.target;
             var position = target.position;
             var aroundAngle = uoCamera.GetAroundAngle();
-            var rotZ = uoCamera.m_fRotZ;
+            var rotZ = Camera.main.GetRotationZ();
             var distance = uoCamera.distance;
             var updateTransform = false;
 
@@ -637,10 +638,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             if (updateTransform)
             {
-                uoCamera.m_fRotZ = rotZ;
                 uoCamera.SetTargetPos(position);
                 uoCamera.SetDistance(distance);
                 uoCamera.SetAroundAngle(aroundAngle);
+                Camera.main.SetRotationZ(rotZ);
             }
         }
 
