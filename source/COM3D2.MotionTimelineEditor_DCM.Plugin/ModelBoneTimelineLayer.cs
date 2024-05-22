@@ -10,9 +10,9 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
-    using ModelPlayData = MotionPlayData<ModelMotionData>;
+    using ModelBonePlayData = MotionPlayData<ModelBoneMotionData>;
 
-    public class ModelTimeLineRow
+    public class ModelBoneTimeLineRow
     {
         public int frame;
         public string name;
@@ -22,7 +22,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public int easing;
     }
 
-    public class ModelMotionData : IMotionData
+    public class ModelBoneMotionData : IMotionData
     {
         public int stFrame { get; set; }
         public int edFrame { get; set; }
@@ -32,14 +32,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public int easing;
     }
 
-    [LayerDisplayName("モデル")]
-    public partial class ModelTimelineLayer : TimelineLayerBase
+    [LayerDisplayName("モデルボーン")]
+    public partial class ModelBoneTimelineLayer : TimelineLayerBase
     {
         public override int priority
         {
             get
             {
-                return 21;
+                return 22;
             }
         }
 
@@ -47,7 +47,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             get
             {
-                return typeof(ModelTimelineLayer).Name;
+                return typeof(ModelBoneTimelineLayer).Name;
             }
         }
 
@@ -55,22 +55,22 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             get
             {
-                return modelManager.modelNames;
+                return modelManager.boneNames;
             }
         }
 
-        private Dictionary<string, List<ModelTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<ModelTimeLineRow>>();
-        private Dictionary<string, ModelPlayData> _playDataMap = new Dictionary<string, ModelPlayData>();
-        private List<ModelMotionData> _outputMotions = new List<ModelMotionData>(128);
+        private Dictionary<string, List<ModelBoneTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<ModelBoneTimeLineRow>>();
+        private Dictionary<string, ModelBonePlayData> _playDataMap = new Dictionary<string, ModelBonePlayData>();
+        private List<ModelBoneMotionData> _outputMotions = new List<ModelBoneMotionData>(128);
 
-        public ModelTimelineLayer()
+        public ModelBoneTimelineLayer()
         {
+            PluginUtils.LogDebug("{0}.Create", className);
         }
 
-        public static ModelTimelineLayer Create(int slotNo)
+        public static ModelBoneTimelineLayer Create(int slotNo)
         {
-            PluginUtils.LogDebug("ModelTimelineLayer.Create");
-            return new ModelTimelineLayer();
+            return new ModelBoneTimelineLayer();
         }
 
         public override void Init()
@@ -97,8 +97,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             foreach (var model in modelManager.modelMap.Values)
             {
-                var menuItem = new BoneMenuItem(model.name, model.displayName);
-                allMenuItems.Add(menuItem);
+                var setMenuItem = new BoneSetMenuItem(model.name, model.displayName);
+                allMenuItems.Add(setMenuItem);
+
+                foreach (var bone in model.bones)
+                {
+                    var menuItem = new BoneMenuItem(bone.name, bone.transform.name);
+                    setMenuItem.AddChild(menuItem);
+                }
             }
         }
 
@@ -106,12 +112,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             var playingFrameNoFloat = this.playingFrameNoFloat;
 
-            foreach (var modelName in _playDataMap.Keys)
+            foreach (var boneName in _playDataMap.Keys)
             {
-                var playData = _playDataMap[modelName];
+                var playData = _playDataMap[boneName];
 
-                var model = modelManager.GetModel(modelName);
-                if (model == null)
+                var bone = modelManager.GetBone(boneName);
+                if (bone == null)
                 {
                     continue;
                 }
@@ -121,10 +127,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var current = playData.current;
                 if (current != null)
                 {
-                    ApplyLerp(current.myTm, model.transform, playData.lerpFrame, current.easing);
+                    ApplyLerp(current.myTm, bone.transform, playData.lerpFrame, current.easing);
                 }
 
-                //PluginUtils.LogDebug("ApplyPlayData: modelName={0} lerpTime={1}, listIndex={2}", modelName, playData.lerpTime, playData.listIndex);
+                //PluginUtils.LogDebug("ApplyPlayData: boneName={0} lerpFrame={1}, listIndex={2}", boneName, playData.lerpFrame, playData.listIndex);
             }
         }
 
@@ -171,15 +177,26 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
 
             float easingTime = CalcEasingValue(lerpTime, easing);
-            transform.position = Vector3.Lerp(myTrans.stPos, myTrans.edPos, easingTime);
-            transform.rotation = Quaternion.Euler(Vector3.Lerp(myTrans.stRot, myTrans.edRot, easingTime));
+            transform.localPosition = Vector3.Lerp(myTrans.stPos, myTrans.edPos, easingTime);
+            transform.localRotation = Quaternion.Euler(Vector3.Lerp(myTrans.stRot, myTrans.edRot, easingTime));
             transform.localScale = Vector3.Lerp(myTrans.stSca, myTrans.edSca, easingTime);
         }
 
         private void SetupModels()
         {
+            var existModelNameHash = new HashSet<string>();
+
             var existBoneNames = GetExistBoneNames();
-            foreach (var modelName in existBoneNames)
+            foreach (var boneName in existBoneNames)
+            {
+                var modelName = boneName.Split('/')[0];
+                if (!string.IsNullOrEmpty(modelName))
+                {
+                    existModelNameHash.Add(modelName);
+                }
+            }
+            
+            foreach (var modelName in existModelNameHash)
             {
                 var model = modelManager.GetModel(modelName);
                 if (model == null)
@@ -194,7 +211,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             foreach (var modelName in modelManager.modelNames)
             {
-                if (!existBoneNames.Contains(modelName))
+                if (!existModelNameHash.Contains(modelName))
                 {
                     var model = modelManager.GetModel(modelName);
                     if (model != null)
@@ -210,14 +227,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public override void UpdateFrameWithCurrentStat(FrameData frame)
         {
-            foreach (var model in modelManager.modelMap.Values)
+            foreach (var sourceBone in modelManager.boneMap.Values)
             {
-                var modelName = model.name;
+                var boneName = sourceBone.name;
 
-                var trans = CreateTransformData(modelName);
-                trans.position = model.transform.position;
-                trans.eulerAngles = model.transform.eulerAngles;
-                trans.scale = model.transform.localScale;
+                var trans = CreateTransformData(boneName);
+                trans.position = sourceBone.transform.localPosition;
+                trans.eulerAngles = sourceBone.transform.localEulerAngles;
+                trans.scale = sourceBone.transform.localScale;
 
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
@@ -256,16 +273,16 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     continue;
                 }
 
-                List<ModelTimeLineRow> rows;
+                List<ModelBoneTimeLineRow> rows;
                 if (!_timelineRowsMap.TryGetValue(name, out rows))
                 {
-                    rows = new List<ModelTimeLineRow>();
+                    rows = new List<ModelBoneTimeLineRow>();
                     _timelineRowsMap[name] = rows;
                 }
 
                 var trans = bone.transform;
 
-                var row = new ModelTimeLineRow
+                var row = new ModelBoneTimeLineRow
                 {
                     frame = frame.frameNo,
                     name = bone.name,
@@ -291,18 +308,18 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var name = pair.Key;
                 var rows = pair.Value;
 
-                var model = modelManager.GetModel(name);
-                if (model == null)
+                var bone = modelManager.GetBone(name);
+                if (bone == null)
                 {
                     continue;
                 }
 
-                ModelPlayData playData;
+                ModelBonePlayData playData;
                 if (!_playDataMap.TryGetValue(name, out playData))
                 {
-                    playData = new ModelPlayData
+                    playData = new ModelBonePlayData
                     {
-                        motions = new List<ModelMotionData>(rows.Count),
+                        motions = new List<ModelBoneMotionData>(rows.Count),
                     };
                     _playDataMap[name] = playData;
                 }
@@ -332,7 +349,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                         isWarpFrame = false;
                     }
 
-                    var motion = new ModelMotionData
+                    var motion = new ModelBoneMotionData
                     {
                         name = name,
                         stFrame = stFrame,
@@ -377,112 +394,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return null;
         }
 
-        public void SaveModelMotion(
-            List<ModelMotionData> motions,
-            string filePath)
-        {
-            var offsetTime = timeline.startOffsetTime;
-
-            var builder = new StringBuilder();
-            builder.Append("model,group,stTime,stPosX,stPosY,stPosZ,stRotX,stRotY,stRotZ,stScaX,stScaY,stScaZ," +
-                            "edTime,edPosX,edPosY,edPosZ,edRotX,edRotY,edRotZ,edScaX,edScaY,edScaZ," +
-                            "easing,maidSlotNo,option,type," +
-                            "bezier1,bezier2,bezierType,slotName" +
-                            "\r\n");
-
-            Action<ModelMotionData, bool> appendMotion = (motion, isFirst) =>
-            {
-                var model = modelManager.GetModel(motion.name);
-                if (model == null)
-                {
-                    return;
-                }
-
-                var stTime = motion.stFrame * timeline.frameDuration;
-                var edTime = motion.edFrame * timeline.frameDuration;
-
-                if (isFirst)
-                {
-                    stTime = 0;
-                    edTime = offsetTime;
-                }
-                else
-                {
-                    stTime += offsetTime;
-                    edTime += offsetTime;
-                }
-
-                builder.Append(model.info.fileNameOrId + ",");
-                builder.Append(model.group + ",");
-                builder.Append(stTime.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stPos.x.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stPos.y.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stPos.z.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stRot.x.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stRot.y.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stRot.z.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stSca.x.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stSca.y.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stSca.z.ToString("0.000") + ",");
-                builder.Append(edTime.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edPos.x.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edPos.y.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edPos.z.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edRot.x.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edRot.y.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edRot.z.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edSca.x.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edSca.y.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edSca.z.ToString("0.000") + ",");
-                builder.Append(motion.easing + ",");
-                builder.Append(0 + ","); // maidSlotNo
-                builder.Append("" + ","); // option
-                builder.Append((int) model.info.type + ",");
-                builder.Append(0 + ","); // bezier1
-                builder.Append(0 + ","); // bezier2
-                builder.Append(0 + ","); // bezierType
-                builder.Append(""); // slotName
-                builder.Append("\r\n");
-            };
-
-            if (motions.Count > 0 && offsetTime > 0f)
-            {
-                appendMotion(motions.First(), true);
-            }
-            
-            foreach (var motion in motions)
-            {
-                appendMotion(motion, false);
-            }
-
-            using (var streamWriter = new StreamWriter(filePath, false))
-            {
-                streamWriter.Write(builder.ToString());
-            }
-        }
-
         public override void OutputDCM(XElement songElement)
         {
-            try
-            {
-                _outputMotions.Clear();
-
-                foreach (var playData in _playDataMap.Values)
-                {
-                    _outputMotions.AddRange(playData.motions);
-                }
-
-                var outputFileName = "model.csv";
-                var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveModelMotion(_outputMotions, outputPath);
-
-                songElement.Add(new XElement("changeModel", outputFileName));
-            }
-            catch (Exception e)
-            {
-                PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("モデルチェンジの出力に失敗しました");
-            }
+            PluginUtils.LogWarning("モデルボーンはDCMに対応していません");
         }
 
         public override float CalcEasingValue(float t, int easing)
@@ -490,48 +404,48 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
-        private int _targetModelIndex = 0;
+        private int _targetBoneIndex = 0;
         private FloatFieldValue[] _fieldValues = FloatFieldValue.CreateArray(
             new string[] { "X", "Y", "Z", "RX", "RY", "RZ", "SX", "SY", "SZ" }
         );
 
         public override void DrawWindow(GUIView view)
         {
-            if (modelManager.modelNames.Count == 0)
+            if (modelManager.boneNames.Count == 0)
             {
-                view.DrawLabel("モデルが存在しません", 200, 20);
+                view.DrawLabel("ボーンが存在しません", 200, 20);
                 return;
             }
 
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
-                view.DrawLabel("モデル選択", 70, 20);
+                view.DrawLabel("ボーン選択", 70, 20);
 
-                var newTargetModelIndex = view.DrawSelectList(
-                    modelManager.modelNames,
+                var newTargetBoneIndex = view.DrawSelectList(
+                    modelManager.boneNames,
                     (modelName, index) =>
                     {
-                        var m = modelManager.GetModel(index);
-                        return m != null ? m.displayName : string.Empty;
+                        var b = modelManager.GetBone(index);
+                        return b != null ? b.name : string.Empty;
                     },
-                    140, 20, _targetModelIndex);
+                    140, 20, _targetBoneIndex);
 
-                if (newTargetModelIndex != _targetModelIndex)
+                if (newTargetBoneIndex != _targetBoneIndex)
                 {
-                    _targetModelIndex = newTargetModelIndex;
+                    _targetBoneIndex = newTargetBoneIndex;
                 }
             }
             view.EndLayout();
 
-            var model = modelManager.GetModel(_targetModelIndex);
-            if (model == null)
+            var bone = modelManager.GetBone(_targetBoneIndex);
+            if (bone == null)
             {
                 return;
             }
 
-            var position = model.transform.position;
-            var angle = model.transform.eulerAngles;
-            var scale = model.transform.localScale;
+            var position = bone.transform.localPosition;
+            var angle = bone.transform.localEulerAngles;
+            var scale = bone.transform.localScale;
             var updateTransform = false;
 
             GUI.enabled = studioHack.isPoseEditing;
@@ -585,9 +499,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             if (updateTransform)
             {
-                model.transform.position = position;
-                model.transform.eulerAngles = angle;
-                model.transform.localScale = scale;
+                bone.transform.localPosition = position;
+                bone.transform.localEulerAngles = angle;
+                bone.transform.localScale = scale;
             }
         }
 
@@ -605,14 +519,22 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             // モデル追加時にキーフレーム追加
             {
                 var firstFrame = GetOrCreateFrame(0);
-                var bone = firstFrame.GetBone(model.name);
-                if (bone == null)
-                {
-                    var tmpFrame = CreateFrame(timelineManager.currentFrameNo);
-                    UpdateFrameWithCurrentStat(tmpFrame);
+                FrameData tmpFrame = null;
 
-                    var tmpBone = tmpFrame.GetBone(model.name);                    
-                    firstFrame.SetBone(tmpBone);
+                foreach (var sourceBone in model.bones)
+                {
+                    var bone = firstFrame.GetBone(sourceBone.name);
+                    if (bone == null)
+                    {
+                        if (tmpFrame == null)
+                        {
+                            tmpFrame = CreateFrame(timelineManager.currentFrameNo);
+                            UpdateFrameWithCurrentStat(tmpFrame);
+                        }
+
+                        var tmpBone = tmpFrame.GetBone(model.name);                    
+                        firstFrame.SetBone(tmpBone);
+                    }
                 }
             }
 
@@ -626,18 +548,24 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             // モデル削除時にキーフレーム削除
             foreach (var frame in keyFrames)
             {
-                var bone = frame.GetBone(model.name);
-                if (bone != null)
+                foreach (var sourceBone in model.bones)
                 {
-                    frame.RemoveBone(bone);
+                    var bone = frame.GetBone(sourceBone.name);
+                    if (bone != null)
+                    {
+                        frame.RemoveBone(bone);
+                    }
                 }
             }
 
             {
-                var bone = _dummyLastFrame.GetBone(model.name);
-                if (bone != null)
+                foreach (var sourceBone in model.bones)
                 {
-                    _dummyLastFrame.RemoveBone(bone);
+                    var bone = _dummyLastFrame.GetBone(sourceBone.name);
+                    if (bone != null)
+                    {
+                        _dummyLastFrame.RemoveBone(bone);
+                    }
                 }
             }
 

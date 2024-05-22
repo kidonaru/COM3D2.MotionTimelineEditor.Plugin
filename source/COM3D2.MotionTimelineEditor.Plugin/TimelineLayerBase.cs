@@ -15,9 +15,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public abstract int priority { get; }
         public abstract string className { get; }
+
         public int slotNo { get; protected set; }
-        public abstract bool hasSlotNo { get; }
-        public abstract bool isCameraLayer { get; }
+
+        public virtual bool hasSlotNo
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public virtual bool isCameraLayer
+        {
+            get
+            {
+                return false;
+            }
+        }
 
         protected List<FrameData> _keyFrames = new List<FrameData>();
         public List<FrameData> keyFrames

@@ -1,4 +1,5 @@
 
+using System.IO;
 using COM3D2.MotionTimelineEditor.Plugin;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
@@ -79,6 +80,16 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public TransformDataModel()
         {
+        }
+
+        public override void FromXml(TransformXml xml)
+        {
+            base.FromXml(xml);
+
+            if (name.EndsWith(".menu", System.StringComparison.Ordinal))
+            {
+                name = Path.GetFileName(name);
+            }
         }
     }
 }

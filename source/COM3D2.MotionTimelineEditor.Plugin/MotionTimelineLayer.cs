@@ -48,14 +48,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override bool isCameraLayer
-        {
-            get
-            {
-                return false;
-            }
-        }
-
         public override List<string> allBoneNames
         {
             get

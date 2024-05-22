@@ -50,14 +50,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override bool hasSlotNo
-        {
-            get
-            {
-                return false;
-            }
-        }
-
         public override bool isCameraLayer
         {
             get

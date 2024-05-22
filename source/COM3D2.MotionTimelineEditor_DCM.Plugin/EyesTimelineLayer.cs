@@ -61,14 +61,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override bool isCameraLayer
-        {
-            get
-            {
-                return false;
-            }
-        }
-
         public static readonly Dictionary<string, SongEyesType> EyesTypeMap = new Dictionary<string, SongEyesType>
         {
             { "EyesPosL", SongEyesType.EyesPosL },

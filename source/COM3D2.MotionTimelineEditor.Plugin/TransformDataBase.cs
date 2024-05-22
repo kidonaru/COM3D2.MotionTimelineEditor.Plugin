@@ -649,7 +649,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void FromXml(TransformXml xml)
+        public virtual void FromXml(TransformXml xml)
         {
             name = xml.name;
             _valuesForXml = xml.values;
@@ -659,7 +659,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _outSmoothBit = xml.outSmoothBit;
         }
 
-        public TransformXml ToXml()
+        public virtual TransformXml ToXml()
         {
             var xml = new TransformXml
             {

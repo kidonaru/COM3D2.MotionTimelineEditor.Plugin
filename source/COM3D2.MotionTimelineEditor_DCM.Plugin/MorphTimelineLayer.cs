@@ -54,13 +54,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return true;
             }
         }
-        public override bool isCameraLayer
-        {
-            get
-            {
-                return false;
-            }
-        }
 
         public override List<string> allBoneNames
         {

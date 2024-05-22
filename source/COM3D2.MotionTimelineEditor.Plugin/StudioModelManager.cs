@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using MyRoomCustom;
@@ -35,7 +36,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public class StudioModelManager
     {
         public Dictionary<string, StudioModelStat> modelMap = new Dictionary<string, StudioModelStat>();
+        public Dictionary<string, StudioModelBoneStat> boneMap = new Dictionary<string, StudioModelBoneStat>();
         public List<string> modelNames = new List<string>();
+        public List<string> boneNames = new List<string>();
 
         public static event UnityAction<StudioModelStat> onModelAdded;
         public static event UnityAction<StudioModelStat> onModelRemoved;
@@ -127,6 +130,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return GetModel(modelNames[index]);
         }
 
+        public StudioModelBoneStat GetBone(string name)
+        {
+            StudioModelBoneStat bone;
+            if (boneMap.TryGetValue(name, out bone))
+            {
+                return bone;
+            }
+            return null;
+        }
+
+        public StudioModelBoneStat GetBone(int index)
+        {
+            if (index < 0 || index >= boneNames.Count)
+            {
+                return null;
+            }
+            return GetBone(boneNames[index]);
+        }
+
         private Dictionary<string, int> _modelGroupMap = new Dictionary<string, int>();
 
         public void LateUpdate()
@@ -136,6 +158,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var addedModels = new List<StudioModelStat>();
             var removedModels = new List<StudioModelStat>();
+            var updated = false;
 
             foreach (var model in modelList)
             {
@@ -152,7 +175,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     addedModels.Add(cachedModel);
                 }
 
-                cachedModel.FromModel(model);
+                if (cachedModel.transform != model.transform)
+                {
+                    cachedModel.FromModel(model);
+                    updated = true;
+                }
             }
 
             if (modelList.Count < modelMap.Count)
@@ -164,14 +191,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         removedModels.Add(modelMap[name]);
                         modelMap.Remove(name);
+                        updated = true;
                     }
                 }
             }
 
-            if (addedModels.Count > 0 || removedModels.Count > 0)
+            if (updated)
             {
                 modelNames.Clear();
                 modelNames.AddRange(modelMap.Keys);
+
+                boneMap.Clear();
+                boneNames.Clear();
+
+                foreach (var model in modelMap.Values)
+                {
+                    foreach (var bone in model.bones)
+                    {
+                        boneMap[bone.name] = bone;
+                        boneNames.Add(bone.name);
+                    }
+                }
 
                 PluginUtils.Log("StudioModelManager: Model list updated");
 
@@ -179,6 +219,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     PluginUtils.Log("model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
                         model.info.type, model.displayName, model.name, model.info.label, model.info.fileName, model.info.myRoomId, model.info.bgObjectId);
+
+                    foreach (var bone in model.bones)
+                    {
+                        PluginUtils.Log("  bone: name={0}", bone.name);
+                    }
                 }
 
                 foreach (var model in addedModels)
@@ -212,7 +257,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void Reset()
         {
             modelMap.Clear();
+            boneMap.Clear();
             modelNames.Clear();
+            boneNames.Clear();
         }
 
         public StudioModelStat CreateModelStat(
@@ -294,6 +341,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     return objectInfo;
                 }
+            }
+
+            if (label.EndsWith(".menu", System.StringComparison.Ordinal))
+            {
+                label = Path.GetFileName(label);
+            }
+
+            if (fileName.EndsWith(".menu", System.StringComparison.Ordinal))
+            {
+                fileName = Path.GetFileName(fileName);
             }
 
             var info = new OfficialObjectInfo
@@ -455,7 +512,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void OnRefresh()
         {
-            Reset();
+            //Reset();
         }
     }
 }

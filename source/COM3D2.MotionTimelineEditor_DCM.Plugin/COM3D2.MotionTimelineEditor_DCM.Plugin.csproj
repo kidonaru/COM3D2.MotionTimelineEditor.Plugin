@@ -68,6 +68,7 @@
     <Compile Include="COM3D2.MotionTimelineEditor_DCM.Plugin.cs" />
     <Compile Include="DCMUtils.cs" />
     <Compile Include="EyesTimelineLayer.cs" />
+    <Compile Include="ModelBoneTimelineLayer.cs" />
     <Compile Include="ModelTimelineLayer.cs" />
     <Compile Include="MorphTimelineLayer.cs" />
     <Compile Include="MorphUtils.cs" />

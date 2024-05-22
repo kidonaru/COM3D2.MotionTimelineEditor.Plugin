@@ -56,14 +56,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override bool isCameraLayer
-        {
-            get
-            {
-                return false;
-            }
-        }
-
         public static string MoveBoneName = "move";
         public static string MoveDisplayName = "移動";
 

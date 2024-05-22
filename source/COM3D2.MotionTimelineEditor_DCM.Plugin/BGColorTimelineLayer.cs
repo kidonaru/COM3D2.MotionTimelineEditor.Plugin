@@ -33,7 +33,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             get
             {
-                return 23;
+                return 32;
             }
         }
 
@@ -42,22 +42,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             get
             {
                 return typeof(BGColorTimelineLayer).Name;
-            }
-        }
-
-        public override bool hasSlotNo
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        public override bool isCameraLayer
-        {
-            get
-            {
-                return false;
             }
         }
 
