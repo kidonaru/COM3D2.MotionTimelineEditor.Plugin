@@ -360,6 +360,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public static Vector3 GetFixedEulerAngles(Vector3 angles, Vector3 prevAngles)
+        {
+            var diff = angles - prevAngles;
+
+            for (int i = 0; i < 3; i++)
+            {
+                int iDiff = (int) diff[i];
+                if (iDiff > 180)
+                {
+                    angles[i] -= (iDiff + 180) / 360 * 360;
+                }
+                else if (iDiff < -180)
+                {
+                    angles[i] -= (iDiff - 180) / 360 * 360;
+                }
+            }
+
+            return angles;
+        }
+
         public void FixEulerAngles(ITransformData _prevTrans)
         {
             if (!hasEulerAngles)
@@ -375,22 +395,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var prevEuler = prevTrans.eulerAngles;
             var euler = this.eulerAngles;
-            var diff = euler - prevEuler;
-
-            for (int i = 0; i < 3; i++)
-            {
-                int iDiff = (int) diff[i];
-                if (iDiff > 180)
-                {
-                    euler[i] -= (iDiff + 180) / 360 * 360;
-                }
-                else if (iDiff < -180)
-                {
-                    euler[i] -= (iDiff - 180) / 360 * 360;
-                }
-            }
-
-            this.eulerAngles = euler;
+            this.eulerAngles = GetFixedEulerAngles(euler, prevEuler);
         }
 
         public void UpdateTangent(

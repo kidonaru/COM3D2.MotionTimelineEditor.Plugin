@@ -437,7 +437,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         protected abstract byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo);
         public abstract void OutputDCM(XElement songElement);
         public abstract float CalcEasingValue(float t, int easing);
-        public abstract void DrawWindow(GUIView view);
+
+        public virtual void ResetDraw(GUIView view)
+        {
+            _fieldValueIndex = 0;
+        }
+
+        public virtual void DrawWindow(GUIView view)
+        {
+            // do nothing
+        }
 
         public void AddKeyFrameAll()
         {
@@ -1115,6 +1124,190 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             return maidElement;
+        }
+
+        private List<FloatFieldValue> _fieldValues = new List<FloatFieldValue>();
+        private int _fieldValueIndex = 0;
+
+        protected FloatFieldValue GetNextFieldValue(string label)
+        {
+            if (_fieldValueIndex < _fieldValues.Count)
+            {
+                var fieldValue = _fieldValues[_fieldValueIndex++];
+                fieldValue.label = label;
+                return fieldValue;
+            }
+
+            {
+                var fieldValue = new FloatFieldValue(label);
+                _fieldValues.Add(fieldValue);
+                _fieldValueIndex++;
+                return fieldValue;
+            }
+        }
+
+        protected enum TransformEditType
+        {
+            位置,
+            角度,
+            サイズ,
+            X,
+            Y,
+            Z,
+            RX,
+            RY,
+            RZ,
+            SX,
+            SY,
+            SZ,
+        }
+
+        protected void DrawTransform(
+            GUIView view,
+            Transform transform,
+            TransformEditType editType,
+            string boneName)
+        {
+            switch (editType)
+            {
+                case TransformEditType.位置:
+                case TransformEditType.X:
+                case TransformEditType.Y:
+                case TransformEditType.Z:
+                    DrawPosition(view, transform, editType);
+                    break;
+                case TransformEditType.角度:
+                case TransformEditType.RX:
+                case TransformEditType.RY:
+                case TransformEditType.RZ:
+                {
+                    var prevBone = GetPrevBone(timelineManager.currentFrameNo, boneName);
+                    DrawRotation(view, transform, editType, prevBone);
+                    break;
+                }
+                case TransformEditType.サイズ:
+                case TransformEditType.SX:
+                case TransformEditType.SY:
+                case TransformEditType.SZ:
+                    DrawScale(view, transform, editType);
+                    break;
+            }
+        }
+
+        protected void DrawPosition(GUIView view, Transform transform, TransformEditType editType)
+        {
+            var position = transform.localPosition;
+            var updateTransform = false;
+
+            if (editType == TransformEditType.位置 || editType == TransformEditType.X)
+            {
+                updateTransform |= view.DrawValue(GetNextFieldValue("X"), 0.01f, 0.1f, 0f,
+                    position.x,
+                    x => position.x = x,
+                    x => position.x += x);
+            }
+
+            if (editType == TransformEditType.位置 || editType == TransformEditType.Y)
+            {
+                updateTransform |= view.DrawValue(GetNextFieldValue("Y"), 0.01f, 0.1f, 0f,
+                    position.y,
+                    y => position.y = y,
+                    y => position.y += y);
+            }
+
+            if (editType == TransformEditType.位置 || editType == TransformEditType.Z)
+            {
+                updateTransform |= view.DrawValue(GetNextFieldValue("Z"), 0.01f, 0.1f, 0f,
+                    position.z,
+                    z => position.z = z,
+                    z => position.z += z);
+            }
+
+            if (updateTransform)
+            {
+                transform.localPosition = position;
+            }
+        }
+
+        protected void DrawRotation(GUIView view, Transform transform, TransformEditType editType, BoneData prevBone)
+        {
+            var angle = transform.localEulerAngles;
+            var prevAngle = prevBone != null ? prevBone.transform.eulerAngles : Vector3.zero;
+            angle = TransformDataBase.GetFixedEulerAngles(angle, prevAngle);
+            var updateTransform = false;
+
+            if (editType == TransformEditType.角度 || editType == TransformEditType.RX)
+            {
+                updateTransform |= view.DrawSliderValue(GetNextFieldValue("RX"), prevAngle.x - 180f, prevAngle.x + 180f, prevAngle.x,
+                    angle.x,
+                    x => angle.x = x);
+            }
+
+            if (editType == TransformEditType.角度 || editType == TransformEditType.RY)
+            {
+                updateTransform |= view.DrawSliderValue(GetNextFieldValue("RY"), prevAngle.y - 180f, prevAngle.y + 180f, prevAngle.y,
+                    angle.y,
+                    y => angle.y = y);
+            }
+
+            if (editType == TransformEditType.角度 || editType == TransformEditType.RZ)
+            {
+                updateTransform |= view.DrawSliderValue(GetNextFieldValue("RZ"), prevAngle.z - 180f, prevAngle.z + 180f, prevAngle.z,
+                    angle.z,
+                    z => angle.z = z);
+            }
+
+            if (updateTransform)
+            {
+                transform.localEulerAngles = angle;
+            }
+        }
+
+        protected void DrawScale(GUIView view, Transform transform, TransformEditType editType)
+        {
+            var scale = transform.localScale;
+            var updateTransform = false;
+
+            if (editType == TransformEditType.サイズ || editType == TransformEditType.SX)
+            {
+                updateTransform |= view.DrawValue(GetNextFieldValue("SX"), 0.01f, 0.1f, 1f,
+                    scale.x,
+                    x => scale.x = x,
+                    x => scale.x += x);
+            }
+
+            if (editType == TransformEditType.サイズ || editType == TransformEditType.SY)
+            {
+                updateTransform |= view.DrawValue(GetNextFieldValue("SY"), 0.01f, 0.1f, 1f,
+                    scale.y,
+                    y => scale.y = y,
+                    y => scale.y += y);
+            }
+
+            if (editType == TransformEditType.サイズ || editType == TransformEditType.SZ)
+            {
+                updateTransform |= view.DrawValue(GetNextFieldValue("SZ"), 0.01f, 0.1f, 1f,
+                    scale.z,
+                    z => scale.z = z,
+                    z => scale.z += z);
+            }
+
+            if (editType == TransformEditType.サイズ)
+            {
+                updateTransform |= view.DrawSliderValue(GetNextFieldValue("All"), 0f, 10f, 1f,
+                    scale.x,
+                    x =>
+                    {
+                        scale.x = x;
+                        scale.y = x;
+                        scale.z = x;
+                    });
+            }
+
+            if (updateTransform)
+            {
+                transform.localScale = scale;
+            }
         }
     }
 }

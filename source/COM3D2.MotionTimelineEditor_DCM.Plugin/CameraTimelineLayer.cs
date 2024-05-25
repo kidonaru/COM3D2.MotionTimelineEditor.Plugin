@@ -463,7 +463,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var position = target.position;
             var aroundAngle = uoCamera.GetAroundAngle();
             var rotZ = Camera.main.GetRotationZ();
+            var angles = new Vector3(aroundAngle.y, aroundAngle.x, rotZ);
             var distance = uoCamera.distance;
+            var prevBone = GetPrevBone(timelineManager.currentFrameNo, CameraBoneName);
+            var prevAngles = prevBone != null ? prevBone.transform.eulerAngles : Vector3.zero;
+            angles = TransformDataBase.GetFixedEulerAngles(angles, prevAngles);
             var updateTransform = false;
 
             GUI.enabled = studioHack.isPoseEditing;
@@ -483,20 +487,17 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 z => position.z = z,
                 z => position.z += z);
 
-            updateTransform |= view.DrawValue(_fieldValues[3], 1f, 10f, 0f,
-                aroundAngle.y,
-                y => aroundAngle.y = y,
-                y => aroundAngle.y += y);
+            updateTransform |= view.DrawSliderValue(_fieldValues[3], prevAngles.x - 180f, prevAngles.x + 180f, 0f,
+                angles.x,
+                x => angles.x = x);
 
-            updateTransform |= view.DrawValue(_fieldValues[4], 1f, 10f, 180f,
-                aroundAngle.x, 
-                x => aroundAngle.x = x,
-                x => aroundAngle.x += x);
+            updateTransform |= view.DrawSliderValue(_fieldValues[4], prevAngles.y - 180f, prevAngles.y + 180f, 0f,
+                angles.y,
+                y => angles.y = y);
 
-            updateTransform |= view.DrawValue(_fieldValues[5], 1f, 10f, 0f,
-                rotZ,
-                z => rotZ = z,
-                z => rotZ += z);
+            updateTransform |= view.DrawSliderValue(_fieldValues[5], prevAngles.z - 180f, prevAngles.z + 180f, 0f,
+                angles.z,
+                z => angles.z = z);
 
             updateTransform |= view.DrawValue(_fieldValues[6], 0.1f, 1f, 2f,
                 distance,
@@ -605,8 +606,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 uoCamera.SetTargetPos(position);
                 uoCamera.SetDistance(distance);
-                uoCamera.SetAroundAngle(aroundAngle);
-                Camera.main.SetRotationZ(rotZ);
+                uoCamera.SetAroundAngle(new Vector2(angles.y, angles.x));
+                Camera.main.SetRotationZ(angles.z);
             }
         }
 

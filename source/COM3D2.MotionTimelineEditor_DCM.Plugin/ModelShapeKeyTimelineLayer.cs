@@ -31,7 +31,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public int easing;
     }
 
-    [LayerDisplayName("モデルシェイプキー")]
+    [LayerDisplayName("モデルシェイプ")]
     public partial class ModelShapeKeyTimelineLayer : TimelineLayerBase
     {
         public override int priority
@@ -175,6 +175,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var boneName = blendShape.name;
 
                 var trans = CreateTransformData(boneName);
+                trans.easing = GetEasing(frame.frameNo, boneName);
                 trans["weight"].value = blendShape.weight;
 
                 var bone = frame.CreateBone(trans);
@@ -341,10 +342,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             getName = (model, index) =>
             {
-                return model.name;
+                return model.displayName;
             }
         };
-        private List<FloatFieldValue> _fieldValues = new List<FloatFieldValue>();
 
         public override void DrawWindow(GUIView view)
         {
@@ -368,7 +368,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             view.DrawComboBoxButton(modelComboBox, 260, 20, true);
 
             var model = modelComboBox.currentItem;
-            if (model == null)
+            if (model == null || model.transform == null)
             {
                 view.DrawLabel("モデルが見つかりません", 200, 20);
                 return;
@@ -381,20 +381,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            while (_fieldValues.Count < blendShapes.Count)
-            {
-                var fieldValue = new FloatFieldValue();
-                _fieldValues.Add(fieldValue);
-            }
-
             view.SetEnabled(!modelComboBox.focused && studioHack.isPoseEditing);
 
             for (var i = 0; i < blendShapes.Count; i++)
             {
                 var blendShape = blendShapes[i];
-                var fieldValue = _fieldValues[i];
-
-                fieldValue.label = blendShape.shapeKeyName;
+                var fieldValue = GetNextFieldValue(blendShape.shapeKeyName);
 
                 var weight = blendShape.weight;
                 var updateTransform = false;

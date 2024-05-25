@@ -16,6 +16,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override void DrawWindow(int id)
         {
             var view = new GUIView(0, 20, WINDOW_WIDTH, WINDOW_HEIGHT - 20);
+            currentLayer.ResetDraw(view);
             currentLayer.DrawWindow(view);
 
             if (!currentLayer.isDragging)

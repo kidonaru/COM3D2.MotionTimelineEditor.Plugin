@@ -113,7 +113,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var playData = _playDataMap[modelName];
 
                 var model = modelManager.GetModel(modelName);
-                if (model == null)
+                if (model == null || model.transform == null)
                 {
                     continue;
                 }
@@ -165,6 +165,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 trans.position = model.transform.localPosition;
                 trans.eulerAngles = model.transform.localEulerAngles;
                 trans.scale = model.transform.localScale;
+                trans.easing = GetEasing(frame.frameNo, modelName);
 
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
@@ -239,7 +240,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var rows = pair.Value;
 
                 var model = modelManager.GetModel(name);
-                if (model == null)
+                if (model == null || model.transform == null)
                 {
                     continue;
                 }
@@ -340,7 +341,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             Action<ModelMotionData, bool> appendMotion = (motion, isFirst) =>
             {
                 var model = modelManager.GetModel(motion.name);
-                if (model == null)
+                if (model == null || model.transform == null)
                 {
                     return;
                 }
@@ -437,102 +438,73 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
-        private FloatFieldValue[] _fieldValues = FloatFieldValue.CreateArray(
-            new string[] { "X", "Y", "Z", "RX", "RY", "RZ", "SX", "SY", "SZ" }
-        );
-        private ComboBoxValue<StudioModelStat> modelComboBox = new ComboBoxValue<StudioModelStat>
+        private ComboBoxValue<TransformEditType> _transComboBox = new ComboBoxValue<TransformEditType>
         {
-            getName = (model, index) =>
+            items = Enum.GetValues(typeof(TransformEditType)).Cast<TransformEditType>().ToList(),
+            getName = (type, index) =>
             {
-                return model.name;
+                return type.ToString();
             }
         };
 
+        private Rect _contentRect = new Rect(0, 0, SubWindow.WINDOW_WIDTH, SubWindow.WINDOW_HEIGHT);
+        private Vector2 _scrollPosition = Vector2.zero;
+
         public override void DrawWindow(GUIView view)
         {
+            _contentRect.width = view.viewRect.width - 20;
+
+            _scrollPosition = view.BeginScrollView(
+                view.viewRect.width,
+                view.viewRect.height,
+                _contentRect,
+                _scrollPosition,
+                false,
+                true);
+
             DrawModel(view);
+
+            _contentRect.height = view.currentPos.y + 20;
+
+            view.EndScrollView();
+
             DrawComboBox(view);
         }
         
         public void DrawModel(GUIView view)
         {
-            modelComboBox.items = modelManager.models;
-
-            if (modelManager.models.Count == 0)
+            var models = modelManager.models;
+            if (models.Count == 0)
             {
                 view.DrawLabel("モデルが存在しません", 200, 20);
                 return;
             }
 
-            view.SetEnabled(!modelComboBox.focused);
+            view.SetEnabled(!_transComboBox.focused);
 
-            view.DrawLabel("モデル選択", 200, 20);
-            view.DrawComboBoxButton(modelComboBox, 260, 20, true);
-
-            var model = modelComboBox.currentItem;
-            if (model == null)
+            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
-                view.DrawLabel("モデルが見つかりません", 200, 20);
-                return;
+                view.DrawLabel("操作種類", 80, 20);
+                view.DrawComboBoxButton(_transComboBox, 140, 20, true);
             }
+            view.EndLayout();
 
-            view.SetEnabled(!modelComboBox.focused && studioHack.isPoseEditing);
+            var editType = _transComboBox.currentItem;
 
-            var position = model.transform.localPosition;
-            var angle = model.transform.localEulerAngles;
-            var scale = model.transform.localScale;
-            var updateTransform = false;
+            view.SetEnabled(!_transComboBox.focused && studioHack.isPoseEditing);
 
-            updateTransform |= view.DrawValue(_fieldValues[0], 0.01f, 0.1f, 0f,
-                position.x,
-                x => position.x = x,
-                x => position.x += x);
-
-            updateTransform |= view.DrawValue(_fieldValues[1], 0.01f, 0.1f, 0f,
-                position.y,
-                y => position.y = y,
-                y => position.y += y);
-
-            updateTransform |= view.DrawValue(_fieldValues[2], 0.01f, 0.1f, 0f,
-                position.z,
-                z => position.z = z,
-                z => position.z += z);
-
-            updateTransform |= view.DrawValue(_fieldValues[3], 1f, 10f, 0f,
-                angle.x,
-                x => angle.x = x,
-                x => angle.x += x);
-
-            updateTransform |= view.DrawValue(_fieldValues[4], 1f, 10f, 0f,
-                angle.y,
-                y => angle.y = y,
-                y => angle.y += y);
-
-            updateTransform |= view.DrawValue(_fieldValues[5], 1f, 10f, 0f,
-                angle.z,
-                z => angle.z = z,
-                z => angle.z += z);
-
-            updateTransform |= view.DrawValue(_fieldValues[6], 0.01f, 0.1f, 1f,
-                scale.x,
-                x => scale.x = x,
-                x => scale.x += x);
-
-            updateTransform |= view.DrawValue(_fieldValues[7], 0.01f, 0.1f, 1f,
-                scale.y,
-                y => scale.y = y,
-                y => scale.y += y);
-
-            updateTransform |= view.DrawValue(_fieldValues[8], 0.01f, 0.1f, 1f,
-                scale.z,
-                z => scale.z = z,
-                z => scale.z += z);
-
-            if (updateTransform)
+            foreach (var model in models)
             {
-                model.transform.localPosition = position;
-                model.transform.localEulerAngles = angle;
-                model.transform.localScale = scale;
+                if (model == null || model.transform == null)
+                {
+                    continue;
+                }
+
+                view.DrawHorizontalLine(Color.gray);
+
+                view.DrawLabel(model.displayName, 200, 20);
+
+                DrawTransform(view, model.transform, editType, model.name);
             }
         }
 
@@ -541,8 +513,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             view.SetEnabled(true);
 
             view.DrawComboBoxContent(
-                modelComboBox,
-                240, 300,
+                _transComboBox,
+                140, 300,
                 SubWindow.rc_stgw.width, SubWindow.rc_stgw.height,
                 20);
         }

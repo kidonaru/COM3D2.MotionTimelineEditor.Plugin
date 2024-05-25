@@ -526,7 +526,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
                 view.DrawLabel("対象ボーン", 80, 20);
-
                 view.DrawComboBoxButton(boneComboBox, 140, 20, true);
             }
             view.EndLayout();

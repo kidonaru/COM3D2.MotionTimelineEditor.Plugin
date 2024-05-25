@@ -53,6 +53,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         void OutputAnm();
         void OutputDCM(XElement songElement);
         float CalcEasingValue(float t, int easing);
+        void ResetDraw(GUIView view);
         void DrawWindow(GUIView view);
 
         void AddKeyFrameAll();
