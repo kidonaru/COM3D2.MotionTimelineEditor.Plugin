@@ -59,6 +59,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 typeof(ModelBoneTimelineLayer), ModelBoneTimelineLayer.Create
             );
             timelineManager.RegisterLayer(
+                typeof(ModelShapeKeyTimelineLayer), ModelShapeKeyTimelineLayer.Create
+            );
+            timelineManager.RegisterLayer(
                 typeof(BGTimelineLayer), BGTimelineLayer.Create
             );
             timelineManager.RegisterLayer(

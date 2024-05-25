@@ -79,14 +79,13 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public BGTimelineLayer()
+        private BGTimelineLayer(int slotNo) : base(slotNo)
         {
         }
 
         public static BGTimelineLayer Create(int slotNo)
         {
-            PluginUtils.LogDebug("BGTimelineLayer.Create");
-            return new BGTimelineLayer();
+            return new BGTimelineLayer(0);
         }
 
         public override void Init()
@@ -121,24 +120,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 {
                     var menuItem = new BoneMenuItem(boneName, boneName);
                     allMenuItems.Add(menuItem);
-                }
-            }
-        }
-
-        private void ApplyPlayData()
-        {
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            foreach (var bgName in _playDataMap.Keys)
-            {
-                var playData = _playDataMap[bgName];
-
-                var indexUpdated = playData.Update(playingFrameNoFloat);
-
-                var current = playData.current;
-                if (current != null && indexUpdated)
-                {
-                    ApplyBG(current);
                 }
             }
         }
@@ -180,15 +161,33 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             base.LateUpdate();
         }
 
-        private void ApplyBG(BGMotionData motion)
+        private void ApplyPlayData()
+        {
+            var playingFrameNoFloat = this.playingFrameNoFloat;
+
+            foreach (var bgName in _playDataMap.Keys)
+            {
+                var playData = _playDataMap[bgName];
+
+                var indexUpdated = playData.Update(playingFrameNoFloat);
+
+                var current = playData.current;
+                if (current != null && indexUpdated)
+                {
+                    ApplyMotion(current);
+                }
+            }
+        }
+
+        private void ApplyMotion(BGMotionData motion)
         {
             if (motion == null)
             {
                 return;
             }
 
-            PluginUtils.LogDebug("ApplyBG: bgName={0} stFrame={1}, stPos={2}, stRot={3}",
-                motion.name, motion.stFrame, motion.myTm.stPos, motion.myTm.stRot);
+            //PluginUtils.LogDebug("ApplyMotion: bgName={0} stFrame={1}, stPos={2}, stRot={3}",
+            //    motion.name, motion.stFrame, motion.myTm.stPos, motion.myTm.stRot);
 
             try
             {
@@ -251,7 +250,20 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             // do nothing
         }
 
-        private void AddMotion(FrameData frame)
+        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
+        {
+            _timelineRowsMap.Clear();
+
+            foreach (var keyFrame in keyFrames)
+            {
+                AppendTimeLineRow(keyFrame);
+            }
+
+            BuildPlayData(forOutput);
+            return null;
+        }
+
+        private void AppendTimeLineRow(FrameData frame)
         {
             foreach (var name in allBoneNames)
             {
@@ -334,19 +346,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var playData = pair.Value;
                 PluginUtils.LogDebug("PlayData: name={0}, count={1}", name, playData.motions.Count);
             }
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRowsMap.Clear();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AddMotion(keyFrame);
-            }
-
-            BuildPlayData(forOutput);
-            return null;
         }
 
         public void SaveBGTimeLine(

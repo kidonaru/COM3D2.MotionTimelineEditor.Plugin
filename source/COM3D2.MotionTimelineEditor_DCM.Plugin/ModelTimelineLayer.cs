@@ -63,32 +63,19 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         private Dictionary<string, ModelPlayData> _playDataMap = new Dictionary<string, ModelPlayData>();
         private List<ModelMotionData> _outputMotions = new List<ModelMotionData>(128);
 
-        public ModelTimelineLayer()
+        private ModelTimelineLayer(int slotNo) : base(slotNo)
         {
         }
 
         public static ModelTimelineLayer Create(int slotNo)
         {
-            PluginUtils.LogDebug("ModelTimelineLayer.Create");
-            return new ModelTimelineLayer();
+            return new ModelTimelineLayer(0);
         }
 
         public override void Init()
         {
             base.Init();
-
-            StudioModelManager.onModelAdded += OnModelAdded;
-            StudioModelManager.onModelRemoved += OnModelRemoved;
-
             SetupModels();
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-
-            StudioModelManager.onModelAdded -= OnModelAdded;
-            StudioModelManager.onModelRemoved -= OnModelRemoved;
         }
 
         protected override void InitMenuItems()
@@ -99,32 +86,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 var menuItem = new BoneMenuItem(model.name, model.displayName);
                 allMenuItems.Add(menuItem);
-            }
-        }
-
-        private void ApplyPlayData()
-        {
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            foreach (var modelName in _playDataMap.Keys)
-            {
-                var playData = _playDataMap[modelName];
-
-                var model = modelManager.GetModel(modelName);
-                if (model == null)
-                {
-                    continue;
-                }
-
-                playData.Update(playingFrameNoFloat);
-
-                var current = playData.current;
-                if (current != null)
-                {
-                    ApplyLerp(current.myTm, model.transform, playData.lerpFrame, current.easing);
-                }
-
-                //PluginUtils.LogDebug("ApplyPlayData: modelName={0} lerpTime={1}, listIndex={2}", modelName, playData.lerpTime, playData.listIndex);
             }
         }
 
@@ -149,11 +110,57 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
+        private void ApplyPlayData()
+        {
+            var playingFrameNoFloat = this.playingFrameNoFloat;
+
+            foreach (var modelName in _playDataMap.Keys)
+            {
+                var playData = _playDataMap[modelName];
+
+                var model = modelManager.GetModel(modelName);
+                if (model == null)
+                {
+                    continue;
+                }
+
+                playData.Update(playingFrameNoFloat);
+
+                var current = playData.current;
+                if (current != null)
+                {
+                    ApplyMotion(current, model.transform, playData.lerpFrame);
+                }
+
+                //PluginUtils.LogDebug("ApplyPlayData: modelName={0} lerpTime={1}, listIndex={2}", modelName, playData.lerpTime, playData.listIndex);
+            }
+        }
+
+        private void ApplyMotion(ModelMotionData motion, Transform transform, float lerpTime)
+        {
+            if (transform == null)
+            {
+                return;
+            }
+
+            float easingTime = CalcEasingValue(lerpTime, motion.easing);
+            transform.position = Vector3.Lerp(motion.myTm.stPos, motion.myTm.edPos, easingTime);
+            transform.rotation = Quaternion.Euler(Vector3.Lerp(motion.myTm.stRot, motion.myTm.edRot, easingTime));
+            transform.localScale = Vector3.Lerp(motion.myTm.stSca, motion.myTm.edSca, easingTime);
+        }
+
         public override void OnPluginEnable()
         {
             base.OnPluginEnable();
 
             SetupModels();
+        }
+
+        private void SetupModels()
+        {
+            var existBoneNames = GetExistBoneNames();
+            modelManager.SetupModels(new HashSet<string>(existBoneNames));
+            InitMenuItems();
         }
 
         public override void OnPluginDisable()
@@ -163,49 +170,16 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             studioHack.DeleteAllModels();
         }
 
-        private void ApplyLerp(MyTransform myTrans, Transform transform, float lerpTime, int easing)
+        public override void OnModelAdded(StudioModelStat model)
         {
-            if (transform == null)
-            {
-                return;
-            }
-
-            float easingTime = CalcEasingValue(lerpTime, easing);
-            transform.position = Vector3.Lerp(myTrans.stPos, myTrans.edPos, easingTime);
-            transform.rotation = Quaternion.Euler(Vector3.Lerp(myTrans.stRot, myTrans.edRot, easingTime));
-            transform.localScale = Vector3.Lerp(myTrans.stSca, myTrans.edSca, easingTime);
+            InitMenuItems();
+            AddFirstBones(new List<string> { model.name });
         }
 
-        private void SetupModels()
+        public override void OnModelRemoved(StudioModelStat model)
         {
-            var existBoneNames = GetExistBoneNames();
-            foreach (var modelName in existBoneNames)
-            {
-                var model = modelManager.GetModel(modelName);
-                if (model == null)
-                {
-                    model = modelManager.CreateModelStat(modelName, null);
-                    studioHack.CreateModel(model);
-
-                    PluginUtils.Log("Create model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
-                        model.info.type, model.displayName, model.name, model.info.label, model.info.fileName, model.info.myRoomId, model.info.bgObjectId);
-                }
-            }
-
-            foreach (var modelName in modelManager.modelNames)
-            {
-                if (!existBoneNames.Contains(modelName))
-                {
-                    var model = modelManager.GetModel(modelName);
-                    if (model != null)
-                    {
-                        studioHack.DeleteModel(model);
-                        PluginUtils.Log("Delete model: name={0}", modelName);
-                    }
-                }
-            }
-
-            modelManager.LateUpdate();
+            InitMenuItems();
+            RemoveAllBones(new List<string> { model.name });
         }
 
         public override void UpdateFrameWithCurrentStat(FrameData frame)
@@ -596,52 +570,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var transform = new TransformDataModel();
             transform.Initialize(name);
             return transform;
-        }
-
-        private void OnModelAdded(StudioModelStat model)
-        {
-            InitMenuItems();
-
-            // モデル追加時にキーフレーム追加
-            {
-                var firstFrame = GetOrCreateFrame(0);
-                var bone = firstFrame.GetBone(model.name);
-                if (bone == null)
-                {
-                    var tmpFrame = CreateFrame(timelineManager.currentFrameNo);
-                    UpdateFrameWithCurrentStat(tmpFrame);
-
-                    var tmpBone = tmpFrame.GetBone(model.name);                    
-                    firstFrame.SetBone(tmpBone);
-                }
-            }
-
-            ApplyCurrentFrame(true);
-        }
-
-        private void OnModelRemoved(StudioModelStat model)
-        {
-            InitMenuItems();
-
-            // モデル削除時にキーフレーム削除
-            foreach (var frame in keyFrames)
-            {
-                var bone = frame.GetBone(model.name);
-                if (bone != null)
-                {
-                    frame.RemoveBone(bone);
-                }
-            }
-
-            {
-                var bone = _dummyLastFrame.GetBone(model.name);
-                if (bone != null)
-                {
-                    _dummyLastFrame.RemoveBone(bone);
-                }
-            }
-
-            ApplyCurrentFrame(true);
         }
     }
 }

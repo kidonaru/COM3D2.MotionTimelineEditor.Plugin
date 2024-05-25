@@ -110,14 +110,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         private Dictionary<string, EyesPlayData> _playDataMap = new Dictionary<string, EyesPlayData>();
         private List<EyesMotionData> _dcmOutputMotions = new List<EyesMotionData>(128);
 
-        public EyesTimelineLayer(int slotNo)
+        private EyesTimelineLayer(int slotNo) : base(slotNo)
         {
-            this.slotNo = slotNo;
         }
 
         public static EyesTimelineLayer Create(int slotNo)
         {
-            PluginUtils.LogDebug("EyesTimelineLayer.Create slotNo={0}", slotNo);
             return new EyesTimelineLayer(slotNo);
         }
 
@@ -132,6 +130,35 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                 var menuItem = new BoneMenuItem(eyesName, displayName);
                 _allMenuItems.Add(menuItem);
+            }
+        }
+
+        public override bool IsValidData()
+        {
+            errorMessage = "";
+
+            var firstFrame = this.firstFrame;
+            if (firstFrame == null || firstFrame.frameNo != 0)
+            {
+                errorMessage = "0フレーム目にキーフレームが必要です";
+                return false;
+            }
+
+            return true;
+        }
+
+        public override void Update()
+        {
+            base.Update();
+        }
+
+        public override void LateUpdate()
+        {
+            base.LateUpdate();
+
+            if (!studioHack.isPoseEditing)
+            {
+                ApplyPlayData();
             }
         }
 
@@ -222,35 +249,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return Vector2.zero;
         }
 
-        public override bool IsValidData()
-        {
-            errorMessage = "";
-
-            var firstFrame = this.firstFrame;
-            if (firstFrame == null || firstFrame.frameNo != 0)
-            {
-                errorMessage = "0フレーム目にキーフレームが必要です";
-                return false;
-            }
-
-            return true;
-        }
-
-        public override void Update()
-        {
-            base.Update();
-        }
-
-        public override void LateUpdate()
-        {
-            base.LateUpdate();
-
-            if (!studioHack.isPoseEditing)
-            {
-                ApplyPlayData();
-            }
-        }
-
         public override void UpdateFrameWithCurrentStat(FrameData frame)
         {
             foreach (var eyesName in allBoneNames)
@@ -267,7 +265,44 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private void AddRow(FrameData frame)
+        public override void ApplyAnm(long id, byte[] anmData)
+        {
+            ApplyPlayData();
+        }
+
+        public override void ApplyCurrentFrame(bool motionUpdate)
+        {
+            if (anmId != TimelineAnmId || motionUpdate)
+            {
+                CreateAndApplyAnm();
+            }
+            else
+            {
+                ApplyPlayData();
+            }
+        }
+
+        public override void OutputAnm()
+        {
+            // do nothing
+        }
+
+        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
+        {
+            _timelineRowsMap.Clear();
+
+            foreach (var keyFrame in keyFrames)
+            {
+                AppendTimelineRow(keyFrame);
+            }
+
+            AppendTimelineRow(_dummyLastFrame);
+
+            BuildPlayData();
+            return null;
+        }
+
+        private void AppendTimelineRow(FrameData frame)
         {
             var isLastFrame = frame.frameNo == maxFrameNo;
             foreach (var name in firstFrame.boneNames)
@@ -349,43 +384,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     }
                 }
             }
-        }
-
-        public override void ApplyAnm(long id, byte[] anmData)
-        {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRowsMap.Clear();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AddRow(keyFrame);
-            }
-
-            AddRow(_dummyLastFrame);
-
-            BuildPlayData();
-            return null;
         }
 
         public void SaveMotions(

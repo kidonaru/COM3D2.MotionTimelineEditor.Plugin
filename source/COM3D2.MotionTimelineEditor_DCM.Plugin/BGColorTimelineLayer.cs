@@ -68,14 +68,13 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public BGColorTimelineLayer()
+        private BGColorTimelineLayer(int slotNo) : base(slotNo)
         {
         }
 
         public static BGColorTimelineLayer Create(int slotNo)
         {
-            PluginUtils.LogDebug("BGColorTimelineLayer.Create");
-            return new BGColorTimelineLayer();
+            return new BGColorTimelineLayer(0);
         }
 
         protected override void InitMenuItems()
@@ -84,19 +83,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             var menuItem = new BoneMenuItem(BoneName, BoneDisplayName);
             allMenuItems.Add(menuItem);
-        }
-
-        private void ApplyPlayData()
-        {
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            var indexUpdated = _playData.Update(playingFrameNoFloat);
-
-            var current = _playData.current;
-            if (current != null && indexUpdated)
-            {
-                ApplyBGColor(current);
-            }
         }
 
         public override bool IsValidData()
@@ -120,15 +106,28 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             base.LateUpdate();
         }
 
-        private void ApplyBGColor(BGColorMotionData motion)
+        private void ApplyPlayData()
+        {
+            var playingFrameNoFloat = this.playingFrameNoFloat;
+
+            var indexUpdated = _playData.Update(playingFrameNoFloat);
+
+            var current = _playData.current;
+            if (current != null && indexUpdated)
+            {
+                ApplyMotion(current);
+            }
+        }
+
+        private void ApplyMotion(BGColorMotionData motion)
         {
             if (motion == null)
             {
                 return;
             }
 
-            PluginUtils.LogDebug("ApplyBGColor: stFrame={0}, color={1}",
-                motion.stFrame, motion.color);
+            //PluginUtils.LogDebug("ApplyMotion: stFrame={0}, color={1}",
+            //    motion.stFrame, motion.color);
 
             try
             {
@@ -171,7 +170,20 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             // do nothing
         }
 
-        private void AddTimelineRow(FrameData frame)
+        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
+        {
+            _timelineRows.Clear();
+
+            foreach (var keyFrame in keyFrames)
+            {
+                AppendTimelineRow(keyFrame);
+            }
+
+            BuildPlayData(forOutput);
+            return null;
+        }
+
+        private void AppendTimelineRow(FrameData frame)
         {
             var bone = frame.GetBone(BoneName);
             if (bone == null)
@@ -213,19 +225,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
 
             PluginUtils.LogDebug("PlayData: name={0}, count={1}", BoneName, _playData.motions.Count);
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRows.Clear();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AddTimelineRow(keyFrame);
-            }
-
-            BuildPlayData(forOutput);
-            return null;
         }
 
         public void SaveBGTimeLine(

@@ -10,36 +10,35 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
-    using ModelBonePlayData = MotionPlayData<ModelBoneMotionData>;
+    using ModelShapeKeyPlayData = MotionPlayData<ModelShapeKeyMotionData>;
 
-    public class ModelBoneTimeLineRow
+    public class ModelShapeKeyTimeLineRow
     {
         public int frame;
         public string name;
-        public Vector3 position;
-        public Vector3 rotation;
-        public Vector3 scale;
+        public float weight;
         public int easing;
     }
 
-    public class ModelBoneMotionData : IMotionData
+    public class ModelShapeKeyMotionData : IMotionData
     {
         public int stFrame { get; set; }
         public int edFrame { get; set; }
 
         public string name;
-        public MyTransform myTm;
+        public float stWeight;
+        public float edWeight;
         public int easing;
     }
 
-    [LayerDisplayName("モデルボーン")]
-    public partial class ModelBoneTimelineLayer : TimelineLayerBase
+    [LayerDisplayName("モデルシェイプキー")]
+    public partial class ModelShapeKeyTimelineLayer : TimelineLayerBase
     {
         public override int priority
         {
             get
             {
-                return 22;
+                return 23;
             }
         }
 
@@ -47,7 +46,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             get
             {
-                return typeof(ModelBoneTimelineLayer).Name;
+                return typeof(ModelShapeKeyTimelineLayer).Name;
             }
         }
 
@@ -55,20 +54,21 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             get
             {
-                return modelManager.boneNames;
+                return modelManager.blendShapeNames;
             }
         }
 
-        private Dictionary<string, List<ModelBoneTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<ModelBoneTimeLineRow>>();
-        private Dictionary<string, ModelBonePlayData> _playDataMap = new Dictionary<string, ModelBonePlayData>();
+        private Dictionary<string, List<ModelShapeKeyTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<ModelShapeKeyTimeLineRow>>();
+        private Dictionary<string, ModelShapeKeyPlayData> _playDataMap = new Dictionary<string, ModelShapeKeyPlayData>();
+        private List<ModelShapeKeyMotionData> _outputMotions = new List<ModelShapeKeyMotionData>(128);
 
-        private ModelBoneTimelineLayer(int slotNo) : base(slotNo)
+        private ModelShapeKeyTimelineLayer(int slotNo) : base(slotNo)
         {
         }
 
-        public static ModelBoneTimelineLayer Create(int slotNo)
+        public static ModelShapeKeyTimelineLayer Create(int slotNo)
         {
-            return new ModelBoneTimelineLayer(0);
+            return new ModelShapeKeyTimelineLayer(0);
         }
 
         public override void Init()
@@ -83,12 +83,17 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             foreach (var model in modelManager.modelMap.Values)
             {
+                if (model.blendShapes.Count == 0)
+                {
+                    continue;
+                }
+
                 var setMenuItem = new BoneSetMenuItem(model.name, model.displayName);
                 allMenuItems.Add(setMenuItem);
 
-                foreach (var bone in model.bones)
+                foreach (var blendShape in model.blendShapes)
                 {
-                    var menuItem = new BoneMenuItem(bone.name, bone.transform.name);
+                    var menuItem = new BoneMenuItem(blendShape.name, blendShape.shapeKeyName);
                     setMenuItem.AddChild(menuItem);
                 }
             }
@@ -119,12 +124,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             var playingFrameNoFloat = this.playingFrameNoFloat;
 
-            foreach (var boneName in _playDataMap.Keys)
+            foreach (var shapeName in _playDataMap.Keys)
             {
-                var playData = _playDataMap[boneName];
+                var playData = _playDataMap[shapeName];
 
-                var bone = modelManager.GetBone(boneName);
-                if (bone == null)
+                var blendShape = modelManager.GetBlendShape(shapeName);
+                if (blendShape == null)
                 {
                     continue;
                 }
@@ -134,24 +139,24 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var current = playData.current;
                 if (current != null)
                 {
-                    ApplyMotion(current, bone.transform, playData.lerpFrame);
+                    ApplyMotion(current, blendShape, playData.lerpFrame);
                 }
 
                 //PluginUtils.LogDebug("ApplyPlayData: boneName={0} lerpFrame={1}, listIndex={2}", boneName, playData.lerpFrame, playData.listIndex);
             }
+
+            var models = modelManager.modelMap.Values;
+            foreach (var model in models)
+            {
+                model.FixBlendValues();
+            }
         }
 
-        private void ApplyMotion(ModelBoneMotionData motion, Transform transform, float lerpTime)
+        private void ApplyMotion(ModelShapeKeyMotionData motion, StudioModelBlendShape blendShape, float lerpTime)
         {
-            if (transform == null)
-            {
-                return;
-            }
-
             float easingTime = CalcEasingValue(lerpTime, motion.easing);
-            transform.localPosition = Vector3.Lerp(motion.myTm.stPos, motion.myTm.edPos, easingTime);
-            transform.localRotation = Quaternion.Euler(Vector3.Lerp(motion.myTm.stRot, motion.myTm.edRot, easingTime));
-            transform.localScale = Vector3.Lerp(motion.myTm.stSca, motion.myTm.edSca, easingTime);
+            var weight = Mathf.Lerp(motion.stWeight, motion.edWeight, easingTime);
+            blendShape.weight = weight;
         }
 
         public override void OnPluginEnable()
@@ -174,7 +179,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     existModelNameHash.Add(modelName);
                 }
             }
-            
+
             modelManager.SetupModels(existModelNameHash);
             InitMenuItems();
         }
@@ -190,7 +195,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             InitMenuItems();
 
-            var boneNames = model.bones.Select(x => x.name).ToList();
+            var boneNames = model.blendShapes.Select(x => x.name).ToList();
             AddFirstBones(boneNames);
         }
 
@@ -198,20 +203,18 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             InitMenuItems();
 
-            var boneNames = model.bones.Select(x => x.name).ToList();
+            var boneNames = model.blendShapes.Select(x => x.name).ToList();
             RemoveAllBones(boneNames);
         }
 
         public override void UpdateFrameWithCurrentStat(FrameData frame)
         {
-            foreach (var sourceBone in modelManager.boneMap.Values)
+            foreach (var blendShape in modelManager.blendShapeMap.Values)
             {
-                var boneName = sourceBone.name;
+                var boneName = blendShape.name;
 
                 var trans = CreateTransformData(boneName);
-                trans.position = sourceBone.transform.localPosition;
-                trans.eulerAngles = sourceBone.transform.localEulerAngles;
-                trans.scale = sourceBone.transform.localScale;
+                trans["weight"].value = blendShape.weight;
 
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
@@ -252,18 +255,18 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var name = pair.Key;
                 var rows = pair.Value;
 
-                var bone = modelManager.GetBone(name);
-                if (bone == null)
+                var blendShape = modelManager.GetBlendShape(name);
+                if (blendShape == null)
                 {
                     continue;
                 }
 
-                ModelBonePlayData playData;
+                ModelShapeKeyPlayData playData;
                 if (!_playDataMap.TryGetValue(name, out playData))
                 {
-                    playData = new ModelBonePlayData
+                    playData = new ModelShapeKeyPlayData
                     {
-                        motions = new List<ModelBoneMotionData>(rows.Count),
+                        motions = new List<ModelShapeKeyMotionData>(rows.Count),
                     };
                     _playDataMap[name] = playData;
                 }
@@ -293,20 +296,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                         isWarpFrame = false;
                     }
 
-                    var motion = new ModelBoneMotionData
+                    var motion = new ModelShapeKeyMotionData
                     {
                         name = name,
                         stFrame = stFrame,
                         edFrame = edFrame,
-                        myTm = new MyTransform
-                        {
-                            stPos = start.position,
-                            stRot = start.rotation,
-                            stSca = start.scale,
-                            edPos = end.position,
-                            edRot = end.rotation,
-                            edSca = end.scale,
-                        },
+
+                        stWeight = start.weight,
+                        edWeight = end.weight,
                         easing = end.easing,
                     };
 
@@ -348,22 +345,20 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     continue;
                 }
 
-                List<ModelBoneTimeLineRow> rows;
+                List<ModelShapeKeyTimeLineRow> rows;
                 if (!_timelineRowsMap.TryGetValue(name, out rows))
                 {
-                    rows = new List<ModelBoneTimeLineRow>();
+                    rows = new List<ModelShapeKeyTimeLineRow>();
                     _timelineRowsMap[name] = rows;
                 }
 
                 var trans = bone.transform;
 
-                var row = new ModelBoneTimeLineRow
+                var row = new ModelShapeKeyTimeLineRow
                 {
                     frame = frame.frameNo,
                     name = bone.name,
-                    position = trans.position,
-                    rotation = trans.eulerAngles,
-                    scale = trans.scale,
+                    weight = trans["weight"].value,
                     easing = trans.easing
                 };
 
@@ -373,7 +368,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public override void OutputDCM(XElement songElement)
         {
-            PluginUtils.LogWarning("モデルボーンはDCMに対応していません");
+            PluginUtils.LogWarning("モデルシェイプキーはDCMに対応していません");
         }
 
         public override float CalcEasingValue(float t, int easing)
@@ -381,110 +376,80 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
-        private int _targetBoneIndex = 0;
-        private FloatFieldValue[] _fieldValues = FloatFieldValue.CreateArray(
-            new string[] { "X", "Y", "Z", "RX", "RY", "RZ", "SX", "SY", "SZ" }
-        );
+        private int _targetModelIndex = 0;
+        private List<FloatFieldValue> _fieldValues = new List<FloatFieldValue>();
 
         public override void DrawWindow(GUIView view)
         {
-            if (modelManager.boneNames.Count == 0)
+            if (modelManager.blendShapeNames.Count == 0)
             {
-                view.DrawLabel("ボーンが存在しません", 200, 20);
+                view.DrawLabel("シェイプキーが存在しません", 200, 20);
                 return;
             }
 
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
-                view.DrawLabel("ボーン選択", 70, 20);
+                view.DrawLabel("モデル選択", 70, 20);
 
-                var newTargetBoneIndex = view.DrawSelectList(
-                    modelManager.boneNames,
+                var newTargetModelIndex = view.DrawSelectList(
+                    modelManager.modelNames,
                     (modelName, index) =>
                     {
-                        var b = modelManager.GetBone(index);
+                        var b = modelManager.GetModel(index);
                         return b != null ? b.name : string.Empty;
                     },
-                    140, 20, _targetBoneIndex);
+                    140, 20, _targetModelIndex);
 
-                if (newTargetBoneIndex != _targetBoneIndex)
+                if (newTargetModelIndex != _targetModelIndex)
                 {
-                    _targetBoneIndex = newTargetBoneIndex;
+                    _targetModelIndex = newTargetModelIndex;
                 }
             }
             view.EndLayout();
 
-            var bone = modelManager.GetBone(_targetBoneIndex);
-            if (bone == null)
+            var model = modelManager.GetModel(_targetModelIndex);
+            if (model == null)
             {
                 return;
             }
 
-            var position = bone.transform.localPosition;
-            var angle = bone.transform.localEulerAngles;
-            var scale = bone.transform.localScale;
-            var updateTransform = false;
+            var blendShapes = model.blendShapes;
 
-            GUI.enabled = studioHack.isPoseEditing;
-
-            updateTransform |= view.DrawValue(_fieldValues[0], 0.01f, 0.1f, 0f,
-                position.x,
-                x => position.x = x,
-                x => position.x += x);
-
-            updateTransform |= view.DrawValue(_fieldValues[1], 0.01f, 0.1f, 0f,
-                position.y,
-                y => position.y = y,
-                y => position.y += y);
-
-            updateTransform |= view.DrawValue(_fieldValues[2], 0.01f, 0.1f, 0f,
-                position.z,
-                z => position.z = z,
-                z => position.z += z);
-
-            updateTransform |= view.DrawValue(_fieldValues[3], 1f, 10f, 0f,
-                angle.x,
-                x => angle.x = x,
-                x => angle.x += x);
-
-            updateTransform |= view.DrawValue(_fieldValues[4], 1f, 10f, 0f,
-                angle.y,
-                y => angle.y = y,
-                y => angle.y += y);
-
-            updateTransform |= view.DrawValue(_fieldValues[5], 1f, 10f, 0f,
-                angle.z,
-                z => angle.z = z,
-                z => angle.z += z);
-
-            updateTransform |= view.DrawValue(_fieldValues[6], 0.01f, 0.1f, 1f,
-                scale.x,
-                x => scale.x = x,
-                x => scale.x += x);
-
-            updateTransform |= view.DrawValue(_fieldValues[7], 0.01f, 0.1f, 1f,
-                scale.y,
-                y => scale.y = y,
-                y => scale.y += y);
-
-            updateTransform |= view.DrawValue(_fieldValues[8], 0.01f, 0.1f, 1f,
-                scale.z,
-                z => scale.z = z,
-                z => scale.z += z);
-
-            GUI.enabled = true;
-
-            if (updateTransform)
+            while (_fieldValues.Count < blendShapes.Count)
             {
-                bone.transform.localPosition = position;
-                bone.transform.localEulerAngles = angle;
-                bone.transform.localScale = scale;
+                var fieldValue = new FloatFieldValue();
+                _fieldValues.Add(fieldValue);
             }
+
+            view.SetEnabled(studioHack.isPoseEditing);
+
+            for (var i = 0; i < blendShapes.Count; i++)
+            {
+                var blendShape = blendShapes[i];
+                var fieldValue = _fieldValues[i];
+
+                fieldValue.label = blendShape.shapeKeyName;
+
+                var weight = blendShape.weight;
+                var updateTransform = false;
+
+                updateTransform |= view.DrawSliderValue(fieldValue, -1f, 2f, 0f,
+                    weight,
+                    x => weight = x);
+
+                if (updateTransform)
+                {
+                    blendShape.weight = weight;
+                    model.FixBlendValues();
+                }
+            }
+
+            view.SetEnabled(true);
         }
 
         public override ITransformData CreateTransformData(string name)
         {
-            var transform = new TransformDataModel();
+            var transform = new TransformDataShapeKey();
             transform.Initialize(name);
             return transform;
         }

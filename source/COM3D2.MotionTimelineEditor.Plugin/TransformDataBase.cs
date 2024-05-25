@@ -386,7 +386,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
                 else if (iDiff < -180)
                 {
-                    euler[i] += (iDiff + 180) / 360 * 360;
+                    euler[i] -= (iDiff - 180) / 360 * 360;
                 }
             }
 

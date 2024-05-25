@@ -178,6 +178,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private TimelineManager()
         {
             MaidManager.onMaidSlotNoChanged += OnMaidSlotNoChanged;
+            StudioModelManager.onModelAdded += OnModelAdded;
+            StudioModelManager.onModelRemoved += OnModelRemoved;
         }
 
         public void Update()
@@ -1468,6 +1470,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (IsValidData())
             {
                 ChangeActiveLayer(currentLayer.className, maidSlotNo);
+            }
+        }
+
+        private void OnModelAdded(StudioModelStat model)
+        {
+            if (IsValidData())
+            {
+                foreach (var layer in layers)
+                {
+                    layer.OnModelAdded(model);
+                }
+            }
+        }
+
+        private void OnModelRemoved(StudioModelStat model)
+        {
+            if (IsValidData())
+            {
+                foreach (var layer in layers)
+                {
+                    layer.OnModelRemoved(model);
+                }
             }
         }
     }

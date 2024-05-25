@@ -343,6 +343,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected TimelineLayerBase(int slotNo)
+        {
+            PluginUtils.LogDebug("{0}.Create slotNo={1}", className, slotNo);
+            this.slotNo = slotNo;
+        }
+
         public virtual void Init()
         {
             if (firstFrame == null)
@@ -410,6 +416,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public virtual void OnPluginDisable()
+        {
+            // do nothing
+        }
+
+        public virtual void OnModelAdded(StudioModelStat model)
+        {
+            // do nothing
+        }
+
+        public virtual void OnModelRemoved(StudioModelStat model)
         {
             // do nothing
         }
@@ -912,6 +928,78 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             int nextFrameNo;
             return GetNextBone(frameNo, name, out nextFrameNo);
+        }
+
+        public void AddFirstBones(List<string> boneNames)
+        {
+            if (boneNames.Count == 0)
+            {
+                return;
+            }
+
+            var firstFrame = GetOrCreateFrame(0);
+            FrameData tmpFrame = null;
+
+            foreach (var boneName in boneNames)
+            {
+                var bone = firstFrame.GetBone(boneName);
+                if (bone == null)
+                {
+                    if (tmpFrame == null)
+                    {
+                        tmpFrame = CreateFrame(timelineManager.currentFrameNo);
+                        UpdateFrameWithCurrentStat(tmpFrame);
+                    }
+
+                    var tmpBone = tmpFrame.GetBone(boneName);
+                    firstFrame.SetBone(tmpBone);
+                }
+            }
+
+            if (tmpFrame != null)
+            {
+                ApplyCurrentFrame(true);
+            }
+        }
+
+        public void RemoveAllBones(List<string> boneNames)
+        {
+            if (boneNames.Count == 0)
+            {
+                return;
+            }
+            
+            bool removed = false;
+
+            foreach (var frame in keyFrames)
+            {
+                foreach (var boneName in boneNames)
+                {
+                    var bone = frame.GetBone(boneName);
+                    if (bone != null)
+                    {
+                        frame.RemoveBone(bone);
+                        removed = true;
+                    }
+                }
+            }
+
+            {
+                foreach (var boneName in boneNames)
+                {
+                    var bone = _dummyLastFrame.GetBone(boneName);
+                    if (bone != null)
+                    {
+                        _dummyLastFrame.RemoveBone(bone);
+                        removed = true;
+                    }
+                }
+            }
+
+            if (removed)
+            {
+                ApplyCurrentFrame(true);
+            }
         }
 
         public FrameData GetActiveFrame(float frameNo)

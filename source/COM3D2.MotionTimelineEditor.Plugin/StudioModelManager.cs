@@ -36,9 +36,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public class StudioModelManager
     {
         public Dictionary<string, StudioModelStat> modelMap = new Dictionary<string, StudioModelStat>();
-        public Dictionary<string, StudioModelBoneStat> boneMap = new Dictionary<string, StudioModelBoneStat>();
+        public Dictionary<string, StudioModelBone> boneMap = new Dictionary<string, StudioModelBone>();
+        public Dictionary<string, StudioModelBlendShape> blendShapeMap = new Dictionary<string, StudioModelBlendShape>();
         public List<string> modelNames = new List<string>();
         public List<string> boneNames = new List<string>();
+        public List<string> blendShapeNames = new List<string>();
 
         public static event UnityAction<StudioModelStat> onModelAdded;
         public static event UnityAction<StudioModelStat> onModelRemoved;
@@ -108,7 +110,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private StudioModelManager()
         {
             SceneManager.sceneLoaded += OnChangedSceneLevel;
-            TimelineManager.onRefresh += OnRefresh;
         }
 
         public StudioModelStat GetModel(string name)
@@ -130,9 +131,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return GetModel(modelNames[index]);
         }
 
-        public StudioModelBoneStat GetBone(string name)
+        public StudioModelBone GetBone(string name)
         {
-            StudioModelBoneStat bone;
+            StudioModelBone bone;
             if (boneMap.TryGetValue(name, out bone))
             {
                 return bone;
@@ -140,13 +141,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return null;
         }
 
-        public StudioModelBoneStat GetBone(int index)
+        public StudioModelBone GetBone(int index)
         {
             if (index < 0 || index >= boneNames.Count)
             {
                 return null;
             }
             return GetBone(boneNames[index]);
+        }
+
+        public StudioModelBlendShape GetBlendShape(string name)
+        {
+            StudioModelBlendShape blendShape;
+            if (blendShapeMap.TryGetValue(name, out blendShape))
+            {
+                return blendShape;
+            }
+            return null;
+        }
+
+        public StudioModelBlendShape GetBlendShape(int index)
+        {
+            if (index < 0 || index >= blendShapeNames.Count)
+            {
+                return null;
+            }
+            return GetBlendShape(blendShapeNames[index]);
         }
 
         private Dictionary<string, int> _modelGroupMap = new Dictionary<string, int>();
@@ -204,12 +224,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 boneMap.Clear();
                 boneNames.Clear();
 
+                blendShapeMap.Clear();
+                blendShapeNames.Clear();
+
                 foreach (var model in modelMap.Values)
                 {
                     foreach (var bone in model.bones)
                     {
                         boneMap[bone.name] = bone;
                         boneNames.Add(bone.name);
+                    }
+
+                    foreach (var blendShape in model.blendShapes)
+                    {
+                        blendShapeMap[blendShape.name] = blendShape;
+                        blendShapeNames.Add(blendShape.name);
                     }
                 }
 
@@ -223,6 +252,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     foreach (var bone in model.bones)
                     {
                         PluginUtils.Log("  bone: name={0}", bone.name);
+                    }
+
+                    foreach (var blendShape in model.blendShapes)
+                    {
+                        PluginUtils.Log("  blendShape: name={0}", blendShape.name);
                     }
                 }
 
@@ -244,6 +278,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public void SetupModels(HashSet<string> setupModelNames)
+        {
+            bool created = false;
+            foreach (var modelName in setupModelNames)
+            {
+                var model = GetModel(modelName);
+                if (model == null)
+                {
+                    model = CreateModelStat(modelName, null);
+                    studioHack.CreateModel(model);
+                    created = true;
+
+                    PluginUtils.Log("Create model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
+                        model.info.type, model.displayName, model.name, model.info.label, model.info.fileName, model.info.myRoomId, model.info.bgObjectId);
+                }
+            }
+
+            if (created)
+            {
+                LateUpdate();
+            }
+        }
+
         public void OnPluginDisable()
         {
             Reset();
@@ -258,8 +315,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             modelMap.Clear();
             boneMap.Clear();
+            blendShapeMap.Clear();
             modelNames.Clear();
             boneNames.Clear();
+            blendShapeNames.Clear();
         }
 
         public StudioModelStat CreateModelStat(
@@ -508,11 +567,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)
         {
             Reset();
-        }
-
-        private void OnRefresh()
-        {
-            //Reset();
         }
     }
 }

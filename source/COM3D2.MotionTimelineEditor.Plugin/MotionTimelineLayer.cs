@@ -58,14 +58,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private List<PoseTimeLineRow> _dcmPoseRows = new List<PoseTimeLineRow>();
 
-        public MotionTimelineLayer(int slotNo)
+        private MotionTimelineLayer(int slotNo) : base(slotNo)
         {
-            this.slotNo = slotNo;
         }
 
         public static MotionTimelineLayer Create(int slotNo)
         {
-            PluginUtils.LogDebug("MotionTimelineLayer.Create slotNo={0}", slotNo);
             return new MotionTimelineLayer(slotNo);
         }
 

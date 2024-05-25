@@ -69,6 +69,7 @@
     <Compile Include="DCMUtils.cs" />
     <Compile Include="EyesTimelineLayer.cs" />
     <Compile Include="ModelBoneTimelineLayer.cs" />
+    <Compile Include="ModelShapeKeyTimelineLayer.cs" />
     <Compile Include="ModelTimelineLayer.cs" />
     <Compile Include="MorphTimelineLayer.cs" />
     <Compile Include="MorphUtils.cs" />
@@ -82,6 +83,7 @@
     <Compile Include="TransformDataModel.cs" />
     <Compile Include="TransformDataMorph.cs" />
     <Compile Include="TransformDataMove.cs" />
+    <Compile Include="TransformDataShapeKey.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

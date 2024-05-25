@@ -74,15 +74,13 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         private CameraPlayData _playData = new CameraPlayData();
         private DanceCameraMotion.Plugin.MaidManager _dcmMaidManager = new DanceCameraMotion.Plugin.MaidManager();
 
-        public CameraTimelineLayer()
+        private CameraTimelineLayer(int slotNo) : base(slotNo)
         {
-            this.slotNo = 0;
         }
 
         public static CameraTimelineLayer Create(int slotNo)
         {
-            PluginUtils.LogDebug("CameraTimelineLayer.Create");
-            return new CameraTimelineLayer();
+            return new CameraTimelineLayer(0);
         }
 
         public override void Init()
@@ -96,79 +94,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             var menuItem = new BoneMenuItem(CameraBoneName, CameraDisplayName);
             allMenuItems.Add(menuItem);
-        }
-
-        private void ApplyPlayData()
-        {
-            if (!isCurrent && !config.isCameraSync)
-            {
-                return;
-            }
-
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            _playData.Update(playingFrameNoFloat);
-
-            if (_playData.current == null)
-            {
-                PluginUtils.LogError("ApplyCamera: カメラデータの取得に失敗しました");
-                return;
-            }
-
-            //PluginUtils.LogDebug("ApplyCamera: lerpFrame={0}, listIndex={1}", playData.lerpFrame, playData.listIndex);
-
-            SetTimelineCameraTransform(true);
-        }
-
-        private Vector3 GetSelectedFramePosition()
-        {
-            var motion = _playData.current;
-            float easing = CalcEasingValue(_playData.lerpFrame, motion.easing);
-            float x = Mathf.Lerp(motion.myTm.stPos.x, motion.myTm.edPos.x, easing);
-            float y = Mathf.Lerp(motion.myTm.stPos.y, motion.myTm.edPos.y, easing);
-            float z = Mathf.Lerp(motion.myTm.stPos.z, motion.myTm.edPos.z, easing);
-            return new Vector3(x, y, z);
-        }
-
-        private Vector3 GetSelectedFrameRotation()
-        {
-            var motion = _playData.current;
-            float easing = CalcEasingValue(_playData.lerpFrame, motion.easing);
-            return Vector3.Lerp(motion.myTm.stRot, motion.myTm.edRot, easing);
-        }
-
-        private float GetDistance()
-        {
-            var motion = _playData.current;
-            float easing = CalcEasingValue(_playData.lerpFrame, motion.easing);
-            return Mathf.Lerp(motion.myTm.stSca.x, motion.myTm.edSca.x, easing);
-        }
-
-        private float GetViewAngle()
-        {
-            var motion = _playData.current;
-            float easing = CalcEasingValue(_playData.lerpFrame, motion.easing);
-            return Mathf.Lerp(motion.myTm.stSca.y, motion.myTm.edSca.y, easing);
-        }
-
-        private void SetTimelineCameraTransform(bool isViewAngle)
-        {
-            var position = GetSelectedFramePosition();
-            var rotation = GetSelectedFrameRotation();
-            var distance = GetDistance();
-            var viewAngle = GetViewAngle();
-
-            var uoCamera = MyHelper.GetUOCamera();
-            uoCamera.SetTargetPos(position);
-            uoCamera.SetDistance(distance);
-            uoCamera.SetAroundAngle(new Vector2(rotation.y, rotation.x));
-            Camera.main.SetRotationZ(rotation.z);
-            if (isViewAngle)
-            {
-                Camera.main.fieldOfView = viewAngle;
-            }
-
-            //PluginUtils.LogDebug("SetTimelineCameraTransform: position={0}, rotation={1}, distance={2}, viewAngle={3}", position, rotation, distance, viewAngle);
         }
 
         public override bool IsValidData()
@@ -190,6 +115,46 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public override void LateUpdate()
         {
             base.LateUpdate();
+        }
+
+        private void ApplyPlayData()
+        {
+            if (!isCurrent && !config.isCameraSync)
+            {
+                return;
+            }
+
+            var playingFrameNoFloat = this.playingFrameNoFloat;
+
+            _playData.Update(playingFrameNoFloat);
+
+            if (_playData.current == null)
+            {
+                PluginUtils.LogError("ApplyCamera: カメラデータの取得に失敗しました");
+                return;
+            }
+
+            //PluginUtils.LogDebug("ApplyCamera: lerpFrame={0}, listIndex={1}", playData.lerpFrame, playData.listIndex);
+
+            ApplyMotion(_playData.current);
+        }
+
+        private void ApplyMotion(CameraMotionData  motion)
+        {
+            float easing = CalcEasingValue(_playData.lerpFrame, motion.easing);
+            var position = Vector3.Lerp(motion.myTm.stPos, motion.myTm.edPos, easing);
+            var rotation = Vector3.Lerp(motion.myTm.stRot, motion.myTm.edRot, easing);
+            var distance = Mathf.Lerp(motion.myTm.stSca.x, motion.myTm.edSca.x, easing);
+            var viewAngle = Mathf.Lerp(motion.myTm.stSca.y, motion.myTm.edSca.y, easing);
+
+            var uoCamera = MyHelper.GetUOCamera();
+            uoCamera.SetTargetPos(position);
+            uoCamera.SetDistance(distance);
+            uoCamera.SetAroundAngle(new Vector2(rotation.y, rotation.x));
+            Camera.main.SetRotationZ(rotation.z);
+            Camera.main.fieldOfView = viewAngle;
+
+            //PluginUtils.LogDebug("ApplyMotion: position={0}, rotation={1}, distance={2}, viewAngle={3}", position, rotation, distance, viewAngle);
         }
 
         public override void UpdateFrameWithCurrentStat(FrameData frame)
@@ -232,6 +197,27 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public override void OutputAnm()
         {
             // do nothing
+        }
+
+        protected override byte[] GetAnmBinaryInternal(
+            bool forOutput,
+            int startFrameNo,
+            int endFrameNo)
+        {
+            _timelineRows.Clear();
+
+            foreach (var keyFrame in keyFrames)
+            {
+                AddTimeLineRow(keyFrame);
+            }
+
+            if (_timelineRows.Count > 0 && _timelineRows.Last().frame != timeline.maxFrameNo)
+            {
+                AddTimeLineRow(_dummyLastFrame);
+            }
+
+            BuildPlayData(forOutput);
+            return null;
         }
 
         private void AddTimeLineRow(FrameData frame)
@@ -303,27 +289,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     }
                 }
             }
-        }
-
-        protected override byte[] GetAnmBinaryInternal(
-            bool forOutput,
-            int startFrameNo,
-            int endFrameNo)
-        {
-            _timelineRows.Clear();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AddTimeLineRow(keyFrame);
-            }
-
-            if (_timelineRows.Count > 0 && _timelineRows.Last().frame != timeline.maxFrameNo)
-            {
-                AddTimeLineRow(_dummyLastFrame);
-            }
-
-            BuildPlayData(forOutput);
-            return null;
         }
 
         public void SaveCameraTimeLine(

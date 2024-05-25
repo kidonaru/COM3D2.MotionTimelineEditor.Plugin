@@ -71,14 +71,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         private List<MoveTimeLineRow> _timelineRows = new List<MoveTimeLineRow>();
         private MovePlayData _playData = new MovePlayData();
 
-        public MoveTimelineLayer(int slotNo)
+        private MoveTimelineLayer(int slotNo) : base(slotNo)
         {
-            this.slotNo = slotNo;
         }
 
         public static MoveTimelineLayer Create(int slotNo)
         {
-            PluginUtils.LogDebug("MoveTimelineLayer.Create");
             return new MoveTimelineLayer(slotNo);
         }
 
@@ -88,28 +86,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             var menuItem = new BoneMenuItem(MoveBoneName, MoveDisplayName);
             allMenuItems.Add(menuItem);
-        }
-
-        private void ApplyPlayData()
-        {
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            var maid = this.maid;
-            if (maid == null)
-            {
-                return;
-            }
-
-            _playData.Update(playingFrameNoFloat);
-
-            var current = _playData.current;
-            if (current != null)
-            {
-                ApplyLerp(current.myTm, maid.transform, _playData.lerpFrame, current.easing);
-            }
-
-            //PluginUtils.LogDebug("ApplyPlayData: name={0} lerpFrame={1}, listIndex={2}",
-            //    maid.name, _playData.lerpFrame, _playData.listIndex);
         }
 
         public override bool IsValidData()
@@ -133,17 +109,39 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
+        private void ApplyPlayData()
+        {
+            var playingFrameNoFloat = this.playingFrameNoFloat;
+
+            var maid = this.maid;
+            if (maid == null)
+            {
+                return;
+            }
+
+            _playData.Update(playingFrameNoFloat);
+
+            var current = _playData.current;
+            if (current != null)
+            {
+                ApplyMotion(current, maid.transform, _playData.lerpFrame);
+            }
+
+            //PluginUtils.LogDebug("ApplyPlayData: name={0} lerpFrame={1}, listIndex={2}",
+            //    maid.name, _playData.lerpFrame, _playData.listIndex);
+        }
+
+        private void ApplyMotion(MoveMotionData motion, Transform transform, float lerpTime)
+        {
+            float easingTime = CalcEasingValue(lerpTime, motion.easing);
+            transform.position = Vector3.Lerp(motion.myTm.stPos, motion.myTm.edPos, easingTime);
+            transform.rotation = Quaternion.Euler(Vector3.Lerp(motion.myTm.stRot, motion.myTm.edRot, easingTime));
+        }
+
         public override void OnEndPoseEdit()
         {
             base.OnEndPoseEdit();
             ApplyPlayData();
-        }
-
-        private void ApplyLerp(MyTransform myTrans, Transform transform, float lerpTime, int easing)
-        {
-            float easingTime = CalcEasingValue(lerpTime, easing);
-            transform.position = Vector3.Lerp(myTrans.stPos, myTrans.edPos, easingTime);
-            transform.rotation = Quaternion.Euler(Vector3.Lerp(myTrans.stRot, myTrans.edRot, easingTime));
         }
 
         public override void UpdateFrameWithCurrentStat(FrameData frame)
@@ -185,7 +183,23 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             // do nothing
         }
 
-        private void AddMotion(FrameData frame)
+        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
+        {
+            _timelineRows.Clear();
+
+            foreach (var keyFrame in keyFrames)
+            {
+                AppendTimeLineRow(keyFrame);
+            }
+
+            AppendTimeLineRow(_dummyLastFrame);
+
+            BuildPlayData(forOutput);
+
+            return null;
+        }
+
+        private void AppendTimeLineRow(FrameData frame)
         {
             var bone = frame.GetBone(MoveBoneName);
             if (bone == null)
@@ -261,22 +275,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
 
             PluginUtils.LogDebug("PlayData: name={0}, count={1}", maid.name, _playData.motions.Count);
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRows.Clear();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AddMotion(keyFrame);
-            }
-
-            AddMotion(_dummyLastFrame);
-
-            BuildPlayData(forOutput);
-
-            return null;
         }
 
         public void SaveModelMotion(

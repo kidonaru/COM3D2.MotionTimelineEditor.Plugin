@@ -57,6 +57,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BGMManager.cs" />
+    <Compile Include="BinaryExtensions.cs" />
+    <Compile Include="BlendShapeCacheData.cs" />
+    <Compile Include="BlendShapeController.cs" />
+    <Compile Include="BlendShapeLoader.cs" />
     <Compile Include="BoneData.cs" />
     <Compile Include="BoneMenuItem.cs" />
     <Compile Include="BoneMenuManager.cs" />

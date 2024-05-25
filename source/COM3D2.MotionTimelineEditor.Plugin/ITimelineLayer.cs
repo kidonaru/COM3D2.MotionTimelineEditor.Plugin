@@ -43,6 +43,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         void OnEndPoseEdit();
         void OnPluginEnable();
         void OnPluginDisable();
+        void OnModelAdded(StudioModelStat model);
+        void OnModelRemoved(StudioModelStat model);
         void UpdateFrameWithCurrentStat(FrameData frame);
         byte[] GetAnmBinary(bool forOutput);
         void ApplyAnm(long id, byte[] anmData);

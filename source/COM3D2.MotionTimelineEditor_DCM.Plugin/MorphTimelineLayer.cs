@@ -70,14 +70,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         private Dictionary<string, MorphPlayData> _playDataMap = new Dictionary<string, MorphPlayData>();
         private List<MorphTimeLineRow> _dcmOutputRows = new List<MorphTimeLineRow>(128);
 
-        public MorphTimelineLayer(int slotNo)
+        private MorphTimelineLayer(int slotNo) : base(slotNo)
         {
-            this.slotNo = slotNo;
         }
 
         public static MorphTimelineLayer Create(int slotNo)
         {
-            PluginUtils.LogDebug("MorphTimelineLayer.Create slotNo={0}", slotNo);
             return new MorphTimelineLayer(slotNo);
         }
 
@@ -106,6 +104,35 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             _allMenuItems = new List<IBoneMenuItem>(
                 setMenuItemMap.Values.Cast<IBoneMenuItem>());
+        }
+
+        public override bool IsValidData()
+        {
+            errorMessage = "";
+
+            var firstFrame = this.firstFrame;
+            if (firstFrame == null || firstFrame.frameNo != 0)
+            {
+                errorMessage = "0フレーム目にキーフレームが必要です";
+                return false;
+            }
+
+            return true;
+        }
+
+        public override void Update()
+        {
+            base.Update();
+        }
+
+        public override void LateUpdate()
+        {
+            base.LateUpdate();
+
+            if (!studioHack.isPoseEditing)
+            {
+                ApplyPlayData();
+            }
         }
 
         private void ApplyPlayData()
@@ -143,35 +170,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             //PluginUtils.LogDebug("ApplyCamera: lerpFrame={0}, listIndex={1}", playData.lerpFrame, playData.listIndex);
         }
 
-        public override bool IsValidData()
-        {
-            errorMessage = "";
-
-            var firstFrame = this.firstFrame;
-            if (firstFrame == null || firstFrame.frameNo != 0)
-            {
-                errorMessage = "0フレーム目にキーフレームが必要です";
-                return false;
-            }
-
-            return true;
-        }
-
-        public override void Update()
-        {
-            base.Update();
-        }
-
-        public override void LateUpdate()
-        {
-            base.LateUpdate();
-
-            if (!studioHack.isPoseEditing)
-            {
-                ApplyPlayData();
-            }
-        }
-
         private float Lerp(float startValue, float endValue, float lerpFrame, string morphName)
         {
             if (MyConst.FACE_OPTION_MORPH.ContainsKey(morphName) && lerpFrame < 0.99f)
@@ -196,7 +194,44 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private void AddMorph(FrameData frame)
+        public override void ApplyAnm(long id, byte[] anmData)
+        {
+            ApplyPlayData();
+        }
+
+        public override void ApplyCurrentFrame(bool motionUpdate)
+        {
+            if (anmId != TimelineAnmId || motionUpdate)
+            {
+                CreateAndApplyAnm();
+            }
+            else
+            {
+                ApplyPlayData();
+            }
+        }
+
+        public override void OutputAnm()
+        {
+            // do nothing
+        }
+
+        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
+        {
+            _timelineRowsMap.Clear();
+
+            foreach (var keyFrame in keyFrames)
+            {
+                AppendTimeLineRow(keyFrame);
+            }
+
+            AppendTimeLineRow(_dummyLastFrame);
+
+            BuildPlayData();
+            return null;
+        }
+
+        private void AppendTimeLineRow(FrameData frame)
         {
             var isLastFrame = frame.frameNo == maxFrameNo;
             foreach (var name in firstFrame.boneNames)
@@ -230,7 +265,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 rows.Add(row);
             }
         }
-        
+
         private void BuildPlayData()
         {
             _playDataMap.Clear();
@@ -270,43 +305,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     }
                 }
             }
-        }
-
-        public override void ApplyAnm(long id, byte[] anmData)
-        {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRowsMap.Clear();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AddMorph(keyFrame);
-            }
-
-            AddMorph(_dummyLastFrame);
-
-            BuildPlayData();
-            return null;
         }
 
         public void SaveMorphTimeLine(
