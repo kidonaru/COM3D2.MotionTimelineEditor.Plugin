@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using RootMotion.FinalIK;
 using UnityEngine;
@@ -7,6 +8,7 @@ using UnityEngine.Events;
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using MTE = MotionTimelineEditor;
+    using AttachPoint = PhotoTransTargetObject.AttachPoint;
 
     public class MaidCache
     {
@@ -540,6 +542,36 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     trsEyeR.localRotation = maid.body0.quaDefEyeR;
                 }
             }
+        }
+
+        public Transform GetAttachPointTransform(AttachPoint point)
+        {
+            if (ikManager == null || point == AttachPoint.Null)
+            {
+                return null;
+            }
+
+            var boneType = BoneUtils.GetBoneType(point);
+            return ikManager.GetBone(boneType).transform;
+        }
+
+        public void AttachItem(Transform item, AttachPoint point, bool keepWorldPosition)
+        {
+            Transform parent = GetAttachPointTransform(point);
+            Quaternion quaternion = item.rotation;
+            Vector3 localScale = item.localScale;
+
+            item.SetParent(parent, keepWorldPosition);
+            if (keepWorldPosition)
+            {
+                item.rotation = quaternion;
+            }
+            else
+            {
+                item.localPosition = Vector3.zero;
+                item.rotation = Quaternion.identity;
+            }
+            item.localScale = localScale;
         }
 
         private void OnMaidChanged(Maid maid)

@@ -5,6 +5,8 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+    using AttachPoint = PhotoTransTargetObject.AttachPoint;
+
     public enum BoneSetMenuType
     {
         Body,
@@ -283,7 +285,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         private static Dictionary<string, IKManager.BoneType> _boneNameToTypeMap = null;
-        public static Dictionary<string, IKManager.BoneType> boneNameToTypeMap
+        public static Dictionary<string, IKManager.BoneType> BoneNameToTypeMap
         {
             get
             {
@@ -298,12 +300,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static IKManager.BoneType GetBoneTypeByName(string boneName)
         {
             IKManager.BoneType boneType;
-            if (boneNameToTypeMap.TryGetValue(boneName, out boneType))
+            if (BoneNameToTypeMap.TryGetValue(boneName, out boneType))
             {
                 return boneType;
             }
             PluginUtils.LogError("無効なBoneName：" + boneName);
             return IKManager.BoneType.TopFixed;
+        }
+
+        public static bool IsValidBoneName(string boneName)
+        {
+            return BoneNameToTypeMap.ContainsKey(boneName);
         }
 
         public static readonly Dictionary<IKManager.BoneType, IKManager.BoneSetType> BoneTypeToSetTypeMap = new Dictionary<IKManager.BoneType, IKManager.BoneSetType>
@@ -573,6 +580,51 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return new Vector3(0f, 0.9f, 0f);
             }
             return Vector3.zero;
+        }
+
+        public static readonly Dictionary<AttachPoint, IKManager.BoneType> AttachPointToBoneTypeMap = new Dictionary<AttachPoint, IKManager.BoneType>
+        {
+            {AttachPoint.Fix, IKManager.BoneType.TopFixed},
+            {AttachPoint.Root, IKManager.BoneType.Root},
+            {AttachPoint.Head, IKManager.BoneType.Head},
+            {AttachPoint.Neck, IKManager.BoneType.Neck},
+            {AttachPoint.Mune_R, IKManager.BoneType.Bust_R},
+            {AttachPoint.UpperArm_R, IKManager.BoneType.UpperArm_R},
+            {AttachPoint.Forearm_R, IKManager.BoneType.Forearm_R},
+            {AttachPoint.Hand_R, IKManager.BoneType.Hand_R},
+            {AttachPoint.Thigh_R, IKManager.BoneType.Thigh_R},
+            {AttachPoint.Calf_R, IKManager.BoneType.Calf_R},
+            {AttachPoint.Foot_R, IKManager.BoneType.Foot_R},
+            {AttachPoint.Mune_L, IKManager.BoneType.Bust_L},
+            {AttachPoint.UpperArm_L, IKManager.BoneType.UpperArm_L},
+            {AttachPoint.Forearm_L, IKManager.BoneType.Forearm_L},
+            {AttachPoint.Hand_L, IKManager.BoneType.Hand_L},
+            {AttachPoint.Thigh_L, IKManager.BoneType.Thigh_L},
+            {AttachPoint.Calf_L, IKManager.BoneType.Calf_L},
+            {AttachPoint.Foot_L, IKManager.BoneType.Foot_L},
+        };
+
+        public static readonly Dictionary<IKManager.BoneType, AttachPoint> BoneTypeToAttachPointMap =
+            AttachPointToBoneTypeMap.ToDictionary(kv => kv.Value, kv => kv.Key);
+
+        public static AttachPoint GetAttachPoint(IKManager.BoneType boneType)
+        {
+            AttachPoint attachPoint;
+            if (BoneTypeToAttachPointMap.TryGetValue(boneType, out attachPoint))
+            {
+                return attachPoint;
+            }
+            return AttachPoint.Null;
+        }
+
+        public static IKManager.BoneType GetBoneType(AttachPoint attachPoint)
+        {
+            IKManager.BoneType boneType;
+            if (AttachPointToBoneTypeMap.TryGetValue(attachPoint, out boneType))
+            {
+                return boneType;
+            }
+            return IKManager.BoneType.TopFixed;
         }
     }
 }

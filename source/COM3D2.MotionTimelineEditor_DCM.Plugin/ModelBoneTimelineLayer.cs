@@ -71,12 +71,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return new ModelBoneTimelineLayer(0);
         }
 
-        public override void Init()
-        {
-            base.Init();
-            SetupModels();
-        }
-
         protected override void InitMenuItems()
         {
             allMenuItems.Clear();
@@ -152,38 +146,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             transform.localPosition = Vector3.Lerp(motion.myTm.stPos, motion.myTm.edPos, easingTime);
             transform.localRotation = Quaternion.Euler(Vector3.Lerp(motion.myTm.stRot, motion.myTm.edRot, easingTime));
             transform.localScale = Vector3.Lerp(motion.myTm.stSca, motion.myTm.edSca, easingTime);
-        }
-
-        public override void OnPluginEnable()
-        {
-            base.OnPluginEnable();
-
-            SetupModels();
-        }
-
-        private void SetupModels()
-        {
-            var existModelNameHash = new HashSet<string>();
-
-            var existBoneNames = GetExistBoneNames();
-            foreach (var boneName in existBoneNames)
-            {
-                var modelName = boneName.Split('/')[0];
-                if (!string.IsNullOrEmpty(modelName))
-                {
-                    existModelNameHash.Add(modelName);
-                }
-            }
-            
-            modelManager.SetupModels(existModelNameHash);
-            InitMenuItems();
-        }
-
-        public override void OnPluginDisable()
-        {
-            base.OnPluginDisable();
-
-            studioHack.DeleteAllModels();
         }
 
         public override void OnModelAdded(StudioModelStat model)
@@ -381,51 +343,76 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
-        private int _targetBoneIndex = 0;
         private FloatFieldValue[] _fieldValues = FloatFieldValue.CreateArray(
             new string[] { "X", "Y", "Z", "RX", "RY", "RZ", "SX", "SY", "SZ" }
         );
+        private ComboBoxValue<StudioModelStat> modelComboBox = new ComboBoxValue<StudioModelStat>
+        {
+            getName = (model, index) =>
+            {
+                return model.name;
+            }
+        };
+        private ComboBoxValue<StudioModelBone> boneComboBox = new ComboBoxValue<StudioModelBone>
+        {
+            getName = (bone, index) =>
+            {
+                return bone.transform.name;
+            }
+        };
 
         public override void DrawWindow(GUIView view)
         {
-            if (modelManager.boneNames.Count == 0)
+            DrawBone(view);
+            DrawComboBox(view);
+        }
+
+        public void DrawBone(GUIView view)
+        {
+            modelComboBox.items = modelManager.models;
+
+            if (modelManager.models.Count == 0)
+            {
+                view.DrawLabel("モデルが存在しません", 200, 20);
+                return;
+            }
+
+            view.SetEnabled(!modelComboBox.focused && !boneComboBox.focused);
+
+            view.DrawLabel("モデル選択", 200, 20);
+            view.DrawComboBoxButton(modelComboBox, 260, 20, true);
+
+            var model = modelComboBox.currentItem;
+            if (model == null)
+            {
+                view.DrawLabel("モデルが見つかりません", 200, 20);
+                return;
+            }
+
+            if (model.bones.Count == 0)
             {
                 view.DrawLabel("ボーンが存在しません", 200, 20);
                 return;
             }
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
-            {
-                view.DrawLabel("ボーン選択", 70, 20);
+            boneComboBox.items = model.bones;
 
-                var newTargetBoneIndex = view.DrawSelectList(
-                    modelManager.boneNames,
-                    (modelName, index) =>
-                    {
-                        var b = modelManager.GetBone(index);
-                        return b != null ? b.name : string.Empty;
-                    },
-                    140, 20, _targetBoneIndex);
+            view.DrawLabel("ボーン選択", 200, 20);
+            view.DrawComboBoxButton(boneComboBox, 260, 20, true);
 
-                if (newTargetBoneIndex != _targetBoneIndex)
-                {
-                    _targetBoneIndex = newTargetBoneIndex;
-                }
-            }
-            view.EndLayout();
-
-            var bone = modelManager.GetBone(_targetBoneIndex);
+            var bone = boneComboBox.currentItem;
             if (bone == null)
             {
+                view.DrawLabel("ボーンが存在しません", 200, 20);
                 return;
             }
+
+            view.SetEnabled(!modelComboBox.focused && !boneComboBox.focused && studioHack.isPoseEditing);
 
             var position = bone.transform.localPosition;
             var angle = bone.transform.localEulerAngles;
             var scale = bone.transform.localScale;
             var updateTransform = false;
-
-            GUI.enabled = studioHack.isPoseEditing;
 
             updateTransform |= view.DrawValue(_fieldValues[0], 0.01f, 0.1f, 0f,
                 position.x,
@@ -472,14 +459,29 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 z => scale.z = z,
                 z => scale.z += z);
 
-            GUI.enabled = true;
-
             if (updateTransform)
             {
                 bone.transform.localPosition = position;
                 bone.transform.localEulerAngles = angle;
                 bone.transform.localScale = scale;
             }
+        }
+
+        private void DrawComboBox(GUIView view)
+        {
+            view.SetEnabled(true);
+
+            view.DrawComboBoxContent(
+                modelComboBox,
+                240, 300,
+                SubWindow.rc_stgw.width, SubWindow.rc_stgw.height,
+                20);
+
+            view.DrawComboBoxContent(
+                boneComboBox,
+                240, 300,
+                SubWindow.rc_stgw.width, SubWindow.rc_stgw.height,
+                20);
         }
 
         public override ITransformData CreateTransformData(string name)

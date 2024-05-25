@@ -182,7 +182,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             texWhite = GUIView.CreateColorTexture(Color.white);
 
             fileMenuComboBox.label = "ファイル";
-            fileMenuComboBox.currentIndex = -1;
             fileMenuComboBox.items = new List<FileMenuType>
             {
                 FileMenuType.New,
@@ -498,6 +497,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.margin = 0;
 
+                fileMenuComboBox.currentIndex = -1;
                 view.DrawComboBoxButton(fileMenuComboBox, 60, 20, false);
 
                 if (view.DrawButton("ロード", 60, 20))

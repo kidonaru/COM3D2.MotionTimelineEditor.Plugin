@@ -13,7 +13,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static BlendShapeController LoadController(StudioModelStat model)
         {
-            if (model == null || model.transform == null || model.info == null || string.IsNullOrEmpty(model.info.fileName))
+            if (model == null || model.transform == null || model.info == null || model.info.menu == null)
             {
                 return null;
             }
@@ -24,7 +24,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return controller;
             }
 
-            var blendShapeCache = LoadCache(model.info.fileName);
+            var menu = model.info.menu;
+            var blendShapeCache = LoadCache(menu.modelFileName);
             if (blendShapeCache == null)
             {
                 return null;
@@ -41,20 +42,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return controller;
         }
 
-        public static BlendShapeCacheData LoadCache(string menuFileName)
+        public static BlendShapeCacheData LoadCache(string modelFileName)
         {
-            PluginUtils.LogDebug("Menuからブレンドシェイプのロード中: {0}", menuFileName);
-
             BlendShapeCacheData blendShapeCache;
-            if (blendShapeCacheMap.TryGetValue(menuFileName, out blendShapeCache))
+            if (blendShapeCacheMap.TryGetValue(modelFileName, out blendShapeCache))
             {
                 return blendShapeCache;
-            }
-
-            var modelFileName = ReadModelFileName(menuFileName);
-            if (modelFileName == null)
-            {
-                return null;
             }
 
             blendShapeCache = LoadCacheFromModel(modelFileName);
@@ -63,71 +56,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return null;
             }
 
-            blendShapeCacheMap[menuFileName] = blendShapeCache;
+            blendShapeCacheMap[modelFileName] = blendShapeCache;
             return blendShapeCache;
         }
 
-        private static string ReadModelFileName(string menuFileName)
-        {
-            byte[] buffer;
-            try
-            {
-                buffer = ReadAFileBase(menuFileName);
-            }
-            catch (Exception ex)
-            {
-                PluginUtils.LogError("Could not read menu file '" + menuFileName + "' because " + ex.Message);
-                return null;
-            }
-            try
-            {
-                using (var reader = new BinaryReader(new MemoryStream(buffer), Encoding.UTF8))
-                {
-                    if (!(reader.ReadString() == "CM3D2_MENU"))
-                    {
-                        return null;
-                    }
-                    reader.ReadInt32();
-                    reader.ReadString();
-                    reader.ReadString();
-                    reader.ReadString();
-                    reader.ReadString();
-                    reader.ReadInt32();
-                    for (;;)
-                    {
-                        byte b = reader.ReadByte();
-                        string text = string.Empty;
-                        if (b == 0)
-                        {
-                            break;
-                        }
-                        for (int i = 0; i < (int)b; i++)
-                        {
-                            text = text + "\"" + reader.ReadString() + "\"";
-                        }
-                        if (!string.IsNullOrEmpty(text))
-                        {
-                            string stringCom = UTY.GetStringCom(text);
-                            string[] stringList = UTY.GetStringList(text);
-                            if (stringCom == "end")
-                            {
-                                break;
-                            }
-                            if (stringCom == "additem")
-                            {
-                                return stringList[1];
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex2)
-            {
-                PluginUtils.LogWarning("Could not parse menu file '" + menuFileName + "' because " + ex2.Message);
-                return null;
-            }
-            return null;
-        }
+		public static void ClearCache()
+		{
+			blendShapeCacheMap.Clear();
+			fileBuffer = null;
+		}
 
         public static byte[] ReadAFileBase(string filename)
         {

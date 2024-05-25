@@ -88,6 +88,7 @@
     <Compile Include="MainWindow.cs" />
     <Compile Include="MediaPlayerUI.cs" />
     <Compile Include="MotionPlayData.cs" />
+    <Compile Include="ModMenuLoader.cs" />
     <Compile Include="MotionTimelineLayer.cs" />
     <Compile Include="MoveEasingType.cs" />
     <Compile Include="MovieManager.cs" />

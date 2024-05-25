@@ -366,7 +366,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         return;
                     }
 
-                    modelManager.LateUpdate();
+                    modelManager.LateUpdate(false);
                     timelineManager.LateUpdate();
                 }
             }
@@ -394,6 +394,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     studioHack.OnChangedSceneLevel(sceneName, sceneMode);
                 }
+
+                BlendShapeLoader.ClearCache();
             }
             catch (Exception e)
             {
@@ -598,11 +600,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             maidManager.OnPluginEnable();
             modelManager.OnPluginEnable();
             movieManager.OnPluginEnable();
-
-            if (timeline != null)
-            {
-                timeline.OnPluginEnable();
-            }
+            timelineManager.OnPluginEnable();
         }
 
         private void OnPluginDisable()
@@ -615,11 +613,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             maidManager.OnPluginDisable();
             modelManager.OnPluginDisable();
             movieManager.OnPluginDisable();
-
-            if (timeline != null)
-            {
-                timeline.OnPluginDisable();
-            }
+            timelineManager.OnPluginDisable();
         }
     }
 }

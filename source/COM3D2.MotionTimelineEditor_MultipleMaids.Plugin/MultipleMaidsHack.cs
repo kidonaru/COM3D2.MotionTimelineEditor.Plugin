@@ -11,6 +11,8 @@ using MyRoomCustom;
 
 namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 {
+    using AttachPoint = PhotoTransTargetObject.AttachPoint;
+
     public class MultipleMaidsHack : StudioHackBase
     {
         private MultipleMaids multipleMaids = null;
@@ -270,8 +272,42 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                 {
                     if (dogu != null)
                     {
+                        AttachPoint attachPoint = AttachPoint.Null;
+                        int attachMaidSlotNo = -1;
+
+                        var parent = dogu.transform.parent;
+                        if (parent != null && BoneUtils.IsValidBoneName(parent.name))
+                        {
+                            var boneType = BoneUtils.GetBoneTypeByName(parent.name);
+                            attachPoint = BoneUtils.GetAttachPoint(boneType);
+
+                            if (attachPoint != AttachPoint.Null)
+                            {
+                                var maidCaches = maidManager.maidCaches;
+                                for (int i = 0; i < maidCaches.Count; ++i)
+                                {
+                                    var maidCache = maidCaches[i];
+                                    if (maidCache.ikManager == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    var bone = maidCache.ikManager.GetBone(boneType);
+                                    if (bone == parent.gameObject)
+                                    {
+                                        attachMaidSlotNo = i;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
                         var modelName = dogu.name;
-                        var model = modelManager.CreateModelStat(modelName, dogu.transform);
+                        var model = modelManager.CreateModelStat(
+                            modelName,
+                            dogu.transform,
+                            attachPoint,
+                            attachMaidSlotNo);
                         _modelList.Add(model);
                     }
                 }
@@ -574,10 +610,20 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         private GameObject LoadModObject(string assetName)
         {
+            if (!assetName.EndsWith(".menu", StringComparison.Ordinal))
+            {
+                PluginUtils.LogWarning("未対応のファイルです。 :" + assetName);
+                return null;
+            }
+
             byte[] menuBytes = null;
             using (var file = GameUty.FileOpen(assetName, null))
             {
-                NDebug.Assert(file.IsValid(), "メニューファイルが存在しません。 :" + assetName);
+                if (!file.IsValid())
+                {
+                    PluginUtils.LogError("メニューファイルが存在しません。 :" + assetName);
+                    return null;
+                }
                 menuBytes = new byte[file.GetSize()];
                 file.Read(ref menuBytes, file.GetSize());
             }
@@ -686,27 +732,42 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         public override void CreateModel(StudioModelStat model)
         {
-            GameObject obj = null;
-            if (model.info.type == StudioModelType.Prefab ||
-                model.info.type == StudioModelType.Asset)
+            try
             {
-                obj = LoadGameModel(model.info.fileName);
-            }
-            else if (model.info.type == StudioModelType.MyRoom)
-            {
-                obj = LoadMyRoomObject((int)model.info.myRoomId);
-            }
-            else if (model.info.type == StudioModelType.Mod)
-            {
-                obj = LoadModObject(model.info.fileName);
-            }
+                GameObject obj = null;
+                if (model.info.type == StudioModelType.Prefab ||
+                    model.info.type == StudioModelType.Asset)
+                {
+                    obj = LoadGameModel(model.info.fileName);
+                }
+                else if (model.info.type == StudioModelType.MyRoom)
+                {
+                    obj = LoadMyRoomObject((int)model.info.myRoomId);
+                }
+                else if (model.info.type == StudioModelType.Mod)
+                {
+                    obj = LoadModObject(model.info.fileName);
+                }
 
-            if (obj == null)
+                if (obj == null)
+                {
+                    PluginUtils.LogError("CreateModel: モデルの追加に失敗しました" + model.name);
+                    return;
+                }
+
+                var attachPoint = model.attachPoint;
+                var attachMaidSlotNo = model.attachMaidSlotNo;
+                var maidCache = maidManager.GetMaidCache(attachMaidSlotNo);
+                if (maidCache != null)
+                {
+                    maidCache.AttachItem(obj.transform, attachPoint, false);
+                }
+            }
+            catch (Exception e)
             {
-                PluginUtils.LogError("CreateModel: モデルの追加に失敗しました" + model.name);
+                PluginUtils.LogException(e);
             }
         }
-
 
         protected override void OnMaidChanged(int maidSlotNo, Maid maid)
         {

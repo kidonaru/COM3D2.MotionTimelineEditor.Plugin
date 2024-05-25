@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using COM3D2.MotionTimelineEditor.Plugin;
 using MeidoPhotoStudio.Plugin;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 {
@@ -300,13 +301,19 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                     var myRoomId = prop.Info.MyRoomID;
                     var bgObjectId = 0;
                     var transform = prop.MyObject;
+                    var attachPoint = ConvertAttachPoint(prop.AttachPointInfo.AttachPoint);
+                    var attachMaidSlotNo = GetMaidSlotNo(prop.AttachPointInfo.MaidGuid);
+
+                    //PluginUtils.LogDebug("modelList name:{0} attachPoint:{1} attachMaidSlotNo:{2}", displayName, attachPoint, attachMaidSlotNo);
 
                     var model = modelManager.CreateModelStat(
                         displayName,
                         fileName,
                         myRoomId,
                         bgObjectId,
-                        transform);
+                        transform,
+                        attachPoint,
+                        attachMaidSlotNo);
 
                     _modelList.Add(model);
                 }
@@ -433,6 +440,52 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
         {
         }
 
+        private static readonly Dictionary<AttachPoint, PhotoTransTargetObject.AttachPoint> MeidoAttachPointMap
+            = new Dictionary<AttachPoint, PhotoTransTargetObject.AttachPoint>
+            {
+                {AttachPoint.None, PhotoTransTargetObject.AttachPoint.Null},
+                {AttachPoint.Head, PhotoTransTargetObject.AttachPoint.Head},
+                {AttachPoint.Neck, PhotoTransTargetObject.AttachPoint.Neck},
+                {AttachPoint.UpperArmL, PhotoTransTargetObject.AttachPoint.UpperArm_L},
+                {AttachPoint.UpperArmR, PhotoTransTargetObject.AttachPoint.UpperArm_R},
+                {AttachPoint.ForearmL, PhotoTransTargetObject.AttachPoint.Forearm_L},
+                {AttachPoint.ForearmR, PhotoTransTargetObject.AttachPoint.Forearm_R},
+                {AttachPoint.MuneL, PhotoTransTargetObject.AttachPoint.Mune_L},
+                {AttachPoint.MuneR, PhotoTransTargetObject.AttachPoint.Mune_R},
+                {AttachPoint.HandL, PhotoTransTargetObject.AttachPoint.Hand_L},
+                {AttachPoint.HandR, PhotoTransTargetObject.AttachPoint.Hand_R},
+                {AttachPoint.Pelvis, PhotoTransTargetObject.AttachPoint.Root},
+                {AttachPoint.ThighL, PhotoTransTargetObject.AttachPoint.Thigh_L},
+                {AttachPoint.ThighR, PhotoTransTargetObject.AttachPoint.Thigh_R},
+                {AttachPoint.CalfL, PhotoTransTargetObject.AttachPoint.Calf_L},
+                {AttachPoint.CalfR, PhotoTransTargetObject.AttachPoint.Calf_R},
+                {AttachPoint.FootL, PhotoTransTargetObject.AttachPoint.Foot_L},
+                {AttachPoint.FootR, PhotoTransTargetObject.AttachPoint.Foot_R},
+            };
+
+        private static readonly Dictionary<PhotoTransTargetObject.AttachPoint, AttachPoint> PhotoAttachPointMap
+            = MeidoAttachPointMap.ToDictionary(kv => kv.Value, kv => kv.Key);
+
+        public static PhotoTransTargetObject.AttachPoint ConvertAttachPoint(AttachPoint attachPoint)
+        {
+            PhotoTransTargetObject.AttachPoint result;
+            if (MeidoAttachPointMap.TryGetValue(attachPoint, out result))
+            {
+                return result;
+            }
+            return PhotoTransTargetObject.AttachPoint.Null;
+        }
+
+        public static AttachPoint ConvertAttachPoint(PhotoTransTargetObject.AttachPoint attachPoint)
+        {
+            AttachPoint result;
+            if (PhotoAttachPointMap.TryGetValue(attachPoint, out result))
+            {
+                return result;
+            }
+            return AttachPoint.None;
+        }
+
         public override bool Init()
         {
             PluginUtils.Log("初期化中...");
@@ -544,16 +597,36 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
         {
             var propType = propTypeMap[model.info.type];
             var isMyRoom = model.info.type == StudioModelType.MyRoom;
-            var prop = new PropInfo(propType)
+            var propInfo = new PropInfo(propType)
             {
                 Filename = isMyRoom ? model.info.prefabName : model.info.fileName,
                 MyRoomID = model.info.myRoomId,
             };
 
-            if (!propManager.AddFromPropInfo(prop))
+            if (!propManager.AddFromPropInfo(propInfo))
             {
                 PluginUtils.LogError("CreateModel: モデルの追加に失敗しました" + model.name);
+                return;
             }
+
+            var propList = this.propList;
+            var prop = propList.Last();
+
+            var attachPoint = ConvertAttachPoint(model.attachPoint);
+            var attachMaidSlotNo = model.attachMaidSlotNo;
+            var attachMeido = GetMeido(attachMaidSlotNo);
+            prop.AttachTo(attachMeido, attachPoint, false);
+        }
+
+        private Meido GetMeido(int slotNo)
+        {
+            var activeMeidoList = this.activeMeidoList;
+            if (slotNo < 0 || slotNo >= activeMeidoList.Count)
+            {
+                return null;
+            }
+
+            return activeMeidoList[slotNo];
         }
 
         protected override void OnMaidChanged(int maidSlotNo, Maid maid)

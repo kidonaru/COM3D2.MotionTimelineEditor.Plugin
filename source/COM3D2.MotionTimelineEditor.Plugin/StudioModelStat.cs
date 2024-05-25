@@ -4,6 +4,8 @@ using UnityEngine.Rendering;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+    using AttachPoint = PhotoTransTargetObject.AttachPoint;
+
     public enum StudioModelType
     {
         Mod,
@@ -21,7 +23,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return string.Format("{0}/{1}", parentModel.name, transform.name);
+                return string.Format("{0}/{1}", parentModel.name, transform != null ? transform.name : "");
             }
         }
 
@@ -102,6 +104,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int group { get; private set; }
         public string name { get; private set; }
         public string displayName { get; private set; }
+        public AttachPoint attachPoint { get; set; }
+        public int attachMaidSlotNo { get; set; }
         public List<StudioModelBone> bones { get; private set; }
         public List<StudioModelBlendShape> blendShapes { get; private set; }
         public BlendShapeController blendShapeController { get; private set; }
@@ -134,18 +138,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public StudioModelStat(
             OfficialObjectInfo info,
             int group,
-            Transform transform) : this()
+            Transform transform,
+            AttachPoint attachPoint,
+            int attachMaidSlotNo) : this()
         {
-            Init(info, group, transform);
+            Init(info, group, transform, attachPoint, attachMaidSlotNo);
         }
 
         public void Init(
             OfficialObjectInfo info,
             int group,
-            Transform transform)
+            Transform transform,
+            AttachPoint attachPoint,
+            int attachMaidSlotNo)
         {
             this.info = info;
             this.group = group;
+            this.attachPoint = attachPoint;
+            this.attachMaidSlotNo = attachMaidSlotNo;
             this.transform = transform;
 
             InitName();
@@ -168,6 +178,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             info = model.info;
             group = model.group;
+            attachPoint = model.attachPoint;
+            attachMaidSlotNo = model.attachMaidSlotNo;
             transform = model.transform;
             name = model.name;
             displayName = model.displayName;
@@ -219,6 +231,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var blendShape = new StudioModelBlendShape(this, shapeKeyName);
                 blendShapes.Add(blendShape);
             }
+        }
+
+        public StudioModelBone GetBone(int index)
+        {
+            if (index < 0 || index >= bones.Count)
+            {
+                return null;
+            }
+
+            return bones[index];
         }
 
         private bool IsVisibleBone(Transform trans)

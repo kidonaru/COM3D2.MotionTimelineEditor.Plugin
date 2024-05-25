@@ -4,6 +4,18 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+    using AttachPoint = PhotoTransTargetObject.AttachPoint;
+
+    public class TimelineModelXml
+    {
+        [XmlElement("Name")]
+        public string name;
+        [XmlElement("AttachPoint")]
+        public AttachPoint attachPoint;
+        [XmlElement("AttachMaidSlotNo")]
+        public int attachMaidSlotNo = -1;
+    }
+
     [XmlRoot("TimelineData")]
     public class TimelineXml
     {
@@ -19,6 +31,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlArray("Tracks")]
         [XmlArrayItem("Track")]
         public List<TrackXml> tracks = new List<TrackXml>();
+
+        [XmlArray("Models")]
+        [XmlArrayItem("Model")]
+        public List<TimelineModelXml> models = new List<TimelineModelXml>();
 
         [XmlElement("MaxFrameNo")]
         public int maxFrameNo;
@@ -131,6 +147,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 // 旧バージョンでは動画表示タイプがbool
                 videoDisplayType = videoDisplayOnGUI ? VideoDisplayType.GUI : VideoDisplayType.Mesh;
+            }
+
+            if (version < 6)
+            {
+                // 旧バージョンではモデル情報が格納されていない
+                models.Clear();
+
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "ModelTimelineLayer")
+                    {
+                        var modelNames = new HashSet<string>();
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                modelNames.Add(bone.transform.name);
+                            }
+                        }
+
+                        foreach (var modelName in modelNames)
+                        {
+                            var model = new TimelineModelXml
+                            {
+                                name = modelName
+                            };
+                            models.Add(model);
+                        }
+                        break;
+                    }
+                }
             }
         }
     }

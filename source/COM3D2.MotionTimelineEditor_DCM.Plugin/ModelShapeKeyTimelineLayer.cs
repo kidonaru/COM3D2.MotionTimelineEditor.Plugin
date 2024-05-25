@@ -60,7 +60,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private Dictionary<string, List<ModelShapeKeyTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<ModelShapeKeyTimeLineRow>>();
         private Dictionary<string, ModelShapeKeyPlayData> _playDataMap = new Dictionary<string, ModelShapeKeyPlayData>();
-        private List<ModelShapeKeyMotionData> _outputMotions = new List<ModelShapeKeyMotionData>(128);
 
         private ModelShapeKeyTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -69,12 +68,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public static ModelShapeKeyTimelineLayer Create(int slotNo)
         {
             return new ModelShapeKeyTimelineLayer(0);
-        }
-
-        public override void Init()
-        {
-            base.Init();
-            SetupModels();
         }
 
         protected override void InitMenuItems()
@@ -157,38 +150,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             float easingTime = CalcEasingValue(lerpTime, motion.easing);
             var weight = Mathf.Lerp(motion.stWeight, motion.edWeight, easingTime);
             blendShape.weight = weight;
-        }
-
-        public override void OnPluginEnable()
-        {
-            base.OnPluginEnable();
-
-            SetupModels();
-        }
-
-        private void SetupModels()
-        {
-            var existModelNameHash = new HashSet<string>();
-
-            var existBoneNames = GetExistBoneNames();
-            foreach (var boneName in existBoneNames)
-            {
-                var modelName = boneName.Split('/')[0];
-                if (!string.IsNullOrEmpty(modelName))
-                {
-                    existModelNameHash.Add(modelName);
-                }
-            }
-
-            modelManager.SetupModels(existModelNameHash);
-            InitMenuItems();
-        }
-
-        public override void OnPluginDisable()
-        {
-            base.OnPluginDisable();
-
-            studioHack.DeleteAllModels();
         }
 
         public override void OnModelAdded(StudioModelStat model)
@@ -376,44 +337,49 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
-        private int _targetModelIndex = 0;
+        private ComboBoxValue<StudioModelStat> modelComboBox = new ComboBoxValue<StudioModelStat>
+        {
+            getName = (model, index) =>
+            {
+                return model.name;
+            }
+        };
         private List<FloatFieldValue> _fieldValues = new List<FloatFieldValue>();
 
         public override void DrawWindow(GUIView view)
         {
-            if (modelManager.blendShapeNames.Count == 0)
+            DrawBlendShapes(view);
+            DrawComboBox(view);
+        }
+
+        public void DrawBlendShapes(GUIView view)
+        {
+            modelComboBox.items = modelManager.models;
+
+            if (modelManager.models.Count == 0)
             {
-                view.DrawLabel("シェイプキーが存在しません", 200, 20);
+                view.DrawLabel("モデルが存在しません", 200, 20);
                 return;
             }
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
-            {
-                view.DrawLabel("モデル選択", 70, 20);
+            view.SetEnabled(!modelComboBox.focused);
 
-                var newTargetModelIndex = view.DrawSelectList(
-                    modelManager.modelNames,
-                    (modelName, index) =>
-                    {
-                        var b = modelManager.GetModel(index);
-                        return b != null ? b.name : string.Empty;
-                    },
-                    140, 20, _targetModelIndex);
+            view.DrawLabel("モデル選択", 200, 20);
+            view.DrawComboBoxButton(modelComboBox, 260, 20, true);
 
-                if (newTargetModelIndex != _targetModelIndex)
-                {
-                    _targetModelIndex = newTargetModelIndex;
-                }
-            }
-            view.EndLayout();
-
-            var model = modelManager.GetModel(_targetModelIndex);
+            var model = modelComboBox.currentItem;
             if (model == null)
             {
+                view.DrawLabel("モデルが見つかりません", 200, 20);
                 return;
             }
 
             var blendShapes = model.blendShapes;
+            if (blendShapes.Count == 0)
+            {
+                view.DrawLabel("シェイプキーが存在しません", 200, 20);
+                return;
+            }
 
             while (_fieldValues.Count < blendShapes.Count)
             {
@@ -421,7 +387,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 _fieldValues.Add(fieldValue);
             }
 
-            view.SetEnabled(studioHack.isPoseEditing);
+            view.SetEnabled(!modelComboBox.focused && studioHack.isPoseEditing);
 
             for (var i = 0; i < blendShapes.Count; i++)
             {
@@ -443,8 +409,17 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     model.FixBlendValues();
                 }
             }
+        }
 
+        private void DrawComboBox(GUIView view)
+        {
             view.SetEnabled(true);
+
+            view.DrawComboBoxContent(
+                modelComboBox,
+                240, 300,
+                SubWindow.rc_stgw.width, SubWindow.rc_stgw.height,
+                20);
         }
 
         public override ITransformData CreateTransformData(string name)

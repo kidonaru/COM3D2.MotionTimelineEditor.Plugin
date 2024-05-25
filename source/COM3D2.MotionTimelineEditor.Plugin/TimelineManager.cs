@@ -135,6 +135,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static StudioModelManager modelManager
+        {
+            get
+            {
+                return StudioModelManager.instance;
+            }
+        }
+
         private static Maid maid
         {
             get
@@ -180,6 +188,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             MaidManager.onMaidSlotNoChanged += OnMaidSlotNoChanged;
             StudioModelManager.onModelAdded += OnModelAdded;
             StudioModelManager.onModelRemoved += OnModelRemoved;
+            StudioModelManager.onModelAttached += OnModelAttached;
         }
 
         public void Update()
@@ -353,9 +362,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ClearTimeline();
             currentLayerIndex = 0;
 
-            timeline = new TimelineData();
-            timeline.anmName = "テスト";
-            timeline.version = TimelineData.CurrentVersion;
+            timeline = new TimelineData
+            {
+                anmName = "テスト",
+                version = TimelineData.CurrentVersion
+            };
             timeline.Initialize();
             currentLayer.OnActive();
 
@@ -404,10 +415,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timeline.directoryName = directoryName;
                 timeline.Initialize();
                 timeline.OnLoad();
-                currentLayer.OnActive();
             }
 
+            currentLayer.OnActive();
+
             maidManager.ChangeMaid(currentLayer.maid);
+            modelManager.SetupModels(timeline.models);
 
             CreateAndApplyAnmAll();
             SeekCurrentFrame(0);
@@ -458,12 +471,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             timeline = new TimelineData();
             timeline.FromXml(xml);
             timeline.Initialize();
+            timeline.OnLoad();
 
             if (currentLayerIndex >= layers.Count)
             {
                 currentLayerIndex = 0;
             }
             currentLayer.OnActive();
+
+            modelManager.SetupModels(timeline.models);
 
             CreateAndApplyAnmAll();
             Refresh();
@@ -1416,6 +1432,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return null;
         }
 
+        public void OnPluginEnable()
+        {
+            if (timeline != null)
+            {
+                timeline.OnPluginEnable();
+                modelManager.SetupModels(timeline.models);
+            }
+        }
+
+        public void OnPluginDisable()
+        {
+            if (timeline != null)
+            {
+                timeline.OnPluginDisable();
+                studioHack.DeleteAllModels();
+            }
+        }
+
         public void OnEditPoseUpdated()
         {
             OnEndPoseEdit();
@@ -1473,10 +1507,42 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private void UpdateTimelineModels()
+        {
+            if (timeline == null)
+            {
+                return;
+            }
+
+            var models = modelManager.models;
+            var timelineModels = timeline.models;
+
+            if (models.Count != timelineModels.Count)
+            {
+                timelineModels.Clear();
+                foreach (var model in models)
+                {
+                    var timelineModel = new TimelineModelData(model);
+                    timelineModels.Add(timelineModel);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < models.Count; i++)
+                {
+                    var model = models[i];
+                    var timelineModel = timelineModels[i];
+                    timelineModel.FromStat(model);
+                }
+            }
+        }
+
         private void OnModelAdded(StudioModelStat model)
         {
             if (IsValidData())
             {
+                UpdateTimelineModels();
+
                 foreach (var layer in layers)
                 {
                     layer.OnModelAdded(model);
@@ -1488,10 +1554,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (IsValidData())
             {
+                UpdateTimelineModels();
+
                 foreach (var layer in layers)
                 {
                     layer.OnModelRemoved(model);
                 }
+            }
+        }
+
+        private void OnModelAttached()
+        {
+            if (IsValidData())
+            {
+                UpdateTimelineModels();
             }
         }
     }

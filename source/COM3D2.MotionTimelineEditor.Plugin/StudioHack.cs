@@ -90,13 +90,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     int myRoomId = 0;
                     long bgObjectId = 0;
                     var transform = targetObj.obj.transform;
+                    var attachMaidSlotNo = GetMaidSlotNo(targetObj.attach_maid_guid);
 
                     var model = modelManager.CreateModelStat(
                         displayName,
                         modelName,
                         myRoomId,
                         bgObjectId,
-                        transform);
+                        transform,
+                        targetObj.attachi_point,
+                        attachMaidSlotNo);
 
                     _modelList.Add(model);
                 }
@@ -469,8 +472,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var date = DateTime.Now;
             var dateFormat = "yyyyMMddHHmmss";
             var targetList = objectManagerWindow.GetTargetList();
-            var timeStr = date.ToString(dateFormat) + targetList.Count.ToString("G3");
+            var timeStr = date.ToString(dateFormat) + targetList.Count.ToString("D3");
             AddObject(bgObject, timeStr);
+
+            foreach (var target in targetList)
+            {
+                if (target == null || target.obj == null || target.obj.name != timeStr)
+                {
+                    continue;
+                }
+
+                var attachMaid = GetMaid(model.attachMaidSlotNo);
+                target.Attach(model.attachPoint, false, attachMaid);
+                //PluginUtils.Log("CreateModel: Attach model:{0} attachMaidSlotNo:{1} point:{2}", model.name, model.attachMaidSlotNo, model.attachPoint);
+                break;
+            }
         }
 
         private static Dictionary<string, PhotoBGData> bgDataMap = null;

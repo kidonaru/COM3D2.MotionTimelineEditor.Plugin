@@ -158,6 +158,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return nextIndex;
             }
         }
+
+        public T currentItem
+        {
+            get
+            {
+                if (currentIndex >= 0 && currentIndex < items.Count)
+                {
+                    return items[currentIndex];
+                }
+                return default(T);
+            }
+        }
     }
 
     public class GUIView
@@ -820,7 +832,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     if (subView.DrawButton("<", 20, 20))
                     {
-                        comboBox.onSelected(comboBox.items[comboBox.prevIndex], comboBox.prevIndex);
+                        comboBox.currentIndex = comboBox.prevIndex;
+                        if (comboBox.onSelected != null)
+                        {
+                            comboBox.onSelected(comboBox.items[comboBox.currentIndex], comboBox.currentIndex);
+                        }
                     }
                 }
 
@@ -843,7 +859,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     if (subView.DrawButton(">", 20, 20))
                     {
-                        comboBox.onSelected(comboBox.items[comboBox.nextIndex], comboBox.nextIndex);
+                        comboBox.currentIndex = comboBox.nextIndex;
+                        if (comboBox.onSelected != null)
+                        {
+                            comboBox.onSelected(comboBox.items[comboBox.currentIndex], comboBox.currentIndex);
+                        }
                     }
                 }
             }
@@ -919,7 +939,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (selectedIndex >= 0 && selectedIndex < comboBox.items.Count)
             {
-                comboBox.onSelected(comboBox.items[selectedIndex], selectedIndex);
+                comboBox.currentIndex = selectedIndex;
+                if (comboBox.onSelected != null)
+                {
+                    comboBox.onSelected(comboBox.items[comboBox.currentIndex], comboBox.currentIndex);
+                }
             }
         }
 

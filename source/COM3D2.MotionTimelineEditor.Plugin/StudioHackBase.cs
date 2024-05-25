@@ -213,6 +213,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return bgObject != null && bgObject.activeSelf;
         }
 
+        public int GetMaidSlotNo(string guid)
+        {
+            var maids = this.allMaids;
+            for (var i = 0; i < maids.Count; i++)
+            {
+                if (maids[i].status.guid == guid)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public Maid GetMaid(int slotNo)
+        {
+            var maids = this.allMaids;
+            if (slotNo < 0 || slotNo >= maids.Count)
+            {
+                return null;
+            }
+            return maids[slotNo];
+        }
+
         protected virtual void OnMaidChanged(int maidSlotNo, Maid maid)
         {
             // do nothing

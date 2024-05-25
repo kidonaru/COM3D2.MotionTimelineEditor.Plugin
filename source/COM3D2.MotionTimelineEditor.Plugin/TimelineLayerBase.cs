@@ -959,6 +959,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (tmpFrame != null)
             {
                 ApplyCurrentFrame(true);
+
+                timelineManager.RequestHistory("初期フレーム登録: " + boneNames.First());
             }
         }
 
@@ -999,6 +1001,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (removed)
             {
                 ApplyCurrentFrame(true);
+                timelineManager.RequestHistory("ボーン削除: " + boneNames.First());
             }
         }
 

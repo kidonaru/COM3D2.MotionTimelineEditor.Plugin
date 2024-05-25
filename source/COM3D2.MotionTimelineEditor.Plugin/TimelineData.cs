@@ -6,10 +6,52 @@ using UnityEngine;
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using MTE = MotionTimelineEditor;
+    using AttachPoint = PhotoTransTargetObject.AttachPoint;
+
+    public class TimelineModelData
+    {
+        public string name;
+        public AttachPoint attachPoint;
+        public int attachMaidSlotNo = -1;
+
+        public TimelineModelData()
+        {
+        }
+
+        public TimelineModelData(StudioModelStat stat)
+        {
+            FromStat(stat);
+        }
+
+        public void FromStat(StudioModelStat stat)
+        {
+            name = stat.name;
+            attachPoint = stat.attachPoint;
+            attachMaidSlotNo = stat.attachMaidSlotNo;
+        }
+
+        public void FromXml(TimelineModelXml xml)
+        {
+            name = xml.name;
+            attachPoint = xml.attachPoint;
+            attachMaidSlotNo = xml.attachMaidSlotNo;
+        }
+
+        public TimelineModelXml ToXml()
+        {
+            var xml = new TimelineModelXml
+            {
+                name = name,
+                attachPoint = attachPoint,
+                attachMaidSlotNo = attachMaidSlotNo,
+            };
+            return xml;
+        }
+    }
 
     public class TimelineData
     {
-        public static readonly int CurrentVersion = 5;
+        public static readonly int CurrentVersion = 6;
         public static readonly TimelineData DefaultTimeline = new TimelineData();
 
         public int version = 0;
@@ -17,6 +59,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public List<ITimelineLayer> layers = new List<ITimelineLayer>();
 
         public List<TrackData> tracks = new List<TrackData>();
+
+        public List<TimelineModelData> models = new List<TimelineModelData>();
 
         private int _maxFrameNo = 30;
         public int maxFrameNo
@@ -503,6 +547,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 tracks.Add(track);
             }
 
+            models = new List<TimelineModelData>(xml.models.Count);
+            foreach (var modelXml in xml.models)
+            {
+                var model = new TimelineModelData();
+                model.FromXml(modelXml);
+                models.Add(model);
+            }
+
             maxFrameNo = xml.maxFrameNo;
             frameRate = xml.frameRate;
             anmName = xml.anmName;
@@ -550,6 +602,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var trackXml = track.ToXml();
                 xml.tracks.Add(trackXml);
+            }
+
+            xml.models = new List<TimelineModelXml>(models.Count);
+            foreach (var model in models)
+            {
+                var modelXml = model.ToXml();
+                xml.models.Add(modelXml);
             }
 
             xml.maxFrameNo = maxFrameNo;

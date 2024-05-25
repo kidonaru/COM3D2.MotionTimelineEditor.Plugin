@@ -67,21 +67,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return new MotionTimelineLayer(slotNo);
         }
 
-        public override void Init()
-        {
-            base.Init();
-
-            boneComboBox.getName = (boneType, index) =>
-            {
-                return BoneUtils.GetBoneJpName(boneType);
-            };
-            boneComboBox.onSelected = (boneType, index) =>
-            {
-                _targetBoneIndex = index;
-            };
-            boneComboBox.items = BoneUtils.saveBoneTypes;
-        }
-
         protected override void InitMenuItems()
         {
             var setMenuItemMap = new Dictionary<BoneSetMenuType, BoneSetMenuItem>(10);
@@ -471,11 +456,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return t;
         }
 
-        private int _targetBoneIndex = 0;
         private FloatFieldValue[] _fieldValues = FloatFieldValue.CreateArray(
             new string[] { "X", "Y", "Z", "RX", "RY", "RZ" }
         );
-        private ComboBoxValue<IKManager.BoneType> boneComboBox = new ComboBoxValue<IKManager.BoneType>();
+        private ComboBoxValue<IKManager.BoneType> boneComboBox = new ComboBoxValue<IKManager.BoneType>
+        {
+            items = BoneUtils.saveBoneTypes,
+            getName = (boneType, index) =>
+            {
+                return BoneUtils.GetBoneJpName(boneType);
+            }
+        };
         private Rect _contentRect = new Rect(0, 0, SubWindow.WINDOW_WIDTH, SubWindow.WINDOW_HEIGHT);
         private Vector2 _scrollPosition = Vector2.zero;
 
@@ -536,17 +527,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.DrawLabel("対象ボーン", 80, 20);
 
-                boneComboBox.currentIndex = _targetBoneIndex;
                 view.DrawComboBoxButton(boneComboBox, 140, 20, true);
             }
             view.EndLayout();
 
-            if (_targetBoneIndex < 0 || _targetBoneIndex >= saveBoneTypes.Count)
-            {
-                return;
-            }
-
-            var boneType = saveBoneTypes[_targetBoneIndex];
+            var boneType = boneComboBox.currentItem;
             var bonePath = BoneUtils.GetBonePath(boneType);
             var cacheBoneData = maidCache.cacheBoneData;
             var bone = cacheBoneData.GetBoneData(bonePath);
