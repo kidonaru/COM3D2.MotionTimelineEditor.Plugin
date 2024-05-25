@@ -183,11 +183,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         private void DeleteBGObject()
-		{
-			BgMgr bgMgr = GameMain.Instance.BgMgr;
-			UnityEngine.Object.Destroy(bgMgr.current_bg_object);
-			bgMgr.DeleteBg();
-		}
+        {
+            BgMgr bgMgr = GameMain.Instance.BgMgr;
+            UnityEngine.Object.Destroy(bgMgr.current_bg_object);
+            bgMgr.DeleteBg();
+        }
 
         public virtual void ChangeBackground(string bgName)
         {

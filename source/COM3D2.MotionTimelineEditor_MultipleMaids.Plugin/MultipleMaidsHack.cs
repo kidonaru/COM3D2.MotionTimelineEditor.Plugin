@@ -541,24 +541,24 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         }
 
         private GameObject LoadMyRoomObject(int myRoomId)
-		{
-			var parentObj = GameObject.Find("Deployment Object Parent");
-			if (parentObj == null)
-			{
-				parentObj = new GameObject("Deployment Object Parent");
-			}
-			var data = PlacementData.GetData(myRoomId);
-			var prefab = data.GetPrefab();
-			var newObj = UnityEngine.Object.Instantiate<GameObject>(prefab);
-			var obj = new GameObject(newObj.name);
-			newObj.transform.SetParent(obj.transform, true);
-			obj.transform.SetParent(parentObj.transform, false);
+        {
+            var parentObj = GameObject.Find("Deployment Object Parent");
+            if (parentObj == null)
+            {
+                parentObj = new GameObject("Deployment Object Parent");
+            }
+            var data = PlacementData.GetData(myRoomId);
+            var prefab = data.GetPrefab();
+            var newObj = UnityEngine.Object.Instantiate<GameObject>(prefab);
+            var obj = new GameObject(newObj.name);
+            newObj.transform.SetParent(obj.transform, true);
+            obj.transform.SetParent(parentObj.transform, false);
 
-			var assetName = "MYR_" + myRoomId;
+            var assetName = "MYR_" + myRoomId;
             AddDogu(obj, assetName);
 
             return obj;
-		}
+        }
 
         private MethodInfo methodProcScriptBin = null;
         private string[] ProcScriptBin(Maid maid, byte[] cd, string filename, bool f_bTemp)

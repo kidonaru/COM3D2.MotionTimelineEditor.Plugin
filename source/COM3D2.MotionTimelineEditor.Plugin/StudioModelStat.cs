@@ -222,13 +222,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         private bool IsVisibleBone(Transform trans)
-		{
+        {
             if (trans == null)
             {
                 return false;
             }
 
-			return !trans.name.EndsWith("_nub") && !trans.name.EndsWith("_SCL_");
-		}
+            return !trans.name.EndsWith("_nub") && !trans.name.EndsWith("_SCL_");
+        }
     }
 }
