@@ -318,12 +318,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var model = GetModel(modelData.name);
                 if (model == null)
                 {
-                    model = CreateModelStat(modelData.name, null, modelData.attachPoint, modelData.attachMaidSlotNo);
+                    model = CreateModelStat(
+                        modelData.name,
+                        null,
+                        modelData.attachPoint,
+                        modelData.attachMaidSlotNo,
+                        null);
                     studioHack.CreateModel(model);
                     updated = true;
 
                     PluginUtils.Log("Create model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
                         model.info.type, model.displayName, model.name, model.info.label, model.info.fileName, model.info.myRoomId, model.info.bgObjectId);
+                }
+                else
+                {
+                    model.attachPoint = modelData.attachPoint;
+                    model.attachMaidSlotNo = modelData.attachMaidSlotNo;
+                    studioHack.UpdateAttachPoint(model);
                 }
             }
 
@@ -374,7 +385,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             long bgObjectId,
             Transform transform,
             AttachPoint attachPoint,
-            int attachMaidSlotNo)
+            int attachMaidSlotNo,
+            object obj)
         {
             var label = displayName;
             var fileName = modelName;
@@ -392,14 +404,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var info = FindOfficialObject(label, fileName, myRoomId, bgObjectId);
-            return new StudioModelStat(info, group, transform, attachPoint, attachMaidSlotNo);
+            return new StudioModelStat(info, group, transform, attachPoint, attachMaidSlotNo, obj);
         }
 
         public StudioModelStat CreateModelStat(
             string modelName,
             Transform transform,
             AttachPoint attachPoint,
-            int attachMaidSlotNo)
+            int attachMaidSlotNo,
+            object obj)
         {
             int myRoomId = 0;
             long bgObjectId = 0;
@@ -411,7 +424,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 bgObjectId,
                 transform,
                 attachPoint,
-                attachMaidSlotNo);
+                attachMaidSlotNo,
+                obj);
         }
 
         private OfficialObjectInfo FindOfficialObject(

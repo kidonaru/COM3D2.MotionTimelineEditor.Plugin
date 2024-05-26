@@ -54,6 +54,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return StudioModelManager.instance;
             }
         }
+
+        protected static StudioHackBase studioHack
+        {
+            get
+            {
+                return MTE.studioHack;
+            }
+        }
         
         protected static ITimelineLayer currentLayer
         {

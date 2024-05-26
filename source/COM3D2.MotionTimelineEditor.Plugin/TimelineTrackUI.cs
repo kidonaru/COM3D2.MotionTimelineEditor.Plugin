@@ -65,7 +65,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void DrawTrack(
             GUIView view,
-            TrackData track)
+            TrackData track,
+            int index)
         {
             if (track == null)
             {

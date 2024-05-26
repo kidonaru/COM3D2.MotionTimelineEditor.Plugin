@@ -626,5 +626,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             return IKManager.BoneType.TopFixed;
         }
+
+        public static readonly List<string> AttachPointNames = new List<string>
+        {
+            "設定なし",
+            "固定",
+            "原点",
+            "頭",
+            "首元",
+            "右胸",
+            "右肩",
+            "右肘",
+            "右手首",
+            "右足付け根",
+            "右膝",
+            "右足首",
+            "左胸",
+            "左肩",
+            "左肘",
+            "左手首",
+            "左足付け根",
+            "左膝",
+            "左足首",  
+        };
+
+        public static string GetAttachPointName(AttachPoint attachPoint)
+        {
+            var index = (int)attachPoint;
+            if (index < 0 || index >= AttachPointNames.Count)
+            {
+                return "";
+            }
+            return AttachPointNames[(int)attachPoint];
+        }
     }
 }

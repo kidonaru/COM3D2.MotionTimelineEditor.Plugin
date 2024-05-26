@@ -313,7 +313,8 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                         bgObjectId,
                         transform,
                         attachPoint,
-                        attachMaidSlotNo);
+                        attachMaidSlotNo,
+                        prop);
 
                     _modelList.Add(model);
                 }
@@ -461,6 +462,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                 {AttachPoint.CalfR, PhotoTransTargetObject.AttachPoint.Calf_R},
                 {AttachPoint.FootL, PhotoTransTargetObject.AttachPoint.Foot_L},
                 {AttachPoint.FootR, PhotoTransTargetObject.AttachPoint.Foot_R},
+                {AttachPoint.Spine0, PhotoTransTargetObject.AttachPoint.Fix}, // 仮
             };
 
         private static readonly Dictionary<PhotoTransTargetObject.AttachPoint, AttachPoint> PhotoAttachPointMap
@@ -611,6 +613,21 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 
             var propList = this.propList;
             var prop = propList.Last();
+
+            model.transform = prop.MyObject;
+            model.obj = prop;
+
+            UpdateAttachPoint(model);
+        }
+
+        public override void UpdateAttachPoint(StudioModelStat model)
+        {
+            var prop = model.obj as DragPointProp;
+            if (prop == null)
+            {
+                PluginUtils.LogError("UpdateAttachPoint: モデルが見つかりません" + model.name);
+                return;
+            }
 
             var attachPoint = ConvertAttachPoint(model.attachPoint);
             var attachMaidSlotNo = model.attachMaidSlotNo;

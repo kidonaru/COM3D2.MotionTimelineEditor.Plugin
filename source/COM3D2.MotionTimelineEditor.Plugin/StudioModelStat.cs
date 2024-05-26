@@ -106,6 +106,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string displayName { get; private set; }
         public AttachPoint attachPoint { get; set; }
         public int attachMaidSlotNo { get; set; }
+        public object obj { get; set; }
         public List<StudioModelBone> bones { get; private set; }
         public List<StudioModelBlendShape> blendShapes { get; private set; }
         public BlendShapeController blendShapeController { get; private set; }
@@ -140,9 +141,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             int group,
             Transform transform,
             AttachPoint attachPoint,
-            int attachMaidSlotNo) : this()
+            int attachMaidSlotNo,
+            object obj) : this()
         {
-            Init(info, group, transform, attachPoint, attachMaidSlotNo);
+            Init(info, group, transform, attachPoint, attachMaidSlotNo, obj);
         }
 
         public void Init(
@@ -150,13 +152,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             int group,
             Transform transform,
             AttachPoint attachPoint,
-            int attachMaidSlotNo)
+            int attachMaidSlotNo,
+            object obj)
         {
             this.info = info;
             this.group = group;
             this.attachPoint = attachPoint;
             this.attachMaidSlotNo = attachMaidSlotNo;
             this.transform = transform;
+            this.obj = obj;
 
             InitName();
         }
@@ -186,6 +190,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             group = model.group;
             attachPoint = model.attachPoint;
             attachMaidSlotNo = model.attachMaidSlotNo;
+            obj = model.obj;
             transform = model.transform;
             name = model.name;
             displayName = model.displayName;

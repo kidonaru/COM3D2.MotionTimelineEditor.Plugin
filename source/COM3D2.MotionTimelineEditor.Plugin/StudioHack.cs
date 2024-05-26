@@ -99,7 +99,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         bgObjectId,
                         transform,
                         targetObj.attachi_point,
-                        attachMaidSlotNo);
+                        attachMaidSlotNo,
+                        targetObj);
 
                     _modelList.Add(model);
                 }
@@ -482,10 +483,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     continue;
                 }
 
-                var attachMaid = GetMaid(model.attachMaidSlotNo);
-                target.Attach(model.attachPoint, false, attachMaid);
-                //PluginUtils.Log("CreateModel: Attach model:{0} attachMaidSlotNo:{1} point:{2}", model.name, model.attachMaidSlotNo, model.attachPoint);
+                model.transform = target.obj.transform;
+                model.obj = target;
+                UpdateAttachPoint(model);
                 break;
+            }
+        }
+
+        public override void UpdateAttachPoint(StudioModelStat model)
+        {
+            var target = model.obj as PhotoTransTargetObject;
+            if (target != null)
+            {
+                target.Attach(model.attachPoint, false, GetMaid(model.attachMaidSlotNo));
             }
         }
 

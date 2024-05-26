@@ -58,14 +58,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private bool resetPositionRequested = false;
         private bool positionUpdated = false;
 
-        private static StudioHackBase studioHack
-        {
-            get
-            {
-                return MTE.studioHack;
-            }
-        }
-
         private bool[] isHoldList
         {
             get

@@ -307,7 +307,8 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                             modelName,
                             dogu.transform,
                             attachPoint,
-                            attachMaidSlotNo);
+                            attachMaidSlotNo,
+                            dogu);
                         _modelList.Add(model);
                     }
                 }
@@ -755,18 +756,42 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                     return;
                 }
 
-                var attachPoint = model.attachPoint;
-                var attachMaidSlotNo = model.attachMaidSlotNo;
-                var maidCache = maidManager.GetMaidCache(attachMaidSlotNo);
-                if (maidCache != null)
-                {
-                    maidCache.AttachItem(obj.transform, attachPoint, false);
-                }
+                model.transform = obj.transform;
+                model.obj = obj;
+
+                UpdateAttachPoint(model);
             }
             catch (Exception e)
             {
                 PluginUtils.LogException(e);
             }
+        }
+
+        public override void UpdateAttachPoint(StudioModelStat model)
+        {
+            var attachPoint = model.attachPoint;
+            var attachMaidSlotNo = model.attachMaidSlotNo;
+            var maidCache = maidManager.GetMaidCache(attachMaidSlotNo);
+            AttachItem(maidCache, model.transform, attachPoint, false);
+        }
+
+        public void AttachItem(MaidCache maidCache, Transform item, AttachPoint point, bool keepWorldPosition)
+        {
+            Transform parent = maidCache != null ? maidCache.GetAttachPointTransform(point) : null;
+            Quaternion quaternion = item.rotation;
+            Vector3 localScale = item.localScale;
+
+            item.SetParent(parent, keepWorldPosition);
+            if (keepWorldPosition)
+            {
+                item.rotation = quaternion;
+            }
+            else
+            {
+                item.localPosition = Vector3.zero;
+                item.rotation = Quaternion.identity;
+            }
+            item.localScale = localScale;
         }
 
         protected override void OnMaidChanged(int maidSlotNo, Maid maid)

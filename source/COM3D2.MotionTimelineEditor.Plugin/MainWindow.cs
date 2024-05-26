@@ -160,7 +160,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private GUIView headerView = new GUIView(0, 20, WINDOW_WIDTH, HEADER_HEIGHT);
         private ComboBoxValue<FileMenuType> fileMenuComboBox = new ComboBoxValue<FileMenuType>();
         private ComboBoxValue<TimelineLayerInfo> layerComboBox = new ComboBoxValue<TimelineLayerInfo>();
-        private ComboBoxValue<Maid> maidComboBox = new ComboBoxValue<Maid>();
+        private ComboBoxValue<Maid> _maidComboBox = new ComboBoxValue<Maid>();
 
         public GUIStyle gsWin = new GUIStyle("box")
         {
@@ -247,12 +247,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timelineManager.ChangeActiveLayer(className, maidManager.maidSlotNo);
             };
 
-            maidComboBox.getName = (maid, index) =>
+            _maidComboBox.getName = (maid, index) =>
             {
                 var name = maid == null ? "未選択" : maid.status.fullNameJpStyle;
                 return string.Format("{0}:{1}", index, name);
             };
-            maidComboBox.onSelected = (maid, index) =>
+            _maidComboBox.onSelected = (maid, index) =>
             {
                 maidManager.ChangeMaid(maid);
             };
@@ -474,7 +474,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             && maidManager.maid != null;
 
             bool guiEnabled = !fileMenuComboBox.focused
-                            && !maidComboBox.focused
+                            && !_maidComboBox.focused
                             && !layerComboBox.focused;
 
             DrawHeader(editEnabled, guiEnabled);
@@ -777,10 +777,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     view.DrawLabel("操作対象", 50, 20);
 
-                    maidComboBox.currentIndex = currentLayer.slotNo;
-                    maidComboBox.items = studioHack.allMaids;
+                    _maidComboBox.currentIndex = currentLayer.slotNo;
+                    _maidComboBox.items = studioHack.allMaids;
 
-                    view.DrawComboBoxButton(maidComboBox, 190, 20, true);
+                    view.DrawComboBoxButton(_maidComboBox, 190, 20, true);
                 }
             }
             view.EndLayout();
@@ -1230,7 +1230,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (!editEnabled)
             {
                 layerComboBox.focused = false;
-                maidComboBox.focused = false;
+                _maidComboBox.focused = false;
             }
 
             headerView.SetEnabled(guiEnabled);
@@ -1248,7 +1248,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 20);
 
             headerView.DrawComboBoxContent(
-                maidComboBox,
+                _maidComboBox,
                 170, 120,
                 rc_stgw.width, rc_stgw.height,
                 20);

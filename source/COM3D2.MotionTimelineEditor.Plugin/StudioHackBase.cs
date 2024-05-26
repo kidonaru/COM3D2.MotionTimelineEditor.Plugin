@@ -182,6 +182,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // do nothing
         }
 
+        public virtual void UpdateAttachPoint(StudioModelStat model)
+        {
+            // do nothing
+        }
+
         private void DeleteBGObject()
         {
             BgMgr bgMgr = GameMain.Instance.BgMgr;

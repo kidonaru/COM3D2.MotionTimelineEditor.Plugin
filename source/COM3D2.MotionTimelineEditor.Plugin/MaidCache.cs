@@ -265,6 +265,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public string fullName
+        {
+            get
+            {
+                return maid != null ? maid.status.fullNameJpStyle : "";
+            }
+        }
+
         private static TimelineManager timelineManager
         {
             get
@@ -553,25 +561,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var boneType = BoneUtils.GetBoneType(point);
             return ikManager.GetBone(boneType).transform;
-        }
-
-        public void AttachItem(Transform item, AttachPoint point, bool keepWorldPosition)
-        {
-            Transform parent = GetAttachPointTransform(point);
-            Quaternion quaternion = item.rotation;
-            Vector3 localScale = item.localScale;
-
-            item.SetParent(parent, keepWorldPosition);
-            if (keepWorldPosition)
-            {
-                item.rotation = quaternion;
-            }
-            else
-            {
-                item.localPosition = Vector3.zero;
-                item.rotation = Quaternion.identity;
-            }
-            item.localScale = localScale;
         }
 
         private void OnMaidChanged(Maid maid)
