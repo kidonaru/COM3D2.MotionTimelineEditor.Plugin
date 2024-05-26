@@ -1062,6 +1062,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlRoot("Layer")]
         public class CopyLayerData
         {
+            [XmlElement("ClassName")]
+            public string className;
             [XmlElement("Frame")]
             public List<FrameXml> frames;
         }
@@ -1074,7 +1076,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var copyFrameData = new CopyLayerData();
+            var copyFrameData = new CopyLayerData
+            {
+                className = currentLayer.className
+            };
 
             var tmpFrames = new Dictionary<int, FrameData>();
             foreach (var bone in selectedBones)
@@ -1124,6 +1129,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var copyFrameData = new CopyLayerData
             {
+                className = currentLayer.className,
                 frames = new List<FrameXml> { tmpFrame.ToXml() }
             };
 
@@ -1155,6 +1161,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 using (var reader = new StringReader(data))
                 {
                     var copyFrameData = (CopyLayerData) serializer.Deserialize(reader);
+
+                    if (copyFrameData.className != currentLayer.className)
+                    {
+                        PluginUtils.LogWarning("ペーストするレイヤーが一致しません");
+                        return;
+                    }
 
                     if (copyFrameData.frames.Count == 0)
                     {
@@ -1430,6 +1442,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             PluginUtils.LogError("未登録のレイヤークラス: " + className);
             return null;
+        }
+
+        public void CopyModel(StudioModelStat model)
+        {
+            if (model == null || timeline == null)
+            {
+                return;
+            }
+
+            var newModel = new StudioModelStat();
+            newModel.FromModel(model);
+
+            var group = newModel.group;
+            while (modelManager.GetModel(newModel.name) != null)
+            {
+                group++;
+                if (group == 1) group++; // 1は使わない
+                newModel.SetGroup(group);
+            }
+
+            timeline.OnCopyModel(model, newModel);
+            studioHack.CreateModel(newModel);
+            modelManager.LateUpdate(true);
+        }
+
+        public void DeleteModel(StudioModelStat model)
+        {
+            if (model == null || timeline == null)
+            {
+                return;
+            }
+
+            studioHack.DeleteModel(model);
+            modelManager.LateUpdate(true);
         }
 
         public void OnPluginEnable()

@@ -100,6 +100,7 @@
     <Compile Include="StudioHackBase.cs" />
     <Compile Include="StudioModelManager.cs" />
     <Compile Include="StudioModelStat.cs" />
+    <Compile Include="StudioModelUI.cs" />
     <Compile Include="SubWindow.cs" />
     <Compile Include="SubWindowUIBase.cs" />
     <Compile Include="TangentData.cs" />

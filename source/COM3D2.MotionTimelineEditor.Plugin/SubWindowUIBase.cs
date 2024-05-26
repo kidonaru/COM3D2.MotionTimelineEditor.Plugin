@@ -46,6 +46,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return MaidManager.instance;
             }
         }
+
+        protected static StudioModelManager modelManager
+        {
+            get
+            {
+                return StudioModelManager.instance;
+            }
+        }
         
         protected static ITimelineLayer currentLayer
         {

@@ -147,12 +147,31 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             InitMenuItems();
             AddFirstBones(new List<string> { model.name });
+            ApplyCurrentFrame(true);
         }
 
         public override void OnModelRemoved(StudioModelStat model)
         {
             InitMenuItems();
             RemoveAllBones(new List<string> { model.name });
+            ApplyCurrentFrame(true);
+        }
+
+        public override void OnCopyModel(StudioModelStat sourceModel, StudioModelStat newModel)
+        {
+            var sourceModelName = sourceModel.name;
+            var newModelName = newModel.name;
+            foreach (var keyFrame in keyFrames)
+            {
+                var sourceBone = keyFrame.GetBone(sourceModelName);
+                if (sourceBone == null)
+                {
+                    continue;
+                }
+
+                var newBone = keyFrame.GetOrCreateBone(newModelName);
+                newBone.transform.FromTransformData(sourceBone.transform);
+            }
         }
 
         public override void UpdateFrameWithCurrentStat(FrameData frame)

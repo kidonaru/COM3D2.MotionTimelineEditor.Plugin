@@ -31,7 +31,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.BeginLayout(GUIView.LayoutDirection.Horizontal);
                 {
-                    if (view.DrawButton("登録", 80, 20))
+                    if (view.DrawButton("追加", 80, 20))
                     {
                         timelineManager.AddTrack();
                     }

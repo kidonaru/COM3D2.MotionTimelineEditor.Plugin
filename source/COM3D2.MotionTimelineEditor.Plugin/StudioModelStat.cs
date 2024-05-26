@@ -174,6 +174,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             InitName();
         }
 
+        public string GetNameByGroup(int group)
+        {
+            var groupSuffix = StudioModelManager.GetGroupSuffix(group);
+            return info.fileName + groupSuffix;
+        }
+
         public void FromModel(StudioModelStat model)
         {
             info = model.info;

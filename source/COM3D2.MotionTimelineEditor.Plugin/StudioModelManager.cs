@@ -603,7 +603,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static string RemoveGroupSuffix(string input)
         {
-            return _regexGroup.Replace(input, "");
+            return _regexGroup.Replace(input, "").Trim();
         }
 
         public static int ExtractMyRoomId(string input)

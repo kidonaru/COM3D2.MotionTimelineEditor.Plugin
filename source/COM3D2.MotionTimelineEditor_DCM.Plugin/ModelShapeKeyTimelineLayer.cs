@@ -158,6 +158,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             var boneNames = model.blendShapes.Select(x => x.name).ToList();
             AddFirstBones(boneNames);
+            ApplyCurrentFrame(true);
         }
 
         public override void OnModelRemoved(StudioModelStat model)
@@ -166,6 +167,30 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             var boneNames = model.blendShapes.Select(x => x.name).ToList();
             RemoveAllBones(boneNames);
+            ApplyCurrentFrame(true);
+        }
+
+        public override void OnCopyModel(StudioModelStat sourceModel, StudioModelStat newModel)
+        {
+            var blendShapes = sourceModel.blendShapes;
+            var newModelName = newModel.name;
+            foreach (var keyFrame in keyFrames)
+            {
+                foreach (var blendShape in blendShapes)
+                {
+                    var sourceBone = keyFrame.GetBone(blendShape.name);
+                    if (sourceBone == null)
+                    {
+                        continue;
+                    }
+
+                    var baseName = blendShape.shapeKeyName;
+                    var newBoneName = string.Format("{0}/{1}", newModelName, baseName);
+
+                    var newBone = keyFrame.GetOrCreateBone(newBoneName);
+                    newBone.transform.FromTransformData(sourceBone.transform);
+                }
+            }
         }
 
         public override void UpdateFrameWithCurrentStat(FrameData frame)
@@ -338,7 +363,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
-        private ComboBoxValue<StudioModelStat> modelComboBox = new ComboBoxValue<StudioModelStat>
+        private ComboBoxValue<StudioModelStat> _modelComboBox = new ComboBoxValue<StudioModelStat>
         {
             getName = (model, index) =>
             {
@@ -354,7 +379,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public void DrawBlendShapes(GUIView view)
         {
-            modelComboBox.items = modelManager.models;
+            _modelComboBox.items = modelManager.models;
 
             if (modelManager.models.Count == 0)
             {
@@ -362,12 +387,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            view.SetEnabled(!modelComboBox.focused);
+            view.SetEnabled(!_modelComboBox.focused);
 
             view.DrawLabel("モデル選択", 200, 20);
-            view.DrawComboBoxButton(modelComboBox, 260, 20, true);
+            view.DrawComboBoxButton(_modelComboBox, 240, 20, true);
 
-            var model = modelComboBox.currentItem;
+            var model = _modelComboBox.currentItem;
             if (model == null || model.transform == null)
             {
                 view.DrawLabel("モデルが見つかりません", 200, 20);
@@ -381,7 +406,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            view.SetEnabled(!modelComboBox.focused && studioHack.isPoseEditing);
+            view.SetEnabled(!_modelComboBox.focused && studioHack.isPoseEditing);
 
             for (var i = 0; i < blendShapes.Count; i++)
             {
@@ -408,8 +433,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             view.SetEnabled(true);
 
             view.DrawComboBoxContent(
-                modelComboBox,
-                240, 300,
+                _modelComboBox,
+                220, 300,
                 SubWindow.rc_stgw.width, SubWindow.rc_stgw.height,
                 20);
         }

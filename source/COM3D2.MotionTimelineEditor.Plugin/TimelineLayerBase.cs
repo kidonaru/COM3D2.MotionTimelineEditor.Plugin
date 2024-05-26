@@ -430,6 +430,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // do nothing
         }
 
+        public virtual void OnCopyModel(StudioModelStat sourceModel, StudioModelStat newModel)
+        {
+            // do nothing
+        }
+
         public abstract void UpdateFrameWithCurrentStat(FrameData frame);
         public abstract void ApplyAnm(long id, byte[] anmData);
         public abstract void ApplyCurrentFrame(bool motionUpdate);
@@ -967,8 +972,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (tmpFrame != null)
             {
-                ApplyCurrentFrame(true);
-
                 timelineManager.RequestHistory("初期フレーム登録: " + boneNames.First());
             }
         }
@@ -1009,7 +1012,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (removed)
             {
-                ApplyCurrentFrame(true);
                 timelineManager.RequestHistory("ボーン削除: " + boneNames.First());
             }
         }

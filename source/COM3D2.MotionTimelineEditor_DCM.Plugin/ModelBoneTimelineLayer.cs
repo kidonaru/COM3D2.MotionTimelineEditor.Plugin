@@ -77,6 +77,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             foreach (var model in modelManager.modelMap.Values)
             {
+                if (model.bones.Count == 0)
+                {
+                    continue;
+                }
+
                 var setMenuItem = new BoneSetMenuItem(model.name, model.displayName);
                 allMenuItems.Add(setMenuItem);
 
@@ -154,6 +159,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             var boneNames = model.bones.Select(x => x.name).ToList();
             AddFirstBones(boneNames);
+            ApplyCurrentFrame(true);
         }
 
         public override void OnModelRemoved(StudioModelStat model)
@@ -162,6 +168,30 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             var boneNames = model.bones.Select(x => x.name).ToList();
             RemoveAllBones(boneNames);
+            ApplyCurrentFrame(true);
+        }
+
+        public override void OnCopyModel(StudioModelStat sourceModel, StudioModelStat newModel)
+        {
+            var sourceModelBones = sourceModel.bones;
+            var newModelName = newModel.name;
+            foreach (var keyFrame in keyFrames)
+            {
+                foreach (var sourceModelBone in sourceModelBones)
+                {
+                    var sourceBone = keyFrame.GetBone(sourceModelBone.name);
+                    if (sourceBone == null)
+                    {
+                        continue;
+                    }
+
+                    var baseName = sourceModelBone.transform.name;
+                    var newBoneName = string.Format("{0}/{1}", newModelName, baseName);
+
+                    var newBone = keyFrame.GetOrCreateBone(newBoneName);
+                    newBone.transform.FromTransformData(sourceBone.transform);
+                }
+            }
         }
 
         public override void UpdateFrameWithCurrentStat(FrameData frame)
@@ -398,7 +428,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             view.SetEnabled(!_modelComboBox.focused && !_transComboBox.focused);
 
             view.DrawLabel("モデル選択", 200, 20);
-            view.DrawComboBoxButton(_modelComboBox, 260, 20, true);
+            view.DrawComboBoxButton(_modelComboBox, 240, 20, true);
 
             var model = _modelComboBox.currentItem;
             if (model == null || model.transform == null)
@@ -441,7 +471,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             view.DrawComboBoxContent(
                 _modelComboBox,
-                240, 300,
+                220, 300,
                 SubWindow.rc_stgw.width, SubWindow.rc_stgw.height,
                 20);
 

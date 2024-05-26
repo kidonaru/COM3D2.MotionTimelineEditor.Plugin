@@ -16,6 +16,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         MoviePlayer,
         History,
         Track,
+        StudioModel,
     }
 
     public class SubWindow
@@ -60,6 +61,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             new MediaPlayerUI(),
             new TimelineHistoryUI(),
             new TimelineTrackUI(),
+            new StudioModelUI(),
         };
 
         private SubWindowType _subWindowType = SubWindowType.None;

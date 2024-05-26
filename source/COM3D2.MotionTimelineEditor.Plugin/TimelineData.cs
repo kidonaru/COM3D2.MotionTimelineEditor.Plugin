@@ -524,6 +524,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             studioHack.SetBackgroundVisible(true);
         }
 
+        public void OnCopyModel(StudioModelStat sourceModel, StudioModelStat newModel)
+        {
+            foreach (var layer in layers)
+            {
+                layer.OnCopyModel(sourceModel, newModel);
+            }
+        }
+
         public void FromXml(TimelineXml xml)
         {
             version = xml.version;

@@ -532,6 +532,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     subWindow.ToggleSubWindow(SubWindowType.Track);
                 }
 
+                if (view.DrawButton("モデル", 60, 20, editEnabled))
+                {
+                    subWindow.ToggleSubWindow(SubWindowType.StudioModel);
+                }
+
                 if (view.DrawButton("メディア", 60, 20, editEnabled))
                 {
                     subWindow.ToggleSubWindow(SubWindowType.MoviePlayer);
