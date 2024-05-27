@@ -470,7 +470,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             angles = TransformDataBase.GetFixedEulerAngles(angles, prevAngles);
             var updateTransform = false;
 
-            GUI.enabled = studioHack.isPoseEditing;
+            view.SetEnabled(studioHack.isPoseEditing);
 
             updateTransform |= view.DrawValue(_fieldValues[0], 0.01f, 0.1f, 0f,
                 position.x,
@@ -487,15 +487,15 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 z => position.z = z,
                 z => position.z += z);
 
-            updateTransform |= view.DrawSliderValue(_fieldValues[3], prevAngles.x - 180f, prevAngles.x + 180f, 0f,
+            updateTransform |= view.DrawSliderValue(_fieldValues[3], prevAngles.x - 180f, prevAngles.x + 180f, 1f, 0f,
                 angles.x,
                 x => angles.x = x);
 
-            updateTransform |= view.DrawSliderValue(_fieldValues[4], prevAngles.y - 180f, prevAngles.y + 180f, 0f,
+            updateTransform |= view.DrawSliderValue(_fieldValues[4], prevAngles.y - 180f, prevAngles.y + 180f, 1f, 0f,
                 angles.y,
                 y => angles.y = y);
 
-            updateTransform |= view.DrawSliderValue(_fieldValues[5], prevAngles.z - 180f, prevAngles.z + 180f, 0f,
+            updateTransform |= view.DrawSliderValue(_fieldValues[5], prevAngles.z - 180f, prevAngles.z + 180f, 1f, 0f,
                 angles.z,
                 z => angles.z = z);
 
@@ -600,7 +600,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
             view.EndLayout();
 
-            GUI.enabled = true;
+            view.SetEnabled(true);
 
             if (updateTransform)
             {

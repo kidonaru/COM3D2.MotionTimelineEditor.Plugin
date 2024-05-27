@@ -1150,9 +1150,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected enum TransformEditType
         {
-            位置,
-            角度,
-            サイズ,
+            移動,
+            回転,
+            拡縮,
             X,
             Y,
             Z,
@@ -1172,13 +1172,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             switch (editType)
             {
-                case TransformEditType.位置:
+                case TransformEditType.移動:
                 case TransformEditType.X:
                 case TransformEditType.Y:
                 case TransformEditType.Z:
                     DrawPosition(view, transform, editType);
                     break;
-                case TransformEditType.角度:
+                case TransformEditType.回転:
                 case TransformEditType.RX:
                 case TransformEditType.RY:
                 case TransformEditType.RZ:
@@ -1187,7 +1187,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     DrawRotation(view, transform, editType, prevBone);
                     break;
                 }
-                case TransformEditType.サイズ:
+                case TransformEditType.拡縮:
                 case TransformEditType.SX:
                 case TransformEditType.SY:
                 case TransformEditType.SZ:
@@ -1201,7 +1201,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var position = transform.localPosition;
             var updateTransform = false;
 
-            if (editType == TransformEditType.位置 || editType == TransformEditType.X)
+            if (editType == TransformEditType.移動 || editType == TransformEditType.X)
             {
                 updateTransform |= view.DrawValue(GetNextFieldValue("X"), 0.01f, 0.1f, 0f,
                     position.x,
@@ -1209,7 +1209,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     x => position.x += x);
             }
 
-            if (editType == TransformEditType.位置 || editType == TransformEditType.Y)
+            if (editType == TransformEditType.移動 || editType == TransformEditType.Y)
             {
                 updateTransform |= view.DrawValue(GetNextFieldValue("Y"), 0.01f, 0.1f, 0f,
                     position.y,
@@ -1217,7 +1217,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     y => position.y += y);
             }
 
-            if (editType == TransformEditType.位置 || editType == TransformEditType.Z)
+            if (editType == TransformEditType.移動 || editType == TransformEditType.Z)
             {
                 updateTransform |= view.DrawValue(GetNextFieldValue("Z"), 0.01f, 0.1f, 0f,
                     position.z,
@@ -1238,23 +1238,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             angle = TransformDataBase.GetFixedEulerAngles(angle, prevAngle);
             var updateTransform = false;
 
-            if (editType == TransformEditType.角度 || editType == TransformEditType.RX)
+            if (editType == TransformEditType.回転 || editType == TransformEditType.RX)
             {
-                updateTransform |= view.DrawSliderValue(GetNextFieldValue("RX"), prevAngle.x - 180f, prevAngle.x + 180f, prevAngle.x,
+                updateTransform |= view.DrawSliderValue(
+                    GetNextFieldValue("RX"), prevAngle.x - 180f, prevAngle.x + 180f, 1f, prevAngle.x,
                     angle.x,
                     x => angle.x = x);
             }
 
-            if (editType == TransformEditType.角度 || editType == TransformEditType.RY)
+            if (editType == TransformEditType.回転 || editType == TransformEditType.RY)
             {
-                updateTransform |= view.DrawSliderValue(GetNextFieldValue("RY"), prevAngle.y - 180f, prevAngle.y + 180f, prevAngle.y,
+                updateTransform |= view.DrawSliderValue(
+                    GetNextFieldValue("RY"), prevAngle.y - 180f, prevAngle.y + 180f, 1f, prevAngle.y,
                     angle.y,
                     y => angle.y = y);
             }
 
-            if (editType == TransformEditType.角度 || editType == TransformEditType.RZ)
+            if (editType == TransformEditType.回転 || editType == TransformEditType.RZ)
             {
-                updateTransform |= view.DrawSliderValue(GetNextFieldValue("RZ"), prevAngle.z - 180f, prevAngle.z + 180f, prevAngle.z,
+                updateTransform |= view.DrawSliderValue(
+                    GetNextFieldValue("RZ"), prevAngle.z - 180f, prevAngle.z + 180f, 1f, prevAngle.z,
                     angle.z,
                     z => angle.z = z);
             }
@@ -1270,7 +1273,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var scale = transform.localScale;
             var updateTransform = false;
 
-            if (editType == TransformEditType.サイズ || editType == TransformEditType.SX)
+            if (editType == TransformEditType.拡縮 || editType == TransformEditType.SX)
             {
                 updateTransform |= view.DrawValue(GetNextFieldValue("SX"), 0.01f, 0.1f, 1f,
                     scale.x,
@@ -1278,7 +1281,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     x => scale.x += x);
             }
 
-            if (editType == TransformEditType.サイズ || editType == TransformEditType.SY)
+            if (editType == TransformEditType.拡縮 || editType == TransformEditType.SY)
             {
                 updateTransform |= view.DrawValue(GetNextFieldValue("SY"), 0.01f, 0.1f, 1f,
                     scale.y,
@@ -1286,7 +1289,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     y => scale.y += y);
             }
 
-            if (editType == TransformEditType.サイズ || editType == TransformEditType.SZ)
+            if (editType == TransformEditType.拡縮 || editType == TransformEditType.SZ)
             {
                 updateTransform |= view.DrawValue(GetNextFieldValue("SZ"), 0.01f, 0.1f, 1f,
                     scale.z,
@@ -1294,9 +1297,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     z => scale.z += z);
             }
 
-            if (editType == TransformEditType.サイズ)
+            if (editType == TransformEditType.拡縮)
             {
-                updateTransform |= view.DrawSliderValue(GetNextFieldValue("All"), 0f, 10f, 1f,
+                updateTransform |= view.DrawSliderValue(GetNextFieldValue("拡縮"), 0f, 10f, 0.01f, 1f,
                     scale.x,
                     x =>
                     {

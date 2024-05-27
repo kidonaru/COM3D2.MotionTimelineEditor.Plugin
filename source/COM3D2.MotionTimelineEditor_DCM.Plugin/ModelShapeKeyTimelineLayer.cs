@@ -416,7 +416,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var weight = blendShape.weight;
                 var updateTransform = false;
 
-                updateTransform |= view.DrawSliderValue(fieldValue, -1f, 2f, 0f,
+                updateTransform |= view.DrawSliderValue(fieldValue, -1f, 2f, 0.01f, 0f,
                     weight,
                     x => weight = x);
 

@@ -1164,7 +1164,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     if (copyFrameData.className != currentLayer.className)
                     {
-                        PluginUtils.LogWarning("ペーストするレイヤーが一致しません");
+                        PluginUtils.ShowDialog("ペーストするレイヤーが一致しません");
                         return;
                     }
 
@@ -1230,6 +1230,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 using (var reader = new StringReader(data))
                 {
                     var copyFrameData = (CopyLayerData) serializer.Deserialize(reader);
+
+                    if (copyFrameData.className != currentLayer.className)
+                    {
+                        PluginUtils.ShowDialog("ペーストするレイヤーが一致しません");
+                        return;
+                    }
 
                     if (copyFrameData.frames.Count == 0)
                     {

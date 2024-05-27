@@ -103,6 +103,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return;
             }
+            if (modelIndex < 0 || modelIndex >= _maidComboBoxList.Count || modelIndex >= _attachPointComboBoxList.Count)
+            {
+                return;
+            }
 
             var width = view.viewRect.width;
             var height = view.viewRect.height;

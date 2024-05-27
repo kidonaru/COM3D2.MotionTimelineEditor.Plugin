@@ -1070,7 +1070,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ref Vector2 scrollPosition,
             float itemHeight)
         {
-            var contentHeight = (itemHeight + margin) * items.Count + padding.y * 2;
+            var contentHeight = (itemHeight + margin) * items.Count + 20;
             var contentRect = GetDrawRect(0, 0, width, height);
             contentRect.width -= 20; // スクロールバーの幅分狭める
             contentRect.height = contentHeight;
@@ -1347,6 +1347,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             FloatFieldValue fieldValue,
             float minValue,
             float maxValue,
+            float diffValue,
             float resetValue,
             float value,
             Action<float> updateNewValue)
@@ -1355,6 +1356,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 fieldValue,
                 minValue,
                 maxValue,
+                diffValue,
                 () => updateNewValue(resetValue),
                 value,
                 updateNewValue);
@@ -1364,6 +1366,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             FloatFieldValue fieldValue,
             float minValue,
             float maxValue,
+            float diffValue,
             Action resetValueFunc,
             float value,
             Action<float> updateNewValue)
@@ -1373,25 +1376,46 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var newValue = value;
             var updated = false;
 
-            BeginLayout(LayoutDirection.Horizontal);
+            var subViewRect = GetDrawRect(250, 20);
+            var subView = new GUIView(subViewRect);
+            subView.SetEnabled(guiEnabled);
+            subView.margin = 0;
+            subView.padding = Vector2.zero;
+
+            subView.BeginLayout(LayoutDirection.Horizontal);
             {
                 var label = fieldValue.label;
                 if (label != null)
                 {
-                    DrawLabel(label, 50, 20);
+                    subView.DrawLabel(label, 50, 20);
                 }
 
-                newValue = DrawFloatFieldValue(null, fieldValue, 50, 20);
+                newValue = subView.DrawFloatFieldValue(null, fieldValue, 50, 20);
 
-                newValue = DrawSlider(newValue, minValue, maxValue, 100, 20);
+                if (subView.DrawButton("<", 20, 20))
+                {
+                    newValue -= diffValue;
+                }
+                if (subView.DrawButton(">", 20, 20))
+                {
+                    newValue += diffValue;
+                }
 
-                if (DrawButton("R", 20, 20))
+                subView.AddSpace(5);
+
+                newValue = subView.DrawSlider(newValue, minValue, maxValue, 80, 20);
+
+                subView.AddSpace(5);
+
+                if (subView.DrawButton("R", 20, 20))
                 {
                     resetValueFunc();
                     updated = true;
                 }
             }
-            EndLayout();
+            subView.EndLayout();
+
+            NextElement(subViewRect);
 
             if (!float.IsNaN(newValue) && newValue != value)
             {
