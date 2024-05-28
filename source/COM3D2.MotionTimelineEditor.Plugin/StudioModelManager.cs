@@ -20,7 +20,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string prefabName;
         public int myRoomId;
         public long bgObjectId;
-        public MenuInfo menu;
 
         public string fileNameOrId
         {
@@ -468,8 +467,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            MenuInfo menu = null;
-
             if (label.EndsWith(".menu", System.StringComparison.Ordinal))
             {
                 label = Path.GetFileName(label);
@@ -479,7 +476,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 fileName = Path.GetFileName(fileName);
 
-                menu = ModMenuLoader.Load(fileName);
+                var menu = ModMenuLoader.Load(fileName);
                 if (menu != null)
                 {
                     label = menu.name;
@@ -493,7 +490,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 fileName = string.IsNullOrEmpty(fileName) ? label : fileName,
                 myRoomId = myRoomId,
                 bgObjectId = bgObjectId,
-                menu = menu,
             };
             OfficialObjectLabelMap[label] = info;
 

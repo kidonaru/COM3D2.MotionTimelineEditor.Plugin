@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -13,14 +14,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public class ModMenuLoader
     {
         private static byte[] fileBuffer;
+        private static Dictionary<string, MenuInfo> menuCache = new Dictionary<string, MenuInfo>();
 
 		public static void ClearCache()
 		{
 			fileBuffer = null;
+            menuCache.Clear();
 		}
 
         public static MenuInfo Load(string menuFileName)
         {
+            MenuInfo menu;
+            if (menuCache.TryGetValue(menuFileName, out menu))
+            {
+                return menu;
+            }
+
+            menu = LoadInternal(menuFileName);
+            menuCache[menuFileName] = menu;
+
+            return menu;
+        }
+
+        private static MenuInfo LoadInternal(string menuFileName)
+        {
+            if (!menuFileName.EndsWith(".menu", StringComparison.Ordinal))
+            {
+                menuFileName += ".menu";
+            }
+
             byte[] buffer;
             try
             {
@@ -90,7 +112,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static byte[] ReadAFileBase(string filename)
+        private static byte[] ReadAFileBase(string filename)
         {
             byte[] result;
             using (AFileBase afileBase = GameUty.FileOpen(filename, null))

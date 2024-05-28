@@ -13,7 +13,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static BlendShapeController LoadController(StudioModelStat model)
         {
-            if (model == null || model.transform == null || model.info == null || model.info.menu == null)
+            if (model == null || model.transform == null || model.info == null)
             {
                 return null;
             }
@@ -24,7 +24,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return controller;
             }
 
-            var menu = model.info.menu;
+            var menu = ModMenuLoader.Load(model.info.fileName);
+            if (menu == null)
+            {
+                return null;
+            }
+
             var blendShapeCache = LoadCache(menu.modelFileName);
             if (blendShapeCache == null)
             {

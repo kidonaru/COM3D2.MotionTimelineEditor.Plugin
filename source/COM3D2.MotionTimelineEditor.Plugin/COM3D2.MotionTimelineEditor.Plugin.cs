@@ -396,6 +396,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 BlendShapeLoader.ClearCache();
+                ModMenuLoader.ClearCache();
             }
             catch (Exception e)
             {
