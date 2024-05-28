@@ -1125,7 +1125,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var tmpFrame = currentLayer.CreateFrame(currentFrameNo);
-            currentLayer.UpdateFrameWithCurrentStat(tmpFrame);
+            currentLayer.UpdateFrame(tmpFrame);
 
             var copyFrameData = new CopyLayerData
             {
@@ -1507,7 +1507,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             OnEndPoseEdit();
 
             var frame = currentLayer.CreateFrame(currentFrameNo);
-            currentLayer.UpdateFrameWithCurrentStat(frame);
+            currentLayer.UpdateFrame(frame);
             initialEditFrame = frame;
 
             if (maid != null)

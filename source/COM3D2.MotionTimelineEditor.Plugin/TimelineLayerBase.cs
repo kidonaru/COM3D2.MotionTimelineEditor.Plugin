@@ -354,7 +354,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (firstFrame == null)
             {
                 var frame = GetOrCreateFrame(0);
-                UpdateFrameWithCurrentStat(frame);
+                UpdateFrame(frame);
             }
             if (_dummyLastFrame == null)
             {
@@ -435,7 +435,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // do nothing
         }
 
-        public abstract void UpdateFrameWithCurrentStat(FrameData frame);
+        public abstract void UpdateFrame(FrameData frame);
         public abstract void ApplyAnm(long id, byte[] anmData);
         public abstract void ApplyCurrentFrame(bool motionUpdate);
         public abstract void OutputAnm();
@@ -464,7 +464,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var frame = GetOrCreateFrame(timelineManager.currentFrameNo);
-            UpdateFrameWithCurrentStat(frame);
+            UpdateFrame(frame);
 
             ApplyCurrentFrame(true);
 
@@ -487,7 +487,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var tmpFrame = CreateFrame(timelineManager.currentFrameNo);
-            UpdateFrameWithCurrentStat(tmpFrame);
+            UpdateFrame(tmpFrame);
 
             var diffBones = tmpFrame.GetDiffBones(timelineManager.initialEditFrame);
             if (diffBones.Count == 0)
@@ -962,7 +962,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     if (tmpFrame == null)
                     {
                         tmpFrame = CreateFrame(timelineManager.currentFrameNo);
-                        UpdateFrameWithCurrentStat(tmpFrame);
+                        UpdateFrame(tmpFrame);
                     }
 
                     var tmpBone = tmpFrame.GetBone(boneName);

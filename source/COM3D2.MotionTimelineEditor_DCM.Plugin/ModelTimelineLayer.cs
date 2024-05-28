@@ -174,7 +174,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override void UpdateFrameWithCurrentStat(FrameData frame)
+        public override void UpdateFrame(FrameData frame)
         {
             foreach (var model in modelManager.modelMap.Values)
             {

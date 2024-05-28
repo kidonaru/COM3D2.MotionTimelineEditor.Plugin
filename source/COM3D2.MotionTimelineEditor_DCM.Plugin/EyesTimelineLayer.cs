@@ -249,7 +249,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return Vector2.zero;
         }
 
-        public override void UpdateFrameWithCurrentStat(FrameData frame)
+        public override void UpdateFrame(FrameData frame)
         {
             foreach (var eyesName in allBoneNames)
             {

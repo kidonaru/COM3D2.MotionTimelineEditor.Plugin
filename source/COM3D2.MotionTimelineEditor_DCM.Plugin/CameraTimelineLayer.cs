@@ -157,7 +157,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             //PluginUtils.LogDebug("ApplyMotion: position={0}, rotation={1}, distance={2}, viewAngle={3}", position, rotation, distance, viewAngle);
         }
 
-        public override void UpdateFrameWithCurrentStat(FrameData frame)
+        public override void UpdateFrame(FrameData frame)
         {
             var uOCamera = MyHelper.GetUOCamera();
             var target = uOCamera.target;

@@ -144,7 +144,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             ApplyPlayData();
         }
 
-        public override void UpdateFrameWithCurrentStat(FrameData frame)
+        public override void UpdateFrame(FrameData frame)
         {
             var maid = this.maid;
             if (maid == null)

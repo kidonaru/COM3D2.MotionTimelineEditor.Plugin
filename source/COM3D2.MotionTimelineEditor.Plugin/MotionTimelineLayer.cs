@@ -120,7 +120,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             base.LateUpdate();
         }
 
-        public override void UpdateFrameWithCurrentStat(FrameData frame)
+        public override void UpdateFrame(FrameData frame)
         {
             var cacheBoneData = maidManager.cacheBoneData;
             if (cacheBoneData == null)

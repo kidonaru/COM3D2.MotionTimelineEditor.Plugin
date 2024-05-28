@@ -179,7 +179,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return Mathf.Lerp(startValue, endValue, lerpFrame);
         }
 
-        public override void UpdateFrameWithCurrentStat(FrameData frame)
+        public override void UpdateFrame(FrameData frame)
         {
             var maid = this.maid;
             foreach (var name in allBoneNames)
