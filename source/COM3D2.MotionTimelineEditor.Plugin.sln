@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COM3D2.MotionTimelineEditor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COM3D2.MotionTimelineEditor_DCM.Plugin", "COM3D2.MotionTimelineEditor_DCM.Plugin\COM3D2.MotionTimelineEditor_DCM.Plugin.csproj", "{D6C151C5-BFBA-4A1E-ACBB-16C8FC82C6A8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COM3D2.MotionTimelineEditor_SceneCapture.Plugin", "COM3D2.MotionTimelineEditor_SceneCapture.Plugin\COM3D2.MotionTimelineEditor_SceneCapture.Plugin.csproj", "{3766ABA0-DAAF-476C-BA45-3AFBF70AF7BA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{D6C151C5-BFBA-4A1E-ACBB-16C8FC82C6A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6C151C5-BFBA-4A1E-ACBB-16C8FC82C6A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6C151C5-BFBA-4A1E-ACBB-16C8FC82C6A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3766ABA0-DAAF-476C-BA45-3AFBF70AF7BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3766ABA0-DAAF-476C-BA45-3AFBF70AF7BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3766ABA0-DAAF-476C-BA45-3AFBF70AF7BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3766ABA0-DAAF-476C-BA45-3AFBF70AF7BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -87,6 +87,8 @@
     <Compile Include="MaidManager.cs" />
     <Compile Include="MainWindow.cs" />
     <Compile Include="MediaPlayerUI.cs" />
+    <Compile Include="ModelHackBase.cs" />
+    <Compile Include="ModelHackManager.cs" />
     <Compile Include="MotionPlayData.cs" />
     <Compile Include="ModMenuLoader.cs" />
     <Compile Include="MotionTimelineLayer.cs" />
@@ -97,7 +99,9 @@
     <Compile Include="StopwatchDebug.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StudioHack.cs" />
+    <Compile Include="SceneCaptureHack.cs" />
     <Compile Include="StudioHackBase.cs" />
+    <Compile Include="StudioHackManager.cs" />
     <Compile Include="StudioModelManager.cs" />
     <Compile Include="StudioModelStat.cs" />
     <Compile Include="StudioModelUI.cs" />

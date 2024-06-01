@@ -6,8 +6,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MTE = MotionTimelineEditor;
-
     public enum IKHoldType
     {
         Arm_R_Joint,

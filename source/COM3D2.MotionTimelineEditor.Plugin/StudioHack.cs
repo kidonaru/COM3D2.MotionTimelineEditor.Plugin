@@ -27,6 +27,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public WFCheckBox ikBoxVisibleRoot = null;
         public WFCheckBox ikBoxVisibleBody = null;
 
+        public override string pluginName
+        {
+            get
+            {
+                return "StudioMode";
+            }
+        }
+
         public override int priority
         {
             get
@@ -100,7 +108,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         transform,
                         targetObj.attachi_point,
                         attachMaidSlotNo,
-                        targetObj);
+                        targetObj,
+                        pluginName);
 
                     _modelList.Add(model);
                 }

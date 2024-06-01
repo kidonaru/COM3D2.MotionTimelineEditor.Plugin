@@ -1,12 +1,11 @@
 using System;
+using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 using UnityInjector;
 using UnityInjector.Attributes;
 
 namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 {
-    using MTE = MotionTimelineEditor.Plugin.MotionTimelineEditor;
-
     [
         PluginFilter("COM3D2x64"),
         PluginName(PluginUtils.PluginFullName),
@@ -33,7 +32,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 
         private void Initialize()
         {
-            MTE.instance.AddStudioHack(new MeidoPhotoStudioHack());
+            StudioHackManager.instance.Register(new MeidoPhotoStudioHack());
         }
     }
 }

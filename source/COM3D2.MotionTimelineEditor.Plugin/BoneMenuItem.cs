@@ -2,8 +2,6 @@ using System.Collections.Generic;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MTE = MotionTimelineEditor;
-
     public class BoneMenuItem : IBoneMenuItem
     {
         public string name { get; private set; }
@@ -64,7 +62,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return MTE.studioHack;
+                return StudioHackManager.studioHack;
             }
         }
 

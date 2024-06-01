@@ -17,8 +17,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private List<ComboBoxValue<string>> _pluginComboBoxList = new List<ComboBoxValue<string>>();
         private List<ComboBoxValue<MaidCache>> _maidComboBoxList = new List<ComboBoxValue<MaidCache>>();
         private List<ComboBoxValue<string>> _attachPointComboBoxList = new List<ComboBoxValue<string>>();
+        private List<string> _pluginNames = new List<string>();
+        private Dictionary<string, int> _pluginNameToIndex = new Dictionary<string, int>();
         private List<MaidCache> _maidCaches = new List<MaidCache>();
         private Vector2 _scrollPosition = Vector2.zero;
 
@@ -31,6 +34,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var view = new GUIView(0, 0, WINDOW_WIDTH, 20);
                 view.padding = Vector2.zero;
+            }
+
+            _pluginNames = modelHackManager.pluginNames;
+
+            _pluginNameToIndex.Clear();
+            for (var i = 0; i < _pluginNames.Count; i++)
+            {
+                _pluginNameToIndex[_pluginNames[i]] = i;
             }
 
             _maidCaches.Clear();
@@ -54,6 +65,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.DrawLabel("モデルがありません", -1, 20);
                 return;
+            }
+
+            while (_pluginComboBoxList.Count < models.Count)
+            {
+                _pluginComboBoxList.Add(new ComboBoxValue<string>
+                {
+                    getName = (name, _) =>
+                    {
+                        return string.IsNullOrEmpty(name) ? "Default" : name;
+                    },
+                });
             }
 
             while (_maidComboBoxList.Count < models.Count)
@@ -122,6 +144,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
+                // プラグイン選択
+                {
+                    var pluginComboBox = _pluginComboBoxList[modelIndex];
+
+                    pluginComboBox.currentIndex = GetPluginIndex(model.pluginName);
+                    pluginComboBox.items = _pluginNames;
+                    pluginComboBox.onSelected = (pluginName, index) =>
+                    {
+                        modelManager.ChangePluginName(model, pluginName);
+                    };
+
+                    view.DrawComboBoxButton(pluginComboBox, 150, 20, true);
+                }
+
                 if (view.DrawButton("複製", 50, 20))
                 {
                     timelineManager.CopyModel(model);
@@ -129,7 +165,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (view.DrawButton("削除", 50, 20))
                 {
-                    timelineManager.DeleteModel(model);
+                    modelManager.DeleteModel(model);
                 }
             }
             view.EndLayout();
@@ -149,7 +185,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         {
                             model.attachPoint = AttachPoint.Head;
                         }
-                        studioHack.UpdateAttachPoint(model);
+                        modelManager.UpdateAttachPoint(model);
                     };
 
                     view.DrawComboBoxButton(maidComboBox, 150, 20, true);
@@ -164,7 +200,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     attachPointComboBox.onSelected = (maidCache, index) =>
                     {
                         model.attachPoint = (AttachPoint) index;
-                        studioHack.UpdateAttachPoint(model);
+                        modelManager.UpdateAttachPoint(model);
                     };
 
                     view.DrawComboBoxButton(attachPointComboBox, 100, 20, true);
@@ -175,15 +211,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.DrawHorizontalLine(Color.gray);
         }
 
+        private int GetPluginIndex(string pluginName)
+        {
+            int index;
+            if (!string.IsNullOrEmpty(pluginName) && _pluginNameToIndex.TryGetValue(pluginName, out index))
+            {
+                return index;
+            }
+
+            return 0;
+        }
+
         private bool IsComboBoxFocused()
         {
             var models = modelManager.models;
             for (var i = 0; i < models.Count; i++)
             {
+                var pluginComboBox = _pluginComboBoxList[i];
                 var maidComboBox = _maidComboBoxList[i];
                 var attachPointComboBox = _attachPointComboBoxList[i];
 
-                if (maidComboBox.focused || attachPointComboBox.focused)
+                if (pluginComboBox.focused || maidComboBox.focused || attachPointComboBox.focused)
                 {
                     return true;
                 }
@@ -199,13 +247,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var models = modelManager.models;
             for (var i = 0; i < models.Count; i++)
             {
-                if (i >= _maidComboBoxList.Count || i >= _attachPointComboBoxList.Count)
+                if (i >= _pluginComboBoxList.Count || i >= _maidComboBoxList.Count || i >= _attachPointComboBoxList.Count)
                 {
                     break;
                 }
 
+                var pluginComboBox = _pluginComboBoxList[i];
                 var maidComboBox = _maidComboBoxList[i];
                 var attachPointComboBox = _attachPointComboBoxList[i];
+
+                view.DrawComboBoxContent(
+                    pluginComboBox,
+                    130, 120,
+                    SubWindow.rc_stgw.width, SubWindow.rc_stgw.height,
+                    20);
 
                 view.DrawComboBoxContent(
                     maidComboBox,

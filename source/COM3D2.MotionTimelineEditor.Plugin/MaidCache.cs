@@ -7,7 +7,6 @@ using UnityEngine.Events;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MTE = MotionTimelineEditor;
     using AttachPoint = PhotoTransTargetObject.AttachPoint;
 
     public class MaidCache
@@ -293,7 +292,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return MTE.studioHack;
+                return StudioHackManager.studioHack;
             }
         }
 

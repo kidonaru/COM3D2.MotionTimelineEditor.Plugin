@@ -7,8 +7,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using MTE = MotionTimelineEditor;
 
-    public abstract class StudioHackBase
+    public abstract class StudioHackBase : IModelHack
     {
+        public abstract string pluginName { get; }
         public abstract int priority { get; }
         public abstract Maid selectedMaid { get; }
         public abstract List<Maid> allMaids { get; }
@@ -99,7 +100,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public StudioHackBase()
+        protected StudioHackBase()
         {
         }
 

@@ -14,6 +14,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public AttachPoint attachPoint;
         [XmlElement("AttachMaidSlotNo")]
         public int attachMaidSlotNo = -1;
+        [XmlElement("PluginName")]
+        public string pluginName;
     }
 
     [XmlRoot("TimelineData")]

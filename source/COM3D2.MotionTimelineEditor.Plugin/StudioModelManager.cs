@@ -9,7 +9,6 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MTE = MotionTimelineEditor;
     using AttachPoint = PhotoTransTargetObject.AttachPoint;
 
     public class OfficialObjectInfo
@@ -46,7 +45,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static event UnityAction<StudioModelStat> onModelAdded;
         public static event UnityAction<StudioModelStat> onModelRemoved;
-        public static event UnityAction onModelAttached;
+        public static event UnityAction<StudioModelStat> onModelUpdated;
 
         private static StudioModelManager _instance = null;
         public static StudioModelManager instance
@@ -61,11 +60,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static StudioHackBase studioHack
+        private static ModelHackManager modelHackManager
         {
             get
             {
-                return MTE.studioHack;
+                return ModelHackManager.instance;
+            }
+        }
+
+        private static TimelineManager timelineManager
+        {
+            get
+            {
+                return TimelineManager.instance;
             }
         }
 
@@ -183,18 +190,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             _prevUpdateFrame = Time.frameCount;
 
-            var modelList = studioHack.modelList;
+            var modelList = modelHackManager.modelList;
             FixGroup(modelList);
 
             var addedModels = new List<StudioModelStat>();
             var removedModels = new List<StudioModelStat>();
-            var updated = false;
-            var attachPointUpdated = false;
+            var updatedModels = new List<StudioModelStat>();
+            var refresh = false;
 
             foreach (var model in modelList)
             {
                 if (string.IsNullOrEmpty(model.name))
                 {
+                    continue;
+                }
+
+                if (model.transform == null)
+                {
+                    PluginUtils.LogWarning("StudioModelManager: transformがありません: name={0}", model.name);
                     continue;
                 }
 
@@ -206,17 +219,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     addedModels.Add(cachedModel);
                 }
 
-                if (cachedModel.transform != model.transform)
+                if (cachedModel.transform != model.transform || cachedModel.pluginName != model.pluginName)
                 {
                     cachedModel.FromModel(model);
-                    updated = true;
+                    updatedModels.Add(cachedModel);
+                    refresh = true;
                 }
 
                 if (cachedModel.attachPoint != model.attachPoint || cachedModel.attachMaidSlotNo != model.attachMaidSlotNo)
                 {
                     cachedModel.attachPoint = model.attachPoint;
                     cachedModel.attachMaidSlotNo = model.attachMaidSlotNo;
-                    attachPointUpdated = true;
+                    updatedModels.Add(cachedModel);
                 }
             }
 
@@ -229,12 +243,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         removedModels.Add(modelMap[name]);
                         modelMap.Remove(name);
-                        updated = true;
+                        refresh = true;
                     }
                 }
             }
 
-            if (updated)
+            if (refresh)
             {
                 modelNames.Clear();
                 modelNames.AddRange(modelMap.Keys);
@@ -266,43 +280,42 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 foreach (var model in models)
                 {
-                    PluginUtils.Log("model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
-                        model.info.type, model.displayName, model.name, model.info.label, model.info.fileName, model.info.myRoomId, model.info.bgObjectId);
+                    PluginUtils.LogDebug("model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6} pluginName={7}",
+                        model.info.type, model.displayName, model.name, model.info.label, model.info.fileName, model.info.myRoomId, model.info.bgObjectId, model.pluginName);
 
                     foreach (var bone in model.bones)
                     {
-                        PluginUtils.Log("  bone: name={0}", bone.name);
+                        PluginUtils.LogDebug("  bone: name={0}", bone.name);
                     }
 
                     foreach (var blendShape in model.blendShapes)
                     {
-                        PluginUtils.Log("  blendShape: name={0}", blendShape.name);
-                    }
-                }
-
-                foreach (var model in addedModels)
-                {
-                    if (onModelAdded != null)
-                    {
-                        onModelAdded.Invoke(model);
-                    }
-                }
-
-                foreach (var model in removedModels)
-                {
-                    if (onModelRemoved != null)
-                    {
-                        onModelRemoved.Invoke(model);
+                        PluginUtils.LogDebug("  blendShape: name={0}", blendShape.name);
                     }
                 }
             }
-            else if (attachPointUpdated)
-            {
-                PluginUtils.Log("StudioModelManager: Attach point updated");
 
-                if (onModelAttached != null)
+            foreach (var model in addedModels)
+            {
+                if (onModelAdded != null)
                 {
-                    onModelAttached.Invoke();
+                    onModelAdded.Invoke(model);
+                }
+            }
+
+            foreach (var model in removedModels)
+            {
+                if (onModelRemoved != null)
+                {
+                    onModelRemoved.Invoke(model);
+                }
+            }
+
+             foreach (var model in updatedModels)
+            {
+                if (onModelUpdated != null)
+                {
+                    onModelUpdated.Invoke(model);
                 }
             }
         }
@@ -311,7 +324,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             LateUpdate(true);
 
-            bool updated = false;
             foreach (var modelData in modelDataList)
             {
                 var model = GetModel(modelData.name);
@@ -322,18 +334,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         null,
                         modelData.attachPoint,
                         modelData.attachMaidSlotNo,
-                        null);
-                    studioHack.CreateModel(model);
-                    updated = true;
+                        null,
+                        modelData.pluginName);
+                    modelHackManager.CreateModel(model);
 
                     PluginUtils.Log("Create model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
                         model.info.type, model.displayName, model.name, model.info.label, model.info.fileName, model.info.myRoomId, model.info.bgObjectId);
+                }
+                else if (model.pluginName != modelData.pluginName)
+                {
+                    modelHackManager.ChangePluginName(model, modelData.pluginName);
                 }
                 else
                 {
                     model.attachPoint = modelData.attachPoint;
                     model.attachMaidSlotNo = modelData.attachMaidSlotNo;
-                    studioHack.UpdateAttachPoint(model);
+                    modelHackManager.UpdateAttachPoint(model);
                 }
             }
 
@@ -341,18 +357,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (modelDataList.FindIndex(data => data.name == model.name) < 0)
                 {
-                    studioHack.DeleteModel(model);
-                    updated = true;
+                    modelHackManager.DeleteModel(model);
 
                     PluginUtils.Log("Remove model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
                         model.info.type, model.displayName, model.name, model.info.label, model.info.fileName, model.info.myRoomId, model.info.bgObjectId);
                 }
             }
 
-            if (updated)
-            {
-                LateUpdate(true);
-            }
+            LateUpdate(true);
         }
 
         public void OnPluginDisable()
@@ -375,6 +387,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             boneNames.Clear();
             blendShapeNames.Clear();
             _prevUpdateFrame = -1;
+
+            modelHackManager.DeleteAllModels();
         }
 
         public StudioModelStat CreateModelStat(
@@ -385,7 +399,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Transform transform,
             AttachPoint attachPoint,
             int attachMaidSlotNo,
-            object obj)
+            object obj,
+            string pluginName)
         {
             var label = displayName;
             var fileName = modelName;
@@ -397,13 +412,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 fileName = RemoveGroupSuffix(fileName);
             }
 
-            if (fileName.StartsWith("MYR_", System.StringComparison.Ordinal))
+            if (!string.IsNullOrEmpty(fileName) && fileName.StartsWith("MYR_", System.StringComparison.Ordinal))
             {
                 myRoomId = ExtractMyRoomId(fileName);
             }
 
             var info = FindOfficialObject(label, fileName, myRoomId, bgObjectId);
-            return new StudioModelStat(info, group, transform, attachPoint, attachMaidSlotNo, obj);
+            return new StudioModelStat(info, group, transform, attachPoint, attachMaidSlotNo, obj, pluginName);
         }
 
         public StudioModelStat CreateModelStat(
@@ -411,7 +426,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Transform transform,
             AttachPoint attachPoint,
             int attachMaidSlotNo,
-            object obj)
+            object obj,
+            string pluginName)
         {
             int myRoomId = 0;
             long bgObjectId = 0;
@@ -424,7 +440,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 transform,
                 attachPoint,
                 attachMaidSlotNo,
-                obj);
+                obj,
+                pluginName);
+        }
+
+        public void DeleteModel(StudioModelStat model)
+        {
+            modelHackManager.DeleteModel(model);
+            LateUpdate(true);
+
+            timelineManager.RequestHistory("モデルの削除: " + model.displayName);
+        }
+
+        public void CreateModel(StudioModelStat model)
+        {
+            modelHackManager.CreateModel(model);
+            LateUpdate(true);
+
+            timelineManager.RequestHistory("モデルの追加: " + model.displayName);
+        }
+
+        public void UpdateAttachPoint(StudioModelStat model)
+        {
+            modelHackManager.UpdateAttachPoint(model);
+            LateUpdate(true);
+
+            //timelineManager.RequestHistory("アタッチ変更: " + model.displayName);
+        }
+
+        public void ChangePluginName(StudioModelStat model, string pluginName)
+        {
+            modelHackManager.ChangePluginName(model, pluginName);
+            LateUpdate(true);
+
+            timelineManager.RequestHistory("プラグイン変更: " + model.displayName);
         }
 
         private OfficialObjectInfo FindOfficialObject(
@@ -472,7 +521,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 label = Path.GetFileName(label);
             }
 
-            if (fileName.EndsWith(".menu", System.StringComparison.Ordinal))
+            if (!string.IsNullOrEmpty(fileName) && fileName.EndsWith(".menu", System.StringComparison.Ordinal))
             {
                 fileName = Path.GetFileName(fileName);
 
@@ -508,11 +557,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 //PluginUtils.Log("FixGroup: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
                 //        model.info.type, model.displayName, model.name, model.info.label, model.info.fileName, model.info.myRoomId, model.info.bgObjectId);
-                int group = model.group;
-                if (group != 0)
-                {
-                    continue;
-                }
+                int group = 0;
 
                 if (_modelGroupMap.TryGetValue(model.info.fileName, out group))
                 {
@@ -603,6 +648,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static int ExtractGroup(string input)
         {
+            if (string.IsNullOrEmpty(input))
+            {
+                return 0;
+            }
             var match = _regexGroup.Match(input);
             if (match.Success)
             {
@@ -613,11 +662,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static string RemoveGroupSuffix(string input)
         {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
             return _regexGroup.Replace(input, "").Trim();
         }
 
         public static int ExtractMyRoomId(string input)
         {
+            if (string.IsNullOrEmpty(input))
+            {
+                return 0;
+            }
             var match = _regexMyRoomId.Match(input);
             if (match.Success)
             {

@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityInjector;
 using UnityInjector.Attributes;
-using System.Collections.Generic;
 using System.Collections;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
@@ -51,9 +50,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public bool isVisible;
-
-        private List<StudioHackBase> studioHacks = new List<StudioHackBase>();
-        private List<StudioHackBase> activeStudioHacks = new List<StudioHackBase>();
 
         public static MotionTimelineEditor instance { get; private set; }
 
@@ -121,6 +117,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static StudioHackManager studioHackManager
+        {
+            get
+            {
+                return StudioHackManager.instance;
+            }
+        }
+
+        private static StudioHackBase studioHack
+        {
+            get
+            {
+                return StudioHackManager.studioHack;
+            }
+        }
+
+        private static ModelHackManager modelHackManager
+        {
+            get
+            {
+                return ModelHackManager.instance;
+            }
+        }
+
         public static Rect rc_stgw
         {
             get
@@ -132,7 +152,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static MainWindow mainWindow = new MainWindow();
         public static SubWindow subWindow = new SubWindow();
         public static Config config = new Config();
-        public static StudioHackBase studioHack = null;
 
         private static TimelineData timeline
         {
@@ -177,7 +196,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     return;
                 }
 
-                UpdateStudioHack();
+                studioHackManager.Update();
+                modelHackManager.Update();
 
                 if (studioHack == null)
                 {
@@ -307,39 +327,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void UpdateStudioHack()
-        {
-            if (studioHacks.Count == 0)
-            {
-                return;
-            }
-
-            studioHack = null;
-            activeStudioHacks.Clear();
-
-            foreach (var hack in studioHacks)
-            {
-                if (hack.isSceneActive)
-                {
-                    activeStudioHacks.Add(hack);
-                }
-            }
-
-            foreach (var hack in activeStudioHacks)
-            {
-                if (hack.IsValid())
-                {
-                    studioHack = hack;
-                    break;
-                }
-            }
-
-            if (studioHack == null && activeStudioHacks.Count > 0)
-            {
-                studioHack = activeStudioHacks[0];
-            }
-        }
-
         public void LateUpdate()
         {
             try
@@ -388,11 +375,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (sceneName.name == "SceneTitle")
                 {
                     this.isEnable = false;
-                }
-
-                foreach (var studioHack in studioHacks)
-                {
-                    studioHack.OnChangedSceneLevel(sceneName, sceneMode);
                 }
 
                 BlendShapeLoader.ClearCache();
@@ -481,7 +463,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 SceneManager.sceneLoaded += OnChangedSceneLevel;
                 TimelineManager.onRefresh += OnRefreshTimeline;
 
-                AddStudioHack(new StudioHack());
+                studioHackManager.Register(new StudioHack());
 
                 timelineManager.RegisterLayer(
                     typeof(MotionTimelineLayer), MotionTimelineLayer.Create
@@ -536,17 +518,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void AddStudioHack(StudioHackBase studioHack)
-        {
-            if (studioHack == null || !studioHack.Init())
-            {
-                return;
-            }
-
-            studioHacks.Add(studioHack);
-            studioHacks.Sort((a, b) => b.priority - a.priority);
-        }
-
         public void SaveScreenShot(string filePath, int width, int height)
         {
             StartCoroutine(SaveScreenShotInternal(filePath, width, height));
@@ -591,7 +562,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void OnPluginEnable()
         {
-            UpdateStudioHack();
+            studioHackManager.Update();
+            modelHackManager.Update();
 
             if (studioHack == null || !studioHack.IsValid())
             {

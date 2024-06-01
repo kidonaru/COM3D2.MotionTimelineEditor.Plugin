@@ -220,6 +220,14 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
         }
 
+        public override string pluginName
+        {
+            get
+            {
+                return "MultipleMaids";
+            }
+        }
+
         public override int priority
         {
             get
@@ -308,7 +316,8 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                             dogu.transform,
                             attachPoint,
                             attachMaidSlotNo,
-                            dogu);
+                            dogu,
+                            pluginName);
                         _modelList.Add(model);
                     }
                 }

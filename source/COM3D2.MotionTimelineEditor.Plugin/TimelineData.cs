@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MTE = MotionTimelineEditor;
     using AttachPoint = PhotoTransTargetObject.AttachPoint;
 
     public class TimelineModelData
@@ -13,21 +12,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string name;
         public AttachPoint attachPoint;
         public int attachMaidSlotNo = -1;
+        public string pluginName;
 
         public TimelineModelData()
         {
         }
 
-        public TimelineModelData(StudioModelStat stat)
+        public TimelineModelData(StudioModelStat model)
         {
-            FromStat(stat);
+            FromModel(model);
         }
 
-        public void FromStat(StudioModelStat stat)
+        public void FromModel(StudioModelStat model)
         {
-            name = stat.name;
-            attachPoint = stat.attachPoint;
-            attachMaidSlotNo = stat.attachMaidSlotNo;
+            name = model.name;
+            attachPoint = model.attachPoint;
+            attachMaidSlotNo = model.attachMaidSlotNo;
+            pluginName = model.pluginName;
         }
 
         public void FromXml(TimelineModelXml xml)
@@ -35,6 +36,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             name = xml.name;
             attachPoint = xml.attachPoint;
             attachMaidSlotNo = xml.attachMaidSlotNo;
+            pluginName = xml.pluginName;
         }
 
         public TimelineModelXml ToXml()
@@ -44,6 +46,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 name = name,
                 attachPoint = attachPoint,
                 attachMaidSlotNo = attachMaidSlotNo,
+                pluginName = pluginName,
             };
             return xml;
         }
@@ -294,7 +297,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return MTE.studioHack;
+                return StudioHackManager.studioHack;
             }
         }
 

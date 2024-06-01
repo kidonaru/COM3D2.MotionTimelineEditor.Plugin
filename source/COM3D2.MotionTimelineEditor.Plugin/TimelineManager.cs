@@ -123,7 +123,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return MTE.studioHack;
+                return StudioHackManager.studioHack;
             }
         }
 
@@ -140,6 +140,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return StudioModelManager.instance;
+            }
+        }
+
+        private static ModelHackManager modelHackManager
+        {
+            get
+            {
+                return ModelHackManager.instance;
             }
         }
 
@@ -188,7 +196,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             MaidManager.onMaidSlotNoChanged += OnMaidSlotNoChanged;
             StudioModelManager.onModelAdded += OnModelAdded;
             StudioModelManager.onModelRemoved += OnModelRemoved;
-            StudioModelManager.onModelAttached += OnModelAttached;
+            StudioModelManager.onModelUpdated += OnModelUpdated;
         }
 
         public void Update()
@@ -1469,19 +1477,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             timeline.OnCopyModel(model, newModel);
-            studioHack.CreateModel(newModel);
-            modelManager.LateUpdate(true);
-        }
-
-        public void DeleteModel(StudioModelStat model)
-        {
-            if (model == null || timeline == null)
-            {
-                return;
-            }
-
-            studioHack.DeleteModel(model);
-            modelManager.LateUpdate(true);
+            modelManager.CreateModel(newModel);
         }
 
         public void OnPluginEnable()
@@ -1498,7 +1494,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (timeline != null)
             {
                 timeline.OnPluginDisable();
-                studioHack.DeleteAllModels();
             }
         }
 
@@ -1584,7 +1579,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var model = models[i];
                     var timelineModel = timelineModels[i];
-                    timelineModel.FromStat(model);
+                    timelineModel.FromModel(model);
                 }
             }
         }
@@ -1615,7 +1610,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void OnModelAttached()
+        private void OnModelUpdated(StudioModelStat model)
         {
             if (IsValidData())
             {

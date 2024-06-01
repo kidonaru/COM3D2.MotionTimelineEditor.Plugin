@@ -107,6 +107,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public AttachPoint attachPoint { get; set; }
         public int attachMaidSlotNo { get; set; }
         public object obj { get; set; }
+        public string pluginName { get; set; }
         public List<StudioModelBone> bones { get; private set; }
         public List<StudioModelBlendShape> blendShapes { get; private set; }
         public BlendShapeController blendShapeController { get; private set; }
@@ -142,9 +143,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Transform transform,
             AttachPoint attachPoint,
             int attachMaidSlotNo,
-            object obj) : this()
+            object obj,
+            string pluginName) : this()
         {
-            Init(info, group, transform, attachPoint, attachMaidSlotNo, obj);
+            Init(info, group, transform, attachPoint, attachMaidSlotNo, obj, pluginName);
         }
 
         public void Init(
@@ -153,7 +155,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Transform transform,
             AttachPoint attachPoint,
             int attachMaidSlotNo,
-            object obj)
+            object obj,
+            string pluginName)
         {
             this.info = info;
             this.group = group;
@@ -161,6 +164,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.attachMaidSlotNo = attachMaidSlotNo;
             this.transform = transform;
             this.obj = obj;
+            this.pluginName = pluginName;
 
             InitName();
         }
@@ -187,13 +191,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void FromModel(StudioModelStat model)
         {
             info = model.info;
+            name = model.name;
+            displayName = model.displayName;
             group = model.group;
             attachPoint = model.attachPoint;
             attachMaidSlotNo = model.attachMaidSlotNo;
             obj = model.obj;
+            pluginName = model.pluginName;
+
             transform = model.transform;
-            name = model.name;
-            displayName = model.displayName;
         }
 
         public void FixBlendValues()

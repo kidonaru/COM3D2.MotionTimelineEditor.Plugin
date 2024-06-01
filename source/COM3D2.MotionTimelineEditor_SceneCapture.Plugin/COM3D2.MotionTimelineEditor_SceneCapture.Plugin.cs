@@ -4,15 +4,23 @@ using UnityEngine;
 using UnityInjector;
 using UnityInjector.Attributes;
 
-namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
+namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
 {
     [
         PluginFilter("COM3D2x64"),
         PluginName(PluginUtils.PluginFullName),
         PluginVersion(PluginUtils.PluginVersion)
     ]
-    public class MotionTimelineEditor_MultipleMaids : PluginBase
+    public class MotionTimelineEditor_DCM : PluginBase
     {
+        private static ModelHackManager modelHackManager
+        {
+            get
+            {
+                return ModelHackManager.instance;
+            }
+        }
+
         public void Awake()
         {
             GameObject.DontDestroyOnLoad(this);
@@ -32,7 +40,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         private void Initialize()
         {
-            StudioHackManager.instance.Register(new MultipleMaidsHack());
+            modelHackManager.Register(new SceneCaptureHack());
         }
     }
 }

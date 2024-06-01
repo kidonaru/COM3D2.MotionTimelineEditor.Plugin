@@ -7,12 +7,6 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-call .\source\COM3D2.MotionTimelineEditor_DCM.Plugin\build.bat debug
-if %ERRORLEVEL% neq 0 (
-    echo ビルドに失敗しました
-    exit /b 1
-)
-
 call .\source\COM3D2.MotionTimelineEditor_MultipleMaids.Plugin\build.bat debug
 if %ERRORLEVEL% neq 0 (
     echo ビルドに失敗しました
@@ -20,6 +14,18 @@ if %ERRORLEVEL% neq 0 (
 )
 
 call .\source\COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin\build.bat debug
+if %ERRORLEVEL% neq 0 (
+    echo ビルドに失敗しました
+    exit /b 1
+)
+
+call .\source\COM3D2.MotionTimelineEditor_DCM.Plugin\build.bat debug
+if %ERRORLEVEL% neq 0 (
+    echo ビルドに失敗しました
+    exit /b 1
+)
+
+call .\source\COM3D2.MotionTimelineEditor_SceneCapture.Plugin\build.bat debug
 if %ERRORLEVEL% neq 0 (
     echo ビルドに失敗しました
     exit /b 1

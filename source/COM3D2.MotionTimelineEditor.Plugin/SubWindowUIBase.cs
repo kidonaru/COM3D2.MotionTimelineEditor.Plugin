@@ -1,6 +1,7 @@
+using UnityEngine;
+
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using UnityEngine;
     using MTE = MotionTimelineEditor;
 
     public abstract class SubWindowUIBase
@@ -59,7 +60,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return MTE.studioHack;
+                return StudioHackManager.studioHack;
+            }
+        }
+        
+        protected static ModelHackManager modelHackManager
+        {
+            get
+            {
+                return ModelHackManager.instance;
             }
         }
         

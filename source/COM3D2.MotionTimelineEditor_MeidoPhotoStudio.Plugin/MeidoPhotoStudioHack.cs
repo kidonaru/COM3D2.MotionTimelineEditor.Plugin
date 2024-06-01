@@ -248,6 +248,14 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
         }
 
+        public override string pluginName
+        {
+            get
+            {
+                return "MeidoPhotoStudio";
+            }
+        }
+
         public override int priority
         {
             get
@@ -314,7 +322,8 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                         transform,
                         attachPoint,
                         attachMaidSlotNo,
-                        prop);
+                        prop,
+                        pluginName);
 
                     _modelList.Add(model);
                 }
