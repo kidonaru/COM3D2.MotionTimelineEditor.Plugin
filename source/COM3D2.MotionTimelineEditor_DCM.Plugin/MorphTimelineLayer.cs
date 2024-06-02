@@ -408,7 +408,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 false,
                 true);
 
-            view.SetEnabled(studioHack.isPoseEditing);
+            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
             Action<string> drawMorphSlider = morphName =>
             {
@@ -484,8 +484,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             _contentRect.height = view.currentPos.y + 20;
 
             view.EndScrollView();
-
-            view.SetEnabled(true);
         }
 
         public override ITransformData CreateTransformData(string name)

@@ -3,8 +3,6 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MTE = MotionTimelineEditor;
-
     public class ModelHackManager
     {
         private Dictionary<string, IModelHack> modelHackMap = new Dictionary<string, IModelHack>();
@@ -69,7 +67,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return MTE.config;
+                return ConfigManager.config;
             }
         }
 

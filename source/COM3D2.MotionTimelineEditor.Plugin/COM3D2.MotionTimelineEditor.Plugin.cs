@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using UnityInjector;
 using UnityInjector.Attributes;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -77,6 +78,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static TimelineLoadManager timelineLoadManager
+        {
+            get
+            {
+                return TimelineLoadManager.instance;
+            }
+        }
+
         protected static StudioModelManager modelManager
         {
             get
@@ -141,23 +150,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static Rect rc_stgw
+        private static IKHoldManager ikHoldManager
         {
             get
             {
-                return MainWindow.rc_stgw;
+                return IKHoldManager.instance;
             }
         }
 
-        public static MainWindow mainWindow = new MainWindow();
-        public static SubWindow subWindow = new SubWindow();
-        public static Config config = new Config();
-
-        private static TimelineData timeline
+        private static WindowManager windowManager
         {
             get
             {
-                return timelineManager.timeline;
+                return WindowManager.instance;
+            }
+        }
+
+        private static ConfigManager configManager
+        {
+            get
+            {
+                return ConfigManager.instance;
+            }
+        }
+
+        private static Config config
+        {
+            get
+            {
+                return ConfigManager.config;
             }
         }
 
@@ -167,6 +188,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return timelineManager.currentLayer;
             }
+        }
+
+        private static MainWindow mainWindow
+        {
+            get
+            {
+                return windowManager.mainWindow;
+            }
+        }
+
+        public MotionTimelineEditor()
+        {
         }
 
         public void Awake()
@@ -198,6 +231,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 studioHackManager.Update();
                 modelHackManager.Update();
+                windowManager.Update();
 
                 if (studioHack == null)
                 {
@@ -316,9 +350,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     studioHack.Update();
                     timelineManager.Update();
-                    mainWindow.Update();
-                    subWindow.Update();
                     bgmManager.Update();
+                    ikHoldManager.Update();
                 }
             }
             catch (Exception e)
@@ -346,8 +379,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (isEnable)
                 {
-                    subWindow.LateUpdate();
-
                     if (!timelineManager.IsValidData())
                     {
                         return;
@@ -355,6 +386,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     modelManager.LateUpdate(false);
                     timelineManager.LateUpdate();
+                    ikHoldManager.LateUpdate();
                 }
             }
             catch (Exception e)
@@ -388,61 +420,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         void OnApplicationQuit()
         {
-            SaveConfigXml();
+            configManager.SaveConfigXml();
         }
 
         public void OnRefreshTimeline()
         {
             mainWindow.UpdateTexture();
-        }
-
-        public static void LoadConfigXml()
-        {
-            try
-            {
-                var path = PluginUtils.ConfigPath;
-                if (!File.Exists(path))
-                {
-                    return;
-                }
-
-                var serializer = new XmlSerializer(typeof(Config));
-                using (var stream = new FileStream(path, FileMode.Open))
-                {
-                    config = (Config)serializer.Deserialize(stream);
-                    config.ConvertVersion();
-                }
-            }
-            catch (Exception e)
-            {
-                PluginUtils.LogException(e);
-            }
-        }
-
-        public static void SaveConfigXml()
-        {
-            config.dirty = false;
-
-            PluginUtils.Log("設定保存中...");
-            try
-            {
-                var path = PluginUtils.ConfigPath;
-                var serializer = new XmlSerializer(typeof(Config));
-                using (var stream = new FileStream(path, FileMode.Create))
-                {
-                    serializer.Serialize(stream, config);
-                }
-            }
-            catch (Exception e)
-            {
-                PluginUtils.LogException(e);
-            }
-        }
-
-        public static void ResetConfig()
-        {
-            config = new Config();
-            SaveConfigXml();
         }
 
         private void Initialize()
@@ -451,8 +434,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 PluginUtils.Log("初期化中...");
 
-                LoadConfigXml();
-                SaveConfigXml();
+                configManager.Init();
 
                 if (!config.pluginEnabled)
                 {
@@ -469,11 +451,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     typeof(MotionTimelineLayer), MotionTimelineLayer.Create
                 );
 
-                mainWindow.Init();
-                subWindow.Init();
+                windowManager.Init();
                 boneMenuManager.Init();
                 bgmManager.Init();
                 movieManager.Init();
+                ikHoldManager.Init();
+                timelineLoadManager.Init();
 
                 AddGearMenu();
             }
@@ -526,14 +509,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private IEnumerator SaveScreenShotInternal(string filePath, int width, int height)
         {
             PluginUtils.UIHide();
-            var subWindowType = subWindow.subWindowType;
             isVisible = false;
             yield return new WaitForEndOfFrame();
             var texture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
             texture.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
             yield return new WaitForEndOfFrame();
             isVisible = true;
-            subWindow.subWindowType = subWindowType;
             PluginUtils.UIResume();
 
             texture.ResizeTexture(width, height);
@@ -550,8 +531,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (isEnable && isVisible)
                 {
-                    mainWindow.OnGUI();
-                    subWindow.OnGUI();
+                    windowManager.OnGUI();
                 }
             }
             catch (Exception e)

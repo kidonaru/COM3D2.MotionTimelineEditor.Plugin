@@ -171,7 +171,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return MTE.config;
+                return ConfigManager.config;
             }
         }
 
@@ -803,6 +803,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Refresh()
         {
+            UpdateTimelineModels();
+
             if (onRefresh != null)
             {
                 onRefresh();

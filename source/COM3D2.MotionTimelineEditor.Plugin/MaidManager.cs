@@ -5,8 +5,6 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MTE = MotionTimelineEditor;
-
     public class MaidManager
     {
         public List<MaidCache> maidCaches = new List<MaidCache>();

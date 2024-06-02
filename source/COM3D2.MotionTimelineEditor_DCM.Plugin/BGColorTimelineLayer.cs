@@ -224,7 +224,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 _playData.motions.Add(motion);
             }
 
-            PluginUtils.LogDebug("PlayData: name={0}, count={1}", BoneName, _playData.motions.Count);
+            //PluginUtils.LogDebug("PlayData: name={0}, count={1}", BoneName, _playData.motions.Count);
         }
 
         public void SaveBGTimeLine(
@@ -309,7 +309,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var color = camera.backgroundColor;
             var updateTransform = false;
 
-            GUI.enabled = studioHack.isPoseEditing;
+            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
             updateTransform |= view.DrawSliderValue(_fieldValues[0], 0f, 1f, 0.01f, 0f,
                 color.r,
@@ -330,8 +330,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 c => color = c);
 
             view.DrawHorizontalLine(Color.gray);
-
-            GUI.enabled = true;
 
             if (updateTransform)
             {

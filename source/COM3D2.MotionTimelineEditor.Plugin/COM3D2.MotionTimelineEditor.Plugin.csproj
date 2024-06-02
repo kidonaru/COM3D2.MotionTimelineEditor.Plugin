@@ -71,12 +71,14 @@
     <Compile Include="COM3D2.GUIExt.cs" />
     <Compile Include="COM3D2.MotionTimelineEditor.Plugin.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="ConfigManager.cs" />
     <Compile Include="EasyMenuItem.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FrameData.cs" />
     <Compile Include="FrameXml.cs" />
     <Compile Include="GUIView.cs" />
     <Compile Include="IBoneMenuItem.cs" />
+    <Compile Include="IKHoldManager.cs" />
     <Compile Include="IKHoldUI.cs" />
     <Compile Include="ITimelineLayer.cs" />
     <Compile Include="ITransformData.cs" />
@@ -117,6 +119,7 @@
     <Compile Include="TimelineLayerInfo.cs" />
     <Compile Include="TimelineLayerUI.cs" />
     <Compile Include="TimelineLayerXml.cs" />
+    <Compile Include="TimelineLoadManager.cs" />
     <Compile Include="TimelineLoadUI.cs" />
     <Compile Include="TimelineManager.cs" />
     <Compile Include="TimelineSettingUI.cs" />
@@ -128,6 +131,7 @@
     <Compile Include="TransformDataRotation.cs" />
     <Compile Include="TransformXml.cs" />
     <Compile Include="ValueData.cs" />
+    <Compile Include="WindowManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

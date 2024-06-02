@@ -13,16 +13,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void DrawWindow(int id)
+        public TimelineLayerUI(SubWindow subWindow) : base(subWindow)
         {
-            var view = new GUIView(0, 20, WINDOW_WIDTH, WINDOW_HEIGHT - 20);
+        }
+
+        public override void DrawContent(GUIView view)
+        {
+            if (timeline == null || currentLayer == null)
+            {
+                return;
+            }
+
             currentLayer.ResetDraw(view);
             currentLayer.DrawWindow(view);
+        }
 
-            if (!currentLayer.isDragging)
-            {
-                GUI.DragWindow();
-            }
+        public override bool IsDragging()
+        {
+            return currentLayer.isDragging;
         }
     }
 }

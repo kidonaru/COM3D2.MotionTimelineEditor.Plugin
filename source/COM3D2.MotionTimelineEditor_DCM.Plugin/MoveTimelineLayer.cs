@@ -274,7 +274,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 _playData.motions.Add(motion);
             }
 
-            PluginUtils.LogDebug("PlayData: name={0}, count={1}", maid.name, _playData.motions.Count);
+            //PluginUtils.LogDebug("PlayData: name={0}, count={1}", maid.name, _playData.motions.Count);
         }
 
         public void SaveModelMotion(
@@ -381,7 +381,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var angle = maid.transform.eulerAngles;
             var updateTransform = false;
 
-            GUI.enabled = studioHack.isPoseEditing;
+            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
             updateTransform |= view.DrawValue(_fieldValues[0], 0.01f, 0.1f, 0f,
                 position.x,
@@ -412,8 +412,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 angle.z,
                 z => angle.z = z,
                 z => angle.z += z);
-
-            GUI.enabled = true;
 
             if (updateTransform)
             {

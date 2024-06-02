@@ -324,7 +324,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 var name = pair.Key;
                 var playData = pair.Value;
-                PluginUtils.LogDebug("PlayData: name={0}, count={1}", name, playData.motions.Count);
+                //PluginUtils.LogDebug("PlayData: name={0}, count={1}", name, playData.motions.Count);
             }
         }
 
@@ -499,7 +499,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            view.SetEnabled(!_transComboBox.focused);
+            view.SetEnabled(view.guiEnabled && !_transComboBox.focused);
 
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
@@ -510,7 +510,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             var editType = _transComboBox.currentItem;
 
-            view.SetEnabled(!_transComboBox.focused && studioHack.isPoseEditing);
+            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
             foreach (var model in models)
             {
@@ -534,7 +534,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             view.DrawComboBoxContent(
                 _transComboBox,
                 140, 300,
-                SubWindow.rc_stgw.width, SubWindow.rc_stgw.height,
+                view.viewRect.width, view.viewRect.height,
                 20);
         }
 

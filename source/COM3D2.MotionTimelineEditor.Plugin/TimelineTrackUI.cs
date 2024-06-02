@@ -15,52 +15,46 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private Vector2 scrollPosition = Vector2.zero;
 
-        public override void OnOpen()
+        public TimelineTrackUI(SubWindow subWindow) : base(subWindow)
         {
         }
 
-        public override void DrawWindow(int id)
+        public override void DrawContent(GUIView view)
         {
+            if (timeline == null)
             {
-                var view = new GUIView(0, 0, WINDOW_WIDTH, 20);
+                return;
+            }
+
+            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            {
+                if (view.DrawButton("追加", 80, 20))
+                {
+                    timelineManager.AddTrack();
+                }
+            }
+            view.EndLayout();
+
+            view.AddSpace(10);
+
+            var tracks = timeline.tracks;
+            if (tracks.Count == 0)
+            {
+                view.DrawLabel("トラックがありません", -1, 20);
+            }
+            else
+            {
                 view.padding = Vector2.zero;
+                var currentIndex = timeline.activeTrackIndex;
+
+                view.DrawContentListView(
+                    tracks,
+                    DrawTrack,
+                    -1,
+                    -1,
+                    ref scrollPosition,
+                    55);
             }
-
-            {
-                var view = new GUIView(0, 20, WINDOW_WIDTH, WINDOW_HEIGHT - 20);
-
-                view.BeginLayout(GUIView.LayoutDirection.Horizontal);
-                {
-                    if (view.DrawButton("追加", 80, 20))
-                    {
-                        timelineManager.AddTrack();
-                    }
-                }
-                view.EndLayout();
-
-                view.AddSpace(10);
-
-                var tracks = timeline.tracks;
-                if (tracks.Count == 0)
-                {
-                    view.DrawLabel("トラックがありません", -1, 20);
-                }
-                else
-                {
-                    view.padding = Vector2.zero;
-                    var currentIndex = timeline.activeTrackIndex;
-
-                    view.DrawContentListView(
-                        tracks,
-                        DrawTrack,
-                        -1,
-                        -1,
-                        ref scrollPosition,
-                        55);
-                }
-            }
-
-            GUI.DragWindow();
         }
 
         public void DrawTrack(

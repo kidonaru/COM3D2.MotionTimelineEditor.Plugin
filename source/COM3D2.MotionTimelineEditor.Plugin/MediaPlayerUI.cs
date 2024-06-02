@@ -44,18 +44,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void OnOpen()
+        public MediaPlayerUI(SubWindow subWindow) : base(subWindow)
         {
         }
 
-        public override void DrawWindow(int id)
+        public override void DrawContent(GUIView view)
         {
-            var view = new GUIView(0, 20, WINDOW_WIDTH, WINDOW_HEIGHT - 20);
+            if (timeline == null)
+            {
+                return;
+            }
 
             DrawAudio(view);
             DrawVideo(view);
-
-            GUI.DragWindow();
         }
 
         private void DrawAudio(GUIView view)

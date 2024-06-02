@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Serialization;
 using UnityEngine;
 
@@ -137,6 +138,31 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public int subWindowCount = 1;
+
+        [XmlIgnore]
+        private Dictionary<int, SubWindowInfo> _subWindowInfoMap = new Dictionary<int, SubWindowInfo>();
+
+        [XmlElement("subWindow")]
+        public SubWindowInfo[] subWindowList
+        {
+            get
+            {
+                return _subWindowInfoMap.Values.ToArray();
+            }
+            set
+            {
+                if (value == null)
+                {
+                    return;
+                }
+                foreach (var info in value)
+                {
+                    _subWindowInfoMap[info.windowIndex] = info;
+                }
+            }
+        }
+
 
         [XmlIgnore]
         public bool dirty = false;
@@ -192,6 +218,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void SetBoneSetMenuOpen(string name, bool value)
         {
             _boneSetMenuOpenMap[name] = value;
+        }
+
+        public SubWindowInfo GetSubWindowInfo(int windowIndex)
+        {
+            SubWindowInfo info;
+            if (_subWindowInfoMap.TryGetValue(windowIndex, out info))
+            {
+                return info;
+            }
+
+            info = new SubWindowInfo();
+            info.windowIndex = windowIndex;
+            _subWindowInfoMap[windowIndex] = info;
+
+            return info;
+        }
+
+        public void SetSubWindowInfo(int windowIndex, SubWindowInfo info)
+        {
+            _subWindowInfoMap[windowIndex] = info;
         }
     }
 }

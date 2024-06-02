@@ -472,7 +472,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void DrawWindow(GUIView view)
         {
-            view.SetEnabled(!boneComboBox.focused);
+            view.SetEnabled(view.guiEnabled && !boneComboBox.focused);
 
             if (maidCache == null)
             {
@@ -543,7 +543,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var angle = bone.transform.localEulerAngles;
             var updateTransform = false;
 
-            view.SetEnabled(!boneComboBox.focused && studioHack.isPoseEditing);
+            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
             if (boneType == IKManager.BoneType.Root)
             {
@@ -601,7 +601,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.DrawComboBoxContent(
                 boneComboBox,
                 120, 300,
-                SubWindow.rc_stgw.width, SubWindow.rc_stgw.height,
+                view.viewRect.width, view.viewRect.height,
                 20);
         }
 

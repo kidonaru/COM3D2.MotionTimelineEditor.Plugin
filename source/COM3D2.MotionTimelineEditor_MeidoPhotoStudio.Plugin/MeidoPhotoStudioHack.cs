@@ -11,6 +11,7 @@ using System.Linq;
 namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 {
     using MPS = MeidoPhotoStudio.Plugin.MeidoPhotoStudio;
+    using MPSWindowManager = MeidoPhotoStudio.Plugin.WindowManager;
 
     public class MeidoPhotoStudioHack : StudioHackBase
     {
@@ -42,11 +43,11 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
         }
 
-        private WindowManager windowManager
+        private MPSWindowManager windowManager
         {
             get
             {
-                return (WindowManager)fieldWindowManager.GetValue(meidoPhotoStudio);
+                return (MPSWindowManager) fieldWindowManager.GetValue(meidoPhotoStudio);
             }
         }
 

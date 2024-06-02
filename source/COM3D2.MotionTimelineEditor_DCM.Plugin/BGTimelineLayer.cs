@@ -344,7 +344,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 var name = pair.Key;
                 var playData = pair.Value;
-                PluginUtils.LogDebug("PlayData: name={0}, count={1}", name, playData.motions.Count);
+                //PluginUtils.LogDebug("PlayData: name={0}, count={1}", name, playData.motions.Count);
             }
         }
 
@@ -447,7 +447,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var scale = bgObject.transform.localScale.x;
             var updateTransform = false;
 
-            GUI.enabled = studioHack.isPoseEditing;
+            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
             updateTransform |= view.DrawValue(_fieldValues[0], 0.01f, 0.1f, 0f,
                 position.x,
@@ -492,8 +492,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 studioHack.SetBackgroundVidible(newIsBgVisible);
             }*/
-
-            GUI.enabled = true;
 
             if (updateTransform)
             {

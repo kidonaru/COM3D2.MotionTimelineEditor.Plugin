@@ -7,8 +7,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MTE = MotionTimelineEditor;
-
     public abstract class TimelineLayerBase : ITimelineLayer
     {
         public static readonly long TimelineAnmId = 26925014;
@@ -283,7 +281,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return MTE.config;
+                return ConfigManager.config;
             }
         }
 

@@ -470,7 +470,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             angles = TransformDataBase.GetFixedEulerAngles(angles, prevAngles);
             var updateTransform = false;
 
-            view.SetEnabled(studioHack.isPoseEditing);
+            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
             updateTransform |= view.DrawValue(_fieldValues[0], 0.01f, 0.1f, 0f,
                 position.x,
@@ -599,8 +599,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 }
             }
             view.EndLayout();
-
-            view.SetEnabled(true);
 
             if (updateTransform)
             {

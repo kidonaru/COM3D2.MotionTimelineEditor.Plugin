@@ -6,8 +6,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MTE = MotionTimelineEditor;
-
     public class TimelineSettingUI : SubWindowUIBase
     {
         public override string title
@@ -36,36 +34,39 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             "共通設定",
         };
 
-        public override void DrawWindow(int id)
+        public TimelineSettingUI(SubWindow subWindow) : base(subWindow)
         {
+        }
+
+        public override void DrawContent(GUIView view)
+        {
+            if (timeline == null)
             {
-                var view = new GUIView(0, 20, WINDOW_WIDTH, WINDOW_HEIGHT - 20);
-
-                view.BeginLayout(GUIView.LayoutDirection.Horizontal);
-                for (var i = 0; i < (int)TabType.Max; i++)
-                {
-                    var type = (TabType)i;
-                    var color = tabType == type ? Color.green : Color.white;
-                    if (view.DrawButton(TabTypeNames[i], 80, 20, true, color))
-                    {
-                        tabType = type;
-                    }
-                }
-                view.EndLayout();
-
-                view.DrawHorizontalLine(Color.gray);
-
-                if (tabType == TabType.Song)
-                {
-                    DrawSongSetting(view);
-                }
-                else if (tabType == TabType.Common)
-                {
-                    DrawCommonSetting(view);
-                }
+                return;
             }
 
-            GUI.DragWindow();
+            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            for (var i = 0; i < (int)TabType.Max; i++)
+            {
+                var type = (TabType)i;
+                var color = tabType == type ? Color.green : Color.white;
+                if (view.DrawButton(TabTypeNames[i], 80, 20, true, color))
+                {
+                    tabType = type;
+                }
+            }
+            view.EndLayout();
+
+            view.DrawHorizontalLine(Color.gray);
+
+            if (tabType == TabType.Song)
+            {
+                DrawSongSetting(view);
+            }
+            else if (tabType == TabType.Common)
+            {
+                DrawCommonSetting(view);
+            }
         }
 
         private void DrawSongSetting(GUIView view)
@@ -268,7 +269,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 PluginUtils.ShowConfirmDialog("共通設定を初期化しますか？", () =>
                 {
                     GameMain.Instance.SysDlg.Close();
-                    MTE.ResetConfig();
+                    ConfigManager.instance.ResetConfig();
                     timelineManager.Refresh();
                 }, null);
             }

@@ -4,8 +4,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MTE = MotionTimelineEditor;
-
     public abstract class TransformDataBase : ITransformData
     {
         public string name { get; protected set; }
@@ -280,7 +278,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return MTE.config;
+                return ConfigManager.config;
             }
         }
 

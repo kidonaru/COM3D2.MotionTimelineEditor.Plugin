@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MTE = MotionTimelineEditor;
-
     public class StudioHackManager
     {
         private List<StudioHackBase> studioHacks = new List<StudioHackBase>();
@@ -30,7 +28,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return MTE.config;
+                return ConfigManager.config;
             }
         }
 

@@ -25,15 +25,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private List<MaidCache> _maidCaches = new List<MaidCache>();
         private Vector2 _scrollPosition = Vector2.zero;
 
-        public override void OnOpen()
+        public StudioModelUI(SubWindow subWindow) : base(subWindow)
         {
         }
 
-        public override void DrawWindow(int id)
+        public override void DrawContent(GUIView view)
         {
+            if (timeline == null)
             {
-                var view = new GUIView(0, 0, WINDOW_WIDTH, 20);
-                view.padding = Vector2.zero;
+                return;
             }
 
             _pluginNames = modelHackManager.pluginNames;
@@ -49,13 +49,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _maidCaches.AddRange(maidManager.maidCaches);
 
             {
-                var view = new GUIView(0, 20, WINDOW_WIDTH, WINDOW_HEIGHT - 20);
-
                 DrawModels(view);
-                DrawComboBox(view);
             }
-
-            GUI.DragWindow();
         }
 
         public void DrawModels(GUIView view)
@@ -222,27 +217,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return 0;
         }
 
-        private bool IsComboBoxFocused()
+        public override void DrawComboBox(GUIView view)
         {
-            var models = modelManager.models;
-            for (var i = 0; i < models.Count; i++)
-            {
-                var pluginComboBox = _pluginComboBoxList[i];
-                var maidComboBox = _maidComboBoxList[i];
-                var attachPointComboBox = _attachPointComboBoxList[i];
-
-                if (pluginComboBox.focused || maidComboBox.focused || attachPointComboBox.focused)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private void DrawComboBox(GUIView view)
-        {
-            view.SetEnabled(true);
+            base.DrawComboBox(view);
 
             var models = modelManager.models;
             for (var i = 0; i < models.Count; i++)
@@ -259,21 +236,49 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.DrawComboBoxContent(
                     pluginComboBox,
                     130, 120,
-                    SubWindow.rc_stgw.width, SubWindow.rc_stgw.height,
+                    view.viewRect.width, view.viewRect.height,
                     20);
 
                 view.DrawComboBoxContent(
                     maidComboBox,
                     130, 120,
-                    SubWindow.rc_stgw.width, SubWindow.rc_stgw.height,
+                    view.viewRect.width, view.viewRect.height,
                     20);
 
                 view.DrawComboBoxContent(
                     attachPointComboBox,
                     80, 200,
-                    SubWindow.rc_stgw.width, SubWindow.rc_stgw.height,
+                    view.viewRect.width, view.viewRect.height,
                     20);
             }
+        }
+
+        public override bool IsComboBoxFocused()
+        {
+            if (base.IsComboBoxFocused())
+            {
+                return true;
+            }
+
+            var models = modelManager.models;
+            for (var i = 0; i < models.Count; i++)
+            {
+                if (i >= _pluginComboBoxList.Count || i >= _maidComboBoxList.Count || i >= _attachPointComboBoxList.Count)
+                {
+                    break;
+                }
+
+                var pluginComboBox = _pluginComboBoxList[i];
+                var maidComboBox = _maidComboBoxList[i];
+                var attachPointComboBox = _attachPointComboBoxList[i];
+
+                if (pluginComboBox.focused || maidComboBox.focused || attachPointComboBox.focused)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

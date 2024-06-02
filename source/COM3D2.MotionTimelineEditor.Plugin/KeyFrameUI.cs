@@ -15,7 +15,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private GUIView mainView = new GUIView(0, 20, WINDOW_WIDTH, WINDOW_HEIGHT);
         private Texture2D tangentTex = null;
         private TangentValueType tangentValueType = TangentValueType.All;
         private HashSet<TangentPair> cachedTangents = new HashSet<TangentPair>();
@@ -49,7 +48,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void OnOpen()
+        public KeyFrameUI(SubWindow subWindow) : base(subWindow)
+        {
+        }
+
+        public override void InitWindow()
         {
             if (tangentPresetTextures == null)
             {
@@ -98,13 +101,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     getName = (type, index) => ((MoveEasingType)type).ToString()
                 };
             }
+
+            base.InitWindow();
         }
 
-        public override void DrawWindow(int id)
+        public override void DrawContent(GUIView view)
         {
-            var view = mainView;
-            view.SetEnabled(!easingComboBox.focused);
-            view.ResetLayout();
+            if (timeline == null)
+            {
+                return;
+            }
 
             if (selectedBones.Count == 0)
             {
@@ -130,10 +136,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 DrawTangent(view);
                 DrawEasing(view);
-                DrawComboBox(view);
             }
+        }
 
-            GUI.DragWindow();
+        public override bool IsComboBoxFocused()
+        {
+            return base.IsComboBoxFocused() || easingComboBox.focused;
         }
 
         private void DrawTransform(GUIView view)
@@ -929,14 +937,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.DrawTexture(easingTex);
         }
 
-        private void DrawComboBox(GUIView view)
+        public override void DrawComboBox(GUIView view)
         {
-            view.SetEnabled(true);
+            base.DrawComboBox(view);
 
             view.DrawComboBoxContent(
                 easingComboBox,
                 100, 100,
-                rc_stgw.width, rc_stgw.height,
+                windowRect.width, windowRect.height,
                 20);
         }
 

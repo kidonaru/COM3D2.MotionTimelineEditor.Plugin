@@ -3,8 +3,6 @@ using System.Linq;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MTE = MotionTimelineEditor;
-
     public class BoneSetMenuItem : IBoneMenuItem
     {
         public string name { get; private set; }
@@ -92,7 +90,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return MTE.config;
+                return ConfigManager.config;
             }
         }
 

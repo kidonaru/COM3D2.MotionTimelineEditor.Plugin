@@ -455,6 +455,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return result;
         }
 
+        public bool DrawTextureButton(
+            Texture2D texture,
+            float width,
+            float height,
+            Color color)
+        {
+            var drawRect = GetDrawRect(width, height);
+            BeginColor(color);
+            bool result = GUI.Button(drawRect, "", gsButton);
+            DrawTileThumb(texture, 0, 0, drawRect.width, drawRect.height);
+            EndColor();
+            NextElement(drawRect);
+            return result;
+        }
+
         public bool DrawButton(string text, float width, float height)
         {
             return DrawButton(text, width, height, gsButton);
@@ -916,6 +931,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (currentPos.y + height > windowHeight)
             {
                 currentPos.y = buttonRect.position.y - buttonRect.height - height;
+            }
+            if (currentPos.x + width > windowWidth)
+            {
+                currentPos.x = windowWidth - width;
             }
 
             var selectedIndex = DrawListView(

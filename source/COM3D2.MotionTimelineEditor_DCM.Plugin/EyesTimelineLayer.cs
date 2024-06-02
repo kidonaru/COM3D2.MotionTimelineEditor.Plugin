@@ -533,7 +533,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             InitTexture();
 
-            GUI.enabled = studioHack.isPoseEditing;
+            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
             var basePos = view.currentPos;
 
@@ -633,8 +633,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     TransformEyes(eyesName, horizon, vertical);
                 }
             }
-
-            GUI.enabled = true;
         }
 
         public override ITransformData CreateTransformData(string name)

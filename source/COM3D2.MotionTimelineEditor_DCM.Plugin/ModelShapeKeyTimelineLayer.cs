@@ -302,7 +302,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 var name = pair.Key;
                 var playData = pair.Value;
-                PluginUtils.LogDebug("PlayData: name={0}, count={1}", name, playData.motions.Count);
+                //PluginUtils.LogDebug("PlayData: name={0}, count={1}", name, playData.motions.Count);
             }
         }
 
@@ -387,7 +387,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            view.SetEnabled(!_modelComboBox.focused);
+            view.SetEnabled(view.guiEnabled && !_modelComboBox.focused);
 
             view.DrawLabel("モデル選択", 200, 20);
             view.DrawComboBoxButton(_modelComboBox, 240, 20, true);
@@ -406,7 +406,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            view.SetEnabled(!_modelComboBox.focused && studioHack.isPoseEditing);
+            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
             for (var i = 0; i < blendShapes.Count; i++)
             {
@@ -435,7 +435,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             view.DrawComboBoxContent(
                 _modelComboBox,
                 220, 300,
-                SubWindow.rc_stgw.width, SubWindow.rc_stgw.height,
+                view.viewRect.width, view.viewRect.height,
                 20);
         }
 

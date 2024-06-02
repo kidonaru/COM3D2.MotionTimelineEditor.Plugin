@@ -12,7 +12,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         OutputDCM,
     }
 
-    public class MainWindow
+    public interface IWindow
+    {
+        int windowIndex { get; set; }
+        bool isShowWnd { get; set; }
+        Rect windowRect { get; set; }
+    }
+
+    public class MainWindow : IWindow
     {
         public readonly static int WINDOW_ID = 615814;
         public readonly static int WINDOW_WIDTH = 640;
@@ -66,7 +73,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return MTE.config;
+                return ConfigManager.config;
             }
         }
 
@@ -92,11 +99,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public static WindowManager windowManager
+        {
+            get
+            {
+                return WindowManager.instance;
+            }
+        }
+
         private static SubWindow subWindow
         {
             get
             {
-                return MTE.subWindow;
+                return windowManager.subWindows[0];
             }
         }
 
@@ -131,14 +146,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private int ScWidth = 0, ScHeight = 0;
-        private Vector2 prevWindowPos = Vector2.zero;
-        public static Rect rc_stgw = new Rect(
+        public int windowIndex { get; set; }
+        public bool isShowWnd { get; set; }
+
+        private Rect _windowRect = new Rect(
             Screen.width + WIDTH_DPOS,
             Screen.height + HEIGHT_DPOS,
             WINDOW_WIDTH,
             WINDOW_HEIGHT
         );
+
+        public Rect windowRect
+        {
+            get
+            {
+                return _windowRect;
+            }
+            set
+            {
+                _windowRect = value;
+            }
+        }
+
+        private int ScWidth = 0, ScHeight = 0;
         private bool initializedGUI = false;
         private bool isFrameDragging = false;
         private Vector2 frameDragDelta = Vector2.zero;
@@ -176,6 +206,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private Texture2D texWhite = null;
         private Texture2D texTimelineBG = null;
         private Texture2D texKeyFrame = null;
+
+        public MainWindow(int windowIndex)
+        {
+            this.windowIndex = windowIndex;
+            this.isShowWnd = true;
+        }
 
         public void Init()
         {
@@ -260,6 +296,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Update()
         {
+            if (studioHack == null || !timelineManager.IsValidData())
+            {
+                return;
+            }
+
             // 自動スクロール
             if (config.isAutoScroll &&
                 currentLayer.isAnmSyncing &&
@@ -352,10 +393,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             foreach (var name in names)
             {
-                var style = new GUIStyle();
-                style.name = name;
-                style.fixedWidth = 0;
-                style.fixedHeight = 0;
+                var style = new GUIStyle
+                {
+                    name = name,
+                    fixedWidth = 0,
+                    fixedHeight = 0
+                };
                 style.normal.background = null;
                 style.hover.background = null;
                 style.active.background = null;
@@ -366,8 +409,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (config.windowPosX != -1 && config.windowPosY != -1)
             {
-                rc_stgw.x = config.windowPosX;
-                rc_stgw.y = config.windowPosY;
+                _windowRect.x = config.windowPosX;
+                _windowRect.y = config.windowPosY;
             }
         }
 
@@ -377,37 +420,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (WINDOW_HEIGHT != windowHeight)
             {
-                PluginUtils.AdjustWindowPosition(ref rc_stgw);
+                PluginUtils.AdjustWindowPosition(ref _windowRect);
                 WINDOW_HEIGHT = windowHeight;
-                rc_stgw.height = WINDOW_HEIGHT;
+                _windowRect.height = WINDOW_HEIGHT;
             }
 
             bool isScreenSizeChanged = ScWidth != Screen.width || ScHeight != Screen.height;
             if (isScreenSizeChanged)
             {
-                PluginUtils.AdjustWindowPosition(ref rc_stgw);
+                PluginUtils.AdjustWindowPosition(ref _windowRect);
                 ScWidth = Screen.width;
                 ScHeight = Screen.height;
             }
 
-            if (prevWindowPos != rc_stgw.position)
-            {
-                subWindow.ResetPosition();
-                prevWindowPos = rc_stgw.position;
-            }
+            windowRect = GUI.Window(WINDOW_ID, windowRect, DrawWindow, PluginUtils.WindowName, gsWin);
 
-            rc_stgw = GUI.Window(WINDOW_ID, rc_stgw, DrawWindow, PluginUtils.WindowName, gsWin);
-
-            if (config.windowPosX != (int)rc_stgw.x ||
-                config.windowPosY != (int)rc_stgw.y)
+            if (config.windowPosX != (int)windowRect.x ||
+                config.windowPosY != (int)windowRect.y)
             {
-                config.windowPosX = (int)rc_stgw.x;
-                config.windowPosY = (int)rc_stgw.y;
-            }
-
-            if (config.dirty && Input.GetMouseButtonUp(0))
-            {
-                MTE.SaveConfigXml();
+                config.windowPosX = (int)windowRect.x;
+                config.windowPosY = (int)windowRect.y;
             }
         }
 
@@ -539,7 +571,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (view.DrawButton("メディア", 60, 20, editEnabled))
                 {
-                    subWindow.ToggleSubWindow(SubWindowType.MoviePlayer);
+                    subWindow.ToggleSubWindow(SubWindowType.MediaPlayer);
                 }
 
                 if (view.DrawButton("履歴", 60, 20, editEnabled))
@@ -1238,19 +1270,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             headerView.DrawComboBoxContent(
                 fileMenuComboBox,
                 100, 120,
-                rc_stgw.width, rc_stgw.height,
+                windowRect.width, windowRect.height,
                 20);
 
             headerView.DrawComboBoxContent(
                 layerComboBox,
                 120, 120,
-                rc_stgw.width, rc_stgw.height,
+                windowRect.width, windowRect.height,
                 20);
 
             headerView.DrawComboBoxContent(
                 _maidComboBox,
                 170, 120,
-                rc_stgw.width, rc_stgw.height,
+                windowRect.width, windowRect.height,
                 20);
         }
     }

@@ -214,6 +214,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "gQHf2a67uxuRSATpdDrQm5+fn+Ph4QE/fzQjGw+nlmV9m7FlWc2H03rnTx3PfwOkkRgyh6JzmQAA" +
                 "AABJRU5ErkJggg==");
 
+        public readonly static byte[] LockIcon = Convert.FromBase64String(
+                "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAC4jAAAuIwF4pT92AAAB" +
+                "pElEQVRYhe2WP08UQRjGf8txwRMSIIGYiD0hFBY211kbOjsqY+j5BH4BCmobWij4CFgSCyltIEJQ" +
+                "YmFM+GPhHwq4H8VOwgq7eztk785EnmSzszs7z/PM7PvOO4nKIDE0UPV7A8DwHcc1gXngKTANfAU+" +
+                "Ap+AyygmNfaaVTfV7/6NI3VNnYnhixWfUw+D4Bf1tdpWl9WT8H5HfdILA+PqXhBZUVtqI/QNq2Pq" +
+                "eujfCv21GlgK5O8ywjevlnqg/lQXqvBWzYIG8Cq035YE2jmwCowCL6mQZVUNtAIppJFeBIHd0J6i" +
+                "QpZVNTCUIfvR5dvjzJikG3GVfeAh6ewb4XkiiCSkM+aG0GS4j4SxDeB3EXlicTGaAlaAR8ADoB2M" +
+                "vAfOyJ9dB3gMPCNdqQ/ABbAPvAF+3RpREJ2Jumi9eB6TBQkwVrQ0d0QuX1kQdmo2kJu6/ayGuRlR" +
+                "ZqAvR6UyA11zuNcG6kbuig78RPTPBmEvAjDqFyRc7/11IWoFOsBn4E9N4qfAt7yOsmLUBF4ACxFC" +
+                "2QqZxQawTc7uWmagL/iv0vDeQC6uAKyOO781btv8AAAAAElFTkSuQmCC");
+
         public readonly static byte[] DefaultBgmData = Convert.FromBase64String(
                 "T2dnUwACAAAAAAAAAAAD8iFxAAAAAHbAeUEBHgF2b3JiaXMAAAAAAkSsAAAAAAAAgLUBAAAAAAC4" +
                 "AU9nZ1MAAAAAAAAAAAAAA/IhcQEAAADDMXE0ET7///////////////////8HA3ZvcmJpcwwAAABM" +

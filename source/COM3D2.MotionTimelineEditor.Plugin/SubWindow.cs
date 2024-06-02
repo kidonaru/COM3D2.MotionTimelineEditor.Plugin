@@ -1,70 +1,91 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MTE = MotionTimelineEditor;
-
     public enum SubWindowType
     {
-        None,
         TimelineLoad,
-        TimelineSetting,
+        KeyFrame,
         TimelineLayer,
         IKHold,
-        KeyFrame,
-        MoviePlayer,
-        History,
         Track,
         StudioModel,
+        MediaPlayer,
+        History,
+        TimelineSetting,
     }
 
-    public class SubWindow
+    public class SubWindowInfo
     {
-        public readonly static int WINDOW_ID = 485087;
+        public int windowIndex = 0;
+        public Vector2 position = Vector2.zero;
+        public SubWindowType subWindowType = SubWindowType.TimelineLoad;
+        public bool isPositionLocked = true;
+    }
+
+    public class SubWindow : IWindow
+    {
+        public int WINDOW_ID
+        {
+            get
+            {
+                return 485087 + windowIndex;
+            }
+        }
+
         public readonly static int WINDOW_WIDTH = 280;
         public readonly static int WINDOW_HEIGHT = 480;
-        public static Rect rc_stgw = new Rect(
+
+        private SubWindowUIBase[] _uiList = null;
+
+        public static readonly List<SubWindowType> SubWindowTypes =
+                Enum.GetValues(typeof(SubWindowType))
+                .Cast<SubWindowType>()
+                .ToList();
+
+        public int windowIndex { get; set; }
+
+        private Rect _windowRect = new Rect(
             0,
             0,
             WINDOW_WIDTH,
             WINDOW_HEIGHT
         );
+        public Rect windowRect
+        {
+            get
+            {
+                return _windowRect;
+            }
+            set
+            {
+                _windowRect = value;
+            }
+        }
 
+        private bool _isShowWnd;
         public bool isShowWnd
         {
             get
             {
-                return _subWindowType != SubWindowType.None;
+                return _isShowWnd;
             }
             set
             {
-                if (value)
+                if (value == _isShowWnd)
                 {
-                    PluginUtils.LogError("SubWindow.isShowWnd = true is not supported");
                     return;
                 }
 
-                if (ui != null) ui.OnClose();
-                _subWindowType = SubWindowType.None;
+                _isShowWnd = value;
+                dirty = true;
             }
         }
 
-        public static SubWindowUIBase[] uiList = new SubWindowUIBase[]
-        {
-            null,
-            new TimelineLoadUI(),
-            new TimelineSettingUI(),
-            new TimelineLayerUI(),
-            new IKHoldUI(),
-            new KeyFrameUI(),
-            new MediaPlayerUI(),
-            new TimelineHistoryUI(),
-            new TimelineTrackUI(),
-            new StudioModelUI(),
-        };
-
-        private SubWindowType _subWindowType = SubWindowType.None;
+        private SubWindowType _subWindowType;
         public SubWindowType subWindowType
         {
             get
@@ -73,16 +94,36 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             set
             {
-                if (_subWindowType == value)
+                if (value == _subWindowType)
                 {
                     return;
                 }
 
-                if (ui != null) ui.OnClose();
                 _subWindowType = value;
-                if (ui != null) ui.OnOpen();
+                dirty = true;
             }
         }
+
+        private bool _isPositionLocked;
+        public bool isPositionLocked
+        {
+            get
+            {
+                return _isPositionLocked;
+            }
+            set
+            {
+                if (value == _isPositionLocked)
+                {
+                    return;
+                }
+
+                _isPositionLocked = value;
+                dirty = true;
+            }
+        }
+
+        public bool dirty;
 
         public SubWindowUIBase ui
         {
@@ -92,11 +133,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public SubWindowInfo info
+        {
+            get
+            {
+                return config.GetSubWindowInfo(windowIndex);
+            }
+        }
+
         public static Config config
         {
             get
             {
-                return MotionTimelineEditor.config;
+                return ConfigManager.config;
             }
         }
 
@@ -124,73 +173,71 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void ToggleSubWindow(SubWindowType type)
+        private static WindowManager windowManager
         {
-            subWindowType = subWindowType == type ? SubWindowType.None : type;
-        }
-
-        public SubWindowUIBase GetSubWindowUI(SubWindowType type)
-        {
-            return uiList[(int) type];
-        }
-
-        public void Init()
-        {
-            foreach (var ui in uiList)
+            get
             {
-                if (ui != null)
-                {
-                    ui.Init();
-                }
+                return WindowManager.instance;
             }
+        }
+
+        public SubWindow(int windowIndex)
+        {
+            this.windowIndex = windowIndex;
+            this._isShowWnd = true;
+
+            var info = this.info;
+            this._windowRect.position = info.position;
+            this._subWindowType = info.subWindowType;
+            this._isPositionLocked = info.isPositionLocked;
+
+            this._uiList = new SubWindowUIBase[]
+            {
+                new TimelineLoadUI(this),
+                new KeyFrameUI(this),
+                new TimelineLayerUI(this),
+                new IKHoldUI(this),
+                new TimelineTrackUI(this),
+                new StudioModelUI(this),
+                new MediaPlayerUI(this),
+                new TimelineHistoryUI(this),
+                new TimelineSettingUI(this),
+            };
         }
 
         public void Update()
         {
-            foreach (var ui in uiList)
-            {
-                if (ui != null)
-                {
-                    ui.Update();
-                }
-            }
+            UpdatePosition();
         }
 
-        public void LateUpdate()
+        public void ToggleSubWindow(SubWindowType type)
         {
-            foreach (var ui in uiList)
+            if (type == subWindowType)
             {
-                if (ui != null)
-                {
-                    ui.LateUpdate();
-                }
+                isShowWnd = !isShowWnd;
+                return;
             }
+
+            subWindowType = type;
+            isShowWnd = true;
+        }
+
+        public SubWindowUIBase GetSubWindowUI(SubWindowType type)
+        {
+            return _uiList[(int) type];
         }
 
         public void OnGUI()
         {
             if (isShowWnd)
             {
-                var gsWin = MTE.mainWindow.gsWin;
-                rc_stgw = GUI.Window(WINDOW_ID, rc_stgw, DrawWindow, ui != null ? ui.title : "", gsWin);
+                var gsWin = windowManager.mainWindow.gsWin;
+                _windowRect = GUI.Window(WINDOW_ID, windowRect, DrawWindow, ui.title, gsWin);
             }
         }
 
         private void DrawWindow(int id)
         {
-            {
-                var view = new GUIView(0, 0, WINDOW_WIDTH, 20);
-                view.padding.y = 0;
-                view.padding.x = 0;
-
-                view.currentPos.x = WINDOW_WIDTH - 20;
-
-                if (view.DrawButton("x", 20, 20))
-                {
-                    isShowWnd = false;
-                }
-            }
-
             if (studioHack == null || maid == null)
             {
                 return;
@@ -200,14 +247,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            if (ui != null) ui.DrawWindow(id);
+            ui.DrawWindow(id);
         }
 
-        public void ResetPosition()
+        private Rect _prevFocusedRect = new Rect(0, 0, 0, 0);
+
+        public void UpdatePosition()
         {
-            var source = MainWindow.rc_stgw;
-            rc_stgw.x = source.x - WINDOW_WIDTH;
-            rc_stgw.y = source.y;
+            if (isPositionLocked)
+            {
+                var focusedWindow = windowManager.GetWindow(windowIndex - 1);
+
+                if (!Input.GetMouseButton(0) || _prevFocusedRect != focusedWindow.windowRect)
+                {
+                    var source = focusedWindow.windowRect;
+                    _windowRect.x = source.x - WINDOW_WIDTH;
+                    _windowRect.y = source.y;
+                    _prevFocusedRect = focusedWindow.windowRect;
+                }
+            }
+        }
+
+        public void UpdateInfo()
+        {
+            var info = this.info;
+            info.position = _windowRect.position;
+            info.subWindowType = subWindowType;
+            info.isPositionLocked = isPositionLocked;
         }
     }
 }
