@@ -8,6 +8,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
+                if (currentLayer == null)
+                {
+                    return "レイヤー情報";
+                }
+
                 var layerInfo = timelineManager.GetLayerInfo(currentLayer.className);
                 return layerInfo.displayName + "情報";
             }
@@ -30,6 +35,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override bool IsDragging()
         {
+            if (currentLayer == null)
+            {
+                return false;
+            }
+
             return currentLayer.isDragging;
         }
     }

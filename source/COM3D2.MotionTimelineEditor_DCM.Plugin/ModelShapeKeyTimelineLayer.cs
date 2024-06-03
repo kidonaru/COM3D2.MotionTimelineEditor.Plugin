@@ -74,7 +74,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             allMenuItems.Clear();
 
-            foreach (var model in modelManager.modelMap.Values)
+            foreach (var model in modelManager.models)
             {
                 if (model.blendShapes.Count == 0)
                 {
@@ -138,7 +138,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 //PluginUtils.LogDebug("ApplyPlayData: boneName={0} lerpFrame={1}, listIndex={2}", boneName, playData.lerpFrame, playData.listIndex);
             }
 
-            var models = modelManager.modelMap.Values;
+            var models = modelManager.models;
             foreach (var model in models)
             {
                 model.FixBlendValues();

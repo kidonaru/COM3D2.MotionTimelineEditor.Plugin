@@ -69,13 +69,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected override void InitMenuItems()
         {
-            var setMenuItemMap = new Dictionary<BoneSetMenuType, BoneSetMenuItem>(10);
+            _allMenuItems.Clear();
+
+            var setMenuItemMap = new Dictionary<BoneSetMenuType, BoneSetMenuItem>(12);
 
             foreach (var pair in BoneUtils.BoneTypeToSetMenuTypeMap)
             {
                 var boneType = pair.Key;
                 var boneSetType = pair.Value;
-                
+
+                var boneName = BoneUtils.GetBoneName(boneType);
+                var displayName = BoneUtils.GetBoneJpName(boneType);
+                var menuItem = new BoneMotionMenuItem(boneName, displayName);
+
+                if (boneSetType == BoneSetMenuType.None)
+                {
+                    _allMenuItems.Add(menuItem);
+                    continue;
+                }
+
                 BoneSetMenuItem setMenuItem;
                 if (!setMenuItemMap.TryGetValue(boneSetType, out setMenuItem))
                 {
@@ -85,15 +97,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     setMenuItemMap[boneSetType] = setMenuItem;
                 }
 
-                var boneName = BoneUtils.GetBoneName(boneType);
-                var displayName = BoneUtils.GetBoneJpName(boneType);
-
-                var menuItem = new BoneMotionMenuItem(boneName, displayName);
                 setMenuItem.AddChild(menuItem);
             }
 
-            _allMenuItems = new List<IBoneMenuItem>(
-                setMenuItemMap.Values.Cast<IBoneMenuItem>());
+            _allMenuItems.AddRange(setMenuItemMap.Values.Cast<IBoneMenuItem>());
         }
 
         public override bool IsValidData()
@@ -461,7 +468,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         );
         private ComboBoxValue<IKManager.BoneType> boneComboBox = new ComboBoxValue<IKManager.BoneType>
         {
-            items = BoneUtils.saveBoneTypes,
+            items = BoneUtils.BoneTypeToSetMenuTypeMap.Keys.ToList(),
             getName = (boneType, index) =>
             {
                 return BoneUtils.GetBoneJpName(boneType);
@@ -521,8 +528,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void DrawTransform(GUIView view)
         {
-            var saveBoneTypes = BoneUtils.saveBoneTypes;
-
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
                 view.DrawLabel("対象ボーン", 80, 20);

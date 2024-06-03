@@ -76,7 +76,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             allMenuItems.Clear();
 
-            foreach (var model in modelManager.modelMap.Values)
+            foreach (var model in modelManager.models)
             {
                 var menuItem = new BoneMenuItem(model.name, model.displayName);
                 allMenuItems.Add(menuItem);
@@ -176,7 +176,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public override void UpdateFrame(FrameData frame)
         {
-            foreach (var model in modelManager.modelMap.Values)
+            foreach (var model in modelManager.models)
             {
                 var modelName = model.name;
 

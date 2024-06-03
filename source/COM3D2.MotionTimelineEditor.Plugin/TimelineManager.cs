@@ -72,7 +72,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return timeline.layers;
+                return timeline != null ? timeline.layers : new List<ITimelineLayer>();
             }
         }
 

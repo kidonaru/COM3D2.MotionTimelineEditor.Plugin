@@ -275,5 +275,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             info.subWindowType = subWindowType;
             info.isPositionLocked = isPositionLocked;
         }
+
+        public void OnScreenSizeChanged()
+        {
+            PluginUtils.AdjustWindowPosition(ref _windowRect);
+        }
     }
 }

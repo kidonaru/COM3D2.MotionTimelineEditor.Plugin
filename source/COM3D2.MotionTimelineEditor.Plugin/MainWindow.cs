@@ -22,12 +22,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public class MainWindow : IWindow
     {
         public readonly static int WINDOW_ID = 615814;
-        public readonly static int WINDOW_WIDTH = 640;
-        public static int WINDOW_HEIGHT = 240;
+        public readonly static int MIN_WINDOW_WIDTH = 640;
+        public readonly static int MIN_WINDOW_HEIGHT = 480;
         public readonly static int HEADER_HEIGHT = 200;
-
-        public readonly static int WIDTH_DPOS = -WINDOW_WIDTH - 30;
-        public readonly static int HEIGHT_DPOS = -WINDOW_HEIGHT - 100;
+        public readonly static int EASY_EDIT_WINDOW_HEIGHT = 260;
 
         private static StudioHackBase studioHack
         {
@@ -123,39 +121,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static int windowHeight
-        {
-            get
-            {
-                if (config.isEasyEdit)
-                {
-                    return 260;
-                }
-                else
-                {
-                    return 480;
-                }
-            }
-        }
-
         private static int timelineViewHeight
         {
             get
             {
-                return windowHeight - HEADER_HEIGHT - 20;
+                return GetWindowHeight() - HEADER_HEIGHT - 20;
             }
         }
 
         public int windowIndex { get; set; }
         public bool isShowWnd { get; set; }
 
-        private Rect _windowRect = new Rect(
-            Screen.width + WIDTH_DPOS,
-            Screen.height + HEIGHT_DPOS,
-            WINDOW_WIDTH,
-            WINDOW_HEIGHT
-        );
-
+        private Rect _windowRect;
         public Rect windowRect
         {
             get
@@ -168,7 +145,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private int ScWidth = 0, ScHeight = 0;
+        public int windowWidth = 640;
+        public int windowHeight = 240;
         private bool initializedGUI = false;
         private bool isFrameDragging = false;
         private Vector2 frameDragDelta = Vector2.zero;
@@ -187,7 +165,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             public System.Action action;
         }
 
-        private GUIView headerView = new GUIView(0, 20, WINDOW_WIDTH, HEADER_HEIGHT);
+        private GUIView headerView = null;
         private ComboBoxValue<FileMenuType> fileMenuComboBox = new ComboBoxValue<FileMenuType>();
         private ComboBoxValue<TimelineLayerInfo> layerComboBox = new ComboBoxValue<TimelineLayerInfo>();
         private ComboBoxValue<Maid> _maidComboBox = new ComboBoxValue<Maid>();
@@ -211,6 +189,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             this.windowIndex = windowIndex;
             this.isShowWnd = true;
+            this._windowRect = new Rect(
+                Screen.width - windowWidth - 30,
+                Screen.height - windowHeight - 100,
+                windowWidth,
+                windowHeight
+            );
+            headerView = new GUIView(0, 20, windowWidth, HEADER_HEIGHT);
         }
 
         public void Init()
@@ -296,24 +281,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Update()
         {
-            if (studioHack == null || !timelineManager.IsValidData())
-            {
-                return;
-            }
-
-            // 自動スクロール
-            if (config.isAutoScroll &&
-                currentLayer.isAnmSyncing &&
-                studioHack.isMotionPlaying &&
-                !Input.GetMouseButton(0))
-            {
-                var contentWidth = timeline.maxFrameCount * config.frameWidth;
-                var viewWidth = WINDOW_WIDTH - 100;
-                scrollPosition.x = Mathf.Clamp(
-                    timelineManager.currentFrameNo * config.frameWidth - viewWidth / 2,
-                    0,
-                    Mathf.Max(0, contentWidth - viewWidth));
-            }
         }
 
         public void UpdateTexture()
@@ -325,7 +292,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 texTimelineBG = null;
             }
 
-            var bgWidth = WINDOW_WIDTH - 100 + config.frameWidth * config.frameNoInterval;
+            var bgWidth = windowWidth - 100 + config.frameWidth * config.frameNoInterval;
             bgWidth = Mathf.Min(bgWidth, config.frameWidth * timeline.maxFrameCount);
 
             texTimelineBG = timelineManager.timeline.CreateBGTexture(
@@ -351,7 +318,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void FixScrollPosition()
         {
-            var viewWidth = WINDOW_WIDTH - 100;
+            var viewWidth = windowWidth - 100;
             var frameWidth = config.frameWidth;
 
             var minScrollX = timelineManager.currentFrameNo * frameWidth - (viewWidth - 20 - frameWidth);
@@ -418,19 +385,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             InitGUI();
 
-            if (WINDOW_HEIGHT != windowHeight)
+            if (windowHeight != GetWindowHeight())
             {
                 PluginUtils.AdjustWindowPosition(ref _windowRect);
-                WINDOW_HEIGHT = windowHeight;
-                _windowRect.height = WINDOW_HEIGHT;
+                windowHeight = GetWindowHeight();
+                _windowRect.height = windowHeight;
             }
 
-            bool isScreenSizeChanged = ScWidth != Screen.width || ScHeight != Screen.height;
-            if (isScreenSizeChanged)
+            if (windowWidth != GetWindowWidth())
             {
                 PluginUtils.AdjustWindowPosition(ref _windowRect);
-                ScWidth = Screen.width;
-                ScHeight = Screen.height;
+                windowWidth = GetWindowWidth();
+                _windowRect.width = windowWidth;
             }
 
             windowRect = GUI.Window(WINDOW_ID, windowRect, DrawWindow, PluginUtils.WindowName, gsWin);
@@ -454,20 +420,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var isMaidValid = maidManager.IsValid();
 
             {
-                var view = new GUIView(0, 0, WINDOW_WIDTH, 20);
+                var view = new GUIView(0, 0, windowWidth, 20);
                 view.padding.y = 0;
                 view.padding.x = 0;
 
                 view.BeginLayout(GUIView.LayoutDirection.Free);
 
-                view.currentPos.x = WINDOW_WIDTH - 20;
+                view.currentPos.x = windowWidth - 20;
 
                 if (view.DrawButton("x", 20, 20))
                 {
                     MTE.instance.isEnable = false;
                 }
 
-                view.currentPos.x = WINDOW_WIDTH - 400;
+                view.currentPos.x = windowWidth - 400;
 
                 if (!isStudioHackValid)
                 {
@@ -881,7 +847,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var view = new GUIView(0, HEADER_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT - HEADER_HEIGHT);
+            var view = new GUIView(0, HEADER_HEIGHT, windowWidth, windowHeight - HEADER_HEIGHT);
             view.SetEnabled(guiEnabled);
 
             view.BeginLayout(GUIView.LayoutDirection.Free);
@@ -898,11 +864,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var contentWidth = timeline.maxFrameCount * frameWidth;
             var contentHeight = menuItems.Count * frameHeight;
-            var viewWidth = WINDOW_WIDTH - 100;
+            var viewWidth = windowWidth - 100;
             var viewHeight = timelineViewHeight;
             var contentRect = new Rect(0, 0, contentWidth, contentHeight);
             bool alwaysShowHorizontal = true;
             bool alwaysShowVertical = !config.isEasyEdit;
+
+            // 自動スクロール
+            if (config.isAutoScroll &&
+                currentLayer.isAnmSyncing &&
+                studioHack.isMotionPlaying &&
+                !Input.GetMouseButton(0))
+            {
+                scrollPosition.x = Mathf.Clamp(
+                    timelineManager.currentFrameNo * config.frameWidth - viewWidth / 2,
+                    0,
+                    Mathf.Max(0, contentWidth - viewWidth));
+            }
+
             var newScrollPosition = view.BeginScrollView(
                 viewWidth,
                 viewHeight,
@@ -1168,7 +1147,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.currentPos.x = 100 + frameNo * frameWidth - scrollPosition.x + adjustX;
                 if (view.currentPos.x < 100 - halfFrameLabelWidth ||
-                    view.currentPos.x > WINDOW_WIDTH - halfFrameLabelWidth)
+                    view.currentPos.x > windowWidth - halfFrameLabelWidth)
                 {
                     continue;
                 }
@@ -1284,6 +1263,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 170, 120,
                 windowRect.width, windowRect.height,
                 20);
+        }
+
+        public void OnScreenSizeChanged()
+        {
+            PluginUtils.AdjustWindowPosition(ref _windowRect);
+        }
+
+        public static int GetWindowWidth()
+        {
+            return Mathf.Max(MIN_WINDOW_WIDTH, config.windowWidth);
+        }
+        
+        public static int GetWindowHeight()
+        {
+            if (config.isEasyEdit)
+            {
+                return EASY_EDIT_WINDOW_HEIGHT;
+            }
+            else
+            {
+                return Mathf.Max(MIN_WINDOW_HEIGHT, config.windowHeight);
+            }
         }
     }
 }

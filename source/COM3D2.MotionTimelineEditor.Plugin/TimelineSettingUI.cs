@@ -34,6 +34,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             "共通設定",
         };
 
+        private static MainWindow mainWindow
+        {
+            get
+            {
+                return WindowManager.instance.mainWindow;
+            }
+        }
+
         public TimelineSettingUI(SubWindow subWindow) : base(subWindow)
         {
         }
@@ -259,6 +267,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (newTimelineBgAlpha != config.timelineBgAlpha)
                 {
                     config.timelineBgAlpha = newTimelineBgAlpha;
+                    config.dirty = true;
+                }
+            }
+            view.EndLayout();
+
+            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            {
+                view.DrawLabel("ウィンドウ幅", 100, 20);
+
+                var newWindowWidth = view.DrawIntField(config.windowWidth, 50, 20);
+
+                newWindowWidth = (int) view.DrawSlider(newWindowWidth, MainWindow.MIN_WINDOW_WIDTH, Screen.width, 100, 20);
+
+                if (newWindowWidth != config.windowWidth)
+                {
+                    config.windowWidth = newWindowWidth;
+                    mainWindow.UpdateTexture();
+                    config.dirty = true;
+                }
+            }
+            view.EndLayout();
+
+            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            {
+                view.DrawLabel("ウィンドウ高さ", 100, 20);
+
+                var newWindowHeight = view.DrawIntField(config.windowHeight, 50, 20);
+
+                newWindowHeight = (int) view.DrawSlider(newWindowHeight, MainWindow.MIN_WINDOW_HEIGHT, Screen.height, 100, 20);
+
+                if (newWindowHeight != config.windowHeight)
+                {
+                    config.windowHeight = newWindowHeight;
+                    mainWindow.UpdateTexture();
                     config.dirty = true;
                 }
             }

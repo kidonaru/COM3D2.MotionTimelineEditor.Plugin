@@ -7,6 +7,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public MainWindow mainWindow = null;
         public List<SubWindow> subWindows = null;
+        private int _screenWidth = 0;
+        private int _screenHeight = 0;
 
         private static WindowManager _instance = null;
         public static WindowManager instance
@@ -51,6 +53,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Init()
         {
+            TimelineManager.onRefresh += OnRefreshTimeline;
+
             mainWindow = new MainWindow(0);
             mainWindow.Init();
 
@@ -89,6 +93,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             foreach (var subWindow in removeWindows)
             {
                 RemoveSubWindow(subWindow.windowIndex);
+            }
+
+            bool isScreenSizeChanged = _screenWidth != Screen.width || _screenHeight != Screen.height;
+            if (isScreenSizeChanged)
+            {
+                mainWindow.OnScreenSizeChanged();
+
+                foreach (var subWindow in subWindows)
+                {
+                    subWindow.OnScreenSizeChanged();
+                }
+
+                _screenWidth = Screen.width;
+                _screenHeight = Screen.height;
             }
         }
 
@@ -147,6 +165,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             config.subWindowCount = subWindows.Count;
+        }
+
+        private void OnRefreshTimeline()
+        {
+            mainWindow.UpdateTexture();
         }
     }
 }

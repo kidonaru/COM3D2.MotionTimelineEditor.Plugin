@@ -75,7 +75,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             allMenuItems.Clear();
 
-            foreach (var model in modelManager.modelMap.Values)
+            foreach (var model in modelManager.models)
             {
                 if (model.bones.Count == 0)
                 {

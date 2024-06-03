@@ -1,12 +1,9 @@
 using System;
-using System.IO;
-using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityInjector;
 using UnityInjector.Attributes;
 using System.Collections;
-using System.Collections.Generic;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -352,6 +349,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     timelineManager.Update();
                     bgmManager.Update();
                     ikHoldManager.Update();
+                    configManager.Update();
                 }
             }
             catch (Exception e)
@@ -423,11 +421,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             configManager.SaveConfigXml();
         }
 
-        public void OnRefreshTimeline()
-        {
-            mainWindow.UpdateTexture();
-        }
-
         private void Initialize()
         {
             try
@@ -443,7 +436,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 SceneManager.sceneLoaded += OnChangedSceneLevel;
-                TimelineManager.onRefresh += OnRefreshTimeline;
 
                 studioHackManager.Register(new StudioHack());
 

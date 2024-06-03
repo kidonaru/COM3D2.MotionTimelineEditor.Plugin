@@ -9,7 +9,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public enum BoneSetMenuType
     {
+        None,
         Body,
+        Head,
         LeftArm,
         RightArm,
         LeftLeg,
@@ -313,121 +315,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return BoneNameToTypeMap.ContainsKey(boneName);
         }
 
-        public static readonly Dictionary<IKManager.BoneType, IKManager.BoneSetType> BoneTypeToSetTypeMap = new Dictionary<IKManager.BoneType, IKManager.BoneSetType>
-        {
-            {IKManager.BoneType.Root, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.TopFixed, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Pelvis, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Thigh_L, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Calf_L, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Foot_L, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Thigh_R, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Calf_R, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Foot_R, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Toe0_Root_L, IKManager.BoneSetType.LeftLegFinger},
-            {IKManager.BoneType.Toe0_0_L, IKManager.BoneSetType.LeftLegFinger},
-            {IKManager.BoneType.Toe1_Root_L, IKManager.BoneSetType.LeftLegFinger},
-            {IKManager.BoneType.Toe1_0_L, IKManager.BoneSetType.LeftLegFinger},
-            {IKManager.BoneType.Toe2_Root_L, IKManager.BoneSetType.LeftLegFinger},
-            {IKManager.BoneType.Toe2_0_L, IKManager.BoneSetType.LeftLegFinger},
-            {IKManager.BoneType.Toe0_Root_R, IKManager.BoneSetType.RightLegFinger},
-            {IKManager.BoneType.Toe0_0_R, IKManager.BoneSetType.RightLegFinger},
-            {IKManager.BoneType.Toe1_Root_R, IKManager.BoneSetType.RightLegFinger},
-            {IKManager.BoneType.Toe1_0_R, IKManager.BoneSetType.RightLegFinger},
-            {IKManager.BoneType.Toe2_Root_R, IKManager.BoneSetType.RightLegFinger},
-            {IKManager.BoneType.Toe2_0_R, IKManager.BoneSetType.RightLegFinger},
-            {IKManager.BoneType.Spine0, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Spine1, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Spine2, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Spine3, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Neck, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Head, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Clavicle_L, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.UpperArm_L, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Forearm_L, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Hand_L, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Finger0_Root_L, IKManager.BoneSetType.LeftArmFinger},
-            {IKManager.BoneType.Finger0_0_L, IKManager.BoneSetType.LeftArmFinger},
-            {IKManager.BoneType.Finger0_1_L, IKManager.BoneSetType.LeftArmFinger},
-            {IKManager.BoneType.Finger1_Root_L, IKManager.BoneSetType.LeftArmFinger},
-            {IKManager.BoneType.Finger1_0_L, IKManager.BoneSetType.LeftArmFinger},
-            {IKManager.BoneType.Finger1_1_L, IKManager.BoneSetType.LeftArmFinger},
-            {IKManager.BoneType.Finger2_Root_L, IKManager.BoneSetType.LeftArmFinger},
-            {IKManager.BoneType.Finger2_0_L, IKManager.BoneSetType.LeftArmFinger},
-            {IKManager.BoneType.Finger2_1_L, IKManager.BoneSetType.LeftArmFinger},
-            {IKManager.BoneType.Finger3_Root_L, IKManager.BoneSetType.LeftArmFinger},
-            {IKManager.BoneType.Finger3_0_L, IKManager.BoneSetType.LeftArmFinger},
-            {IKManager.BoneType.Finger3_1_L, IKManager.BoneSetType.LeftArmFinger},
-            {IKManager.BoneType.Finger4_Root_L, IKManager.BoneSetType.LeftArmFinger},
-            {IKManager.BoneType.Finger4_0_L, IKManager.BoneSetType.LeftArmFinger},
-            {IKManager.BoneType.Finger4_1_L, IKManager.BoneSetType.LeftArmFinger},
-            {IKManager.BoneType.Clavicle_R, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.UpperArm_R, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Forearm_R, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Hand_R, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Finger0_Root_R, IKManager.BoneSetType.RightArmFinger},
-            {IKManager.BoneType.Finger0_0_R, IKManager.BoneSetType.RightArmFinger},
-            {IKManager.BoneType.Finger0_1_R, IKManager.BoneSetType.RightArmFinger},
-            {IKManager.BoneType.Finger1_Root_R, IKManager.BoneSetType.RightArmFinger},
-            {IKManager.BoneType.Finger1_0_R, IKManager.BoneSetType.RightArmFinger},
-            {IKManager.BoneType.Finger1_1_R, IKManager.BoneSetType.RightArmFinger},
-            {IKManager.BoneType.Finger2_Root_R, IKManager.BoneSetType.RightArmFinger},
-            {IKManager.BoneType.Finger2_0_R, IKManager.BoneSetType.RightArmFinger},
-            {IKManager.BoneType.Finger2_1_R, IKManager.BoneSetType.RightArmFinger},
-            {IKManager.BoneType.Finger3_Root_R, IKManager.BoneSetType.RightArmFinger},
-            {IKManager.BoneType.Finger3_0_R, IKManager.BoneSetType.RightArmFinger},
-            {IKManager.BoneType.Finger3_1_R, IKManager.BoneSetType.RightArmFinger},
-            {IKManager.BoneType.Finger4_Root_R, IKManager.BoneSetType.RightArmFinger},
-            {IKManager.BoneType.Finger4_0_R, IKManager.BoneSetType.RightArmFinger},
-            {IKManager.BoneType.Finger4_1_R, IKManager.BoneSetType.RightArmFinger},
-            {IKManager.BoneType.Bust_L, IKManager.BoneSetType.Body},
-            {IKManager.BoneType.Bust_R, IKManager.BoneSetType.Body},
-        };
-
-        public static IKManager.BoneSetType GetBoneSetType(IKManager.BoneType boneType)
-        {
-            IKManager.BoneSetType boneSetType;
-            if (BoneTypeToSetTypeMap.TryGetValue(boneType, out boneSetType))
-            {
-                return boneSetType;
-            }
-            PluginUtils.LogError("無効なBoneType：" + boneType);
-            return IKManager.BoneSetType.Body;
-        }
-
-        public static readonly Dictionary<IKManager.BoneSetType, string> BoneSetTypeToJpNameMap = new Dictionary<IKManager.BoneSetType, string>
-        {
-            {IKManager.BoneSetType.Body, "体"},
-            {IKManager.BoneSetType.LeftArmFinger, "左手指"},
-            {IKManager.BoneSetType.RightArmFinger, "右手指"},
-            {IKManager.BoneSetType.LeftLegFinger, "左足指"},
-            {IKManager.BoneSetType.RightLegFinger, "右足指"},
-        };
-
-        public static string GetBoneSetJpName(IKManager.BoneSetType boneSetType)
-        {
-            string japaneseName;
-            if (BoneSetTypeToJpNameMap.TryGetValue(boneSetType, out japaneseName))
-            {
-                return japaneseName;
-            }
-            PluginUtils.LogError("無効なBoneSetType：" + boneSetType);
-            return "";
-        }
-
         public static readonly Dictionary<IKManager.BoneType, BoneSetMenuType> BoneTypeToSetMenuTypeMap = new Dictionary<IKManager.BoneType, BoneSetMenuType>
         {
-            {IKManager.BoneType.Root, BoneSetMenuType.Body},
+            {IKManager.BoneType.Root, BoneSetMenuType.None},
+
             {IKManager.BoneType.TopFixed, BoneSetMenuType.Body},
             {IKManager.BoneType.Pelvis, BoneSetMenuType.Body},
             {IKManager.BoneType.Spine3, BoneSetMenuType.Body},
             {IKManager.BoneType.Spine2, BoneSetMenuType.Body},
             {IKManager.BoneType.Spine1, BoneSetMenuType.Body},
             {IKManager.BoneType.Spine0, BoneSetMenuType.Body},
-            {IKManager.BoneType.Neck, BoneSetMenuType.Body},
-            {IKManager.BoneType.Head, BoneSetMenuType.Body},
             {IKManager.BoneType.Bust_L, BoneSetMenuType.Body},
             {IKManager.BoneType.Bust_R, BoneSetMenuType.Body},
+
+            {IKManager.BoneType.Neck, BoneSetMenuType.Head},
+            {IKManager.BoneType.Head, BoneSetMenuType.Head},
 
             {IKManager.BoneType.Clavicle_L, BoneSetMenuType.LeftArm},
             {IKManager.BoneType.UpperArm_L, BoneSetMenuType.LeftArm},
@@ -507,7 +409,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static readonly Dictionary<BoneSetMenuType, string> BoneSetMenuTypeToJpNameMap = new Dictionary<BoneSetMenuType, string>
         {
+            {BoneSetMenuType.None, ""},
             {BoneSetMenuType.Body, "体"},
+            {BoneSetMenuType.Head, "頭"},
             {BoneSetMenuType.LeftArm, "左腕"},
             {BoneSetMenuType.RightArm, "右腕"},
             {BoneSetMenuType.LeftLeg, "左足"},

@@ -35,9 +35,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class StudioModelManager
     {
-        public Dictionary<string, StudioModelStat> modelMap = new Dictionary<string, StudioModelStat>();
+        private Dictionary<string, StudioModelStat> modelMap = new Dictionary<string, StudioModelStat>();
         public Dictionary<string, StudioModelBone> boneMap = new Dictionary<string, StudioModelBone>();
         public Dictionary<string, StudioModelBlendShape> blendShapeMap = new Dictionary<string, StudioModelBlendShape>();
+
         public List<StudioModelStat> models = new List<StudioModelStat>();
         public List<string> modelNames = new List<string>();
         public List<string> boneNames = new List<string>();
@@ -250,18 +251,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (refresh)
             {
-                modelNames.Clear();
-                modelNames.AddRange(modelMap.Keys);
-
                 models.Clear();
+                modelNames.Clear();
                 boneMap.Clear();
                 blendShapeMap.Clear();
                 boneNames.Clear();
                 blendShapeNames.Clear();
 
-                foreach (var model in modelMap.Values)
+                models.AddRange(modelMap.Values);
+
+                models.Sort((model1, model2) =>
                 {
-                    models.Add(model);
+                    var c = string.Compare(model1.info.fileName, model2.info.fileName);
+                    if (c != 0)
+                    {
+                        return c;
+                    }
+                    return model1.group - model2.group;
+                });
+
+                foreach (var model in models)
+                {
+                    modelNames.Add(model.name);
 
                     foreach (var bone in model.bones)
                     {
