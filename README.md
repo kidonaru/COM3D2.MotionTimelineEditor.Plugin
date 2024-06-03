@@ -47,7 +47,6 @@ https://ux.getuploader.com/com3d2_mod_kyouyu_g/download/79
 
 
 SceneCaptureプラグインで配置したモデルの制御も可能です。
-複数メイド撮影プラグインやMeidoPhotoStudioでもモデルの配置は可能です。
 
 - COM3D2.SceneCapture.Plugin v0.3.1.30
 現在未公開
