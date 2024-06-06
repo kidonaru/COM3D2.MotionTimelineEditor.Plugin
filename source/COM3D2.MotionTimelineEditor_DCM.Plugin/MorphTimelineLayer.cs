@@ -69,6 +69,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         private Dictionary<string, List<MorphTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<MorphTimeLineRow>>();
         private Dictionary<string, MorphPlayData> _playDataMap = new Dictionary<string, MorphPlayData>();
         private List<MorphTimeLineRow> _dcmOutputRows = new List<MorphTimeLineRow>(128);
+        private bool _isForceUpdate = false;
 
         private MorphTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -179,12 +180,56 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return Mathf.Lerp(startValue, endValue, lerpFrame);
         }
 
+        private float GetMorphValue(string morphName)
+        {
+            var morphValue = 0f;
+            if (_isForceUpdate)
+            {
+                if (_applyMorphMap.TryGetValue(morphName, out morphValue))
+                {
+                    return morphValue;
+                }
+                return 0f;
+            }
+
+            morphValue = _faceManager.GetMorphValue(this.maid, morphName);
+
+            // 目閉じ補正を戻す
+            if (morphName == "eyeclose")
+            {
+                TMorph morph = maid.body0.Face.morph;
+                if (morph != null)
+                {
+                    var eyeCloseRate = morph.m_fEyeCloseRate;
+                    if (eyeCloseRate != 0f && eyeCloseRate != 1f)
+                    {
+                        morphValue = (morphValue - eyeCloseRate) / (1f - eyeCloseRate);
+                        morphValue = Mathf.Clamp01(morphValue);
+                    }
+                }
+            }
+
+            return morphValue;
+        }
+
+        private void SetMorphValue(string morphName, float value)
+        {
+            if (_isForceUpdate)
+            {
+                _applyMorphMap[morphName] = value;
+                return;
+            }
+
+            var tmpMorphMap = new Dictionary<string, float>();
+            tmpMorphMap[morphName] = value;
+            _faceManager.SetMorphValue(maid, tmpMorphMap);
+        }
+
         public override void UpdateFrame(FrameData frame)
         {
-            var maid = this.maid;
             foreach (var name in allBoneNames)
             {
-                var morphValue = _faceManager.GetMorphValue(maid, name);
+                var morphValue = GetMorphValue(name);
 
                 var trans = CreateTransformData(name);
                 trans.values[0].value = morphValue;
@@ -408,12 +453,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 false,
                 true);
 
+            _isForceUpdate = view.DrawToggle("強制上書き", _isForceUpdate, 150, 20);
+
             view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
             Action<string> drawMorphSlider = morphName =>
             {
                 var displayName = MorphUtils.GetMorphJpName(morphName);
-                var morphValue = _faceManager.GetMorphValue(maid, morphName);
+                var morphValue = GetMorphValue(morphName);
                 var newMorphValue = morphValue;
 
                 view.BeginLayout(GUIView.LayoutDirection.Horizontal);
@@ -430,9 +477,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                 if (!Mathf.Approximately(newMorphValue, morphValue))
                 {
-                    _applyMorphMap.Clear();
-                    _applyMorphMap[morphName] = newMorphValue;
-                    _faceManager.SetMorphValue(maid, _applyMorphMap);
+                    SetMorphValue(morphName, newMorphValue);
                 }
 
                 view.EndLayout();
@@ -441,16 +486,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             Action<string> drawMorphToggle = morphName =>
             {
                 var displayName = MorphUtils.GetMorphJpName(morphName);
-                var morphValue = _faceManager.GetMorphValue(maid, morphName);
+                var morphValue = GetMorphValue(morphName);
                 var isOn = morphValue >= 1f;
 
                 var newIsOn = view.DrawToggle(displayName, isOn, 150, 20);
 
                 if (newIsOn != isOn)
                 {
-                    _applyMorphMap.Clear();
-                    _applyMorphMap[morphName] = newIsOn ? 1f : 0f;
-                    _faceManager.SetMorphValue(maid, _applyMorphMap);
+                    SetMorphValue(morphName, newIsOn ? 1f : 0f);
                 }
             };
 
@@ -479,6 +522,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             foreach (var morphName in MyConst.FACE_OPTION_MORPH.Keys)
             {
                 drawMorphToggle(morphName);
+            }
+
+            if (studioHack.isPoseEditing && _isForceUpdate)
+            {
+                _faceManager.SetMorphValue(maid, _applyMorphMap);
             }
 
             _contentRect.height = view.currentPos.y + 20;
