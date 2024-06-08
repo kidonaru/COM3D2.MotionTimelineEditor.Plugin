@@ -274,6 +274,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool isBustR { get; protected set; }
         public bool isHead { get; protected set; }
 
+        public static readonly string[] PositionNames = new string[] { "X", "Y", "Z" };
+        public static readonly string[] RotationNames = new string[] { "RX", "RY", "RZ", "RW" };
+        public static readonly string[] ScaleNames = new string[] { "SX", "SY", "SZ" };
+
         protected static Config config
         {
             get

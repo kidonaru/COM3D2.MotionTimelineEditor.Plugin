@@ -1369,6 +1369,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             float diffValue,
             float resetValue,
             float value,
+            Action<float> updateNewValue,
+            float labelWidth)
+        {
+            return DrawSliderValue(
+                fieldValue,
+                minValue,
+                maxValue,
+                diffValue,
+                () => updateNewValue(resetValue),
+                value,
+                updateNewValue,
+                labelWidth);
+        }
+
+        public bool DrawSliderValue(
+            FloatFieldValue fieldValue,
+            float minValue,
+            float maxValue,
+            float diffValue,
+            float resetValue,
+            float value,
             Action<float> updateNewValue)
         {
             return DrawSliderValue(
@@ -1378,7 +1399,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 diffValue,
                 () => updateNewValue(resetValue),
                 value,
-                updateNewValue);
+                updateNewValue,
+                50);
         }
 
         public bool DrawSliderValue(
@@ -1388,7 +1410,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             float diffValue,
             Action resetValueFunc,
             float value,
-            Action<float> updateNewValue)
+            Action<float> updateNewValue,
+            float labelWidth)
         {
             fieldValue.UpdateValue(value, true);
 
@@ -1406,7 +1429,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var label = fieldValue.label;
                 if (label != null)
                 {
-                    subView.DrawLabel(label, 50, 20);
+                    subView.DrawLabel(label, labelWidth, 20);
                 }
 
                 newValue = subView.DrawFloatFieldValue(null, fieldValue, 50, 20);
@@ -1422,7 +1445,103 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 subView.AddSpace(5);
 
-                newValue = subView.DrawSlider(newValue, minValue, maxValue, 80, 20);
+                var sliderWidth = 130 - labelWidth;
+                newValue = subView.DrawSlider(newValue, minValue, maxValue, sliderWidth, 20);
+
+                subView.AddSpace(5);
+
+                if (subView.DrawButton("R", 20, 20))
+                {
+                    resetValueFunc();
+                    updated = true;
+                }
+            }
+            subView.EndLayout();
+
+            NextElement(subViewRect);
+
+            if (!float.IsNaN(newValue) && newValue != value)
+            {
+                updateNewValue(newValue);
+                updated = true;
+            }
+
+            return updated;
+        }
+
+        public bool DrawSliderValueEx(
+            FloatFieldValue fieldValue,
+            float minValue,
+            float maxValue,
+            float diffValue,
+            float resetValue,
+            float value,
+            Action<float> updateNewValue,
+            bool enabled,
+            Action<bool> updateEnabled)
+        {
+            return DrawSliderValueEx(
+                fieldValue,
+                minValue,
+                maxValue,
+                diffValue,
+                () => updateNewValue(resetValue),
+                value,
+                updateNewValue,
+                enabled,
+                updateEnabled);
+        }
+
+        public bool DrawSliderValueEx(
+            FloatFieldValue fieldValue,
+            float minValue,
+            float maxValue,
+            float diffValue,
+            Action resetValueFunc,
+            float value,
+            Action<float> updateNewValue,
+            bool enabled,
+            Action<bool> updateEnabled)
+        {
+            fieldValue.UpdateValue(value, true);
+
+            var newValue = value;
+            var updated = false;
+
+            var subViewRect = GetDrawRect(250, 20);
+            var subView = new GUIView(subViewRect);
+            subView.SetEnabled(guiEnabled && enabled);
+            subView.margin = 0;
+            subView.padding = Vector2.zero;
+
+            subView.BeginLayout(LayoutDirection.Horizontal);
+            {
+                var newEnabled = subView.DrawToggle(null, enabled, 20, 20, true);
+                if (newEnabled != enabled)
+                {
+                    updateEnabled(newEnabled);
+                }
+
+                var label = fieldValue.label;
+                if (label != null)
+                {
+                    subView.DrawLabel(label, 70, 20);
+                }
+
+                newValue = subView.DrawFloatFieldValue(null, fieldValue, 50, 20);
+
+                if (subView.DrawButton("<", 20, 20))
+                {
+                    newValue -= diffValue;
+                }
+                if (subView.DrawButton(">", 20, 20))
+                {
+                    newValue += diffValue;
+                }
+
+                subView.AddSpace(5);
+
+                newValue = subView.DrawSlider(newValue, minValue, maxValue, 40, 20);
 
                 subView.AddSpace(5);
 

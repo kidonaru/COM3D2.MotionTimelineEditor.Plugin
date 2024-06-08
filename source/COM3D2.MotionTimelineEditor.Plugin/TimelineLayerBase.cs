@@ -433,6 +433,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // do nothing
         }
 
+        public virtual void OnShapeKeyAdded(string shapeKey)
+        {
+            // do nothing
+        }
+
+        public virtual void OnShapeKeyRemoved(string shapeKey)
+        {
+            // do nothing
+        }
+
         public abstract void UpdateFrame(FrameData frame);
         public abstract void ApplyAnm(long id, byte[] anmData);
         public abstract void ApplyCurrentFrame(bool motionUpdate);

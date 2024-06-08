@@ -65,6 +65,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public List<TimelineModelData> models = new List<TimelineModelData>();
 
+        // maidSlotNo -> slotName/shapeKey
+        public Dictionary<int, HashSet<string>> maidShapeKeysMap = new Dictionary<int, HashSet<string>>();
+
         private int _maxFrameNo = 30;
         public int maxFrameNo
         {
@@ -535,6 +538,52 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public bool HasMaidShapeKey(int maidSlotNo, string shapeKey)
+        {
+            var shapeKeys = GetMaidShapeKeys(maidSlotNo);
+            return shapeKeys.Contains(shapeKey);
+        }
+
+        public HashSet<string> GetMaidShapeKeys(int maidSlotNo)
+        {
+            HashSet<string> shapeKeys;
+            if (!maidShapeKeysMap.TryGetValue(maidSlotNo, out shapeKeys))
+            {
+                shapeKeys = new HashSet<string>();
+                maidShapeKeysMap[maidSlotNo] = shapeKeys;
+            }
+
+            return shapeKeys;
+        }
+
+        public void AddMaidShapeKey(int maidSlotNo, string shapeKey)
+        {
+            var shapeKeys = GetMaidShapeKeys(maidSlotNo);
+            shapeKeys.Add(shapeKey);
+
+            foreach (var layer in layers)
+            {
+                if (layer.hasSlotNo && layer.slotNo == maidSlotNo)
+                {
+                    layer.OnShapeKeyAdded(shapeKey);
+                }
+            }
+        }
+
+        public void RemoveMaidShapeKey(int maidSlotNo, string shapeKey)
+        {
+            var shapeKeys = GetMaidShapeKeys(maidSlotNo);
+            shapeKeys.Remove(shapeKey);
+
+            foreach (var layer in layers)
+            {
+                if (layer.hasSlotNo && layer.slotNo == maidSlotNo)
+                {
+                    layer.OnShapeKeyRemoved(shapeKey);
+                }
+            }
+        }
+
         public void FromXml(TimelineXml xml)
         {
             version = xml.version;
@@ -564,6 +613,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var model = new TimelineModelData();
                 model.FromXml(modelXml);
                 models.Add(model);
+            }
+
+            maidShapeKeysMap.Clear();
+            foreach (var shapeKeyml in xml.maidShapeKeys)
+            {
+                AddMaidShapeKey(shapeKeyml.maidSlotNo, shapeKeyml.shapeKey);
             }
 
             maxFrameNo = xml.maxFrameNo;
@@ -620,6 +675,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var modelXml = model.ToXml();
                 xml.models.Add(modelXml);
+            }
+
+            xml.maidShapeKeys = new List<TimelineMaidShapeKeyXml>();
+            foreach (var pair in maidShapeKeysMap)
+            {
+                var maidSlotNo = pair.Key;
+                foreach (var shapeKey in pair.Value)
+                {
+                    var shapeKeyXml = new TimelineMaidShapeKeyXml
+                    {
+                        maidSlotNo = maidSlotNo,
+                        shapeKey = shapeKey,
+                    };
+                    xml.maidShapeKeys.Add(shapeKeyXml);
+                }
             }
 
             xml.maxFrameNo = maxFrameNo;

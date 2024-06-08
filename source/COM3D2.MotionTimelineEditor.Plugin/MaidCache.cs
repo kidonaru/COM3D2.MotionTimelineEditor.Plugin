@@ -562,6 +562,136 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return ikManager.GetBone(boneType).transform;
         }
 
+        private Dictionary<string, MaidBlendShape> _blendShapeCache =
+                new Dictionary<string, MaidBlendShape>();
+
+        public class MaidBlendShapeEntity
+        {
+            public TMorph morph;
+            public int shapeKeyIndex;
+
+            public float weight
+            {
+                get
+                {
+                    return morph.GetBlendValues(shapeKeyIndex);
+                }
+                set
+                {
+                    morph.SetBlendValues(shapeKeyIndex, value);
+                }
+            }
+        }
+
+        public class MaidBlendShape
+        {
+            public List<MaidBlendShapeEntity> entities = new List<MaidBlendShapeEntity>();
+
+            public float weight
+            {
+                get
+                {
+                    if (entities.Count > 0)
+                    {
+                        return entities.First().weight;
+                    }
+                    return 0f;
+                }
+                set
+                {
+                    foreach (var entity in entities)
+                    {
+                        entity.weight = value;
+                    }
+                }
+            }
+        }
+
+        public MaidBlendShape GetBlendShape(string shapeKey)
+        {
+            if (!_blendShapeCache.ContainsKey(shapeKey))
+            {
+                var blendShape = GetBlendShapeInternal(shapeKey);
+                _blendShapeCache[shapeKey] = blendShape;
+            }
+            return _blendShapeCache[shapeKey];
+        }
+
+        private MaidBlendShape GetBlendShapeInternal(string shapeKey)
+        {
+            if (maid == null || maid.body0 == null)
+            {
+                return null;
+            }
+
+            var blendShape = new MaidBlendShape();
+            
+            foreach (var slot in maid.body0.goSlot)
+            {
+                if (slot.morph == null || slot.morph.hash.Count == 0)
+                {
+                    continue;
+                }
+
+                if (slot.morph.Contains(shapeKey))
+                {
+                    blendShape.entities.Add(new MaidBlendShapeEntity
+                    {
+                        morph = slot.morph,
+                        shapeKeyIndex = (int) slot.morph.hash[shapeKey],
+                    });
+                }
+            }
+
+            return blendShape;
+        }
+
+        public void SetBlendShapeValue(string shapeKey, float value)
+        {
+            var blendShape = GetBlendShape(shapeKey);
+            if (blendShape != null)
+            {
+                blendShape.weight = value;
+            }
+        }
+
+        public float GetBlendShapeValue(string shapeKey)
+        {
+            var blendShape = GetBlendShape(shapeKey);
+            if (blendShape != null)
+            {
+                return blendShape.weight;
+            }
+            return 0f;
+        }
+
+        public void FixBlendValues(IEnumerable<string> shapeKeys)
+        {
+            if (maid == null || maid.body0 == null)
+            {
+                return;
+            }
+
+            var morphs = new HashSet<TMorph>();
+
+            foreach (var shapeKey in shapeKeys)
+            {
+                var blendShape = GetBlendShape(shapeKey);
+                foreach (var entity in blendShape.entities)
+                {
+                    morphs.Add(entity.morph);
+                }
+            }
+
+            foreach (var morph in morphs)
+            {
+                if (morph != null)
+                {
+                    morph.FixBlendValues();
+                }
+            }
+        }
+
         private void OnMaidChanged(Maid maid)
         {
             PluginUtils.LogDebug("Maid changed: " + (maid != null ? maid.name : "null"));

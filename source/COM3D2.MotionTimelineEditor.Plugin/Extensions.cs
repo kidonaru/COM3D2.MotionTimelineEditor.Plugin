@@ -456,6 +456,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             PluginUtils.LogError("Invalid IKHoldType: " + holdType);
             return IKManager.BoneType.UpperArm_R;
         }
+
+        public static List<string> GetTags(this TMorph morph)
+        {
+            if (morph != null)
+            {
+                var tags = new List<string>(morph.hash.Count);
+                foreach (string tag in morph.hash.Keys)
+                {
+                    tags.Add(tag);
+                }
+                return tags;
+            }
+
+            return new List<string>();
+        }
     }
 
 }

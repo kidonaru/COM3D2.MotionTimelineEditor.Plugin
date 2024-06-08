@@ -18,6 +18,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string pluginName;
     }
 
+    public class TimelineMaidShapeKeyXml
+    {
+        [XmlElement("MaidSlotNo")]
+        public int maidSlotNo = -1;
+        [XmlElement("ShapeKey")]
+        public string shapeKey;
+    }
+
     [XmlRoot("TimelineData")]
     public class TimelineXml
     {
@@ -37,6 +45,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlArray("Models")]
         [XmlArrayItem("Model")]
         public List<TimelineModelXml> models = new List<TimelineModelXml>();
+
+        [XmlArray("MaidShapeKeys")]
+        [XmlArrayItem("MaidShapeKey")]
+        public List<TimelineMaidShapeKeyXml> maidShapeKeys = new List<TimelineMaidShapeKeyXml>();
 
         [XmlElement("MaxFrameNo")]
         public int maxFrameNo;

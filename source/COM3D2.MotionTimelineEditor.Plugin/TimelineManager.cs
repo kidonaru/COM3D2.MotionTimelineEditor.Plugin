@@ -1460,6 +1460,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return null;
         }
 
+        public List<T> FindLayers<T>(string className)
+            where T : class
+        {
+            var layers = new List<T>();
+
+            foreach (var layer in this.layers)
+            {
+                if (layer.className == className)
+                {
+                    layers.Add(layer as T);
+                }
+            }
+
+            return layers;
+        }
+
         public void CopyModel(StudioModelStat model)
         {
             if (model == null || timeline == null)

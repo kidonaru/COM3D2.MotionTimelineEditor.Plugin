@@ -13,9 +13,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         IKHold,
         Track,
         StudioModel,
-        MediaPlayer,
         History,
         TimelineSetting,
+        Max,
+
+        MediaPlayer = 7, // dummy
     }
 
     public class SubWindowInfo
@@ -42,7 +44,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private SubWindowUIBase[] _uiList = null;
 
         public static readonly List<SubWindowType> SubWindowTypes =
-                Enum.GetValues(typeof(SubWindowType))
+                Enumerable.Range(0, (int) SubWindowType.Max)
                 .Cast<SubWindowType>()
                 .ToList();
 
@@ -199,7 +201,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 new IKHoldUI(this),
                 new TimelineTrackUI(this),
                 new StudioModelUI(this),
-                new MediaPlayerUI(this),
                 new TimelineHistoryUI(this),
                 new TimelineSettingUI(this),
             };

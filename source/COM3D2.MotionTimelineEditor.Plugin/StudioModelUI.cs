@@ -110,7 +110,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 80);
         }
 
-
         public void DrawModel(
             GUIView view,
             StudioModelStat model,
@@ -153,12 +152,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     view.DrawComboBoxButton(pluginComboBox, 150, 20, true);
                 }
 
-                if (view.DrawButton("複製", 50, 20))
+                if (view.DrawButton("複製", 45, 20))
                 {
                     timelineManager.CopyModel(model);
                 }
 
-                if (view.DrawButton("削除", 50, 20))
+                if (view.DrawButton("削除", 45, 20))
                 {
                     modelManager.DeleteModel(model);
                 }

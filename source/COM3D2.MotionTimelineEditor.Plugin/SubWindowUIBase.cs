@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
@@ -78,6 +79,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return WindowManager.instance;
             }
         }
+
+        protected static MovieManager movieManager
+        {
+            get
+            {
+                return MovieManager.instance;
+            }
+        }
+
+        protected static BGMManager bgmManager
+        {
+            get
+            {
+                return BGMManager.instance;
+            }
+        }
         
         protected static ITimelineLayer currentLayer
         {
@@ -118,9 +135,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (headerView == null)
             {
-                headerView = new GUIView(0, 0, WINDOW_WIDTH, 20);
-                headerView.padding = Vector2.zero;
-                headerView.margin = 0;
+                headerView = new GUIView(0, 0, WINDOW_WIDTH, 20)
+                {
+                    padding = Vector2.zero,
+                    margin = 0
+                };
             }
 
             if (contentView == null)
@@ -152,6 +171,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             contentView.SetEnabled(!IsComboBoxFocused());
             contentView.padding = GUIView.defaultPadding;
             contentView.margin = GUIView.defaultMargin;
+
+            _fieldValueIndex = 0;
         }
 
         public virtual void DrawWindow(int id)
@@ -217,6 +238,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public virtual bool IsDragging()
         {
             return false;
+        }
+
+        private List<FloatFieldValue> _fieldValues = new List<FloatFieldValue>();
+        private int _fieldValueIndex = 0;
+
+        protected FloatFieldValue GetNextFieldValue(string label)
+        {
+            if (_fieldValueIndex < _fieldValues.Count)
+            {
+                var fieldValue = _fieldValues[_fieldValueIndex++];
+                fieldValue.label = label;
+                return fieldValue;
+            }
+
+            {
+                var fieldValue = new FloatFieldValue(label);
+                _fieldValues.Add(fieldValue);
+                _fieldValueIndex++;
+                return fieldValue;
+            }
         }
     }
 }
