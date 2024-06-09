@@ -73,6 +73,7 @@
     <Compile Include="Config.cs" />
     <Compile Include="ConfigManager.cs" />
     <Compile Include="EasyMenuItem.cs" />
+    <Compile Include="ExtendBoneCache.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FrameData.cs" />
     <Compile Include="FrameXml.cs" />
@@ -84,6 +85,7 @@
     <Compile Include="ITransformData.cs" />
     <Compile Include="KeyBind.cs" />
     <Compile Include="KeyFrameUI.cs" />
+    <Compile Include="MaidBlendShape.cs" />
     <Compile Include="MaidCache.cs" />
     <Compile Include="MaidInfo.cs" />
     <Compile Include="MaidManager.cs" />

@@ -267,7 +267,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return false;
             }
 
-            return !trans.name.EndsWith("_nub") && !trans.name.EndsWith("_SCL_");
+            return BoneUtils.IsVisibleBoneName(trans.name);
         }
     }
 }

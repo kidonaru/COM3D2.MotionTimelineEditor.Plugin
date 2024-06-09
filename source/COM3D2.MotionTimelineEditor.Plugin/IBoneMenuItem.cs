@@ -11,6 +11,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         bool isOpenMenu { get; set; }
         bool isSetMenu { get; }
 
+        IBoneMenuItem parent { get; set; }
         List<IBoneMenuItem> children { get; }
 
         void SelectMenu(bool isMultiSelect);

@@ -20,6 +20,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         RightArmFinger,
         LeftLegFinger,
         RightLegFinger,
+        Extended,
     }
 
     public static class BoneUtils
@@ -49,7 +50,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _saveBoneNames = new List<string>(saveBonePaths.Length);
                     for (int i = 0; i < saveBonePaths.Length; i++)
                     {
-                        _saveBoneNames.Add(ConvertBoneName(saveBonePaths[i]));
+                        _saveBoneNames.Add(ConvertToBoneName(saveBonePaths[i]));
                     }
                 }
                 return _saveBoneNames;
@@ -84,7 +85,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _boneNameToPathMap = new Dictionary<string, string>(saveBonePaths.Length + 2);
                     foreach (var bonePath in saveBonePaths)
                     {
-                        _boneNameToPathMap[ConvertBoneName(bonePath)] = bonePath;
+                        _boneNameToPathMap[ConvertToBoneName(bonePath)] = bonePath;
                     }
 
                     _boneNameToPathMap["Hip_L"] = "Bip01/Bip01 Pelvis/Hip_L";
@@ -94,24 +95,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static string ConvertBoneName(string bonePath)
+        public static string ConvertToBoneName(string bonePath)
         {
             return bonePath.Substring(bonePath.LastIndexOf('/') + 1);
         }
 
-        public static string ConvertBonePath(string boneName)
+        public static string ConvertToBonePath(string boneName)
         {
             string bonePath;
             if (boneNameToPathMap.TryGetValue(boneName, out bonePath))
             {
                 return bonePath;
             }
-            return boneName;
-        }
-
-        public static bool IsTargetBoneName(string boneName)
-        {
-            return boneNameToPathMap.ContainsKey(boneName);
+            return "";
         }
 
         public static readonly Dictionary<IKManager.BoneType, string> BoneTypeToJpNameMap = new Dictionary<IKManager.BoneType, string>
@@ -194,6 +190,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             PluginUtils.LogError("無効なBoneType：" + boneType);
             return "";
+        }
+
+        public static string GetBoneJpName(string boneName)
+        {
+            if (IsDefaultBoneName(boneName))
+            {
+                return GetBoneJpName(GetBoneTypeByName(boneName));
+            }
+
+            return boneName;
         }
 
         public static readonly Dictionary<IKManager.BoneType, string> BoneTypeToNameMap = new Dictionary<IKManager.BoneType, string>
@@ -281,11 +287,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return "";
         }
 
-        public static string GetBonePath(IKManager.BoneType boneType)
-        {
-            return ConvertBonePath(GetBoneName(boneType));
-        }
-
         private static Dictionary<string, IKManager.BoneType> _boneNameToTypeMap = null;
         public static Dictionary<string, IKManager.BoneType> BoneNameToTypeMap
         {
@@ -306,13 +307,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return boneType;
             }
-            PluginUtils.LogError("無効なBoneName：" + boneName);
+            //PluginUtils.LogError("無効なBoneName：" + boneName);
             return IKManager.BoneType.TopFixed;
         }
 
-        public static bool IsValidBoneName(string boneName)
+        public static bool IsDefaultBoneName(string boneName)
         {
             return BoneNameToTypeMap.ContainsKey(boneName);
+        }
+
+        public static bool IsVisibleBoneName(string boneName)
+        {
+            if (boneName.EndsWith("nub", System.StringComparison.Ordinal))
+            {
+                return false;
+            }
+            if (boneName.EndsWith("_SCL_", System.StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public static readonly Dictionary<IKManager.BoneType, BoneSetMenuType> BoneTypeToSetMenuTypeMap = new Dictionary<IKManager.BoneType, BoneSetMenuType>
@@ -396,7 +411,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {IKManager.BoneType.Toe2_0_R, BoneSetMenuType.RightLegFinger},
         };
 
-        public static BoneSetMenuType GetBoneSetMenuType(IKManager.BoneType boneType)
+        private static BoneSetMenuType _GetBoneSetMenuType(IKManager.BoneType boneType)
         {
             BoneSetMenuType boneSetMenuType;
             if (BoneTypeToSetMenuTypeMap.TryGetValue(boneType, out boneSetMenuType))
@@ -405,6 +420,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             PluginUtils.LogError("無効なBoneType：" + boneType);
             return BoneSetMenuType.Body;
+        }
+
+        public static BoneSetMenuType GetBoneSetMenuType(string boneName)
+        {
+            if (IsDefaultBoneName(boneName))
+            {
+                return _GetBoneSetMenuType(GetBoneTypeByName(boneName));
+            }
+            return BoneSetMenuType.Extended;
         }
 
         public static readonly Dictionary<BoneSetMenuType, string> BoneSetMenuTypeToJpNameMap = new Dictionary<BoneSetMenuType, string>
@@ -420,6 +444,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {BoneSetMenuType.RightArmFinger, "右手指"},
             {BoneSetMenuType.LeftLegFinger, "左足指"},
             {BoneSetMenuType.RightLegFinger, "右足指"},
+            {BoneSetMenuType.Extended, "追加"},
         };
 
         public static string GetBoneSetMenuJpName(BoneSetMenuType boneSetMenuType)

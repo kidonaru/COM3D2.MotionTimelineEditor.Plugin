@@ -179,7 +179,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var maids = studioHack.allMaids;
             foreach (var m in maids)
             {
-                if (m.body0 == null || m.body0.m_Bones == null || m.body0.trsEyeL == null || m.body0.trsEyeR == null)
+                if (m.body0 == null || m.body0.m_Bones == null ||
+                    m.body0.trsEyeL == null || m.body0.trsEyeR == null ||
+                    m.IsAllProcPropBusy)
                 {
                     _errorMessage = "メイド生成中です";
                     return false;

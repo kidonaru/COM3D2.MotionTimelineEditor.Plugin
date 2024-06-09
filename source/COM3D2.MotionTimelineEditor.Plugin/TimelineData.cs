@@ -65,8 +65,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public List<TimelineModelData> models = new List<TimelineModelData>();
 
-        // maidSlotNo -> slotName/shapeKey
+        // maidSlotNo -> shapeKeys
         public Dictionary<int, HashSet<string>> maidShapeKeysMap = new Dictionary<int, HashSet<string>>();
+
+        // maidSlotNo -> extendBoneNames
+        public Dictionary<int, HashSet<string>> extendBoneNamesMap = new Dictionary<int, HashSet<string>>();
 
         private int _maxFrameNo = 30;
         public int maxFrameNo
@@ -584,6 +587,52 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public bool HasExtendBoneName(int maidSlotNo, string extendBoneName)
+        {
+            var boneNames = GetExtendBoneNames(maidSlotNo);
+            return boneNames.Contains(extendBoneName);
+        }
+
+        public HashSet<string> GetExtendBoneNames(int maidSlotNo)
+        {
+            HashSet<string> boneNames;
+            if (!extendBoneNamesMap.TryGetValue(maidSlotNo, out boneNames))
+            {
+                boneNames = new HashSet<string>();
+                extendBoneNamesMap[maidSlotNo] = boneNames;
+            }
+
+            return boneNames;
+        }
+
+        public void AddExtendBoneName(int maidSlotNo, string extendBoneName)
+        {
+            var boneNames = GetExtendBoneNames(maidSlotNo);
+            boneNames.Add(extendBoneName);
+
+            foreach (var layer in layers)
+            {
+                if (layer.hasSlotNo && layer.slotNo == maidSlotNo)
+                {
+                    layer.OnBoneNameAdded(extendBoneName);
+                }
+            }
+        }
+
+        public void RemoveExtendBoneName(int maidSlotNo, string extendBoneName)
+        {
+            var boneNames = GetExtendBoneNames(maidSlotNo);
+            boneNames.Remove(extendBoneName);
+
+            foreach (var layer in layers)
+            {
+                if (layer.hasSlotNo && layer.slotNo == maidSlotNo)
+                {
+                    layer.OnBoneNameRemoved(extendBoneName);
+                }
+            }
+        }
+
         public void FromXml(TimelineXml xml)
         {
             version = xml.version;
@@ -618,7 +667,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             maidShapeKeysMap.Clear();
             foreach (var shapeKeyml in xml.maidShapeKeys)
             {
-                AddMaidShapeKey(shapeKeyml.maidSlotNo, shapeKeyml.shapeKey);
+                var shapeKeys = GetMaidShapeKeys(shapeKeyml.maidSlotNo);
+                shapeKeys.Add(shapeKeyml.shapeKey);
+            }
+
+            extendBoneNamesMap.Clear();
+            foreach (var extendBoneName in xml.extendBoneNames)
+            {
+                var boneNames = GetExtendBoneNames(extendBoneName.maidSlotNo);
+                boneNames.Add(extendBoneName.extendBoneName);
             }
 
             maxFrameNo = xml.maxFrameNo;
@@ -689,6 +746,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         shapeKey = shapeKey,
                     };
                     xml.maidShapeKeys.Add(shapeKeyXml);
+                }
+            }
+
+            xml.extendBoneNames = new List<TimelineExtendBoneNameXml>();
+            foreach (var pair in extendBoneNamesMap)
+            {
+                var maidSlotNo = pair.Key;
+                foreach (var extendBoneName in pair.Value)
+                {
+                    var extendBoneNameXml = new TimelineExtendBoneNameXml
+                    {
+                        maidSlotNo = maidSlotNo,
+                        extendBoneName = extendBoneName,
+                    };
+                    xml.extendBoneNames.Add(extendBoneNameXml);
                 }
             }
 

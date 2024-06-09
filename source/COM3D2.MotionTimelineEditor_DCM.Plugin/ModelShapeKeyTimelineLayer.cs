@@ -411,7 +411,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             for (var i = 0; i < blendShapes.Count; i++)
             {
                 var blendShape = blendShapes[i];
-                var fieldValue = GetNextFieldValue(blendShape.shapeKeyName);
+                var fieldValue = GetFieldValue(blendShape.shapeKeyName);
 
                 var weight = blendShape.weight;
                 var updateTransform = false;

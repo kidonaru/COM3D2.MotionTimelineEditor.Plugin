@@ -1260,7 +1260,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                         foreach (var tmpBone in tmpFrame.bones)
                         {
-                            var path = BoneUtils.ConvertBonePath(tmpBone.name);
+                            var path = maidCache.GetBonePath(tmpBone.name);
                             CacheBoneDataArray.BoneData bone;
                             if (pathDic.TryGetValue(path, out bone))
                             {

@@ -56,6 +56,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public IBoneMenuItem parent { get; set; }
+
         public List<IBoneMenuItem> children
         {
             get

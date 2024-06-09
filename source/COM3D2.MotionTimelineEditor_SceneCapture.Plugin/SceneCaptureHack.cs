@@ -126,7 +126,7 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
                         int attachMaidSlotNo = -1;
 
                         var parent = modelPane.go.transform.parent;
-                        if (parent != null && BoneUtils.IsValidBoneName(parent.name))
+                        if (parent != null && BoneUtils.IsDefaultBoneName(parent.name))
                         {
                             var boneType = BoneUtils.GetBoneTypeByName(parent.name);
                             attachPoint = BoneUtils.GetAttachPoint(boneType);

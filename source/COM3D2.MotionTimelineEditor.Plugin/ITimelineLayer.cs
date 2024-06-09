@@ -48,6 +48,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         void OnCopyModel(StudioModelStat sourceModel, StudioModelStat newModel);
         void OnShapeKeyAdded(string shapeKey);
         void OnShapeKeyRemoved(string shapeKey);
+        void OnBoneNameAdded(string extendBoneName);
+        void OnBoneNameRemoved(string extendBoneName);
         void UpdateFrame(FrameData frame);
         byte[] GetAnmBinary(bool forOutput);
         void ApplyAnm(long id, byte[] anmData);

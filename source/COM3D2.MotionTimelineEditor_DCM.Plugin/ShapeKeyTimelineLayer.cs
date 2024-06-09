@@ -76,15 +76,17 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private List<string> _allBoneNames = new List<string>();
+        private List<string> _allBoneNames = null;
         public override List<string> allBoneNames
         {
             get
             {
-                var shapeKeys = timeline.GetMaidShapeKeys(slotNo);
+                if (_allBoneNames == null)
+                {
+                    var shapeKeys = timeline.GetMaidShapeKeys(slotNo);
+                    _allBoneNames = new List<string>(shapeKeys);
+                }
 
-                _allBoneNames.Clear();
-                _allBoneNames.AddRange(shapeKeys);
                 return _allBoneNames;
             }
         }
@@ -106,6 +108,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             allMenuItems.Clear();
 
+            _allBoneNames = null;
             foreach (var boneName in allBoneNames)
             {
                 var menuItem = new BoneMenuItem(boneName, boneName);
@@ -486,7 +489,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
                 var color = !_isEditMode ? Color.green : Color.white;
-                if (view.DrawButton("対象選択", 80, 20, true, color))
+                if (view.DrawButton("追加", 80, 20, true, color))
                 {
                     _isEditMode = false;
                 }
@@ -526,11 +529,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     .ToList();
             }
 
-            _slotNameComboBox.items = _slotNames;
-
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
                 view.DrawLabel("対象スロット", 80, 20);
+
+                _slotNameComboBox.items = _slotNames;
                 view.DrawComboBoxButton(_slotNameComboBox, 140, 20, true);
             }
             view.EndLayout();
@@ -612,7 +615,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     continue;
                 }
 
-                var fieldValue = GetNextFieldValue(menuItem.displayName);
+                var fieldValue = GetFieldValue(menuItem.displayName);
                 var weight = blendShape.weight;
                 var updateTransform = false;
 

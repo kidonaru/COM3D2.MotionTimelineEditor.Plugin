@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using RootMotion.FinalIK;
 using UnityEngine;
@@ -9,7 +9,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using AttachPoint = PhotoTransTargetObject.AttachPoint;
 
-    public class MaidCache
+    public partial class MaidCache
     {
         public int slotNo = 0;
         public Maid maid = null;
@@ -21,6 +21,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int anmEndFrameNo = 0;
         public CacheBoneDataArray cacheBoneData;
         public IKManager ikManager = null;
+        public ExtendBoneCache extendBoneCache = null;
 
         public static event UnityAction<int, Maid> onMaidChanged;
         public static event UnityAction<int, string> onAnmChanged;
@@ -442,6 +443,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             animationState = null;
             cacheBoneData = null;
             ikManager = null;
+            extendBoneCache = null;
+            _blendShapeCache.Clear();
         }
 
         public void ResetAnm()
@@ -565,48 +568,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private Dictionary<string, MaidBlendShape> _blendShapeCache =
                 new Dictionary<string, MaidBlendShape>();
 
-        public class MaidBlendShapeEntity
-        {
-            public TMorph morph;
-            public int shapeKeyIndex;
-
-            public float weight
-            {
-                get
-                {
-                    return morph.GetBlendValues(shapeKeyIndex);
-                }
-                set
-                {
-                    morph.SetBlendValues(shapeKeyIndex, value);
-                }
-            }
-        }
-
-        public class MaidBlendShape
-        {
-            public List<MaidBlendShapeEntity> entities = new List<MaidBlendShapeEntity>();
-
-            public float weight
-            {
-                get
-                {
-                    if (entities.Count > 0)
-                    {
-                        return entities.First().weight;
-                    }
-                    return 0f;
-                }
-                set
-                {
-                    foreach (var entity in entities)
-                    {
-                        entity.weight = value;
-                    }
-                }
-            }
-        }
-
         public MaidBlendShape GetBlendShape(string shapeKey)
         {
             if (!_blendShapeCache.ContainsKey(shapeKey))
@@ -635,7 +596,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (slot.morph.Contains(shapeKey))
                 {
-                    blendShape.entities.Add(new MaidBlendShapeEntity
+                    blendShape.entities.Add(new MaidBlendShape.Entity
                     {
                         morph = slot.morph,
                         shapeKeyIndex = (int) slot.morph.hash[shapeKey],
@@ -692,6 +653,50 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public string GetBonePath(string boneName)
+        {
+            var bonePath = BoneUtils.ConvertToBonePath(boneName);
+            if (!string.IsNullOrEmpty(bonePath))
+            {
+                return bonePath;
+            }
+
+            if (extendBoneCache != null)
+            {
+                var entity = extendBoneCache.GetEntity(boneName);
+                if (entity != null)
+                {
+                    return entity.bonePath;
+                }
+            }
+            return "";
+        }
+
+        public Transform GetBoneTransform(string boneName)
+        {
+            if (BoneUtils.IsDefaultBoneName(boneName))
+            {
+                var bonePath = BoneUtils.ConvertToBonePath(boneName);
+                var boneData = cacheBoneData.GetBoneData(bonePath);
+                if (boneData != null)
+                {
+                    return boneData.transform;
+                }
+                return null;
+            }
+
+            if (extendBoneCache != null)
+            {
+                var entity = extendBoneCache.GetEntity(boneName);
+                if (entity != null)
+                {
+                    return entity.transform;
+                }
+            }
+
+            return null;
+        }
+
         private void OnMaidChanged(Maid maid)
         {
             PluginUtils.LogDebug("Maid changed: " + (maid != null ? maid.name : "null"));
@@ -713,6 +718,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ikManager = PoseEditWindow.GetMaidIKManager(maid);
 
             info = MaidInfo.GetOrCreate(maid, ikManager);
+
+            var root = cacheBoneData.GetBoneData("Bip01");
+            extendBoneCache = new ExtendBoneCache(maid, root.transform);
 
             if (onMaidChanged != null)
             {

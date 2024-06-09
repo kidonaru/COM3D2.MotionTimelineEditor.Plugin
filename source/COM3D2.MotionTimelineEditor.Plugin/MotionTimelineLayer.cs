@@ -48,15 +48,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private List<string> _allBoneNames = null;
         public override List<string> allBoneNames
         {
             get
             {
-                return BoneUtils.saveBoneNames;
+                if (_allBoneNames == null)
+                {
+                    _allBoneNames = new List<string>(BoneUtils.saveBoneNames);
+                    _allBoneNames.AddRange(timeline.GetExtendBoneNames(slotNo));
+                }
+                return _allBoneNames;
             }
         }
 
-        private List<PoseTimeLineRow> _dcmPoseRows = new List<PoseTimeLineRow>();
+        private List<PoseTimeLineRow> _dcmOutputRows = new List<PoseTimeLineRow>();
 
         private MotionTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -70,6 +76,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         protected override void InitMenuItems()
         {
             _allMenuItems.Clear();
+            _allBoneNames = null;
 
             var setMenuItemMap = new Dictionary<BoneSetMenuType, BoneSetMenuItem>(12);
 
@@ -95,12 +102,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var displaySetName = BoneUtils.GetBoneSetMenuJpName(boneSetType);
                     setMenuItem = new BoneSetMenuItem(boneSetName, displaySetName);
                     setMenuItemMap[boneSetType] = setMenuItem;
+                    _allMenuItems.Add(setMenuItem);
                 }
 
                 setMenuItem.AddChild(menuItem);
             }
 
-            _allMenuItems.AddRange(setMenuItemMap.Values.Cast<IBoneMenuItem>());
+            var slotMenuItemMap = new Dictionary<string, BoneSetMenuItem>(12);
+
+            foreach (var extendBoneName in timeline.GetExtendBoneNames(slotNo))
+            {
+                var entity = maidCache.extendBoneCache.GetEntity(extendBoneName);
+                if (entity == null)
+                {
+                    continue;
+                }
+
+                var slotName = entity.slotName;
+                var boneName = entity.boneName;
+
+                var menuItem = new BoneMotionMenuItem(extendBoneName, boneName);
+
+                BoneSetMenuItem setMenuItem;
+                if (!slotMenuItemMap.TryGetValue(slotName, out setMenuItem))
+                {
+                    setMenuItem = new BoneSetMenuItem(slotName, slotName);
+                    slotMenuItemMap[slotName] = setMenuItem;
+                    _allMenuItems.Add(setMenuItem);
+                }
+
+                setMenuItem.AddChild(menuItem);
+            }
         }
 
         public override bool IsValidData()
@@ -125,6 +157,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override void LateUpdate()
         {
             base.LateUpdate();
+        }
+
+        public override void OnBoneNameAdded(string extendBoneName)
+        {
+            InitMenuItems();
+
+            var boneNames = new List<string> { extendBoneName };
+            AddFirstBones(boneNames);
+            ApplyCurrentFrame(true);
+        }
+
+        public override void OnBoneNameRemoved(string extendBoneName)
+        {
+            InitMenuItems();
+
+            var boneNames = new List<string> { extendBoneName };
+            RemoveAllBones(boneNames);
+            ApplyCurrentFrame(true);
         }
 
         public override void UpdateFrame(FrameData frame)
@@ -156,29 +206,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 rootBone.transform.rotation = targetRotation;
             }
 
-            var pathDic = cacheBoneData.GetPathDic();
             foreach (var name in allBoneNames)
             {
-                var path = BoneUtils.ConvertBonePath(name);
-                CacheBoneDataArray.BoneData sourceBone;
-                if (pathDic.TryGetValue(path, out sourceBone))
+                var transform = maidCache.GetBoneTransform(name);
+                if (transform == null)
                 {
-                    if (sourceBone == null || sourceBone.transform == null)
-                    {
-                        PluginUtils.LogError("SetCacheBoneDataArray：ボーンがnullです Maidを読み込み直してください：" + name);
-                        break;
-                    }
-
-                    var trans = CreateTransformData(name);
-                    if (trans.hasPosition)
-                    {
-                        trans.position = sourceBone.transform.localPosition;
-                    }
-                    trans.rotation = sourceBone.transform.localRotation;
-
-                    var bone = frame.CreateBone(trans);
-                    frame.UpdateBone(bone);
+                    PluginUtils.LogError("SetCacheBoneDataArray：ボーンがnullです Maidを読み込み直してください：" + name);
+                    continue;
                 }
+
+                var trans = CreateTransformData(name);
+                if (trans.hasPosition)
+                {
+                    trans.position = transform.localPosition;
+                }
+                trans.rotation = transform.localRotation;
+
+                var bone = frame.CreateBone(trans);
+                frame.UpdateBone(bone);
             }
         }
 
@@ -265,7 +310,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 BoneData firstBone)
             {
                 var name = firstBone.name;
-                var path = BoneUtils.ConvertBonePath(name);
+                var path = maidCache.GetBonePath(name);
                 w.Write((byte)1);
                 w.Write(path);
 
@@ -427,7 +472,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 {
-                    _dcmPoseRows.Clear();
+                    _dcmOutputRows.Clear();
 
                     var row = new PoseTimeLineRow
                     {
@@ -441,11 +486,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         eyeMoveType = timeline.eyeMoveType,
                         option = string.Empty
                     };
-                    _dcmPoseRows.Add(row);
+                    _dcmOutputRows.Add(row);
 
                     var outputFileName = string.Format("pose_{0}.csv", slotNo);
                     var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                    SavePoseTimeLine(_dcmPoseRows, outputPath);
+                    SavePoseTimeLine(_dcmOutputRows, outputPath);
 
                     var maidElement = GetMeidElement(songElement);
                     maidElement.Add(new XElement("pose", outputFileName));
@@ -463,23 +508,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return t;
         }
 
-        private FloatFieldValue[] _fieldValues = FloatFieldValue.CreateArray(
-            new string[] { "X", "Y", "Z", "RX", "RY", "RZ" }
-        );
-        private ComboBoxValue<IKManager.BoneType> boneComboBox = new ComboBoxValue<IKManager.BoneType>
+        private ComboBoxValue<string> _boneNameComboBox = new ComboBoxValue<string>
         {
-            items = BoneUtils.BoneTypeToSetMenuTypeMap.Keys.ToList(),
-            getName = (boneType, index) =>
+            getName = (boneName, index) =>
             {
-                return BoneUtils.GetBoneJpName(boneType);
+                return BoneUtils.GetBoneJpName(boneName);
             }
         };
         private Rect _contentRect = new Rect(0, 0, SubWindow.WINDOW_WIDTH, SubWindow.WINDOW_HEIGHT);
         private Vector2 _scrollPosition = Vector2.zero;
 
+        private enum TabType
+        {
+            Edit,
+            Extend,
+            ArmFinger,
+            LegFinger,
+            Max,
+        }
+
+        private TabType tabType = TabType.Edit;
+
+        public static readonly List<string> TabTypeNames = new List<string>
+        {
+            "編集",
+            "追加",
+            "手指",
+            "足指",
+        };
+
         public override void DrawWindow(GUIView view)
         {
-            view.SetEnabled(view.guiEnabled && !boneComboBox.focused);
+            view.SetEnabled(view.guiEnabled && !_boneNameComboBox.focused && !_slotNameComboBox.focused);
 
             if (maidCache == null)
             {
@@ -487,41 +547,53 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            _contentRect.width = view.viewRect.width - 20;
+            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            for (var i = 0; i < (int)TabType.Max; i++)
+            {
+                var type = (TabType)i;
+                var color = tabType == type ? Color.green : Color.white;
+                if (view.DrawButton(TabTypeNames[i], 50, 20, true, color))
+                {
+                    tabType = type;
+                }
+            }
+            view.EndLayout();
 
-            _scrollPosition = view.BeginScrollView(
-                view.viewRect.width,
-                view.viewRect.height,
-                _contentRect,
-                _scrollPosition,
-                false,
-                true);
+            view.DrawHorizontalLine(Color.gray);
 
-            DrawTransform(view);
-            DrawFingerBlend(
-                view,
-                FingerSlotNames,
-                WindowPartsFingerBlend.Type.RightArm,
-                WindowPartsFingerBlend.Type.LeftArm);
-            DrawFingerBlend(
-                view,
-                FingerSlotNames,
-                WindowPartsFingerBlend.Type.LeftArm,
-                WindowPartsFingerBlend.Type.RightArm);
-            DrawFingerBlend(
-                view,
-                LegSlotNames,
-                WindowPartsFingerBlend.Type.RightLeg,
-                WindowPartsFingerBlend.Type.LeftLeg);
-            DrawFingerBlend(
-                view,
-                LegSlotNames,
-                WindowPartsFingerBlend.Type.LeftLeg,
-                WindowPartsFingerBlend.Type.RightLeg);
-
-            _contentRect.height = view.currentPos.y + 20;
-
-            view.EndScrollView();
+            switch (tabType)
+            {
+                case TabType.Edit:
+                    DrawTransform(view);
+                    break;
+                case TabType.Extend:
+                    DrawExtendedBoneName(view);
+                    break;
+                case TabType.ArmFinger:
+                    DrawFingerBlend(
+                        view,
+                        FingerSlotNames,
+                        WindowPartsFingerBlend.Type.RightArm,
+                        WindowPartsFingerBlend.Type.LeftArm);
+                    DrawFingerBlend(
+                        view,
+                        FingerSlotNames,
+                        WindowPartsFingerBlend.Type.LeftArm,
+                        WindowPartsFingerBlend.Type.RightArm);
+                    break;
+                case TabType.LegFinger:
+                    DrawFingerBlend(
+                        view,
+                        LegSlotNames,
+                        WindowPartsFingerBlend.Type.RightLeg,
+                        WindowPartsFingerBlend.Type.LeftLeg);
+                    DrawFingerBlend(
+                        view,
+                        LegSlotNames,
+                        WindowPartsFingerBlend.Type.LeftLeg,
+                        WindowPartsFingerBlend.Type.RightLeg);
+                    break;
+            }
 
             DrawComboBox(view);
         }
@@ -531,59 +603,60 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
                 view.DrawLabel("対象ボーン", 80, 20);
-                view.DrawComboBoxButton(boneComboBox, 140, 20, true);
+
+                _boneNameComboBox.items = allBoneNames;
+                view.DrawComboBoxButton(_boneNameComboBox, 140, 20, true);
             }
             view.EndLayout();
 
-            var boneType = boneComboBox.currentItem;
-            var bonePath = BoneUtils.GetBonePath(boneType);
-            var cacheBoneData = maidCache.cacheBoneData;
-            var bone = cacheBoneData.GetBoneData(bonePath);
-            if (bone == null)
+            var boneName = _boneNameComboBox.currentItem;
+            var boneType = BoneUtils.GetBoneTypeByName(boneName);
+            var transform = maidCache.GetBoneTransform(boneName);
+            if (transform == null)
             {
                 return;
             }
 
-            var position = bone.transform.localPosition;
-            var angle = bone.transform.localEulerAngles;
+            var position = transform.localPosition;
+            var angle = transform.localEulerAngles;
             var updateTransform = false;
 
             view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
             if (boneType == IKManager.BoneType.Root)
             {
-                updateTransform |= view.DrawValue(_fieldValues[0], 0.01f, 0.1f,
+                updateTransform |= view.DrawValue(GetFieldValue("X"), 0.01f, 0.1f,
                     () => position.x = BoneUtils.GetInitialPosition(boneType).x,
                     position.x,
                     x => position.x = x,
                     x => position.x += x);
 
-                updateTransform |= view.DrawValue(_fieldValues[1], 0.01f, 0.1f,
+                updateTransform |= view.DrawValue(GetFieldValue("Y"), 0.01f, 0.1f,
                     () => position.y = BoneUtils.GetInitialPosition(boneType).y,
                     position.y,
                     y => position.y = y,
                     y => position.y += y);
 
-                updateTransform |= view.DrawValue(_fieldValues[2], 0.01f, 0.1f,
+                updateTransform |= view.DrawValue(GetFieldValue("Z"), 0.01f, 0.1f,
                     () => position.z = BoneUtils.GetInitialPosition(boneType).z,
                     position.z,
                     z => position.z = z,
                     z => position.z += z);
             }
             {
-                updateTransform |= view.DrawValue(_fieldValues[3], 1f, 10f,
+                updateTransform |= view.DrawValue(GetFieldValue("RX"), 1f, 10f,
                     () => angle.x = BoneUtils.GetInitialEulerAngles(boneType).x,
                     angle.x,
                     x => angle.x = x,
                     x => angle.x += x);
 
-                updateTransform |= view.DrawValue(_fieldValues[4], 1f, 10f,
+                updateTransform |= view.DrawValue(GetFieldValue("RY"), 1f, 10f,
                     () => angle.y = BoneUtils.GetInitialEulerAngles(boneType).y,
                     angle.y,
                     y => angle.y = y,
                     y => angle.y += y);
 
-                updateTransform |= view.DrawValue(_fieldValues[5], 1f, 10f,
+                updateTransform |= view.DrawValue(GetFieldValue("RZ"), 1f, 10f,
                     () => angle.z = BoneUtils.GetInitialEulerAngles(boneType).z,
                     angle.z,
                     z => angle.z = z,
@@ -592,8 +665,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (updateTransform)
             {
-                bone.transform.localPosition = position;
-                bone.transform.localEulerAngles = angle;
+                transform.localPosition = position;
+                transform.localEulerAngles = angle;
             }
 
             view.DrawHorizontalLine(Color.gray);
@@ -604,8 +677,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.SetEnabled(true);
 
             view.DrawComboBoxContent(
-                boneComboBox,
+                _boneNameComboBox,
                 120, 300,
+                view.viewRect.width, view.viewRect.height,
+                20);
+
+            view.DrawComboBoxContent(
+                _slotNameComboBox,
+                130, 300,
                 view.viewRect.width, view.viewRect.height,
                 20);
         }
@@ -634,7 +713,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             "小",
         };
 
-        public FingerBlend.BaseFinger GetBaseFingerClass(WindowPartsFingerBlend.Type type)
+        private FingerBlend.BaseFinger GetBaseFingerClass(WindowPartsFingerBlend.Type type)
         {
             var finger_blend = maidManager.ikManager.finger_blend;
             FingerBlend.BaseFinger result = null;
@@ -766,6 +845,80 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             view.DrawHorizontalLine(Color.gray);
+        }
+
+        private ComboBoxValue<string> _slotNameComboBox = new ComboBoxValue<string>
+        {
+            getName = (slotName, index) =>
+            {
+                return slotName;
+            }
+        };
+
+        public void DrawExtendedBoneName(GUIView view)
+        {
+            var extendedBoneCache = this.maidCache.extendBoneCache;
+
+            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            {
+                view.DrawLabel("対象スロット", 80, 20);
+
+                _slotNameComboBox.items = extendedBoneCache.slotNames;
+                view.DrawComboBoxButton(_slotNameComboBox, 140, 20, true);
+            }
+            view.EndLayout();
+
+            var slotName = _slotNameComboBox.currentItem;
+
+            if (string.IsNullOrEmpty(slotName))
+            {
+                view.DrawLabel("対象スロットがありません", -1, 20);
+                return;
+            }
+
+            _contentRect.width = view.viewRect.width - 20;
+
+            _scrollPosition = view.BeginScrollView(
+                view.viewRect.width,
+                view.viewRect.height - view.currentPos.y,
+                _contentRect,
+                _scrollPosition,
+                false,
+                true);
+
+            foreach (var entity in extendedBoneCache.entities.Values)
+            {
+                if (entity.slotName != slotName)
+                {
+                    continue;
+                }
+
+                var extendBoneName = entity.extendBoneName;
+
+                var enable = timeline.HasExtendBoneName(slotNo, extendBoneName);
+
+                var newEnable = view.DrawToggle(
+                    entity.boneName,
+                    enable,
+                    _contentRect.width - 20,
+                    20);
+
+                if (newEnable != enable)
+                {
+                    if (newEnable)
+                    {
+                        timeline.AddExtendBoneName(slotNo, extendBoneName);
+                    }
+                    else
+                    {
+                        timeline.RemoveExtendBoneName(slotNo, extendBoneName);
+                    }
+                }
+            }
+
+            _contentRect.height = view.currentPos.y + 20;
+
+            view.EndScrollView();
         }
 
         public override ITransformData CreateTransformData(string name)

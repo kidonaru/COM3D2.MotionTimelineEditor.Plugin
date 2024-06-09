@@ -458,7 +458,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var value = timeline.videoStartTime;
                 var newValue = value;
-                var fieldValue = GetNextFieldValue("開始位置");
+                var fieldValue = GetFieldValue("開始位置");
 
                 view.DrawValue(
                     fieldValue,
@@ -485,7 +485,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 for (var i = 0; i < 2; i++)
                 {
                     var value = guiPosition[i];
-                    var fieldValue = GetNextFieldValue(TransformDataBase.PositionNames[i]);
+                    var fieldValue = GetFieldValue(TransformDataBase.PositionNames[i]);
 
                     view.DrawValue(
                         fieldValue, 0.01f, 0.1f, 0f,
@@ -550,7 +550,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 for (var i = 0; i < 3; i++)
                 {
                     var value = position[i];
-                    var fieldValue = GetNextFieldValue(TransformDataBase.PositionNames[i]);
+                    var fieldValue = GetFieldValue(TransformDataBase.PositionNames[i]);
 
                     view.DrawValue(
                         fieldValue, 0.01f, 0.1f, 0f,
@@ -571,7 +571,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 for (var i = 0; i < 3; i++)
                 {
                     var value = rotation[i];
-                    var fieldValue = GetNextFieldValue(TransformDataBase.RotationNames[i]);
+                    var fieldValue = GetFieldValue(TransformDataBase.RotationNames[i]);
 
                     view.DrawValue(
                         fieldValue, 1f, 10f, 0f,
@@ -615,7 +615,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 for (var i = 0; i < 2; i++)
                 {
                     var value = position[i];
-                    var fieldValue = GetNextFieldValue(TransformDataBase.PositionNames[i]);
+                    var fieldValue = GetFieldValue(TransformDataBase.PositionNames[i]);
 
                     view.DrawValue(
                         fieldValue, 0.01f, 0.1f, 0f,

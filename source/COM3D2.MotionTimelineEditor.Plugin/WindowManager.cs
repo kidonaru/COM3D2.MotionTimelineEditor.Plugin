@@ -6,7 +6,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public class WindowManager
     {
         public MainWindow mainWindow = null;
-        public List<SubWindow> subWindows = null;
+        public List<SubWindow> subWindows = new List<SubWindow>();
         private int _screenWidth = 0;
         private int _screenHeight = 0;
 
@@ -58,7 +58,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             mainWindow = new MainWindow(0);
             mainWindow.Init();
 
-            subWindows = new List<SubWindow>();
+            subWindows.Clear();
             var subWindowCount = Mathf.Max(config.subWindowCount, 1);
             for (var i = 0; i < subWindowCount; i++)
             {

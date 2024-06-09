@@ -243,7 +243,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private List<FloatFieldValue> _fieldValues = new List<FloatFieldValue>();
         private int _fieldValueIndex = 0;
 
-        protected FloatFieldValue GetNextFieldValue(string label)
+        protected FloatFieldValue GetFieldValue(string label)
         {
             if (_fieldValueIndex < _fieldValues.Count)
             {

@@ -21,9 +21,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public class TimelineMaidShapeKeyXml
     {
         [XmlElement("MaidSlotNo")]
-        public int maidSlotNo = -1;
+        public int maidSlotNo;
         [XmlElement("ShapeKey")]
         public string shapeKey;
+    }
+
+    public class TimelineExtendBoneNameXml
+    {
+        [XmlElement("MaidSlotNo")]
+        public int maidSlotNo;
+        [XmlElement("ExtendBoneName")]
+        public string extendBoneName;
     }
 
     [XmlRoot("TimelineData")]
@@ -49,6 +57,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlArray("MaidShapeKeys")]
         [XmlArrayItem("MaidShapeKey")]
         public List<TimelineMaidShapeKeyXml> maidShapeKeys = new List<TimelineMaidShapeKeyXml>();
+
+        [XmlArray("ExtendBoneNames")]
+        [XmlArrayItem("ExtendBoneName")]
+        public List<TimelineExtendBoneNameXml> extendBoneNames = new List<TimelineExtendBoneNameXml>();
 
         [XmlElement("MaxFrameNo")]
         public int maxFrameNo;

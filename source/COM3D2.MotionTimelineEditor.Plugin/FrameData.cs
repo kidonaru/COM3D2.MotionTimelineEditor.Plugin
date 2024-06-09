@@ -70,11 +70,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return null;
         }
 
-        public BoneData GetBone(IKManager.BoneType boneType)
-        {
-            return GetBone(BoneUtils.GetBonePath(boneType));
-        }
-
         public bool HasBone(BoneData bone)
         {
             return bone != null && _boneMap.ContainsKey(bone.name);
@@ -95,11 +90,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _boneMap[name] = bone;
             }
             return bone;
-        }
-
-        public BoneData GetOrCreateBone(IKManager.BoneType boneType)
-        {
-            return GetOrCreateBone(BoneUtils.GetBonePath(boneType));
         }
 
         public void SetBone(BoneData bone)

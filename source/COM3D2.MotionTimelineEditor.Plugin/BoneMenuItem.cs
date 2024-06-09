@@ -7,30 +7,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string name { get; private set; }
         public string displayName { get; private set; }
 
-        private bool _isSelectedMenu = false;
-        public virtual bool isSelectedMenu
-        {
-            get
-            {
-                return _isSelectedMenu;
-            }
-            set
-            {
-                _isSelectedMenu = value;
-            }
-        }
+        public virtual bool isSelectedMenu { get; set; }
 
-        public bool _isVisibleMenu = true;
         public bool isVisibleMenu
         {
             get
             {
-                return _isVisibleMenu;
+                return parent == null || parent.isOpenMenu;
             }
-            set
-            {
-                _isVisibleMenu = value;
-            }
+            set {}
         }
 
         public bool isOpenMenu
@@ -49,6 +34,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return false;
             }
         }
+
+        public IBoneMenuItem parent { get; set; }
 
         public List<IBoneMenuItem> children
         {

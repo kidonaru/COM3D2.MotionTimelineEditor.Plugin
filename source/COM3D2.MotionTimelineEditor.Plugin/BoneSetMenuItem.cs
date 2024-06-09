@@ -52,11 +52,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _isOpenMenu = value;
 
                 config.SetBoneSetMenuOpen(name, value);
-
-                foreach (var menuItem in children)
-                {
-                    menuItem.isVisibleMenu = value;
-                }
             }
         }
 
@@ -67,6 +62,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return true;
             }
         }
+
+        public IBoneMenuItem parent { get; set; }
 
         public List<IBoneMenuItem> children { get; private set; }
 
@@ -99,10 +96,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.name = name;
             this.displayName = displayName;
             this.children = new List<IBoneMenuItem>(8);
+            this._isOpenMenu = config.IsBoneSetMenuOpen(name);
         }
 
         public void AddChild(BoneMenuItem menuItem)
         {
+            menuItem.parent = this;
             children.Add(menuItem);
         }
 

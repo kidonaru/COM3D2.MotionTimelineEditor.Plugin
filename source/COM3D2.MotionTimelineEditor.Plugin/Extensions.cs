@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public static class Extensions
+    public static partial class Extensions
     {
         public static void ResizeTexture(
             this Texture2D sourceTexture,
@@ -94,13 +94,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return boneData;
             }
             return null;
-        }
-
-        public static CacheBoneDataArray.BoneData GetBoneData(
-            this CacheBoneDataArray cacheBoneDataArray,
-            IKManager.BoneType boneType)
-        {
-            return cacheBoneDataArray.GetBoneData(BoneUtils.GetBonePath(boneType));
         }
 
         private static FieldInfo fieldIkFabrik = null;
@@ -470,6 +463,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             return new List<string>();
+        }
+
+        public static string GetFullPath(this Transform transform, Transform root)
+        {
+            if (transform == null || root == null)
+            {
+                return "";
+            }
+
+            return transform.parent == null || transform == root
+                ? transform.name
+                : transform.parent.GetFullPath(root) + "/" + transform.name;
         }
     }
 
