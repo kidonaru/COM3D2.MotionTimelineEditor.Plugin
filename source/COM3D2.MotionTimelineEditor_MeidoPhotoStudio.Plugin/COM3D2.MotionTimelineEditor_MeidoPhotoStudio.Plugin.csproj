@@ -67,7 +67,7 @@
   <ItemGroup>
     <Compile Include="COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin.cs" />
     <Compile Include="MeidoPhotoStudioHack.cs" />
-    <Compile Include="PluginUtils.cs" />
+    <Compile Include="PluginInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

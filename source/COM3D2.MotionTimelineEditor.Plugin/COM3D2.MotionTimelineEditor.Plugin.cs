@@ -9,8 +9,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     [
         PluginFilter("COM3D2x64"),
-        PluginName(PluginUtils.PluginFullName),
-        PluginVersion(PluginUtils.PluginVersion)
+        PluginName(PluginInfo.PluginFullName),
+        PluginVersion(PluginInfo.PluginVersion)
     ]
     public class MotionTimelineEditor : PluginBase
     {
@@ -463,8 +463,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void AddGearMenu()
         {
             gearMenuIcon = GUIExtBase.GUIExt.Add(
-                PluginUtils.PluginName,
-                PluginUtils.PluginName,
+                PluginInfo.PluginName,
+                PluginInfo.PluginName,
                 PluginUtils.Icon,
                 (go) => {
                     if (studioHack == null)

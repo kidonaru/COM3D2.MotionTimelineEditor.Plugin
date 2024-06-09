@@ -64,7 +64,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="COM3D2.MotionTimelineEditor_SceneCapture.Plugin.cs" />
-    <Compile Include="PluginUtils.cs" />
+    <Compile Include="PluginInfo.cs" />
     <Compile Include="SceneCaptureHack.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

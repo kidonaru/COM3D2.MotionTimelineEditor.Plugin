@@ -6,11 +6,11 @@ using COM3D2.MotionTimelineEditor.Plugin;
 // アセンブリに関する一般情報は以下の属性セットをとおして制御されます。
 // アセンブリに関連付けられている情報を変更するには、
 // これらの属性値を変更してください。
-[assembly: AssemblyTitle(PluginUtils.PluginFullName)]
+[assembly: AssemblyTitle(PluginInfo.PluginFullName)]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct(PluginUtils.PluginFullName)]
+[assembly: AssemblyProduct(PluginInfo.PluginFullName)]
 [assembly: AssemblyCopyright("Copyright ©kidonaru 2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -33,5 +33,5 @@ using COM3D2.MotionTimelineEditor.Plugin;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion(PluginUtils.PluginVersion)]
-[assembly: AssemblyFileVersion(PluginUtils.PluginVersion)]
+[assembly: AssemblyVersion(PluginInfo.PluginVersion)]
+[assembly: AssemblyFileVersion(PluginInfo.PluginVersion)]

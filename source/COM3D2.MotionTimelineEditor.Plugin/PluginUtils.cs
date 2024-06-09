@@ -1,28 +1,22 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Linq;
-using System.Collections.Generic;
 using UnityEngine;
 using System.Diagnostics;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+
     public static class PluginUtils
     {
-        public const string PluginName = "MotionTimelineEditor";
-        public const string PluginFullName = "COM3D2." + PluginName + ".Plugin";
-        public const string PluginVersion = "2.3.1.0";
-        public const string WindowName = PluginName + " " + PluginVersion;
-
         public static readonly string UserDataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Config");
 
         public static string ConfigPath
         {
             get
             {
-                return CombinePaths(UserDataPath, PluginName + ".xml");
+                return CombinePaths(UserDataPath, PluginInfo.PluginName + ".xml");
             }
         }
         
@@ -60,25 +54,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static void LogDebug(string format, params object[] args)
         {
             string message = string.Format(format, args);
-            UnityEngine.Debug.Log("[Debug] " + PluginName + ": " + message);
+            UnityEngine.Debug.Log("[Debug] " + PluginInfo.PluginName + ": " + message);
         }
 
         public static void Log(string format, params object[] args)
         {
             string message = string.Format(format, args);
-            UnityEngine.Debug.Log(PluginName + ": " + message);
+            UnityEngine.Debug.Log(PluginInfo.PluginName + ": " + message);
         }
 
         public static void LogWarning(string format, params object[] args)
         {
             string message = string.Format(format, args);
-            UnityEngine.Debug.LogWarning(PluginName + ": " + message);
+            UnityEngine.Debug.LogWarning(PluginInfo.PluginName + ": " + message);
         }
         
         public static void LogError(string format, params object[] args)
         {
             string message = string.Format(format, args);
-            UnityEngine.Debug.LogError(PluginName + ": " + message);
+            UnityEngine.Debug.LogError(PluginInfo.PluginName + ": " + message);
         }
 
         public static void AssertNull(bool condition, string message)

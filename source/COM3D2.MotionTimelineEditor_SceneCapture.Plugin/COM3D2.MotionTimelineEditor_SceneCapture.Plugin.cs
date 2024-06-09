@@ -8,8 +8,8 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
 {
     [
         PluginFilter("COM3D2x64"),
-        PluginName(PluginUtils.PluginFullName),
-        PluginVersion(PluginUtils.PluginVersion)
+        PluginName(PluginInfo.PluginFullName),
+        PluginVersion(PluginInfo.PluginVersion)
     ]
     public class MotionTimelineEditor_DCM : PluginBase
     {

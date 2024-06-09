@@ -20,7 +20,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         RightArmFinger,
         LeftLegFinger,
         RightLegFinger,
-        Extended,
     }
 
     public static class BoneUtils
@@ -428,7 +427,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return _GetBoneSetMenuType(GetBoneTypeByName(boneName));
             }
-            return BoneSetMenuType.Extended;
+            return BoneSetMenuType.None;
         }
 
         public static readonly Dictionary<BoneSetMenuType, string> BoneSetMenuTypeToJpNameMap = new Dictionary<BoneSetMenuType, string>
@@ -444,7 +443,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {BoneSetMenuType.RightArmFinger, "右手指"},
             {BoneSetMenuType.LeftLegFinger, "左足指"},
             {BoneSetMenuType.RightLegFinger, "右足指"},
-            {BoneSetMenuType.Extended, "追加"},
         };
 
         public static string GetBoneSetMenuJpName(BoneSetMenuType boneSetMenuType)

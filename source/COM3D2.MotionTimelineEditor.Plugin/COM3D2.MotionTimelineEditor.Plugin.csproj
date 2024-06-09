@@ -99,6 +99,7 @@
     <Compile Include="MoveEasingType.cs" />
     <Compile Include="MovieManager.cs" />
     <Compile Include="MoviePlayerImpl.cs" />
+    <Compile Include="PluginInfo.cs" />
     <Compile Include="PluginUtils.cs" />
     <Compile Include="StopwatchDebug.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

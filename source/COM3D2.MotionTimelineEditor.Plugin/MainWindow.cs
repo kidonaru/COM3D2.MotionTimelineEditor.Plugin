@@ -399,7 +399,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _windowRect.width = windowWidth;
             }
 
-            windowRect = GUI.Window(WINDOW_ID, windowRect, DrawWindow, PluginUtils.WindowName, gsWin);
+            windowRect = GUI.Window(WINDOW_ID, windowRect, DrawWindow, PluginInfo.WindowName, gsWin);
 
             if (config.windowPosX != (int)windowRect.x ||
                 config.windowPosY != (int)windowRect.y)
