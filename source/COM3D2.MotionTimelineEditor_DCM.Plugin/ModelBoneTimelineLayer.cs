@@ -461,7 +461,15 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                 view.DrawLabel(bone.transform.name, 200, 20);
 
-                DrawTransform(view, bone.transform, editType, bone.name);
+                DrawTransform(
+                    view,
+                    bone.transform,
+                    editType,
+                    DrawMaskAll,
+                    bone.name,
+                    bone.initialPosition,
+                    bone.initialEulerAngles,
+                    bone.initialScale);
             }
         }
 
@@ -484,7 +492,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public override ITransformData CreateTransformData(string name)
         {
-            var transform = new TransformDataModel();
+            var transform = new TransformDataModelBone();
             transform.Initialize(name);
             return transform;
         }

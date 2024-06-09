@@ -329,6 +329,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return true;
         }
 
+        public static bool IsVisibleBone(Transform transform)
+        {
+            if (transform == null)
+            {
+                return false;
+            }
+
+            return IsVisibleBoneName(transform.name);
+        }
+
         public static readonly Dictionary<IKManager.BoneType, BoneSetMenuType> BoneTypeToSetMenuTypeMap = new Dictionary<IKManager.BoneType, BoneSetMenuType>
         {
             {IKManager.BoneType.Root, BoneSetMenuType.None},

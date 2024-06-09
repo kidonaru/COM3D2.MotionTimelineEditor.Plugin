@@ -82,6 +82,7 @@
     <Compile Include="TransformDataCamera.cs" />
     <Compile Include="TransformDataEyes.cs" />
     <Compile Include="TransformDataModel.cs" />
+    <Compile Include="TransformDataModelBone.cs" />
     <Compile Include="TransformDataMorph.cs" />
     <Compile Include="TransformDataMove.cs" />
     <Compile Include="TransformDataShapeKey.cs" />

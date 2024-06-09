@@ -65,7 +65,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return new Vector3(0f, 0.9f, 0f);
+                if (maidCache != null)
+                {
+                    return maidCache.GetInitialPosition(name);
+                }
+                return Vector3.zero;
             }
         }
 
@@ -81,9 +85,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                var boneType = BoneUtils.GetBoneTypeByName(name);
-                var angles = BoneUtils.GetInitialEulerAngles(boneType);
-                return angles;
+                if (maidCache != null)
+                {
+                    return maidCache.GetInitialEulerAngles(name);
+                }
+                return Vector3.zero;
             }
         }
 

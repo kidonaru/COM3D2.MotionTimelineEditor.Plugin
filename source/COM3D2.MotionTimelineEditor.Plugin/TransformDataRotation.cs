@@ -48,9 +48,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                var boneType = BoneUtils.GetBoneTypeByName(name);
-                var angles = BoneUtils.GetInitialEulerAngles(boneType);
-                return angles;
+                if (maidCache != null)
+                {
+                    return maidCache.GetInitialEulerAngles(name);
+                }
+                return Vector3.zero;
             }
         }
 

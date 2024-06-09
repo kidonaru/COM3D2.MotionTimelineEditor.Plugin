@@ -14,32 +14,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         MyRoom,
     }
 
-    public class StudioModelBone
-    {
-        public StudioModelStat parentModel { get; private set; }
-        public Transform transform { get; private set; }
-
-        public string name
-        {
-            get
-            {
-                return string.Format("{0}/{1}", parentModel.name, transform != null ? transform.name : "");
-            }
-        }
-
-        public StudioModelBone()
-        {
-        }
-
-        public StudioModelBone(
-            StudioModelStat parentModel,
-            Transform transform)
-        {
-            this.parentModel = parentModel;
-            this.transform = transform;
-        }
-    }
-
     public class StudioModelBlendShape
     {
         public StudioModelStat parentModel { get; private set; }
@@ -108,9 +82,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int attachMaidSlotNo { get; set; }
         public object obj { get; set; }
         public string pluginName { get; set; }
-        public List<StudioModelBone> bones { get; private set; }
+        public List<ModelBone> bones { get; private set; }
         public List<StudioModelBlendShape> blendShapes { get; private set; }
         public BlendShapeController blendShapeController { get; private set; }
+        public ModelBoneController modelBoneController { get; private set; }
 
         private Transform _transform;
         public Transform transform
@@ -133,7 +108,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public StudioModelStat()
         {
-            bones = new List<StudioModelBone>();
+            bones = new List<ModelBone>();
             blendShapes = new List<StudioModelBlendShape>();
         }
 
@@ -220,19 +195,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var meshRenderer = transform.GetComponentInChildren<SkinnedMeshRenderer>();
-            if (meshRenderer == null)
+            modelBoneController = ModelBoneController.GetOrCreate(this);
+            if (modelBoneController == null)
             {
                 return;
             }
 
-            foreach (var boneTrans in meshRenderer.bones)
+            foreach (var bone in modelBoneController.bones)
             {
-                if (IsVisibleBone(boneTrans))
-                {
-                    var bone = new StudioModelBone(this, boneTrans);
-                    bones.Add(bone);
-                }
+                bones.Add(bone);
             }
 
             blendShapeController = BlendShapeLoader.LoadController(this);
@@ -250,24 +221,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public StudioModelBone GetBone(int index)
+        public ModelBone GetBone(int index)
         {
-            if (index < 0 || index >= bones.Count)
-            {
-                return null;
-            }
-
-            return bones[index];
-        }
-
-        private bool IsVisibleBone(Transform trans)
-        {
-            if (trans == null)
-            {
-                return false;
-            }
-
-            return BoneUtils.IsVisibleBoneName(trans.name);
+            return modelBoneController.GetBone(index);
         }
     }
 }

@@ -523,7 +523,19 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                 view.DrawLabel(model.displayName, 200, 20);
 
-                DrawTransform(view, model.transform, editType, model.name);
+                var initialPosition = Vector3.zero;
+                var initialEulerAngles = Vector3.zero;
+                var initialScale = Vector3.one;
+
+                DrawTransform(
+                    view,
+                    model.transform,
+                    editType,
+                    DrawMaskAll,
+                    model.name,
+                    initialPosition,
+                    initialEulerAngles,
+                    initialScale);
             }
         }
 

@@ -163,7 +163,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return maidManager.cache;
+                return maidManager.maidCache;
             }
         }
 

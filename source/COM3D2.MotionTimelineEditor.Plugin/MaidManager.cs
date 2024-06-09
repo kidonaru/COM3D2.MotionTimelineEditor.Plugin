@@ -26,7 +26,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public MaidCache cache
+        public MaidCache maidCache
         {
             get
             {
@@ -42,9 +42,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (cache != null)
+                if (maidCache != null)
                 {
-                    return cache.maid;
+                    return maidCache.maid;
                 }
                 return null;
             }
@@ -62,9 +62,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (cache != null)
+                if (maidCache != null)
                 {
-                    return cache.animation;
+                    return maidCache.animation;
                 }
                 return null;
             }
@@ -74,9 +74,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (cache != null)
+                if (maidCache != null)
                 {
-                    return cache.animationState;
+                    return maidCache.animationState;
                 }
                 return null;
             }
@@ -86,9 +86,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (cache != null)
+                if (maidCache != null)
                 {
-                    return cache.annName;
+                    return maidCache.annName;
                 }
                 return "";
             }
@@ -98,9 +98,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (cache != null)
+                if (maidCache != null)
                 {
-                    return cache.anmSpeed;
+                    return maidCache.anmSpeed;
                 }
                 return 0;
             }
@@ -110,9 +110,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (cache != null)
+                if (maidCache != null)
                 {
-                    return cache.ikManager;
+                    return maidCache.ikManager;
                 }
                 return null;
             }
@@ -122,9 +122,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (cache != null)
+                if (maidCache != null)
                 {
-                    return cache.cacheBoneData;
+                    return maidCache.cacheBoneData;
                 }
                 return null;
             }
@@ -260,7 +260,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public Vector3 GetIkPosition(IKHoldType holdType)
         {
-            var cache = this.cache;
+            var cache = this.maidCache;
             if (cache != null)
             {
                 return cache.GetIkPosition(holdType);
@@ -270,7 +270,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void UpdateIkPosition(IKHoldType holdType, Vector3 targetPosition)
         {
-            var cache = this.cache;
+            var cache = this.maidCache;
             if (cache != null)
             {
                 cache.UpdateIkPosition(holdType, targetPosition);
@@ -279,7 +279,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void PositonCorrection(IKHoldType holdType)
         {
-            var cache = this.cache;
+            var cache = this.maidCache;
             if (cache != null)
             {
                 cache.PositonCorrection(holdType);

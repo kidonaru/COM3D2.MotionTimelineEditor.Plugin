@@ -290,6 +290,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
+                view.DrawLabel("メニュー幅", 100, 20);
+
+                var newMenuWidth = view.DrawIntField(config.menuWidth, 50, 20);
+
+                newMenuWidth = (int) view.DrawSlider(newMenuWidth, 100, 300, 100, 20);
+
+                if (newMenuWidth != config.menuWidth)
+                {
+                    config.menuWidth = newMenuWidth;
+                    mainWindow.UpdateTexture();
+                    config.dirty = true;
+                }
+            }
+            view.EndLayout();
+
+            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            {
                 view.DrawLabel("ウィンドウ幅", 100, 20);
 
                 var newWindowWidth = view.DrawIntField(config.windowWidth, 50, 20);

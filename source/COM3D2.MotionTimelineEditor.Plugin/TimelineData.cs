@@ -637,18 +637,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             version = xml.version;
 
-            layers = new List<ITimelineLayer>(xml.layers.Count);
-            foreach (var layerXml in xml.layers)
-            {
-                var layer = timelineManager.CreateLayer(layerXml.className, layerXml.slotNo);
-                if (layer != null)
-                {
-                    layers.Add(layer);
-                    layer.FromXml(layerXml);
-                    layer.Init();
-                }
-            }
-
             tracks = new List<TrackData>(xml.tracks.Count);
             foreach (var trackXml in xml.tracks)
             {
@@ -709,6 +697,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             videoGUIScale = xml.videoGUIScale;
             videoGUIAlpha = xml.videoGUIAlpha;
             videoBackmostPosition = xml.videoBackmostPosition;
+
+            layers = new List<ITimelineLayer>(xml.layers.Count);
+            foreach (var layerXml in xml.layers)
+            {
+                var layer = timelineManager.CreateLayer(layerXml.className, layerXml.slotNo);
+                if (layer != null)
+                {
+                    layers.Add(layer);
+                    layer.FromXml(layerXml);
+                    layer.Init();
+                }
+            }
         }
 
         public TimelineXml ToXml()

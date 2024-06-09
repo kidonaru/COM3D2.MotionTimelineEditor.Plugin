@@ -91,6 +91,7 @@
     <Compile Include="MaidManager.cs" />
     <Compile Include="MaidSettingUI.cs" />
     <Compile Include="MainWindow.cs" />
+    <Compile Include="ModelBoneController.cs" />
     <Compile Include="ModelHackBase.cs" />
     <Compile Include="ModelHackManager.cs" />
     <Compile Include="MotionPlayData.cs" />

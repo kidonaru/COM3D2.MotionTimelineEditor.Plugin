@@ -697,6 +697,46 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return null;
         }
 
+        public Vector3 GetInitialPosition(string boneName)
+        {
+            if (BoneUtils.IsDefaultBoneName(boneName))
+            {
+                var boneType = BoneUtils.GetBoneTypeByName(boneName);
+                return BoneUtils.GetInitialPosition(boneType);
+            }
+
+            if (extendBoneCache != null)
+            {
+                var entity = extendBoneCache.GetEntity(boneName);
+                if (entity != null)
+                {
+                    return entity.initialPosition;
+                }
+            }
+
+            return Vector3.zero;
+        }
+
+        public Vector3 GetInitialEulerAngles(string boneName)
+        {
+            if (BoneUtils.IsDefaultBoneName(boneName))
+            {
+                var boneType = BoneUtils.GetBoneTypeByName(boneName);
+                return BoneUtils.GetInitialEulerAngles(boneType);
+            }
+
+            if (extendBoneCache != null)
+            {
+                var entity = extendBoneCache.GetEntity(boneName);
+                if (entity != null)
+                {
+                    return entity.initialRotation.eulerAngles;
+                }
+            }
+
+            return Vector3.zero;
+        }
+
         private void OnMaidChanged(Maid maid)
         {
             PluginUtils.LogDebug("Maid changed: " + (maid != null ? maid.name : "null"));

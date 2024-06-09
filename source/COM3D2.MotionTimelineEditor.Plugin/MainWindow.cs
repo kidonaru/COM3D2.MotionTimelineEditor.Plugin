@@ -292,7 +292,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 texTimelineBG = null;
             }
 
-            var bgWidth = windowWidth - 100 + config.frameWidth * config.frameNoInterval;
+            var bgWidth = windowWidth - config.menuWidth + config.frameWidth * config.frameNoInterval;
             bgWidth = Mathf.Min(bgWidth, config.frameWidth * timeline.maxFrameCount);
 
             texTimelineBG = timelineManager.timeline.CreateBGTexture(
@@ -318,7 +318,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void FixScrollPosition()
         {
-            var viewWidth = windowWidth - 100;
+            var viewWidth = windowWidth - config.menuWidth;
             var frameWidth = config.frameWidth;
 
             var minScrollX = timelineManager.currentFrameNo * frameWidth - (viewWidth - 20 - frameWidth);
@@ -848,7 +848,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.BeginLayout(GUIView.LayoutDirection.Free);
             view.padding = Vector2.zero;
 
-            view.currentPos.x = 100;
+            view.currentPos.x = config.menuWidth;
             view.currentPos.y = 20;
 
             var frameWidth = config.frameWidth;
@@ -859,7 +859,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var contentWidth = timeline.maxFrameCount * frameWidth;
             var contentHeight = menuItems.Count * frameHeight;
-            var viewWidth = windowWidth - 100;
+            var viewWidth = windowWidth - config.menuWidth;
             var viewHeight = timelineViewHeight;
             var contentRect = new Rect(0, 0, contentWidth, contentHeight);
             bool alwaysShowHorizontal = true;
@@ -1119,7 +1119,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.EndScrollView();
 
             // 時間背景の表示
-            view.currentPos.x = 100;
+            view.currentPos.x = config.menuWidth;
             view.currentPos.y = 0;
             view.DrawTexture(texWhite, -1, 20, timelineLabelBgColor);
 
@@ -1140,8 +1140,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var adjustX = -halfFrameLabelWidth + halfFrameWidth;
             for (int frameNo = 0; frameNo < timeline.maxFrameCount; frameNo++)
             {
-                view.currentPos.x = 100 + frameNo * frameWidth - scrollPosition.x + adjustX;
-                if (view.currentPos.x < 100 - halfFrameLabelWidth ||
+                view.currentPos.x = config.menuWidth + frameNo * frameWidth - scrollPosition.x + adjustX;
+                if (view.currentPos.x < config.menuWidth - halfFrameLabelWidth ||
                     view.currentPos.x > windowWidth - halfFrameLabelWidth)
                 {
                     continue;
@@ -1160,12 +1160,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // ボーンメニューの表示
             view.currentPos.x = 0;
             view.currentPos.y = 20;
-            view.DrawTexture(texWhite, 100, -1, timelineLabelBgColor);
+            view.DrawTexture(texWhite, config.menuWidth, -1, timelineLabelBgColor);
 
             menuScrollPosition.y = scrollPosition.y;
-            contentWidth = 100;
+            contentWidth = config.menuWidth;
             contentHeight = menuItems.Count * frameHeight;
-            viewWidth = 100;
+            viewWidth = config.menuWidth;
             viewHeight = timelineViewHeight - 20;
             contentRect = new Rect(0, 0, contentWidth, contentHeight);
             var newMenuScrollPosition = view.BeginScrollView(
@@ -1216,7 +1216,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.DrawLabel(
                     diplayName,
-                    80,
+                    config.menuWidth - 20,
                     20,
                     isSelected ? config.timelineMenuSelectTextColor : Color.white,
                     null,

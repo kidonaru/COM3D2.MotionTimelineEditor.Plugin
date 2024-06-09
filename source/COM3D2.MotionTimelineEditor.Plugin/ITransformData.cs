@@ -11,6 +11,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Vector3 position { get; set; }
         Quaternion rotation { get; set; }
         Vector3 eulerAngles { get; set; }
+        Vector3 normalizedEulerAngles { get; }
         Vector3 scale { get; set; }
         Color color { get; set; }
         int easing { get; set; }

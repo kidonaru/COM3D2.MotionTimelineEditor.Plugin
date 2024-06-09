@@ -297,6 +297,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
+            if (maidCache == null)
+            {
+                return null;
+            }
+
             var startSecond = timeline.GetFrameTimeSeconds(startFrameNo);
             var endSecond = timeline.GetFrameTimeSeconds(endFrameNo);
 
@@ -508,13 +513,42 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return t;
         }
 
-        private ComboBoxValue<string> _boneNameComboBox = new ComboBoxValue<string>
+        private ComboBoxValue<TransformEditType> _transComboBox = new ComboBoxValue<TransformEditType>
         {
-            getName = (boneName, index) =>
+            items = new List<TransformEditType>
             {
-                return BoneUtils.GetBoneJpName(boneName);
+                TransformEditType.全て,
+                TransformEditType.移動,
+                TransformEditType.回転,
+                TransformEditType.X,
+                TransformEditType.Y,
+                TransformEditType.Z,
+                TransformEditType.RX,
+                TransformEditType.RY,
+                TransformEditType.RZ,
+            },
+            getName = (type, index) =>
+            {
+                return type.ToString();
             }
         };
+
+        private ComboBoxValue<string> _slotNameComboBox = new ComboBoxValue<string>
+        {
+            getName = (slotName, index) =>
+            {
+                return slotName;
+            }
+        };
+
+        private ComboBoxValue<IBoneMenuItem> _menuItemComboBox = new ComboBoxValue<IBoneMenuItem>
+        {
+            getName = (menuItem, index) =>
+            {
+                return menuItem.displayName;
+            }
+        };
+
         private Rect _contentRect = new Rect(0, 0, SubWindow.WINDOW_WIDTH, SubWindow.WINDOW_HEIGHT);
         private Vector2 _scrollPosition = Vector2.zero;
 
@@ -539,7 +573,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void DrawWindow(GUIView view)
         {
-            view.SetEnabled(view.guiEnabled && !_boneNameComboBox.focused && !_slotNameComboBox.focused);
+            view.SetEnabled(view.guiEnabled && !_transComboBox.focused && !_slotNameComboBox.focused && !_menuItemComboBox.focused);
 
             if (maidCache == null)
             {
@@ -561,13 +595,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawHorizontalLine(Color.gray);
 
+            _contentRect.width = view.viewRect.width - 20;
+
+            _scrollPosition = view.BeginScrollView(
+                view.viewRect.width,
+                view.viewRect.height - view.currentPos.y,
+                _contentRect,
+                _scrollPosition,
+                false,
+                true);
+
             switch (tabType)
             {
                 case TabType.Edit:
-                    DrawTransform(view);
+                    DrawTransformEdit(view);
                     break;
                 case TabType.Extend:
-                    DrawExtendedBoneName(view);
+                    DrawExtendBone(view);
                     break;
                 case TabType.ArmFinger:
                     DrawFingerBlend(
@@ -595,23 +639,69 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     break;
             }
 
+            _contentRect.height = view.currentPos.y + 20;
+
+            view.EndScrollView();
+
             DrawComboBox(view);
         }
 
-        private void DrawTransform(GUIView view)
+        private void DrawTransformEdit(GUIView view)
         {
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
-                view.DrawLabel("対象ボーン", 80, 20);
+                view.DrawLabel("対象カテゴリ", 80, 20);
 
-                _boneNameComboBox.items = allBoneNames;
-                view.DrawComboBoxButton(_boneNameComboBox, 140, 20, true);
+                _menuItemComboBox.items = allMenuItems;
+                view.DrawComboBoxButton(_menuItemComboBox, 150, 20, true);
             }
             view.EndLayout();
 
-            var boneName = _boneNameComboBox.currentItem;
+            var menuItem = _menuItemComboBox.currentItem;
+            if (menuItem == null)
+            {
+                view.DrawLabel("カテゴリを選択してください", -1, 20);
+                return;
+            }
+
+            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            {
+                view.DrawLabel("操作種類", 80, 20);
+                view.DrawComboBoxButton(_transComboBox, 140, 20, true);
+            }
+            view.EndLayout();
+
+            var editType = _transComboBox.currentItem;
+
+            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
+
+            if (menuItem.children == null)
+            {
+                DrawMenuItem(view, editType, menuItem);
+            }
+            else
+            {
+                foreach (var child in menuItem.children)
+                {
+                    DrawMenuItem(view, editType, child);
+                }
+            }
+        }
+
+        private void DrawMenuItem(
+            GUIView view,
+            TransformEditType editType,
+            IBoneMenuItem menuItem)
+        {
+            var boneName = menuItem.name;
+            var displayName = menuItem.displayName;
+            var isDefaultBoneName = BoneUtils.IsDefaultBoneName(boneName);
             var boneType = BoneUtils.GetBoneTypeByName(boneName);
             var transform = maidCache.GetBoneTransform(boneName);
+            var initialPosition = maidCache.GetInitialPosition(boneName);
+            var initialRotation = maidCache.GetInitialEulerAngles(boneName);
+            var initialScale = Vector3.one;
+            var drawMask = (boneType == IKManager.BoneType.Root || !isDefaultBoneName) ? DrawMaskPositonAndRotation : DrawMaskRotation;
             if (transform == null)
             {
                 return;
@@ -621,55 +711,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var angle = transform.localEulerAngles;
             var updateTransform = false;
 
-            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
+            view.DrawHorizontalLine(Color.gray);
 
-            if (boneType == IKManager.BoneType.Root)
-            {
-                updateTransform |= view.DrawValue(GetFieldValue("X"), 0.01f, 0.1f,
-                    () => position.x = BoneUtils.GetInitialPosition(boneType).x,
-                    position.x,
-                    x => position.x = x,
-                    x => position.x += x);
+            view.DrawLabel(displayName, 200, 20);
 
-                updateTransform |= view.DrawValue(GetFieldValue("Y"), 0.01f, 0.1f,
-                    () => position.y = BoneUtils.GetInitialPosition(boneType).y,
-                    position.y,
-                    y => position.y = y,
-                    y => position.y += y);
-
-                updateTransform |= view.DrawValue(GetFieldValue("Z"), 0.01f, 0.1f,
-                    () => position.z = BoneUtils.GetInitialPosition(boneType).z,
-                    position.z,
-                    z => position.z = z,
-                    z => position.z += z);
-            }
-            {
-                updateTransform |= view.DrawValue(GetFieldValue("RX"), 1f, 10f,
-                    () => angle.x = BoneUtils.GetInitialEulerAngles(boneType).x,
-                    angle.x,
-                    x => angle.x = x,
-                    x => angle.x += x);
-
-                updateTransform |= view.DrawValue(GetFieldValue("RY"), 1f, 10f,
-                    () => angle.y = BoneUtils.GetInitialEulerAngles(boneType).y,
-                    angle.y,
-                    y => angle.y = y,
-                    y => angle.y += y);
-
-                updateTransform |= view.DrawValue(GetFieldValue("RZ"), 1f, 10f,
-                    () => angle.z = BoneUtils.GetInitialEulerAngles(boneType).z,
-                    angle.z,
-                    z => angle.z = z,
-                    z => angle.z += z);
-            }
+            DrawTransform(
+                view,
+                transform,
+                editType,
+                drawMask,
+                boneName,
+                initialPosition,
+                initialRotation,
+                initialScale);
 
             if (updateTransform)
             {
                 transform.localPosition = position;
                 transform.localEulerAngles = angle;
             }
-
-            view.DrawHorizontalLine(Color.gray);
         }
 
         private void DrawComboBox(GUIView view)
@@ -677,13 +737,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.SetEnabled(true);
 
             view.DrawComboBoxContent(
-                _boneNameComboBox,
-                120, 300,
+                _transComboBox,
+                130, 300,
                 view.viewRect.width, view.viewRect.height,
                 20);
 
             view.DrawComboBoxContent(
                 _slotNameComboBox,
+                130, 300,
+                view.viewRect.width, view.viewRect.height,
+                20);
+
+            view.DrawComboBoxContent(
+                _menuItemComboBox,
                 130, 300,
                 view.viewRect.width, view.viewRect.height,
                 20);
@@ -847,15 +913,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.DrawHorizontalLine(Color.gray);
         }
 
-        private ComboBoxValue<string> _slotNameComboBox = new ComboBoxValue<string>
-        {
-            getName = (slotName, index) =>
-            {
-                return slotName;
-            }
-        };
-
-        public void DrawExtendedBoneName(GUIView view)
+        public void DrawExtendBone(GUIView view)
         {
             var extendedBoneCache = this.maidCache.extendBoneCache;
 
@@ -864,7 +922,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.DrawLabel("対象スロット", 80, 20);
 
                 _slotNameComboBox.items = extendedBoneCache.slotNames;
-                view.DrawComboBoxButton(_slotNameComboBox, 140, 20, true);
+                view.DrawComboBoxButton(_slotNameComboBox, 150, 20, true);
             }
             view.EndLayout();
 
@@ -875,16 +933,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.DrawLabel("対象スロットがありません", -1, 20);
                 return;
             }
-
-            _contentRect.width = view.viewRect.width - 20;
-
-            _scrollPosition = view.BeginScrollView(
-                view.viewRect.width,
-                view.viewRect.height - view.currentPos.y,
-                _contentRect,
-                _scrollPosition,
-                false,
-                true);
 
             foreach (var entity in extendedBoneCache.entities.Values)
             {
@@ -915,10 +963,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
             }
-
-            _contentRect.height = view.currentPos.y + 20;
-
-            view.EndScrollView();
         }
 
         public override ITransformData CreateTransformData(string name)

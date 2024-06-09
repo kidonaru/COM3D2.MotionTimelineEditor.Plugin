@@ -16,6 +16,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             public string extendBoneName;
             public string bonePath;
             public Transform transform;
+            public Vector3 initialPosition;
+            public Quaternion initialRotation;
         }
 
         public Dictionary<string, Entity> entities = new Dictionary<string, Entity>(64);
@@ -77,7 +79,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 boneName = boneName,
                 extendBoneName = extendBoneName,
                 bonePath = transform.GetFullPath(this.root),
-                transform = transform
+                transform = transform,
+                initialPosition = transform.localPosition,
+                initialRotation = transform.localRotation,
             };
         }
 

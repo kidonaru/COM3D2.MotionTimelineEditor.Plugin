@@ -35,6 +35,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int windowHeight = 480;
         public int windowPosX = -1;
         public int windowPosY = -1;
+        public int menuWidth = 100;
 
         // 色設定
         public Color timelineBgColor1 = new Color(0 / 255f, 0 / 255f, 0 / 255f);

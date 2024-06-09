@@ -70,6 +70,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public Vector3 normalizedEulerAngles
+        {
+            get
+            {
+                return GetNormalizedEulerAngles(eulerAngles);
+            }
+        }
+
         public Vector3 scale
         {
             get
@@ -302,6 +310,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static MaidManager maidManager
+        {
+            get
+            {
+                return MaidManager.instance;
+            }
+        }
+
+        protected static MaidCache maidCache
+        {
+            get
+            {
+                return maidManager.maidCache;
+            }
+        }
+
+        protected static StudioModelManager modelManager
+        {
+            get
+            {
+                return StudioModelManager.instance;
+            }
+        }
+
         public void Initialize(string name)
         {
             this.name = name;
@@ -376,6 +408,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 else if (iDiff < -180)
                 {
                     angles[i] -= (iDiff - 180) / 360 * 360;
+                }
+            }
+
+            return angles;
+        }
+
+        public static Vector3 GetNormalizedEulerAngles(Vector3 angles)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                int value = (int) angles[i];
+                if (value > 180)
+                {
+                    angles[i] -= (value + 180) / 360 * 360;
+                }
+                else if (value < -180)
+                {
+                    angles[i] -= (value - 180) / 360 * 360;
                 }
             }
 

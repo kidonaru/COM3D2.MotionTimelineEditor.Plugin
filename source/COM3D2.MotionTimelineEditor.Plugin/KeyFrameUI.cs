@@ -163,7 +163,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 10f,
                 transform => transform.initialEulerAngles,
                 transform => transform.hasRotation || transform.hasEulerAngles,
-                transform => transform.eulerAngles,
+                transform => transform.normalizedEulerAngles,
                 (transform, angle) => transform.eulerAngles = angle
             );
             DrawVector3(

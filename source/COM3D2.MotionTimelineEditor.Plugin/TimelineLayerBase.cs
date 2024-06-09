@@ -1160,8 +1160,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        protected enum TransformEditType
+        public enum TransformEditType
         {
+            全て,
             移動,
             回転,
             拡縮,
@@ -1176,11 +1177,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             SZ,
         }
 
-        protected void DrawTransform(
-            GUIView view,
-            Transform transform,
+        public enum TransformDrawType
+        {
+            移動 = 1,
+            回転 = 2,
+            拡縮 = 4,
+        }
+
+        public readonly static int DrawMaskAll = 0;
+        public readonly static int DrawMaskPositonAndRotation = (int) (TransformDrawType.移動 | TransformDrawType.回転);
+        public readonly static int DrawMaskRotation = (int) (TransformDrawType.回転);
+
+        protected bool IsDrawTransformType(
+            TransformDrawType drawType,
             TransformEditType editType,
-            string boneName)
+            int drawMask)
         {
             switch (editType)
             {
@@ -1188,50 +1199,97 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 case TransformEditType.X:
                 case TransformEditType.Y:
                 case TransformEditType.Z:
-                    DrawPosition(view, transform, editType);
+                    if (drawType != TransformDrawType.移動) return false;
                     break;
                 case TransformEditType.回転:
                 case TransformEditType.RX:
                 case TransformEditType.RY:
                 case TransformEditType.RZ:
-                {
-                    var prevBone = GetPrevBone(timelineManager.currentFrameNo, boneName);
-                    DrawRotation(view, transform, editType, prevBone);
+                    if (drawType != TransformDrawType.回転) return false;
                     break;
-                }
                 case TransformEditType.拡縮:
                 case TransformEditType.SX:
                 case TransformEditType.SY:
                 case TransformEditType.SZ:
-                    DrawScale(view, transform, editType);
+                    if (drawType != TransformDrawType.拡縮) return false;
                     break;
+            }
+
+            if (drawMask != 0)
+            {
+                if (drawType == TransformDrawType.移動 &&
+                    (drawMask & (int) TransformDrawType.移動) == 0)
+                {
+                    return false;
+                }
+                if (drawType == TransformDrawType.回転 &&
+                    (drawMask & (int) TransformDrawType.回転) == 0)
+                {
+                    return false;
+                }
+                if (drawType == TransformDrawType.拡縮 &&
+                    (drawMask & (int) TransformDrawType.拡縮) == 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        protected void DrawTransform(
+            GUIView view,
+            Transform transform,
+            TransformEditType editType,
+            int drawMask,
+            string boneName,
+            Vector3 initialPosition,
+            Vector3 initialEulerAngles,
+            Vector3 initialScale)
+        {
+            if (IsDrawTransformType(TransformDrawType.移動, editType, drawMask))
+            {
+                DrawPosition(view, transform, editType, initialPosition);
+            }
+            if (IsDrawTransformType(TransformDrawType.回転, editType, drawMask))
+            {
+                DrawEulerAngles(view, transform, editType, initialEulerAngles);
+            }
+            if (IsDrawTransformType(TransformDrawType.拡縮, editType, drawMask))
+            {
+                DrawScale(view, transform, editType, initialScale);
             }
         }
 
-        protected void DrawPosition(GUIView view, Transform transform, TransformEditType editType)
+        protected void DrawPosition(
+            GUIView view,
+            Transform transform,
+            TransformEditType editType,
+            Vector3 initialPosition)
         {
             var position = transform.localPosition;
             var updateTransform = false;
+            var isFull = editType == TransformEditType.全て || editType == TransformEditType.移動;
 
-            if (editType == TransformEditType.移動 || editType == TransformEditType.X)
+            if (isFull || editType == TransformEditType.X)
             {
-                updateTransform |= view.DrawValue(GetFieldValue("X"), 0.01f, 0.1f, 0f,
+                updateTransform |= view.DrawValue(GetFieldValue("X"), 0.01f, 0.1f, initialPosition.x,
                     position.x,
                     x => position.x = x,
                     x => position.x += x);
             }
 
-            if (editType == TransformEditType.移動 || editType == TransformEditType.Y)
+            if (isFull || editType == TransformEditType.Y)
             {
-                updateTransform |= view.DrawValue(GetFieldValue("Y"), 0.01f, 0.1f, 0f,
+                updateTransform |= view.DrawValue(GetFieldValue("Y"), 0.01f, 0.1f, initialPosition.y,
                     position.y,
                     y => position.y = y,
                     y => position.y += y);
             }
 
-            if (editType == TransformEditType.移動 || editType == TransformEditType.Z)
+            if (isFull || editType == TransformEditType.Z)
             {
-                updateTransform |= view.DrawValue(GetFieldValue("Z"), 0.01f, 0.1f, 0f,
+                updateTransform |= view.DrawValue(GetFieldValue("Z"), 0.01f, 0.1f, initialPosition.z,
                     position.z,
                     z => position.z = z,
                     z => position.z += z);
@@ -1243,33 +1301,36 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        protected void DrawRotation(GUIView view, Transform transform, TransformEditType editType, BoneData prevBone)
+        protected void DrawEulerAngles(
+            GUIView view,
+            Transform transform,
+            TransformEditType editType,
+            Vector3 initialEulerAngles)
         {
-            var angle = transform.localEulerAngles;
-            var prevAngle = prevBone != null ? prevBone.transform.eulerAngles : Vector3.zero;
-            angle = TransformDataBase.GetFixedEulerAngles(angle, prevAngle);
+            var angle = TransformDataBase.GetNormalizedEulerAngles(transform.localEulerAngles);
             var updateTransform = false;
+            var isFull = editType == TransformEditType.全て || editType == TransformEditType.回転;
 
-            if (editType == TransformEditType.回転 || editType == TransformEditType.RX)
+            if (isFull || editType == TransformEditType.RX)
             {
                 updateTransform |= view.DrawSliderValue(
-                    GetFieldValue("RX"), prevAngle.x - 180f, prevAngle.x + 180f, 1f, prevAngle.x,
+                    GetFieldValue("RX"), -180f, 180f, 1f, initialEulerAngles.x,
                     angle.x,
                     x => angle.x = x);
             }
 
-            if (editType == TransformEditType.回転 || editType == TransformEditType.RY)
+            if (isFull || editType == TransformEditType.RY)
             {
                 updateTransform |= view.DrawSliderValue(
-                    GetFieldValue("RY"), prevAngle.y - 180f, prevAngle.y + 180f, 1f, prevAngle.y,
+                    GetFieldValue("RY"), -180f, 180f, 1f, initialEulerAngles.y,
                     angle.y,
                     y => angle.y = y);
             }
 
-            if (editType == TransformEditType.回転 || editType == TransformEditType.RZ)
+            if (isFull || editType == TransformEditType.RZ)
             {
                 updateTransform |= view.DrawSliderValue(
-                    GetFieldValue("RZ"), prevAngle.z - 180f, prevAngle.z + 180f, 1f, prevAngle.z,
+                    GetFieldValue("RZ"), -180f, 180f, 1f, initialEulerAngles.z,
                     angle.z,
                     z => angle.z = z);
             }
@@ -1280,38 +1341,43 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        protected void DrawScale(GUIView view, Transform transform, TransformEditType editType)
+        protected void DrawScale(
+            GUIView view,
+            Transform transform,
+            TransformEditType editType,
+            Vector3 initialScale)
         {
             var scale = transform.localScale;
             var updateTransform = false;
+            var isFull = editType == TransformEditType.全て || editType == TransformEditType.拡縮;
 
-            if (editType == TransformEditType.拡縮 || editType == TransformEditType.SX)
+            if (isFull || editType == TransformEditType.SX)
             {
-                updateTransform |= view.DrawValue(GetFieldValue("SX"), 0.01f, 0.1f, 1f,
+                updateTransform |= view.DrawValue(GetFieldValue("SX"), 0.01f, 0.1f, initialScale.x,
                     scale.x,
                     x => scale.x = x,
                     x => scale.x += x);
             }
 
-            if (editType == TransformEditType.拡縮 || editType == TransformEditType.SY)
+            if (isFull || editType == TransformEditType.SY)
             {
-                updateTransform |= view.DrawValue(GetFieldValue("SY"), 0.01f, 0.1f, 1f,
+                updateTransform |= view.DrawValue(GetFieldValue("SY"), 0.01f, 0.1f, initialScale.y,
                     scale.y,
                     y => scale.y = y,
                     y => scale.y += y);
             }
 
-            if (editType == TransformEditType.拡縮 || editType == TransformEditType.SZ)
+            if (isFull || editType == TransformEditType.SZ)
             {
-                updateTransform |= view.DrawValue(GetFieldValue("SZ"), 0.01f, 0.1f, 1f,
+                updateTransform |= view.DrawValue(GetFieldValue("SZ"), 0.01f, 0.1f, initialScale.z,
                     scale.z,
                     z => scale.z = z,
                     z => scale.z += z);
             }
 
-            if (editType == TransformEditType.拡縮)
+            if (isFull)
             {
-                updateTransform |= view.DrawSliderValue(GetFieldValue("拡縮"), 0f, 10f, 0.01f, 1f,
+                updateTransform |= view.DrawSliderValue(GetFieldValue("拡縮"), 0f, 10f, 0.01f, initialScale.x,
                     scale.x,
                     x =>
                     {
