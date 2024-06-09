@@ -672,10 +672,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             extendBoneNamesMap.Clear();
-            foreach (var extendBoneName in xml.extendBoneNames)
+            foreach (var extendBone in xml.extendBones)
             {
-                var boneNames = GetExtendBoneNames(extendBoneName.maidSlotNo);
-                boneNames.Add(extendBoneName.extendBoneName);
+                var boneNames = GetExtendBoneNames(extendBone.maidSlotNo);
+                foreach (var extendBoneName in extendBone.extendBoneNames)
+                {
+                    boneNames.Add(extendBoneName);
+                }
             }
 
             maxFrameNo = xml.maxFrameNo;
@@ -749,19 +752,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            xml.extendBoneNames = new List<TimelineExtendBoneNameXml>();
+            xml.extendBones = new List<TimelineExtendBoneXml>();
             foreach (var pair in extendBoneNamesMap)
             {
                 var maidSlotNo = pair.Key;
-                foreach (var extendBoneName in pair.Value)
+                var extendBoneXml = new TimelineExtendBoneXml
                 {
-                    var extendBoneNameXml = new TimelineExtendBoneNameXml
-                    {
-                        maidSlotNo = maidSlotNo,
-                        extendBoneName = extendBoneName,
-                    };
-                    xml.extendBoneNames.Add(extendBoneNameXml);
-                }
+                    maidSlotNo = maidSlotNo,
+                    extendBoneNames = pair.Value.ToList(),
+                };
+                xml.extendBones.Add(extendBoneXml);
             }
 
             xml.maxFrameNo = maxFrameNo;
