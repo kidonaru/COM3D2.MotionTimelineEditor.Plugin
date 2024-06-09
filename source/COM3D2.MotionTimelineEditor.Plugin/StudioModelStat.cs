@@ -14,64 +14,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         MyRoom,
     }
 
-    public class StudioModelBlendShape
-    {
-        public StudioModelStat parentModel { get; private set; }
-        public string shapeKeyName { get; private set; }
-        public int shapeKeyIndex { get; set; }
-
-        public BlendShapeController blendShapeController
-        {
-            get
-            {
-                return parentModel.blendShapeController;
-            }
-        }
-
-        public string name
-        {
-            get
-            {
-                return string.Format("{0}/{1}", parentModel.name, shapeKeyName);
-            }
-        }
-
-        public float weight
-        {
-            get
-            {
-                if (shapeKeyIndex >= 0 && shapeKeyIndex < blendShapeController.blendShapeCount)
-                {
-                    return blendShapeController.GetBlendShapeWeight(shapeKeyIndex);
-                }
-                PluginUtils.LogWarning("BlendShapeIndex out of range: {0}", shapeKeyIndex);
-                return 0f;
-            }
-            set
-            {
-                if (shapeKeyIndex >= 0 && shapeKeyIndex < blendShapeController.blendShapeCount)
-                {
-                    blendShapeController.SetBlendShapeWeight(shapeKeyIndex, value);
-                    return;
-                }
-                PluginUtils.LogWarning("BlendShapeIndex out of range: {0}", shapeKeyIndex);
-            }
-        }
-
-        public StudioModelBlendShape()
-        {
-        }
-
-        public StudioModelBlendShape(
-            StudioModelStat parentModel,
-            string shapeKeyName)
-        {
-            this.parentModel = parentModel;
-            this.shapeKeyName = shapeKeyName;
-            this.shapeKeyIndex = blendShapeController.GetBlendShapeIndex(shapeKeyName);
-        }
-    }
-
     public class StudioModelStat
     {
         public OfficialObjectInfo info { get; private set; }
@@ -82,10 +24,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int attachMaidSlotNo { get; set; }
         public object obj { get; set; }
         public string pluginName { get; set; }
-        public List<ModelBone> bones { get; private set; }
-        public List<StudioModelBlendShape> blendShapes { get; private set; }
         public BlendShapeController blendShapeController { get; private set; }
         public ModelBoneController modelBoneController { get; private set; }
+
+        public List<ModelBone> bones
+        {
+            get
+            {
+                if (modelBoneController != null)
+                {
+                    return modelBoneController.bones;
+                }
+                return new List<ModelBone>();
+            }
+        }
+
+        public List<ModelBlendShape> blendShapes
+        {
+            get
+            {
+                if (blendShapeController != null)
+                {
+                    return blendShapeController.blendShapes;
+                }
+                return new List<ModelBlendShape>();
+            }
+        }
 
         private Transform _transform;
         public Transform transform
@@ -108,8 +72,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public StudioModelStat()
         {
-            bones = new List<ModelBone>();
-            blendShapes = new List<StudioModelBlendShape>();
         }
 
         public StudioModelStat(
@@ -119,7 +81,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             AttachPoint attachPoint,
             int attachMaidSlotNo,
             object obj,
-            string pluginName) : this()
+            string pluginName)
         {
             Init(info, group, transform, attachPoint, attachMaidSlotNo, obj, pluginName);
         }
@@ -187,38 +149,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void BuildBonesAndBlendShapes()
         {
-            bones.Clear();
-            blendShapes.Clear();
-
             if (transform == null)
             {
                 return;
             }
 
             modelBoneController = ModelBoneController.GetOrCreate(this);
-            if (modelBoneController == null)
-            {
-                return;
-            }
-
-            foreach (var bone in modelBoneController.bones)
-            {
-                bones.Add(bone);
-            }
-
             blendShapeController = BlendShapeLoader.LoadController(this);
-            if (blendShapeController == null)
-            {
-                return;
-            }
-
-            var blendShapeCount = blendShapeController.blendShapeCount;
-            for (int i = 0; i < blendShapeCount; i++)
-            {
-                var shapeKeyName = blendShapeController.GetBlendShapeName(i);
-                var blendShape = new StudioModelBlendShape(this, shapeKeyName);
-                blendShapes.Add(blendShape);
-            }
         }
 
         public ModelBone GetBone(int index)

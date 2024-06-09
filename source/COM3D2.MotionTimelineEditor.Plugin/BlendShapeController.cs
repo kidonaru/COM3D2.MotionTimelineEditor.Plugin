@@ -1,14 +1,47 @@
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+    public class ModelBlendShape
+    {
+        public BlendShapeController controller { get; set; }
+        public string shapeKeyName { get; private set; }
+        public float weight { get; set; }
+
+        public StudioModelStat model
+        {
+            get
+            {
+                return controller.model;
+            }
+        }
+
+        public string name
+        {
+            get
+            {
+                return string.Format("{0}/{1}", model.name, shapeKeyName);
+            }
+        }
+
+        public ModelBlendShape(
+            BlendShapeController controller,
+            string shapeKeyName)
+        {
+            this.controller = controller;
+            this.shapeKeyName = shapeKeyName;
+        }
+    }
+
     public class BlendShapeController : MonoBehaviour
     {
+        public StudioModelStat model;
         private Mesh mesh;
         private BlendShapeCacheData blendData;
-        private float[] blendWeights;
-        
+        public List<ModelBlendShape> blendShapes = new List<ModelBlendShape>();
+
         private Vector3[] orgVertices;
         private Vector3[] orgNormals;
         private Vector3[] tmpVertices;
@@ -37,54 +70,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             tmpVertices = new Vector3[mesh.vertexCount];
             tmpNormals = new Vector3[mesh.vertexCount];
 
-            blendWeights = new float[blendData.blendShapes.Count];
+            blendShapes.Clear();
 
-            for (int i = 0; i < blendWeights.Length; i++)
-            {
-                blendWeights[i] = 0f;
-            }
-        }
-
-        public int GetBlendShapeIndex(string name)
-        {
             for (int i = 0; i < blendData.blendShapes.Count; i++)
             {
-                if (blendData.blendShapes[i].name == name)
-                {
-                    return i;
-                }
+                var shepeKey = blendData.blendShapes[i].name;
+                var blendShape = new ModelBlendShape(this, shepeKey);
+                blendShapes.Add(blendShape);
             }
-            return -1;
-        }
-
-        public string GetBlendShapeName(int index)
-        {
-            if (index >= 0 && index < blendData.blendShapes.Count)
-            {
-                return blendData.blendShapes[index].name;
-            }
-            PluginUtils.LogWarning("BlendShapeIndex out of range: {0}", index);
-            return null;
-        }
-
-        public float GetBlendShapeWeight(int index)
-        {
-            if (index >= 0 && index < blendWeights.Length)
-            {
-                return blendWeights[index];
-            }
-            PluginUtils.LogWarning("BlendShapeIndex out of range: {0}", index);
-            return 0f;
-        }
-
-        public void SetBlendShapeWeight(int index, float weight)
-        {
-            if (index >= 0 && index < blendWeights.Length)
-            {
-                blendWeights[index] = weight;
-                return;
-            }
-            PluginUtils.LogWarning("BlendShapeIndex out of range: {0}", index);
         }
 
         public void FixBlendValues()
@@ -99,19 +92,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             for (int i = 0; i < blendData.blendShapes.Count; i++)
             {
-                var blendShape = blendData.blendShapes[i];
-                var weight = blendWeights[i];
+                var blendShapeData = blendData.blendShapes[i];
+                var weight = blendShapes[i].weight;
 
                 if (weight == 0f)
                 {
                     continue;
                 }
 
-                for (int j = 0; j < blendShape.vertexCount; j++)
+                for (int j = 0; j < blendShapeData.vertexCount; j++)
                 {
-                    var index = blendShape.vertexIndices[j];
-                    tmpVertices[index] += blendShape.vertices[j] * weight;
-                    tmpNormals[index] += blendShape.normals[j] * weight;
+                    var index = blendShapeData.vertexIndices[j];
+                    tmpVertices[index] += blendShapeData.vertices[j] * weight;
+                    tmpNormals[index] += blendShapeData.normals[j] * weight;
                 }
             }
 

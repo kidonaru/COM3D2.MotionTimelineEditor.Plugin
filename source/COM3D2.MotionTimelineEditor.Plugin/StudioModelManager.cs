@@ -37,7 +37,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         private Dictionary<string, StudioModelStat> modelMap = new Dictionary<string, StudioModelStat>();
         public Dictionary<string, ModelBone> boneMap = new Dictionary<string, ModelBone>();
-        public Dictionary<string, StudioModelBlendShape> blendShapeMap = new Dictionary<string, StudioModelBlendShape>();
+        public Dictionary<string, ModelBlendShape> blendShapeMap = new Dictionary<string, ModelBlendShape>();
 
         public List<StudioModelStat> models = new List<StudioModelStat>();
         public List<string> modelNames = new List<string>();
@@ -161,9 +161,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return GetBone(boneNames[index]);
         }
 
-        public StudioModelBlendShape GetBlendShape(string name)
+        public ModelBlendShape GetBlendShape(string name)
         {
-            StudioModelBlendShape blendShape;
+            ModelBlendShape blendShape;
             if (blendShapeMap.TryGetValue(name, out blendShape))
             {
                 return blendShape;
@@ -171,7 +171,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return null;
         }
 
-        public StudioModelBlendShape GetBlendShape(int index)
+        public ModelBlendShape GetBlendShape(int index)
         {
             if (index < 0 || index >= blendShapeNames.Count)
             {

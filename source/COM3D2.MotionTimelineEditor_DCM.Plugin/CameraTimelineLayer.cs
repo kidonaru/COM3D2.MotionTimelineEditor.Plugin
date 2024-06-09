@@ -447,9 +447,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         private int _targetMaidSlotNo = 0;
         private MaidPointType _targetMaidPoint = MaidPointType.Head;
         private int _targetModelIndex = 0;
-        private FloatFieldValue[] _fieldValues = FloatFieldValue.CreateArray(
-            new string[] { "X", "Y", "Z", "RX", "RY", "RZ", "距離", "FoV" }
-        );
 
         private static readonly List<string> MaidPointTypeNames = new List<string>
         {
@@ -470,44 +467,74 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             angles = TransformDataBase.GetFixedEulerAngles(angles, prevAngles);
             var updateTransform = false;
 
+            var initialPosition = Vector3.zero;
+            var initialEulerAngles = Vector3.zero;
+
             view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
-            updateTransform |= view.DrawValue(_fieldValues[0], 0.01f, 0.1f, 0f,
+            updateTransform |= view.DrawSliderValue(
+                GetFieldValue("X"),
+                -config.positionRange, config.positionRange, 0.01f,
+                initialPosition.x,
                 position.x,
                 x => position.x = x,
-                x => position.x += x);
-
-            updateTransform |= view.DrawValue(_fieldValues[1], 0.01f, 0.1f, 0f,
+                30);
+            
+            updateTransform |= view.DrawSliderValue(
+                GetFieldValue("Y"),
+                -config.positionRange, config.positionRange, 0.01f,
+                initialPosition.y,
                 position.y,
                 y => position.y = y,
-                y => position.y += y);
+                30);
 
-            updateTransform |= view.DrawValue(_fieldValues[2], 0.01f, 0.1f, 0f,
+            updateTransform |= view.DrawSliderValue(
+                GetFieldValue("Z"),
+                -config.positionRange, config.positionRange, 0.01f,
+                initialPosition.z,
                 position.z,
                 z => position.z = z,
-                z => position.z += z);
+                30);
 
-            updateTransform |= view.DrawSliderValue(_fieldValues[3], prevAngles.x - 180f, prevAngles.x + 180f, 1f, 0f,
+            updateTransform |= view.DrawSliderValue(
+                GetFieldValue("RX"),
+                prevAngles.x - 180f, prevAngles.x + 180f, 1f,
+                initialEulerAngles.x,
                 angles.x,
-                x => angles.x = x);
+                x => angles.x = x,
+                30);
 
-            updateTransform |= view.DrawSliderValue(_fieldValues[4], prevAngles.y - 180f, prevAngles.y + 180f, 1f, 0f,
+            updateTransform |= view.DrawSliderValue(
+                GetFieldValue("RY"),
+                prevAngles.y - 180f, prevAngles.y + 180f, 1f,
+                initialEulerAngles.y,
                 angles.y,
-                y => angles.y = y);
+                y => angles.y = y,
+                30);
 
-            updateTransform |= view.DrawSliderValue(_fieldValues[5], prevAngles.z - 180f, prevAngles.z + 180f, 1f, 0f,
+            updateTransform |= view.DrawSliderValue(
+                GetFieldValue("RZ"),
+                prevAngles.z - 180f, prevAngles.z + 180f, 1f,
+                initialEulerAngles.z,
                 angles.z,
-                z => angles.z = z);
+                z => angles.z = z,
+                30);
 
-            updateTransform |= view.DrawValue(_fieldValues[6], 0.1f, 1f, 2f,
+            updateTransform |= view.DrawSliderValue(
+                GetFieldValue("距離"),
+                0.1f, 30, 0.01f,
+                2,
                 distance,
                 d => distance = d,
-                d => distance += d);
+                30);
 
-            updateTransform |= view.DrawValue(_fieldValues[7], 0.1f, 1f, 35f,
+            updateTransform |= view.DrawSliderValue(
+                GetFieldValue("FoV"),
+                1, 179, 0.1f,
+                35,
                 Camera.main.fieldOfView,
                 a => Camera.main.fieldOfView = a,
-                a => Camera.main.fieldOfView += a);
+                30);
 
             view.DrawHorizontalLine(Color.gray);
 

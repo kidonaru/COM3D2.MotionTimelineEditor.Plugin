@@ -699,7 +699,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var boneType = BoneUtils.GetBoneTypeByName(boneName);
             var transform = maidCache.GetBoneTransform(boneName);
             var initialPosition = maidCache.GetInitialPosition(boneName);
-            var initialRotation = maidCache.GetInitialEulerAngles(boneName);
+            var initialEulerAngles = maidCache.GetInitialEulerAngles(boneName);
             var initialScale = Vector3.one;
             var drawMask = (boneType == IKManager.BoneType.Root || !isDefaultBoneName) ? DrawMaskPositonAndRotation : DrawMaskRotation;
             if (transform == null)
@@ -722,7 +722,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 drawMask,
                 boneName,
                 initialPosition,
-                initialRotation,
+                initialEulerAngles,
                 initialScale);
 
             if (updateTransform)

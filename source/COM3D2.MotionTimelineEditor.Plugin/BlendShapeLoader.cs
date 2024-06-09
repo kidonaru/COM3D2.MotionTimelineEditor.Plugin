@@ -18,9 +18,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return null;
             }
 
-            var controller = model.transform.GetComponent<BlendShapeController>();
+            var transform = model.transform;
+            var go = transform.gameObject;
+
+            var controller = go.GetComponent<BlendShapeController>();
             if (controller != null)
             {
+                controller.model = model;
                 return controller;
             }
 
@@ -36,14 +40,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return null;
             }
 
-            var meshRenderer = model.transform.GetComponentInChildren<SkinnedMeshRenderer>();
+            var meshRenderer = go.GetComponentInChildren<SkinnedMeshRenderer>();
             if (meshRenderer == null)
             {
                 return null;
             }
 
-            controller = model.transform.gameObject.AddComponent<BlendShapeController>();
+            controller = go.AddComponent<BlendShapeController>();
             controller.Init(meshRenderer.sharedMesh, blendShapeCache);
+            controller.model = model;
             return controller;
         }
 

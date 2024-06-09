@@ -294,10 +294,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
-        private FloatFieldValue[] _fieldValues = FloatFieldValue.CreateArray(
-            new string[] { "R", "G", "B" }
-        );
-
         private ColorFieldValue _colorFieldValue = new ColorFieldValue("Color", false);
 
         public override void DrawWindow(GUIView view)
@@ -311,17 +307,23 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
-            updateTransform |= view.DrawSliderValue(_fieldValues[0], 0f, 1f, 0.01f, 0f,
+            updateTransform |= view.DrawSliderValue(
+                GetFieldValue("R"), 0f, 1f, 0.01f, 0f,
                 color.r,
-                x => color.r = x);
+                x => color.r = x,
+                30);
 
-            updateTransform |= view.DrawSliderValue(_fieldValues[1], 0f, 1f, 0.01f, 0f,
+            updateTransform |= view.DrawSliderValue(
+                GetFieldValue("G"), 0f, 1f, 0.01f, 0f,
                 color.g,
-                y => color.g = y);
+                y => color.g = y,
+                30);
 
-            updateTransform |= view.DrawSliderValue(_fieldValues[2], 0f, 1f, 0.01f, 0f,
+            updateTransform |= view.DrawSliderValue(
+                GetFieldValue("B"), 0f, 1f, 0.01f, 0f,
                 color.b,
-                z => color.b = z);
+                z => color.b = z,
+                30);
 
             updateTransform |= view.DrawColor(
                 _colorFieldValue,

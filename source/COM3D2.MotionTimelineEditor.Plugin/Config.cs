@@ -20,6 +20,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public TangentType defaultTangentType = TangentType.Smooth;
         public int detailTransformCount = 16;
         public int detailTangentCount = 32;
+        public float positionRange = 5.0f;
+        public float scaleRange = 5.0f;
         public bool disablePoseHistory = true;
         public int historyLimit = 20;
         public float keyRepeatTimeFirst = 0.15f;

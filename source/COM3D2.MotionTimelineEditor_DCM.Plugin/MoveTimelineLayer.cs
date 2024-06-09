@@ -134,8 +134,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         private void ApplyMotion(MoveMotionData motion, Transform transform, float lerpTime)
         {
             float easingTime = CalcEasingValue(lerpTime, motion.easing);
-            transform.position = Vector3.Lerp(motion.myTm.stPos, motion.myTm.edPos, easingTime);
-            transform.rotation = Quaternion.Euler(Vector3.Lerp(motion.myTm.stRot, motion.myTm.edRot, easingTime));
+            transform.localPosition = Vector3.Lerp(motion.myTm.stPos, motion.myTm.edPos, easingTime);
+            transform.localRotation = Quaternion.Euler(Vector3.Lerp(motion.myTm.stRot, motion.myTm.edRot, easingTime));
         }
 
         public override void OnEndPoseEdit()
@@ -154,8 +154,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
 
             var trans = CreateTransformData(MoveBoneName);
-            trans.position = maid.transform.position;
-            trans.eulerAngles = maid.transform.eulerAngles;
+            trans.position = maid.transform.localPosition;
+            trans.eulerAngles = maid.transform.localEulerAngles;
 
             var bone = frame.CreateBone(trans);
             frame.UpdateBone(bone);
@@ -377,47 +377,22 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            var position = maid.transform.position;
-            var angle = maid.transform.eulerAngles;
-            var updateTransform = false;
+            var transform = maid.transform;
+            var initialPosition = Vector3.zero;
+            var initialEulerAngles = Vector3.zero;
+            var initialScale = Vector3.one;
 
             view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
-            updateTransform |= view.DrawValue(_fieldValues[0], 0.01f, 0.1f, 0f,
-                position.x,
-                x => position.x = x,
-                x => position.x += x);
-
-            updateTransform |= view.DrawValue(_fieldValues[1], 0.01f, 0.1f, 0f,
-                position.y,
-                y => position.y = y,
-                y => position.y += y);
-
-            updateTransform |= view.DrawValue(_fieldValues[2], 0.01f, 0.1f, 0f,
-                position.z,
-                z => position.z = z,
-                z => position.z += z);
-
-            updateTransform |= view.DrawValue(_fieldValues[3], 1f, 10f, 0f,
-                angle.x,
-                x => angle.x = x,
-                x => angle.x += x);
-
-            updateTransform |= view.DrawValue(_fieldValues[4], 1f, 10f, 0f,
-                angle.y,
-                y => angle.y = y,
-                y => angle.y += y);
-
-            updateTransform |= view.DrawValue(_fieldValues[5], 1f, 10f, 0f,
-                angle.z,
-                z => angle.z = z,
-                z => angle.z += z);
-
-            if (updateTransform)
-            {
-                maid.transform.position = position;
-                maid.transform.eulerAngles = angle;
-            }
+            DrawTransform(
+                view,
+                transform,
+                TransformEditType.全て,
+                DrawMaskPositonAndRotation,
+                MoveBoneName,
+                initialPosition,
+                initialEulerAngles,
+                initialScale);
         }
 
         public override ITransformData CreateTransformData(string name)

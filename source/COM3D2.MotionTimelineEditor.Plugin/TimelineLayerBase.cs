@@ -1253,7 +1253,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             if (IsDrawTransformType(TransformDrawType.回転, editType, drawMask))
             {
-                DrawEulerAngles(view, transform, editType, initialEulerAngles);
+                var prevBone = GetPrevBone(timelineManager.currentFrameNo, boneName);
+                DrawEulerAngles(view, transform, editType, prevBone, initialEulerAngles);
             }
             if (IsDrawTransformType(TransformDrawType.拡縮, editType, drawMask))
             {
@@ -1273,26 +1274,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (isFull || editType == TransformEditType.X)
             {
-                updateTransform |= view.DrawValue(GetFieldValue("X"), 0.01f, 0.1f, initialPosition.x,
+                updateTransform |= view.DrawSliderValue(
+                    GetFieldValue("X"),
+                    -config.positionRange, config.positionRange, 0.01f,
+                    initialPosition.x,
                     position.x,
                     x => position.x = x,
-                    x => position.x += x);
+                    30);
             }
 
             if (isFull || editType == TransformEditType.Y)
             {
-                updateTransform |= view.DrawValue(GetFieldValue("Y"), 0.01f, 0.1f, initialPosition.y,
+                updateTransform |= view.DrawSliderValue(
+                    GetFieldValue("Y"),
+                    -config.positionRange, config.positionRange, 0.01f,
+                    initialPosition.y,
                     position.y,
                     y => position.y = y,
-                    y => position.y += y);
+                    30);
             }
 
             if (isFull || editType == TransformEditType.Z)
             {
-                updateTransform |= view.DrawValue(GetFieldValue("Z"), 0.01f, 0.1f, initialPosition.z,
+                updateTransform |= view.DrawSliderValue(
+                    GetFieldValue("Z"),
+                    -config.positionRange, config.positionRange, 0.01f,
+                    initialPosition.z,
                     position.z,
                     z => position.z = z,
-                    z => position.z += z);
+                    30);
             }
 
             if (updateTransform)
@@ -1305,39 +1315,48 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             GUIView view,
             Transform transform,
             TransformEditType editType,
+            BoneData prevBone,
             Vector3 initialEulerAngles)
         {
-            var angle = TransformDataBase.GetNormalizedEulerAngles(transform.localEulerAngles);
+            var angles = transform.localEulerAngles;
+            var prevAngles = prevBone != null ? prevBone.transform.eulerAngles : Vector3.zero;
+            angles = TransformDataBase.GetFixedEulerAngles(angles, prevAngles);
             var updateTransform = false;
             var isFull = editType == TransformEditType.全て || editType == TransformEditType.回転;
 
             if (isFull || editType == TransformEditType.RX)
             {
                 updateTransform |= view.DrawSliderValue(
-                    GetFieldValue("RX"), -180f, 180f, 1f, initialEulerAngles.x,
-                    angle.x,
-                    x => angle.x = x);
+                    GetFieldValue("RX"), prevAngles.x - 180f, prevAngles.x + 180f, 1f,
+                    initialEulerAngles.x,
+                    angles.x,
+                    x => angles.x = x,
+                    30);
             }
 
             if (isFull || editType == TransformEditType.RY)
             {
                 updateTransform |= view.DrawSliderValue(
-                    GetFieldValue("RY"), -180f, 180f, 1f, initialEulerAngles.y,
-                    angle.y,
-                    y => angle.y = y);
+                    GetFieldValue("RY"), prevAngles.y - 180f, prevAngles.y + 180f, 1f,
+                    initialEulerAngles.y,
+                    angles.y,
+                    y => angles.y = y,
+                    30);
             }
 
             if (isFull || editType == TransformEditType.RZ)
             {
                 updateTransform |= view.DrawSliderValue(
-                    GetFieldValue("RZ"), -180f, 180f, 1f, initialEulerAngles.z,
-                    angle.z,
-                    z => angle.z = z);
+                    GetFieldValue("RZ"), prevAngles.z - 180f, prevAngles.z + 180f, 1f,
+                    initialEulerAngles.z,
+                    angles.z,
+                    z => angles.z = z,
+                    30);
             }
 
             if (updateTransform)
             {
-                transform.localEulerAngles = angle;
+                transform.localEulerAngles = angles;
             }
         }
 
@@ -1353,38 +1372,51 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (isFull || editType == TransformEditType.SX)
             {
-                updateTransform |= view.DrawValue(GetFieldValue("SX"), 0.01f, 0.1f, initialScale.x,
+                updateTransform |= view.DrawSliderValue(
+                    GetFieldValue("SX"),
+                    0, config.scaleRange, 0.01f,
+                    initialScale.x,
                     scale.x,
                     x => scale.x = x,
-                    x => scale.x += x);
+                    30);
             }
 
             if (isFull || editType == TransformEditType.SY)
             {
-                updateTransform |= view.DrawValue(GetFieldValue("SY"), 0.01f, 0.1f, initialScale.y,
+                updateTransform |= view.DrawSliderValue(
+                    GetFieldValue("SY"),
+                    0, config.scaleRange, 0.01f,
+                    initialScale.y,
                     scale.y,
                     y => scale.y = y,
-                    y => scale.y += y);
+                    30);
             }
 
             if (isFull || editType == TransformEditType.SZ)
             {
-                updateTransform |= view.DrawValue(GetFieldValue("SZ"), 0.01f, 0.1f, initialScale.z,
+                updateTransform |= view.DrawSliderValue(
+                    GetFieldValue("SZ"),
+                    0, config.scaleRange, 0.01f,
+                    initialScale.z,
                     scale.z,
                     z => scale.z = z,
-                    z => scale.z += z);
+                    30);
             }
 
             if (isFull)
             {
-                updateTransform |= view.DrawSliderValue(GetFieldValue("拡縮"), 0f, 10f, 0.01f, initialScale.x,
+                updateTransform |= view.DrawSliderValue(
+                    GetFieldValue("拡縮"),
+                    0f, config.scaleRange, 0.01f,
+                    initialScale.x,
                     scale.x,
                     x =>
                     {
                         scale.x = x;
                         scale.y = x;
                         scale.z = x;
-                    });
+                    },
+                    30);
             }
 
             if (updateTransform)

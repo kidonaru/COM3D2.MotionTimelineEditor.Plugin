@@ -145,7 +145,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private void ApplyMotion(ModelShapeKeyMotionData motion, StudioModelBlendShape blendShape, float lerpTime)
+        private void ApplyMotion(ModelShapeKeyMotionData motion, ModelBlendShape blendShape, float lerpTime)
         {
             float easingTime = CalcEasingValue(lerpTime, motion.easing);
             var weight = Mathf.Lerp(motion.stWeight, motion.edWeight, easingTime);

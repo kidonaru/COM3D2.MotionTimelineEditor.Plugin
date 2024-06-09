@@ -254,6 +254,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 config.dirty = true;
             }
 
+            view.DrawSliderValue(
+                GetFieldValue("移動範囲"),
+                1f, 10f, 0.1f,
+                5f,
+                config.positionRange,
+                value =>
+                {
+                    config.positionRange = value;
+                    config.dirty = true;
+                });
+
+            view.DrawSliderValue(
+                GetFieldValue("拡縮範囲"),
+                1f, 10f, 0.1f,
+                5f,
+                config.scaleRange,
+                value =>
+                {
+                    config.scaleRange = value;
+                    config.dirty = true;
+                });
+
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
                 var newIsAutoScroll = view.DrawToggle("自動スクロール", config.isAutoScroll, 120, 20);
@@ -272,21 +294,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
-            {
-                view.DrawLabel("背景透過度", 100, 20);
-
-                var newTimelineBgAlpha = view.DrawFloatField(config.timelineBgAlpha, 50, 20);
-
-                newTimelineBgAlpha = view.DrawSlider(newTimelineBgAlpha, 0f, 1.0f, 100, 20);
-
-                if (newTimelineBgAlpha != config.timelineBgAlpha)
+            view.DrawSliderValue(
+                GetFieldValue("背景透過度"),
+                0f, 1f, 0.01f,
+                0.5f,
+                config.timelineBgAlpha,
+                value =>
                 {
-                    config.timelineBgAlpha = newTimelineBgAlpha;
+                    config.timelineBgAlpha = value;
                     config.dirty = true;
-                }
-            }
-            view.EndLayout();
+                });
 
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
