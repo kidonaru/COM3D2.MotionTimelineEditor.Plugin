@@ -188,7 +188,7 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
 
         public override bool Init()
         {
-            PluginUtils.Log("初期化中...");
+            PluginUtils.Log("SceneCaptureHack: 初期化中...");
 
             if (!base.Init())
             {

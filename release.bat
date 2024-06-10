@@ -31,6 +31,12 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
+call .\source\COM3D2.MotionTimelineEditor_PartsEdit.Plugin\build.bat
+if %ERRORLEVEL% neq 0 (
+    echo ビルドに失敗しました
+    exit /b 1
+)
+
 set VERSION=2.3.1.0
 set PLUGIN_NAME=COM3D2.MotionTimelineEditor.Plugin
 

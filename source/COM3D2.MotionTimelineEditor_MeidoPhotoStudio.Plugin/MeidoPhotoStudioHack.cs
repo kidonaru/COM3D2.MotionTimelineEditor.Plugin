@@ -500,7 +500,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 
         public override bool Init()
         {
-            PluginUtils.Log("初期化中...");
+            PluginUtils.Log("MeidoPhotoStudioHack: 初期化中...");
 
             if (!base.Init())
             {

@@ -3,11 +3,12 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class ExtendBoneCache
+    public class ExtendBoneCache : MonoBehaviour
     {
         public Maid maid;
         public Transform root;
-        public List<string> slotNames;
+        public List<string> slotNames = new List<string>();
+        public HashSet<string> yureSlotNames = new HashSet<string>();
 
         public class Entity
         {
@@ -22,17 +23,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public Dictionary<string, Entity> entities = new Dictionary<string, Entity>(64);
 
-        public ExtendBoneCache(Maid maid, Transform root)
+        private static PartsEditHackManager partsEditHackManager
+        {
+            get
+            {
+                return PartsEditHackManager.instance;
+            }
+        }
+
+        public ExtendBoneCache()
+        {
+        }
+
+        public void Init(Maid maid, Transform root)
         {
             this.maid = maid;
             this.root = root;
 
-            Init();
+            Refresh();
         }
 
-        public void Init()
+        public void Refresh()
         {
             entities.Clear();
+            slotNames.Clear();
 
             var slotNameHash = new HashSet<string>();
 
@@ -68,6 +82,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             slotNames = new List<string>(slotNameHash);
+
+            foreach (var slotName in slotNames)
+            {
+                if (partsEditHackManager.GetYureAble(maid, slotName))
+                {
+                    yureSlotNames.Add(slotName);
+                }
+            }
         }
 
         public void AddEntity(string slotName, string boneName, Transform transform)
@@ -93,6 +115,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return entity;
             }
             return null;
+        }
+
+        public bool IsYureSlot(string slotName)
+        {
+            return yureSlotNames.Contains(slotName);
         }
     }
 }

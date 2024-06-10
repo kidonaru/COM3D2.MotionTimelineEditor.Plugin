@@ -84,14 +84,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             SceneManager.sceneLoaded += OnChangedSceneLevel;
         }
 
-        public void Register(ModelHackBase studioHack)
+        public void Register(IModelHack modelHack)
         {
-            if (studioHack == null || !studioHack.Init())
+            if (modelHack == null || !modelHack.Init())
             {
                 return;
             }
 
-            modelHackMap[studioHack.pluginName] = studioHack;
+            modelHackMap[modelHack.pluginName] = modelHack;
         }
 
         public IModelHack GetOrDefault(string pluginName)

@@ -294,6 +294,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
+            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            {
+                var newIsAutoYureBone = view.DrawToggle("自動揺れボーン", config.isAutoYureBone, 120, 20);
+                if (newIsAutoYureBone != config.isAutoYureBone)
+                {
+                    config.isAutoYureBone = newIsAutoYureBone;
+                    config.dirty = true;
+                }
+            }
+            view.EndLayout();
+
             view.DrawSliderValue(
                 GetFieldValue("背景透過度"),
                 0f, 1f, 0.01f,

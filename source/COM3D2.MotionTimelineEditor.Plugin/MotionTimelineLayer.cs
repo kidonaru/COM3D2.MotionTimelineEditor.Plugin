@@ -63,6 +63,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         private List<PoseTimeLineRow> _dcmOutputRows = new List<PoseTimeLineRow>();
+        private List<string> _extendSlotNames = new List<string>();
 
         private MotionTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -76,6 +77,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         protected override void InitMenuItems()
         {
             _allMenuItems.Clear();
+            _extendSlotNames.Clear();
             _allBoneNames = null;
 
             var setMenuItemMap = new Dictionary<BoneSetMenuType, BoneSetMenuItem>(12);
@@ -133,6 +135,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 setMenuItem.AddChild(menuItem);
             }
+
+            _extendSlotNames.AddRange(slotMenuItemMap.Keys);
         }
 
         public override bool IsValidData()
@@ -256,6 +260,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             this.isMotionPlaying = isMotionPlaying;
             maidCache.playingFrameNoFloat = playingFrameNoFloat;
+
+            if (config.isAutoYureBone)
+            {
+                foreach (var slotName in maidCache.extendBoneCache.yureSlotNames)
+                {
+                    var yureState = !_extendSlotNames.Contains(slotName);
+                    if (yureState != maidCache.GetYureState(slotName))
+                    {
+                        maidCache.SetYureState(slotName, yureState);
+                    }
+                }
+            }
         }
 
         public override void ApplyCurrentFrame(bool motionUpdate)
@@ -821,7 +837,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     baseFinger.Apply();
                 }
 
-                if (view.DrawButton("更新", 40, 20))
+                if (view.DrawButton("更新", 50, 20))
                 {
                     baseFinger.Apply();
                 }
@@ -933,6 +949,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.DrawLabel("対象スロットがありません", -1, 20);
                 return;
             }
+
+            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            {
+                if (maidCache.IsYureSlot(slotName))
+                {
+                    var yureState = maidCache.GetYureState(slotName);
+                    var newYureState = view.DrawToggle("揺れボーン", yureState, 120, 20);
+                    if (newYureState != yureState)
+                    {
+                        maidCache.SetYureState(slotName, newYureState);
+                    }
+                }
+
+                view.currentPos.x = view.viewRect.width - 60;
+
+                if (view.DrawButton("更新", 50, 20))
+                {
+                    maidCache.extendBoneCache.Refresh();
+                }
+            }
+            view.EndLayout();
+
+            view.DrawHorizontalLine(Color.gray);
 
             foreach (var entity in extendedBoneCache.entities.Values)
             {

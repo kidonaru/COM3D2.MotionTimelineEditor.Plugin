@@ -297,6 +297,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static PartsEditHackManager partsEditHackManager
+        {
+            get
+            {
+                return PartsEditHackManager.instance;
+            }
+        }
+
         public MaidCache(int slotNo)
         {
             this.slotNo = slotNo;
@@ -737,6 +745,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return Vector3.zero;
         }
 
+        public bool IsYureSlot(string slotName)
+        {
+            return extendBoneCache != null && extendBoneCache.IsYureSlot(slotName);
+        }
+
+        public bool GetYureState(string slotName)
+        {
+            return partsEditHackManager.GetYureState(maid, slotName);
+        }
+
+        public void SetYureState(string slotName, bool state)
+        {
+            partsEditHackManager.SetYureState(maid, slotName, state);
+        }
+
         private void OnMaidChanged(Maid maid)
         {
             PluginUtils.LogDebug("Maid changed: " + (maid != null ? maid.name : "null"));
@@ -759,8 +782,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             info = MaidInfo.GetOrCreate(maid, ikManager);
 
-            var root = cacheBoneData.GetBoneData("Bip01");
-            extendBoneCache = new ExtendBoneCache(maid, root.transform);
+            extendBoneCache = maid.gameObject.GetComponent<ExtendBoneCache>();
+            if (extendBoneCache == null)
+            {
+                var root = cacheBoneData.GetBoneData("Bip01");
+                extendBoneCache = maid.gameObject.AddComponent<ExtendBoneCache>();
+                extendBoneCache.Init(maid, root.transform);
+            }
 
             if (onMaidChanged != null)
             {

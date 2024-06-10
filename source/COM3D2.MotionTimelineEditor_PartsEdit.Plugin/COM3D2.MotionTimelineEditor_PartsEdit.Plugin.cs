@@ -4,20 +4,20 @@ using UnityEngine;
 using UnityInjector;
 using UnityInjector.Attributes;
 
-namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
+namespace COM3D2.MotionTimelineEditor_PartsEdit.Plugin
 {
     [
         PluginFilter("COM3D2x64"),
         PluginName(PluginInfo.PluginFullName),
         PluginVersion(PluginInfo.PluginVersion)
     ]
-    public class MotionTimelineEditor_SceneCapture : PluginBase
+    public class MotionTimelineEditor_PartsEdit: PluginBase
     {
-        private static ModelHackManager modelHackManager
+        private static PartsEditHackManager partsEditHackManager
         {
             get
             {
-                return ModelHackManager.instance;
+                return PartsEditHackManager.instance;
             }
         }
 
@@ -40,7 +40,7 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
 
         private void Initialize()
         {
-            modelHackManager.Register(new SceneCaptureHack());
+            partsEditHackManager.Register(new PartsEditHack());
         }
     }
 }
