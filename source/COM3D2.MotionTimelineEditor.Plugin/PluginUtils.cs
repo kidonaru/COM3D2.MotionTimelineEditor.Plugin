@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Linq;
 using UnityEngine;
 using System.Diagnostics;
+using System.Collections;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -188,6 +189,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static string GetDcmSongListFilePath(string songName)
         {
             return CombinePaths(GetDcmSongListDirPath(), songName + ".xml");
+        }
+
+        public static void ExecuteNextFrame(Action action)
+        {
+            GameMain.Instance.StartCoroutine(ExecuteNextFrameInternal(action));
+        }
+
+        public static IEnumerator ExecuteNextFrameInternal(Action action)
+        {
+            yield return null;
+            if (action != null)
+            {
+                action();
+            }
         }
 
         public readonly static byte[] Icon = Convert.FromBase64String(

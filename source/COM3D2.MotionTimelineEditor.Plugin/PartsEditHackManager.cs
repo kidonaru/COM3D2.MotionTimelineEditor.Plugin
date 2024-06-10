@@ -2,28 +2,9 @@ using System.Collections.Generic;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public interface IPartsEditHack
-    {
-        bool Init();
-        bool GetYureAble(Maid maid, int slotNo);
-        bool GetYureState(Maid maid, int slotNo);
-        void SetYureState(Maid maid, int slotNo, bool state);
-    }
-
-    public abstract class PartsEditHackBase : IPartsEditHack
-    {
-        public abstract bool Init();
-
-        public abstract bool GetYureAble(Maid maid, int slotNo);
-
-        public abstract bool GetYureState(Maid maid, int slotNo);
-
-        public abstract void SetYureState(Maid maid, int slotNo, bool state);
-    }
-
     public class PartsEditHackManager
     {
-        private IPartsEditHack partsEditHack = null;
+        public IPartsEditHack partsEditHack = null;
 
         private static PartsEditHackManager _instance;
         public static PartsEditHackManager instance
@@ -41,6 +22,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private PartsEditHackManager()
         {
+            StudioHackManager.onPoseEditingChanged += OnPoseEditingChanged;
         }
 
         public void Register(IPartsEditHack partsEditHack)
@@ -119,6 +101,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             partsEditHack.SetYureState(maid, slotNo, state);
+        }
+
+        private GizmoType _savedGizmoType = GizmoType.Rotation;
+
+        private void OnPoseEditingChanged(bool isPoseEditing)
+        {
+            if (partsEditHack == null)
+            {
+                return;
+            }
+
+            if (isPoseEditing)
+            {
+                partsEditHack.boneDisplay = BoneDisplay.Visible;
+                partsEditHack.gizmoType = _savedGizmoType;
+            }
+            else
+            {
+                _savedGizmoType = partsEditHack.gizmoType;
+
+                partsEditHack.boneDisplay = BoneDisplay.None;
+                partsEditHack.gizmoType = GizmoType.None;
+            }
         }
     }
 }

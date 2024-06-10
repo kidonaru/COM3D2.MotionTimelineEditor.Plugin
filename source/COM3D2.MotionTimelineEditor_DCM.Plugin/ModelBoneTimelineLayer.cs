@@ -87,7 +87,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                 foreach (var bone in model.bones)
                 {
-                    var menuItem = new BoneMenuItem(bone.name, bone.transform.name);
+                    var menuItem = new ModelBoneMenuItem(bone.name, bone.transform.name);
                     setMenuItem.AddChild(menuItem);
                 }
             }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class BoneMotionMenuItem : BoneMenuItem
+    public class MaidBoneMenuItem : BoneMenuItem
     {
         public readonly IKManager.BoneType boneType;
 
@@ -27,7 +27,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public BoneMotionMenuItem(string name, string displayName) : base(name, displayName)
+        public MaidBoneMenuItem(string name, string displayName) : base(name, displayName)
         {
             this.boneType = BoneUtils.GetBoneTypeByName(name);
         }

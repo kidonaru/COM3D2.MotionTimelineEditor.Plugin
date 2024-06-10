@@ -89,7 +89,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var boneName = BoneUtils.GetBoneName(boneType);
                 var displayName = BoneUtils.GetBoneJpName(boneType);
-                var menuItem = new BoneMotionMenuItem(boneName, displayName);
+                var menuItem = new MaidBoneMenuItem(boneName, displayName);
 
                 if (boneSetType == BoneSetMenuType.None)
                 {
@@ -123,7 +123,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var slotName = entity.slotName;
                 var boneName = entity.boneName;
 
-                var menuItem = new BoneMotionMenuItem(extendBoneName, boneName);
+                var menuItem = new ExtendBoneMenuItem(extendBoneName, boneName);
 
                 BoneSetMenuItem setMenuItem;
                 if (!slotMenuItemMap.TryGetValue(slotName, out setMenuItem))
@@ -973,32 +973,55 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawHorizontalLine(Color.gray);
 
-            foreach (var entity in extendedBoneCache.entities.Values)
-            {
-                if (entity.slotName != slotName)
-                {
-                    continue;
-                }
+            var entities = extendedBoneCache.entities.Values
+                .Where(entity => entity.slotName == slotName)
+                .ToList();
+            var isAllEnabled = true;
 
+            foreach (var entity in entities)
+            {
                 var extendBoneName = entity.extendBoneName;
 
-                var enable = timeline.HasExtendBoneName(slotNo, extendBoneName);
+                var enabled = timeline.HasExtendBoneName(slotNo, extendBoneName);
 
-                var newEnable = view.DrawToggle(
+                var newEnabled = view.DrawToggle(
                     entity.boneName,
-                    enable,
+                    enabled,
                     _contentRect.width - 20,
                     20);
 
-                if (newEnable != enable)
+                if (newEnabled != enabled)
                 {
-                    if (newEnable)
+                    if (newEnabled)
                     {
                         timeline.AddExtendBoneName(slotNo, extendBoneName);
                     }
                     else
                     {
                         timeline.RemoveExtendBoneName(slotNo, extendBoneName);
+                    }
+                }
+
+                isAllEnabled &= newEnabled;
+            }
+
+            if (isAllEnabled)
+            {
+                if (view.DrawButton("全解除", 80, 20))
+                {
+                    foreach (var entity in entities)
+                    {
+                        timeline.RemoveExtendBoneName(slotNo, entity.extendBoneName);
+                    }
+                }
+            }
+            else
+            {
+                if (view.DrawButton("全選択", 80, 20))
+                {
+                    foreach (var entity in entities)
+                    {
+                        timeline.AddExtendBoneName(slotNo, entity.extendBoneName);
                     }
                 }
             }

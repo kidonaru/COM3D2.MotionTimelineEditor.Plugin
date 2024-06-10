@@ -12,6 +12,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public class Entity
         {
+            public int slotNo;
             public string slotName;
             public string boneName;
             public string extendBoneName;
@@ -50,8 +51,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var slotNameHash = new HashSet<string>();
 
-            foreach (var bodySkin in maid.body0.goSlot)
+            var slotCount = maid.body0.goSlot.Count;
+            for (var slotNo = 0; slotNo < slotCount; slotNo++)
             {
+                var bodySkin = maid.body0.GetSlot(slotNo);
                 if (bodySkin == null || bodySkin.obj == null)
                 {
                     continue;
@@ -75,7 +78,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         BoneUtils.IsVisibleBoneName(boneName))
                     {
                         var slotName = bodySkin.Category;
-                        AddEntity(slotName, boneName, bone);
+                        AddEntity(slotNo, slotName, boneName, bone);
                         slotNameHash.Add(slotName);
                     }
                 }
@@ -92,11 +95,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void AddEntity(string slotName, string boneName, Transform transform)
+        public void AddEntity(int slotNo, string slotName, string boneName, Transform transform)
         {
             var extendBoneName = slotName + "/" + boneName;
             entities[extendBoneName] = new Entity
             {
+                slotNo = slotNo,
                 slotName = slotName,
                 boneName = boneName,
                 extendBoneName = extendBoneName,

@@ -1,5 +1,6 @@
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using UnityEngine.Events;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -9,6 +10,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private List<StudioHackBase> activeStudioHacks = new List<StudioHackBase>();
 
         public static StudioHackBase studioHack { get; private set; }
+
+        public static event UnityAction<bool> onPoseEditingChanged;
 
         private static StudioHackManager _instance;
         public static StudioHackManager instance
@@ -48,6 +51,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             studioHacks.Sort((a, b) => b.priority - a.priority);
         }
 
+        private bool _isPoseEditing = false;
+
         public void Update()
         {
             if (studioHacks.Count == 0)
@@ -78,6 +83,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (studioHack == null && activeStudioHacks.Count > 0)
             {
                 studioHack = activeStudioHacks[0];
+            }
+
+            if (studioHack != null)
+            {
+                if (studioHack.isPoseEditing != _isPoseEditing)
+                {
+                    _isPoseEditing = studioHack.isPoseEditing;
+
+                    if (onPoseEditingChanged != null)
+                    {
+                        onPoseEditingChanged(_isPoseEditing);
+                    }
+                }
             }
         }
 

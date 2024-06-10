@@ -69,6 +69,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static StudioModelManager modelManager
+        {
+            get
+            {
+                return StudioModelManager.instance;
+            }
+        }
+
+        protected static IPartsEditHack partsEditHack
+        {
+            get
+            {
+                return PartsEditHackManager.instance.partsEditHack;
+            }
+        }
+
+        protected static MaidCache maidCache
+        {
+            get
+            {
+                return MaidManager.instance.maidCache;
+            }
+        }
+
         public BoneMenuItem(string name, string displayName)
         {
             this.name = name;

@@ -64,7 +64,6 @@
     <Compile Include="BoneData.cs" />
     <Compile Include="BoneMenuItem.cs" />
     <Compile Include="BoneMenuManager.cs" />
-    <Compile Include="BoneMotionMenuItem.cs" />
     <Compile Include="BoneSetMenuItem.cs" />
     <Compile Include="BoneUtils.cs" />
     <Compile Include="BoneXml.cs" />
@@ -74,6 +73,7 @@
     <Compile Include="ConfigManager.cs" />
     <Compile Include="EasyMenuItem.cs" />
     <Compile Include="ExtendBoneCache.cs" />
+    <Compile Include="ExtendBoneMenuItem.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FrameData.cs" />
     <Compile Include="FrameXml.cs" />
@@ -86,6 +86,7 @@
     <Compile Include="KeyBind.cs" />
     <Compile Include="KeyFrameUI.cs" />
     <Compile Include="MaidBlendShape.cs" />
+    <Compile Include="MaidBoneMenuItem.cs" />
     <Compile Include="MaidCache.cs" />
     <Compile Include="MaidInfo.cs" />
     <Compile Include="MaidManager.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="MoveEasingType.cs" />
     <Compile Include="MovieManager.cs" />
     <Compile Include="MoviePlayerImpl.cs" />
+    <Compile Include="PartsEditHackBase.cs" />
     <Compile Include="PartsEditHackManager.cs" />
     <Compile Include="PluginInfo.cs" />
     <Compile Include="PluginUtils.cs" />
