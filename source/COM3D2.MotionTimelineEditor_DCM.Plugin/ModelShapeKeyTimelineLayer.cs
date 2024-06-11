@@ -411,10 +411,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             for (var i = 0; i < blendShapes.Count; i++)
             {
                 var blendShape = blendShapes[i];
-                var fieldValue = GetFieldValue(blendShape.shapeKeyName);
+                var fieldValue = GetFieldValue(null);
 
                 var weight = blendShape.weight;
                 var updateTransform = false;
+
+                view.DrawLabel(blendShape.shapeKeyName, -1, 20);
 
                 updateTransform |= view.DrawSliderValue(fieldValue, -1f, 2f, 0.01f, 0f,
                     weight,

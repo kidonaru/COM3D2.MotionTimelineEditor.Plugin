@@ -1427,7 +1427,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             subView.BeginLayout(LayoutDirection.Horizontal);
             {
                 var label = fieldValue.label;
-                if (label != null)
+                if (label == null)
+                {
+                    labelWidth = 0;
+                }
+                else
                 {
                     subView.DrawLabel(label, labelWidth, 20);
                 }
