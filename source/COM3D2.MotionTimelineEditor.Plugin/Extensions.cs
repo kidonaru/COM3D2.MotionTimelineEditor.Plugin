@@ -472,9 +472,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return "";
             }
 
-            return transform.parent == null || transform == root
-                ? transform.name
-                : transform.parent.GetFullPath(root) + "/" + transform.name;
+            var parent = transform.parent;
+            if (parent == null || parent == root)
+            {
+                return transform.name;
+            }
+
+            return parent.GetFullPath(root) + "/" + transform.name;
         }
     }
 

@@ -785,9 +785,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             extendBoneCache = maid.gameObject.GetComponent<ExtendBoneCache>();
             if (extendBoneCache == null)
             {
-                var root = cacheBoneData.GetBoneData("Bip01");
+                var anmRoot = cacheBoneData.GetBoneData("Bip01").transform.parent;
                 extendBoneCache = maid.gameObject.AddComponent<ExtendBoneCache>();
-                extendBoneCache.Init(maid, root.transform);
+                extendBoneCache.Init(maid, anmRoot);
             }
 
             if (onMaidChanged != null)

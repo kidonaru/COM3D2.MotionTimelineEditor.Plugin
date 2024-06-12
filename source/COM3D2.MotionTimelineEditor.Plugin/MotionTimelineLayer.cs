@@ -220,7 +220,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var transform = maidCache.GetBoneTransform(name);
                 if (transform == null)
                 {
-                    PluginUtils.LogError("SetCacheBoneDataArray：ボーンがnullです Maidを読み込み直してください：" + name);
+                    PluginUtils.LogDebug("UpdateFrame: ボーンがないのでスキップしました name={0}", name);
                     continue;
                 }
 
@@ -339,7 +339,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var path = maidCache.GetBonePath(name);
                 if (string.IsNullOrEmpty(path))
                 {
-                    PluginUtils.LogWarning("ボーンのパスが取得できませんでした boneName={0}", name);
+                    PluginUtils.LogWarning("ボーンがないのでスキップしました boneName={0}", name);
                     return;
                 }
 

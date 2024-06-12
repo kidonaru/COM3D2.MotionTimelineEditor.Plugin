@@ -6,7 +6,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public class ExtendBoneCache : MonoBehaviour
     {
         public Maid maid;
-        public Transform root;
+        public Transform anmRoot;
         public List<string> slotNames = new List<string>();
         public HashSet<string> yureSlotNames = new HashSet<string>();
 
@@ -36,10 +36,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
         }
 
-        public void Init(Maid maid, Transform root)
+        public void Init(Maid maid, Transform anmRoot)
         {
             this.maid = maid;
-            this.root = root;
+            this.anmRoot = anmRoot;
 
             Refresh();
         }
@@ -98,17 +98,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void AddEntity(int slotNo, string slotName, string boneName, Transform transform)
         {
             var extendBoneName = slotName + "/" + boneName;
-            entities[extendBoneName] = new Entity
+            var entity = new Entity
             {
                 slotNo = slotNo,
                 slotName = slotName,
                 boneName = boneName,
                 extendBoneName = extendBoneName,
-                bonePath = transform.GetFullPath(this.root),
+                bonePath = transform.GetFullPath(this.anmRoot),
                 transform = transform,
                 initialPosition = transform.localPosition,
                 initialRotation = transform.localRotation,
             };
+            entities[extendBoneName] = entity;
+
+            //PluginUtils.LogDebug("AddEntity slotNo:{0} slotName:{1} boneName:{2} extendBoneName:{3} bonePath:{4}",
+            //    slotNo, slotName, boneName, extendBoneName, entity.bonePath);
         }
 
         public Entity GetEntity(string extendBoneName)
