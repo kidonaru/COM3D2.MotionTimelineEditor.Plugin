@@ -163,6 +163,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             base.LateUpdate();
         }
 
+        public override void OnMaidChanged(Maid maid)
+        {
+            InitMenuItems();
+        }
+
         public override void OnBoneNameAdded(string extendBoneName)
         {
             InitMenuItems();
@@ -332,6 +337,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var name = firstBone.name;
                 var path = maidCache.GetBonePath(name);
+                if (string.IsNullOrEmpty(path))
+                {
+                    PluginUtils.LogWarning("ボーンのパスが取得できませんでした boneName={0}", name);
+                    return;
+                }
+
                 w.Write((byte)1);
                 w.Write(path);
 

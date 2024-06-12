@@ -412,6 +412,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // do nothing
         }
 
+        public virtual void OnMaidChanged(Maid maid)
+        {
+            // do nothing
+        }
+
         public virtual void OnModelAdded(StudioModelStat model)
         {
             // do nothing
