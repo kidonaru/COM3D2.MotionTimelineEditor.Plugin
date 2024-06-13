@@ -135,6 +135,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public static void ResetInputOnScroll(Rect windowRect)
+        {
+            var mousePosition = Input.mousePosition;
+            if (mousePosition.x > windowRect.x &&
+                mousePosition.x < windowRect.x + windowRect.width &&
+                Screen.height - mousePosition.y > windowRect.y &&
+                Screen.height - mousePosition.y < windowRect.y + windowRect.height &&
+                Input.GetAxis("Mouse ScrollWheel") != 0f)
+            {
+                Input.ResetInputAxes();
+            }
+        }
+
         public static string GetKeyName(this KeyCode key)
         {
             if (key == KeyCode.Return)

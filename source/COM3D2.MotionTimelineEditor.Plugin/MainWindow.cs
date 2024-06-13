@@ -400,6 +400,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             windowRect = GUI.Window(WINDOW_ID, windowRect, DrawWindow, PluginInfo.WindowName, gsWin);
+            PluginUtils.ResetInputOnScroll(windowRect);
 
             if (config.windowPosX != (int)windowRect.x ||
                 config.windowPosY != (int)windowRect.y)

@@ -234,6 +234,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var gsWin = windowManager.mainWindow.gsWin;
                 _windowRect = GUI.Window(WINDOW_ID, windowRect, DrawWindow, ui.title, gsWin);
+                PluginUtils.ResetInputOnScroll(_windowRect);
             }
         }
 
