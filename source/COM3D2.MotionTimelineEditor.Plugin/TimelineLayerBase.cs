@@ -463,6 +463,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public virtual void ResetDraw(GUIView view)
         {
             _fieldValueIndex = 0;
+            _transformCacheIndex = 0;
         }
 
         public virtual void DrawWindow(GUIView view)
@@ -1165,6 +1166,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private List<TransformCache> _transformCaches = new List<TransformCache>();
+        private int _transformCacheIndex = 0;
+
+        protected TransformCache GetTransformCache(Transform transform)
+        {
+            if (_transformCacheIndex < _transformCaches.Count)
+            {
+                var cache = _transformCaches[_transformCacheIndex++];
+                cache.Update(transform);
+                return cache;
+            }
+
+            {
+                var cache = new TransformCache();
+                cache.Update(transform);
+                _transformCaches.Add(cache);
+                _transformCacheIndex++;
+                return cache;
+            }
+        }
+
         public enum TransformEditType
         {
             全て,
@@ -1242,6 +1264,70 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return true;
         }
 
+        public class TransformCache
+        {
+            public Transform source;
+            public Vector3 position;
+            public Vector3 scale;
+
+            public Vector3 _eulerAngles;
+            private Quaternion _rotation;
+
+            public Vector3 eulerAngles
+            {
+                get
+                {
+                    return _eulerAngles;
+                }
+                set
+                {
+                    _eulerAngles = value;
+                    _rotation = Quaternion.Euler(value);
+                }
+            }
+
+            public TransformCache()
+            {
+            }
+
+            public void Update(Transform source)
+            {
+                if (source == null)
+                {
+                    this.source = null;
+                    return;
+                }
+
+                if (this.source == source)
+                {
+                    this.position = source.localPosition;
+                    this.scale = source.localScale;
+
+                    if (source.localRotation != _rotation)
+                    {
+                        this.eulerAngles = source.localEulerAngles;
+                    }
+                }
+                else
+                {
+                    this.source = source;
+                    this.position = source.localPosition;
+                    this.eulerAngles = source.localEulerAngles;
+                    this.scale = source.localScale;
+                }
+            }
+
+            public void Apply()
+            {
+                if (source != null)
+                {
+                    source.localPosition = position;
+                    source.localRotation = _rotation;
+                    source.localScale = scale;
+                }
+            }
+        }
+
         protected void DrawTransform(
             GUIView view,
             Transform transform,
@@ -1252,28 +1338,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Vector3 initialEulerAngles,
             Vector3 initialScale)
         {
+            var transformCache = GetTransformCache(transform);
             if (IsDrawTransformType(TransformDrawType.移動, editType, drawMask))
             {
-                DrawPosition(view, transform, editType, initialPosition);
+                DrawPosition(view, transformCache, editType, initialPosition);
             }
             if (IsDrawTransformType(TransformDrawType.回転, editType, drawMask))
             {
                 var prevBone = GetPrevBone(timelineManager.currentFrameNo, boneName);
-                DrawEulerAngles(view, transform, editType, prevBone, initialEulerAngles);
+                DrawEulerAngles(view, transformCache, editType, prevBone, initialEulerAngles);
             }
             if (IsDrawTransformType(TransformDrawType.拡縮, editType, drawMask))
             {
-                DrawScale(view, transform, editType, initialScale);
+                DrawScale(view, transformCache, editType, initialScale);
             }
         }
 
         protected void DrawPosition(
             GUIView view,
-            Transform transform,
+            TransformCache transform,
             TransformEditType editType,
             Vector3 initialPosition)
         {
-            var position = transform.localPosition;
+            var position = transform.position;
             var updateTransform = false;
             var isFull = editType == TransformEditType.全て || editType == TransformEditType.移動;
 
@@ -1312,18 +1399,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (updateTransform)
             {
-                transform.localPosition = position;
+                transform.position = position;
+                transform.Apply();
             }
         }
 
         protected void DrawEulerAngles(
             GUIView view,
-            Transform transform,
+            TransformCache transform,
             TransformEditType editType,
             BoneData prevBone,
             Vector3 initialEulerAngles)
         {
-            var angles = transform.localEulerAngles;
+            var angles = transform.eulerAngles;
             var prevAngles = prevBone != null ? prevBone.transform.eulerAngles : Vector3.zero;
             angles = TransformDataBase.GetFixedEulerAngles(angles, prevAngles);
             var updateTransform = false;
@@ -1361,17 +1449,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (updateTransform)
             {
-                transform.localEulerAngles = angles;
+                angles = TransformDataBase.GetFixedEulerAngles(angles, prevAngles);
+                transform.eulerAngles = angles;
+                transform.Apply();
             }
         }
 
         protected void DrawScale(
             GUIView view,
-            Transform transform,
+            TransformCache transform,
             TransformEditType editType,
             Vector3 initialScale)
         {
-            var scale = transform.localScale;
+            var scale = transform.scale;
             var updateTransform = false;
             var isFull = editType == TransformEditType.全て || editType == TransformEditType.拡縮;
 
@@ -1426,7 +1516,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (updateTransform)
             {
-                transform.localScale = scale;
+                transform.scale = scale;
+                transform.Apply();
             }
         }
     }

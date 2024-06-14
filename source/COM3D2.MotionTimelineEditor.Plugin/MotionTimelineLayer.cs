@@ -734,10 +734,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var position = transform.localPosition;
-            var angle = transform.localEulerAngles;
-            var updateTransform = false;
-
             view.DrawHorizontalLine(Color.gray);
 
             view.DrawLabel(displayName, 200, 20);
@@ -751,12 +747,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 initialPosition,
                 initialEulerAngles,
                 initialScale);
-
-            if (updateTransform)
-            {
-                transform.localPosition = position;
-                transform.localEulerAngles = angle;
-            }
         }
 
         private void DrawComboBox(GUIView view)
