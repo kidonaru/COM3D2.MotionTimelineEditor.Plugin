@@ -37,5 +37,11 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
+copy .\UnityInjector\Config\*.csv ..\UnityInjector\Config
+if %ERRORLEVEL% neq 0 (
+    echo Failed to copy csv
+    exit /b 1
+)
+
 echo ビルドに成功しました
 exit /b 0

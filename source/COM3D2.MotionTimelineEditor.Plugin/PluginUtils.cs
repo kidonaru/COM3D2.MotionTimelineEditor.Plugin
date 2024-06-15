@@ -43,6 +43,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public static string ExtraModelCsvPath
+        {
+            get
+            {
+                return CombinePaths(UserDataPath, PluginInfo.PluginName + "_ExtraModel.csv");
+            }
+        }
+
         public static CameraMain MainCamera
         {
             get

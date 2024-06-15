@@ -576,6 +576,18 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         public GameObject LoadGameModel(string assetName)
         {
+            var objIndex = -1;
+
+            if (assetName.IndexOf(":") >= 0)
+            {
+                string[] splited = assetName.Split(new char[] { ':' });
+                if (splited.Length == 2)
+                {
+                    assetName = splited[0];
+                    objIndex = int.Parse(splited[1]);
+                }
+            }
+
             var sourceObj = GameMain.Instance.BgMgr.CreateAssetBundle(assetName);
             if (!sourceObj)
             {
@@ -592,6 +604,25 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
 
             var obj = UnityEngine.Object.Instantiate(sourceObj);
+
+            if (objIndex != -1)
+            {
+                var index = 0;
+                foreach (object child in obj.transform)
+                {
+                    var transform = (Transform)child;
+                    if (index++ == objIndex)
+                    {
+                        transform.parent = null;
+                        UnityEngine.Object.Destroy(obj);
+                        obj.SetActive(false);
+
+                        obj = transform.gameObject;
+                        break;
+                    }
+                }
+            }
+
             obj.transform.localPosition = Vector3.zero;
             Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
             foreach (Renderer renderer in renderers)
@@ -608,6 +639,16 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                 if ((bool)collider)
                 {
                     collider.enabled = false;
+                }
+            }
+
+            ParticleSystem[] particles = obj.GetComponentsInChildren<ParticleSystem>();
+            foreach (ParticleSystem particle in particles)
+            {
+                if (particle != null)
+                {
+                    var main = particle.main;
+                    main.loop = true;
                 }
             }
 

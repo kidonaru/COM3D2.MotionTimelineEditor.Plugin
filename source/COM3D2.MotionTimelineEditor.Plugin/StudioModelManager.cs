@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -651,6 +652,68 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 _officialObjectLabelMap[info.label] = info;
                 _myRoomObjectIdMap[info.myRoomId] = info;
+            }
+
+            LoadExtraModel(PluginUtils.ExtraModelCsvPath);
+        }
+
+        void LoadExtraModel(string path)
+        {
+            if (!File.Exists(path))
+            {
+                PluginUtils.LogWarning("CSVファイルが見つかりません path={0}", path);
+                return;
+            }
+
+            try
+            {
+                using (FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read))
+                using (StreamReader reader = new StreamReader(fileStream))
+                {
+                    bool isFirstLine = true;
+
+                    while (!reader.EndOfStream)
+                    {
+                        string line = reader.ReadLine();
+                        if (isFirstLine)
+                        {
+                            isFirstLine = false;
+                            continue; // ヘッダー行をスキップ
+                        }
+
+                        if (string.IsNullOrEmpty(line))
+                        {
+                            continue; // 空行をスキップ
+                        }
+
+                        string[] values = line.Split(',');
+                        if (values.Length < 3)
+                        {
+                            PluginUtils.LogWarning("CSVファイルの形式が不正です line={0}", line);
+                            continue;
+                        }
+
+                        var info = new OfficialObjectInfo
+                        {
+                            label = values[1],
+                            fileName = values[2],
+                            type = (StudioModelType) int.Parse(values[0]),
+                        };
+
+                        if (_bgObjectFileNameMap.ContainsKey(info.fileName))
+                        {
+                            PluginUtils.LogWarning("ファイル名が重複していたのでスキップ fileName={0}", info.fileName);
+                            continue;
+                        }
+
+                        _officialObjectLabelMap[info.label] = info;
+                        _bgObjectFileNameMap[info.fileName] = info;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                PluginUtils.LogException(e);
             }
         }
 
