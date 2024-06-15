@@ -365,34 +365,24 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private ComboBoxCache<StudioModelStat> _modelComboBox = new ComboBoxCache<StudioModelStat>
         {
-            getName = (model, index) =>
-            {
-                return model.displayName;
-            }
+            getName = (model, index) => model.displayName,
+            contentSize = new Vector2(220, 300),
         };
-
-        private Rect _contentRect = new Rect(0, 0, SubWindow.WINDOW_WIDTH, SubWindow.WINDOW_HEIGHT);
-        private Vector2 _scrollPosition = Vector2.zero;
 
         public override void DrawWindow(GUIView view)
         {
-            _contentRect.width = view.viewRect.width - 20;
-
-            _scrollPosition = view.BeginScrollView(
+            view.BeginScrollView(
                 view.viewRect.width,
                 view.viewRect.height,
-                _contentRect,
-                _scrollPosition,
+                GUIView.AutoScrollViewRect,
                 false,
                 true);
 
             DrawBlendShapes(view);
 
-            _contentRect.height = view.currentPos.y + 20;
-
             view.EndScrollView();
 
-            DrawComboBox(view);
+            view.DrawComboBox();
         }
 
         public void DrawBlendShapes(GUIView view)
@@ -405,7 +395,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            view.SetEnabled(view.guiEnabled && !_modelComboBox.focused);
+            view.SetEnabled(view.guiEnabled && !view.IsComboBoxFocused());
 
             view.DrawLabel("モデル選択", 200, 20);
             view.DrawComboBoxButton(_modelComboBox, 240, 20, true);
@@ -451,17 +441,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     model.FixBlendValues();
                 }
             }
-        }
-
-        private void DrawComboBox(GUIView view)
-        {
-            view.SetEnabled(true);
-
-            view.DrawComboBoxContent(
-                _modelComboBox,
-                220, 300,
-                view.viewRect.width, view.viewRect.height,
-                20);
         }
 
         public override ITransformData CreateTransformData(string name)

@@ -557,7 +557,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             getName = (type, index) =>
             {
                 return type.ToString();
-            }
+            },
+            contentSize = new Vector2(130, 300),
         };
 
         private ComboBoxCache<string> _slotNameComboBox = new ComboBoxCache<string>
@@ -565,7 +566,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             getName = (slotName, index) =>
             {
                 return slotName;
-            }
+            },
+            contentSize = new Vector2(130, 300),
         };
 
         private ComboBoxCache<IBoneMenuItem> _menuItemComboBox = new ComboBoxCache<IBoneMenuItem>
@@ -573,11 +575,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             getName = (menuItem, index) =>
             {
                 return menuItem.displayName;
-            }
+            },
+            contentSize = new Vector2(130, 300),
         };
-
-        private Rect _contentRect = new Rect(0, 0, SubWindow.WINDOW_WIDTH, SubWindow.WINDOW_HEIGHT);
-        private Vector2 _scrollPosition = Vector2.zero;
 
         private enum TabType
         {
@@ -600,7 +600,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void DrawWindow(GUIView view)
         {
-            view.SetEnabled(view.guiEnabled && !_transComboBox.focused && !_slotNameComboBox.focused && !_menuItemComboBox.focused);
+            view.SetEnabled(view.guiEnabled && !view.IsComboBoxFocused());
 
             if (maidCache == null)
             {
@@ -622,13 +622,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawHorizontalLine(Color.gray);
 
-            _contentRect.width = view.viewRect.width - 20;
+            view.AddSpace(5);
 
-            _scrollPosition = view.BeginScrollView(
+            view.BeginScrollView(
                 view.viewRect.width,
                 view.viewRect.height - view.currentPos.y,
-                _contentRect,
-                _scrollPosition,
+                GUIView.AutoScrollViewRect,
                 false,
                 true);
 
@@ -666,11 +665,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     break;
             }
 
-            _contentRect.height = view.currentPos.y + 20;
-
             view.EndScrollView();
 
-            DrawComboBox(view);
+            view.DrawComboBox();
         }
 
         private void DrawTransformEdit(GUIView view)
@@ -747,29 +744,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 initialPosition,
                 initialEulerAngles,
                 initialScale);
-        }
-
-        private void DrawComboBox(GUIView view)
-        {
-            view.SetEnabled(true);
-
-            view.DrawComboBoxContent(
-                _transComboBox,
-                130, 300,
-                view.viewRect.width, view.viewRect.height,
-                20);
-
-            view.DrawComboBoxContent(
-                _slotNameComboBox,
-                130, 300,
-                view.viewRect.width, view.viewRect.height,
-                20);
-
-            view.DrawComboBoxContent(
-                _menuItemComboBox,
-                130, 300,
-                view.viewRect.width, view.viewRect.height,
-                20);
         }
 
         private static readonly string[] FingerBrendNames = new string[]
@@ -978,7 +952,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var newEnabled = view.DrawToggle(
                     entity.boneName,
                     enabled,
-                    _contentRect.width - 20,
+                    -1,
                     20);
 
                 if (newEnabled != enabled)

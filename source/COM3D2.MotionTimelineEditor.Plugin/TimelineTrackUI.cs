@@ -13,8 +13,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Vector2 scrollPosition = Vector2.zero;
-
         public TimelineTrackUI(SubWindow subWindow) : base(subWindow)
         {
         }
@@ -52,7 +50,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     DrawTrack,
                     -1,
                     -1,
-                    ref scrollPosition,
                     55);
             }
         }

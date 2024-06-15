@@ -14,8 +14,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Vector2 scrollPosition = Vector2.zero;
-
         private TimelineLoadItem selectedItem
         {
             get
@@ -83,7 +81,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     itemList,
                     -1,
                     WINDOW_HEIGHT - 20 - 20 - 10 - 20 - 10,
-                    ref scrollPosition,
                     120,
                     120 * config.thumHeight / config.thumWidth + 20,
                     2,
@@ -103,8 +100,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         timelineManager.LoadTimeline(item.name, directoryName);
                     }
                 }
-
-                view.currentPos.y = WINDOW_HEIGHT - 20 - 20;
 
                 view.DrawBox(-1, 20);
 

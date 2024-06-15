@@ -23,7 +23,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private List<string> _pluginNames = new List<string>();
         private Dictionary<string, int> _pluginNameToIndex = new Dictionary<string, int>();
         private List<MaidCache> _maidCaches = new List<MaidCache>();
-        private Vector2 _scrollPosition = Vector2.zero;
 
         public StudioModelUI(SubWindow subWindow) : base(subWindow)
         {
@@ -70,6 +69,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         return string.IsNullOrEmpty(name) ? "Default" : name;
                     },
+                    contentSize = new Vector2(130, 120),
                 });
             }
 
@@ -81,6 +81,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         return maidCache == null ? "未選択" : maidCache.fullName;
                     },
+                    contentSize = new Vector2(130, 120),
                 });
             }
 
@@ -88,15 +89,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 _attachPointComboBoxList.Add(new ComboBoxCache<string>
                 {
-                    getName = (name, _) =>
-                    {
-                        return name;
-                    },
+                    getName = (name, _) => name,
                     items = BoneUtils.AttachPointNames,
+                    contentSize = new Vector2(80, 200),
                 });
             }
 
-            view.SetEnabled(!IsComboBoxFocused());
+            view.SetEnabled(!view.IsComboBoxFocused());
 
             view.padding = Vector2.zero;
             var currentIndex = timeline.activeTrackIndex;
@@ -106,7 +105,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 DrawModel,
                 -1,
                 -1,
-                ref _scrollPosition,
                 80);
         }
 
@@ -214,70 +212,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             return 0;
-        }
-
-        public override void DrawComboBox(GUIView view)
-        {
-            base.DrawComboBox(view);
-
-            var models = modelManager.models;
-            for (var i = 0; i < models.Count; i++)
-            {
-                if (i >= _pluginComboBoxList.Count || i >= _maidComboBoxList.Count || i >= _attachPointComboBoxList.Count)
-                {
-                    break;
-                }
-
-                var pluginComboBox = _pluginComboBoxList[i];
-                var maidComboBox = _maidComboBoxList[i];
-                var attachPointComboBox = _attachPointComboBoxList[i];
-
-                view.DrawComboBoxContent(
-                    pluginComboBox,
-                    130, 120,
-                    view.viewRect.width, view.viewRect.height,
-                    20);
-
-                view.DrawComboBoxContent(
-                    maidComboBox,
-                    130, 120,
-                    view.viewRect.width, view.viewRect.height,
-                    20);
-
-                view.DrawComboBoxContent(
-                    attachPointComboBox,
-                    80, 200,
-                    view.viewRect.width, view.viewRect.height,
-                    20);
-            }
-        }
-
-        public override bool IsComboBoxFocused()
-        {
-            if (base.IsComboBoxFocused())
-            {
-                return true;
-            }
-
-            var models = modelManager.models;
-            for (var i = 0; i < models.Count; i++)
-            {
-                if (i >= _pluginComboBoxList.Count || i >= _maidComboBoxList.Count || i >= _attachPointComboBoxList.Count)
-                {
-                    break;
-                }
-
-                var pluginComboBox = _pluginComboBoxList[i];
-                var maidComboBox = _maidComboBoxList[i];
-                var attachPointComboBox = _attachPointComboBoxList[i];
-
-                if (pluginComboBox.focused || maidComboBox.focused || attachPointComboBox.focused)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }

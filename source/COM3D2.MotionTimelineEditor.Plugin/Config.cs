@@ -18,6 +18,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool isCameraSync = true;
         public bool isAutoScroll = false;
         public TangentType defaultTangentType = TangentType.Smooth;
+        public MoveEasingType defaultEasingType = MoveEasingType.Linear;
         public int detailTransformCount = 16;
         public int detailTangentCount = 32;
         public float positionRange = 5.0f;

@@ -53,6 +53,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public override ComboBoxCacheBase focusedComboBox
+        {
+            get
+            {
+                return parent.focusedComboBox;
+            }
+            set
+            {
+                parent.focusedComboBox = value;
+            }
+        }
+
         public GUISubView(GUIView parent, float x, float y, float width, float height)
             : base(x, y, width, height)
         {
@@ -97,20 +109,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public Rect scrollViewContentRect { get; private set; }
-        public Rect scrollViewRect { get; private set; }
-        public Vector2 scrollPosition { get; private set; }
-        public bool isScrollViewEnabled { get; private set; }
-        public float labelWidth { get; private set; }
-        public float layoutMaxX { get; private set; }
-        public float layoutMaxY { get; private set; }
-        public float margin { get; set; }
+        public Rect scrollViewContentRect;
+        public Rect scrollViewRect;
+        public Vector2 scrollPosition;
+
+        public bool isScrollViewEnabled;
+        public float labelWidth;
+        public Vector2 layoutMaxPos;
+        public float margin;
         public Color defaultColor = Color.white;
         public bool guiEnabled = true;
 
         public virtual int repeatButtonLastPressFrame { get; set; }
         public virtual float repeatButtonStartTime { get; set; }
         public virtual float repeatButtonLastInvokeTime { get; set; }
+
+        public virtual ComboBoxCacheBase focusedComboBox { get; set; }
 
         private List<FloatFieldCache> _fieldCaches = new List<FloatFieldCache>();
         private int _fieldCacheIndex = 0;
@@ -224,10 +238,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void ResetLayout()
         {
             this.layoutDirection = LayoutDirection.Vertical;
-            this.currentPos.x = 0;
-            this.currentPos.y = 0;
-            this.layoutMaxX = 0;
-            this.layoutMaxY = 0;
+            this.currentPos = Vector2.zero;
+            this.layoutMaxPos = Vector2.zero;
 
             //PluginUtils.LogDebug("ResetLayout frame={0} _fieldCacheIndex={1} _transformCacheIndex={2}",
             //    Time.frameCount, _fieldCacheIndex, _transformCacheIndex);
@@ -246,37 +258,49 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void EndLayout()
         {
             this.currentPos.x = 0;
-            this.currentPos.y = this.layoutMaxY;
+            this.currentPos.y = this.layoutMaxPos.y;
             this.layoutDirection = LayoutDirection.Vertical;
         }
 
-        public Vector2 BeginScrollView(
+        private void UpdateScrollViewContentRect(Rect newContentRect)
+        {
+            if (newContentRect.width < 0f) newContentRect.width = viewRect.width - 20;
+            if (newContentRect.height < 0f) newContentRect.height = scrollViewContentRect.height;
+            if (newContentRect.height < scrollViewRect.height) newContentRect.height = scrollViewRect.height;
+            scrollViewContentRect = newContentRect;
+        }
+
+        public void BeginScrollView(
             float width,
             float height,
             Rect contentRect,
-            Vector2 scrollPosition,
             GUIStyle horizontalScrollbar,
             GUIStyle verticalScrollbar)
         {
+            var savedPadding = padding;
+            padding = Vector2.zero;
             scrollViewRect = GetDrawRect(width, height);
-            var ret = GUI.BeginScrollView(
+            padding = savedPadding;
+
+            UpdateScrollViewContentRect(contentRect);
+
+            scrollPosition = GUI.BeginScrollView(
                 scrollViewRect,
                 scrollPosition,
-                contentRect,
+                scrollViewContentRect,
                 horizontalScrollbar,
                 verticalScrollbar);
-            this.scrollViewContentRect = contentRect;
-            this.scrollPosition = scrollPosition;
+
             this.isScrollViewEnabled = true;
             this.currentPos = Vector2.zero;
-            return ret;
         }
 
-        public Vector2 BeginScrollView(
+        public readonly static Rect AutoScrollViewRect = new Rect(0, 0, -1, -1);
+
+        public void BeginScrollView(
             float width,
             float height,
             Rect contentRect,
-            Vector2 scrollPosition,
             bool alwaysShowHorizontal,
             bool alwaysShowVertical)
         {
@@ -285,28 +309,31 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             scrollViewRect = GetDrawRect(width, height);
             padding = savedPadding;
 
-            var ret = GUI.BeginScrollView(
+            UpdateScrollViewContentRect(contentRect);
+
+            scrollPosition = GUI.BeginScrollView(
                 scrollViewRect,
                 scrollPosition,
-                contentRect,
+                scrollViewContentRect,
                 alwaysShowHorizontal,
                 alwaysShowVertical);
-            this.scrollViewContentRect = contentRect;
-            this.scrollPosition = scrollPosition;
+
             this.isScrollViewEnabled = true;
             this.currentPos = Vector2.zero;
-            return ret;
+            this.layoutMaxPos = Vector2.zero;
         }
 
         public void EndScrollView()
         {
+            scrollViewContentRect.height = currentPos.y + 20;
+
             GUI.EndScrollView();
             this.isScrollViewEnabled = false;
-            this.scrollViewRect = Rect.zero;
-            this.scrollPosition = Vector2.zero;
 
             currentPos = scrollViewRect.position;
             NextElement(scrollViewRect);
+
+            this.scrollViewRect = Rect.zero;
         }
 
         public void NextElement(Rect drawRect)
@@ -315,13 +342,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 this.currentPos.x = 0;
                 this.currentPos.y += drawRect.height + margin;
-                this.layoutMaxY = Math.Max(this.layoutMaxY, this.currentPos.y);
+                this.layoutMaxPos.y = Math.Max(this.layoutMaxPos.y, this.currentPos.y);
             }
             if (this.layoutDirection == LayoutDirection.Horizontal)
             {
                 this.currentPos.x += drawRect.width + margin;
-                this.layoutMaxX = Math.Max(this.layoutMaxX, this.currentPos.x);
-                this.layoutMaxY = Math.Max(this.layoutMaxY, this.currentPos.y + drawRect.height + margin);
+                this.layoutMaxPos.x = Math.Max(this.layoutMaxPos.x, this.currentPos.x);
+                this.layoutMaxPos.y = Math.Max(this.layoutMaxPos.y, this.currentPos.y + drawRect.height + margin);
             }
         }
 
@@ -745,6 +772,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public void SetFocusComboBox(ComboBoxCacheBase comboBox)
+        {
+            focusedComboBox = comboBox;
+        }
+
+        public bool IsComboBoxFocused()
+        {
+            return focusedComboBox != null;
+        }
+
+        public void CancelFocusComboBox()
+        {
+            focusedComboBox = null;
+        }
+
         public void DrawComboBoxButton<T>(
             ComboBoxCache<T> comboBox,
             float width,
@@ -796,7 +838,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (subView.DrawButton(name, buttonWidth, buttonHeight))
                 {
-                    comboBox.focused = !comboBox.focused;
+                    SetFocusComboBox(comboBox);
                 }
 
                 if (showArrow)
@@ -816,82 +858,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             NextElement(subViewRect);
         }
 
-        public void DrawComboBoxContent<T>(
-            ComboBoxCache<T> comboBox,
-            float width,
-            float height,
-            float windowWidth,
-            float windowHeight,
-            float buttonHeight)
+        private GUISubView _comboBoxSubView = null;
+
+        public void DrawComboBox()
         {
-            if (!comboBox.focused)
+            SetEnabled(true);
+
+            if (focusedComboBox != null)
             {
-                return;
-            }
-
-            var savedMergin = margin;
-            var savedPadding = padding;
-
-            margin = 0;
-            padding = Vector2.zero;
-
-            var windowRect = new Rect(0, 0, windowWidth, windowHeight);
-            GUI.Box(windowRect, "", gsMask);
-
-            var savedPos = currentPos;
-            var savedLayoutMaxY = layoutMaxY;
-
-            var buttonRect = comboBox.buttonRect;
-            currentPos = buttonRect.position;
-
-            if (height > comboBox.items.Count * buttonHeight)
-            {
-                height = comboBox.items.Count * buttonHeight;
-            }
-
-            if (currentPos.y + height > windowHeight)
-            {
-                currentPos.y = buttonRect.position.y - buttonRect.height - height;
-            }
-            if (currentPos.x + width > windowWidth)
-            {
-                currentPos.x = windowWidth - width;
-            }
-
-            var selectedIndex = DrawListView(
-                comboBox.items,
-                comboBox.getName,
-                comboBox.getEnabled,
-                width,
-                height,
-                ref comboBox.scrollPosition,
-                comboBox.currentIndex,
-                buttonHeight);
-
-            if (selectedIndex >= 0)
-            {
-                comboBox.focused = false;
-            }
-
-            if (Event.current.type == EventType.MouseUp &&
-                Event.current.button == 0)
-            {
-                comboBox.focused = false;
-            }
-
-            currentPos = savedPos;
-            layoutMaxY = savedLayoutMaxY;
-
-            margin = savedMergin;
-            padding = savedPadding;
-
-            if (selectedIndex >= 0 && selectedIndex < comboBox.items.Count)
-            {
-                comboBox.currentIndex = selectedIndex;
-                if (comboBox.onSelected != null)
+                if (_comboBoxSubView == null)
                 {
-                    comboBox.onSelected(comboBox.items[comboBox.currentIndex], comboBox.currentIndex);
+                    _comboBoxSubView = new GUISubView(this, _viewRect)
+                    {
+                        padding = Vector2.zero,
+                        margin = 0,
+                    };
                 }
+
+                _comboBoxSubView.Init(_viewRect);
+
+                focusedComboBox.DrawContent(_comboBoxSubView);
             }
         }
 
@@ -969,7 +955,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Func<T, int, bool> getEnabled,
             float width,
             float height,
-            ref Vector2 scrollPosition,
             int currentIndex,
             float buttonHeight)
         {
@@ -978,7 +963,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var contentRect = GetDrawRect(0, 0, width, height);
             contentRect.width -= 20; // スクロールバーの幅分狭める
             contentRect.height = contentHeight;
-            scrollPosition = BeginScrollView(width, height, contentRect, scrollPosition, false, false);
+            BeginScrollView(
+                width,
+                height,
+                contentRect,
+                false,
+                false);
 
             var buttonWidth = contentRect.width;
 
@@ -1007,14 +997,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Action<GUIView, T, int> drawContent,
             float width,
             float height,
-            ref Vector2 scrollPosition,
             float itemHeight)
         {
             var contentHeight = (itemHeight + margin) * items.Count + 20;
             var contentRect = GetDrawRect(0, 0, width, height);
             contentRect.width -= 20; // スクロールバーの幅分狭める
             contentRect.height = contentHeight;
-            scrollPosition = BeginScrollView(width, height, contentRect, scrollPosition, false, true);
+            BeginScrollView(
+                width,
+                height,
+                contentRect,
+                false,
+                true);
 
             var itemWidth = contentRect.width;
 
@@ -1150,7 +1144,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             IEnumerable<ITileViewContent> contents,
             float width,
             float height,
-            ref Vector2 scrollPosition,
             float tileWidth,
             float tileHeight,
             int columns,
@@ -1163,7 +1156,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var contentRect = GetDrawRect(0, 0, width, height);
             contentRect.width -= 20; // スクロールバーの幅分狭める
             contentRect.height = contentHeight;
-            scrollPosition = BeginScrollView(width, height, contentRect, scrollPosition, false, true);
+            BeginScrollView(
+                width,
+                height,
+                contentRect,
+                false,
+                true);
 
             BeginLayout(LayoutDirection.Horizontal);
 

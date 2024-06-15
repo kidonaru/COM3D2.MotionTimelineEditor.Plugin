@@ -153,8 +153,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private bool isAreaDragging = false;
         private Vector2 areaDragPos = Vector2.zero;
         private Rect areaDragRect = new Rect();
-        private Vector2 scrollPosition = Vector2.zero;
-        private Vector2 menuScrollPosition = Vector2.zero;
         private int selectStartFrameNo = 0;
         private int selectEndFrameNo = 0;
         public bool isMultiSelect = false;
@@ -168,9 +166,83 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private GUIView headerView = null;
         private GUIView contentView = null;
         private GUIView timelineView = null;
-        private ComboBoxCache<FileMenuType> fileMenuComboBox = new ComboBoxCache<FileMenuType>();
-        private ComboBoxCache<TimelineLayerInfo> layerComboBox = new ComboBoxCache<TimelineLayerInfo>();
-        private ComboBoxCache<Maid> _maidComboBox = new ComboBoxCache<Maid>();
+        private GUIView boneMenuView = null;
+
+        private ComboBoxCache<FileMenuType> fileMenuComboBox = new ComboBoxCache<FileMenuType>
+        {
+            label = "ファイル",
+            items = new List<FileMenuType>
+            {
+                FileMenuType.New,
+                FileMenuType.Save,
+                FileMenuType.OutputAnm,
+                FileMenuType.OutputDCM,
+            },
+            getName = (type, index) =>
+            {
+                switch (type)
+                {
+                    case FileMenuType.New:
+                        return "新規作成";
+                    case FileMenuType.Save:
+                        return "セーブ";
+                    case FileMenuType.OutputAnm:
+                        return "アニメ出力";
+                    case FileMenuType.OutputDCM:
+                        return "DCM出力";
+                    default:
+                        return "";
+                }
+            },
+            getEnabled = (type, index) =>
+            {
+                switch (type)
+                {
+                    case FileMenuType.Save:
+                    case FileMenuType.OutputAnm:
+                    case FileMenuType.OutputDCM:
+                        return timelineManager.IsValidData();
+                    default:
+                        return true;
+                }
+            },
+            onSelected = (type, index) =>
+            {
+                switch (type)
+                {
+                    case FileMenuType.New:
+                        timelineManager.CreateNewTimeline();
+                        break;
+                    case FileMenuType.Save:
+                        timelineManager.SaveTimeline();
+                        break;
+                    case FileMenuType.OutputAnm:
+                        timelineManager.OutputAnm();
+                        break;
+                    case FileMenuType.OutputDCM:
+                        timelineManager.OutputDCM();
+                        break;
+                }
+            },
+            contentSize = new Vector2(100, 120),
+        };
+        private ComboBoxCache<TimelineLayerInfo> layerComboBox = new ComboBoxCache<TimelineLayerInfo>
+        {
+            getName = (layerInfo, index) =>
+            {
+                return layerInfo.displayName;
+            },
+            onSelected = (layerInfo, index) =>
+            {
+                var className = layerInfo.className;
+                timelineManager.ChangeActiveLayer(className, maidManager.maidSlotNo);
+            },
+            contentSize = new Vector2(120, 200),
+        };
+        private ComboBoxCache<Maid> _maidComboBox = new ComboBoxCache<Maid>
+        {
+            contentSize = new Vector2(170, 200),
+        };
 
         public GUIStyle gsWin = new GUIStyle("box")
         {
@@ -198,79 +270,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 windowHeight
             );
             this.headerView = new GUIView(0, 0, windowWidth, 20);
-            this.contentView = new GUIView(0, 20, windowWidth, HEADER_HEIGHT);
+            this.contentView = new GUIView(0, 0, windowWidth, windowHeight);
             this.timelineView = new GUIView(0, HEADER_HEIGHT, windowWidth, windowHeight - HEADER_HEIGHT);
+            this.boneMenuView = new GUIView(0, HEADER_HEIGHT, config.menuWidth, windowHeight - HEADER_HEIGHT);
         }
 
         public void Init()
         {
             texWhite = GUIView.CreateColorTexture(Color.white);
-
-            fileMenuComboBox.label = "ファイル";
-            fileMenuComboBox.items = new List<FileMenuType>
-            {
-                FileMenuType.New,
-                FileMenuType.Save,
-                FileMenuType.OutputAnm,
-                FileMenuType.OutputDCM,
-            };
-
-            fileMenuComboBox.getName = (type, index) =>
-            {
-                switch (type)
-                {
-                    case FileMenuType.New:
-                        return "新規作成";
-                    case FileMenuType.Save:
-                        return "セーブ";
-                    case FileMenuType.OutputAnm:
-                        return "アニメ出力";
-                    case FileMenuType.OutputDCM:
-                        return "DCM出力";
-                    default:
-                        return "";
-                }
-            };
-            fileMenuComboBox.getEnabled = (type, index) =>
-            {
-                switch (type)
-                {
-                    case FileMenuType.Save:
-                    case FileMenuType.OutputAnm:
-                    case FileMenuType.OutputDCM:
-                        return timelineManager.IsValidData();
-                    default:
-                        return true;
-                }
-            };
-            fileMenuComboBox.onSelected = (type, index) =>
-            {
-                switch (type)
-                {
-                    case FileMenuType.New:
-                        timelineManager.CreateNewTimeline();
-                        break;
-                    case FileMenuType.Save:
-                        timelineManager.SaveTimeline();
-                        break;
-                    case FileMenuType.OutputAnm:
-                        timelineManager.OutputAnm();
-                        break;
-                    case FileMenuType.OutputDCM:
-                        timelineManager.OutputDCM();
-                        break;
-                }
-            };
-
-            layerComboBox.getName = (layerInfo, index) =>
-            {
-                return layerInfo.displayName;
-            };
-            layerComboBox.onSelected = (layerInfo, index) =>
-            {
-                var className = layerInfo.className;
-                timelineManager.ChangeActiveLayer(className, maidManager.maidSlotNo);
-            };
 
             _maidComboBox.getName = (maid, index) =>
             {
@@ -327,7 +334,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var minScrollX = timelineManager.currentFrameNo * frameWidth - (viewWidth - 20 - frameWidth);
             var maxScrollX = timelineManager.currentFrameNo * frameWidth;
-            scrollPosition.x = Mathf.Clamp(scrollPosition.x, minScrollX, maxScrollX);
+            timelineView.scrollPosition.x = Mathf.Clamp(timelineView.scrollPosition.x, minScrollX, maxScrollX);
         }
 
         public void InitGUI()
@@ -431,13 +438,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             && timeline != null
                             && maidManager.maid != null;
 
-            bool guiEnabled = !fileMenuComboBox.focused
-                            && !_maidComboBox.focused
-                            && !layerComboBox.focused;
+            bool guiEnabled = !contentView.IsComboBoxFocused();
 
             DrawContent(editEnabled, guiEnabled);
             DrawTimeline(editEnabled, guiEnabled);
-            DrawComboBox(editEnabled, true);
+            DrawBoneMenu(editEnabled, guiEnabled);
+
+            if (!editEnabled)
+            {
+                contentView.CancelFocusComboBox();
+            }
+            contentView.DrawComboBox();
 
             if (!isFrameDragging && !isAreaDragging)
             {
@@ -498,8 +509,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private void DrawContent(bool editEnabled, bool guiEnabled)
         {
             var view = contentView;
+            view.Init(0, 0, windowWidth, windowHeight);
             view.SetEnabled(guiEnabled);
-            view.ResetLayout();
+
+            view.currentPos.y = 20;
 
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
@@ -869,23 +882,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 studioHack.isMotionPlaying &&
                 !Input.GetMouseButton(0))
             {
-                scrollPosition.x = Mathf.Clamp(
+                timelineView.scrollPosition.x = Mathf.Clamp(
                     timelineManager.currentFrameNo * config.frameWidth - viewWidth / 2,
                     0,
                     Mathf.Max(0, contentWidth - viewWidth));
             }
 
-            var newScrollPosition = view.BeginScrollView(
+            view.BeginScrollView(
                 viewWidth,
                 viewHeight,
                 contentRect,
-                scrollPosition,
                 alwaysShowHorizontal,
                 alwaysShowVertical);
-            if (!isFrameDragging)
-            {
-                scrollPosition = newScrollPosition;
-            }
+
+            var scrollPosition = view.scrollPosition;
 
             // 背景表示
             view.currentPos = Vector2.zero;
@@ -1155,29 +1165,47 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
+            view.EndLayout();
+        }
+
+        private void DrawBoneMenu(bool editEnabled, bool guiEnabled)
+        {
+            if (!editEnabled)
+            {
+                return;
+            }
+
+            var view = boneMenuView;
+            view.Init(0, HEADER_HEIGHT, config.menuWidth, windowHeight - HEADER_HEIGHT);
+            view.SetEnabled(guiEnabled);
+
+            view.BeginLayout(GUIView.LayoutDirection.Free);
+            view.padding = Vector2.zero;
+
+            var frameHeight = config.frameHeight;
+
+            var menuItems = boneMenuManager.GetVisibleItems();
+
             // ボーンメニューの表示
             view.currentPos.x = 0;
             view.currentPos.y = 20;
             view.DrawTexture(texWhite, config.menuWidth, -1, timelineLabelBgColor);
 
-            menuScrollPosition.y = scrollPosition.y;
-            contentWidth = config.menuWidth;
-            contentHeight = menuItems.Count * frameHeight;
-            viewWidth = config.menuWidth;
-            viewHeight = timelineViewHeight - 20;
-            contentRect = new Rect(0, 0, contentWidth, contentHeight);
-            var newMenuScrollPosition = view.BeginScrollView(
+            view.scrollPosition.y = timelineView.scrollPosition.y;
+            var contentWidth = config.menuWidth;
+            var contentHeight = menuItems.Count * frameHeight;
+            var viewWidth = config.menuWidth;
+            var viewHeight = timelineViewHeight - 20;
+            var contentRect = new Rect(0, 0, contentWidth, contentHeight);
+            view.BeginScrollView(
                 viewWidth,
                 viewHeight,
                 contentRect,
-                menuScrollPosition,
                 "invisible",
                 "invisible");
-            if (!isFrameDragging)
-            {
-                menuScrollPosition = newMenuScrollPosition;
-                scrollPosition.y = menuScrollPosition.y;
-            }
+
+            var scrollPosition = view.scrollPosition;
+            timelineView.scrollPosition.y = scrollPosition.y;
 
             for (int i = 0; i < menuItems.Count; i++)
             {
@@ -1227,35 +1255,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.EndScrollView();
             view.EndLayout();
-        }
-
-        private void DrawComboBox(bool editEnabled, bool guiEnabled)
-        {
-            if (!editEnabled)
-            {
-                layerComboBox.focused = false;
-                _maidComboBox.focused = false;
-            }
-
-            contentView.SetEnabled(guiEnabled);
-
-            contentView.DrawComboBoxContent(
-                fileMenuComboBox,
-                100, 120,
-                windowRect.width, windowRect.height,
-                20);
-
-            contentView.DrawComboBoxContent(
-                layerComboBox,
-                120, 120,
-                windowRect.width, windowRect.height,
-                20);
-
-            contentView.DrawComboBoxContent(
-                _maidComboBox,
-                170, 120,
-                windowRect.width, windowRect.height,
-                20);
         }
 
         public void OnScreenSizeChanged()

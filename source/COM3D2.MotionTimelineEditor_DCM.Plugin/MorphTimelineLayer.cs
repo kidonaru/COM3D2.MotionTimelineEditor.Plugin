@@ -432,9 +432,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
-        private Rect _contentRect = new Rect(0, 0, SubWindow.WINDOW_WIDTH, SubWindow.WINDOW_HEIGHT);
-        private Vector2 _scrollPosition = Vector2.zero;
-
         public override void DrawWindow(GUIView view)
         {
             var maid = this.maid;
@@ -443,13 +440,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            _contentRect.width = view.viewRect.width - 20;
-
-            _scrollPosition = view.BeginScrollView(
+            view.BeginScrollView(
                 view.viewRect.width,
                 view.viewRect.height,
-                _contentRect,
-                _scrollPosition,
+                GUIView.AutoScrollViewRect,
                 false,
                 true);
 
@@ -527,8 +521,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 _faceManager.SetMorphValue(maid, _applyMorphMap);
             }
-
-            _contentRect.height = view.currentPos.y + 20;
 
             view.EndScrollView();
         }

@@ -12,8 +12,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Vector2 scrollPosition = Vector2.zero;
-
         private static TimelineHistoryManager historyManager
         {
             get
@@ -67,7 +65,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     null,
                     -1,
                     -1,
-                    ref scrollPosition,
                     currentIndex,
                     20);
                 if (index >= 0)

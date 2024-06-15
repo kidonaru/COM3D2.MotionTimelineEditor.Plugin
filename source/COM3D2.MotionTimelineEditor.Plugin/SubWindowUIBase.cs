@@ -125,36 +125,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.subWindow = subWindow;
         }
 
-        private GUIView headerView = null;
-        private GUIView contentView = null;
-        private ComboBoxCache<SubWindowType> subWindowTypeComboBox = null;
+        private GUISubView _headerView = null;
+        private GUIView _contentView = new GUIView(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+        private ComboBoxCache<SubWindowType> _subWindowTypeComboBox = null;
 
         public static Texture2D texLock = null;
 
         public virtual void InitWindow()
         {
-            if (headerView == null)
+            if (_subWindowTypeComboBox == null)
             {
-                headerView = new GUIView(0, 0, WINDOW_WIDTH, 20)
-                {
-                    padding = Vector2.zero,
-                    margin = 0
-                };
-            }
-
-            if (contentView == null)
-            {
-                contentView = new GUIView(0, 20, WINDOW_WIDTH, WINDOW_HEIGHT - 20);
-            }
-
-            if (subWindowTypeComboBox == null)
-            {
-                subWindowTypeComboBox = new ComboBoxCache<SubWindowType>
+                _subWindowTypeComboBox = new ComboBoxCache<SubWindowType>
                 {
                     label = "切替",
                     items = SubWindow.SubWindowTypes,
                     getName = (type, index) => subWindow.GetSubWindowUI(type).title,
                     onSelected = (type, index) => subWindow.subWindowType = type,
+                    contentSize = new Vector2(180, 200),
                 };
             }
 
@@ -164,22 +151,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 texLock.LoadImage(PluginUtils.LockIcon);
             }
 
-            headerView.ResetLayout();
-            headerView.SetEnabled(!IsComboBoxFocused());
+            if (_headerView == null)
+            {
+                _headerView = new GUISubView(_contentView, 0, 0, WINDOW_WIDTH, 20)
+                {
+                    padding = Vector2.zero,
+                    margin = 0,
+                };
+            }
 
-            contentView.ResetLayout();
-            contentView.SetEnabled(!IsComboBoxFocused());
-            contentView.padding = GUIView.defaultPadding;
-            contentView.margin = GUIView.defaultMargin;
+            _headerView.ResetLayout();
+            _headerView.SetEnabled(!_contentView.IsComboBoxFocused());
+
+            _contentView.ResetLayout();
+            _contentView.SetEnabled(!_contentView.IsComboBoxFocused());
+            _contentView.padding = GUIView.defaultPadding;
+            _contentView.margin = GUIView.defaultMargin;
+            _contentView.currentPos.y = 20;
         }
 
         public virtual void DrawWindow(int id)
         {
             InitWindow();
 
-            DrawHeader(headerView);
-            DrawContent(contentView);
-            DrawComboBox(contentView);
+            DrawHeader(_headerView);
+            DrawContent(_contentView);
+
+            _contentView.DrawComboBox();
 
             if (!IsDragging())
             {
@@ -193,8 +191,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.currentPos.x = 140;
 
-                subWindowTypeComboBox.currentIndex = (int) subWindow.subWindowType;
-                view.DrawComboBoxButton(subWindowTypeComboBox, 80, 20, true);
+                _subWindowTypeComboBox.currentIndex = (int) subWindow.subWindowType;
+                view.DrawComboBoxButton(_subWindowTypeComboBox, 80, 20, true);
 
                 if (view.DrawButton("+", 20, 20))
                 {
@@ -216,22 +214,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public abstract void DrawContent(GUIView view);
-
-        public virtual void DrawComboBox(GUIView view)
-        {
-            view.SetEnabled(true);
-
-            view.DrawComboBoxContent(
-                subWindowTypeComboBox,
-                180, 200,
-                windowRect.width, windowRect.height,
-                20);
-        }
-
-        public virtual bool IsComboBoxFocused()
-        {
-            return subWindowTypeComboBox.focused;
-        }
 
         public virtual bool IsDragging()
         {

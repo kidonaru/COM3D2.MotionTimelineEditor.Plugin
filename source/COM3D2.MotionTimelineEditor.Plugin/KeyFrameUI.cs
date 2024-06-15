@@ -22,7 +22,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private Texture2D easingTex = null;
         private HashSet<int> cachedEasings = new HashSet<int>();
-        private ComboBoxCache<int> easingComboBox = null;
+        private ComboBoxCache<int> easingComboBox = new ComboBoxCache<int>
+        {
+            items = Enumerable.Range(0, (int)MoveEasingType.Max).ToList(),
+            getName = (type, index) => ((MoveEasingType)type).ToString()
+        };
 
         private static HashSet<BoneData> selectedBones
         {
@@ -77,15 +81,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 TextureUtils.ClearTexture(easingTex, config.curveBgColor);
             }
 
-            if (easingComboBox == null)
-            {
-                easingComboBox = new ComboBoxCache<int>
-                {
-                    items = Enumerable.Range(0, (int)MoveEasingType.Max).ToList(),
-                    getName = (type, index) => ((MoveEasingType)type).ToString()
-                };
-            }
-
             base.InitWindow();
         }
 
@@ -121,11 +116,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 DrawTangent(view);
                 DrawEasing(view);
             }
-        }
-
-        public override bool IsComboBoxFocused()
-        {
-            return base.IsComboBoxFocused() || easingComboBox.focused;
         }
 
         private void DrawTransform(GUIView view)
@@ -820,7 +810,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (cachedEasings.Count == 0)
             {
-                easingComboBox.focused = false;
+                view.CancelFocusComboBox();
                 return;
             }
 
@@ -900,17 +890,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             view.DrawTexture(easingTex);
-        }
-
-        public override void DrawComboBox(GUIView view)
-        {
-            base.DrawComboBox(view);
-
-            view.DrawComboBoxContent(
-                easingComboBox,
-                100, 100,
-                windowRect.width, windowRect.height,
-                20);
         }
 
         // ヘルミート曲線の計算

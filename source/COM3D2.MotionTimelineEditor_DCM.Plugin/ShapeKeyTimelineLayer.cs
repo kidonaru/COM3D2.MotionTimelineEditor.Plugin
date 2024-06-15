@@ -462,15 +462,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private ComboBoxCache<string> _slotNameComboBox = new ComboBoxCache<string>
         {
-            getName = (slotName, index) =>
-            {
-                return slotName;
-            }
+            getName = (slotName, index) => slotName,
+            contentSize = new Vector2(130, 300),
         };
         private Maid _maid = null;
         private List<string> _slotNames = new List<string>();
-        private Rect _contentRect = new Rect(0, 0, SubWindow.WINDOW_WIDTH, SubWindow.WINDOW_HEIGHT);
-        private Vector2 _scrollPosition = Vector2.zero;
         private bool _isEditMode = false;
 
         public override void DrawWindow(GUIView view)
@@ -484,7 +480,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            view.SetEnabled(view.guiEnabled && !_slotNameComboBox.focused);
+            view.SetEnabled(view.guiEnabled && !view.IsComboBoxFocused());
 
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
@@ -513,7 +509,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 DrawBlendShapesSelect(view);
             }
 
-            DrawComboBox(view);
+            view.DrawComboBox();
         }
 
         public void DrawBlendShapesSelect(GUIView view)
@@ -550,13 +546,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var tags = morph.GetTags();
             tags.Sort();
 
-            _contentRect.width = view.viewRect.width - 20;
-
-            _scrollPosition = view.BeginScrollView(
+            view.BeginScrollView(
                 view.viewRect.width,
                 view.viewRect.height - view.currentPos.y,
-                _contentRect,
-                _scrollPosition,
+                GUIView.AutoScrollViewRect,
                 false,
                 true);
 
@@ -567,7 +560,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var newEnable = view.DrawToggle(
                     tag,
                     enable,
-                    _contentRect.width - 20,
+                    -1,
                     20);
 
                 if (newEnable != enable)
@@ -583,8 +576,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 }
             }
 
-            _contentRect.height = view.currentPos.y + 20;
-
             view.EndScrollView();
         }
 
@@ -593,13 +584,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var maid = maidManager.maid;
             var maidSlotNo = maidManager.maidSlotNo;
 
-            _contentRect.width = view.viewRect.width - 20;
-
-            _scrollPosition = view.BeginScrollView(
+            view.BeginScrollView(
                 view.viewRect.width,
                 view.viewRect.height - view.currentPos.y,
-                _contentRect,
-                _scrollPosition,
+                GUIView.AutoScrollViewRect,
                 false,
                 true);
 
@@ -638,20 +626,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 }
             }
 
-            _contentRect.height = view.currentPos.y + 20;
-
             view.EndScrollView();
-        }
-
-        private void DrawComboBox(GUIView view)
-        {
-            view.SetEnabled(true);
-
-            view.DrawComboBoxContent(
-                _slotNameComboBox,
-                130, 300,
-                view.viewRect.width, view.viewRect.height,
-                20);
         }
 
         public override ITransformData CreateTransformData(string name)
