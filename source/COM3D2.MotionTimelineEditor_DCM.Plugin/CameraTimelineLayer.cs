@@ -473,107 +473,107 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
             updateTransform |= view.DrawSliderValue(
-                view.GetFieldCache("X"),
                 new GUIView.SliderOption
                 {
+                    label = "X",
+                    labelWidth = 30,
                     min = -config.positionRange,
                     max = config.positionRange,
                     step = 0.01f,
                     defaultValue = initialPosition.x,
                     value = position.x,
                     onChanged = x => position.x = x,
-                    labelWidth = 30,
                 });
             
             updateTransform |= view.DrawSliderValue(
-                view.GetFieldCache("Y"),
                 new GUIView.SliderOption
                 {
+                    label = "Y",
+                    labelWidth = 30,
                     min = -config.positionRange,
                     max = config.positionRange,
                     step = 0.01f,
                     defaultValue = initialPosition.y,
                     value = position.y,
                     onChanged = y => position.y = y,
-                    labelWidth = 30,
                 });
 
             updateTransform |= view.DrawSliderValue(
-                view.GetFieldCache("Z"),
                 new GUIView.SliderOption
                 {
+                    label = "Z",
+                    labelWidth = 30,
                     min = -config.positionRange,
                     max = config.positionRange,
                     step = 0.01f,
                     defaultValue = initialPosition.z,
                     value = position.z,
                     onChanged = z => position.z = z,
-                    labelWidth = 30,
                 });
 
             updateTransform |= view.DrawSliderValue(
-                view.GetFieldCache("RX"),
                 new GUIView.SliderOption
                 {
+                    label = "RX",
+                    labelWidth = 30,
                     min = prevAngles.x - 180f,
                     max = prevAngles.x + 180f,
                     step = 1f,
                     defaultValue = initialEulerAngles.x,
                     value = angles.x,
                     onChanged = x => angles.x = x,
-                    labelWidth = 30,
                 });
 
             updateTransform |= view.DrawSliderValue(
-                view.GetFieldCache("RY"),
                 new GUIView.SliderOption
                 {
+                    label = "RY",
+                    labelWidth = 30,
                     min = prevAngles.y - 180f,
                     max = prevAngles.y + 180f,
                     step = 1f,
                     defaultValue = initialEulerAngles.y,
                     value = angles.y,
                     onChanged = y => angles.y = y,
-                    labelWidth = 30,
                 });
 
             updateTransform |= view.DrawSliderValue(
-                view.GetFieldCache("RZ"),
                 new GUIView.SliderOption
                 {
+                    label = "RZ",
+                    labelWidth = 30,
                     min = prevAngles.z - 180f,
                     max = prevAngles.z + 180f,
                     step = 1f,
                     defaultValue = initialEulerAngles.z,
                     value = angles.z,
                     onChanged = z => angles.z = z,
-                    labelWidth = 30,
                 });
 
             updateTransform |= view.DrawSliderValue(
-                view.GetFieldCache("距離"),
                 new GUIView.SliderOption
                 {
+                    label = "距離",
+                    labelWidth = 30,
                     min = 0.1f,
                     max = 30,
                     step = 0.01f,
                     defaultValue = 2,
                     value = distance,
                     onChanged = d => distance = d,
-                    labelWidth = 30,
                 });
 
             updateTransform |= view.DrawSliderValue(
-                view.GetFieldCache("FoV"),
                 new GUIView.SliderOption
                 {
+                    label = "FoV",
+                    labelWidth = 30,
                     min = 1,
                     max = 179,
                     step = 0.1f,
                     defaultValue = 35,
                     value = Camera.main.fieldOfView,
                     onChanged = a => Camera.main.fieldOfView = a,
-                    labelWidth = 30,
                 });
 
             view.DrawHorizontalLine(Color.gray);

@@ -621,7 +621,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 view.DrawLabel(menuItem.displayName, -1, 20);
 
                 updateTransform |= view.DrawSliderValue(
-                    view.GetFieldCache(""),
                     new GUIView.SliderOption
                     {
                         min = 0f,

@@ -566,22 +566,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
-                anmName = view.DrawTextField("アニメ名", anmName, 300, 20);
+                anmName = view.DrawTextField("アニメ名", anmName, 310, 20);
 
                 view.AddSpace(10);
 
-                view.DrawLabel("最終フレーム", 85, 20);
+                view.DrawLabel("最終フレーム", 75, 20);
 
                 var newMaxFrameNo = timeline.maxFrameNo;
 
-                view.DrawValue(
-                    view.GetIntFieldCache(""),
+                view.DrawIntSelect(
+                    "",
                     1,
                     10,
                     null,
                     newMaxFrameNo,
-                    value => newMaxFrameNo = (int)value,
-                    diff => newMaxFrameNo += (int)diff
+                    value => newMaxFrameNo = value,
+                    diff => newMaxFrameNo += diff
                 );
 
                 if (newMaxFrameNo != timeline.maxFrameNo)
@@ -616,10 +616,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     newFrameNo--;
                 }
 
-                var fieldCache = view.GetIntFieldCache("");
-                fieldCache.UpdateValue(newFrameNo);
-
-                newFrameNo = (int) view.DrawFloatFieldCache(fieldCache, 50, 20);
+                newFrameNo = view.DrawIntField(newFrameNo, 50, 20);
 
                 if (view.DrawRepeatButton(">", 25, 20))
                 {
@@ -666,16 +663,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.AddSpace(10);
 
                 view.DrawSliderValue(
-                    view.GetFieldCache("再生速度"),
                     new GUIView.SliderOption
                     {
+                        label = "再生速度",
+                        labelWidth = 50,
                         min = 0f,
                         max = 2f,
                         step = 0.01f,
                         defaultValue = 1f,
                         value = timelineManager.anmSpeed,
                         onChanged = value => timelineManager.SetAnmSpeedAll(value),
-                        labelWidth = 50,
                     });
             }
             view.EndLayout();
@@ -730,17 +727,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.DrawLabel("選択操作", 100, 20);
 
-                selectStartFrameNo = (int) view.DrawFloatFieldCache(
-                    null,
-                    view.GetIntFieldCache("", selectStartFrameNo),
+                selectStartFrameNo = view.DrawIntField(
+                    selectStartFrameNo,
                     50,
                     20);
 
                 view.DrawLabel("～", 15, 20);
 
-                selectEndFrameNo = (int) view.DrawFloatFieldCache(
-                    null,
-                    view.GetIntFieldCache("", selectEndFrameNo),
+                selectEndFrameNo = view.DrawIntField(
+                    selectEndFrameNo,
                     50,
                     20);
 

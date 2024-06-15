@@ -4,28 +4,42 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     using System.Collections.Generic;
     using UnityEngine;
 
+    public enum FloatFieldType
+    {
+        Float = 0,
+        Int,
+    }
+
     public class FloatFieldCache
     {
         public string label = null;
         public string text = "";
 
-        private string _format = "F2";
-        public string format
+        private FloatFieldType _fieldType = FloatFieldType.Float;
+        public FloatFieldType fieldType
         {
             get
             {
-                return _format;
+                return _fieldType;
             }
             set
             {
-                if (value == _format)
+                if (value == _fieldType)
                 {
                     return;
                 }
 
-                _format = value;
+                _fieldType = value;
                 _value = float.NaN;
                 text = "";
+            }
+        }
+
+        public string format
+        {
+            get
+            {
+                return fieldType == FloatFieldType.Int ? "F0" : "F2";
             }
         }
 

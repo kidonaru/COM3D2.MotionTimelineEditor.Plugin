@@ -876,9 +876,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.EndLayout();
 
             view.DrawSliderValue(
-                view.GetFieldCache("開き具合"),
                 new GUIView.SliderOption
                 {
+                    label = "開き具合",
+                    labelWidth = 60,
                     min = 0f,
                     max = 1f,
                     step = 0f,
@@ -889,13 +890,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         baseFinger.value_open = value;
                         baseFinger.Apply();
                     },
-                    labelWidth = 60,
                 });
 
             view.DrawSliderValue(
-                view.GetFieldCache("閉じ具合"),
                 new GUIView.SliderOption
                 {
+                    label = "閉じ具合",
+                    labelWidth = 60,
                     min = 0f,
                     max = 1f,
                     step = 0f,
@@ -906,7 +907,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         baseFinger.value_fist = value;
                         baseFinger.Apply();
                     },
-                    labelWidth = 60,
                 });
 
             var otherName = FingerBrendNames[(int)otherBlendType];

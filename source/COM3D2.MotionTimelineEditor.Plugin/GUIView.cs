@@ -67,9 +67,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             SetEnabled(parent.guiEnabled);
         }
 
-        public override FloatFieldCache GetFieldCache(string label, string format)
+        public override FloatFieldCache GetFieldCache(string label, FloatFieldType fieldType)
         {
-            return parent.GetFieldCache(label, format);
+            return parent.GetFieldCache(label, fieldType);
         }
 
         public override TransformCache GetTransformCache(Transform transform)
@@ -444,8 +444,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (currentTime > repeatButtonStartTime + config.keyRepeatTimeFirst &&
                     currentTime > repeatButtonLastInvokeTime + config.keyRepeatTime)
                 {
-                    PluginUtils.LogDebug("DrawRepeatButton: repeat frame={0} lastInvokeTime={1}",
-                        frameNo, repeatButtonLastInvokeTime);
+                    //PluginUtils.LogDebug("DrawRepeatButton: repeat frame={0} lastInvokeTime={1}",
+                    //    frameNo, repeatButtonLastInvokeTime);
                     repeatButtonLastInvokeTime = currentTime;
                     result = true;
                 }
@@ -533,13 +533,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public int DrawIntField(string label, int value, float width, float height)
         {
-            var text = value.ToString();
-            var newText = DrawTextField(label, text, width, height);
-            if (newText != text)
-            {
-                int.TryParse(newText, out value);
-            }
-            return value;
+            var fieldCache = GetIntFieldCache(label, value);
+            return (int) DrawFloatFieldCache(label, fieldCache, width, height);
         }
 
         public int DrawIntField(int value, float width, float height)
@@ -547,35 +542,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return DrawIntField(null, value, width, height);
         }
 
-        public float DrawFloatFieldCache(
-            FloatFieldCache fieldCache,
-            float width,
-            float height)
+        public float DrawFloatField(string label, float value, float width, float height)
         {
-            return DrawFloatFieldCache(fieldCache.label, fieldCache, width, height);
+            var fieldCache = GetFieldCache(label, value);
+            return DrawFloatFieldCache(label, fieldCache, width, height);
         }
 
-        public float DrawFloatFieldCache(
+        public float DrawFloatField(float value, float width, float height)
+        {
+            return DrawFloatField(null, value, width, height);
+        }
+
+        private float DrawFloatFieldCache(
             string label,
             FloatFieldCache fieldCache,
             float width,
             float height)
         {
-            var newText = DrawTextField(label, fieldCache.text, width, height);
-            if (newText != fieldCache.text)
-            {
-                fieldCache.text = newText;
-
-                float newValue;
-                if (float.TryParse(newText, out newValue))
-                {
-                    fieldCache.UpdateValue(newValue, false);
-                }
-            }
-            return fieldCache.value;
+            return DrawFloatFieldCache(label, fieldCache, 0f, 0f, width, height);
         }
 
-        public float DrawFloatFieldCache(
+        private float DrawFloatFieldCache(
             string label,
             FloatFieldCache fieldCache,
             float minValue,
@@ -591,7 +578,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 float newValue;
                 if (float.TryParse(newText, out newValue))
                 {
-                    newValue = Mathf.Clamp(newValue, minValue, maxValue);
+                    if (minValue != 0f || maxValue != 0f)
+                    {
+                        newValue = Mathf.Clamp(newValue, minValue, maxValue);
+                    }
                     fieldCache.UpdateValue(newValue, false);
                 }
             }
@@ -616,62 +606,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
             return fieldCache.color;
-        }
-
-        public float DrawFloatField(string label, float value, float width, float height)
-        {
-            var text = value.ToString("F2");
-            var newText = DrawTextField(label, text, width, height);
-            if (newText != text)
-            {
-                float.TryParse(newText, out value);
-            }
-            return value;
-        }
-
-        public float DrawFloatField(float value, float width, float height)
-        {
-            return DrawFloatField(null, value, width, height);
-        }
-
-        public float DrawSelectFloatField(
-            float value, float diffValue, float width, float height)
-        {
-            var startPos = currentPos;
-            var baseDrawRect = GetDrawRect(width, height);
-
-            {
-                var buttonRect = GetDrawRect(20, height);
-                if (GUI.Button(buttonRect, "<", gsButton))
-                {
-                    value -= diffValue;
-                }
-                currentPos.x += 20 + margin;
-            }
-
-            var text = value.ToString("F2");
-            var drawRect = GetDrawRect(width - (20 + margin) * 2, height);
-            var newText = GUI.TextField(drawRect, text, gsTextField);
-            if (newText != text)
-            {
-                float.TryParse(newText, out value);
-            }
-
-            currentPos.x += width - (20 + margin) * 2;
-
-            {
-                var buttonRect = GetDrawRect(20, height);
-                if (GUI.Button(buttonRect, ">", gsButton))
-                {
-                    value += diffValue;
-                }
-                currentPos.x += 20 + margin;
-            }
-
-            currentPos = startPos;
-            NextElement(baseDrawRect);
-
-            return value;
         }
 
         public float DrawSlider(
@@ -1268,27 +1202,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return selectedIndex;
         }
 
-        public bool DrawValue(
-            FloatFieldCache fieldCache,
-            float step1,
-            float step2,
-            float defaultValue,
-            float value,
-            Action<float> onChanged,
-            Action<float> onDiffChanged)
-        {
-            return DrawValue(
-                fieldCache,
-                step1,
-                step2,
-                () => onChanged(defaultValue),
-                value,
-                onChanged,
-                onDiffChanged);
-        }
-
-        public bool DrawValue(
-            FloatFieldCache fieldCache,
+        public bool DrawFloatSelect(
+            string label,
             float step1,
             float step2,
             Action onReset,
@@ -1296,6 +1211,41 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Action<float> onChanged,
             Action<float> onDiffChanged)
         {
+            return DrawValueSelect(label, FloatFieldType.Float, step1, step2, onReset, value, onChanged, onDiffChanged);
+        }
+
+        public bool DrawIntSelect(
+            string label,
+            int step1,
+            int step2,
+            Action onReset,
+            int value,
+            Action<int> onChanged,
+            Action<int> onDiffChanged)
+        {
+            return DrawValueSelect(
+                label,
+                FloatFieldType.Int,
+                step1,
+                step2,
+                onReset,
+                value,
+                v => onChanged((int)v), 
+                v => onDiffChanged((int)v)
+            );
+        }
+
+        public bool DrawValueSelect(
+            string label,
+            FloatFieldType fieldType,
+            float step1,
+            float step2,
+            Action onReset,
+            float value,
+            Action<float> onChanged,
+            Action<float> onDiffChanged)
+        {
+            var fieldCache = GetFieldCache(label, fieldType);
             fieldCache.UpdateValue(value);
 
             var newValue = value;
@@ -1311,13 +1261,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             subView.BeginLayout(LayoutDirection.Horizontal);
             {
-                var label = fieldCache.label;
                 if (!string.IsNullOrEmpty(label))
                 {
                     subView.DrawLabel(label, 50, 20);
                 }
 
-                if (subView.DrawRepeatButton("<<", 25, 20))
+                if (step2 != 0f && subView.DrawRepeatButton("<<", 25, 20))
                 {
                     diffValue = -step2;
                 }
@@ -1336,10 +1285,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     diffValue = step1;
                 }
-                if (subView.DrawRepeatButton(">>", 25, 20))
+                if (step2 != 0f && subView.DrawRepeatButton(">>", 25, 20))
                 {
                     diffValue = step2;
                 }
+
+                subView.AddSpace(5);
 
                 if (onReset != null && subView.DrawButton("R", 20, 20))
                 {
@@ -1367,20 +1318,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public struct SliderOption
         {
+            public string label;
+            public float labelWidth;
+            public FloatFieldType fieldType;
             public float min;
             public float max;
             public float step;
             public float defaultValue;
             public float value;
-            public Action onReset;
             public Action<float> onChanged;
-            public float labelWidth;
         }
 
-        public bool DrawSliderValue(
-            FloatFieldCache fieldCache,
-            SliderOption option)
+        public bool DrawSliderValue(SliderOption option)
         {
+            var fieldCache = GetFieldCache(option.label, option.fieldType);
             fieldCache.UpdateValue(option.value);
 
             var newValue = option.value;
@@ -1498,7 +1449,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             AddSpace(size, size);
         }
 
-        public virtual FloatFieldCache GetFieldCache(string label, string format)
+        public virtual FloatFieldCache GetFieldCache(
+            string label,
+            FloatFieldType fieldType)
         {
             FloatFieldCache fieldCache;
             if (_fieldCacheIndex >= _fieldCaches.Count)
@@ -1509,13 +1462,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             fieldCache = _fieldCaches[_fieldCacheIndex++];
             fieldCache.label = label;
-            fieldCache.format = format;
+            fieldCache.fieldType = fieldType;
             return fieldCache;
         }
 
         public FloatFieldCache GetFieldCache(string label)
         {
-            return GetFieldCache(label, "F2");
+            return GetFieldCache(label, FloatFieldType.Float);
         }
 
         public FloatFieldCache GetFieldCache(string label, float value)
@@ -1527,7 +1480,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public FloatFieldCache GetIntFieldCache(string label)
         {
-            return GetFieldCache(label, "F0");
+            return GetFieldCache(label, FloatFieldType.Int);
         }
 
         public FloatFieldCache GetIntFieldCache(string label, int value)

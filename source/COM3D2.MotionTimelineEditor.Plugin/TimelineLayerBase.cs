@@ -1261,48 +1261,48 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (isFull || editType == TransformEditType.X)
             {
                 updateTransform |= view.DrawSliderValue(
-                    view.GetFieldCache("X"),
                     new GUIView.SliderOption
                     {
+                        label = "X",
+                        labelWidth = 30,
                         min = -config.positionRange,
                         max = config.positionRange,
                         step = 0.01f,
                         defaultValue = initialPosition.x,
                         value = position.x,
                         onChanged = x => position.x = x,
-                        labelWidth = 30,
                     });
             }
 
             if (isFull || editType == TransformEditType.Y)
             {
                 updateTransform |= view.DrawSliderValue(
-                    view.GetFieldCache("Y"),
                     new GUIView.SliderOption
                     {
+                        label = "Y",
+                        labelWidth = 30,
                         min = -config.positionRange,
                         max = config.positionRange,
                         step = 0.01f,
                         defaultValue = initialPosition.y,
                         value = position.y,
                         onChanged = y => position.y = y,
-                        labelWidth = 30,
                     });
             }
 
             if (isFull || editType == TransformEditType.Z)
             {
                 updateTransform |= view.DrawSliderValue(
-                    view.GetFieldCache("Z"),
                     new GUIView.SliderOption
                     {
+                        label = "Z",
+                        labelWidth = 30,
                         min = -config.positionRange,
                         max = config.positionRange,
                         step = 0.01f,
                         defaultValue = initialPosition.z,
                         value = position.z,
                         onChanged = z => position.z = z,
-                        labelWidth = 30,
                     });
             }
 
@@ -1330,48 +1330,48 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (isFull || editType == TransformEditType.RX)
             {
                 updateTransform |= view.DrawSliderValue(
-                    view.GetFieldCache("RX"),
                     new GUIView.SliderOption
                     {
+                        label = "RX",
+                        labelWidth = 30,
                         min = prevAngles.x - 180f,
                         max = prevAngles.x + 180f,
                         step = 1f,
                         defaultValue = initialEulerAngles.x,
                         value = angles.x,
                         onChanged = x => angles.x = x,
-                        labelWidth = 30,
                     });
             }
 
             if (isFull || editType == TransformEditType.RY)
             {
                 updateTransform |= view.DrawSliderValue(
-                    view.GetFieldCache("RY"),
                     new GUIView.SliderOption
                     {
+                        label = "RY",
+                        labelWidth = 30,
                         min = prevAngles.y - 180f,
                         max = prevAngles.y + 180f,
                         step = 1f,
                         defaultValue = initialEulerAngles.y,
                         value = angles.y,
                         onChanged = y => angles.y = y,
-                        labelWidth = 30,
                     });
             }
 
             if (isFull || editType == TransformEditType.RZ)
             {
                 updateTransform |= view.DrawSliderValue(
-                    view.GetFieldCache("RZ"),
                     new GUIView.SliderOption
                     {
+                        label = "RZ",
+                        labelWidth = 30,
                         min = prevAngles.z - 180f,
                         max = prevAngles.z + 180f,
                         step = 1f,
                         defaultValue = initialEulerAngles.z,
                         value = angles.z,
                         onChanged = z => angles.z = z,
-                        labelWidth = 30,
                     });
             }
 
@@ -1396,48 +1396,48 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (isFull || editType == TransformEditType.SX)
             {
                 updateTransform |= view.DrawSliderValue(
-                    view.GetFieldCache("SX"),
                     new GUIView.SliderOption
                     {
+                        label = "SX",
+                        labelWidth = 30,
                         min = 0,
                         max = config.scaleRange,
                         step = 0.01f,
                         defaultValue = initialScale.x,
                         value = scale.x,
                         onChanged = x => scale.x = x,
-                        labelWidth = 30,
                     });
             }
 
             if (isFull || editType == TransformEditType.SY)
             {
                 updateTransform |= view.DrawSliderValue(
-                    view.GetFieldCache("SY"),
                     new GUIView.SliderOption
                     {
+                        label = "SY",
+                        labelWidth = 30,
                         min = 0,
                         max = config.scaleRange,
                         step = 0.01f,
                         defaultValue = initialScale.y,
                         value = scale.y,
                         onChanged = y => scale.y = y,
-                        labelWidth = 30,
                     });
             }
 
             if (isFull || editType == TransformEditType.SZ)
             {
                 updateTransform |= view.DrawSliderValue(
-                    view.GetFieldCache("SZ"),
                     new GUIView.SliderOption
                     {
+                        label = "SZ",
+                        labelWidth = 30,
                         min = 0,
                         max = config.scaleRange,
                         step = 0.01f,
                         defaultValue = initialScale.z,
                         value = scale.z,
                         onChanged = z => scale.z = z,
-                        labelWidth = 30,
                     });
             }
 
@@ -1461,9 +1461,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (isFull)
             {
                 updateTransform |= view.DrawSliderValue(
-                    view.GetFieldCache("拡縮"),
                     new GUIView.SliderOption
                     {
+                        label = "拡縮",
+                        labelWidth = 30,
                         min = 0,
                         max = config.scaleRange,
                         step = 0.01f,
@@ -1475,7 +1476,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             scale.y = x;
                             scale.z = x;
                         },
-                        labelWidth = 30,
                     });
             }
 

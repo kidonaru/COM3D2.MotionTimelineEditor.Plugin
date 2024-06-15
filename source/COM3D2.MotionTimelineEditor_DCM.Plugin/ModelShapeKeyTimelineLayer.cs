@@ -435,7 +435,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 view.DrawLabel(blendShape.shapeKeyName, -1, 20);
 
                 updateTransform |= view.DrawSliderValue(
-                    view.GetFieldCache(""),
                     new GUIView.SliderOption
                     {
                         min = -1f,

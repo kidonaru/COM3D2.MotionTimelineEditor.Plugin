@@ -132,7 +132,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             DrawVector3(
                 view,
-                view.GetFieldCaches(new string[] { "X", "Y", "Z" }),
+                new string[] { "X", "Y", "Z" },
                 0.01f,
                 0.1f,
                 transform => transform.initialPosition,
@@ -142,7 +142,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             );
             DrawVector3(
                 view,
-                view.GetFieldCaches(new string[] { "RX", "RY", "RZ" }),
+                new string[] { "RX", "RY", "RZ" },
                 1f,
                 10f,
                 transform => transform.initialEulerAngles,
@@ -152,7 +152,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             );
             DrawVector3(
                 view,
-                view.GetFieldCaches(new string[] { "SX", "SY", "SZ" }),
+                new string[] { "SX", "SY", "SZ" },
                 0.01f,
                 0.1f,
                 transform => transform.initialScale,
@@ -162,7 +162,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             );
             DrawVector3(
                 view,
-                view.GetFieldCaches(new string[] { "R", "G", "B" }),
+                new string[] { "R", "G", "B" },
                 0.01f,
                 0.1f,
                 transform => transform.initialColor.ToVector3(),
@@ -184,7 +184,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 DrawValue(
                     view,
-                    view.GetFieldCache(customName),
+                    customName,
                     0.01f,
                     0.1f,
                     transform => transform.GetInitialCustomValue(customName),
@@ -199,7 +199,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void DrawVector3(
             GUIView view,
-            FloatFieldCache[] fieldCaches,
+            string[] labels,
             float addedValue1,
             float addedValue2,
             Func<ITransformData, Vector3> getResetValue,
@@ -253,8 +253,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             for (var i = 0; i < 3; i++)
             {
-                view.DrawValue(
-                    fieldCaches[i],
+                view.DrawFloatSelect(
+                    labels[i],
                     addedValue1,
                     addedValue2,
                     () => resetIndex = i,
@@ -333,7 +333,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void DrawValue(
             GUIView view,
-            FloatFieldCache fieldCache,
+            string label,
             float addedValue1,
             float addedValue2,
             Func<ITransformData, float> getResetValue,
@@ -382,8 +382,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var newValue = value;
             bool isReset = false;
 
-            view.DrawValue(
-                fieldCache,
+            view.DrawFloatSelect(
+                label,
                 addedValue1,
                 addedValue2,
                 () => isReset = true,
@@ -603,65 +603,48 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
-                var outTangentFieldValue = view.GetFieldCache("");
-                var inTangentFieldValue = view.GetFieldCache("");
-
-                outTangentFieldValue.UpdateValue(outTangent, true);
-                inTangentFieldValue.UpdateValue(inTangent, true);
+                var diffOutTangent = 0f;
+                var diffInTangent = 0f;
+                var newOutTangent = outTangent;
+                var newInTangent = inTangent;
 
                 subView.DrawLabel("OutTangent", 100, 20);
-
-                subView.BeginLayout(GUIView.LayoutDirection.Horizontal);
 
                 if (!includeOutTangent)
                 {
                     GUI.enabled = false;
                 }
 
-                var diffOutTangent = 0f;
-
-                if (subView.DrawButton("<", 20, 20))
-                {
-                    diffOutTangent = -0.1f;
-                }
-
-                var newOutTangent = subView.DrawFloatFieldCache(outTangentFieldValue, 50, 20);
-
-                if (subView.DrawButton(">", 20, 20))
-                {
-                    diffOutTangent = 0.1f;
-                }
+                subView.DrawFloatSelect(
+                    "",
+                    0.1f,
+                    0f,
+                    null,
+                    outTangent,
+                    value => newOutTangent = value,
+                    value => diffOutTangent = value
+                );
 
                 GUI.enabled = true;
 
-                subView.EndLayout();
-
                 subView.DrawLabel("InTangent", 100, 20);
 
-                subView.BeginLayout(GUIView.LayoutDirection.Horizontal);
-
-                if (!includeInTangent)
+                if (!includeOutTangent)
                 {
                     GUI.enabled = false;
                 }
 
-                var diffInTangent = 0f;
-
-                if (subView.DrawButton("<", 20, 20))
-                {
-                    diffInTangent = -0.1f;
-                }
-
-                var newInTangent = subView.DrawFloatFieldCache(inTangentFieldValue, 50, 20);
-
-                if (subView.DrawButton(">", 20, 20))
-                {
-                    diffInTangent = 0.1f;
-                }
+                subView.DrawFloatSelect(
+                    "",
+                    0.1f,
+                    0f,
+                    null,
+                    inTangent,
+                    value => newInTangent = value,
+                    value => diffInTangent = value
+                );
 
                 GUI.enabled = true;
-
-                subView.EndLayout();
 
                 // 新値の適用
                 if (!float.IsNaN(newOutTangent) && newOutTangent != outTangent)

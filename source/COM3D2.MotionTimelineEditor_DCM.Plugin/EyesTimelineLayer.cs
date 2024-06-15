@@ -605,29 +605,29 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var names = i < 2 ? new string[] { "X", "Y" } : new string[] { "幅", "高さ" };
 
                 updateTransform |= view.DrawSliderValue(
-                    view.GetFieldCache(names[0]),
                     new GUIView.SliderOption
                     {
+                        label = names[0],
+                        labelWidth = 30,
                         min = -1f,
                         max = 1f,
                         step = 0.01f,
                         defaultValue = 0f,
                         value = horizon,
                         onChanged = x => horizon = x,
-                        labelWidth = 30,
                     });
 
                 updateTransform |= view.DrawSliderValue(
-                    view.GetFieldCache(names[1]),
                     new GUIView.SliderOption
                     {
+                        label = names[1],
+                        labelWidth = 30,
                         min = -1f,
                         max = 1f,
                         step = 0.01f,
                         defaultValue = 0f,
                         value = vertical,
                         onChanged = y => vertical = y,
-                        labelWidth = 30,
                     });
 
                 if (updateTransform)

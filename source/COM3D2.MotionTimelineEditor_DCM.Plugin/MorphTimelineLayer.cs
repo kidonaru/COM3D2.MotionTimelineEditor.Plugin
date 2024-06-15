@@ -464,16 +464,16 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var newMorphValue = morphValue;
 
                 view.DrawSliderValue(
-                    view.GetFieldCache(displayName),
                     new GUIView.SliderOption
                     {
+                        label = displayName,
+                        labelWidth = 80,
                         min = 0f,
                         max = 1f,
                         step = 0f,
                         defaultValue = 0f,
                         value = newMorphValue,
                         onChanged = value => newMorphValue = value,
-                        labelWidth = 80,
                     });
 
                 if (!Mathf.Approximately(newMorphValue, morphValue))
