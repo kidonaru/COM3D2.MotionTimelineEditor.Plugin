@@ -363,7 +363,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
-        private ComboBoxValue<StudioModelStat> _modelComboBox = new ComboBoxValue<StudioModelStat>
+        private ComboBoxCache<StudioModelStat> _modelComboBox = new ComboBoxCache<StudioModelStat>
         {
             getName = (model, index) =>
             {
@@ -429,16 +429,22 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             for (var i = 0; i < blendShapes.Count; i++)
             {
                 var blendShape = blendShapes[i];
-                var fieldValue = GetFieldValue(null);
-
                 var weight = blendShape.weight;
                 var updateTransform = false;
 
                 view.DrawLabel(blendShape.shapeKeyName, -1, 20);
 
-                updateTransform |= view.DrawSliderValue(fieldValue, -1f, 2f, 0.01f, 0f,
-                    weight,
-                    x => weight = x);
+                updateTransform |= view.DrawSliderValue(
+                    view.GetFieldCache(""),
+                    new GUIView.SliderOption
+                    {
+                        min = -1f,
+                        max = 2f,
+                        step = 0.01f,
+                        defaultValue = 0f,
+                        value = weight,
+                        onChanged = x => weight = x,
+                    });
 
                 if (updateTransform)
                 {

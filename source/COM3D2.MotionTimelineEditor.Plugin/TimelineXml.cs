@@ -205,6 +205,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
             }
+
+            if (version < 7)
+            {
+                // BGTimelineLayerにSY/SZを追加
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "BGTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+                                var values = new List<float>(transform.values);
+                                if (values.Count == 7)
+                                {
+                                    PluginUtils.LogDebug("Add SY/SZ to BGTimelineLayer name={0}", transform.name);
+                                    values.Add(values[6]);
+                                    values.Add(values[6]);
+                                }
+                                transform.values = values.ToArray();
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 }

@@ -423,90 +423,29 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public override void DrawWindow(GUIView view)
         {
-            if (bgObject == null)
+            if (bgObject == null || bgObject.transform == null)
             {
                 return;
             }
 
-            var position = bgObject.transform.localPosition;
-            var angles = bgObject.transform.localEulerAngles;
-            var scale = bgObject.transform.localScale.x;
-            var updateTransform = false;
-
+            var transform = bgObject.transform;
             var boneName = bgMgr.GetBGName();
-            var prevBone = GetPrevBone(timelineManager.currentFrameNo, boneName);
-            var prevAngles = prevBone != null ? prevBone.transform.eulerAngles : Vector3.zero;
-            angles = TransformDataBase.GetFixedEulerAngles(angles, prevAngles);
 
             var initialPosition = Vector3.zero;
             var initialEulerAngles = Vector3.zero;
+            var initialScale = Vector3.one;
 
             view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
-            updateTransform |= view.DrawSliderValue(
-                GetFieldValue("X"),
-                -config.positionRange, config.positionRange, 0.01f,
-                initialPosition.x,
-                position.x,
-                x => position.x = x,
-                30);
-            
-            updateTransform |= view.DrawSliderValue(
-                GetFieldValue("Y"),
-                -config.positionRange, config.positionRange, 0.01f,
-                initialPosition.y,
-                position.y,
-                y => position.y = y,
-                30);
-
-            updateTransform |= view.DrawSliderValue(
-                GetFieldValue("Z"),
-                -config.positionRange, config.positionRange, 0.01f,
-                initialPosition.z,
-                position.z,
-                z => position.z = z,
-                30);
-
-            updateTransform |= view.DrawSliderValue(
-                GetFieldValue("RX"),
-                prevAngles.x - 180f, prevAngles.x + 180f, 1f,
-                initialEulerAngles.x,
-                angles.x,
-                x => angles.x = x,
-                30);
-
-            updateTransform |= view.DrawSliderValue(
-                GetFieldValue("RY"),
-                prevAngles.y - 180f, prevAngles.y + 180f, 1f,
-                initialEulerAngles.y,
-                angles.y,
-                y => angles.y = y,
-                30);
-
-            updateTransform |= view.DrawSliderValue(
-                GetFieldValue("RZ"),
-                prevAngles.z - 180f, prevAngles.z + 180f, 1f,
-                initialEulerAngles.z,
-                angles.z,
-                z => angles.z = z,
-                30);
-            
-            updateTransform |= view.DrawSliderValue(
-                GetFieldValue("拡縮"),
-                0f, config.scaleRange, 0.01f,
-                1f,
-                scale,
-                x => scale = x,
-                30);
-
-            view.DrawHorizontalLine(Color.gray);
-
-            if (updateTransform)
-            {
-                bgObject.transform.localPosition = position;
-                bgObject.transform.localEulerAngles = angles;
-                bgObject.transform.localScale = new Vector3(scale, scale, scale);
-            }
+            DrawTransform(
+                view,
+                transform,
+                TransformEditType.全て,
+                DrawMaskAll,
+                boneName,
+                initialPosition,
+                initialEulerAngles,
+                initialScale);
         }
 
         public override ITransformData CreateTransformData(string name)

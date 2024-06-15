@@ -365,10 +365,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
-        private FloatFieldValue[] _fieldValues = FloatFieldValue.CreateArray(
-            new string[] { "X", "Y", "Z", "RX", "RY", "RZ" }
-        );
-
         public override void DrawWindow(GUIView view)
         {
             var maid = this.maid;

@@ -22,23 +22,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private Texture2D easingTex = null;
         private HashSet<int> cachedEasings = new HashSet<int>();
-        private ComboBoxValue<int> easingComboBox = null;
-
-        private FloatFieldValue[] posFieldValues = FloatFieldValue.CreateArray(
-            new string[] { "X", "Y", "Z" }
-        );
-        private FloatFieldValue[] angleFieldValues = FloatFieldValue.CreateArray(
-            new string[] { "RX", "RY", "RZ" }
-        );
-        private FloatFieldValue[] scaleFieldValues = FloatFieldValue.CreateArray(
-            new string[] { "SX", "SY", "SZ" }
-        );
-        private FloatFieldValue[] colorFieldValues = FloatFieldValue.CreateArray(
-            new string[] { "R", "G", "B", "A" }
-        );
-        private FloatFieldValue outTangentFieldValue = new FloatFieldValue();
-        private FloatFieldValue inTangentFieldValue = new FloatFieldValue();
-        private FloatFieldValue[] customFieldValues = FloatFieldValue.CreateArray(8);
+        private ComboBoxCache<int> easingComboBox = null;
 
         private static HashSet<BoneData> selectedBones
         {
@@ -95,7 +79,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (easingComboBox == null)
             {
-                easingComboBox = new ComboBoxValue<int>
+                easingComboBox = new ComboBoxCache<int>
                 {
                     items = Enumerable.Range(0, (int)MoveEasingType.Max).ToList(),
                     getName = (type, index) => ((MoveEasingType)type).ToString()
@@ -148,7 +132,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             DrawVector3(
                 view,
-                posFieldValues,
+                view.GetFieldCaches(new string[] { "X", "Y", "Z" }),
                 0.01f,
                 0.1f,
                 transform => transform.initialPosition,
@@ -158,7 +142,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             );
             DrawVector3(
                 view,
-                angleFieldValues,
+                view.GetFieldCaches(new string[] { "RX", "RY", "RZ" }),
                 1f,
                 10f,
                 transform => transform.initialEulerAngles,
@@ -168,7 +152,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             );
             DrawVector3(
                 view,
-                scaleFieldValues,
+                view.GetFieldCaches(new string[] { "SX", "SY", "SZ" }),
                 0.01f,
                 0.1f,
                 transform => transform.initialScale,
@@ -178,7 +162,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             );
             DrawVector3(
                 view,
-                colorFieldValues,
+                view.GetFieldCaches(new string[] { "R", "G", "B" }),
                 0.01f,
                 0.1f,
                 transform => transform.initialColor.ToVector3(),
@@ -196,18 +180,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             int index = 0;
             foreach (var customName in customNames)
             {
-                if (index >= customFieldValues.Length)
-                {
-                    break;
-                }
-                var fieldValue = customFieldValues[index];
-                fieldValue.label = customName;
-
                 var value = firstBone.transform.GetCustomValue(customName);
 
                 DrawValue(
                     view,
-                    fieldValue,
+                    view.GetFieldCache(customName),
                     0.01f,
                     0.1f,
                     transform => transform.GetInitialCustomValue(customName),
@@ -222,7 +199,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void DrawVector3(
             GUIView view,
-            FloatFieldValue[] fieldValues,
+            FloatFieldCache[] fieldCaches,
             float addedValue1,
             float addedValue2,
             Func<ITransformData, Vector3> getResetValue,
@@ -277,7 +254,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             for (var i = 0; i < 3; i++)
             {
                 view.DrawValue(
-                    fieldValues[i],
+                    fieldCaches[i],
                     addedValue1,
                     addedValue2,
                     () => resetIndex = i,
@@ -356,7 +333,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void DrawValue(
             GUIView view,
-            FloatFieldValue fieldValue,
+            FloatFieldCache fieldCache,
             float addedValue1,
             float addedValue2,
             Func<ITransformData, float> getResetValue,
@@ -406,7 +383,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             bool isReset = false;
 
             view.DrawValue(
-                fieldValue,
+                fieldCache,
                 addedValue1,
                 addedValue2,
                 () => isReset = true,
@@ -586,7 +563,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.DrawLabel("補間曲線", 100, 20);
 
             {
-                var subView = new GUIView(
+                var subView = new GUISubView(
+                    view,
                     tangentTex.width + 10,
                     view.currentPos.y + 20,
                     WINDOW_WIDTH - tangentTex.width,
@@ -625,6 +603,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
+                var outTangentFieldValue = view.GetFieldCache("");
+                var inTangentFieldValue = view.GetFieldCache("");
+
                 outTangentFieldValue.UpdateValue(outTangent, true);
                 inTangentFieldValue.UpdateValue(inTangent, true);
 
@@ -644,7 +625,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     diffOutTangent = -0.1f;
                 }
 
-                var newOutTangent = subView.DrawFloatFieldValue(outTangentFieldValue, 50, 20);
+                var newOutTangent = subView.DrawFloatFieldCache(outTangentFieldValue, 50, 20);
 
                 if (subView.DrawButton(">", 20, 20))
                 {
@@ -671,7 +652,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     diffInTangent = -0.1f;
                 }
 
-                var newInTangent = subView.DrawFloatFieldValue(inTangentFieldValue, 50, 20);
+                var newInTangent = subView.DrawFloatFieldCache(inTangentFieldValue, 50, 20);
 
                 if (subView.DrawButton(">", 20, 20))
                 {
@@ -884,7 +865,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             };
 
             {
-                var subView = new GUIView(
+                var subView = new GUISubView(
+                    view,
                     easingTex.width + 10,
                     view.currentPos.y + 20,
                     WINDOW_WIDTH - easingTex.width,

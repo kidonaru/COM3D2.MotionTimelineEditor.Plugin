@@ -9,7 +9,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             get
             {
-                return 7;
+                return 9;
             }
         }
 
@@ -57,7 +57,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             get
             {
-                return new ValueData[] { values[6], values[6], values[6] };
+                return new ValueData[] { values[6], values[7], values[8] };
             }
         }
 

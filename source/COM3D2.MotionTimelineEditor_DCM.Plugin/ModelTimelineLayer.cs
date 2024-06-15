@@ -457,7 +457,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
-        private ComboBoxValue<TransformEditType> _transComboBox = new ComboBoxValue<TransformEditType>
+        private ComboBoxCache<TransformEditType> _transComboBox = new ComboBoxCache<TransformEditType>
         {
             items = Enum.GetValues(typeof(TransformEditType)).Cast<TransformEditType>().ToList(),
             getName = (type, index) =>

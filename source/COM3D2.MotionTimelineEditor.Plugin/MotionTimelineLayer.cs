@@ -540,7 +540,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return t;
         }
 
-        private ComboBoxValue<TransformEditType> _transComboBox = new ComboBoxValue<TransformEditType>
+        private ComboBoxCache<TransformEditType> _transComboBox = new ComboBoxCache<TransformEditType>
         {
             items = new List<TransformEditType>
             {
@@ -560,7 +560,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         };
 
-        private ComboBoxValue<string> _slotNameComboBox = new ComboBoxValue<string>
+        private ComboBoxCache<string> _slotNameComboBox = new ComboBoxCache<string>
         {
             getName = (slotName, index) =>
             {
@@ -568,7 +568,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         };
 
-        private ComboBoxValue<IBoneMenuItem> _menuItemComboBox = new ComboBoxValue<IBoneMenuItem>
+        private ComboBoxCache<IBoneMenuItem> _menuItemComboBox = new ComboBoxCache<IBoneMenuItem>
         {
             getName = (menuItem, index) =>
             {
@@ -875,49 +875,39 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
-            {
-                view.DrawLabel("開き具合", 60, 20);
-
-                var value = baseFinger.value_open;
-                var newValue = view.DrawFloatField(value, 50, 20);
-
-                newValue = view.DrawSlider(newValue, 0f, 1.0f, 100, 20);
-
-                if (view.DrawButton("R", 20, 20))
+            view.DrawSliderValue(
+                view.GetFieldCache("開き具合"),
+                new GUIView.SliderOption
                 {
-                    newValue = 0;
-                }
+                    min = 0f,
+                    max = 1f,
+                    step = 0f,
+                    defaultValue = 0f,
+                    value = baseFinger.value_open,
+                    onChanged = value =>
+                    {
+                        baseFinger.value_open = value;
+                        baseFinger.Apply();
+                    },
+                    labelWidth = 60,
+                });
 
-                if (newValue != value)
+            view.DrawSliderValue(
+                view.GetFieldCache("閉じ具合"),
+                new GUIView.SliderOption
                 {
-                    baseFinger.value_open = newValue;
-                    baseFinger.Apply();
-                }
-            }
-            view.EndLayout();
-
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
-            {
-                view.DrawLabel("閉じ具合", 60, 20);
-
-                var value = baseFinger.value_fist;
-                var newValue = view.DrawFloatField(value, 50, 20);
-
-                newValue = view.DrawSlider(newValue, 0f, 1.0f, 100, 20);
-
-                if (view.DrawButton("R", 20, 20))
-                {
-                    newValue = 0;
-                }
-
-                if (newValue != value)
-                {
-                    baseFinger.value_fist = newValue;
-                    baseFinger.Apply();
-                }
-            }
-            view.EndLayout();
+                    min = 0f,
+                    max = 1f,
+                    step = 0f,
+                    defaultValue = 0f,
+                    value = baseFinger.value_fist,
+                    onChanged = value =>
+                    {
+                        baseFinger.value_fist = value;
+                        baseFinger.Apply();
+                    },
+                    labelWidth = 60,
+                });
 
             var otherName = FingerBrendNames[(int)otherBlendType];
             if (view.DrawButton(otherName + "にコピー", 100, 20))

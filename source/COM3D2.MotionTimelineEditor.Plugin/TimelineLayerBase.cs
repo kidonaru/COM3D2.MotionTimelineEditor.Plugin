@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public abstract class TimelineLayerBase : ITimelineLayer
+    public abstract partial class TimelineLayerBase : ITimelineLayer
     {
         public static readonly long TimelineAnmId = 26925014;
 
@@ -462,8 +462,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public virtual void ResetDraw(GUIView view)
         {
-            _fieldValueIndex = 0;
-            _transformCacheIndex = 0;
+            // do nothing
         }
 
         public virtual void DrawWindow(GUIView view)
@@ -1146,47 +1145,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return maidElement;
         }
 
-        private List<FloatFieldValue> _fieldValues = new List<FloatFieldValue>();
-        private int _fieldValueIndex = 0;
-
-        protected FloatFieldValue GetFieldValue(string label)
-        {
-            if (_fieldValueIndex < _fieldValues.Count)
-            {
-                var fieldValue = _fieldValues[_fieldValueIndex++];
-                fieldValue.label = label;
-                return fieldValue;
-            }
-
-            {
-                var fieldValue = new FloatFieldValue(label);
-                _fieldValues.Add(fieldValue);
-                _fieldValueIndex++;
-                return fieldValue;
-            }
-        }
-
-        private List<TransformCache> _transformCaches = new List<TransformCache>();
-        private int _transformCacheIndex = 0;
-
-        protected TransformCache GetTransformCache(Transform transform)
-        {
-            if (_transformCacheIndex < _transformCaches.Count)
-            {
-                var cache = _transformCaches[_transformCacheIndex++];
-                cache.Update(transform);
-                return cache;
-            }
-
-            {
-                var cache = new TransformCache();
-                cache.Update(transform);
-                _transformCaches.Add(cache);
-                _transformCacheIndex++;
-                return cache;
-            }
-        }
-
         public enum TransformEditType
         {
             全て,
@@ -1264,70 +1222,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return true;
         }
 
-        public class TransformCache
-        {
-            public Transform source;
-            public Vector3 position;
-            public Vector3 scale;
-
-            public Vector3 _eulerAngles;
-            private Quaternion _rotation;
-
-            public Vector3 eulerAngles
-            {
-                get
-                {
-                    return _eulerAngles;
-                }
-                set
-                {
-                    _eulerAngles = value;
-                    _rotation = Quaternion.Euler(value);
-                }
-            }
-
-            public TransformCache()
-            {
-            }
-
-            public void Update(Transform source)
-            {
-                if (source == null)
-                {
-                    this.source = null;
-                    return;
-                }
-
-                if (this.source == source)
-                {
-                    this.position = source.localPosition;
-                    this.scale = source.localScale;
-
-                    if (source.localRotation != _rotation)
-                    {
-                        this.eulerAngles = source.localEulerAngles;
-                    }
-                }
-                else
-                {
-                    this.source = source;
-                    this.position = source.localPosition;
-                    this.eulerAngles = source.localEulerAngles;
-                    this.scale = source.localScale;
-                }
-            }
-
-            public void Apply()
-            {
-                if (source != null)
-                {
-                    source.localPosition = position;
-                    source.localRotation = _rotation;
-                    source.localScale = scale;
-                }
-            }
-        }
-
         protected void DrawTransform(
             GUIView view,
             Transform transform,
@@ -1338,19 +1232,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Vector3 initialEulerAngles,
             Vector3 initialScale)
         {
-            var transformCache = GetTransformCache(transform);
+            var transformCache = view.GetTransformCache(transform);
             if (IsDrawTransformType(TransformDrawType.移動, editType, drawMask))
             {
                 DrawPosition(view, transformCache, editType, initialPosition);
             }
             if (IsDrawTransformType(TransformDrawType.回転, editType, drawMask))
             {
-                var prevBone = GetPrevBone(timelineManager.currentFrameNo, boneName);
-                DrawEulerAngles(view, transformCache, editType, prevBone, initialEulerAngles);
+                DrawEulerAngles(view, transformCache, editType, boneName, initialEulerAngles);
             }
             if (IsDrawTransformType(TransformDrawType.拡縮, editType, drawMask))
             {
                 DrawScale(view, transformCache, editType, initialScale);
+                DrawSimpleScale(view, transformCache, editType, initialScale);
             }
         }
 
@@ -1367,34 +1261,49 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (isFull || editType == TransformEditType.X)
             {
                 updateTransform |= view.DrawSliderValue(
-                    GetFieldValue("X"),
-                    -config.positionRange, config.positionRange, 0.01f,
-                    initialPosition.x,
-                    position.x,
-                    x => position.x = x,
-                    30);
+                    view.GetFieldCache("X"),
+                    new GUIView.SliderOption
+                    {
+                        min = -config.positionRange,
+                        max = config.positionRange,
+                        step = 0.01f,
+                        defaultValue = initialPosition.x,
+                        value = position.x,
+                        onChanged = x => position.x = x,
+                        labelWidth = 30,
+                    });
             }
 
             if (isFull || editType == TransformEditType.Y)
             {
                 updateTransform |= view.DrawSliderValue(
-                    GetFieldValue("Y"),
-                    -config.positionRange, config.positionRange, 0.01f,
-                    initialPosition.y,
-                    position.y,
-                    y => position.y = y,
-                    30);
+                    view.GetFieldCache("Y"),
+                    new GUIView.SliderOption
+                    {
+                        min = -config.positionRange,
+                        max = config.positionRange,
+                        step = 0.01f,
+                        defaultValue = initialPosition.y,
+                        value = position.y,
+                        onChanged = y => position.y = y,
+                        labelWidth = 30,
+                    });
             }
 
             if (isFull || editType == TransformEditType.Z)
             {
                 updateTransform |= view.DrawSliderValue(
-                    GetFieldValue("Z"),
-                    -config.positionRange, config.positionRange, 0.01f,
-                    initialPosition.z,
-                    position.z,
-                    z => position.z = z,
-                    30);
+                    view.GetFieldCache("Z"),
+                    new GUIView.SliderOption
+                    {
+                        min = -config.positionRange,
+                        max = config.positionRange,
+                        step = 0.01f,
+                        defaultValue = initialPosition.z,
+                        value = position.z,
+                        onChanged = z => position.z = z,
+                        labelWidth = 30,
+                    });
             }
 
             if (updateTransform)
@@ -1408,11 +1317,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             GUIView view,
             TransformCache transform,
             TransformEditType editType,
-            BoneData prevBone,
+            string boneName,
             Vector3 initialEulerAngles)
         {
             var angles = transform.eulerAngles;
-            var prevAngles = prevBone != null ? prevBone.transform.eulerAngles : Vector3.zero;
+            var prevBone = GetPrevBone(timelineManager.currentFrameNo, boneName);
+            var prevAngles = prevBone != null ? prevBone.transform.eulerAngles : initialEulerAngles;
             angles = TransformDataBase.GetFixedEulerAngles(angles, prevAngles);
             var updateTransform = false;
             var isFull = editType == TransformEditType.全て || editType == TransformEditType.回転;
@@ -1420,31 +1330,49 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (isFull || editType == TransformEditType.RX)
             {
                 updateTransform |= view.DrawSliderValue(
-                    GetFieldValue("RX"), prevAngles.x - 180f, prevAngles.x + 180f, 1f,
-                    initialEulerAngles.x,
-                    angles.x,
-                    x => angles.x = x,
-                    30);
+                    view.GetFieldCache("RX"),
+                    new GUIView.SliderOption
+                    {
+                        min = prevAngles.x - 180f,
+                        max = prevAngles.x + 180f,
+                        step = 1f,
+                        defaultValue = initialEulerAngles.x,
+                        value = angles.x,
+                        onChanged = x => angles.x = x,
+                        labelWidth = 30,
+                    });
             }
 
             if (isFull || editType == TransformEditType.RY)
             {
                 updateTransform |= view.DrawSliderValue(
-                    GetFieldValue("RY"), prevAngles.y - 180f, prevAngles.y + 180f, 1f,
-                    initialEulerAngles.y,
-                    angles.y,
-                    y => angles.y = y,
-                    30);
+                    view.GetFieldCache("RY"),
+                    new GUIView.SliderOption
+                    {
+                        min = prevAngles.y - 180f,
+                        max = prevAngles.y + 180f,
+                        step = 1f,
+                        defaultValue = initialEulerAngles.y,
+                        value = angles.y,
+                        onChanged = y => angles.y = y,
+                        labelWidth = 30,
+                    });
             }
 
             if (isFull || editType == TransformEditType.RZ)
             {
                 updateTransform |= view.DrawSliderValue(
-                    GetFieldValue("RZ"), prevAngles.z - 180f, prevAngles.z + 180f, 1f,
-                    initialEulerAngles.z,
-                    angles.z,
-                    z => angles.z = z,
-                    30);
+                    view.GetFieldCache("RZ"),
+                    new GUIView.SliderOption
+                    {
+                        min = prevAngles.z - 180f,
+                        max = prevAngles.z + 180f,
+                        step = 1f,
+                        defaultValue = initialEulerAngles.z,
+                        value = angles.z,
+                        onChanged = z => angles.z = z,
+                        labelWidth = 30,
+                    });
             }
 
             if (updateTransform)
@@ -1468,50 +1396,87 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (isFull || editType == TransformEditType.SX)
             {
                 updateTransform |= view.DrawSliderValue(
-                    GetFieldValue("SX"),
-                    0, config.scaleRange, 0.01f,
-                    initialScale.x,
-                    scale.x,
-                    x => scale.x = x,
-                    30);
+                    view.GetFieldCache("SX"),
+                    new GUIView.SliderOption
+                    {
+                        min = 0,
+                        max = config.scaleRange,
+                        step = 0.01f,
+                        defaultValue = initialScale.x,
+                        value = scale.x,
+                        onChanged = x => scale.x = x,
+                        labelWidth = 30,
+                    });
             }
 
             if (isFull || editType == TransformEditType.SY)
             {
                 updateTransform |= view.DrawSliderValue(
-                    GetFieldValue("SY"),
-                    0, config.scaleRange, 0.01f,
-                    initialScale.y,
-                    scale.y,
-                    y => scale.y = y,
-                    30);
+                    view.GetFieldCache("SY"),
+                    new GUIView.SliderOption
+                    {
+                        min = 0,
+                        max = config.scaleRange,
+                        step = 0.01f,
+                        defaultValue = initialScale.y,
+                        value = scale.y,
+                        onChanged = y => scale.y = y,
+                        labelWidth = 30,
+                    });
             }
 
             if (isFull || editType == TransformEditType.SZ)
             {
                 updateTransform |= view.DrawSliderValue(
-                    GetFieldValue("SZ"),
-                    0, config.scaleRange, 0.01f,
-                    initialScale.z,
-                    scale.z,
-                    z => scale.z = z,
-                    30);
+                    view.GetFieldCache("SZ"),
+                    new GUIView.SliderOption
+                    {
+                        min = 0,
+                        max = config.scaleRange,
+                        step = 0.01f,
+                        defaultValue = initialScale.z,
+                        value = scale.z,
+                        onChanged = z => scale.z = z,
+                        labelWidth = 30,
+                    });
             }
+
+            if (updateTransform)
+            {
+                transform.scale = scale;
+                transform.Apply();
+            }
+        }
+
+        protected void DrawSimpleScale(
+            GUIView view,
+            TransformCache transform,
+            TransformEditType editType,
+            Vector3 initialScale)
+        {
+            var scale = transform.scale;
+            var updateTransform = false;
+            var isFull = editType == TransformEditType.全て || editType == TransformEditType.拡縮;
 
             if (isFull)
             {
                 updateTransform |= view.DrawSliderValue(
-                    GetFieldValue("拡縮"),
-                    0f, config.scaleRange, 0.01f,
-                    initialScale.x,
-                    scale.x,
-                    x =>
+                    view.GetFieldCache("拡縮"),
+                    new GUIView.SliderOption
                     {
-                        scale.x = x;
-                        scale.y = x;
-                        scale.z = x;
-                    },
-                    30);
+                        min = 0,
+                        max = config.scaleRange,
+                        step = 0.01f,
+                        defaultValue = initialScale.x,
+                        value = scale.x,
+                        onChanged = x =>
+                        {
+                            scale.x = x;
+                            scale.y = x;
+                            scale.z = x;
+                        },
+                        labelWidth = 30,
+                    });
             }
 
             if (updateTransform)

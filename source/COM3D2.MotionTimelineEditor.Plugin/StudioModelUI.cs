@@ -17,9 +17,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private List<ComboBoxValue<string>> _pluginComboBoxList = new List<ComboBoxValue<string>>();
-        private List<ComboBoxValue<MaidCache>> _maidComboBoxList = new List<ComboBoxValue<MaidCache>>();
-        private List<ComboBoxValue<string>> _attachPointComboBoxList = new List<ComboBoxValue<string>>();
+        private List<ComboBoxCache<string>> _pluginComboBoxList = new List<ComboBoxCache<string>>();
+        private List<ComboBoxCache<MaidCache>> _maidComboBoxList = new List<ComboBoxCache<MaidCache>>();
+        private List<ComboBoxCache<string>> _attachPointComboBoxList = new List<ComboBoxCache<string>>();
         private List<string> _pluginNames = new List<string>();
         private Dictionary<string, int> _pluginNameToIndex = new Dictionary<string, int>();
         private List<MaidCache> _maidCaches = new List<MaidCache>();
@@ -64,7 +64,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             while (_pluginComboBoxList.Count < models.Count)
             {
-                _pluginComboBoxList.Add(new ComboBoxValue<string>
+                _pluginComboBoxList.Add(new ComboBoxCache<string>
                 {
                     getName = (name, _) =>
                     {
@@ -75,7 +75,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             while (_maidComboBoxList.Count < models.Count)
             {
-                _maidComboBoxList.Add(new ComboBoxValue<MaidCache>
+                _maidComboBoxList.Add(new ComboBoxCache<MaidCache>
                 {
                     getName = (maidCache, _) =>
                     {
@@ -86,7 +86,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             while (_attachPointComboBoxList.Count < models.Count)
             {
-                _attachPointComboBoxList.Add(new ComboBoxValue<string>
+                _attachPointComboBoxList.Add(new ComboBoxCache<string>
                 {
                     getName = (name, _) =>
                     {

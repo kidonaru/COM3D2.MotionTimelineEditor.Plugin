@@ -294,7 +294,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
-        private ColorFieldValue _colorFieldValue = new ColorFieldValue("Color", false);
+        private ColorFieldCache _colorFieldValue = new ColorFieldCache("Color", false);
 
         public override void DrawWindow(GUIView view)
         {
@@ -308,22 +308,43 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
             updateTransform |= view.DrawSliderValue(
-                GetFieldValue("R"), 0f, 1f, 0.01f, 0f,
-                color.r,
-                x => color.r = x,
-                30);
+                view.GetFieldCache("R"),
+                new GUIView.SliderOption
+                {
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 0f,
+                    value = color.r,
+                    onChanged = x => color.r = x,
+                    labelWidth = 30,
+                });
 
             updateTransform |= view.DrawSliderValue(
-                GetFieldValue("G"), 0f, 1f, 0.01f, 0f,
-                color.g,
-                y => color.g = y,
-                30);
+                view.GetFieldCache("G"),
+                new GUIView.SliderOption
+                {
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 0f,
+                    value = color.g,
+                    onChanged = y => color.g = y,
+                    labelWidth = 30,
+                });
 
             updateTransform |= view.DrawSliderValue(
-                GetFieldValue("B"), 0f, 1f, 0.01f, 0f,
-                color.b,
-                z => color.b = z,
-                30);
+                view.GetFieldCache("B"),
+                new GUIView.SliderOption
+                {
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 0f,
+                    value = color.b,
+                    onChanged = z => color.b = z,
+                    labelWidth = 30,
+                });
 
             updateTransform |= view.DrawColor(
                 _colorFieldValue,

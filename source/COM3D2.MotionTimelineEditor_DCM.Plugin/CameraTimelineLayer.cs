@@ -473,68 +473,108 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
 
             updateTransform |= view.DrawSliderValue(
-                GetFieldValue("X"),
-                -config.positionRange, config.positionRange, 0.01f,
-                initialPosition.x,
-                position.x,
-                x => position.x = x,
-                30);
+                view.GetFieldCache("X"),
+                new GUIView.SliderOption
+                {
+                    min = -config.positionRange,
+                    max = config.positionRange,
+                    step = 0.01f,
+                    defaultValue = initialPosition.x,
+                    value = position.x,
+                    onChanged = x => position.x = x,
+                    labelWidth = 30,
+                });
             
             updateTransform |= view.DrawSliderValue(
-                GetFieldValue("Y"),
-                -config.positionRange, config.positionRange, 0.01f,
-                initialPosition.y,
-                position.y,
-                y => position.y = y,
-                30);
+                view.GetFieldCache("Y"),
+                new GUIView.SliderOption
+                {
+                    min = -config.positionRange,
+                    max = config.positionRange,
+                    step = 0.01f,
+                    defaultValue = initialPosition.y,
+                    value = position.y,
+                    onChanged = y => position.y = y,
+                    labelWidth = 30,
+                });
 
             updateTransform |= view.DrawSliderValue(
-                GetFieldValue("Z"),
-                -config.positionRange, config.positionRange, 0.01f,
-                initialPosition.z,
-                position.z,
-                z => position.z = z,
-                30);
+                view.GetFieldCache("Z"),
+                new GUIView.SliderOption
+                {
+                    min = -config.positionRange,
+                    max = config.positionRange,
+                    step = 0.01f,
+                    defaultValue = initialPosition.z,
+                    value = position.z,
+                    onChanged = z => position.z = z,
+                    labelWidth = 30,
+                });
 
             updateTransform |= view.DrawSliderValue(
-                GetFieldValue("RX"),
-                prevAngles.x - 180f, prevAngles.x + 180f, 1f,
-                initialEulerAngles.x,
-                angles.x,
-                x => angles.x = x,
-                30);
+                view.GetFieldCache("RX"),
+                new GUIView.SliderOption
+                {
+                    min = prevAngles.x - 180f,
+                    max = prevAngles.x + 180f,
+                    step = 1f,
+                    defaultValue = initialEulerAngles.x,
+                    value = angles.x,
+                    onChanged = x => angles.x = x,
+                    labelWidth = 30,
+                });
 
             updateTransform |= view.DrawSliderValue(
-                GetFieldValue("RY"),
-                prevAngles.y - 180f, prevAngles.y + 180f, 1f,
-                initialEulerAngles.y,
-                angles.y,
-                y => angles.y = y,
-                30);
+                view.GetFieldCache("RY"),
+                new GUIView.SliderOption
+                {
+                    min = prevAngles.y - 180f,
+                    max = prevAngles.y + 180f,
+                    step = 1f,
+                    defaultValue = initialEulerAngles.y,
+                    value = angles.y,
+                    onChanged = y => angles.y = y,
+                    labelWidth = 30,
+                });
 
             updateTransform |= view.DrawSliderValue(
-                GetFieldValue("RZ"),
-                prevAngles.z - 180f, prevAngles.z + 180f, 1f,
-                initialEulerAngles.z,
-                angles.z,
-                z => angles.z = z,
-                30);
+                view.GetFieldCache("RZ"),
+                new GUIView.SliderOption
+                {
+                    min = prevAngles.z - 180f,
+                    max = prevAngles.z + 180f,
+                    step = 1f,
+                    defaultValue = initialEulerAngles.z,
+                    value = angles.z,
+                    onChanged = z => angles.z = z,
+                    labelWidth = 30,
+                });
 
             updateTransform |= view.DrawSliderValue(
-                GetFieldValue("距離"),
-                0.1f, 30, 0.01f,
-                2,
-                distance,
-                d => distance = d,
-                30);
+                view.GetFieldCache("距離"),
+                new GUIView.SliderOption
+                {
+                    min = 0.1f,
+                    max = 30,
+                    step = 0.01f,
+                    defaultValue = 2,
+                    value = distance,
+                    onChanged = d => distance = d,
+                    labelWidth = 30,
+                });
 
             updateTransform |= view.DrawSliderValue(
-                GetFieldValue("FoV"),
-                1, 179, 0.1f,
-                35,
-                Camera.main.fieldOfView,
-                a => Camera.main.fieldOfView = a,
-                30);
+                view.GetFieldCache("FoV"),
+                new GUIView.SliderOption
+                {
+                    min = 1,
+                    max = 179,
+                    step = 0.1f,
+                    defaultValue = 35,
+                    value = Camera.main.fieldOfView,
+                    onChanged = a => Camera.main.fieldOfView = a,
+                    labelWidth = 30,
+                });
 
             view.DrawHorizontalLine(Color.gray);
 

@@ -127,7 +127,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private GUIView headerView = null;
         private GUIView contentView = null;
-        private ComboBoxValue<SubWindowType> subWindowTypeComboBox = null;
+        private ComboBoxCache<SubWindowType> subWindowTypeComboBox = null;
 
         public static Texture2D texLock = null;
 
@@ -149,7 +149,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (subWindowTypeComboBox == null)
             {
-                subWindowTypeComboBox = new ComboBoxValue<SubWindowType>
+                subWindowTypeComboBox = new ComboBoxCache<SubWindowType>
                 {
                     label = "切替",
                     items = SubWindow.SubWindowTypes,
@@ -171,8 +171,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             contentView.SetEnabled(!IsComboBoxFocused());
             contentView.padding = GUIView.defaultPadding;
             contentView.margin = GUIView.defaultMargin;
-
-            _fieldValueIndex = 0;
         }
 
         public virtual void DrawWindow(int id)
@@ -238,26 +236,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public virtual bool IsDragging()
         {
             return false;
-        }
-
-        private List<FloatFieldValue> _fieldValues = new List<FloatFieldValue>();
-        private int _fieldValueIndex = 0;
-
-        protected FloatFieldValue GetFieldValue(string label)
-        {
-            if (_fieldValueIndex < _fieldValues.Count)
-            {
-                var fieldValue = _fieldValues[_fieldValueIndex++];
-                fieldValue.label = label;
-                return fieldValue;
-            }
-
-            {
-                var fieldValue = new FloatFieldValue(label);
-                _fieldValues.Add(fieldValue);
-                _fieldValueIndex++;
-                return fieldValue;
-            }
         }
     }
 }

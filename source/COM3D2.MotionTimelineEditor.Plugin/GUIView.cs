@@ -13,162 +13,68 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         List<ITileViewContent> children { get; }
     }
 
-    public class FloatFieldValue
+    public class GUISubView : GUIView
     {
-        public string label = null;
-        public string text = "";
-        public string format = "F2";
+        public GUIView parent;
 
-        private float _value = float.NaN;
-        public float value
+        public override int repeatButtonLastPressFrame
         {
             get
             {
-                return _value;
+                return parent.repeatButtonLastPressFrame;
             }
-        }
-
-        public void UpdateValue(float value, bool updateText)
-        {
-            if (value == _value)
+            set
             {
-                return;
-            }
-
-            _value = value;
-
-            if (updateText)
-            {
-                text = float.IsNaN(_value) ? "" : value.ToString(format);
+                parent.repeatButtonLastPressFrame = value;
             }
         }
 
-        public FloatFieldValue()
-        {
-        }
-
-        public FloatFieldValue(string label)
-        {
-            this.label = label;
-        }
-
-        public static FloatFieldValue[] CreateArray(int count)
-        {
-            var array = new FloatFieldValue[count];
-            for (int i = 0; i < count; i++)
-            {
-                array[i] = new FloatFieldValue();
-            }
-            return array;
-        }
-
-        public static FloatFieldValue[] CreateArray(string[] labels)
-        {
-            var array = new FloatFieldValue[labels.Length];
-            for (int i = 0; i < labels.Length; i++)
-            {
-                array[i] = new FloatFieldValue(labels[i]);
-            }
-            return array;
-        }
-    }
-
-    public class ColorFieldValue
-    {
-        public string label = null;
-        public string text = "";
-        public bool hasAlpha = false;
-
-        private Color _color = Color.white;
-        public Color color
+        public override float repeatButtonStartTime
         {
             get
             {
-                return _color;
+                return parent.repeatButtonStartTime;
             }
-        }
-
-        public void UpdateColor(Color color, bool updateText)
-        {
-            if (color == _color && text.Length > 0)
+            set
             {
-                return;
-            }
-
-            _color = color;
-
-            if (updateText)
-            {
-                if (hasAlpha)
-                {
-                    text = color.ToHexRGBA();
-                }
-                else
-                {
-                    text = color.ToHexRGB();
-                }
+                parent.repeatButtonStartTime = value;
             }
         }
 
-        public ColorFieldValue()
-        {
-        }
-
-        public ColorFieldValue(string label, bool hasAlpha)
-        {
-            this.label = label;
-            this.hasAlpha = hasAlpha;
-        }
-    }
-
-    public class ComboBoxValue<T>
-    {
-        public string label;
-        public List<T> items = new List<T>();
-        public Func<T, int, string> getName;
-        public Func<T, int, bool> getEnabled;
-        public Action<T, int> onSelected;
-        public int currentIndex = 0;
-        public bool focused = false;
-        public Vector2 scrollPosition;
-        public Rect buttonRect;
-
-        public int prevIndex
+        public override float repeatButtonLastInvokeTime
         {
             get
             {
-                var prevIndex = currentIndex - 1;
-                if (prevIndex < 0)
-                {
-                    prevIndex = items.Count - 1;
-                }
-                return prevIndex;
+                return parent.repeatButtonLastInvokeTime;
+            }
+            set
+            {
+                parent.repeatButtonLastInvokeTime = value;
             }
         }
 
-        public int nextIndex
+        public GUISubView(GUIView parent, float x, float y, float width, float height)
+            : base(x, y, width, height)
         {
-            get
-            {
-                var nextIndex = currentIndex + 1;
-                if (nextIndex >= items.Count)
-                {
-                    nextIndex = 0;
-                }
-                return nextIndex;
-            }
+            this.parent = parent;
+            SetEnabled(parent.guiEnabled);
         }
 
-        public T currentItem
+        public GUISubView(GUIView parent, Rect viewRect)
+            : base(viewRect)
         {
-            get
-            {
-                if (currentIndex >= 0 && currentIndex < items.Count)
-                {
-                    return items[currentIndex];
-                }
-                return default(T);
-            }
+            this.parent = parent;
+            SetEnabled(parent.guiEnabled);
+        }
+
+        public override FloatFieldCache GetFieldCache(string label, string format)
+        {
+            return parent.GetFieldCache(label, format);
+        }
+
+        public override TransformCache GetTransformCache(Transform transform)
+        {
+            return parent.GetTransformCache(transform);
         }
     }
 
@@ -190,6 +96,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return _viewRect;
             }
         }
+
         public Rect scrollViewContentRect { get; private set; }
         public Rect scrollViewRect { get; private set; }
         public Vector2 scrollPosition { get; private set; }
@@ -200,6 +107,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float margin { get; set; }
         public Color defaultColor = Color.white;
         public bool guiEnabled = true;
+
+        public virtual int repeatButtonLastPressFrame { get; set; }
+        public virtual float repeatButtonStartTime { get; set; }
+        public virtual float repeatButtonLastInvokeTime { get; set; }
+
+        private List<FloatFieldCache> _fieldCaches = new List<FloatFieldCache>();
+        private int _fieldCacheIndex = 0;
+
+        private List<TransformCache> _transformCaches = new List<TransformCache>();
+        private int _transformCacheIndex = 0;
 
         public static GUIStyle gsLabel = new GUIStyle("label")
         {
@@ -264,6 +181,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static Texture2D texDummy = new Texture2D(1, 1);
         public static Texture2D texWhite = CreateColorTexture(Color.white);
 
+        private static Config config
+        {
+            get
+            {
+                return ConfigManager.config;
+            }
+        }
+
         public enum LayoutDirection
         {
             Vertical,
@@ -281,6 +206,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Init(viewRect);
         }
 
+        public void Init(float x, float y, float width, float height)
+        {
+            Init(new Rect(x, y, width, height));
+        }
+        
         public void Init(Rect viewRect)
         {
             this._viewRect = viewRect;
@@ -298,6 +228,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.currentPos.y = 0;
             this.layoutMaxX = 0;
             this.layoutMaxY = 0;
+
+            //PluginUtils.LogDebug("ResetLayout frame={0} _fieldCacheIndex={1} _transformCacheIndex={2}",
+            //    Time.frameCount, _fieldCacheIndex, _transformCacheIndex);
+
+            this._fieldCacheIndex = 0;
+            this._transformCacheIndex = 0;
 
             EndEnabled();
         }
@@ -443,18 +379,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return GetDrawRect(this.currentPos.x, this.currentPos.y, width, height);
         }
 
-        public bool DrawButton(
-            string text,
-            float width,
-            float height,
-            GUIStyle style)
-        {
-            var drawRect = GetDrawRect(width, height);
-            var result = GUI.Button(drawRect, text, style);
-            this.NextElement(drawRect);
-            return result;
-        }
-
         public bool DrawTextureButton(
             Texture2D texture,
             float width,
@@ -472,7 +396,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool DrawButton(string text, float width, float height)
         {
-            return DrawButton(text, width, height, gsButton);
+            var drawRect = GetDrawRect(width, height);
+            var result = GUI.Button(drawRect, text, gsButton);
+            this.NextElement(drawRect);
+            return result;
         }
 
         public bool DrawButton(string text, float width, float height, bool enabled)
@@ -488,6 +415,42 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             BeginColor(color);
             var result = DrawButton(text, width, height, enabled);
             EndColor();
+            return result;
+        }
+
+        public bool DrawRepeatButton(string text, float width, float height)
+        {
+            var drawRect = GetDrawRect(width, height);
+            var isPressed = GUI.RepeatButton(drawRect, text, gsButton);
+            this.NextElement(drawRect);
+
+            bool result = false;
+            if (isPressed)
+            {
+                var frameNo = Time.frameCount;
+                var currentTime = Time.realtimeSinceStartup;
+
+                if (repeatButtonLastPressFrame < frameNo - 1)
+                {
+                    PluginUtils.LogDebug("DrawRepeatButton: first press frame={0} lastPressFrame={1}",
+                        frameNo, repeatButtonLastPressFrame);
+                    repeatButtonStartTime = currentTime;
+                    repeatButtonLastInvokeTime = currentTime;
+                    result = true;
+                }
+
+                repeatButtonLastPressFrame = frameNo;
+
+                if (currentTime > repeatButtonStartTime + config.keyRepeatTimeFirst &&
+                    currentTime > repeatButtonLastInvokeTime + config.keyRepeatTime)
+                {
+                    PluginUtils.LogDebug("DrawRepeatButton: repeat frame={0} lastInvokeTime={1}",
+                        frameNo, repeatButtonLastInvokeTime);
+                    repeatButtonLastInvokeTime = currentTime;
+                    result = true;
+                }
+            }
+
             return result;
         }
 
@@ -548,7 +511,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public string DrawTextField(string label, string text, float width, float height)
         {
-            if (label != null)
+            if (!string.IsNullOrEmpty(label))
             {
                 var labelRect = GetDrawRect(labelWidth, height);
                 GUI.Label(labelRect, label, gsLabel);
@@ -584,52 +547,75 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return DrawIntField(null, value, width, height);
         }
 
-        public float DrawFloatFieldValue(
-            FloatFieldValue fieldValue,
+        public float DrawFloatFieldCache(
+            FloatFieldCache fieldCache,
             float width,
             float height)
         {
-            return DrawFloatFieldValue(fieldValue.label, fieldValue, width, height);
+            return DrawFloatFieldCache(fieldCache.label, fieldCache, width, height);
         }
 
-        public float DrawFloatFieldValue(
+        public float DrawFloatFieldCache(
             string label,
-            FloatFieldValue fieldValue,
+            FloatFieldCache fieldCache,
             float width,
             float height)
         {
-            var newText = DrawTextField(label, fieldValue.text, width, height);
-            if (newText != fieldValue.text)
+            var newText = DrawTextField(label, fieldCache.text, width, height);
+            if (newText != fieldCache.text)
             {
-                fieldValue.text = newText;
+                fieldCache.text = newText;
 
                 float newValue;
                 if (float.TryParse(newText, out newValue))
                 {
-                    fieldValue.UpdateValue(newValue, false);
+                    fieldCache.UpdateValue(newValue, false);
                 }
             }
-            return fieldValue.value;
+            return fieldCache.value;
         }
 
-        public Color DrawColorFieldValue(
+        public float DrawFloatFieldCache(
             string label,
-            ColorFieldValue fieldValue,
+            FloatFieldCache fieldCache,
+            float minValue,
+            float maxValue,
             float width,
             float height)
         {
-            var newText = DrawTextField(label, fieldValue.text, width, height);
-            if (newText != fieldValue.text)
+            var newText = DrawTextField(label, fieldCache.text, width, height);
+            if (newText != fieldCache.text)
             {
-                fieldValue.text = newText;
+                fieldCache.text = newText;
+
+                float newValue;
+                if (float.TryParse(newText, out newValue))
+                {
+                    newValue = Mathf.Clamp(newValue, minValue, maxValue);
+                    fieldCache.UpdateValue(newValue, false);
+                }
+            }
+            return fieldCache.value;
+        }
+
+        public Color DrawColorFieldCache(
+            string label,
+            ColorFieldCache fieldCache,
+            float width,
+            float height)
+        {
+            var newText = DrawTextField(label, fieldCache.text, width, height);
+            if (newText != fieldCache.text)
+            {
+                fieldCache.text = newText;
 
                 Color newColor;
                 if (ColorUtility.TryParseHtmlString(newText, out newColor))
                 {
-                    fieldValue.UpdateColor(newColor, false);
+                    fieldCache.UpdateColor(newColor, false);
                 }
             }
-            return fieldValue.color;
+            return fieldCache.color;
         }
 
         public float DrawFloatField(string label, float value, float width, float height)
@@ -826,7 +812,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public void DrawComboBoxButton<T>(
-            ComboBoxValue<T> comboBox,
+            ComboBoxCache<T> comboBox,
             float width,
             float height,
             bool showArrow)
@@ -842,10 +828,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var subViewRect = GetDrawRect(width, height);
-            var subView = new GUIView(subViewRect);
-            subView.SetEnabled(guiEnabled);
-            subView.margin = 0;
-            subView.padding = Vector2.zero;
+            var subView = new GUISubView(this, subViewRect)
+            {
+                margin = 0,
+                padding = Vector2.zero
+            };
 
             subView.BeginLayout(LayoutDirection.Horizontal);
             {
@@ -896,7 +883,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public void DrawComboBoxContent<T>(
-            ComboBoxValue<T> comboBox,
+            ComboBoxCache<T> comboBox,
             float width,
             float height,
             float windowWidth,
@@ -1099,10 +1086,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             BeginLayout(LayoutDirection.Vertical);
 
-            var itemView = new GUIView(0, 0, itemWidth, itemHeight);
-            itemView.SetEnabled(guiEnabled);
-            itemView.scrollViewRect = scrollViewRect;
-            itemView.scrollPosition = scrollPosition;
+            var itemRect = new Rect(0, 0, itemWidth, itemHeight);
+            var itemView = new GUISubView(this, itemRect)
+            {
+                scrollViewRect = scrollViewRect,
+                scrollPosition = scrollPosition
+            };
 
             for (int i = 0; i < items.Count; i++)
             {
@@ -1280,288 +1269,180 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public bool DrawValue(
-            FloatFieldValue fieldValue,
-            float addedValue1,
-            float addedValue2,
-            float resetValue,
+            FloatFieldCache fieldCache,
+            float step1,
+            float step2,
+            float defaultValue,
             float value,
-            Action<float> updateNewValue,
-            Action<float> updateDiffValue)
+            Action<float> onChanged,
+            Action<float> onDiffChanged)
         {
             return DrawValue(
-                fieldValue,
-                addedValue1,
-                addedValue2,
-                () => updateNewValue(resetValue),
+                fieldCache,
+                step1,
+                step2,
+                () => onChanged(defaultValue),
                 value,
-                updateNewValue,
-                updateDiffValue);
+                onChanged,
+                onDiffChanged);
         }
 
         public bool DrawValue(
-            FloatFieldValue fieldValue,
-            float addedValue1,
-            float addedValue2,
-            Action resetValueFunc,
+            FloatFieldCache fieldCache,
+            float step1,
+            float step2,
+            Action onReset,
             float value,
-            Action<float> updateNewValue,
-            Action<float> updateDiffValue)
+            Action<float> onChanged,
+            Action<float> onDiffChanged)
         {
-            fieldValue.UpdateValue(value, true);
+            fieldCache.UpdateValue(value);
 
             var newValue = value;
             var diffValue = 0f;
             var updated = false;
 
-            BeginLayout(LayoutDirection.Horizontal);
+            var subViewRect = GetDrawRect(220, 20);
+            var subView = new GUISubView(this, subViewRect)
             {
-                var label = fieldValue.label;
-                if (label != null)
+                margin = 0,
+                padding = Vector2.zero
+            };
+
+            subView.BeginLayout(LayoutDirection.Horizontal);
+            {
+                var label = fieldCache.label;
+                if (!string.IsNullOrEmpty(label))
                 {
-                    DrawLabel(label, 50, 20);
+                    subView.DrawLabel(label, 50, 20);
                 }
 
-                if (DrawButton("<<", 25, 20))
+                if (subView.DrawRepeatButton("<<", 25, 20))
                 {
-                    diffValue = -addedValue2;
+                    diffValue = -step2;
                 }
-                if (DrawButton("<", 20, 20))
+                if (subView.DrawRepeatButton("<", 20, 20))
                 {
-                    diffValue = -addedValue1;
+                    diffValue = -step1;
                 }
 
-                newValue = DrawFloatFieldValue(null, fieldValue, 50, 20);
+                newValue = subView.DrawFloatFieldCache(
+                    null,
+                    fieldCache,
+                    50,
+                    20);
 
-                if (DrawButton(">", 20, 20))
+                if (subView.DrawRepeatButton(">", 20, 20))
                 {
-                    diffValue = addedValue1;
+                    diffValue = step1;
                 }
-                if (DrawButton(">>", 25, 20))
+                if (subView.DrawRepeatButton(">>", 25, 20))
                 {
-                    diffValue = addedValue2;
+                    diffValue = step2;
                 }
-                if (DrawButton("R", 20, 20))
+
+                if (onReset != null && subView.DrawButton("R", 20, 20))
                 {
-                    resetValueFunc();
+                    onReset();
                     updated = true;
                 }
             }
-            EndLayout();
+            subView.EndLayout();
+
+            NextElement(subViewRect);
 
             if (!float.IsNaN(newValue) && newValue != value)
             {
-                updateNewValue(newValue);
+                onChanged(newValue);
                 updated = true;
             }
             if (diffValue != 0f)
             {
-                updateDiffValue(diffValue);
+                onDiffChanged(diffValue);
                 updated = true;
             }
 
             return updated;
         }
 
-        public bool DrawSliderValue(
-            FloatFieldValue fieldValue,
-            float minValue,
-            float maxValue,
-            float diffValue,
-            float resetValue,
-            float value,
-            Action<float> updateNewValue,
-            float labelWidth)
+        public struct SliderOption
         {
-            return DrawSliderValue(
-                fieldValue,
-                minValue,
-                maxValue,
-                diffValue,
-                () => updateNewValue(resetValue),
-                value,
-                updateNewValue,
-                labelWidth);
+            public float min;
+            public float max;
+            public float step;
+            public float defaultValue;
+            public float value;
+            public Action onReset;
+            public Action<float> onChanged;
+            public float labelWidth;
         }
 
         public bool DrawSliderValue(
-            FloatFieldValue fieldValue,
-            float minValue,
-            float maxValue,
-            float diffValue,
-            float resetValue,
-            float value,
-            Action<float> updateNewValue)
+            FloatFieldCache fieldCache,
+            SliderOption option)
         {
-            return DrawSliderValue(
-                fieldValue,
-                minValue,
-                maxValue,
-                diffValue,
-                () => updateNewValue(resetValue),
-                value,
-                updateNewValue,
-                50);
-        }
+            fieldCache.UpdateValue(option.value);
 
-        public bool DrawSliderValue(
-            FloatFieldValue fieldValue,
-            float minValue,
-            float maxValue,
-            float diffValue,
-            Action resetValueFunc,
-            float value,
-            Action<float> updateNewValue,
-            float labelWidth)
-        {
-            fieldValue.UpdateValue(value, true);
-
-            var newValue = value;
+            var newValue = option.value;
             var updated = false;
 
             var subViewRect = GetDrawRect(250, 20);
-            var subView = new GUIView(subViewRect);
-            subView.SetEnabled(guiEnabled);
-            subView.margin = 0;
-            subView.padding = Vector2.zero;
+            var subView = new GUISubView(this, subViewRect)
+            {
+                margin = 0,
+                padding = Vector2.zero
+            };
 
             subView.BeginLayout(LayoutDirection.Horizontal);
             {
-                var label = fieldValue.label;
-                if (label == null)
+                var sliderWidth = 170f;
+
+                var label = fieldCache.label;
+                if (!string.IsNullOrEmpty(label))
                 {
-                    labelWidth = 0;
-                }
-                else
-                {
-                    subView.DrawLabel(label, labelWidth, 20);
+                    subView.DrawLabel(label, option.labelWidth, 20);
+                    sliderWidth -= option.labelWidth;
                 }
 
-                newValue = subView.DrawFloatFieldValue(null, fieldValue, 50, 20);
+                newValue = subView.DrawFloatFieldCache(
+                    null,
+                    fieldCache,
+                    option.min,
+                    option.max,
+                    50,
+                    20);
 
-                if (subView.DrawButton("<", 20, 20))
+                if (option.step > 0f)
                 {
-                    newValue -= diffValue;
-                }
-                if (subView.DrawButton(">", 20, 20))
-                {
-                    newValue += diffValue;
+                    if (subView.DrawRepeatButton("<", 20, 20))
+                    {
+                        newValue -= option.step;
+                    }
+                    if (subView.DrawRepeatButton(">", 20, 20))
+                    {
+                        newValue += option.step;
+                    }
+                    sliderWidth -= 40;
                 }
 
                 subView.AddSpace(5);
 
-                var sliderWidth = 130 - labelWidth;
-                newValue = subView.DrawSlider(newValue, minValue, maxValue, sliderWidth, 20);
+                newValue = subView.DrawSlider(newValue, option.min, option.max, sliderWidth, 20);
 
                 subView.AddSpace(5);
 
                 if (subView.DrawButton("R", 20, 20))
                 {
-                    resetValueFunc();
-                    updated = true;
+                    newValue = option.defaultValue;
                 }
             }
             subView.EndLayout();
 
             NextElement(subViewRect);
 
-            if (!float.IsNaN(newValue) && newValue != value)
+            if (!float.IsNaN(newValue) && newValue != option.value)
             {
-                updateNewValue(newValue);
-                updated = true;
-            }
-
-            return updated;
-        }
-
-        public bool DrawSliderValueEx(
-            FloatFieldValue fieldValue,
-            float minValue,
-            float maxValue,
-            float diffValue,
-            float resetValue,
-            float value,
-            Action<float> updateNewValue,
-            bool enabled,
-            Action<bool> updateEnabled)
-        {
-            return DrawSliderValueEx(
-                fieldValue,
-                minValue,
-                maxValue,
-                diffValue,
-                () => updateNewValue(resetValue),
-                value,
-                updateNewValue,
-                enabled,
-                updateEnabled);
-        }
-
-        public bool DrawSliderValueEx(
-            FloatFieldValue fieldValue,
-            float minValue,
-            float maxValue,
-            float diffValue,
-            Action resetValueFunc,
-            float value,
-            Action<float> updateNewValue,
-            bool enabled,
-            Action<bool> updateEnabled)
-        {
-            fieldValue.UpdateValue(value, true);
-
-            var newValue = value;
-            var updated = false;
-
-            var subViewRect = GetDrawRect(250, 20);
-            var subView = new GUIView(subViewRect);
-            subView.SetEnabled(guiEnabled && enabled);
-            subView.margin = 0;
-            subView.padding = Vector2.zero;
-
-            subView.BeginLayout(LayoutDirection.Horizontal);
-            {
-                var newEnabled = subView.DrawToggle(null, enabled, 20, 20, true);
-                if (newEnabled != enabled)
-                {
-                    updateEnabled(newEnabled);
-                }
-
-                var label = fieldValue.label;
-                if (label != null)
-                {
-                    subView.DrawLabel(label, 70, 20);
-                }
-
-                newValue = subView.DrawFloatFieldValue(null, fieldValue, 50, 20);
-
-                if (subView.DrawButton("<", 20, 20))
-                {
-                    newValue -= diffValue;
-                }
-                if (subView.DrawButton(">", 20, 20))
-                {
-                    newValue += diffValue;
-                }
-
-                subView.AddSpace(5);
-
-                newValue = subView.DrawSlider(newValue, minValue, maxValue, 40, 20);
-
-                subView.AddSpace(5);
-
-                if (subView.DrawButton("R", 20, 20))
-                {
-                    resetValueFunc();
-                    updated = true;
-                }
-            }
-            subView.EndLayout();
-
-            NextElement(subViewRect);
-
-            if (!float.IsNaN(newValue) && newValue != value)
-            {
-                updateNewValue(newValue);
+                option.onChanged(newValue);
                 updated = true;
             }
 
@@ -1569,26 +1450,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public bool DrawColor(
-            ColorFieldValue fieldValue,
+            ColorFieldCache fieldCache,
             Color color,
             Color resetColor,
-            Action<Color> updateNewValue)
+            Action<Color> onColorChanged)
         {
-            fieldValue.UpdateColor(color, true);
+            fieldCache.UpdateColor(color, true);
 
             var newColor = color;
             var updated = false;
 
             BeginLayout(LayoutDirection.Horizontal);
             {
-                if (fieldValue.label != null)
+                if (fieldCache.label != null)
                 {
-                    DrawLabel(fieldValue.label, 50, 20);
+                    DrawLabel(fieldCache.label, 50, 20);
                 }
 
                 DrawTexture(texWhite, 20, 20, color);
 
-                newColor = DrawColorFieldValue(null, fieldValue, 120, 20);
+                newColor = DrawColorFieldCache(null, fieldCache, 120, 20);
 
                 if (DrawButton("R", 20, 20))
                 {
@@ -1599,7 +1480,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (newColor != color)
             {
-                updateNewValue(newColor);
+                onColorChanged(newColor);
                 updated = true;
             }
 
@@ -1615,6 +1496,73 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void AddSpace(float size)
         {
             AddSpace(size, size);
+        }
+
+        public virtual FloatFieldCache GetFieldCache(string label, string format)
+        {
+            FloatFieldCache fieldCache;
+            if (_fieldCacheIndex >= _fieldCaches.Count)
+            {
+                fieldCache = new FloatFieldCache();
+                _fieldCaches.Add(fieldCache);
+            }
+
+            fieldCache = _fieldCaches[_fieldCacheIndex++];
+            fieldCache.label = label;
+            fieldCache.format = format;
+            return fieldCache;
+        }
+
+        public FloatFieldCache GetFieldCache(string label)
+        {
+            return GetFieldCache(label, "F2");
+        }
+
+        public FloatFieldCache GetFieldCache(string label, float value)
+        {
+            var fieldCache = GetFieldCache(label);
+            fieldCache.UpdateValue(value);
+            return fieldCache;
+        }
+
+        public FloatFieldCache GetIntFieldCache(string label)
+        {
+            return GetFieldCache(label, "F0");
+        }
+
+        public FloatFieldCache GetIntFieldCache(string label, int value)
+        {
+            var fieldCache = GetIntFieldCache(label);
+            fieldCache.UpdateValue(value);
+            return fieldCache;
+        }
+
+        public FloatFieldCache[] GetFieldCaches(string[] label)
+        {
+            var fieldCaches = new FloatFieldCache[label.Length];
+            for (var i = 0; i < label.Length; i++)
+            {
+                fieldCaches[i] = GetFieldCache(label[i]);
+            }
+            return fieldCaches;
+        }
+
+        public virtual TransformCache GetTransformCache(Transform transform)
+        {
+            if (_transformCacheIndex < _transformCaches.Count)
+            {
+                var cache = _transformCaches[_transformCacheIndex++];
+                cache.Update(transform);
+                return cache;
+            }
+
+            {
+                var cache = new TransformCache();
+                cache.Update(transform);
+                _transformCaches.Add(cache);
+                _transformCacheIndex++;
+                return cache;
+            }
         }
     }
 }

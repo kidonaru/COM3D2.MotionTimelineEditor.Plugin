@@ -55,7 +55,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             TimelineManager.onRefresh += OnRefreshTimeline;
 
-            mainWindow = new MainWindow(0);
+            mainWindow = new MainWindow();
             mainWindow.Init();
 
             subWindows.Clear();

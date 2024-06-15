@@ -374,7 +374,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
-        private ComboBoxValue<StudioModelStat> _modelComboBox = new ComboBoxValue<StudioModelStat>
+        private ComboBoxCache<StudioModelStat> _modelComboBox = new ComboBoxCache<StudioModelStat>
         {
             getName = (model, index) =>
             {
@@ -382,7 +382,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         };
 
-        private ComboBoxValue<TransformEditType> _transComboBox = new ComboBoxValue<TransformEditType>
+        private ComboBoxCache<TransformEditType> _transComboBox = new ComboBoxCache<TransformEditType>
         {
             items = Enum.GetValues(typeof(TransformEditType)).Cast<TransformEditType>().ToList(),
             getName = (type, index) =>

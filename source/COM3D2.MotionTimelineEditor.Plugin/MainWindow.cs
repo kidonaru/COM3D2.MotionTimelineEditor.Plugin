@@ -166,9 +166,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         private GUIView headerView = null;
-        private ComboBoxValue<FileMenuType> fileMenuComboBox = new ComboBoxValue<FileMenuType>();
-        private ComboBoxValue<TimelineLayerInfo> layerComboBox = new ComboBoxValue<TimelineLayerInfo>();
-        private ComboBoxValue<Maid> _maidComboBox = new ComboBoxValue<Maid>();
+        private GUIView contentView = null;
+        private GUIView timelineView = null;
+        private ComboBoxCache<FileMenuType> fileMenuComboBox = new ComboBoxCache<FileMenuType>();
+        private ComboBoxCache<TimelineLayerInfo> layerComboBox = new ComboBoxCache<TimelineLayerInfo>();
+        private ComboBoxCache<Maid> _maidComboBox = new ComboBoxCache<Maid>();
 
         public GUIStyle gsWin = new GUIStyle("box")
         {
@@ -185,9 +187,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private Texture2D texTimelineBG = null;
         private Texture2D texKeyFrame = null;
 
-        public MainWindow(int windowIndex)
+        public MainWindow()
         {
-            this.windowIndex = windowIndex;
+            this.windowIndex = 0;
             this.isShowWnd = true;
             this._windowRect = new Rect(
                 Screen.width - windowWidth - 30,
@@ -195,7 +197,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 windowWidth,
                 windowHeight
             );
-            headerView = new GUIView(0, 20, windowWidth, HEADER_HEIGHT);
+            this.headerView = new GUIView(0, 0, windowWidth, 20);
+            this.contentView = new GUIView(0, 20, windowWidth, HEADER_HEIGHT);
+            this.timelineView = new GUIView(0, HEADER_HEIGHT, windowWidth, windowHeight - HEADER_HEIGHT);
         }
 
         public void Init()
@@ -420,52 +424,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var isStudioHackValid = studioHack.IsValid();
             var isMaidValid = maidManager.IsValid();
 
-            {
-                var view = new GUIView(0, 0, windowWidth, 20);
-                view.padding.y = 0;
-                view.padding.x = 0;
-
-                view.BeginLayout(GUIView.LayoutDirection.Free);
-
-                view.currentPos.x = windowWidth - 20;
-
-                if (view.DrawButton("x", 20, 20))
-                {
-                    MTE.instance.isEnable = false;
-                }
-
-                view.currentPos.x = windowWidth - 400;
-
-                if (!isStudioHackValid)
-                {
-                    view.DrawLabel(studioHack.errorMessage, 400 - 20, 20, Color.yellow);
-                }
-                else if (!isMaidValid)
-                {
-                    view.DrawLabel(maidManager.errorMessage, 400 - 20, 20, Color.yellow);
-                }
-                else if (!timelineManager.IsValidData())
-                {
-                    view.DrawLabel(timelineManager.errorMessage, 400 - 20, 20, Color.yellow);
-                }
-                else
-                {
-                    // TIPSを表示したい
-                    var message = "";
-                    if (!studioHack.isPoseEditing)
-                    {
-                        var keyName = config.GetKeyName(KeyBindType.EditMode);
-                        message = "[" + keyName + "]キーでポーズ編集モードに切り替えます";
-                    }
-                    else
-                    {
-                        var keyName = config.GetKeyName(KeyBindType.AddKeyFrame);
-                        message = "[" + keyName + "]キーでキーフレームを登録します";
-                    }
-
-                    view.DrawLabel(message, 400 - 20, 20, Color.white);
-                }
-            }
+            DrawHeader(isStudioHackValid, isMaidValid);
 
             bool editEnabled = isMaidValid
                             && isStudioHackValid
@@ -476,7 +435,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             && !_maidComboBox.focused
                             && !layerComboBox.focused;
 
-            DrawHeader(editEnabled, guiEnabled);
+            DrawContent(editEnabled, guiEnabled);
             DrawTimeline(editEnabled, guiEnabled);
             DrawComboBox(editEnabled, true);
 
@@ -486,9 +445,59 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void DrawHeader(bool editEnabled, bool guiEnabled)
+        private void DrawHeader(bool isStudioHackValid, bool isMaidValid)
         {
             var view = headerView;
+            view.ResetLayout();
+
+            view.padding.y = 0;
+            view.padding.x = 0;
+
+            view.BeginLayout(GUIView.LayoutDirection.Free);
+
+            view.currentPos.x = windowWidth - 20;
+
+            if (view.DrawButton("x", 20, 20))
+            {
+                MTE.instance.isEnable = false;
+            }
+
+            view.currentPos.x = windowWidth - 400;
+
+            if (!isStudioHackValid)
+            {
+                view.DrawLabel(studioHack.errorMessage, 400 - 20, 20, Color.yellow);
+            }
+            else if (!isMaidValid)
+            {
+                view.DrawLabel(maidManager.errorMessage, 400 - 20, 20, Color.yellow);
+            }
+            else if (!timelineManager.IsValidData())
+            {
+                view.DrawLabel(timelineManager.errorMessage, 400 - 20, 20, Color.yellow);
+            }
+            else
+            {
+                // TIPSを表示したい
+                var message = "";
+                if (!studioHack.isPoseEditing)
+                {
+                    var keyName = config.GetKeyName(KeyBindType.EditMode);
+                    message = "[" + keyName + "]キーでポーズ編集モードに切り替えます";
+                }
+                else
+                {
+                    var keyName = config.GetKeyName(KeyBindType.AddKeyFrame);
+                    message = "[" + keyName + "]キーでキーフレームを登録します";
+                }
+
+                view.DrawLabel(message, 400 - 20, 20, Color.white);
+            }
+        }
+
+        private void DrawContent(bool editEnabled, bool guiEnabled)
+        {
+            var view = contentView;
             view.SetEnabled(guiEnabled);
             view.ResetLayout();
 
@@ -556,58 +565,45 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
-
-            anmName = view.DrawTextField("アニメ名", anmName, 300, 20);
-
-            view.AddSpace(10);
-
             {
-                view.DrawLabel("最終フレーム番号", 100, 20);
+                anmName = view.DrawTextField("アニメ名", anmName, 300, 20);
+
+                view.AddSpace(10);
+
+                view.DrawLabel("最終フレーム", 85, 20);
 
                 var newMaxFrameNo = timeline.maxFrameNo;
 
-                if (view.DrawButton("<<", 25, 20))
-                {
-                    newMaxFrameNo -= 10;
-                }
-
-                if (view.DrawButton("<", 20, 20))
-                {
-                    newMaxFrameNo -= 1;
-                }
-
-                newMaxFrameNo = view.DrawIntField(newMaxFrameNo, 50, 20);
-
-                if (view.DrawButton(">", 20, 20))
-                {
-                    newMaxFrameNo += 1;
-                }
-
-                if (view.DrawButton(">>", 25, 20))
-                {
-                    newMaxFrameNo += 10;
-                }
+                view.DrawValue(
+                    view.GetIntFieldCache(""),
+                    1,
+                    10,
+                    null,
+                    newMaxFrameNo,
+                    value => newMaxFrameNo = (int)value,
+                    diff => newMaxFrameNo += (int)diff
+                );
 
                 if (newMaxFrameNo != timeline.maxFrameNo)
                 {
                     timelineManager.SetMaxFrameNo(newMaxFrameNo);
                 }
             }
-
             view.EndLayout();
 
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
-
             {
                 view.DrawLabel("フレーム操作", 100, 20);
 
                 var newFrameNo = timelineManager.currentFrameNo;
 
+                view.margin = 0;
+
                 if (view.DrawButton("|<", 25, 20))
                 {
                     newFrameNo = 0;
                 }
-                if (view.DrawButton(".<", 25, 20))
+                if (view.DrawRepeatButton(".<", 25, 20))
                 {
                     var prevFrame = timelineManager.GetPrevFrame(newFrameNo);
                     if (prevFrame != null)
@@ -615,18 +611,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         newFrameNo = prevFrame.frameNo;
                     }
                 }
-                if (view.DrawButton("<", 20, 20))
+                if (view.DrawRepeatButton("<", 25, 20))
                 {
                     newFrameNo--;
                 }
 
-                newFrameNo = view.DrawIntField(newFrameNo, 50, 20);
+                var fieldCache = view.GetIntFieldCache("");
+                fieldCache.UpdateValue(newFrameNo);
 
-                if (view.DrawButton(">", 20, 20))
+                newFrameNo = (int) view.DrawFloatFieldCache(fieldCache, 50, 20);
+
+                if (view.DrawRepeatButton(">", 25, 20))
                 {
                     newFrameNo++;
                 }
-                if (view.DrawButton(">.", 25, 20))
+                if (view.DrawRepeatButton(">.", 25, 20))
                 {
                     var nextFrame = timelineManager.GetNextFrame(newFrameNo);
                     if (nextFrame != null)
@@ -639,52 +638,46 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     newFrameNo = timeline.maxFrameNo;
                 }
 
+                view.margin = GUIView.defaultMargin;
+
                 if (newFrameNo != timelineManager.currentFrameNo)
                 {
                     timelineManager.SeekCurrentFrame(newFrameNo);
                     FixScrollPosition();
                 }
-            }
 
-            view.AddSpace(10);
+                view.AddSpace(10);
 
-            if (currentLayer.isAnmPlaying)
-            {
-                if (view.DrawButton("■", 20, 20))
+                if (currentLayer.isAnmPlaying)
                 {
-                    timelineManager.Stop();
+                    if (view.DrawButton("■", 20, 20))
+                    {
+                        timelineManager.Stop();
+                    }
                 }
-            }
-            else
-            {
-                if (view.DrawButton("▶", 20, 20))
+                else
                 {
-                    timelineManager.Play();
-                }
-            }
-
-            view.AddSpace(10);
-
-            {
-                view.DrawLabel("再生速度", 60, 20);
-
-                var anmSpeed = timelineManager.anmSpeed;
-
-                anmSpeed = view.DrawFloatField(anmSpeed, 50, 20);
-
-                if (view.DrawButton("R", 20, 20))
-                {
-                    anmSpeed = 1.0f;
+                    if (view.DrawButton("▶", 20, 20))
+                    {
+                        timelineManager.Play();
+                    }
                 }
 
-                anmSpeed = view.DrawSlider(anmSpeed, 0f, 2.0f, 90, 20);
+                view.AddSpace(10);
 
-                if (!Mathf.Approximately(anmSpeed, timelineManager.anmSpeed))
-                {
-                    timelineManager.SetAnmSpeedAll(anmSpeed);
-                }
+                view.DrawSliderValue(
+                    view.GetFieldCache("再生速度"),
+                    new GUIView.SliderOption
+                    {
+                        min = 0f,
+                        max = 2f,
+                        step = 0.01f,
+                        defaultValue = 1f,
+                        value = timelineManager.anmSpeed,
+                        onChanged = value => timelineManager.SetAnmSpeedAll(value),
+                        labelWidth = 50,
+                    });
             }
-
             view.EndLayout();
 
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
@@ -737,11 +730,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.DrawLabel("選択操作", 100, 20);
 
-                selectStartFrameNo = view.DrawIntField(selectStartFrameNo, 50, 20);
+                selectStartFrameNo = (int) view.DrawFloatFieldCache(
+                    null,
+                    view.GetIntFieldCache("", selectStartFrameNo),
+                    50,
+                    20);
 
                 view.DrawLabel("～", 15, 20);
 
-                selectEndFrameNo = view.DrawIntField(selectEndFrameNo, 50, 20);
+                selectEndFrameNo = (int) view.DrawFloatFieldCache(
+                    null,
+                    view.GetIntFieldCache("", selectEndFrameNo),
+                    50,
+                    20);
 
                 if (view.DrawButton("範囲選択", 70, 20))
                 {
@@ -843,7 +844,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var view = new GUIView(0, HEADER_HEIGHT, windowWidth, windowHeight - HEADER_HEIGHT);
+            var view = timelineView;
+            view.Init(0, HEADER_HEIGHT, windowWidth, windowHeight - HEADER_HEIGHT);
             view.SetEnabled(guiEnabled);
 
             view.BeginLayout(GUIView.LayoutDirection.Free);
@@ -1240,21 +1242,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _maidComboBox.focused = false;
             }
 
-            headerView.SetEnabled(guiEnabled);
+            contentView.SetEnabled(guiEnabled);
 
-            headerView.DrawComboBoxContent(
+            contentView.DrawComboBoxContent(
                 fileMenuComboBox,
                 100, 120,
                 windowRect.width, windowRect.height,
                 20);
 
-            headerView.DrawComboBoxContent(
+            contentView.DrawComboBoxContent(
                 layerComboBox,
                 120, 120,
                 windowRect.width, windowRect.height,
                 20);
 
-            headerView.DrawComboBoxContent(
+            contentView.DrawComboBoxContent(
                 _maidComboBox,
                 170, 120,
                 windowRect.width, windowRect.height,

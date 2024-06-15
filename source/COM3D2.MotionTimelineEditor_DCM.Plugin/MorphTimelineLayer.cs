@@ -463,24 +463,23 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var morphValue = GetMorphValue(morphName);
                 var newMorphValue = morphValue;
 
-                view.BeginLayout(GUIView.LayoutDirection.Horizontal);
-                view.DrawLabel(displayName, 80, 20);
-
-                newMorphValue = view.DrawFloatField(newMorphValue, 50, 20);
-
-                newMorphValue = view.DrawSlider(newMorphValue, 0f, 1f, 80, 20);
-
-                if (view.DrawButton("R", 20, 20))
-                {
-                    newMorphValue = 0;
-                }
+                view.DrawSliderValue(
+                    view.GetFieldCache(displayName),
+                    new GUIView.SliderOption
+                    {
+                        min = 0f,
+                        max = 1f,
+                        step = 0f,
+                        defaultValue = 0f,
+                        value = newMorphValue,
+                        onChanged = value => newMorphValue = value,
+                        labelWidth = 80,
+                    });
 
                 if (!Mathf.Approximately(newMorphValue, morphValue))
                 {
                     SetMorphValue(morphName, newMorphValue);
                 }
-
-                view.EndLayout();
             };
 
             Action<string> drawMorphToggle = morphName =>

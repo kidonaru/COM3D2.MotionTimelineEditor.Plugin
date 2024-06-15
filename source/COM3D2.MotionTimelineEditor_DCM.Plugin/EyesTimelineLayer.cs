@@ -471,20 +471,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
-        private FloatFieldValue[] _fieldValues = FloatFieldValue.CreateArray(
-            new string[]
-            {
-                "X",
-                "Y",
-                "X",
-                "Y",
-                "幅",
-                "高さ",
-                "幅",
-                "高さ",
-            }
-        );
-
         private Texture2D _eyesPositionTex = null;
         private Texture2D _eyesTex = null;
         private bool _isEyesDragging = false;
@@ -616,17 +602,33 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                 view.DrawLabel(displayName, 100, 20);
 
-                var resetValue = i < 2 ? 0f : 1f;
+                var names = i < 2 ? new string[] { "X", "Y" } : new string[] { "幅", "高さ" };
 
-                updateTransform |= view.DrawValue(_fieldValues[i * 2], 0.01f, 0.1f, resetValue,
-                    horizon,
-                    x => horizon = x,
-                    x => horizon += x);
+                updateTransform |= view.DrawSliderValue(
+                    view.GetFieldCache(names[0]),
+                    new GUIView.SliderOption
+                    {
+                        min = -1f,
+                        max = 1f,
+                        step = 0.01f,
+                        defaultValue = 0f,
+                        value = horizon,
+                        onChanged = x => horizon = x,
+                        labelWidth = 30,
+                    });
 
-                updateTransform |= view.DrawValue(_fieldValues[i * 2 + 1], 0.01f, 0.1f, resetValue,
-                    vertical,
-                    y => vertical = y,
-                    y => vertical += y);
+                updateTransform |= view.DrawSliderValue(
+                    view.GetFieldCache(names[1]),
+                    new GUIView.SliderOption
+                    {
+                        min = -1f,
+                        max = 1f,
+                        step = 0.01f,
+                        defaultValue = 0f,
+                        value = vertical,
+                        onChanged = y => vertical = y,
+                        labelWidth = 30,
+                    });
 
                 if (updateTransform)
                 {
