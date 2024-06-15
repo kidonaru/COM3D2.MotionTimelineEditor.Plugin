@@ -19,6 +19,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         private FieldInfo fieldMaidArray = null;
         private FieldInfo fieldSelectMaidIndex = null;
+        private FieldInfo fieldIsIK = null;
         private FieldInfo fieldIsLock = null;
         private FieldInfo fieldUnLockFlg = null;
         private FieldInfo fieldIsStop = null;
@@ -48,6 +49,38 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             set
             {
                 fieldSelectMaidIndex.SetValue(multipleMaids, value);
+            }
+        }
+
+        private bool[] isIKArray
+        {
+            get
+            {
+                return (bool[])fieldIsIK.GetValue(multipleMaids);
+            }
+        }
+
+        private bool isIK
+        {
+            get
+            {
+                var isIKArray = this.isIKArray;
+                var selectMaidIndex = this.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < isIKArray.Length)
+                {
+                    return isIKArray[selectMaidIndex];
+                }
+
+                return false;
+            }
+            set
+            {
+                var isIKArray = this.isIKArray;
+                var selectMaidIndex = this.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < isIKArray.Length)
+                {
+                    isIKArray[selectMaidIndex] = value;
+                }
             }
         }
 
@@ -394,6 +427,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
                 isLock = value;
                 isBone = value;
+                isIK = value;
                 unLockFlg = value;
             }
         }
@@ -472,6 +506,9 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
                 fieldSelectMaidIndex = typeof(MultipleMaids).GetField("selectMaidIndex", bindingAttr);
                 PluginUtils.AssertNull(fieldSelectMaidIndex != null, "fieldSelectMaidIndex is null");
+
+                fieldIsIK = typeof(MultipleMaids).GetField("isIK", bindingAttr);
+                PluginUtils.AssertNull(fieldIsIK != null, "fieldIsIK is null");
 
                 fieldIsLock = typeof(MultipleMaids).GetField("isLock", bindingAttr);
                 PluginUtils.AssertNull(fieldIsLock != null, "fieldIsLock is null");
