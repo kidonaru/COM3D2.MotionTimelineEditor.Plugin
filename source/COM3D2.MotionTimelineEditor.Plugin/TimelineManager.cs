@@ -1224,7 +1224,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (!studioHack.isPoseEditing)
                 {
-                    PluginUtils.LogWarning("ポーズ編集中のみペーストできます");
+                    PluginUtils.LogWarning("編集モード中のみペーストできます");
                     return;
                 }
 

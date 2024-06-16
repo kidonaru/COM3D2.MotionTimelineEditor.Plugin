@@ -500,7 +500,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (timelineManager.initialEditFrame == null)
             {
-                PluginUtils.Log("ポーズ編集中のみキーフレームの登録ができます");
+                PluginUtils.Log("編集モード中のみキーフレームの登録ができます");
                 return;
             }
 

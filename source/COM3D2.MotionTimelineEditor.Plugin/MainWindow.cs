@@ -488,7 +488,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (!studioHack.isPoseEditing)
                 {
                     var keyName = config.GetKeyName(KeyBindType.EditMode);
-                    message = "[" + keyName + "]キーでポーズ編集モードに切り替えます";
+                    message = "[" + keyName + "]キーで編集モードに切り替えます";
                 }
                 else
                 {
@@ -525,14 +525,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     subWindow.ToggleSubWindow(SubWindowType.TimelineLoad);
                 }
 
-                if (view.DrawButton("ｷｰﾌﾚｰﾑ", 60, 20, editEnabled))
-                {
-                    subWindow.ToggleSubWindow(SubWindowType.KeyFrame);
-                }
-
                 if (view.DrawButton("情報", 60, 20, editEnabled))
                 {
                     subWindow.ToggleSubWindow(SubWindowType.TimelineLayer);
+                }
+
+                if (view.DrawButton("ｷｰﾌﾚｰﾑ", 60, 20, editEnabled))
+                {
+                    subWindow.ToggleSubWindow(SubWindowType.KeyFrame);
                 }
 
                 var ikColor = editEnabled && timeline.isHoldActive ? Color.green : Color.white;
@@ -764,16 +764,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (currentLayer.hasSlotNo)
                 {
+                    view.DrawLabel("操作対象", 60, 20);
+
                     _maidComboBox.currentIndex = currentLayer.slotNo;
                     _maidComboBox.items = maidManager.maidCaches;
-                    _maidComboBox.DrawButton("操作対象", view);
+                    _maidComboBox.DrawButton(view);
                 }
             }
             view.EndLayout();
 
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
-                var newAllowPrecisionEdit = view.DrawToggle("簡易編集", config.isEasyEdit, 80, 20);
+                var newAllowPrecisionEdit = view.DrawToggle("簡易表示", config.isEasyEdit, 80, 20);
                 if (newAllowPrecisionEdit != config.isEasyEdit)
                 {
                     config.isEasyEdit = newAllowPrecisionEdit;
@@ -781,7 +783,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     timelineManager.Refresh();
                 }
 
-                var isPoseEditing = view.DrawToggle("ポーズ編集", studioHack.isPoseEditing, 80, 20);
+                var isPoseEditing = view.DrawToggle("編集モード", studioHack.isPoseEditing, 80, 20);
                 if (isPoseEditing != studioHack.isPoseEditing)
                 {
                     studioHack.isPoseEditing = isPoseEditing;

@@ -202,7 +202,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            // ポーズ編集中の移動は中心ボーンに反映  
+            // 編集モード中の移動は中心ボーンに反映  
             if (timelineManager.initialEditFrame != null)
             {
                 var targetPosition = rootBone.transform.position;
