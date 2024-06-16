@@ -508,9 +508,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.currentPos.y = 20;
 
+            view.margin = 0;
+            view.padding = new Vector2(3, 3);
+
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
-                view.margin = 0;
+                view.AddSpace(5);
 
                 fileMenuComboBox.currentIndex = -1;
                 fileMenuComboBox.DrawButton(view);
@@ -556,10 +559,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     subWindow.ToggleSubWindow(SubWindowType.TimelineSetting);
                 }
-
-                view.margin = GUIView.defaultMargin;
             }
             view.EndLayout();
+
+            view.margin = GUIView.defaultMargin;
+            view.padding = GUIView.defaultPadding;
 
             if (!editEnabled)
             {
