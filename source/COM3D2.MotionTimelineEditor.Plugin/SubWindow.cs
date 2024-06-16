@@ -12,12 +12,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         TimelineLayer,
         IKHold,
         Track,
-        StudioModel,
         History,
         TimelineSetting,
         Max,
 
-        MediaPlayer = 7, // dummy
+        MediaPlayer = TimelineSetting, // dummy
+        StudioModel = TimelineLayer, // dummy
     }
 
     public class SubWindowInfo
@@ -200,7 +200,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 new TimelineLayerUI(this),
                 new IKHoldUI(this),
                 new TimelineTrackUI(this),
-                new StudioModelUI(this),
                 new TimelineHistoryUI(this),
                 new TimelineSettingUI(this),
             };

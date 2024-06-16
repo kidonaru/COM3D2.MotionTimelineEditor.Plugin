@@ -13,88 +13,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         List<ITileViewContent> children { get; }
     }
 
-    public class GUISubView : GUIView
-    {
-        public GUIView parent;
-
-        public override int repeatButtonLastPressFrame
-        {
-            get
-            {
-                return parent.repeatButtonLastPressFrame;
-            }
-            set
-            {
-                parent.repeatButtonLastPressFrame = value;
-            }
-        }
-
-        public override float repeatButtonStartTime
-        {
-            get
-            {
-                return parent.repeatButtonStartTime;
-            }
-            set
-            {
-                parent.repeatButtonStartTime = value;
-            }
-        }
-
-        public override float repeatButtonLastInvokeTime
-        {
-            get
-            {
-                return parent.repeatButtonLastInvokeTime;
-            }
-            set
-            {
-                parent.repeatButtonLastInvokeTime = value;
-            }
-        }
-
-        public override ComboBoxCacheBase focusedComboBox
-        {
-            get
-            {
-                return parent.focusedComboBox;
-            }
-            set
-            {
-                parent.focusedComboBox = value;
-            }
-        }
-
-        public GUISubView(GUIView parent, float x, float y, float width, float height)
-            : base(x, y, width, height)
-        {
-            this.parent = parent;
-            SetEnabled(parent.guiEnabled);
-        }
-
-        public GUISubView(GUIView parent, Rect viewRect)
-            : base(viewRect)
-        {
-            this.parent = parent;
-            SetEnabled(parent.guiEnabled);
-        }
-
-        public override FloatFieldCache GetFieldCache(string label, FloatFieldType fieldType)
-        {
-            return parent.GetFieldCache(label, fieldType);
-        }
-
-        public override TransformCache GetTransformCache(Transform transform)
-        {
-            return parent.GetTransformCache(transform);
-        }
-    }
-
     public class GUIView
     {
+        private GUIView _parent = null;
+        public GUIView parent
+        {
+            get
+            {
+                return _parent;
+            }
+            set
+            {
+                _parent = value;
+
+                if (_parent != null)
+                {
+                    SetEnabled(_parent.guiEnabled);
+                }
+            }
+        }
+
         public Vector2 currentPos;
         private LayoutDirection layoutDirection;
-        public Vector2 padding;
+        public Vector2 padding = defaultPadding;
 
         private Rect _viewRect;
         public Rect viewRect
@@ -114,17 +55,78 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Vector2 scrollPosition;
 
         public bool isScrollViewEnabled;
-        public float labelWidth;
+        public float labelWidth = 100;
         public Vector2 layoutMaxPos;
-        public float margin;
+        public float margin = defaultMargin;
         public Color defaultColor = Color.white;
         public bool guiEnabled = true;
 
-        public virtual int repeatButtonLastPressFrame { get; set; }
-        public virtual float repeatButtonStartTime { get; set; }
-        public virtual float repeatButtonLastInvokeTime { get; set; }
+        public class RepeatButtonInfo
+        {
+            public int lastPressFrame;
+            public float startTime;
+            public float lastInvokeTime;
+        }
 
-        public virtual ComboBoxCacheBase focusedComboBox { get; set; }
+        private RepeatButtonInfo _repeatButtonInfo = new RepeatButtonInfo();
+        public RepeatButtonInfo repeatButtonInfo
+        {
+            get
+            {
+                if (parent != null)
+                {
+                    return parent.repeatButtonInfo;
+                }
+                return _repeatButtonInfo;
+            }
+            set
+            {
+                if (parent != null)
+                {
+                    parent.repeatButtonInfo = value;
+                }
+                else
+                {
+                    _repeatButtonInfo = value;
+                }
+            }
+        }
+
+        private GUIComboBoxBase _focusedComboBox;
+        public GUIComboBoxBase focusedComboBox
+        {
+            get
+            {
+                if (parent != null)
+                {
+                    return parent.focusedComboBox;
+                }
+                return _focusedComboBox;
+            }
+            set
+            {
+                if (parent != null)
+                {
+                    parent.focusedComboBox = value;
+                }
+                else
+                {
+                    _focusedComboBox = value;
+                }
+            }
+        }
+
+        public GUIView topView
+        {
+            get
+            {
+                if (parent != null)
+                {
+                    return parent.topView;
+                }
+                return this;
+            }
+        }
 
         private List<FloatFieldCache> _fieldCaches = new List<FloatFieldCache>();
         private int _fieldCacheIndex = 0;
@@ -210,6 +212,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Free,
         }
 
+        public GUIView()
+        {
+            Init(Rect.zero);
+        }
+
         public GUIView(float x, float y, float width, float height)
         {
             Init(new Rect(x, y, width, height));
@@ -224,14 +231,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             Init(new Rect(x, y, width, height));
         }
-        
+
         public void Init(Rect viewRect)
         {
             this._viewRect = viewRect;
-            this.labelWidth = 100;
-            this.padding = defaultPadding;
-            this.margin = defaultMargin;
-
             ResetLayout();
         }
 
@@ -296,6 +299,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public readonly static Rect AutoScrollViewRect = new Rect(0, 0, -1, -1);
+
+        public void BeginScrollView()
+        {
+            BeginScrollView(-1, -1, AutoScrollViewRect, false, true);;
+        }
 
         public void BeginScrollView(
             float width,
@@ -456,24 +464,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var frameNo = Time.frameCount;
                 var currentTime = Time.realtimeSinceStartup;
+                var info = repeatButtonInfo;
 
-                if (repeatButtonLastPressFrame < frameNo - 1)
+                if (info.lastPressFrame < frameNo - 1)
                 {
                     PluginUtils.LogDebug("DrawRepeatButton: first press frame={0} lastPressFrame={1}",
-                        frameNo, repeatButtonLastPressFrame);
-                    repeatButtonStartTime = currentTime;
-                    repeatButtonLastInvokeTime = currentTime;
+                        frameNo, info.lastPressFrame);
+                    info.startTime = currentTime;
+                    info.lastInvokeTime = currentTime;
                     result = true;
                 }
 
-                repeatButtonLastPressFrame = frameNo;
+                info.lastPressFrame = frameNo;
 
-                if (currentTime > repeatButtonStartTime + config.keyRepeatTimeFirst &&
-                    currentTime > repeatButtonLastInvokeTime + config.keyRepeatTime)
+                if (currentTime > info.startTime + config.keyRepeatTimeFirst &&
+                    currentTime > info.lastInvokeTime + config.keyRepeatTime)
                 {
                     //PluginUtils.LogDebug("DrawRepeatButton: repeat frame={0} lastInvokeTime={1}",
-                    //    frameNo, repeatButtonLastInvokeTime);
-                    repeatButtonLastInvokeTime = currentTime;
+                    //    frameNo, info.lastInvokeTime);
+                    info.lastInvokeTime = currentTime;
                     result = true;
                 }
             }
@@ -772,8 +781,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void SetFocusComboBox(ComboBoxCacheBase comboBox)
+        public void SetFocusComboBox(GUIComboBoxBase comboBox)
         {
+            PluginUtils.LogDebug("SetFocusComboBox comboBox={0}", comboBox);
             focusedComboBox = comboBox;
         }
 
@@ -787,78 +797,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             focusedComboBox = null;
         }
 
-        public void DrawComboBoxButton<T>(
-            ComboBoxCache<T> comboBox,
-            float width,
-            float height,
-            bool showArrow)
-        {
-            var name = comboBox.label;
-            if (name == null)
-            {
-                var index = comboBox.currentIndex;
-                if (index >= 0 && index < comboBox.items.Count)
-                {
-                    name = comboBox.getName(comboBox.items[index], index);
-                }
-            }
-
-            var subViewRect = GetDrawRect(width, height);
-            var subView = new GUISubView(this, subViewRect)
-            {
-                margin = 0,
-                padding = Vector2.zero
-            };
-
-            subView.BeginLayout(LayoutDirection.Horizontal);
-            {
-                if (showArrow)
-                {
-                    if (subView.DrawButton("<", 20, 20))
-                    {
-                        comboBox.currentIndex = comboBox.prevIndex;
-                        if (comboBox.onSelected != null)
-                        {
-                            comboBox.onSelected(comboBox.items[comboBox.currentIndex], comboBox.currentIndex);
-                        }
-                    }
-                }
-
-                var buttonWidth = width;
-                var buttonHeight = height;
-
-                if (showArrow)
-                {
-                    buttonWidth -= 40;
-                }
-
-                comboBox.buttonRect = subView.GetDrawRect(buttonWidth, buttonHeight);
-                comboBox.buttonRect.x += scrollViewRect.x - scrollPosition.x;
-                comboBox.buttonRect.y += scrollViewRect.y - scrollPosition.y;
-
-                if (subView.DrawButton(name, buttonWidth, buttonHeight))
-                {
-                    SetFocusComboBox(comboBox);
-                }
-
-                if (showArrow)
-                {
-                    if (subView.DrawButton(">", 20, 20))
-                    {
-                        comboBox.currentIndex = comboBox.nextIndex;
-                        if (comboBox.onSelected != null)
-                        {
-                            comboBox.onSelected(comboBox.items[comboBox.currentIndex], comboBox.currentIndex);
-                        }
-                    }
-                }
-            }
-            subView.EndLayout();
-
-            NextElement(subViewRect);
-        }
-
-        private GUISubView _comboBoxSubView = null;
+        private GUIView _comboBoxSubView = null;
 
         public void DrawComboBox()
         {
@@ -868,85 +807,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_comboBoxSubView == null)
                 {
-                    _comboBoxSubView = new GUISubView(this, _viewRect)
+                    _comboBoxSubView = new GUIView()
                     {
                         padding = Vector2.zero,
                         margin = 0,
                     };
                 }
 
+                _comboBoxSubView.parent = this;
                 _comboBoxSubView.Init(_viewRect);
 
                 focusedComboBox.DrawContent(_comboBoxSubView);
             }
-        }
-
-        public int DrawSelectList<T>(
-            string label,
-            List<T> items,
-            Func<T, int, string> getName,
-            float width,
-            float height,
-            int selectedIndex)
-        {
-            var startPos = currentPos;
-            var baseDrawRect = GetDrawRect(width, height);
-
-            if (label != null)
-            {
-                var labelRect = GetDrawRect(labelWidth, height);
-                GUI.Label(labelRect, label, gsLabel);
-                currentPos.x += labelWidth + margin;
-                width -= labelWidth + margin;
-            }
-
-            {
-                var buttonRect = GetDrawRect(20, height);
-                if (GUI.Button(buttonRect, "<", gsButton))
-                {
-                    selectedIndex = selectedIndex - 1;
-                    if (selectedIndex < 0)
-                    {
-                        selectedIndex = items.Count - 1;
-                    }
-                }
-                currentPos.x += 20 + margin;
-            }
-
-            if (selectedIndex >= 0 && selectedIndex < items.Count) {
-                var drawRect = GetDrawRect(width - (20 + margin) * 2, height);
-                var name = getName(items[selectedIndex], selectedIndex);
-                GUI.Label(drawRect, name, gsLabel);
-            }
-            currentPos.x += width - (20 + margin) * 2;
-
-            {
-                var buttonRect = GetDrawRect(20, height);
-                if (GUI.Button(buttonRect, ">", gsButton))
-                {
-                    selectedIndex = selectedIndex + 1;
-                    if (selectedIndex >= items.Count)
-                    {
-                        selectedIndex = 0;
-                    }
-                }
-                currentPos.x += 20 + margin;
-            }
-
-            currentPos = startPos;
-            NextElement(baseDrawRect);
-
-            return selectedIndex;
-        }
-
-        public int DrawSelectList<T>(
-            List<T> items,
-            Func<T, int, string> getName,
-            float width,
-            float height,
-            int selectedIndex)
-        {
-            return DrawSelectList(null, items, getName, width, height, selectedIndex);
         }
 
         public int DrawListView<T>(
@@ -1015,8 +887,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             BeginLayout(LayoutDirection.Vertical);
 
             var itemRect = new Rect(0, 0, itemWidth, itemHeight);
-            var itemView = new GUISubView(this, itemRect)
+            var itemView = new GUIView(itemRect)
             {
+                parent = this,
                 scrollViewRect = scrollViewRect,
                 scrollPosition = scrollPosition
             };
@@ -1251,8 +1124,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var updated = false;
 
             var subViewRect = GetDrawRect(220, 20);
-            var subView = new GUISubView(this, subViewRect)
+            var subView = new GUIView(subViewRect)
             {
+                parent = this,
                 margin = 0,
                 padding = Vector2.zero
             };
@@ -1336,8 +1210,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var updated = false;
 
             var subViewRect = GetDrawRect(250, 20);
-            var subView = new GUISubView(this, subViewRect)
+            var subView = new GUIView(subViewRect)
             {
+                parent = this,
                 margin = 0,
                 padding = Vector2.zero
             };
@@ -1436,6 +1311,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return updated;
         }
 
+        public T DrawTabs<T>(T currentTab, float width, float height)
+        {
+            BeginLayout(LayoutDirection.Horizontal);
+            {
+                var savedMargin = margin;
+                margin = 0;
+                foreach (T tabType in Enum.GetValues(typeof(T)))
+                {
+                    var color = currentTab.Equals(tabType) ? Color.green : Color.white;
+                    if (DrawButton(tabType.ToString(), width, height, true, color))
+                    {
+                        currentTab = tabType;
+                    }
+                }
+                margin = savedMargin;
+            }
+            EndLayout();
+
+            AddSpace(5);
+
+            return currentTab;
+        }
+
         public void AddSpace(float width, float height)
         {
             var drawRect = GetDrawRect(width, height);
@@ -1447,10 +1345,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             AddSpace(size, size);
         }
 
-        public virtual FloatFieldCache GetFieldCache(
+        public FloatFieldCache GetFieldCache(
             string label,
             FloatFieldType fieldType)
         {
+            if (parent != null)
+            {
+                return parent.GetFieldCache(label, fieldType);
+            }
+
             FloatFieldCache fieldCache;
             if (_fieldCacheIndex >= _fieldCaches.Count)
             {
@@ -1498,8 +1401,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return fieldCaches;
         }
 
-        public virtual TransformCache GetTransformCache(Transform transform)
+        public TransformCache GetTransformCache(Transform transform)
         {
+            if (parent != null)
+            {
+                return parent.GetTransformCache(transform);
+            }
+
             if (_transformCacheIndex < _transformCaches.Count)
             {
                 var cache = _transformCaches[_transformCacheIndex++];

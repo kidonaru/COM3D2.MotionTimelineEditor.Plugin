@@ -16,16 +16,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         private Texture2D tangentTex = null;
-        private TangentValueType tangentValueType = TangentValueType.All;
+        private TangentValueType tangentValueType = TangentValueType.すべて;
         private HashSet<TangentPair> cachedTangents = new HashSet<TangentPair>();
         private Texture2D[] tangentPresetTextures = null;
 
         private Texture2D easingTex = null;
         private HashSet<int> cachedEasings = new HashSet<int>();
-        private ComboBoxCache<int> easingComboBox = new ComboBoxCache<int>
+        private GUIComboBox<int> easingComboBox = new GUIComboBox<int>
         {
             items = Enumerable.Range(0, (int)MoveEasingType.Max).ToList(),
-            getName = (type, index) => ((MoveEasingType)type).ToString()
+            getName = (type, index) => ((MoveEasingType)type).ToString(),
+            buttonSize = new Vector2(70, 20),
+            contentSize = new Vector2(110, 300),
         };
 
         private static HashSet<BoneData> selectedBones
@@ -433,6 +435,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private GUIComboBox<TangentValueType> _tangentValueTypeComboBox = new GUIComboBox<TangentValueType>
+        {
+            items = Enum.GetValues(typeof(TangentValueType)).Cast<TangentValueType>().ToList(),
+            getName = (type, index) => type.ToString(),
+            buttonSize = new Vector2(50, 20),
+        }; 
+
         private void DrawTangent(GUIView view)
         {
             var tangents = new HashSet<TangentPair>();
@@ -553,17 +562,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.DrawLabel("補間曲線", 100, 20);
 
             {
-                var subView = new GUISubView(
-                    view,
+                var subView = new GUIView(
                     tangentTex.width + 10,
-                    view.currentPos.y + 20,
+                    view.currentPos.y,
                     WINDOW_WIDTH - tangentTex.width,
                     200);
+                subView.parent = view;
 
-                tangentValueType = (TangentValueType)subView.DrawSelectList(
-                    TangentData.TangentValueTypeNames,
-                    (name, index) => name,
-                    100, 20, (int)tangentValueType);
+                _tangentValueTypeComboBox.onSelected = (type, index) =>
+                {
+                    tangentValueType = type;
+                };
+                _tangentValueTypeComboBox.currentIndex = (int)tangentValueType;
+                _tangentValueTypeComboBox.DrawButton(subView);
 
                 float outTangent = float.NaN;
                 float inTangent = float.NaN;
@@ -600,10 +611,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 subView.DrawLabel("OutTangent", 100, 20);
 
-                if (!includeOutTangent)
-                {
-                    GUI.enabled = false;
-                }
+                subView.SetEnabled(!subView.IsComboBoxFocused() && includeOutTangent);
 
                 subView.DrawFloatSelect(
                     "",
@@ -615,14 +623,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     value => diffOutTangent = value
                 );
 
-                GUI.enabled = true;
+                subView.SetEnabled(!subView.IsComboBoxFocused());
 
                 subView.DrawLabel("InTangent", 100, 20);
 
-                if (!includeOutTangent)
-                {
-                    GUI.enabled = false;
-                }
+                subView.SetEnabled(!subView.IsComboBoxFocused() && includeInTangent);
 
                 subView.DrawFloatSelect(
                     "",
@@ -634,7 +639,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     value => diffInTangent = value
                 );
 
-                GUI.enabled = true;
+                subView.SetEnabled(!subView.IsComboBoxFocused());
 
                 // 新値の適用
                 if (!float.IsNaN(newOutTangent) && newOutTangent != outTangent)
@@ -810,7 +815,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (cachedEasings.Count == 0)
             {
-                view.CancelFocusComboBox();
                 return;
             }
 
@@ -832,18 +836,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 currentLayer.ApplyCurrentFrame(true);
             };
 
-            easingComboBox.onSelected = (easing, index) =>
             {
-                updateEasing(easing);
-            };
-
-            {
-                var subView = new GUISubView(
-                    view,
+                var subView = new GUIView(
                     easingTex.width + 10,
-                    view.currentPos.y + 20,
+                    view.currentPos.y,
                     WINDOW_WIDTH - easingTex.width,
                     200);
+                subView.parent = view;
 
                 int easing = -1;
                 bool includeEasing = false;
@@ -861,32 +860,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
-                int newEasing = easing;
+                subView.DrawLabel("Easing", 50, 20);
+
                 easingComboBox.currentIndex = easing;
-
-                subView.BeginLayout(GUIView.LayoutDirection.Horizontal);
+                easingComboBox.onSelected = (_easing, index) =>
                 {
-                    subView.DrawLabel("Easing", 50, 20);
-
-                    if (subView.DrawButton("<", 20, 20))
-                    {
-                        newEasing--;
-                    }
-
-                    if (subView.DrawButton(">", 20, 20))
-                    {
-                        newEasing++;
-                    }
-                }
-                subView.EndLayout();
-
-                // 新値の適用
-                if (newEasing != easing)
-                {
-                    updateEasing(newEasing);
-                }
-
-                subView.DrawComboBoxButton(easingComboBox, 80, 20, false);
+                    updateEasing(_easing);
+                };
+                easingComboBox.DrawButton(subView);
             }
 
             view.DrawTexture(easingTex);

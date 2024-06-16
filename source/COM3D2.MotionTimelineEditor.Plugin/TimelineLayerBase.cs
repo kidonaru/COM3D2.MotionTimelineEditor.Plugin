@@ -333,6 +333,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static ModelHackManager modelHackManager
+        {
+            get
+            {
+                return ModelHackManager.instance;
+            }
+        }
+
         protected static StudioHackBase studioHack
         {
             get
@@ -1096,12 +1104,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int GetEasing(int frameNo, string boneName)
         {
             var bone = GetBone(frameNo, boneName);
-            if (bone != null && bone.transform.easing != 0)
+            if (bone != null)
             {
                 return bone.transform.easing;
             }
 
-            return 0;
+            return (int) config.defaultEasingType;
         }
 
         public void FromXml(TimelineLayerXml xml)

@@ -519,7 +519,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             InitTexture();
 
-            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
             var basePos = view.currentPos;
 

@@ -761,61 +761,61 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             switch (valueType)
             {
-                case TangentValueType.X:
+                case TangentValueType.X移動:
                     if (hasPosition)
                     {
                         return new ValueData[] { positionValues[0] };
                     }
                     break;
-                case TangentValueType.Y:
+                case TangentValueType.Y移動:
                     if (hasPosition)
                     {
                         return new ValueData[] { positionValues[1] };
                     }
                     break;
-                case TangentValueType.Z:
+                case TangentValueType.Z移動:
                     if (hasPosition)
                     {
                         return new ValueData[] { positionValues[2] };
                     }
                     break;
-                case TangentValueType.Move:
+                case TangentValueType.移動:
                     if (hasPosition)
                     {
                         return positionValues;
                     }
                     break;
-                case TangentValueType.RX:
+                case TangentValueType.X回転:
                     if (hasRotation)
                     {
                         return new ValueData[] { rotationValues[0] };
                     }
                     break;
-                case TangentValueType.RY:
+                case TangentValueType.Y回転:
                     if (hasRotation)
                     {
                         return new ValueData[] { rotationValues[1] };
                     }
                     break;
-                case TangentValueType.RZ:
+                case TangentValueType.Z回転:
                     if (hasRotation)
                     {
                         return new ValueData[] { rotationValues[2] };
                     }
                     break;
-                case TangentValueType.RW:
+                case TangentValueType.W回転:
                     if (hasRotation)
                     {
                         return new ValueData[] { rotationValues[3] };
                     }
                     break;
-                case TangentValueType.Rotation:
+                case TangentValueType.回転:
                     if (hasRotation)
                     {
                         return rotationValues;
                     }
                     break;
-                case TangentValueType.All:
+                case TangentValueType.すべて:
                     return values;
             }
 

@@ -435,7 +435,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var initialEulerAngles = Vector3.zero;
             var initialScale = Vector3.one;
 
-            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
             DrawTransform(
                 view,

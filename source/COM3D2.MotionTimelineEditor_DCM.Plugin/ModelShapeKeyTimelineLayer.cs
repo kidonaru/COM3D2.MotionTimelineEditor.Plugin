@@ -32,7 +32,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
     }
 
     [LayerDisplayName("モデルシェイプ")]
-    public partial class ModelShapeKeyTimelineLayer : TimelineLayerBase
+    public partial class ModelShapeKeyTimelineLayer : ModelTimelineLayerBase
     {
         public override int priority
         {
@@ -358,29 +358,34 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             PluginUtils.LogWarning("モデルシェイプキーはDCMに対応していません");
         }
 
-        public override float CalcEasingValue(float t, int easing)
-        {
-            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
-        }
-
-        private ComboBoxCache<StudioModelStat> _modelComboBox = new ComboBoxCache<StudioModelStat>
+        private GUIComboBox<StudioModelStat> _modelComboBox = new GUIComboBox<StudioModelStat>
         {
             getName = (model, index) => model.displayName,
-            contentSize = new Vector2(220, 300),
+            buttonSize = new Vector2(200, 20),
+            contentSize = new Vector2(200, 300),
         };
+
+        private enum TabType
+        {
+            操作,
+            管理,
+        }
+
+        private TabType _tabType = TabType.操作;
 
         public override void DrawWindow(GUIView view)
         {
-            view.BeginScrollView(
-                view.viewRect.width,
-                view.viewRect.height,
-                GUIView.AutoScrollViewRect,
-                false,
-                true);
+            _tabType = view.DrawTabs(_tabType, 50, 20);
 
-            DrawBlendShapes(view);
-
-            view.EndScrollView();
+            switch (_tabType)
+            {
+                case TabType.操作:
+                    DrawBlendShapes(view);
+                    break;
+                case TabType.管理:
+                    DrawModelManage(view);
+                    break;
+            }
 
             view.DrawComboBox();
         }
@@ -395,10 +400,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            view.SetEnabled(view.guiEnabled && !view.IsComboBoxFocused());
+            view.SetEnabled(!view.IsComboBoxFocused());
 
             view.DrawLabel("モデル選択", 200, 20);
-            view.DrawComboBoxButton(_modelComboBox, 240, 20, true);
+            _modelComboBox.DrawButton(view);
 
             var model = _modelComboBox.currentItem;
             if (model == null || model.transform == null)
@@ -414,33 +419,42 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
+            view.DrawHorizontalLine(Color.gray);
 
-            for (var i = 0; i < blendShapes.Count; i++)
+            view.AddSpace(5);
+
+            view.BeginScrollView();
             {
-                var blendShape = blendShapes[i];
-                var weight = blendShape.weight;
-                var updateTransform = false;
+                view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
-                view.DrawLabel(blendShape.shapeKeyName, -1, 20);
-
-                updateTransform |= view.DrawSliderValue(
-                    new GUIView.SliderOption
-                    {
-                        min = -1f,
-                        max = 2f,
-                        step = 0.01f,
-                        defaultValue = 0f,
-                        value = weight,
-                        onChanged = x => weight = x,
-                    });
-
-                if (updateTransform)
+                for (var i = 0; i < blendShapes.Count; i++)
                 {
-                    blendShape.weight = weight;
-                    model.FixBlendValues();
+                    var blendShape = blendShapes[i];
+                    var weight = blendShape.weight;
+                    var updateTransform = false;
+
+                    view.DrawLabel(blendShape.shapeKeyName, -1, 20);
+
+                    updateTransform |= view.DrawSliderValue(
+                        new GUIView.SliderOption
+                        {
+                            min = -1f,
+                            max = 2f,
+                            step = 0.01f,
+                            defaultValue = 0f,
+                            value = weight,
+                            onChanged = x => weight = x,
+                        });
+
+                    if (updateTransform)
+                    {
+                        blendShape.weight = weight;
+                        model.FixBlendValues();
+                    }
                 }
             }
+            view.SetEnabled(!view.IsComboBoxFocused());
+            view.EndScrollView();
         }
 
         public override ITransformData CreateTransformData(string name)

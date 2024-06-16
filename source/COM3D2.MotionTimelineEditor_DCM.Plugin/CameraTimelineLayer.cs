@@ -450,7 +450,35 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private static readonly List<string> MaidPointTypeNames = new List<string>
         {
-            "顔", "胸", "股", "尻"
+            "顔", "胸", "股", "尻", "中心",
+        };
+
+        private GUIComboBox<MaidCache> _maidComboBox = new GUIComboBox<MaidCache>
+        {
+            getName = (maidCache, _) => maidCache == null ? "未選択" : maidCache.fullName,
+            buttonSize = new Vector2(100, 20),
+            contentSize = new Vector2(150, 300),
+        };
+
+        private GUIComboBox<MaidPointType> _targetMaidPointComboBox = new GUIComboBox<MaidPointType>
+        {
+            items = new List<MaidPointType>
+            {
+                MaidPointType.Head,
+                MaidPointType.Chest,
+                MaidPointType.Crotch,
+                MaidPointType.Hip,
+                MaidPointType.Bip01,
+            },
+            getName = (type, index) => MaidPointTypeNames[index],
+            buttonSize = new Vector2(50, 20),
+        };
+
+        private GUIComboBox<StudioModelStat> _modelComboBox = new GUIComboBox<StudioModelStat>
+        {
+            getName = (model, index) => model.displayName,
+            buttonSize = new Vector2(100, 20),
+            contentSize = new Vector2(200, 300),
         };
 
         public override void DrawWindow(GUIView view)
@@ -470,7 +498,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var initialPosition = Vector3.zero;
             var initialEulerAngles = Vector3.zero;
 
-            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
             updateTransform |= view.DrawSliderValue(
                 new GUIView.SliderOption
@@ -580,6 +608,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             view.DrawLabel("対象設定", 70, 20);
 
+            Action updateCamera = () =>
+            {
+                uoCamera.SetTargetPos(position);
+                uoCamera.SetDistance(distance);
+                uoCamera.SetAroundAngle(new Vector2(angles.y, angles.x));
+                Camera.main.SetRotationZ(angles.z);
+            };
+
             Action focusToMaid = () =>
             {
                 var maidCache = maidManager.GetMaidCache(_targetMaidSlotNo);
@@ -587,7 +623,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 {
                     var trans = _dcmMaidManager.GetMiadPatrsTrancform(maidCache.maid, _targetMaidPoint);
                     position = trans.position;
-                    updateTransform = true;
+                    updateCamera();
                 }
             };
 
@@ -595,16 +631,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 view.DrawLabel("対象メイド", 70, 20);
 
-                var newTargetMaidSlotNo = view.DrawSelectList(
-                    maidManager.maidCaches,
-                    (cache, index) => string.Format("{0}:{1}", index, cache.maid.status.fullNameJpStyle),
-                    140, 20, _targetMaidSlotNo);
-                
-                if (newTargetMaidSlotNo != _targetMaidSlotNo)
+                _maidComboBox.currentIndex = _targetMaidSlotNo;
+                _maidComboBox.items = maidManager.maidCaches;
+                _maidComboBox.onSelected = (maidCache, index) =>
                 {
-                    _targetMaidSlotNo = newTargetMaidSlotNo;
+                    _targetMaidSlotNo = index;
                     focusToMaid();
-                }
+                };
+                _maidComboBox.DrawButton(view);
 
                 if (view.DrawButton("移動", 40, 20))
                 {
@@ -617,16 +651,13 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 view.DrawLabel("対象ポイント", 70, 20);
 
-                var newTargetMaidPoint = (MaidPointType)view.DrawSelectList(
-                    MaidPointTypeNames,
-                    (name, index) => name,
-                    80, 20, (int)_targetMaidPoint);
-                
-                if (newTargetMaidPoint != _targetMaidPoint)
+                _targetMaidPointComboBox.currentIndex = (int) _targetMaidPoint;
+                _targetMaidPointComboBox.onSelected = (type, index) =>
                 {
-                    _targetMaidPoint = newTargetMaidPoint;
+                    _targetMaidPoint = type;
                     focusToMaid();
-                }
+                };
+                _targetMaidPointComboBox.DrawButton(view);
             }
             view.EndLayout();
 
@@ -637,7 +668,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 {
                     var trans = model.transform;
                     position = trans.position;
-                    updateTransform = true;
+                    updateCamera();
                 }
             };
 
@@ -645,20 +676,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 view.DrawLabel("対象モデル", 70, 20);
 
-                var newTargetModelIndex = view.DrawSelectList(
-                    modelManager.modelNames,
-                    (modelName, index) =>
-                    {
-                        var m = modelManager.GetModel(index);
-                        return m != null ? m.displayName : string.Empty;
-                    },
-                    140, 20, _targetModelIndex);
-                
-                if (newTargetModelIndex != _targetModelIndex)
+                _modelComboBox.items = modelManager.models;
+                _modelComboBox.currentIndex = _targetModelIndex;
+                _modelComboBox.onSelected = (model, index) =>
                 {
-                    _targetModelIndex = newTargetModelIndex;
+                    _targetModelIndex = index;
                     focusToModel();
-                }
+                };
+                _modelComboBox.DrawButton(view);
 
                 if (view.DrawButton("移動", 40, 20))
                 {
@@ -669,10 +694,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             if (updateTransform)
             {
-                uoCamera.SetTargetPos(position);
-                uoCamera.SetDistance(distance);
-                uoCamera.SetAroundAngle(new Vector2(angles.y, angles.x));
-                Camera.main.SetRotationZ(angles.z);
+                updateCamera();
             }
         }
 

@@ -5,17 +5,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public enum TangentValueType
     {
-        X,
-        Y,
-        Z,
-        RX,
-        RY,
-        RZ,
-        RW,
-        Move,
-        Rotation,
-        All,
-        Max,
+        X移動,
+        Y移動,
+        Z移動,
+        X回転,
+        Y回転,
+        Z回転,
+        W回転,
+        移動,
+        回転,
+        すべて,
     }
 
     public enum TangentType
@@ -29,20 +28,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class TangentData
     {
-        public static readonly List<string> TangentValueTypeNames = new List<string>
-        {
-            "X移動",
-            "Y移動",
-            "Z移動",
-            "X回転",
-            "Y回転",
-            "Z回転",
-            "W回転",
-            "移動",
-            "回転",
-            "すべて",
-        };
-
         public static readonly List<string> TangentTypeNames = new List<string> {
             "EaseInOut", "EaseIn", "EaseOut", "線形補間", "自動補間" };
 

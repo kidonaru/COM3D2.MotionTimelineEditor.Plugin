@@ -168,9 +168,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private GUIView timelineView = null;
         private GUIView boneMenuView = null;
 
-        private ComboBoxCache<FileMenuType> fileMenuComboBox = new ComboBoxCache<FileMenuType>
+        private GUIComboBox<FileMenuType> fileMenuComboBox = new GUIComboBox<FileMenuType>
         {
-            label = "ファイル",
+            defaultName = "ファイル",
             items = new List<FileMenuType>
             {
                 FileMenuType.New,
@@ -224,9 +224,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         break;
                 }
             },
-            contentSize = new Vector2(100, 120),
+            showArrow = false,
+            buttonSize = new Vector2(60, 20),
         };
-        private ComboBoxCache<TimelineLayerInfo> layerComboBox = new ComboBoxCache<TimelineLayerInfo>
+
+        private GUIComboBox<TimelineLayerInfo> _layerComboBox = new GUIComboBox<TimelineLayerInfo>
         {
             getName = (layerInfo, index) =>
             {
@@ -237,11 +239,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var className = layerInfo.className;
                 timelineManager.ChangeActiveLayer(className, maidManager.maidSlotNo);
             },
-            contentSize = new Vector2(120, 200),
         };
-        private ComboBoxCache<Maid> _maidComboBox = new ComboBoxCache<Maid>
+
+        private GUIComboBox<MaidCache> _maidComboBox = new GUIComboBox<MaidCache>
         {
-            contentSize = new Vector2(170, 200),
+            getName = (maidCache, _) => maidCache == null ? "未選択" : maidCache.fullName,
+            onSelected = (maidCache, index) =>
+            {
+                maidManager.ChangeMaid(maidCache.maid);
+            },
+            buttonSize = new Vector2(150, 20),
+            contentSize = new Vector2(150, 300),
         };
 
         public GUIStyle gsWin = new GUIStyle("box")
@@ -278,16 +286,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void Init()
         {
             texWhite = GUIView.CreateColorTexture(Color.white);
-
-            _maidComboBox.getName = (maid, index) =>
-            {
-                var name = maid == null ? "未選択" : maid.status.fullNameJpStyle;
-                return string.Format("{0}:{1}", index, name);
-            };
-            _maidComboBox.onSelected = (maid, index) =>
-            {
-                maidManager.ChangeMaid(maid);
-            };
         }
 
         public void Update()
@@ -444,10 +442,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             DrawTimeline(editEnabled, guiEnabled);
             DrawBoneMenu(editEnabled, guiEnabled);
 
-            if (!editEnabled)
-            {
-                contentView.CancelFocusComboBox();
-            }
             contentView.DrawComboBox();
 
             if (!isFrameDragging && !isAreaDragging)
@@ -519,7 +513,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.margin = 0;
 
                 fileMenuComboBox.currentIndex = -1;
-                view.DrawComboBoxButton(fileMenuComboBox, 60, 20, false);
+                fileMenuComboBox.DrawButton(view);
 
                 if (view.DrawButton("ロード", 60, 20))
                 {
@@ -551,11 +545,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (view.DrawButton("トラック", 60, 20, editEnabled, trackColor))
                 {
                     subWindow.ToggleSubWindow(SubWindowType.Track);
-                }
-
-                if (view.DrawButton("モデル", 60, 20, editEnabled))
-                {
-                    subWindow.ToggleSubWindow(SubWindowType.StudioModel);
                 }
 
                 if (view.DrawButton("履歴", 60, 20, editEnabled))
@@ -766,24 +755,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
-                view.DrawLabel("レイヤー", 100, 20);
-
                 var layerInfo = timelineManager.GetLayerInfo(currentLayer.className);
-                layerComboBox.currentIndex = layerInfo.index;
-                layerComboBox.items = timelineManager.GetLayerInfoList();
-
-                view.DrawComboBoxButton(layerComboBox, 140, 20, true);
+                _layerComboBox.currentIndex = layerInfo.index;
+                _layerComboBox.items = timelineManager.GetLayerInfoList();
+                _layerComboBox.DrawButton("レイヤー", view);
 
                 view.AddSpace(10);
 
                 if (currentLayer.hasSlotNo)
                 {
-                    view.DrawLabel("操作対象", 50, 20);
-
                     _maidComboBox.currentIndex = currentLayer.slotNo;
-                    _maidComboBox.items = studioHack.allMaids;
-
-                    view.DrawComboBoxButton(_maidComboBox, 190, 20, true);
+                    _maidComboBox.items = maidManager.maidCaches;
+                    _maidComboBox.DrawButton("操作対象", view);
                 }
             }
             view.EndLayout();

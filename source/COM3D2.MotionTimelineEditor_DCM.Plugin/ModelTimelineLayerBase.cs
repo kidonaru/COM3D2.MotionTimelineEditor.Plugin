@@ -1,34 +1,36 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Xml.Linq;
+using COM3D2.DanceCameraMotion.Plugin;
+using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
-namespace COM3D2.MotionTimelineEditor.Plugin
+namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
     using AttachPoint = PhotoTransTargetObject.AttachPoint;
 
-    public class StudioModelUI : SubWindowUIBase
+    public abstract class ModelTimelineLayerBase : TimelineLayerBase
     {
-        public override string title
+        protected ModelTimelineLayerBase(int slotNo) : base(slotNo)
         {
-            get
-            {
-                return "モデル設定";
-            }
         }
 
-        private List<ComboBoxCache<string>> _pluginComboBoxList = new List<ComboBoxCache<string>>();
-        private List<ComboBoxCache<MaidCache>> _maidComboBoxList = new List<ComboBoxCache<MaidCache>>();
-        private List<ComboBoxCache<string>> _attachPointComboBoxList = new List<ComboBoxCache<string>>();
+        public override float CalcEasingValue(float t, int easing)
+        {
+            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
+        }
+
+        private List<GUIComboBox<string>> _pluginComboBoxList = new List<GUIComboBox<string>>();
+        private List<GUIComboBox<MaidCache>> _maidComboBoxList = new List<GUIComboBox<MaidCache>>();
+        private List<GUIComboBox<string>> _attachPointComboBoxList = new List<GUIComboBox<string>>();
         private List<string> _pluginNames = new List<string>();
         private Dictionary<string, int> _pluginNameToIndex = new Dictionary<string, int>();
         private List<MaidCache> _maidCaches = new List<MaidCache>();
 
-        public StudioModelUI(SubWindow subWindow) : base(subWindow)
-        {
-        }
-
-        public override void DrawContent(GUIView view)
+        protected void DrawModelManage(GUIView view)
         {
             if (timeline == null)
             {
@@ -47,13 +49,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _maidCaches.Add(null);
             _maidCaches.AddRange(maidManager.maidCaches);
 
-            {
-                DrawModels(view);
-            }
-        }
-
-        public void DrawModels(GUIView view)
-        {
             var models = modelManager.models;
             if (models.Count == 0)
             {
@@ -63,52 +58,47 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             while (_pluginComboBoxList.Count < models.Count)
             {
-                _pluginComboBoxList.Add(new ComboBoxCache<string>
+                _pluginComboBoxList.Add(new GUIComboBox<string>
                 {
-                    getName = (name, _) =>
-                    {
-                        return string.IsNullOrEmpty(name) ? "Default" : name;
-                    },
-                    contentSize = new Vector2(130, 120),
+                    getName = (name, _) => string.IsNullOrEmpty(name) ? "Default" : name,
                 });
             }
 
             while (_maidComboBoxList.Count < models.Count)
             {
-                _maidComboBoxList.Add(new ComboBoxCache<MaidCache>
+                _maidComboBoxList.Add(new GUIComboBox<MaidCache>
                 {
-                    getName = (maidCache, _) =>
-                    {
-                        return maidCache == null ? "未選択" : maidCache.fullName;
-                    },
-                    contentSize = new Vector2(130, 120),
+                    getName = (maidCache, _) => maidCache == null ? "未選択" : maidCache.fullName,
+                    contentSize = new Vector2(150, 300),
                 });
             }
 
             while (_attachPointComboBoxList.Count < models.Count)
             {
-                _attachPointComboBoxList.Add(new ComboBoxCache<string>
+                _attachPointComboBoxList.Add(new GUIComboBox<string>
                 {
                     getName = (name, _) => name,
                     items = BoneUtils.AttachPointNames,
-                    contentSize = new Vector2(80, 200),
+                    buttonSize = new Vector2(60, 20),
                 });
             }
 
-            view.SetEnabled(!view.IsComboBoxFocused());
+            view.DrawHorizontalLine(Color.gray);
+
+            view.AddSpace(5);
 
             view.padding = Vector2.zero;
             var currentIndex = timeline.activeTrackIndex;
 
             view.DrawContentListView(
                 models,
-                DrawModel,
+                DrawModelContent,
                 -1,
                 -1,
                 80);
         }
 
-        public void DrawModel(
+        protected void DrawModelContent(
             GUIView view,
             StudioModelStat model,
             int modelIndex)
@@ -147,7 +137,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         modelManager.ChangePluginName(model, pluginName);
                     };
 
-                    view.DrawComboBoxButton(pluginComboBox, 150, 20, true);
+                    pluginComboBox.DrawButton(view);
                 }
 
                 if (view.DrawButton("複製", 45, 20))
@@ -180,7 +170,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         modelManager.UpdateAttachPoint(model);
                     };
 
-                    view.DrawComboBoxButton(maidComboBox, 150, 20, true);
+                    maidComboBox.DrawButton(view);
                 }
 
                 // アタッチポイント選択
@@ -195,7 +185,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         modelManager.UpdateAttachPoint(model);
                     };
 
-                    view.DrawComboBoxButton(attachPointComboBox, 100, 20, true);
+                    attachPointComboBox.DrawButton(view);
                 }
             }
             view.EndLayout();

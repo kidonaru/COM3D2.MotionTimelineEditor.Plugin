@@ -17,27 +17,47 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static readonly List<string> EyeMoveTypeNames =
-            Enum.GetNames(typeof(Maid.EyeMoveType)).ToList();
-
         private enum TabType
         {
-            Song,
-            Common,
+            個別,
+            共通,
             BGM,
-            Video,
-            Max,
+            動画,
         }
 
-        private TabType tabType = TabType.Song;
+        private TabType _tabType = TabType.個別;
 
-        public static readonly List<string> TabTypeNames = new List<string>
+        private GUIComboBox<TangentType> _defaultTangentTypeComboBox = new GUIComboBox<TangentType>
         {
-            "個別",
-            "共通",
-            "BGM",
-            "動画",
+            items = Enum.GetValues(typeof(TangentType)).Cast<TangentType>().ToList(),
+            getName = (type, index) => TangentData.TangentTypeNames[index],
+            onSelected = (type, index) =>
+            {
+                config.defaultTangentType = type;
+                config.dirty = true;
+            },
         };
+
+        private GUIComboBox<MoveEasingType> _defaultEasingTypeComboBox = new GUIComboBox<MoveEasingType>
+        {
+            items = Enum.GetValues(typeof(MoveEasingType)).Cast<MoveEasingType>().ToList(),
+            getName = (type, index) => type.ToString(),
+            onSelected = (type, index) =>
+            {
+                config.defaultEasingType = type;
+                config.dirty = true;
+            },
+        };
+
+        private GUIComboBox<Maid.EyeMoveType> _eyeMoveTypeComboBox = new GUIComboBox<Maid.EyeMoveType>
+        {
+            items = Enum.GetValues(typeof(Maid.EyeMoveType)).Cast<Maid.EyeMoveType>().ToList(),
+            getName = (type, index) => type.ToString(),
+            onSelected = (type, index) =>
+            {
+                timeline.eyeMoveType = type;
+            },
+        }; 
 
         private static MainWindow mainWindow
         {
@@ -58,32 +78,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
-            for (var i = 0; i < (int)TabType.Max; i++)
-            {
-                var type = (TabType)i;
-                var color = tabType == type ? Color.green : Color.white;
-                if (view.DrawButton(TabTypeNames[i], 50, 20, true, color))
-                {
-                    tabType = type;
-                }
-            }
-            view.EndLayout();
+            _tabType = view.DrawTabs(_tabType, 50, 20);
 
             view.DrawHorizontalLine(Color.gray);
 
-            switch (tabType)
+            switch (_tabType)
             {
-                case TabType.Song:
+                case TabType.個別:
                     DrawSongSetting(view);
                     break;
-                case TabType.Common:
+                case TabType.共通:
                     DrawCommonSetting(view);
                     break;
                 case TabType.BGM:
                     DrawBGMSetting(view);
                     break;
-                case TabType.Video:
+                case TabType.動画:
                     DrawVideoSetting(view);
                     break;
             }
@@ -118,19 +128,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            var newEyeMoveType = (Maid.EyeMoveType)view.DrawSelectList(
-                "メイド目線",
-                EyeMoveTypeNames,
-                (name, index) => name,
-                250,
-                20,
-                (int)timeline.eyeMoveType);
-            if (newEyeMoveType != timeline.eyeMoveType)
-            {
-                timeline.eyeMoveType = newEyeMoveType;
-            }
+            _eyeMoveTypeComboBox.currentIndex = (int)timeline.eyeMoveType;
+            _eyeMoveTypeComboBox.DrawButton("メイド目線", view);
 
-            var newUseHeadKey = view.DrawToggle("顔/瞳の固定化", timeline.useHeadKey, 200, 20);
+            var newUseHeadKey = view.DrawToggle("顔/瞳の固定化", timeline.useHeadKey, 120, 20);
             if (newUseHeadKey != timeline.useHeadKey)
             {
                 timeline.useHeadKey = newUseHeadKey;
@@ -152,7 +153,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            var newIsLoopAnm = view.DrawToggle("ループアニメーション", timeline.isLoopAnm, 200, 20);
+            var newIsLoopAnm = view.DrawToggle("ループアニメーション", timeline.isLoopAnm, 150, 20);
             if (newIsLoopAnm != timeline.isLoopAnm)
             {
                 timeline.isLoopAnm = newIsLoopAnm;
@@ -227,18 +228,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             view.DrawLabel("共通設定", 80, 20);
 
-            var newDefaultTangentType = (TangentType)view.DrawSelectList(
-                                "初期補正曲線",
-                                TangentData.TangentTypeNames,
-                                (name, index) => name,
-                                250,
-                                20,
-                                (int)config.defaultTangentType);
-            if (newDefaultTangentType != config.defaultTangentType)
-            {
-                config.defaultTangentType = newDefaultTangentType;
-                config.dirty = true;
-            }
+            _defaultTangentTypeComboBox.currentIndex = (int)config.defaultTangentType;
+            _defaultTangentTypeComboBox.DrawButton("初期補間曲線", view);
+
+            _defaultEasingTypeComboBox.currentIndex = (int)config.defaultEasingType;
+            _defaultEasingTypeComboBox.DrawButton("初期イージング", view);
 
             var newDetailTransformCount = view.DrawIntField("Trans詳細表示数", config.detailTransformCount, 150, 20);
             if (newDetailTransformCount != config.detailTransformCount)
@@ -447,6 +441,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             "最背面",
         };
 
+        private GUIComboBox<VideoDisplayType> _videoDisplayTypeComboBox = new GUIComboBox<VideoDisplayType>
+        {
+            items = Enum.GetValues(typeof(VideoDisplayType)).Cast<VideoDisplayType>().ToList(),
+            getName = (type, index) => VideoDisplayTypeNames[index],
+            onSelected = (type, index) =>
+            {
+                timeline.videoDisplayType = type;
+                movieManager.ReloadMovie();
+            },
+        }; 
+
         private void DrawVideoSetting(GUIView view)
         {
             var isEnabled = timeline.videoEnabled;
@@ -471,27 +476,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
-            {
-                view.DrawLabel("表示形式", 80, 20);
+            _videoDisplayTypeComboBox.currentIndex = (int)timeline.videoDisplayType;
+            _videoDisplayTypeComboBox.DrawButton("表示形式", view);
 
-                var newVideoDisplayType = (VideoDisplayType) view.DrawSelectList(
-                    VideoDisplayTypeNames,
-                    (name, index) => name,
-                    100,
-                    20,
-                    (int) timeline.videoDisplayType
-                );
-
-                if (newVideoDisplayType != timeline.videoDisplayType)
-                {
-                    timeline.videoDisplayType = newVideoDisplayType;
-                    movieManager.ReloadMovie();
-                }
-            }
-            view.EndLayout();
-
-            GUI.enabled = isEnabled;
+            view.SetEnabled(isEnabled);
 
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
@@ -719,7 +707,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     },
                 });
 
-            GUI.enabled = true;
+            view.SetEnabled(true);
         }
     }
 }

@@ -125,9 +125,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.subWindow = subWindow;
         }
 
-        private GUISubView _headerView = null;
+        private GUIView _headerView = new GUIView(0, 0, WINDOW_WIDTH, 20)
+        {
+            padding = Vector2.zero,
+            margin = 0,
+        };
         private GUIView _contentView = new GUIView(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        private ComboBoxCache<SubWindowType> _subWindowTypeComboBox = null;
+        private GUIComboBox<SubWindowType> _subWindowTypeComboBox = null;
 
         public static Texture2D texLock = null;
 
@@ -135,13 +139,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (_subWindowTypeComboBox == null)
             {
-                _subWindowTypeComboBox = new ComboBoxCache<SubWindowType>
+                _subWindowTypeComboBox = new GUIComboBox<SubWindowType>
                 {
-                    label = "切替",
+                    defaultName = "切替",
                     items = SubWindow.SubWindowTypes,
                     getName = (type, index) => subWindow.GetSubWindowUI(type).title,
                     onSelected = (type, index) => subWindow.subWindowType = type,
-                    contentSize = new Vector2(180, 200),
+                    buttonSize = new Vector2(40, 20),
+                    contentSize = new Vector2(140, 300),
                 };
             }
 
@@ -151,23 +156,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 texLock.LoadImage(PluginUtils.LockIcon);
             }
 
-            if (_headerView == null)
-            {
-                _headerView = new GUISubView(_contentView, 0, 0, WINDOW_WIDTH, 20)
-                {
-                    padding = Vector2.zero,
-                    margin = 0,
-                };
-            }
-
-            _headerView.ResetLayout();
-            _headerView.SetEnabled(!_contentView.IsComboBoxFocused());
-
             _contentView.ResetLayout();
             _contentView.SetEnabled(!_contentView.IsComboBoxFocused());
             _contentView.padding = GUIView.defaultPadding;
             _contentView.margin = GUIView.defaultMargin;
             _contentView.currentPos.y = 20;
+
+            _headerView.ResetLayout();
+            _headerView.parent = _contentView;
         }
 
         public virtual void DrawWindow(int id)
@@ -192,7 +188,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.currentPos.x = 140;
 
                 _subWindowTypeComboBox.currentIndex = (int) subWindow.subWindowType;
-                view.DrawComboBoxButton(_subWindowTypeComboBox, 80, 20, true);
+                _subWindowTypeComboBox.DrawButton(view);
 
                 if (view.DrawButton("+", 20, 20))
                 {

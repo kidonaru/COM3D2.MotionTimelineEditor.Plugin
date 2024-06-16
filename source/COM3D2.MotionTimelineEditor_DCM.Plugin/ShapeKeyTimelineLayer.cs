@@ -460,14 +460,20 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
-        private ComboBoxCache<string> _slotNameComboBox = new ComboBoxCache<string>
+        private GUIComboBox<string> _slotNameComboBox = new GUIComboBox<string>
         {
             getName = (slotName, index) => slotName,
-            contentSize = new Vector2(130, 300),
         };
         private Maid _maid = null;
         private List<string> _slotNames = new List<string>();
-        private bool _isEditMode = false;
+
+        private enum TabType
+        {
+            追加,
+            操作,
+        }
+
+        private TabType _tabType = TabType.追加;
 
         public override void DrawWindow(GUIView view)
         {
@@ -480,39 +486,24 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            view.SetEnabled(view.guiEnabled && !view.IsComboBoxFocused());
+            view.SetEnabled(!view.IsComboBoxFocused());
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            _tabType = view.DrawTabs(_tabType, 50, 20);
+
+            switch (_tabType)
             {
-                var color = !_isEditMode ? Color.green : Color.white;
-                if (view.DrawButton("追加", 80, 20, true, color))
-                {
-                    _isEditMode = false;
-                }
-
-                color = _isEditMode ? Color.green : Color.white;
-                if (view.DrawButton("編集", 80, 20, true, color))
-                {
-                    _isEditMode = true;
-                }
-            }
-            view.EndLayout();
-
-            view.DrawHorizontalLine(Color.gray);
-
-            if (_isEditMode)
-            {
-                DrawBlendShapesEdit(view);
-            }
-            else
-            {
-                DrawBlendShapesSelect(view);
+                case TabType.追加:
+                    DrawBlendShapesAdd(view);
+                    break;
+                case TabType.操作:
+                    DrawBlendShapesEdit(view);
+                    break;
             }
 
             view.DrawComboBox();
         }
 
-        public void DrawBlendShapesSelect(GUIView view)
+        public void DrawBlendShapesAdd(GUIView view)
         {
             var maid = maidManager.maid;
             var maidSlotNo = maidManager.maidSlotNo;
@@ -525,14 +516,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     .ToList();
             }
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
-            {
-                view.DrawLabel("対象スロット", 80, 20);
-
-                _slotNameComboBox.items = _slotNames;
-                view.DrawComboBoxButton(_slotNameComboBox, 140, 20, true);
-            }
-            view.EndLayout();
+            _slotNameComboBox.items = _slotNames;
+            _slotNameComboBox.DrawButton("対象スロット", view);
 
             var slotName = _slotNameComboBox.currentItem;
 
@@ -546,12 +531,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var tags = morph.GetTags();
             tags.Sort();
 
-            view.BeginScrollView(
-                view.viewRect.width,
-                view.viewRect.height - view.currentPos.y,
-                GUIView.AutoScrollViewRect,
-                false,
-                true);
+            view.DrawHorizontalLine(Color.gray);
+
+            view.AddSpace(5);
+
+            view.BeginScrollView();
 
             foreach (string tag in tags)
             {
@@ -576,6 +560,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 }
             }
 
+            view.SetEnabled(!view.IsComboBoxFocused());
             view.EndScrollView();
         }
 
@@ -584,14 +569,13 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var maid = maidManager.maid;
             var maidSlotNo = maidManager.maidSlotNo;
 
-            view.BeginScrollView(
-                view.viewRect.width,
-                view.viewRect.height - view.currentPos.y,
-                GUIView.AutoScrollViewRect,
-                false,
-                true);
+            view.DrawHorizontalLine(Color.gray);
 
-            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
+            view.AddSpace(5);
+
+            view.BeginScrollView();
+
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
             foreach (var menuItem in allMenuItems)
             {
@@ -626,6 +610,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 }
             }
 
+            view.SetEnabled(!view.IsComboBoxFocused());
             view.EndScrollView();
         }
 

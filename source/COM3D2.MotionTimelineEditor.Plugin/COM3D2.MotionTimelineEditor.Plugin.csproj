@@ -78,6 +78,7 @@
     <Compile Include="FrameData.cs" />
     <Compile Include="FrameXml.cs" />
     <Compile Include="GUICache.cs" />
+    <Compile Include="GUIComboBox.cs" />
     <Compile Include="GUIView.cs" />
     <Compile Include="IBoneMenuItem.cs" />
     <Compile Include="IKHoldManager.cs" />
@@ -114,7 +115,6 @@
     <Compile Include="StudioHackManager.cs" />
     <Compile Include="StudioModelManager.cs" />
     <Compile Include="StudioModelStat.cs" />
-    <Compile Include="StudioModelUI.cs" />
     <Compile Include="SubWindow.cs" />
     <Compile Include="SubWindowUIBase.cs" />
     <Compile Include="TangentData.cs" />

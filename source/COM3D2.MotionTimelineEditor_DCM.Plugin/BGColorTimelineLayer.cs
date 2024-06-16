@@ -305,7 +305,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var color = camera.backgroundColor;
             var updateTransform = false;
 
-            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
             updateTransform |= view.DrawSliderValue(
                 new GUIView.SliderOption

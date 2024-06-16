@@ -432,97 +432,103 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
+        private enum TabType
+        {
+            目,
+            眉,
+            口,
+            他,
+        }
+
+        private TabType _tabType = TabType.目;
+
         public override void DrawWindow(GUIView view)
         {
-            var maid = this.maid;
             if (maid == null)
             {
                 return;
             }
 
-            view.BeginScrollView(
-                view.viewRect.width,
-                view.viewRect.height,
-                GUIView.AutoScrollViewRect,
-                false,
-                true);
+            _tabType = view.DrawTabs(_tabType, 50, 20);
 
             _isForceUpdate = view.DrawToggle("強制上書き", _isForceUpdate, 150, 20);
 
-            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
+            view.DrawHorizontalLine(Color.gray);
 
-            Action<string> drawMorphSlider = morphName =>
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+
+            DrawMorph(view);
+        }
+
+        private void DrawMorph(GUIView view)
+        {
+            view.DrawLabel(_tabType.ToString(), 80, 20);
+
+            switch (_tabType)
             {
-                var displayName = MorphUtils.GetMorphJpName(morphName);
-                var morphValue = GetMorphValue(morphName);
-                var newMorphValue = morphValue;
-
-                view.DrawSliderValue(
-                    new GUIView.SliderOption
+                case TabType.目:
+                    foreach (var morphName in MyConst.EYE_MORPH.Keys)
                     {
-                        label = displayName,
-                        labelWidth = 80,
-                        min = 0f,
-                        max = 1f,
-                        step = 0f,
-                        defaultValue = 0f,
-                        value = newMorphValue,
-                        onChanged = value => newMorphValue = value,
-                    });
-
-                if (!Mathf.Approximately(newMorphValue, morphValue))
-                {
-                    SetMorphValue(morphName, newMorphValue);
-                }
-            };
-
-            Action<string> drawMorphToggle = morphName =>
-            {
-                var displayName = MorphUtils.GetMorphJpName(morphName);
-                var morphValue = GetMorphValue(morphName);
-                var isOn = morphValue >= 1f;
-
-                var newIsOn = view.DrawToggle(displayName, isOn, 150, 20);
-
-                if (newIsOn != isOn)
-                {
-                    SetMorphValue(morphName, newIsOn ? 1f : 0f);
-                }
-            };
-
-            view.DrawLabel("目", 80, 20);
-            foreach (var morphName in MyConst.EYE_MORPH.Keys)
-            {
-                drawMorphSlider(morphName);
-            }
-            view.DrawHorizontalLine(Color.gray);
-
-            view.DrawLabel("眉", 80, 20);
-            foreach (var morphName in MyConst.MAYU_MORPH.Keys)
-            {
-                drawMorphSlider(morphName);
-            }
-            view.DrawHorizontalLine(Color.gray);
-
-            view.DrawLabel("口", 80, 20);
-            foreach (var morphName in MyConst.MOUTH_MORPH.Keys)
-            {
-                drawMorphSlider(morphName);
-            }
-            view.DrawHorizontalLine(Color.gray);
-
-            view.DrawLabel("オプション", 80, 20);
-            foreach (var morphName in MyConst.FACE_OPTION_MORPH.Keys)
-            {
-                drawMorphToggle(morphName);
+                        DrawMorphSlider(view, morphName);
+                    }
+                    break;
+                case TabType.眉:
+                    foreach (var morphName in MyConst.MAYU_MORPH.Keys)
+                    {
+                        DrawMorphSlider(view, morphName);
+                    }
+                    break;
+                case TabType.口:
+                    foreach (var morphName in MyConst.MOUTH_MORPH.Keys)
+                    {
+                        DrawMorphSlider(view, morphName);
+                    }
+                    break;
+                case TabType.他:
+                    foreach (var morphName in MyConst.FACE_OPTION_MORPH.Keys)
+                    {
+                        DrawMorphToggle(view, morphName);
+                    }
+                    break;
             }
 
             if (studioHack.isPoseEditing && _isForceUpdate)
             {
                 _faceManager.SetMorphValue(maid, _applyMorphMap);
             }
+        }
 
-            view.EndScrollView();
+        private void DrawMorphSlider(GUIView view, string morphName)
+        {
+            var displayName = MorphUtils.GetMorphJpName(morphName);
+            var morphValue = GetMorphValue(morphName);
+
+            view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = displayName,
+                    labelWidth = 80,
+                    min = 0f,
+                    max = 1f,
+                    step = 0f,
+                    defaultValue = 0f,
+                    value = morphValue,
+                    onChanged = newValue => SetMorphValue(morphName, newValue),
+                });
+        }
+
+        private void DrawMorphToggle(GUIView view, string morphName)
+        {
+            var displayName = MorphUtils.GetMorphJpName(morphName);
+            var morphValue = GetMorphValue(morphName);
+            var isOn = morphValue >= 1f;
+
+            var newIsOn = view.DrawToggle(displayName, isOn, 150, 20);
+
+            if (newIsOn != isOn)
+            {
+                SetMorphValue(morphName, newIsOn ? 1f : 0f);
+            }
         }
 
         public override ITransformData CreateTransformData(string name)

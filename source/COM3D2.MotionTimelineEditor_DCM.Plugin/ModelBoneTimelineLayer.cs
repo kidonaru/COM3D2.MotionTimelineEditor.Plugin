@@ -33,7 +33,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
     }
 
     [LayerDisplayName("モデルボーン")]
-    public partial class ModelBoneTimelineLayer : TimelineLayerBase
+    public partial class ModelBoneTimelineLayer : ModelTimelineLayerBase
     {
         public override int priority
         {
@@ -369,36 +369,40 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             PluginUtils.LogWarning("モデルボーンはDCMに対応していません");
         }
 
-        public override float CalcEasingValue(float t, int easing)
-        {
-            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
-        }
-
-        private ComboBoxCache<StudioModelStat> _modelComboBox = new ComboBoxCache<StudioModelStat>
+        private GUIComboBox<StudioModelStat> _modelComboBox = new GUIComboBox<StudioModelStat>
         {
             getName = (model, index) => model.displayName,
-            contentSize = new Vector2(220, 300),
+            buttonSize = new Vector2(200, 20),
+            contentSize = new Vector2(200, 300),
         };
 
-        private ComboBoxCache<TransformEditType> _transComboBox = new ComboBoxCache<TransformEditType>
+        private GUIComboBox<TransformEditType> _transComboBox = new GUIComboBox<TransformEditType>
         {
             items = Enum.GetValues(typeof(TransformEditType)).Cast<TransformEditType>().ToList(),
             getName = (type, index) => type.ToString(),
-            contentSize = new Vector2(140, 300),
         };
+
+        private enum TabType
+        {
+            操作,
+            管理,
+        }
+
+        private TabType _tabType = TabType.操作;
 
         public override void DrawWindow(GUIView view)
         {
-            view.BeginScrollView(
-                view.viewRect.width,
-                view.viewRect.height,
-                GUIView.AutoScrollViewRect,
-                false,
-                true);
+            _tabType = view.DrawTabs(_tabType, 50, 20);
 
-            DrawBone(view);
-
-            view.EndScrollView();
+            switch (_tabType)
+            {
+                case TabType.操作:
+                    DrawBone(view);
+                    break;
+                case TabType.管理:
+                    DrawModelManage(view);
+                    break;
+            }
 
             view.DrawComboBox();
         }
@@ -413,10 +417,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            view.SetEnabled(view.guiEnabled && !view.IsComboBoxFocused());
+            view.SetEnabled(!view.IsComboBoxFocused());
 
             view.DrawLabel("モデル選択", 200, 20);
-            view.DrawComboBoxButton(_modelComboBox, 240, 20, true);
+            _modelComboBox.DrawButton(view);
 
             var model = _modelComboBox.currentItem;
             if (model == null || model.transform == null)
@@ -432,33 +436,37 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
-            {
-                view.DrawLabel("操作種類", 80, 20);
-                view.DrawComboBoxButton(_transComboBox, 140, 20, true);
-            }
-            view.EndLayout();
+            _transComboBox.DrawButton("操作種類", view);
 
             var editType = _transComboBox.currentItem;
 
-            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
+            view.DrawHorizontalLine(Color.gray);
 
-            foreach (var bone in bones)
+            view.AddSpace(5);
+
+            view.BeginScrollView();
             {
-                view.DrawHorizontalLine(Color.gray);
+                view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
-                view.DrawLabel(bone.transform.name, 200, 20);
+                foreach (var bone in bones)
+                {
+                    view.DrawLabel(bone.transform.name, 200, 20);
 
-                DrawTransform(
-                    view,
-                    bone.transform,
-                    editType,
-                    DrawMaskAll,
-                    bone.name,
-                    bone.initialPosition,
-                    bone.initialEulerAngles,
-                    bone.initialScale);
+                    DrawTransform(
+                        view,
+                        bone.transform,
+                        editType,
+                        DrawMaskAll,
+                        bone.name,
+                        bone.initialPosition,
+                        bone.initialEulerAngles,
+                        bone.initialScale);
+
+                    view.DrawHorizontalLine(Color.gray);
+                }
             }
+            view.SetEnabled(!view.IsComboBoxFocused());
+            view.EndScrollView();
         }
 
         public override ITransformData CreateTransformData(string name)

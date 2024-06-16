@@ -33,7 +33,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
     }
 
     [LayerDisplayName("モデル")]
-    public partial class ModelTimelineLayer : TimelineLayerBase
+    public class ModelTimelineLayer : ModelTimelineLayerBase
     {
         public override int priority
         {
@@ -452,35 +452,38 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override float CalcEasingValue(float t, int easing)
-        {
-            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
-        }
-
-        private ComboBoxCache<TransformEditType> _transComboBox = new ComboBoxCache<TransformEditType>
+        private GUIComboBox<TransformEditType> _transComboBox = new GUIComboBox<TransformEditType>
         {
             items = Enum.GetValues(typeof(TransformEditType)).Cast<TransformEditType>().ToList(),
             getName = (type, index) => type.ToString(),
-            contentSize = new Vector2(140, 300),
         };
+
+        private enum TabType
+        {
+            操作,
+            管理,
+        }
+
+        private TabType _tabType = TabType.操作;
 
         public override void DrawWindow(GUIView view)
         {
-            view.BeginScrollView(
-                view.viewRect.width,
-                view.viewRect.height,
-                GUIView.AutoScrollViewRect,
-                false,
-                true);
+            _tabType = view.DrawTabs(_tabType, 50, 20);
 
-            DrawModel(view);
-
-            view.EndScrollView();
+            switch (_tabType)
+            {
+                case TabType.操作:
+                    DrawModelEdit(view);
+                    break;
+                case TabType.管理:
+                    DrawModelManage(view);
+                    break;
+            }
 
             view.DrawComboBox();
         }
         
-        public void DrawModel(GUIView view)
+        public void DrawModelEdit(GUIView view)
         {
             var models = modelManager.models;
             if (models.Count == 0)
@@ -489,18 +492,19 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            view.SetEnabled(view.guiEnabled && !view.IsComboBoxFocused());
+            view.SetEnabled(!view.IsComboBoxFocused());
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
-            {
-                view.DrawLabel("操作種類", 80, 20);
-                view.DrawComboBoxButton(_transComboBox, 140, 20, true);
-            }
-            view.EndLayout();
+            _transComboBox.DrawButton("操作種類", view);
 
             var editType = _transComboBox.currentItem;
 
-            view.SetEnabled(view.guiEnabled && studioHack.isPoseEditing);
+            view.DrawHorizontalLine(Color.gray);
+
+            view.AddSpace(5);
+
+            view.BeginScrollView();
+
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
             foreach (var model in models)
             {
@@ -508,8 +512,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 {
                     continue;
                 }
-
-                view.DrawHorizontalLine(Color.gray);
 
                 view.DrawLabel(model.displayName, 200, 20);
 
@@ -526,7 +528,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     initialPosition,
                     initialEulerAngles,
                     initialScale);
+
+                view.DrawHorizontalLine(Color.gray);
             }
+
+            view.SetEnabled(!view.IsComboBoxFocused());
+            view.EndScrollView();
         }
 
         public override ITransformData CreateTransformData(string name)
