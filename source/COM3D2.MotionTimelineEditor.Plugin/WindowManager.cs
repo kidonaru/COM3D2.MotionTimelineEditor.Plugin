@@ -127,8 +127,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void AddSubWindow()
         {
+            PluginUtils.LogDebug("AddSubWindow");
             var subWindow = new SubWindow(subWindows.Count + 1);
             subWindows.Add(subWindow);
+
+            config.subWindowCount = subWindows.Count;
         }
 
         public void RemoveSubWindow(int windowIndex)
@@ -145,6 +148,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 subWindows[i].windowIndex = i + 1;
             }
+
+            config.subWindowCount = subWindows.Count;
         }
 
         public IWindow GetWindow(int windowIndex)
@@ -163,8 +168,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 subWindow.UpdateInfo();
             }
-
-            config.subWindowCount = subWindows.Count;
         }
 
         private void OnRefreshTimeline()
