@@ -24,6 +24,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int attachMaidSlotNo { get; set; }
         public object obj { get; set; }
         public string pluginName { get; set; }
+        public bool visible { get; set; }
+
         public BlendShapeController blendShapeController { get; private set; }
         public ModelBoneController modelBoneController { get; private set; }
 
@@ -81,9 +83,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             AttachPoint attachPoint,
             int attachMaidSlotNo,
             object obj,
-            string pluginName)
+            string pluginName,
+            bool visible)
         {
-            Init(info, group, transform, attachPoint, attachMaidSlotNo, obj, pluginName);
+            Init(
+                info,
+                group,
+                transform,
+                attachPoint,
+                attachMaidSlotNo,
+                obj,
+                pluginName,
+                visible);
         }
 
         public void Init(
@@ -93,7 +104,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             AttachPoint attachPoint,
             int attachMaidSlotNo,
             object obj,
-            string pluginName)
+            string pluginName,
+            bool visible)
         {
             this.info = info;
             this.group = group;
@@ -102,6 +114,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.transform = transform;
             this.obj = obj;
             this.pluginName = pluginName;
+            this.visible = visible;
 
             InitName();
         }
@@ -135,6 +148,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             attachMaidSlotNo = model.attachMaidSlotNo;
             obj = model.obj;
             pluginName = model.pluginName;
+            visible = model.visible;
 
             transform = model.transform;
         }

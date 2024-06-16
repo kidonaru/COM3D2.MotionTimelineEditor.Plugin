@@ -312,6 +312,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                     var transform = prop.MyObject;
                     var attachPoint = ConvertAttachPoint(prop.AttachPointInfo.AttachPoint);
                     var attachMaidSlotNo = GetMaidSlotNo(prop.AttachPointInfo.MaidGuid);
+                    var visible = prop.Visible;
 
                     //PluginUtils.LogDebug("modelList name:{0} attachPoint:{1} attachMaidSlotNo:{2}", displayName, attachPoint, attachMaidSlotNo);
 
@@ -324,7 +325,8 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                         attachPoint,
                         attachMaidSlotNo,
                         prop,
-                        pluginName);
+                        pluginName,
+                        visible);
 
                     _modelList.Add(model);
                 }
@@ -643,6 +645,18 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             var attachMaidSlotNo = model.attachMaidSlotNo;
             var attachMeido = GetMeido(attachMaidSlotNo);
             prop.AttachTo(attachMeido, attachPoint, false);
+        }
+
+        public override void SetModelVisible(StudioModelStat model, bool visible)
+        {
+            var prop = model.obj as DragPointProp;
+            if (prop == null)
+            {
+                PluginUtils.LogError("SetModelVisible: モデルが見つかりません" + model.name);
+                return;
+            }
+
+            prop.Visible = visible;
         }
 
         private Meido GetMeido(int slotNo)

@@ -145,6 +145,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public void SetModelVisible(StudioModelStat model, bool visible)
+        {
+            var modelHack = GetOrDefault(model.pluginName);
+            if (modelHack != null)
+            {
+                modelHack.SetModelVisible(model, visible);
+            }
+        }
+
         public void ChangePluginName(StudioModelStat model, string pluginName)
         {
             var prevModelHack = GetOrDefault(model.pluginName);

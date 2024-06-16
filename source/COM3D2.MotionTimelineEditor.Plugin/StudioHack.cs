@@ -109,7 +109,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         targetObj.attachi_point,
                         attachMaidSlotNo,
                         targetObj,
-                        pluginName);
+                        pluginName,
+                        targetObj.obj.activeSelf);
 
                     _modelList.Add(model);
                 }

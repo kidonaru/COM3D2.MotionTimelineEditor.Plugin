@@ -172,7 +172,8 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
                             attachPoint,
                             attachMaidSlotNo,
                             modelPane,
-                            pluginName);
+                            pluginName,
+                            modelPane.go.activeSelf);
 
                         _modelList.Add(model);
                     }

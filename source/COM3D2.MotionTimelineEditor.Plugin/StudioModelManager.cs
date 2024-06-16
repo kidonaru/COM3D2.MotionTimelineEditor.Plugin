@@ -221,18 +221,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     addedModels.Add(cachedModel);
                 }
 
-                if (cachedModel.transform != model.transform || cachedModel.pluginName != model.pluginName)
+                if (cachedModel.transform != model.transform ||
+                    cachedModel.pluginName != model.pluginName)
                 {
                     cachedModel.FromModel(model);
                     updatedModels.Add(cachedModel);
                     refresh = true;
+                    continue;
                 }
 
-                if (cachedModel.attachPoint != model.attachPoint || cachedModel.attachMaidSlotNo != model.attachMaidSlotNo)
+                if (cachedModel.attachPoint != model.attachPoint ||
+                    cachedModel.attachMaidSlotNo != model.attachMaidSlotNo ||
+                    cachedModel.visible != model.visible)
                 {
-                    cachedModel.attachPoint = model.attachPoint;
-                    cachedModel.attachMaidSlotNo = model.attachMaidSlotNo;
+                    cachedModel.FromModel(model);
                     updatedModels.Add(cachedModel);
+                    continue;
                 }
             }
 
@@ -347,7 +351,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         modelData.attachPoint,
                         modelData.attachMaidSlotNo,
                         null,
-                        modelData.pluginName);
+                        modelData.pluginName,
+                        modelData.visible);
                     modelHackManager.CreateModel(model);
 
                     PluginUtils.Log("Create model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
@@ -412,7 +417,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             AttachPoint attachPoint,
             int attachMaidSlotNo,
             object obj,
-            string pluginName)
+            string pluginName,
+            bool visible)
         {
             var label = displayName;
             var fileName = modelName;
@@ -430,7 +436,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var info = FindOfficialObject(label, fileName, myRoomId, bgObjectId);
-            return new StudioModelStat(info, group, transform, attachPoint, attachMaidSlotNo, obj, pluginName);
+            return new StudioModelStat(info, group, transform, attachPoint, attachMaidSlotNo, obj, pluginName, visible);
         }
 
         public StudioModelStat CreateModelStat(
@@ -439,7 +445,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             AttachPoint attachPoint,
             int attachMaidSlotNo,
             object obj,
-            string pluginName)
+            string pluginName,
+            bool visible)
         {
             int myRoomId = 0;
             long bgObjectId = 0;
@@ -453,7 +460,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 attachPoint,
                 attachMaidSlotNo,
                 obj,
-                pluginName);
+                pluginName,
+                visible);
         }
 
         public void DeleteModel(StudioModelStat model)
@@ -478,6 +486,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             LateUpdate(true);
 
             //timelineManager.RequestHistory("アタッチ変更: " + model.displayName);
+        }
+
+        public void SetModelVisible(StudioModelStat model, bool visible)
+        {
+            modelHackManager.SetModelVisible(model, visible);
+            LateUpdate(true);
         }
 
         public void ChangePluginName(StudioModelStat model, string pluginName)

@@ -507,6 +507,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return DrawToggle(label, value, width, height, true);
         }
 
+        public bool DrawToggle(bool value, float width, float height)
+        {
+            return DrawToggle(null, value, width, height, true);
+        }
+
         public void DrawLabel(
             string text,
             float width,

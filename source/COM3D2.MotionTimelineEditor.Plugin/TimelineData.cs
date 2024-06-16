@@ -13,6 +13,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public AttachPoint attachPoint;
         public int attachMaidSlotNo = -1;
         public string pluginName;
+        public bool visible = true;
 
         public TimelineModelData()
         {

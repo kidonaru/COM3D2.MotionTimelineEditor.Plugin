@@ -18,6 +18,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         void DeleteModel(StudioModelStat model);
         void CreateModel(StudioModelStat model);
         void UpdateAttachPoint(StudioModelStat model);
+        void SetModelVisible(StudioModelStat model, bool visible);
     }
 
     public abstract class ModelHackBase : IModelHack
@@ -113,6 +114,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public virtual void UpdateAttachPoint(StudioModelStat model)
         {
             // do nothing
+        }
+
+        public virtual void SetModelVisible(StudioModelStat model, bool visible)
+        {
+            if (model.transform != null)
+            {
+                 model.transform.gameObject.SetActive(visible);
+            }
         }
     }
 }

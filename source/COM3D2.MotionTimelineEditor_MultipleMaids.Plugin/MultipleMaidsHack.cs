@@ -350,7 +350,8 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                             attachPoint,
                             attachMaidSlotNo,
                             dogu,
-                            pluginName);
+                            pluginName,
+                            dogu.activeSelf);
                         _modelList.Add(model);
                     }
                 }

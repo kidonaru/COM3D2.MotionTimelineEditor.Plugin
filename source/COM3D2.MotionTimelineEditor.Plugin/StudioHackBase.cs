@@ -188,6 +188,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // do nothing
         }
 
+        public virtual void SetModelVisible(StudioModelStat model, bool visible)
+        {
+            if (model.transform != null)
+            {
+                 model.transform.gameObject.SetActive(visible);
+            }
+        }
+
         private void DeleteBGObject()
         {
             BgMgr bgMgr = GameMain.Instance.BgMgr;
