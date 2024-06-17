@@ -43,13 +43,12 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-set VERSION=2.4.1.0
+set VERSION=2.5.0.0
 set PLUGIN_NAME=COM3D2.MotionTimelineEditor.Plugin
 
 if exist output rmdir /s /q output
 md output\%PLUGIN_NAME%
 
-xcopy img output\%PLUGIN_NAME%\img /E /I
 xcopy UnityInjector output\%PLUGIN_NAME%\UnityInjector /E /I
 
 set README_TXT=output\%PLUGIN_NAME%\README.txt
