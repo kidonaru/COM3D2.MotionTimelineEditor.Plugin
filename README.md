@@ -134,6 +134,10 @@ https://ux.getuploader.com/com3d2_mod_kyouyu_g/download/51
 
 ## 使い方の手順
 
+
+https://github.com/kidonaru/COM3D2.MotionTimelineEditor.Plugin/assets/4057300/c223c782-1876-4ceb-9611-fd3e6099f311
+
+
 1. **GUIの表示**: スタジオモード中か、エディット画面で`Ctrl+M`を押してGUIを表示します。歯車メニューの「MTE」アイコンからも表示できます。
 
 2. **複数メイドの有効化**: エディット画面の場合は`F7`を押して、複数メイド撮影プラグインを有効化します。
@@ -153,10 +157,6 @@ https://ux.getuploader.com/com3d2_mod_kyouyu_g/download/51
 
 9. **タイムラインの保存**: セーブボタンを押してタイムラインを保存します。保存したタイムラインは、ロードウィンドウからいつでもロード可能です。
 
-
-
-詳細な操作方法については、Twitterに上げている動画などを参照してください。
-https://twitter.com/kidonaru/status/1775174898111091134
 
 
 ## キーボード操作
