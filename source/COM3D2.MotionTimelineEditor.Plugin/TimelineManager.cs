@@ -152,6 +152,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static IPartsEditHack partsEditHack
+        {
+            get
+            {
+                return PartsEditHackManager.instance.partsEditHack;
+            }
+        }
+
         private static Maid maid
         {
             get
@@ -1330,6 +1338,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             SetActiveLayer(newLayer);
             newLayer.Init();
             newLayer.CreateAndApplyAnm();
+
+            if (partsEditHack != null)
+            {
+                partsEditHack.SetBone(null);
+            }
 
             var info = GetLayerInfo(className);
             RequestHistory("「" + info.displayName + "」レイヤー新規作成");

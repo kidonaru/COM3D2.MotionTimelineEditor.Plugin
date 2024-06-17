@@ -349,6 +349,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static PhotoBGManager photoBGManager
+        {
+            get
+            {
+                return PhotoBGManager.instance;
+            }
+        }
+
         protected TimelineLayerBase(int slotNo)
         {
             PluginUtils.LogDebug("{0}.Create slotNo={1}", className, slotNo);
@@ -774,7 +782,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             frame.UpdateBone(bone);
         }
 
-        public void UpdateBones(int frameNo, IEnumerable<BoneData> bones)
+        public virtual void UpdateBones(int frameNo, IEnumerable<BoneData> bones)
         {
             var frame = GetOrCreateFrame(frameNo);
             frame.UpdateBones(bones);

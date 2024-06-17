@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class StudioHack : StudioHackBase
+    public partial class StudioHack : StudioHackBase
     {
         private PoseEditWindow poseEditWindow = null;
         private PlacementWindow placementWindow = null;
@@ -509,31 +509,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static Dictionary<string, PhotoBGData> bgDataMap = null;
-
-        private static PhotoBGData GetPhotoBGData(string bgName)
-        {
-            if (bgDataMap == null)
-            {
-                bgDataMap = new Dictionary<string, PhotoBGData>();
-                foreach (var _data in PhotoBGData.data)
-                {
-                    bgDataMap[_data.create_prefab_name] = _data;
-                }
-            }
-
-            PhotoBGData data;
-            if (bgDataMap.TryGetValue(bgName, out data))
-            {
-                return data;
-            }
-
-            return null;
-        }
-
         public override void ChangeBackground(string bgName)
         {
-            var bgData = GetPhotoBGData(bgName);
+            var bgData = photoBGManager.GetPhotoBGData(bgName);
             if (bgData == null)
             {
                 PluginUtils.LogError("背景が見つかりません: " + bgName);

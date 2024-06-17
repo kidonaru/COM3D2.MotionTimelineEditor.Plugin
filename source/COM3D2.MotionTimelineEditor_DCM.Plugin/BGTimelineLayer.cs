@@ -108,7 +108,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                 foreach (var boneName in allBoneNames)
                 {
-                    var menuItem = new BoneMenuItem(boneName, boneName);
+                    var displayName = photoBGManager.GetDisplayName(boneName);
+                    var menuItem = new BoneMenuItem(boneName, displayName);
                     allMenuItems.Add(menuItem);
                 }
             }
@@ -421,6 +422,17 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
+        private GUIComboBox<PhotoBGData> _bgComboBox = new GUIComboBox<PhotoBGData>
+        {
+            items = photoBGManager.bgList,
+            getName = (data, index) => data.name,
+            onSelected = (data, index) =>
+            {
+                studioHack.ChangeBackground(data.create_prefab_name);
+            },
+            contentSize = new Vector2(200, 300),
+        };
+
         public override void DrawWindow(GUIView view)
         {
             if (bgObject == null || bgObject.transform == null)
@@ -436,6 +448,13 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var initialScale = Vector3.one;
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+
+            _bgComboBox.currentIndex = photoBGManager.GetBGIndex(boneName);
+            _bgComboBox.DrawButton("背景", view);
+
+            view.DrawLabel(boneName, -1, 20);
+
+            view.DrawHorizontalLine(Color.gray);
 
             DrawTransform(
                 view,
@@ -453,6 +472,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var transform = new TransformDataBG();
             transform.Initialize(name);
             return transform;
+        }
+
+        public override void UpdateBones(int frameNo, IEnumerable<BoneData> bones)
+        {
+            // 背景は常に前のフレームをクリアしてから更新する
+            var frame = GetOrCreateFrame(frameNo);
+            frame.ClearBones();
+            frame.UpdateBones(bones);
         }
 
         private void OnBGChanged()

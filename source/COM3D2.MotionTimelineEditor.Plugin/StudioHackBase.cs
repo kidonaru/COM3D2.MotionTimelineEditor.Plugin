@@ -100,6 +100,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static PhotoBGManager photoBGManager
+        {
+            get
+            {
+                return PhotoBGManager.instance;
+            }
+        }
+
         protected StudioHackBase()
         {
         }
