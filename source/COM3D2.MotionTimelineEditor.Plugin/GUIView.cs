@@ -954,6 +954,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var drawRect = GetDrawRect(width, height);
 
+            if (drawRect.position.y + drawRect.height < scrollPosition.y ||
+                drawRect.position.y > scrollPosition.y + scrollViewRect.height)
+            {
+                NextElement(drawRect);
+                return false;
+            }
+
             bool isClicked = GUI.Button(drawRect, "", gsTile);
 
             DrawTileThumb(content.thum, 0, 0, drawRect.width, drawRect.height - 20);
@@ -980,6 +987,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Action<ITileViewContent> onMouseOver)
         {
             var drawRect = GetDrawRect(width, height);
+
+            if (drawRect.position.y + drawRect.height < scrollPosition.y ||
+                drawRect.position.y > scrollPosition.y + scrollViewRect.height)
+            {
+                NextElement(drawRect);
+                return false;
+            }
 
             bool isClicked = GUI.Button(drawRect, "", gsTile);
 
@@ -1034,6 +1048,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var contentRect = GetDrawRect(0, 0, width, height);
             contentRect.width -= 20; // スクロールバーの幅分狭める
             contentRect.height = contentHeight;
+
             BeginScrollView(
                 width,
                 height,
