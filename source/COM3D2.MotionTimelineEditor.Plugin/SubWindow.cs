@@ -210,14 +210,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             UpdatePosition();
         }
 
-        public void ToggleSubWindow(SubWindowType type)
+        public void SetSubWindowType(SubWindowType type)
         {
-            if (type == subWindowType)
-            {
-                isShowWnd = !isShowWnd;
-                return;
-            }
-
             subWindowType = type;
             isShowWnd = true;
         }

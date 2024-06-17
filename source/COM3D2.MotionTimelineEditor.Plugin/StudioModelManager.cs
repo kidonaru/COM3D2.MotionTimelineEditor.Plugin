@@ -701,16 +701,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         }
 
                         string[] values = line.Split(',');
-                        if (values.Length < 3)
+                        if (values.Length < 4)
                         {
                             PluginUtils.LogWarning("CSVファイルの形式が不正です line={0}", line);
                             continue;
                         }
 
+                        if (values[2] == "" || values[3] == "")
+                        {
+                            continue; // 空行をスキップ
+                        }
+
                         var info = new OfficialObjectInfo
                         {
-                            label = values[1],
-                            fileName = values[2],
+                            label = values[2],
+                            fileName = values[3],
                             type = (StudioModelType) int.Parse(values[0]),
                         };
 

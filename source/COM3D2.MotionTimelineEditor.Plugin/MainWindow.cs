@@ -238,6 +238,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var className = layerInfo.className;
                 timelineManager.ChangeActiveLayer(className, maidManager.maidSlotNo);
+                subWindow.SetSubWindowType(SubWindowType.TimelineLayer);
             },
         };
 
@@ -525,39 +526,39 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         PluginUtils.ShowDialog(studioHack.errorMessage);
                         return;
                     }
-                    subWindow.ToggleSubWindow(SubWindowType.TimelineLoad);
+                    subWindow.SetSubWindowType(SubWindowType.TimelineLoad);
                 }
 
                 if (view.DrawButton("情報", 60, 20, editEnabled))
                 {
-                    subWindow.ToggleSubWindow(SubWindowType.TimelineLayer);
+                    subWindow.SetSubWindowType(SubWindowType.TimelineLayer);
                 }
 
                 if (view.DrawButton("ｷｰﾌﾚｰﾑ", 60, 20, editEnabled))
                 {
-                    subWindow.ToggleSubWindow(SubWindowType.KeyFrame);
+                    subWindow.SetSubWindowType(SubWindowType.KeyFrame);
                 }
 
                 var ikColor = editEnabled && timeline.isHoldActive ? Color.green : Color.white;
                 if (view.DrawButton("IK固定", 60, 20, editEnabled, ikColor))
                 {
-                    subWindow.ToggleSubWindow(SubWindowType.IKHold);
+                    subWindow.SetSubWindowType(SubWindowType.IKHold);
                 }
 
                 var trackColor = editEnabled && timeline.activeTrack != null ? Color.green : Color.white;
                 if (view.DrawButton("トラック", 60, 20, editEnabled, trackColor))
                 {
-                    subWindow.ToggleSubWindow(SubWindowType.Track);
+                    subWindow.SetSubWindowType(SubWindowType.Track);
                 }
 
                 if (view.DrawButton("履歴", 60, 20, editEnabled))
                 {
-                    subWindow.ToggleSubWindow(SubWindowType.History);
+                    subWindow.SetSubWindowType(SubWindowType.History);
                 }
 
                 if (view.DrawButton("設定", 60, 20, editEnabled))
                 {
-                    subWindow.ToggleSubWindow(SubWindowType.TimelineSetting);
+                    subWindow.SetSubWindowType(SubWindowType.TimelineSetting);
                 }
             }
             view.EndLayout();

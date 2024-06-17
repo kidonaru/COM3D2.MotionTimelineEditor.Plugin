@@ -766,6 +766,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var baseFinger = GetBaseFingerClass(blendType);
 
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+
             view.BeginLayout(GUIView.LayoutDirection.Horizontal);
             {
                 view.DrawLabel(FingerBrendNames[(int)blendType], 40, 20);
