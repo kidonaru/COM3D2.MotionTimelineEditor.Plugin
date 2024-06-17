@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -22,6 +23,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private PartsEditHackManager()
         {
+            SceneManager.sceneLoaded += OnChangedSceneLevel;
             StudioHackManager.onPoseEditingChanged += OnPoseEditingChanged;
         }
 
@@ -124,6 +126,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 partsEditHack.boneDisplay = BoneDisplay.None;
                 partsEditHack.gizmoType = GizmoType.None;
             }
+        }
+
+        private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
+        {
+            if (partsEditHack == null)
+            {
+                return;
+            }
+
+            partsEditHack.SetBone(null);
         }
     }
 }

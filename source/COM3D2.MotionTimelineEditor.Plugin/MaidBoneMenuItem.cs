@@ -18,6 +18,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             set
             {
+                if (partsEditHack != null)
+                {
+                    partsEditHack.SetBone(null);
+                }
+
                 if (!studioHack.HasBoneRotateVisible(boneType))
                 {
                     base.isSelectedMenu = value;

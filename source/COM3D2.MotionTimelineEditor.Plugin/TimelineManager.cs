@@ -1653,9 +1653,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
+        private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
         {
-            if (IsValidData())
+            if (timeline != null)
             {
                 ClearTimeline();
                 currentLayerIndex = 0;
