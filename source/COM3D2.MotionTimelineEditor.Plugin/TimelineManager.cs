@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using System.Xml.Linq;
 using System.Text;
+using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -193,6 +194,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private TimelineManager()
         {
+            SceneManager.sceneLoaded += OnChangedSceneLevel;
             MaidManager.onMaidSlotNoChanged += OnMaidSlotNoChanged;
             MaidCache.onMaidChanged += OnMaidChanged;
             StudioModelManager.onModelAdded += OnModelAdded;
@@ -1648,6 +1650,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (IsValidData())
             {
                 UpdateTimelineModels();
+            }
+        }
+
+        public void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
+        {
+            if (IsValidData())
+            {
+                ClearTimeline();
+                currentLayerIndex = 0;
             }
         }
     }
