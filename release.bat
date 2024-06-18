@@ -53,7 +53,7 @@ xcopy UnityInjector output\%PLUGIN_NAME%\UnityInjector /E /I
 
 set README_TXT=output\%PLUGIN_NAME%\README.txt
 echo このテキストはWeb上で見ることを推奨しています。 > %README_TXT%
-echo https://github.com/kidonaru/COM3D2.MotionTimelineEditor.Plugin/blob/v%VERSION%/README.md >> %README_TXT%
+echo https://github.com/kidonaru/COM3D2.MotionTimelineEditor.Plugin/blob/master/README.md >> %README_TXT%
 echo. >> %README_TXT%
 echo. >> %README_TXT%
 type README.md >> %README_TXT%
