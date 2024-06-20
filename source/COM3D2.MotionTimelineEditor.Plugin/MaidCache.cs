@@ -321,26 +321,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public Vector3 eyeEulerAngle
-        {
-            get
-            {
-                if (maid != null)
-                {
-                    return maid.body0.GetEyeEulerAngle();
-                }
-                return Vector3.zero;
-            }
-            set
-            {
-                if (maid != null)
-                {
-                    maid.body0.SetEyeEulerAngle(value);
-                    this.trsEyeL.localRotation = maid.body0.quaDefEyeL * Quaternion.Euler(0f, -eyeEulerAngle.x * 0.2f + maid.body0.m_editYorime, -eyeEulerAngle.z * 0.1f);
-			        this.trsEyeR.localRotation = maid.body0.quaDefEyeR * Quaternion.Euler(0f, eyeEulerAngle.x * 0.2f + maid.body0.m_editYorime, eyeEulerAngle.z * 0.1f);
-                }
-            }
-        }
+        public Vector3 eyeEulerAngle;
 
         private static FieldInfo fieldLimbControlList = null;
 
@@ -621,6 +602,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
                 _motionSliderRate = value / animationState.length;
             }
+
+            UpdateEyeEulerAngle();
         }
 
         public void PlayAnm(long id, byte[] anmData)
@@ -691,6 +674,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var lookAtTarget = GetLookAtTarget();
             maid.LockHeadAndEye(lookAtTarget == null);
             maid.body0.trsLookTarget = lookAtTarget;
+        }
+
+        public void UpdateEyeEulerAngle()
+        {
+            if (maid == null || timeline == null || !timeline.useHeadKey)
+            {
+                return;
+            }
+
+            var lookAtTarget = GetLookAtTarget();
+            if (lookAtTarget == null)
+            {
+                maid.body0.SetEyeEulerAngle(eyeEulerAngle);
+
+                this.trsEyeL.localRotation = maid.body0.quaDefEyeL * Quaternion.Euler(0f, -eyeEulerAngle.x * 0.2f + maid.body0.m_editYorime, -eyeEulerAngle.z * 0.1f);
+                this.trsEyeR.localRotation = maid.body0.quaDefEyeR * Quaternion.Euler(0f, eyeEulerAngle.x * 0.2f + maid.body0.m_editYorime, eyeEulerAngle.z * 0.1f);
+            }
+            else
+            {
+                eyeEulerAngle = maid.body0.GetEyeEulerAngle();
+            }
         }
 
         public Transform GetAttachPointTransform(AttachPoint point)
