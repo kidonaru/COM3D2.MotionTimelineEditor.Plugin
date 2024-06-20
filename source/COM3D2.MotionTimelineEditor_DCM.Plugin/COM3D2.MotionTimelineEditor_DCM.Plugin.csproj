@@ -83,6 +83,7 @@
     <Compile Include="TransformDataBGColor.cs" />
     <Compile Include="TransformDataCamera.cs" />
     <Compile Include="TransformDataEyes.cs" />
+    <Compile Include="TransformDataLookAtTarget.cs" />
     <Compile Include="TransformDataModel.cs" />
     <Compile Include="TransformDataModelBone.cs" />
     <Compile Include="TransformDataMorph.cs" />

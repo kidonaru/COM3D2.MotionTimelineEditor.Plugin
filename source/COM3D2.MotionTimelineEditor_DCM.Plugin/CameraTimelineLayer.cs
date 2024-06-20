@@ -4,12 +4,15 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using COM3D2.DanceCameraMotion.Plugin;
 using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
+    using MyTransform = DanceCameraMotion.Plugin.MyTransform;
+    using MyHelper = DanceCameraMotion.Plugin.MyHelper;
+    using TimelineMotionEasing = DanceCameraMotion.Plugin.TimelineMotionEasing;
+    using EasingType = DanceCameraMotion.Plugin.EasingType;
     using CameraPlayData = MotionPlayData<CameraMotionData>;
 
     public class CameraTimeLineRow
@@ -72,7 +75,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private List<CameraTimeLineRow> _timelineRows = new List<CameraTimeLineRow>();
         private CameraPlayData _playData = new CameraPlayData();
-        private DanceCameraMotion.Plugin.MaidManager _dcmMaidManager = new DanceCameraMotion.Plugin.MaidManager();
 
         private CameraTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -444,15 +446,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
-        private int _targetMaidSlotNo = 0;
-        private MaidPointType _targetMaidPoint = MaidPointType.Head;
-        private int _targetModelIndex = 0;
-
-        private static readonly List<string> MaidPointTypeNames = new List<string>
-        {
-            "顔", "胸", "股", "尻", "中心",
-        };
-
         private GUIComboBox<MaidCache> _maidComboBox = new GUIComboBox<MaidCache>
         {
             getName = (maidCache, _) => maidCache == null ? "未選択" : maidCache.fullName,
@@ -462,15 +455,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private GUIComboBox<MaidPointType> _targetMaidPointComboBox = new GUIComboBox<MaidPointType>
         {
-            items = new List<MaidPointType>
-            {
-                MaidPointType.Head,
-                MaidPointType.Chest,
-                MaidPointType.Crotch,
-                MaidPointType.Hip,
-                MaidPointType.Bip01,
-            },
-            getName = (type, index) => MaidPointTypeNames[index],
+            items = Enum.GetValues(typeof(MaidPointType)).Cast<MaidPointType>().ToList(),
+            getName = (type, index) => MaidCache.GetMaidPointTypeName(type),
             buttonSize = new Vector2(50, 20),
         };
 
@@ -618,10 +604,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             Action focusToMaid = () =>
             {
-                var maidCache = maidManager.GetMaidCache(_targetMaidSlotNo);
+                var maidCache = _maidComboBox.currentItem;
                 if (maidCache != null)
                 {
-                    var trans = _dcmMaidManager.GetMiadPatrsTrancform(maidCache.maid, _targetMaidPoint);
+                    var trans = maidCache.GetPointTransform(_targetMaidPointComboBox.currentItem);
                     position = trans.position;
                     updateCamera();
                 }
@@ -631,11 +617,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 view.DrawLabel("対象メイド", 70, 20);
 
-                _maidComboBox.currentIndex = _targetMaidSlotNo;
                 _maidComboBox.items = maidManager.maidCaches;
                 _maidComboBox.onSelected = (maidCache, index) =>
                 {
-                    _targetMaidSlotNo = index;
                     focusToMaid();
                 };
                 _maidComboBox.DrawButton(view);
@@ -651,10 +635,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 view.DrawLabel("対象ポイント", 70, 20);
 
-                _targetMaidPointComboBox.currentIndex = (int) _targetMaidPoint;
                 _targetMaidPointComboBox.onSelected = (type, index) =>
                 {
-                    _targetMaidPoint = type;
                     focusToMaid();
                 };
                 _targetMaidPointComboBox.DrawButton(view);
@@ -663,7 +645,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             Action focusToModel = () =>
             {
-                var model = modelManager.GetModel(_targetModelIndex);
+                var model = _modelComboBox.currentItem;
                 if (model != null)
                 {
                     var trans = model.transform;
@@ -677,10 +659,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 view.DrawLabel("対象モデル", 70, 20);
 
                 _modelComboBox.items = modelManager.models;
-                _modelComboBox.currentIndex = _targetModelIndex;
                 _modelComboBox.onSelected = (model, index) =>
                 {
-                    _targetModelIndex = index;
                     focusToModel();
                 };
                 _modelComboBox.DrawButton(view);

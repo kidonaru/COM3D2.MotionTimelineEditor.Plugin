@@ -140,14 +140,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private void ApplyMotion(ModelBoneMotionData motion, Transform transform, float lerpTime)
+        private void ApplyMotion(ModelBoneMotionData motion, Transform transform, float lerpFrame)
         {
             if (transform == null)
             {
                 return;
             }
 
-            float easingTime = CalcEasingValue(lerpTime, motion.easing);
+            float easingTime = CalcEasingValue(lerpFrame, motion.easing);
             transform.localPosition = Vector3.Lerp(motion.myTm.stPos, motion.myTm.edPos, easingTime);
             transform.localRotation = Quaternion.Euler(Vector3.Lerp(motion.myTm.stRot, motion.myTm.edRot, easingTime));
             transform.localScale = Vector3.Lerp(motion.myTm.stSca, motion.myTm.edSca, easingTime);

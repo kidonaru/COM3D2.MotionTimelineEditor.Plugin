@@ -232,6 +232,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
             }
+
+            if (version < 8)
+            {
+                // EyesTimelineLayerにEyesRot/LookAtTargetを追加
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "EyesTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            if (keyFrame.frameNo == 0)
+                            {
+                                var names = new string[] { "EyesRot", "LookAtTarget" };
+                                foreach (var name in names)
+                                {
+                                    var transform = new TransformXml
+                                    {
+                                        name = name,
+                                        values = new float[] {},
+                                    };
+                                    keyFrame.bones.Add(new BoneXml
+                                    {
+                                        transform = transform,
+                                    });
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 }

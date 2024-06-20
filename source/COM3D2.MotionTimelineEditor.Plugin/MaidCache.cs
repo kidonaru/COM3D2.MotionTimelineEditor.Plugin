@@ -9,6 +9,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using AttachPoint = PhotoTransTargetObject.AttachPoint;
 
+    public enum MaidPointType
+    {
+        Head,
+        Chest,
+        Crotch,
+        Hip,
+        Bip01,
+    }
+
+    public enum LookAtTargetType
+    {
+        None,
+        Camera,
+        Maid,
+        Model,
+    }
+
     public partial class MaidCache
     {
         public int slotNo = 0;
@@ -161,6 +178,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 maid.body0.trsLookTarget = value ? null : GameMain.Instance.MainCamera.transform;
             }
         }
+        
+        public Transform trsEyeL
+        {
+            get
+            {
+                return maid != null ? maid.body0.trsEyeL : null;
+            }
+        }
+
+        public Transform trsEyeR
+        {
+            get
+            {
+                return maid != null ? maid.body0.trsEyeR : null;
+            }
+        }
 
         public Vector3 eyesPosL
         {
@@ -169,7 +202,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (maid != null)
                 {
                     var initPos = info.initEyesPosL;
-                    return maid.body0.trsEyeL.localPosition - initPos;
+                    return trsEyeL.localPosition - initPos;
                 }
                 return Vector3.zero;
             }
@@ -178,7 +211,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (maid != null)
                 {
                     var initPos = info.initEyesPosL;
-                    maid.body0.trsEyeL.localPosition = value + initPos;
+                    trsEyeL.localPosition = value + initPos;
                 }
             }
         }
@@ -190,7 +223,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (maid != null)
                 {
                     var initPos = info.initEyesPosR;
-                    return maid.body0.trsEyeR.localPosition - initPos;
+                    return trsEyeR.localPosition - initPos;
                 }
                 return Vector3.zero;
             }
@@ -199,7 +232,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (maid != null)
                 {
                     var initPos = info.initEyesPosR;
-                    maid.body0.trsEyeR.localPosition = value + initPos;
+                    trsEyeR.localPosition = value + initPos;
                 }
             }
         }
@@ -211,7 +244,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (maid != null)
                 {
                     var initSca = info.initEyesScaL;
-                    return maid.body0.trsEyeL.localScale - initSca;
+                    return trsEyeL.localScale - initSca;
                 }
                 return Vector3.zero;
             }
@@ -220,7 +253,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (maid != null)
                 {
                     var initSca = info.initEyesScaL;
-                    maid.body0.trsEyeL.localScale = value + initSca;
+                    trsEyeL.localScale = value + initSca;
                 }
             }
         }
@@ -232,7 +265,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (maid != null)
                 {
                     var initSca = info.initEyesScaR;
-                    return maid.body0.trsEyeR.localScale - initSca;
+                    return trsEyeR.localScale - initSca;
                 }
                 return Vector3.zero;
             }
@@ -241,7 +274,70 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (maid != null)
                 {
                     var initSca = info.initEyesScaR;
-                    maid.body0.trsEyeR.localScale = value + initSca;
+                    trsEyeR.localScale = value + initSca;
+                }
+            }
+        }
+
+        private LookAtTargetType _lookAtTargetType;
+        public LookAtTargetType lookAtTargetType
+        {
+            get
+            {
+                return _lookAtTargetType;
+            }
+            set
+            {
+                _lookAtTargetType = value;
+                UpdateLookAtTarget();
+            }
+        }
+
+        private int _lookAtTargetIndex;
+        public int lookAtTargetIndex
+        {
+            get
+            {
+                return _lookAtTargetIndex;
+            }
+            set
+            {
+                _lookAtTargetIndex = value;
+                UpdateLookAtTarget();
+            }
+        }
+
+        private MaidPointType _lookAtMaidPointType;
+        public MaidPointType lookAtMaidPointType
+        {
+            get
+            {
+                return _lookAtMaidPointType;
+            }
+            set
+            {
+                _lookAtMaidPointType = value;
+                UpdateLookAtTarget();
+            }
+        }
+
+        public Vector3 eyeEulerAngle
+        {
+            get
+            {
+                if (maid != null)
+                {
+                    return maid.body0.GetEyeEulerAngle();
+                }
+                return Vector3.zero;
+            }
+            set
+            {
+                if (maid != null)
+                {
+                    maid.body0.SetEyeEulerAngle(value);
+                    this.trsEyeL.localRotation = maid.body0.quaDefEyeL * Quaternion.Euler(0f, -eyeEulerAngle.x * 0.2f + maid.body0.m_editYorime, -eyeEulerAngle.z * 0.1f);
+			        this.trsEyeR.localRotation = maid.body0.quaDefEyeR * Quaternion.Euler(0f, eyeEulerAngle.x * 0.2f + maid.body0.m_editYorime, eyeEulerAngle.z * 0.1f);
                 }
             }
         }
@@ -297,11 +393,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        protected static PartsEditHackManager partsEditHackManager
+        private static PartsEditHackManager partsEditHackManager
         {
             get
             {
                 return PartsEditHackManager.instance;
+            }
+        }
+
+        private static MaidManager maidManager
+        {
+            get
+            {
+                return MaidManager.instance;
+            }
+        }
+
+        private static StudioModelManager modelManager
+        {
+            get
+            {
+                return StudioModelManager.instance;
             }
         }
 
@@ -453,6 +565,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ikManager = null;
             extendBoneCache = null;
             _blendShapeCache.Clear();
+            lookAtTargetType = LookAtTargetType.None;
+            lookAtTargetIndex = 0;
+            lookAtMaidPointType = MaidPointType.Head;
         }
 
         public void ResetAnm()
@@ -547,19 +662,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void UpdateHeadLook()
         {
-            if (maid != null)
+            if (maid == null || timeline == null)
             {
-                maid.EyeToCamera(timeline.eyeMoveType, 0f);
-                maid.LockHeadAndEye(timeline.useHeadKey);
-
-                if (timeline.useHeadKey)
-                {
-                    var trsEyeL = maid.body0.trsEyeL;
-                    var trsEyeR = maid.body0.trsEyeR;
-                    trsEyeL.localRotation = maid.body0.quaDefEyeL;
-                    trsEyeR.localRotation = maid.body0.quaDefEyeR;
-                }
+                return;
             }
+
+            maid.EyeToCamera(timeline.eyeMoveType, 0f);
+            maid.LockHeadAndEye(false);
+
+            if (timeline.useHeadKey)
+            {
+                var trsEyeL = maid.body0.trsEyeL;
+                var trsEyeR = maid.body0.trsEyeR;
+                trsEyeL.localRotation = maid.body0.quaDefEyeL;
+                trsEyeR.localRotation = maid.body0.quaDefEyeR;
+            }
+
+            UpdateLookAtTarget();
+        }
+
+        public void UpdateLookAtTarget()
+        {
+            if (maid == null || timeline == null || !timeline.useHeadKey)
+            {
+                return;
+            }
+
+            var lookAtTarget = GetLookAtTarget();
+            maid.LockHeadAndEye(lookAtTarget == null);
+            maid.body0.trsLookTarget = lookAtTarget;
         }
 
         public Transform GetAttachPointTransform(AttachPoint point)
@@ -758,6 +889,80 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void SetYureState(string slotName, bool state)
         {
             partsEditHackManager.SetYureState(maid, slotName, state);
+        }
+
+        public Transform GetPointTransform(MaidPointType type)
+        {
+            if (maid == null || maid.body0 == null)
+            {
+                return null;
+            }
+
+            Transform result = null;
+            switch (type)
+            {
+                case MaidPointType.Head:
+                    result = maid.body0.trsHead;
+                    break;
+                case MaidPointType.Chest:
+                    result = maid.body0.Spine1a;
+                    break;
+                case MaidPointType.Crotch:
+                    result = maid.body0.Pelvis;
+                    break;
+                case MaidPointType.Hip:
+                    result = maid.body0.Hip_R;
+                    break;
+                case MaidPointType.Bip01:
+                    result = maid.body0.trBip;
+                    break;
+            }
+
+            return result;
+        }
+
+        public static readonly List<string> MaidPointTypeNames = new List<string>
+        {
+            "顔", "胸", "股", "尻", "中心",
+        };
+
+        public static string GetMaidPointTypeName(MaidPointType type)
+        {
+            return MaidPointTypeNames[(int) type];
+        }
+
+        public Transform GetLookAtTarget()
+        {
+            var maid = this.maid;
+            if (maid == null)
+            {
+                return null;
+            }
+
+            switch (lookAtTargetType)
+            {
+                case LookAtTargetType.Camera:
+                    return GameMain.Instance.MainCamera.transform;
+                case LookAtTargetType.Maid:
+                {
+                    var maidCache = maidManager.GetMaidCache(lookAtTargetIndex);
+                    if (maidCache != null)
+                    {
+                        return maidCache.GetPointTransform(lookAtMaidPointType);
+                    }
+                    break;
+                }
+                case LookAtTargetType.Model:
+                {
+                    var model = modelManager.GetModel(lookAtTargetIndex);
+                    if (model != null)
+                    {
+                        return model.transform;
+                    }
+                    break;
+                }
+            }
+            return null;
         }
 
         private void OnMaidChanged(Maid maid)

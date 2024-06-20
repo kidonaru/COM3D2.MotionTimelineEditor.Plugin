@@ -159,6 +159,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static FieldInfo fieldEyeEulerAngle = null;
+
+        public static Vector3 GetEyeEulerAngle(this TBody body)
+        {
+            if (fieldEyeEulerAngle == null)
+            {
+                fieldEyeEulerAngle = typeof(TBody).GetField("EyeEulerAngle", BindingFlags.NonPublic | BindingFlags.Instance);
+                PluginUtils.AssertNull(fieldEyeEulerAngle != null, "fieldEyeEulerAngle is null");
+            }
+            return (Vector3) fieldEyeEulerAngle.GetValue(body);
+        }
+
+        public static void SetEyeEulerAngle(this TBody body, Vector3 eulerAngle)
+        {
+            if (fieldEyeEulerAngle == null)
+            {
+                fieldEyeEulerAngle = typeof(TBody).GetField("EyeEulerAngle", BindingFlags.NonPublic | BindingFlags.Instance);
+                PluginUtils.AssertNull(fieldEyeEulerAngle != null, "fieldEyeEulerAngle is null");
+            }
+            fieldEyeEulerAngle.SetValue(body, eulerAngle);
+        }
+
         public static T GetCustomAttribute<T>(
             this System.Type type)
             where T : System.Attribute

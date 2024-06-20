@@ -4,13 +4,24 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using COM3D2.DanceCameraMotion.Plugin;
 using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
+    using TimelineMotionEasing = DanceCameraMotion.Plugin.TimelineMotionEasing;
+    using EasingType = DanceCameraMotion.Plugin.EasingType;
     using EyesPlayData = MotionPlayData<EyesMotionData>;
+
+    public enum MotionEyesType
+    {
+        EyesPosL,
+        EyesPosR,
+        EyesScaL,
+        EyesScaR,
+        EyesRot,
+        LookAtTarget,
+    }
 
     public class EyesTimeLineRow
     {
@@ -19,6 +30,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public float horizon;
         public float vertical;
         public int easing;
+        public LookAtTargetType targetType;
+        public int targetIndex;
+        public MaidPointType maidPointType;
     }
 
     public class EyesMotionData : IMotionData
@@ -32,6 +46,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public float endHorizon;
         public float endVertical;
         public int easing;
+        public LookAtTargetType targetType;
+        public int targetIndex;
+        public MaidPointType maidPointType;
     }
 
     [LayerDisplayName("メイド瞳")]
@@ -61,12 +78,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public static readonly Dictionary<string, SongEyesType> EyesTypeMap = new Dictionary<string, SongEyesType>
+        public static readonly Dictionary<string, MotionEyesType> EyesTypeMap = new Dictionary<string, MotionEyesType>
         {
-            { "EyesPosL", SongEyesType.EyesPosL },
-            { "EyesPosR", SongEyesType.EyesPosR },
-            { "EyesScaL", SongEyesType.EyesScaL },
-            { "EyesScaR", SongEyesType.EyesScaR },
+            { "EyesPosL", MotionEyesType.EyesPosL },
+            { "EyesPosR", MotionEyesType.EyesPosR },
+            { "EyesScaL", MotionEyesType.EyesScaL },
+            { "EyesScaR", MotionEyesType.EyesScaR },
+            { "EyesRot", MotionEyesType.EyesRot },
+            { "LookAtTarget", MotionEyesType.LookAtTarget },
         };
 
         public static readonly Dictionary<string, string> EyesDisplayNameMap = new Dictionary<string, string>
@@ -75,6 +94,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             { "EyesPosR", "右瞳位置" },
             { "EyesScaL", "左瞳サイズ" },
             { "EyesScaR", "右瞳サイズ" },
+            { "EyesRot", "視線" },
+            { "LookAtTarget", "注視" },
         };
 
         private static List<string> _saveEyesNames = null;
@@ -109,6 +130,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         private Dictionary<string, List<EyesTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<EyesTimeLineRow>>();
         private Dictionary<string, EyesPlayData> _playDataMap = new Dictionary<string, EyesPlayData>();
         private List<EyesMotionData> _dcmOutputMotions = new List<EyesMotionData>(128);
+        private DanceCameraMotion.Plugin.MaidManager _dcmMaidManager = new DanceCameraMotion.Plugin.MaidManager();
 
         private EyesTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -174,7 +196,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             foreach (var pair in _playDataMap)
             {
-                var eyesName = pair.Key;
                 var playData = pair.Value;
 
                 playData.Update(playingFrameNoFloat);
@@ -182,38 +203,115 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var current = playData.current;
                 if (current != null)
                 {
-                    float easingValue = CalcEasingValue(playData.lerpFrame, current.easing);
-                    float horizon = Mathf.Lerp(current.startHorizon, current.endHorizon, easingValue);
-                    float vertical = Mathf.Lerp(current.startVertical, current.endVertical, easingValue);
-
-                    TransformEyes(eyesName, horizon, vertical);
+                    ApplyMotion(current, playData.lerpFrame);
                 }
             }
 
             //PluginUtils.LogDebug("ApplyPlayData: lerpFrame={0}, listIndex={1}", playData.lerpFrame, playData.listIndex);
         }
 
-        private void TransformEyes(string eyesName, float horizon, float vertical)
+        private void ApplyMotion(EyesMotionData motion, float lerpFrame)
         {
-            var eyesType = EyesTypeMap[eyesName];
+            if (motion.name == "LookAtTarget")
+            {
+                var targetType = motion.targetType;
+                var targetIndex = motion.targetIndex;
+                var maidPointType = motion.maidPointType;
+
+                ApplyLookAtTarget(targetType, targetIndex, maidPointType);
+            }
+            else
+            {
+                float easingValue = CalcEasingValue(lerpFrame, motion.easing);
+                float horizon = Mathf.Lerp(motion.startHorizon, motion.endHorizon, easingValue);
+                float vertical = Mathf.Lerp(motion.startVertical, motion.endVertical, easingValue);
+
+                var eyesType = EyesTypeMap[motion.name];
+                ApplyEyes(eyesType, horizon, vertical);
+            }
+        }
+
+        private void ApplyEyes(
+            MotionEyesType eyesType,
+            float horizon,
+            float vertical)
+        {
+            
             switch (eyesType)
             {
-                case SongEyesType.EyesPosL:
+                case MotionEyesType.EyesPosL:
                     maidCache.eyesPosL = new Vector3(0f, vertical / 100f, horizon / 100f);
                     break;
-                case SongEyesType.EyesPosR:
+                case MotionEyesType.EyesPosR:
                     maidCache.eyesPosR = new Vector3(0f, vertical / 100f, horizon / 100f);
                     break;
-                case SongEyesType.EyesScaL:
+                case MotionEyesType.EyesScaL:
                     maidCache.eyesScaL = new Vector3(0f, vertical, horizon);
                     break;
-                case SongEyesType.EyesScaR:
+                case MotionEyesType.EyesScaR:
                     maidCache.eyesScaR = new Vector3(0f, vertical, horizon);
+                    break;
+                case MotionEyesType.EyesRot:
+                    maidCache.eyeEulerAngle = new Vector3(horizon * 90, 0f, vertical * 90);
                     break;
             }
         }
 
-        private Vector2 GetEyesValue(string eyesName)
+        private void ApplyLookAtTarget(
+            LookAtTargetType targetType,
+            int targetIndex,
+            MaidPointType maidPointType)
+        {
+            var maidCache = this.maidCache;
+            if (maidCache == null)
+            {
+                return;
+            }
+
+            maidCache.lookAtTargetType = targetType;
+            maidCache.lookAtTargetIndex = targetIndex;
+            maidCache.lookAtMaidPointType = maidPointType;
+        }
+
+        private Transform GetLookAtTarget(
+            LookAtTargetType targetType,
+            int targetIndex,
+            MaidPointType maidPointType)
+        {
+            var maid = this.maid;
+            if (maid == null)
+            {
+                return null;
+            }
+
+            switch (targetType)
+            {
+                case LookAtTargetType.Camera:
+                    return GameMain.Instance.MainCamera.transform;
+                case LookAtTargetType.Maid:
+                {
+                    var maidCache = maidManager.GetMaidCache(targetIndex);
+                    if (maidCache != null)
+                    {
+                        return maidCache.GetPointTransform(maidPointType);
+                    }
+                    break;
+                }
+                case LookAtTargetType.Model:
+                {
+                    var model = modelManager.GetModel(targetIndex);
+                    if (model != null)
+                    {
+                        return model.transform;
+                    }
+                    break;
+                }
+            }
+
+            return null;
+        }
+
+        private Vector2 GetEyesValue(MotionEyesType eyesType)
         {
             var maid = this.maid;
             if (maid == null || maid.body0 == null || !maid.body0.isLoadedBody)
@@ -221,28 +319,32 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return Vector2.zero;
             }
 
-            var eyesType = EyesTypeMap[eyesName];
             switch (eyesType)
             {
-                case SongEyesType.EyesPosL:
+                case MotionEyesType.EyesPosL:
                 {
                     var pos = maidCache.eyesPosL;
                     return new Vector2(pos.z * 100f, pos.y * 100f);
                 }
-                case SongEyesType.EyesPosR:
+                case MotionEyesType.EyesPosR:
                 {
                     var pos = maidCache.eyesPosR;
                     return new Vector2(pos.z * 100f, pos.y * 100f);
                 }
-                case SongEyesType.EyesScaL:
+                case MotionEyesType.EyesScaL:
                 {
                     var sca = maidCache.eyesScaL;
                     return new Vector2(sca.z, sca.y);
                 }
-                case SongEyesType.EyesScaR:
+                case MotionEyesType.EyesScaR:
                 {
                     var sca = maidCache.eyesScaR;
                     return new Vector2(sca.z, sca.y);
+                }
+                case MotionEyesType.EyesRot:
+                {
+                    var rot = maidCache.eyeEulerAngle;
+                    return new Vector2(rot.x / 90f, rot.z / 90f);
                 }
             }
 
@@ -253,12 +355,36 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             foreach (var eyesName in allBoneNames)
             {
-                var eyesValue = GetEyesValue(eyesName);
+                var eyesType = EyesTypeMap[eyesName];
+                ITransformData trans = CreateTransformData(eyesName);
 
-                var trans = CreateTransformData(eyesName);
-                trans.easing = GetEasing(frame.frameNo, eyesName);
-                trans["horizon"].value = eyesValue.x;
-                trans["vertical"].value = eyesValue.y;
+                if (eyesType == MotionEyesType.LookAtTarget)
+                {
+                    var targetType = maidCache.lookAtTargetType;
+                    trans["targetType"].value = (int) targetType;
+                    trans["targetIndex"].value = 0;
+                    trans["maidPointType"].value = 0;
+
+                    switch (targetType)
+                    {
+                        case LookAtTargetType.Camera:
+                            break;
+                        case LookAtTargetType.Maid:
+                            trans["targetIndex"].value = maidCache.lookAtTargetIndex;
+                            trans["maidPointType"].value = (int) maidCache.lookAtMaidPointType;
+                            break;
+                        case LookAtTargetType.Model:
+                            trans["targetIndex"].value = maidCache.lookAtTargetIndex;
+                            break;
+                    }
+                }
+                else
+                {
+                    var eyesValue = GetEyesValue(eyesType);
+                    trans["horizon"].value = eyesValue.x;
+                    trans["vertical"].value = eyesValue.y;
+                    trans.easing = GetEasing(frame.frameNo, eyesName);
+                }
 
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
@@ -326,16 +452,34 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     continue;
                 }
 
-                var row = new EyesTimeLineRow
+                if (name == "LookAtTarget")
                 {
-                    frame = frame.frameNo,
-                    name = name,
-                    horizon = bone.transform["horizon"].value,
-                    vertical = bone.transform["vertical"].value,
-                    easing = bone.transform.easing,
-                };
+                    var targetType = (LookAtTargetType) (int) bone.transform["targetType"].value;
+                    var targetIndex = (int) bone.transform["targetIndex"].value;
+                    var maidPointType = (MaidPointType) (int) bone.transform["maidPointType"].value;
 
-                rows.Add(row);
+                    var row = new EyesTimeLineRow
+                    {
+                        frame = frame.frameNo,
+                        name = name,
+                        targetType = targetType,
+                        targetIndex = targetIndex,
+                        maidPointType = maidPointType,
+                    };
+                    rows.Add(row);
+                }
+                else
+                {
+                    var row = new EyesTimeLineRow
+                    {
+                        frame = frame.frameNo,
+                        name = name,
+                        horizon = bone.transform["horizon"].value,
+                        vertical = bone.transform["vertical"].value,
+                        easing = bone.transform.easing,
+                    };
+                    rows.Add(row);
+                }
             }
         }
         
@@ -371,6 +515,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                         startVertical = row.vertical,
                         endVertical = row.vertical,
                         easing = row.easing,
+                        targetType = row.targetType,
+                        targetIndex = row.targetIndex,
+                        maidPointType = row.maidPointType,
                     };
                     playData.motions.Add(motion);
 
@@ -399,6 +546,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             Action<EyesMotionData, bool> appendMotion = (motion, isFirst) =>
             {
                 var type = EyesTypeMap[motion.name];
+
+                if (type == MotionEyesType.LookAtTarget)
+                {
+                    return;
+                }
 
                 var stTime = motion.stFrame * timeline.frameDuration;
                 var edTime = motion.edFrame * timeline.frameDuration;
@@ -509,7 +661,140 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
+        private enum TabType
+        {
+            視線,
+            位置,
+        }
+
+        private TabType _tabType = TabType.視線;
+
+        private GUIComboBox<LookAtTargetType> _targetTypeComboBox = new GUIComboBox<LookAtTargetType>
+        {
+            items = Enum.GetValues(typeof(LookAtTargetType)).Cast<LookAtTargetType>().ToList(),
+            getName = (type, index) => TransformDataLookAtTarget.TargetTypeNames[index],
+        };
+
+        private GUIComboBox<MaidCache> _maidComboBox = new GUIComboBox<MaidCache>
+        {
+            getName = (maidCache, _) => maidCache == null ? "未選択" : maidCache.fullName,
+            contentSize = new Vector2(150, 300),
+        };
+
+        private GUIComboBox<MaidPointType> _maidPointComboBox = new GUIComboBox<MaidPointType>
+        {
+            items = Enum.GetValues(typeof(MaidPointType)).Cast<MaidPointType>().ToList(),
+            getName = (type, index) => MaidCache.GetMaidPointTypeName(type),
+        };
+
+        private GUIComboBox<StudioModelStat> _modelComboBox = new GUIComboBox<StudioModelStat>
+        {
+            getName = (model, index) => model.displayName,
+            contentSize = new Vector2(200, 300),
+        };
+
         public override void DrawWindow(GUIView view)
+        {
+            _tabType = view.DrawTabs(_tabType, 50, 20);
+
+            switch (_tabType)
+            {
+                case TabType.視線:
+                    DrawEyesLookAt(view);
+                    break;
+                case TabType.位置:
+                    DrawEyesPos(view);
+                    break;
+            }
+
+            view.DrawComboBox();
+        }
+
+        private void DrawEyesLookAt(GUIView view)
+        {
+            var maid = this.maid;
+            if (maid == null)
+            {
+                return;
+            }
+
+            if (!timeline.useHeadKey)
+            {
+                view.DrawLabel("顔/瞳の固定化を有効にしてください", -1, 20);
+                return;
+            }
+
+            InitTexture();
+
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+
+            _targetTypeComboBox.currentIndex = (int) maidCache.lookAtTargetType;
+            _targetTypeComboBox.onSelected = (type, index) => maidCache.lookAtTargetType = type;
+            _targetTypeComboBox.DrawButton("注視先", view);
+
+            var targetType = _targetTypeComboBox.currentItem;
+            switch (targetType)
+            {
+                case LookAtTargetType.Maid:
+                    _maidComboBox.items = maidManager.maidCaches;
+                    _maidComboBox.currentIndex = maidCache.lookAtTargetIndex;
+                    _maidComboBox.onSelected = (_, index) => maidCache.lookAtTargetIndex = index;
+                    _maidComboBox.DrawButton("メイド", view);
+
+                    _maidPointComboBox.currentIndex = (int) maidCache.lookAtMaidPointType;
+                    _maidPointComboBox.onSelected = (type, index) => maidCache.lookAtMaidPointType = type;
+                    _maidPointComboBox.DrawButton("ポイント", view);
+                    break;
+                case LookAtTargetType.Model:
+                    _modelComboBox.items = modelManager.models;
+                    _modelComboBox.currentIndex = maidCache.lookAtTargetIndex;
+                    _modelComboBox.onSelected = (model, index) => maidCache.lookAtTargetIndex = index;
+                    _modelComboBox.DrawButton("モデル", view);
+                    break;
+            }
+
+            view.DrawHorizontalLine(Color.gray);
+
+            view.AddSpace(5);
+
+            view.BeginScrollView();
+
+            var basePos = view.currentPos;
+
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing && targetType == LookAtTargetType.None);
+
+            DrawEyesImage(view, basePos, new MotionEyesType[]
+            {
+                MotionEyesType.EyesRot,
+            });
+
+            view.currentPos = basePos;
+            view.currentPos.x += 150 + 10;
+
+            if (view.DrawButton("初期化", 60, 20))
+            {
+                ApplyEyes(MotionEyesType.EyesRot, 0, 0);
+                ApplyLookAtTarget(LookAtTargetType.None, 0, 0);
+            }
+
+            view.currentPos = basePos;
+            view.currentPos.y += 150;
+
+            var eyesTypes = new MotionEyesType[]
+            {
+                MotionEyesType.EyesRot,
+            };
+
+            foreach (var eyesType in eyesTypes)
+            {
+                DrawEyesSlider(view, eyesType);
+            }
+
+            view.SetEnabled(!view.IsComboBoxFocused());
+            view.EndScrollView();
+        }
+
+        private void DrawEyesPos(GUIView view)
         {
             var maid = this.maid;
             if (maid == null)
@@ -519,10 +804,111 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             InitTexture();
 
+            view.BeginScrollView();
+
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
             var basePos = view.currentPos;
 
+            DrawEyesImage(view, basePos, new MotionEyesType[]
+            {
+                MotionEyesType.EyesPosL,
+                MotionEyesType.EyesPosR,
+            });
+
+            view.currentPos = basePos;
+            view.currentPos.x += 150 + 10;
+
+            if (view.DrawButton("初期化", 60, 20))
+            {
+                ApplyEyes(MotionEyesType.EyesPosL, 0, 0);
+                ApplyEyes(MotionEyesType.EyesPosR, 0, 0);
+                ApplyEyes(MotionEyesType.EyesScaL, 0, 0);
+                ApplyEyes(MotionEyesType.EyesScaR, 0, 0);
+            }
+
+            view.currentPos = basePos;
+            view.currentPos.y += 150;
+
+            var eyesTypes = new MotionEyesType[]
+            {
+                MotionEyesType.EyesPosL,
+                MotionEyesType.EyesPosR,
+                MotionEyesType.EyesScaL,
+                MotionEyesType.EyesScaR,
+            };
+
+            foreach (var eyesType in eyesTypes)
+            {
+                DrawEyesSlider(view, eyesType);
+            }
+
+            view.SetEnabled(!view.IsComboBoxFocused());
+            view.EndScrollView();
+        }
+
+        private void DrawEyesSlider(GUIView view, MotionEyesType eyesType)
+        {
+            var eyesName = eyesType.ToString();
+            var displayName = EyesDisplayNameMap[eyesName];
+
+            var eyesValue = GetEyesValue(eyesType);
+            var horizon = eyesValue.x;
+            var vertical = eyesValue.y;
+            var updateTransform = false;
+
+            view.DrawLabel(displayName, 100, 20);
+
+            string[] names;
+            switch (eyesType)
+            {
+                case MotionEyesType.EyesPosL:
+                case MotionEyesType.EyesPosR:
+                case MotionEyesType.EyesRot:
+                    names = new string[] { "水平", "垂直" };
+                    break;
+                case MotionEyesType.EyesScaL:
+                case MotionEyesType.EyesScaR:
+                    names = new string[] { "幅", "高さ" };
+                    break;
+                default:
+                    return;
+            }
+
+            updateTransform |= view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = names[0],
+                    labelWidth = 30,
+                    min = -1f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 0f,
+                    value = horizon,
+                    onChanged = x => horizon = x,
+                });
+
+            updateTransform |= view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = names[1],
+                    labelWidth = 30,
+                    min = -1f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 0f,
+                    value = vertical,
+                    onChanged = y => vertical = y,
+                });
+
+            if (updateTransform)
+            {
+                ApplyEyes(eyesType, horizon, vertical);
+            }
+        }
+
+        private void DrawEyesImage(GUIView view, Vector2 basePos, MotionEyesType[] eyesTypes)
+        {
             view.DrawTexture(
                 _eyesPositionTex,
                 150,
@@ -530,18 +916,31 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 studioHack.isPoseEditing ? Color.white : Color.gray,
                 EventType.MouseDrag,
                 pos =>
-            {
-                _isEyesDragging = true;
+                {
+                    _isEyesDragging = true;
 
-                var x = pos.x - 75;
-                var y = pos.y - 75;
+                    var x = pos.x - 75;
+                    var y = pos.y - 75;
 
-                var horizon = x / 75f;
-                var vertical = y / 75f;
+                    var horizon = x / 75f;
+                    var vertical = y / 75f;
 
-                TransformEyes("EyesPosL", -horizon, -vertical);
-                TransformEyes("EyesPosR", horizon, vertical);
-            });
+                    foreach (var eyesType in eyesTypes)
+                    {
+                        if (eyesType == MotionEyesType.EyesPosL)
+                        {
+                            ApplyEyes(eyesType, -horizon, -vertical);
+                        }
+                        else if (eyesType == MotionEyesType.EyesRot)
+                        {
+                            ApplyEyes(eyesType, horizon, -vertical);
+                        }
+                        else
+                        {
+                            ApplyEyes(eyesType, horizon, vertical);
+                        }
+                    }
+                });
 
             if (_isEyesDragging && !Input.GetMouseButton(0))
             {
@@ -550,98 +949,50 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             var halfEyesSize = _eyesTex.width / 2;
 
+            Func<MotionEyesType, Vector2> getImagePosition = eyesType =>
             {
-                var eyesValue = GetEyesValue("EyesPosL");
+                var eyesValue = GetEyesValue(eyesType);
                 var horizon = eyesValue.x;
                 var vertical = eyesValue.y;
 
-                var pos = new Vector2(75 - horizon * 75, 75 - vertical * 75);
-                pos.x = Mathf.Clamp(pos.x, 0, 150);
-                pos.y = Mathf.Clamp(pos.y, 0, 150);
-
-                view.currentPos = basePos + pos - new Vector2(halfEyesSize, halfEyesSize);
-                view.DrawTexture(_eyesTex);
-            }
-
-            {
-                var eyesValue = GetEyesValue("EyesPosR");
-                var horizon = eyesValue.x;
-                var vertical = eyesValue.y;
+                if (eyesType == MotionEyesType.EyesPosL)
+                {
+                    horizon = -horizon;
+                    vertical = -vertical;
+                }
+                else if (eyesType == MotionEyesType.EyesRot)
+                {
+                    vertical = -vertical;
+                }
 
                 var pos = new Vector2(75 + horizon * 75, 75 + vertical * 75);
                 pos.x = Mathf.Clamp(pos.x, 0, 150);
                 pos.y = Mathf.Clamp(pos.y, 0, 150);
 
-                view.currentPos = basePos + pos - new Vector2(halfEyesSize, halfEyesSize);
+                return basePos + pos - new Vector2(halfEyesSize, halfEyesSize);
+            };
+
+            foreach (var eyesType in eyesTypes)
+            {
+                view.currentPos = getImagePosition(eyesType);
                 view.DrawTexture(_eyesTex);
-            }
-
-            view.currentPos = basePos;
-            view.currentPos.x += 150 + 10;
-
-            if (view.DrawButton("初期化", 60, 20))
-            {
-                TransformEyes("EyesPosL", 0, 0);
-                TransformEyes("EyesPosR", 0, 0);
-                TransformEyes("EyesScaL", 0, 0);
-                TransformEyes("EyesScaR", 0, 0);
-            }
-
-            view.currentPos = basePos;
-            view.currentPos.y += 150;
-
-            for (var i = 0; i < allBoneNames.Count; i++)
-            {
-                var eyesName = allBoneNames[i];
-                var displayName = EyesDisplayNameMap[eyesName];
-
-                var eyesValue = GetEyesValue(eyesName);
-                var horizon = eyesValue.x;
-                var vertical = eyesValue.y;
-                var updateTransform = false;
-
-                view.DrawLabel(displayName, 100, 20);
-
-                var names = i < 2 ? new string[] { "X", "Y" } : new string[] { "幅", "高さ" };
-
-                updateTransform |= view.DrawSliderValue(
-                    new GUIView.SliderOption
-                    {
-                        label = names[0],
-                        labelWidth = 30,
-                        min = -1f,
-                        max = 1f,
-                        step = 0.01f,
-                        defaultValue = 0f,
-                        value = horizon,
-                        onChanged = x => horizon = x,
-                    });
-
-                updateTransform |= view.DrawSliderValue(
-                    new GUIView.SliderOption
-                    {
-                        label = names[1],
-                        labelWidth = 30,
-                        min = -1f,
-                        max = 1f,
-                        step = 0.01f,
-                        defaultValue = 0f,
-                        value = vertical,
-                        onChanged = y => vertical = y,
-                    });
-
-                if (updateTransform)
-                {
-                    TransformEyes(eyesName, horizon, vertical);
-                }
             }
         }
 
         public override ITransformData CreateTransformData(string name)
         {
-            var transform = new TransformDataEyes();
-            transform.Initialize(name);
-            return transform;
+            if (name == "LookAtTarget")
+            {
+                var transform = new TransformDataLookAtTarget();
+                transform.Initialize(name);
+                return transform;
+            }
+            else
+            {
+                var transform = new TransformDataEyes();
+                transform.Initialize(name);
+                return transform;
+            }
         }
     }
 }
