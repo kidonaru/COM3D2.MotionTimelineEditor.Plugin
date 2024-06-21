@@ -323,6 +323,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public Vector3 eyeEulerAngle;
 
+        public string oneTimeVoiceName = string.Empty;
+        public string loopVoiceName = string.Empty;
+
         private static FieldInfo fieldLimbControlList = null;
 
         public List<LimbControl> limbControlList
@@ -549,6 +552,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             lookAtTargetType = LookAtTargetType.None;
             lookAtTargetIndex = 0;
             lookAtMaidPointType = MaidPointType.Head;
+            eyeEulerAngle = Vector3.zero;
+            oneTimeVoiceName = string.Empty;
+            loopVoiceName = string.Empty;
         }
 
         public void ResetAnm()
@@ -604,6 +610,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             UpdateEyeEulerAngle();
+            UpdateVoice();
         }
 
         public void PlayAnm(long id, byte[] anmData)
@@ -967,6 +974,54 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
             return null;
+        }
+
+        public void PlayOneTimeVoice()
+        {
+            PlayVoice(oneTimeVoiceName, 0.1f, false);
+            UpdateVoice();
+        }
+
+        public void PlayVoice(string fileName, float fadeTime, bool isLoop)
+        {
+            if (maid == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(fileName))
+            {
+                maid.AudioMan.Stop();
+                return;
+            }
+
+            var fixedFileName = EndsWith(fileName, ".ogg");
+            maid.AudioMan.LoadPlay(fixedFileName, fadeTime, false, isLoop);
+        }
+
+        public void UpdateVoice()
+        {
+            if (maid == null)
+            {
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(loopVoiceName))
+            {
+                if (!maid.AudioMan.isPlay())
+                {
+                    PlayVoice(loopVoiceName, 0.1f, true);
+                }
+            }
+        }
+
+        public static string EndsWith(string value, string extension)
+        {
+            if (!string.IsNullOrEmpty(value) && !value.EndsWith(extension, StringComparison.CurrentCultureIgnoreCase))
+            {
+                value += extension;
+            }
+            return value;
         }
 
         private void OnMaidChanged(Maid maid)

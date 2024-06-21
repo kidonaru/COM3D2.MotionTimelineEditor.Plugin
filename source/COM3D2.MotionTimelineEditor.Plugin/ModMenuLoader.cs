@@ -16,11 +16,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private static byte[] fileBuffer;
         private static Dictionary<string, MenuInfo> menuCache = new Dictionary<string, MenuInfo>();
 
-		public static void ClearCache()
-		{
-			fileBuffer = null;
+        public static void ClearCache()
+        {
+            fileBuffer = null;
             menuCache.Clear();
-		}
+        }
 
         public static MenuInfo Load(string menuFileName)
         {

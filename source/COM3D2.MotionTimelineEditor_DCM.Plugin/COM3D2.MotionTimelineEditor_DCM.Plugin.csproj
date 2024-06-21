@@ -89,6 +89,8 @@
     <Compile Include="TransformDataMorph.cs" />
     <Compile Include="TransformDataMove.cs" />
     <Compile Include="TransformDataShapeKey.cs" />
+    <Compile Include="TransformDataVoice.cs" />
+    <Compile Include="VoiceTimelineLayer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

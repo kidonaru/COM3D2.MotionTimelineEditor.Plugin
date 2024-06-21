@@ -70,11 +70,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return blendShapeCache;
         }
 
-		public static void ClearCache()
-		{
-			blendShapeCacheMap.Clear();
-			fileBuffer = null;
-		}
+        public static void ClearCache()
+        {
+            blendShapeCacheMap.Clear();
+            fileBuffer = null;
+        }
 
         public static byte[] ReadAFileBase(string filename)
         {

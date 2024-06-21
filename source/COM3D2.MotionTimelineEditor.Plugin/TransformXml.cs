@@ -50,6 +50,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("OutSmoothBit")]
         public int outSmoothBit = 0;
 
+        [XmlIgnore]
+        private string[] _strValues = null;
+
+        [XmlArray("StrValues")]
+        [XmlArrayItem("Value")]
+        public string[] strValues
+        {
+            get
+            {
+                return _strValues;
+            }
+            set
+            {
+                _strValues = value;
+            }
+        }
+
         public TransformXml()
         {
         }

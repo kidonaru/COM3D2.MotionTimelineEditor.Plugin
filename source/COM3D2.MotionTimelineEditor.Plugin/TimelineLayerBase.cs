@@ -522,6 +522,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var tmpFrame = CreateFrame(timelineManager.currentFrameNo);
             UpdateFrame(tmpFrame);
 
+            foreach (var bone in tmpFrame.bones)
+            {
+                PluginUtils.LogDebug("current trans: {0}", bone.transform.ToString());
+            }
+
             var diffBones = tmpFrame.GetDiffBones(timelineManager.initialEditFrame);
             if (diffBones.Count == 0)
             {

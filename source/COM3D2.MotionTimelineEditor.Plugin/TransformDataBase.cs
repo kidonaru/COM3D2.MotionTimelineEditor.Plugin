@@ -8,7 +8,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public string name { get; protected set; }
 
-        public abstract int valueCount { get; }
+        public virtual int valueCount
+        {
+            get
+            {
+                return 0;
+            }
+        }
 
         private ValueData[] _values = new ValueData[0];
         public ValueData[] values
@@ -16,6 +22,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return _values;
+            }
+        }
+
+        public virtual int strValueCount
+        {
+            get
+            {
+                return 0;
+            }
+        }
+
+        private string[] _strValues = new string[0];
+        public string[] strValues
+        {
+            get
+            {
+                return _strValues;
             }
         }
 
@@ -365,6 +388,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     };
                 }
             }
+
+            if (_strValues.Length != strValueCount)
+            {
+                _strValues = new string[strValueCount];
+                for (int i = 0; i < strValueCount; i++)
+                {
+                    _strValues[i] = string.Empty;
+                }
+            }
         }
 
         /// <summary>
@@ -545,6 +577,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 values[i].FromValue(transform.values[i]);
             }
+
+            for (int i = 0; i < strValueCount; i++)
+            {
+                strValues[i] = transform.strValues[i];
+            }
         }
 
         protected float[] _valuesForXml
@@ -706,6 +743,34 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private string[] _strValuesForXml
+        {
+            get
+            {
+                if (strValues.Length == 0)
+                {
+                    return null;
+                }
+                return strValues;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    return;
+                }
+
+                for (int i = 0; i < value.Length; i++)
+                {
+                    if (i >= strValues.Length)
+                    {
+                        break;
+                    }
+                    strValues[i] = value[i];
+                }
+            }
+        }
+
         public virtual void FromXml(TransformXml xml)
         {
             name = xml.name;
@@ -714,6 +779,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _normalizedOutTangents = xml.outTangents;
             _inSmoothBit = xml.inSmoothBit;
             _outSmoothBit = xml.outSmoothBit;
+            _strValuesForXml = xml.strValues;
         }
 
         public virtual TransformXml ToXml()
@@ -726,6 +792,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 outTangents = _normalizedOutTangents,
                 inSmoothBit = _inSmoothBit,
                 outSmoothBit = _outSmoothBit,
+                strValues = _strValuesForXml,
             };
             return xml;
         }
@@ -755,6 +822,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public virtual float GetInitialCustomValue(string customName)
         {
             return 0f;
+        }
+
+        public virtual Dictionary<string, int> GetStrValueIndexMap()
+        {
+            return new Dictionary<string, int>();
+        }
+
+        public string GetStrValue(string keyName)
+        {
+            int index;
+            if (GetStrValueIndexMap().TryGetValue(keyName, out index))
+            {
+                return strValues[index];
+            }
+
+            PluginUtils.LogError("StrValueが見つかりません keyName={0}", keyName);
+            return string.Empty;
+        }
+
+        public void SetStrValue(string keyName, string value)
+        {
+            int index;
+            if (GetStrValueIndexMap().TryGetValue(keyName, out index))
+            {
+                strValues[index] = value;
+                return;
+            }
+
+            PluginUtils.LogError("StrValueが見つかりません keyName={0}", keyName);
+        }
+
+        public bool HasStrValue(string customName)
+        {
+            return GetStrValueIndexMap().ContainsKey(customName);
         }
 
         public ValueData[] GetValueDataList(TangentValueType valueType)
@@ -898,6 +999,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
+            for (int i = 0; i < strValues.Length; i++)
+            {
+                if (strValues[i] != other.strValues[i])
+                {
+                    return false;
+                }
+            }
+
             return true;
         }
 
@@ -910,6 +1019,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 hash = hash * 23 + values.GetHashCode();
                 return hash;
             }
+        }
+
+        public override string ToString()
+        {
+            var ret = "TransformData";
+            ret += string.Format(" name={0} ", name);
+            if (valueCount > 0)
+            {
+                ret += " values=";
+                ret += string.Join(", ", values.Select(value => value.value.ToString()).ToArray());
+            }
+            if (strValueCount > 0)
+            {
+                ret += " strValues=";
+                ret += string.Join(", ", strValues.Select(value => value).ToArray());
+            }
+            return ret;
         }
     }
 }

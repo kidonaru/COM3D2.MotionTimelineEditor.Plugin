@@ -8,6 +8,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         string name { get; }
         int valueCount { get; }
         ValueData[] values { get; }
+        int strValueCount { get; }
+        string[] strValues { get; }
         Vector3 position { get; set; }
         Quaternion rotation { get; set; }
         Vector3 eulerAngles { get; set; }
@@ -60,6 +62,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         ValueData GetCustomValue(string customName);
         bool HasCustomValue(string customName);
         float GetInitialCustomValue(string customName);
+        Dictionary<string, int> GetStrValueIndexMap();
+        string GetStrValue(string keyName);
+        void SetStrValue(string keyName, string value);
+        bool HasStrValue(string keyName);
         ValueData[] GetValueDataList(TangentValueType valueType);
         TangentData[] GetInTangentDataList(TangentValueType valueType);
         TangentData[] GetOutTangentDataList(TangentValueType valueType);

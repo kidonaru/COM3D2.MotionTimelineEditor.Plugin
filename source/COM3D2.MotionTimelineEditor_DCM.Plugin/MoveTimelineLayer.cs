@@ -277,7 +277,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             //PluginUtils.LogDebug("PlayData: name={0}, count={1}", maid.name, _playData.motions.Count);
         }
 
-        public void SaveModelMotion(
+        public void SaveMotions(
             List<MoveMotionData> motions,
             string filePath)
         {
@@ -348,7 +348,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 var outputFileName = string.Format("move_{0}.csv", slotNo);
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveModelMotion(_playData.motions, outputPath);
+                SaveMotions(_playData.motions, outputPath);
 
                 var maidElement = GetMeidElement(songElement);
                 maidElement.Add(new XElement("move", outputFileName));
