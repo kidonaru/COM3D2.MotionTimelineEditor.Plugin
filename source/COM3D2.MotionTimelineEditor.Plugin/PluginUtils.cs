@@ -25,13 +25,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                string text = PhotoWindowManager.path_photo_folder + "_Timeline";
-                if (!Directory.Exists(text))
+                string path = PhotoWindowManager.path_photo_folder + "_Timeline";
+                if (!Directory.Exists(path))
                 {
-                    Directory.CreateDirectory(text);
+                    Directory.CreateDirectory(path);
                 }
 
-                return text;
+                return path;
             }
         }
 
@@ -48,6 +48,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return CombinePaths(UserDataPath, PluginInfo.PluginName + "_ExtraModel.csv");
+            }
+        }
+
+        public static string PluginConfigDirPath
+        {
+            get
+            {
+                var path = CombinePaths(UserDataPath, PluginInfo.PluginName);
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+
+                return path;
             }
         }
 
@@ -224,6 +238,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 action();
             }
+        }
+
+        public static string GetVoiceInfoCsvPath(Personality personality)
+        {
+            return CombinePaths(PluginConfigDirPath, "Voice_" + personality.ToString() + ".csv");
         }
 
         public readonly static byte[] Icon = Convert.FromBase64String(

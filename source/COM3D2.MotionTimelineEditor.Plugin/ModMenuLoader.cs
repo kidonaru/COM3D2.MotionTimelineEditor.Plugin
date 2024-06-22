@@ -11,14 +11,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string modelFileName;
     }
 
-    public class ModMenuLoader
+    public static class ModMenuLoader
     {
-        private static byte[] fileBuffer;
         private static Dictionary<string, MenuInfo> menuCache = new Dictionary<string, MenuInfo>();
 
         public static void ClearCache()
         {
-            fileBuffer = null;
             menuCache.Clear();
         }
 
@@ -43,16 +41,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 menuFileName += ".menu";
             }
 
-            byte[] buffer;
-            try
+            byte[] buffer = BinaryLoader.ReadAFileBase(menuFileName);
+            if (buffer == null)
             {
-                buffer = ReadAFileBase(menuFileName);
-            }
-            catch (Exception ex)
-            {
-                PluginUtils.LogError("Could not read menu file '" + menuFileName + "' because " + ex.Message);
                 return null;
             }
+
             try
             {
                 var menu = new MenuInfo();
@@ -110,33 +104,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 PluginUtils.LogWarning("Could not parse menu file '" + menuFileName + "' because " + ex2.Message);
                 return null;
             }
-        }
-
-        private static byte[] ReadAFileBase(string filename)
-        {
-            byte[] result;
-            using (AFileBase afileBase = GameUty.FileOpen(filename, null))
-            {
-                if (!afileBase.IsValid() || afileBase.GetSize() == 0)
-                {
-                    PluginUtils.LogError("AFileBase '" + filename + "' is invalid");
-                    result = null;
-                }
-                else
-                {
-                    if (fileBuffer == null)
-                    {
-                        fileBuffer = new byte[Math.Max(500000L, afileBase.GetSize())];
-                    }
-                    else if ((long)fileBuffer.Length < afileBase.GetSize())
-                    {
-                        fileBuffer = new byte[afileBase.GetSize()];
-                    }
-                    afileBase.Read(ref fileBuffer, afileBase.GetSize());
-                    result = fileBuffer;
-                }
-            }
-            return result;
         }
     }
 }

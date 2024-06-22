@@ -354,6 +354,20 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 maidCache.PlayOneTimeVoice();
             }
+
+            if (view.DrawButton("ボイス一覧出力", 100, 20))
+            {
+                PluginUtils.ShowConfirmDialog("ボイス一覧を出力しますか？\n※出力に数時間かかることがあります", () =>
+                {
+                    GameMain.Instance.SysDlg.Close();
+
+                    string[] array = MyHelper.GetFileListAtExtension(".ks");
+                    //string[] array = new string[] { "yotogi\\24220_【カラオケ】ハーレム後背位\\a1\\a1_sya_07620a.ks" };
+                    ScriptLoader.OutputVoiceInfo(array);
+
+                    PluginUtils.ShowDialog("ボイス一覧の出力が完了しました");
+                }, null);
+            }
         }
 
         public override ITransformData CreateTransformData(string name)

@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="BGMManager.cs" />
     <Compile Include="BinaryExtensions.cs" />
+    <Compile Include="BinaryLoader.cs" />
     <Compile Include="BlendShapeCacheData.cs" />
     <Compile Include="BlendShapeController.cs" />
     <Compile Include="BlendShapeLoader.cs" />
@@ -108,6 +109,7 @@
     <Compile Include="PhotoBGManager.cs" />
     <Compile Include="PluginInfo.cs" />
     <Compile Include="PluginUtils.cs" />
+    <Compile Include="ScriptLoader.cs" />
     <Compile Include="StopwatchDebug.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StudioHack.cs" />

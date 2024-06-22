@@ -9,7 +9,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public class BlendShapeLoader
     {
         private static Dictionary<string, BlendShapeCacheData> blendShapeCacheMap = new Dictionary<string, BlendShapeCacheData>();
-        private static byte[] fileBuffer;
 
         public static BlendShapeController LoadController(StudioModelStat model)
         {
@@ -73,48 +72,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static void ClearCache()
         {
             blendShapeCacheMap.Clear();
-            fileBuffer = null;
-        }
-
-        public static byte[] ReadAFileBase(string filename)
-        {
-            byte[] result;
-            using (AFileBase afileBase = GameUty.FileOpen(filename, null))
-            {
-                if (!afileBase.IsValid() || afileBase.GetSize() == 0)
-                {
-                    PluginUtils.LogError("AFileBase '" + filename + "' is invalid");
-                    result = null;
-                }
-                else
-                {
-                    if (fileBuffer == null)
-                    {
-                        fileBuffer = new byte[Math.Max(500000L, afileBase.GetSize())];
-                    }
-                    else if ((long)fileBuffer.Length < afileBase.GetSize())
-                    {
-                        fileBuffer = new byte[afileBase.GetSize()];
-                    }
-                    afileBase.Read(ref fileBuffer, afileBase.GetSize());
-                    result = fileBuffer;
-                }
-            }
-            return result;
         }
 
         private static BlendShapeCacheData LoadCacheFromModel(string modelFileName)
         {
             BlendShapeCacheData blendShapeData = null;
 
-            byte[] buffer;
-            try
+            var buffer = BinaryLoader.ReadAFileBase(modelFileName);
+            if (buffer == null)
             {
-                buffer = ReadAFileBase(modelFileName);
-            }
-            catch
-            {
-                PluginUtils.LogError("Could not load model file '" + modelFileName + "'");
                 return null;
             }
 
