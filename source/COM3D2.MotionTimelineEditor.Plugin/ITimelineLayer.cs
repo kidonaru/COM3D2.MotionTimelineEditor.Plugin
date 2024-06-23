@@ -93,6 +93,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         FrameData GetActiveFrame(float frameNo);
         int GetStartFrameNo(int frameNo);
         int GetEndFrameNo(int frameNo);
+        void InsertFrames(int startFrameNo, int endFrameNo);
         void DuplicateFrames(int startFrameNo, int endFrameNo);
         void DeleteFrames(int startFrameNo, int endFrameNo);
 

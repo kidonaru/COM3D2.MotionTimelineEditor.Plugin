@@ -587,20 +587,53 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void DuplicateFrames(int startFrameNo, int endFrameNo)
+        public bool IsValidFrameRnage(int startFrameNo, int endFrameNo)
         {
             if (startFrameNo < 0 || endFrameNo > timeline.maxFrameNo)
             {
-                PluginUtils.LogWarning("コピーする範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
+                return false;
+            }
+
+            if (startFrameNo > endFrameNo)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public void InsertFrames(int startFrameNo, int endFrameNo)
+        {
+            if (!IsValidFrameRnage(startFrameNo, endFrameNo))
+            {
+                PluginUtils.LogWarning("範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
                 return;
             }
 
             var length = endFrameNo - startFrameNo + 1;
-            if (length <= 0)
+
+            timeline.maxFrameNo += length;
+
+            foreach (var layer in layers)
             {
-                PluginUtils.LogWarning("コピーする範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
+                layer.InsertFrames(startFrameNo, endFrameNo);
+            }
+
+            ApplyCurrentFrame(true);
+            Refresh();
+
+            RequestHistory("フレーム挿入: " + startFrameNo + " - " + endFrameNo);
+        }
+
+        public void DuplicateFrames(int startFrameNo, int endFrameNo)
+        {
+            if (!IsValidFrameRnage(startFrameNo, endFrameNo))
+            {
+                PluginUtils.LogWarning("範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
                 return;
             }
+
+            var length = endFrameNo - startFrameNo + 1;
 
             timeline.maxFrameNo += length;
 
@@ -612,23 +645,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyCurrentFrame(true);
             Refresh();
 
-            RequestHistory("範囲複製: " + startFrameNo + " - " + endFrameNo);
+            RequestHistory("フレーム複製: " + startFrameNo + " - " + endFrameNo);
         }
 
         public void DeleteFrames(int startFrameNo, int endFrameNo)
         {
-            if (startFrameNo < 0 || endFrameNo > timeline.maxFrameNo)
+            if (!IsValidFrameRnage(startFrameNo, endFrameNo))
             {
-                PluginUtils.LogWarning("削除する範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
+                PluginUtils.LogWarning("範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
                 return;
             }
 
             var length = endFrameNo - startFrameNo + 1;
-            if (length <= 0)
-            {
-                PluginUtils.LogWarning("削除する範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
-                return;
-            }
 
             if (timeline.maxFrameNo - length <= 1)
             {
@@ -648,7 +676,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyCurrentFrame(true);
             Refresh();
 
-            RequestHistory("範囲削除: " + startFrameNo + " - " + endFrameNo);
+            RequestHistory("フレーム削除: " + startFrameNo + " - " + endFrameNo);
         }
 
         private FrameData FindFrame(int start, int step)

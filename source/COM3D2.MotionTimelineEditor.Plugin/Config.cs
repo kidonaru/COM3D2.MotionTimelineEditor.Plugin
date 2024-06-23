@@ -50,6 +50,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Color timelineMenuBgColor = new Color(105 / 255f, 28 / 255f, 42 / 255f);
         public Color timelineMenuSelectBgColor = new Color(255 / 255f, 0 / 255f, 0 / 255f, 0.2f);
         public Color timelineMenuSelectTextColor = new Color(249 / 255f, 193 / 255f, 207/ 255f);
+        public Color timelineSelectRangeColor = new Color(255 / 255f, 229 / 255f, 0/ 255f, 0.2f);
         public float timelineBgAlpha = 0.5f;
         public Color curveLineColor = new Color(101 / 255f, 154 / 255f, 210 / 255f);
         public Color curveLineSmoothColor = new Color(90 / 255f, 255 / 255f, 25 / 255f);

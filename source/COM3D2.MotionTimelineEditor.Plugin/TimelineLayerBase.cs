@@ -1114,6 +1114,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return endFrameNo;
         }
 
+        public void InsertFrames(int startFrameNo, int endFrameNo)
+        {
+            var length = endFrameNo - startFrameNo + 1;
+
+            // 指定範囲以降のフレームを後ろにずらす
+            for (int i = maxExistFrameNo; i >= startFrameNo; i--)
+            {
+                var frame = GetFrame(i);
+                if (frame != null)
+                {
+                    frame.frameNo += length;
+                }
+            }
+        }
+
         public void DuplicateFrames(int startFrameNo, int endFrameNo)
         {
             var length = endFrameNo - startFrameNo + 1;

@@ -746,24 +746,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     50,
                     20);
 
-                if (view.DrawButton("範囲選択", 60, 20))
+                if (view.DrawButton("R", 20, 20))
+                {
+                    selectStartFrameNo = 0;
+                    selectEndFrameNo = 0;
+                }
+
+                var isValidRange = timelineManager.IsValidFrameRnage(selectStartFrameNo, selectEndFrameNo);
+
+                if (view.DrawButton("範囲選択", 65, 20))
                 {
                     timelineManager.SelectFramesRange(selectStartFrameNo, selectEndFrameNo);
                 }
 
-                if (view.DrawButton("範囲複製", 60, 20))
+                if (view.DrawButton("ﾌﾚｰﾑ挿入", 65, 20, isValidRange && selectStartFrameNo > 0))
                 {
-                    timelineManager.DuplicateFrames(selectStartFrameNo, selectEndFrameNo);
+                    timelineManager.InsertFrames(selectStartFrameNo, selectEndFrameNo);
                 }
 
-                if (view.DrawButton("範囲削除", 60, 20))
+                if (view.DrawButton("ﾌﾚｰﾑ削除", 65, 20, isValidRange && selectStartFrameNo > 0))
                 {
                     timelineManager.DeleteFrames(selectStartFrameNo, selectEndFrameNo);
                 }
 
+                if (view.DrawButton("ﾌﾚｰﾑ複製", 65, 20, isValidRange))
+                {
+                    timelineManager.DuplicateFrames(selectStartFrameNo, selectEndFrameNo);
+                }
+
                 view.AddSpace(10);
 
-                if (view.DrawButton("縦選択", 60, 20, !config.isEasyEdit))
+                if (view.DrawButton("縦選択", 55, 20, !config.isEasyEdit))
                 {
                     timelineManager.SelectVerticalBones();
                 }
@@ -925,6 +938,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 break;
+            }
+
+            // 範囲選択表示
+            if (selectStartFrameNo > 0 || selectEndFrameNo > 0)
+            {
+                var length = selectEndFrameNo - selectStartFrameNo + 1;
+                view.currentPos.x = selectStartFrameNo * frameWidth;
+                view.currentPos.y = scrollPosition.y;
+                view.DrawTexture(texWhite, length * frameWidth, viewHeight, config.timelineSelectRangeColor);
             }
 
             // 選択中のメニュー背景表示
