@@ -33,15 +33,31 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
         }
 
-        private readonly static Dictionary<string, int> CustomValueIndexMap = new Dictionary<string, int>
+        private readonly static Dictionary<string, CustomValueInfo> CustomValueInfoMap = new Dictionary<string, CustomValueInfo>
         {
-            { "horizon", 1 },
-            { "vertical", 2 },
+            {
+                "horizon",
+                new CustomValueInfo
+                {
+                    index = 1,
+                    name = "水平",
+                    defaultValue = 0f,
+                }
+            },
+            {
+                "vertical",
+                new CustomValueInfo
+                {
+                    index = 2,
+                    name = "垂直",
+                    defaultValue = 0f,
+                }
+            },
         };
 
-        public override Dictionary<string, int> GetCustomValueIndexMap()
+        public override Dictionary<string, CustomValueInfo> GetCustomValueInfoMap()
         {
-            return CustomValueIndexMap;
+            return CustomValueInfoMap;
         }
     }
 }

@@ -66,28 +66,29 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
         }
 
-        private readonly static Dictionary<string, int> CustomValueIndexMap = new Dictionary<string, int>
+        private readonly static Dictionary<string, CustomValueInfo> CustomValueInfoMap = new Dictionary<string, CustomValueInfo>
         {
-            { "distance", 7 },
-            { "viewAngle", 8 }
+            {
+                "distance", new CustomValueInfo
+                {
+                    index = 7,
+                    name = "距離",
+                    defaultValue = 1f,
+                }
+            },
+            {
+                "viewAngle", new CustomValueInfo
+                {
+                    index = 8,
+                    name = "FoV",
+                    defaultValue = 35f,
+                }
+            },
         };
 
-        public override Dictionary<string, int> GetCustomValueIndexMap()
+        public override Dictionary<string, CustomValueInfo> GetCustomValueInfoMap()
         {
-            return CustomValueIndexMap;
-        }
-
-        public override float GetInitialCustomValue(string customName)
-        {
-            if (customName == "distance")
-            {
-                return 1f;
-            }
-            if (customName == "viewAngle")
-            {
-                return 35f;
-            }
-            return 0f;
+            return CustomValueInfoMap;
         }
     }
 }

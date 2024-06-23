@@ -3,6 +3,19 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+    public class CustomValueInfo
+    {
+        public int index;
+        public string name;
+        public float defaultValue;
+    }
+
+    public class StrValueInfo
+    {
+        public int index;
+        public string name;
+    }
+
     public interface ITransformData
     {
         string name { get; }
@@ -58,12 +71,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         void FromXml(TransformXml xml);
         TransformXml ToXml();
 
-        Dictionary<string, int> GetCustomValueIndexMap();
-        ValueData GetCustomValue(string customName);
-        bool HasCustomValue(string customName);
-        float GetInitialCustomValue(string customName);
-        Dictionary<string, int> GetStrValueIndexMap();
+        Dictionary<string, CustomValueInfo> GetCustomValueInfoMap();
+        CustomValueInfo GetCustomValueInfo(string customKey);
+        ValueData GetCustomValue(string customKey);
+        string GetCustomValueName(string customKey);
+        bool HasCustomValue(string customKey);
+        float GetDefaultCustomValue(string customKey);
+        Dictionary<string, StrValueInfo> GetStrValueInfoMap();
+        StrValueInfo GetStrValueInfo(string keyName);
         string GetStrValue(string keyName);
+        string GetStrValueName(string keyName);
         void SetStrValue(string keyName, string value);
         bool HasStrValue(string keyName);
         ValueData[] GetValueDataList(TangentValueType valueType);

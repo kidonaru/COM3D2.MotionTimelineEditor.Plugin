@@ -356,9 +356,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
-            view.DrawTextField("ボイス名", maidCache.oneShotVoiceName, -1, 20,
-                newText => maidCache.oneShotVoiceName = newText);
-
             view.DrawSliderValue(
                 new GUIView.SliderOption
                 {
@@ -410,6 +407,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     value = maidCache.voicePitch,
                     onChanged = value => maidCache.voicePitch = value,
                 });
+
+            view.DrawTextField("ボイス名", maidCache.oneShotVoiceName, -1, 20,
+                newText => maidCache.oneShotVoiceName = newText);
 
             view.DrawTextField("ループボイス", maidCache.loopVoiceName, -1, 20,
                 newText => maidCache.loopVoiceName = newText);

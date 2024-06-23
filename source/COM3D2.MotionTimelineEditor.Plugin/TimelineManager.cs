@@ -566,18 +566,83 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         foreach (var bone in frame.bones)
                         {
-                            foreach (var boneMenuItem in selectedMenuItems)
+                            if (selectedMenuItems.Count == 0)
                             {
-                                if (boneMenuItem.IsTargetBone(bone))
+                                selectedBones.Add(bone);
+                            }
+                            else
+                            {
+                                foreach (var boneMenuItem in selectedMenuItems)
                                 {
-                                    selectedBones.Add(bone);
-                                    break;
+                                    if (boneMenuItem.IsTargetBone(bone))
+                                    {
+                                        selectedBones.Add(bone);
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+        }
+
+        public void DuplicateFrames(int startFrameNo, int endFrameNo)
+        {
+            if (startFrameNo < 0 || endFrameNo > timeline.maxFrameNo)
+            {
+                PluginUtils.LogWarning("コピーする範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
+                return;
+            }
+
+            var length = endFrameNo - startFrameNo + 1;
+            if (length <= 0)
+            {
+                PluginUtils.LogWarning("コピーする範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
+                return;
+            }
+
+            timeline.maxFrameNo += length;
+
+            foreach (var layer in layers)
+            {
+                layer.DuplicateFrames(startFrameNo, endFrameNo);
+            }
+
+            ApplyCurrentFrame(true);
+            Refresh();
+        }
+
+        public void DeleteFrames(int startFrameNo, int endFrameNo)
+        {
+            if (startFrameNo < 0 || endFrameNo > timeline.maxFrameNo)
+            {
+                PluginUtils.LogWarning("削除する範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
+                return;
+            }
+
+            var length = endFrameNo - startFrameNo + 1;
+            if (length <= 0)
+            {
+                PluginUtils.LogWarning("削除する範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
+                return;
+            }
+
+            if (timeline.maxFrameNo - length <= 1)
+            {
+                PluginUtils.LogWarning("最低1フレームは残す必要があります");
+                return;
+            }
+
+            foreach (var layer in layers)
+            {
+                layer.DeleteFrames(startFrameNo, endFrameNo);
+            }
+
+            timeline.maxFrameNo -= length;
+
+            ApplyCurrentFrame(true);
+            Refresh();
         }
 
         private FrameData FindFrame(int start, int step)

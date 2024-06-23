@@ -351,6 +351,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             SetBones(newBones);
         }
 
+        public void FromFrameData(FrameData sourceFrame)
+        {
+            ClearBones();
+
+            foreach (var bone in sourceFrame.bones)
+            {
+                var newBone = GetOrCreateBone(bone.transform.name);
+                newBone.transform.FromTransformData(bone.transform);
+                SetBone(newBone);
+            }
+        }
+
         public void FromXml(FrameXml xml)
         {
             frameNo = xml.frameNo;

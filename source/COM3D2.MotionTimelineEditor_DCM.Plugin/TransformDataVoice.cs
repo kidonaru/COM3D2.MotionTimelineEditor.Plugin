@@ -26,41 +26,74 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
         }
 
-        private readonly static Dictionary<string, int> CustomValueIndexMap = new Dictionary<string, int>
+        private readonly static Dictionary<string, CustomValueInfo> CustomValueInfoMap = new Dictionary<string, CustomValueInfo>
         {
-            { "startTime", 0 },
-            { "length", 1 },
-            { "fadeTime", 2 },
-            { "pitch", 3 },
+            {
+                "startTime",
+                new CustomValueInfo
+                {
+                    index = 0,
+                    name = "開始",
+                    defaultValue = 0f,
+                }
+            },
+            {
+                "length",
+                new CustomValueInfo
+                {
+                    index = 1,
+                    name = "長さ",
+                    defaultValue = 0f,
+                }
+            },
+            {
+                "fadeTime",
+                new CustomValueInfo
+                {
+                    index = 2,
+                    name = "Fade",
+                    defaultValue = 0.1f,
+                }
+            },
+            {
+                "pitch",
+                new CustomValueInfo
+                {
+                    index = 3,
+                    name = "音程",
+                    defaultValue = 1f,
+                }
+            },
         };
 
-        public override Dictionary<string, int> GetCustomValueIndexMap()
+        public override Dictionary<string, CustomValueInfo> GetCustomValueInfoMap()
         {
-            return CustomValueIndexMap;
+            return CustomValueInfoMap;
         }
 
-        public override float GetInitialCustomValue(string customName)
+        private readonly static Dictionary<string, StrValueInfo> StrValueInfoMap = new Dictionary<string, StrValueInfo>
         {
-            if (customName == "fadeTime")
             {
-                return 0.1f;
-            }
-            if (customName == "pitch")
+                "voiceName",
+                new StrValueInfo
+                {
+                    index = 0,
+                    name = "ボイス名",
+                }
+            },
             {
-                return 1f;
-            }
-            return 0f;
-        }
-
-        private readonly static Dictionary<string, int> StrValueIndexMap = new Dictionary<string, int>
-        {
-            { "voiceName", 0 },
-            { "loopVoiceName", 1 },
+                "loopVoiceName",
+                new StrValueInfo
+                {
+                    index = 1,
+                    name = "ループボイス",
+                }
+            },
         };
 
-        public override Dictionary<string, int> GetStrValueIndexMap()
+        public override Dictionary<string, StrValueInfo> GetStrValueInfoMap()
         {
-            return StrValueIndexMap;
+            return StrValueInfoMap;
         }
     }
 }

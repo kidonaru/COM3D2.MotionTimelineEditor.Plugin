@@ -25,16 +25,40 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
         }
 
-        private readonly static Dictionary<string, int> CustomValueIndexMap = new Dictionary<string, int>
+        private readonly static Dictionary<string, CustomValueInfo> CustomValueInfoMap = new Dictionary<string, CustomValueInfo>
         {
-            { "targetType", 0 },
-            { "targetIndex", 1 },
-            { "maidPointType", 2 },
+            {
+                "targetType",
+                new CustomValueInfo
+                {
+                    index = 0,
+                    name = "注視先",
+                    defaultValue = 0,
+                }
+            },
+            {
+                "targetIndex",
+                new CustomValueInfo
+                {
+                    index = 1,
+                    name = "対象番号",
+                    defaultValue = 0,
+                }
+            },
+            {
+                "maidPointType",
+                new CustomValueInfo
+                {
+                    index = 2,
+                    name = "ポイント",
+                    defaultValue = 0,
+                }
+            },
         };
 
-        public override Dictionary<string, int> GetCustomValueIndexMap()
+        public override Dictionary<string, CustomValueInfo> GetCustomValueInfoMap()
         {
-            return CustomValueIndexMap;
+            return CustomValueInfoMap;
         }
     }
 }

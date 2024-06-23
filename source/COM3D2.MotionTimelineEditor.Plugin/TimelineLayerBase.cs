@@ -1114,6 +1114,57 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return endFrameNo;
         }
 
+        public void DuplicateFrames(int startFrameNo, int endFrameNo)
+        {
+            var length = endFrameNo - startFrameNo + 1;
+
+            // 複製するフレーム数だけ後ろにずらす
+            for (int i = maxExistFrameNo; i > endFrameNo; i--)
+            {
+                var frame = GetFrame(i);
+                if (frame != null)
+                {
+                    frame.frameNo += length;
+                }
+            }
+
+            // 指定範囲のフレームを複製
+            for (int i = startFrameNo; i <= endFrameNo; i++)
+            {
+                var frame = GetFrame(i);
+                if (frame != null)
+                {
+                    var newFrame = GetOrCreateFrame(i + length);
+                    newFrame.FromFrameData(frame);
+                }
+            }
+        }
+
+        public void DeleteFrames(int startFrameNo, int endFrameNo)
+        {
+            var length = endFrameNo - startFrameNo + 1;
+
+            // 指定範囲のフレームを削除
+            for (int i = startFrameNo; i <= endFrameNo; i++)
+            {
+                var frame = GetFrame(i);
+                if (frame != null)
+                {
+                    _keyFrames.Remove(frame);
+                }
+            }
+
+            // 削除したフレーム数だけ前にずらす
+            for (int i = endFrameNo + 1; i <= maxExistFrameNo; i++)
+            {
+                var frame = GetFrame(i);
+                if (frame != null)
+                {
+                    frame.frameNo -= length;
+                }
+            }
+        }
+
         public int GetEasing(int frameNo, string boneName)
         {
             var bone = GetBone(frameNo, boneName);

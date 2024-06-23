@@ -732,7 +732,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginHorizontal();
             {
-                view.DrawLabel("選択操作", 100, 20);
+                view.DrawLabel("範囲操作", 100, 20);
 
                 selectStartFrameNo = view.DrawIntField(
                     selectStartFrameNo,
@@ -746,12 +746,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     50,
                     20);
 
-                if (view.DrawButton("範囲選択", 70, 20))
+                if (view.DrawButton("範囲選択", 60, 20))
                 {
                     timelineManager.SelectFramesRange(selectStartFrameNo, selectEndFrameNo);
                 }
 
-                if (view.DrawButton("縦選択", 70, 20, !config.isEasyEdit))
+                if (view.DrawButton("範囲複製", 60, 20))
+                {
+                    timelineManager.DuplicateFrames(selectStartFrameNo, selectEndFrameNo);
+                }
+
+                if (view.DrawButton("範囲削除", 60, 20))
+                {
+                    timelineManager.DeleteFrames(selectStartFrameNo, selectEndFrameNo);
+                }
+
+                view.AddSpace(10);
+
+                if (view.DrawButton("縦選択", 60, 20, !config.isEasyEdit))
                 {
                     timelineManager.SelectVerticalBones();
                 }

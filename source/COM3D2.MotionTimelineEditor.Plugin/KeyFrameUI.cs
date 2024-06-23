@@ -100,7 +100,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             else
             {
                 DrawTransform(view);
-                DrawCustomValue(view);
+                DrawCustomValues(view);
+                DrawStrValues(view);
 
                 if (view.DrawButton("初期化", 80, 20))
                 {
@@ -164,25 +165,43 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             );
         }
 
-        private void DrawCustomValue(GUIView view)
+        private void DrawCustomValues(GUIView view)
         {
             var firstBone = selectedBones.First();
-            var customNames = firstBone.transform.GetCustomValueIndexMap().Keys;
+            var customKeys = firstBone.transform.GetCustomValueInfoMap().Keys;
 
             int index = 0;
-            foreach (var customName in customNames)
+            foreach (var customKey in customKeys)
             {
-                var value = firstBone.transform.GetCustomValue(customName);
-
                 DrawValue(
                     view,
-                    customName,
+                    firstBone.transform.GetCustomValueName(customKey),
                     0.01f,
                     0.1f,
-                    transform => transform.GetInitialCustomValue(customName),
-                    transform => transform.HasCustomValue(customName),
-                    transform => transform.GetCustomValue(customName).value,
-                    (transform, newValue) => transform.GetCustomValue(customName).value = newValue
+                    transform => transform.GetDefaultCustomValue(customKey),
+                    transform => transform.HasCustomValue(customKey),
+                    transform => transform.GetCustomValue(customKey).value,
+                    (transform, newValue) => transform.GetCustomValue(customKey).value = newValue
+                );
+
+                index++;
+            }
+        }
+
+        private void DrawStrValues(GUIView view)
+        {
+            var firstBone = selectedBones.First();
+            var customKeys = firstBone.transform.GetStrValueInfoMap().Keys;
+
+            int index = 0;
+            foreach (var customKey in customKeys)
+            {
+                DrawStrValue(
+                    view,
+                    firstBone.transform.GetStrValueName(customKey),
+                    transform => transform.HasStrValue(customKey),
+                    transform => transform.GetStrValue(customKey),
+                    (transform, newValue) => transform.SetStrValue(customKey, newValue)
                 );
 
                 index++;
@@ -420,6 +439,76 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             // 新値の適用
             if (!float.IsNaN(newValue) && newValue != value)
+            {
+                foreach (var selectedBone in selectedBones)
+                {
+                    var transform = selectedBone.transform;
+                    if (hasValue(transform))
+                    {
+                        setValue(transform, newValue);
+                    }
+                }
+
+                PluginUtils.LogDebug("新値を適用します：" + newValue);
+                currentLayer.ApplyCurrentFrame(true);
+            }
+        }
+
+        private void DrawStrValue(
+            GUIView view,
+            string label,
+            Func<ITransformData, bool> hasValue,
+            Func<ITransformData, string> getValue,
+            Action<ITransformData, string> setValue)
+        {
+            var value = "";
+            var boneCount = 0;
+
+            foreach (var bone in selectedBones)
+            {
+                var transform = bone.transform;
+                var isNan = false;
+
+                if (hasValue(transform))
+                {
+                    var _value = getValue(transform);
+                    if (boneCount == 0)
+                    {
+                        value = _value;
+                    }
+                    else
+                    {
+                        if (_value != value)
+                        {
+                            value = "";
+                            isNan = true;
+                        }
+                    }
+
+                    boneCount++;
+                    if (boneCount >= config.detailTransformCount || isNan)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if (boneCount == 0)
+            {
+                return;
+            }
+
+            var newValue = value;
+
+            view.DrawTextField(
+                label,
+                value,
+                -1,
+                20,
+                 _newValue => newValue = _newValue);
+
+            // 新値の適用
+            if (newValue != value)
             {
                 foreach (var selectedBone in selectedBones)
                 {

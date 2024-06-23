@@ -797,65 +797,107 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return xml;
         }
 
-        public virtual Dictionary<string, int> GetCustomValueIndexMap()
+        public virtual Dictionary<string, CustomValueInfo> GetCustomValueInfoMap()
         {
-            return new Dictionary<string, int>();
+            return new Dictionary<string, CustomValueInfo>();
         }
 
-        public ValueData GetCustomValue(string customName)
+        public CustomValueInfo GetCustomValueInfo(string customKey)
         {
-            int index;
-            if (GetCustomValueIndexMap().TryGetValue(customName, out index))
+            CustomValueInfo info;
+            if (GetCustomValueInfoMap().TryGetValue(customKey, out info))
             {
-                return values[index];
+                return info;
             }
 
-            PluginUtils.LogError("CustomValueが見つかりません customName={0}", customName);
+            PluginUtils.LogError("CustomValueが見つかりません customKey={0}", customKey);
+            return null;
+        }
+
+        public ValueData GetCustomValue(string customKey)
+        {
+            var info = GetCustomValueInfo(customKey);
+            if (info != null)
+            {
+                return values[info.index];
+            }
             return new ValueData();
         }
 
-        public bool HasCustomValue(string customName)
+        public string GetCustomValueName(string customKey)
         {
-            return GetCustomValueIndexMap().ContainsKey(customName);
+            var info = GetCustomValueInfo(customKey);
+            if (info != null)
+            {
+                return info.name;
+            }
+            return customKey;
         }
 
-        public virtual float GetInitialCustomValue(string customName)
+        public bool HasCustomValue(string customKey)
         {
+            return GetCustomValueInfoMap().ContainsKey(customKey);
+        }
+
+        public float GetDefaultCustomValue(string customKey)
+        {
+            var info = GetCustomValueInfo(customKey);
+            if (info != null)
+            {
+                return info.defaultValue;
+            }
             return 0f;
         }
 
-        public virtual Dictionary<string, int> GetStrValueIndexMap()
+        public virtual Dictionary<string, StrValueInfo> GetStrValueInfoMap()
         {
-            return new Dictionary<string, int>();
+            return new Dictionary<string, StrValueInfo>();
+        }
+
+        public StrValueInfo GetStrValueInfo(string keyName)
+        {
+            StrValueInfo info;
+            if (GetStrValueInfoMap().TryGetValue(keyName, out info))
+            {
+                return info;
+            }
+
+            PluginUtils.LogError("StrValueが見つかりません keyName={0}", keyName);
+            return null;
         }
 
         public string GetStrValue(string keyName)
         {
-            int index;
-            if (GetStrValueIndexMap().TryGetValue(keyName, out index))
+            var info = GetStrValueInfo(keyName);
+            if (info != null)
             {
-                return strValues[index];
+                return strValues[info.index];
             }
-
-            PluginUtils.LogError("StrValueが見つかりません keyName={0}", keyName);
             return string.Empty;
+        }
+
+        public string GetStrValueName(string keyName)
+        {
+            var info = GetStrValueInfo(keyName);
+            if (info != null)
+            {
+                return info.name;
+            }
+            return keyName;
         }
 
         public void SetStrValue(string keyName, string value)
         {
-            int index;
-            if (GetStrValueIndexMap().TryGetValue(keyName, out index))
+            var info = GetStrValueInfo(keyName);
+            if (info != null)
             {
-                strValues[index] = value;
-                return;
+                strValues[info.index] = value;
             }
-
-            PluginUtils.LogError("StrValueが見つかりません keyName={0}", keyName);
         }
 
-        public bool HasStrValue(string customName)
+        public bool HasStrValue(string customKey)
         {
-            return GetStrValueIndexMap().ContainsKey(customName);
+            return GetStrValueInfoMap().ContainsKey(customKey);
         }
 
         public ValueData[] GetValueDataList(TangentValueType valueType)
@@ -972,9 +1014,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 easing = 0;
             }
 
-            foreach (var customName in GetCustomValueIndexMap().Keys)
+            foreach (var customKey in GetCustomValueInfoMap().Keys)
             {
-                GetCustomValue(customName).value = GetInitialCustomValue(customName);
+                GetCustomValue(customKey).value = GetDefaultCustomValue(customKey);
+            }
+
+            foreach (var strKey in GetStrValueInfoMap().Keys)
+            {
+                SetStrValue(strKey, string.Empty);
             }
         }
 
@@ -1017,6 +1064,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 int hash = 17;
                 hash = hash * 23 + name.GetHashCode();
                 hash = hash * 23 + values.GetHashCode();
+                hash = hash * 23 + strValues.GetHashCode();
                 return hash;
             }
         }
