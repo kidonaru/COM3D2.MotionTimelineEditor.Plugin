@@ -202,6 +202,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginHorizontal();
             {
+                var dirPath = PluginUtils.GetDcmSongDirPath(timeline.dcmSongName);
+                var enabled = Directory.Exists(dirPath);
+                if (view.DrawButton("DCM格納先を開く", 150, 20, enabled))
+                {
+                    PluginUtils.OpenDirectory(dirPath);
+                }
+            }
+            view.EndLayout();
+
+            view.BeginHorizontal();
+            {
                 if (view.DrawButton("初期化", 100, 20))
                 {
                     PluginUtils.ShowConfirmDialog("個別設定を初期化しますか？", () =>

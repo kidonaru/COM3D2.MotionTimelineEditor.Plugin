@@ -611,6 +611,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             ApplyCurrentFrame(true);
             Refresh();
+
+            RequestHistory("範囲複製: " + startFrameNo + " - " + endFrameNo);
         }
 
         public void DeleteFrames(int startFrameNo, int endFrameNo)
@@ -634,6 +636,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
+            UnselectAll();
+
             foreach (var layer in layers)
             {
                 layer.DeleteFrames(startFrameNo, endFrameNo);
@@ -643,6 +647,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             ApplyCurrentFrame(true);
             Refresh();
+
+            RequestHistory("範囲削除: " + startFrameNo + " - " + endFrameNo);
         }
 
         private FrameData FindFrame(int start, int step)

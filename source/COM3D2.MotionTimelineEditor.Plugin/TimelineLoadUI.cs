@@ -53,7 +53,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     selectedItem = selectedItem.parent;
                 }
 
-                view.DrawLabel(directoryName, -1, 20);
+                view.DrawLabel(selectedItem.name, -1, 20);
 
                 view.currentPos.x = WINDOW_WIDTH - 60 - 60;
 

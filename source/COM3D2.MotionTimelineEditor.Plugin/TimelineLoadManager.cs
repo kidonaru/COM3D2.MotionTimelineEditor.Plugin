@@ -7,7 +7,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public class TimelineLoadItem : ITileViewContent
     {
         public string name { get; set; }
-        public Texture2D thum { get; set; }
+        private Texture2D _thum;
+        public Texture2D thum
+        {
+            get
+            {
+                if (children != null && children.Count > 0)
+                {
+                    return children[0].thum;
+                }
+
+                return _thum;
+            }
+            set
+            {
+                if (_thum != null)
+                {
+                    UnityEngine.Object.Destroy(_thum);
+                }
+                _thum = value;
+            }
+        }
+
         public bool isDir { get; set; }
         public List<ITileViewContent> children { get; set; }
 
@@ -124,11 +145,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            if (item.thum != null)
-            {
-                UnityEngine.Object.Destroy(item.thum);
-                item.thum = null;
-            }
+            item.thum = null;
 
             if (item.children != null)
             {
