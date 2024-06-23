@@ -589,6 +589,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool IsValidFrameRnage(int startFrameNo, int endFrameNo)
         {
+            if (startFrameNo == 0 && endFrameNo == 0)
+            {
+                return false;
+            }
+
             if (startFrameNo < 0 || endFrameNo > timeline.maxFrameNo)
             {
                 return false;

@@ -785,8 +785,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 var isSmooth = tangents.All(tangent => tangent.isSmooth);
-                var newIsSmooth = subView.DrawToggle("自動補間", isSmooth, 100, 20);
-                if (newIsSmooth != isSmooth)
+                subView.DrawToggle("自動補間", isSmooth, 100, 20, newIsSmooth =>
                 {
                     foreachOutTangent((outTangentData) =>
                     {
@@ -800,7 +799,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     PluginUtils.LogDebug("自動補間を適用します：" + newIsSmooth);
                     currentLayer.ApplyCurrentFrame(true);
-                }
+                });
             }
 
             view.DrawTexture(tangentTex);

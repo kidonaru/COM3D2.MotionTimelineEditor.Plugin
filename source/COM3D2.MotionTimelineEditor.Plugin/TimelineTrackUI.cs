@@ -74,13 +74,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 bool isActive = timeline.activeTrack == track;
 
-                var newIsActive = view.DrawToggle("", isActive, 20, 20);
-                if (newIsActive != isActive)
+                view.DrawToggle("", isActive, 20, 20, newValue =>
                 {
                     timelineManager.SetActiveTrack(track, !isActive);
-                }
+                });
 
-                view.DrawTextField(track.name, width - 30 - view.currentPos.x, 20, newText => track.name = newText);
+                view.DrawTextField(track.name, width - 30 - view.currentPos.x, 20, newText =>
+                {
+                    track.name = newText;
+                });
             }
             view.EndLayout();
 

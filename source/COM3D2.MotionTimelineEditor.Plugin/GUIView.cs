@@ -495,7 +495,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return result;
         }
 
-        public bool DrawToggle(string label, bool value, float width, float height, bool enabled)
+        public void DrawToggle(
+            string label,
+            bool value,
+            float width,
+            float height,
+            bool enabled,
+            Action<bool> onChanged)
         {
             var drawRect = GetDrawRect(width, height);
             BeginEnabled(enabled);
@@ -504,17 +510,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             EndColor();
             EndEnabled();
             this.NextElement(drawRect);
-            return newValue;
+
+            if (newValue != value)
+            {
+                onChanged(newValue);
+            }
         }
 
-        public bool DrawToggle(string label, bool value, float width, float height)
+        public void DrawToggle(string label, bool value, float width, float height, Action<bool> onChanged)
         {
-            return DrawToggle(label, value, width, height, true);
+            DrawToggle(label, value, width, height, true, onChanged);
         }
 
-        public bool DrawToggle(bool value, float width, float height)
+        public void DrawToggle(bool value, float width, float height, Action<bool> onChanged)
         {
-            return DrawToggle(null, value, width, height, true);
+            DrawToggle(null, value, width, height, true, onChanged);
         }
 
         public void DrawLabel(

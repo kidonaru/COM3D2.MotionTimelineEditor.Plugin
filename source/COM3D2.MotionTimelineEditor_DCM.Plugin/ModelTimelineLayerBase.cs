@@ -120,11 +120,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             view.BeginHorizontal();
             {
-                var newVisible = view.DrawToggle(model.visible, 20, 20);
-                if (newVisible != model.visible)
+                view.DrawToggle(model.visible, 20, 20, newValue =>
                 {
-                    modelManager.SetModelVisible(model, newVisible);
-                }
+                    modelManager.SetModelVisible(model, newValue);
+                });
 
                 view.DrawLabel(model.displayName, -1, 20);
             }

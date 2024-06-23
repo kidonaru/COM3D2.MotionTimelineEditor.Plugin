@@ -541,15 +541,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 var enable = timeline.HasMaidShapeKey(maidSlotNo, tag);
 
-                var newEnable = view.DrawToggle(
-                    tag,
-                    enable,
-                    -1,
-                    20);
-
-                if (newEnable != enable)
+                view.DrawToggle(tag, enable, -1, 20, newValue =>
                 {
-                    if (newEnable)
+                    if (newValue)
                     {
                         timeline.AddMaidShapeKey(maidSlotNo, tag);
                     }
@@ -557,7 +551,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     {
                         timeline.RemoveMaidShapeKey(maidSlotNo, tag);
                     }
-                }
+                });
             }
 
             view.SetEnabled(!view.IsComboBoxFocused());

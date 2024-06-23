@@ -805,56 +805,49 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginHorizontal();
             {
-                var newAllowPrecisionEdit = view.DrawToggle("簡易表示", config.isEasyEdit, 80, 20);
-                if (newAllowPrecisionEdit != config.isEasyEdit)
+                view.DrawToggle("簡易表示", config.isEasyEdit, 80, 20, newValue =>
                 {
-                    config.isEasyEdit = newAllowPrecisionEdit;
+                    config.isEasyEdit = newValue;
                     config.dirty = true;
                     timelineManager.Refresh();
-                }
+                });
 
-                var isPoseEditing = view.DrawToggle("編集モード", studioHack.isPoseEditing, 80, 20);
-                if (isPoseEditing != studioHack.isPoseEditing)
+                view.DrawToggle("編集モード", studioHack.isPoseEditing, 80, 20, newValue =>
                 {
-                    studioHack.isPoseEditing = isPoseEditing;
-                }
+                    studioHack.isPoseEditing = newValue;
+                });
 
                 var isMaidVidible = maidManager.maid.Visible;
-                var newIsMaidVidible = view.DrawToggle("メイド表示", isMaidVidible, 80, 20);
-                if (newIsMaidVidible != isMaidVidible)
+                view.DrawToggle("メイド表示", isMaidVidible, 80, 20, newValue =>
                 {
-                    maidManager.maid.Visible = newIsMaidVidible;
-                }
+                    maidManager.maid.Visible = newValue;
+                });
 
-                var newIsBgVidible = view.DrawToggle("背景表示", timeline.isBackgroundVisible, 80, 20);
-                if (newIsBgVidible != timeline.isBackgroundVisible)
+                view.DrawToggle("背景表示", timeline.isBackgroundVisible, 80, 20, newValue =>
                 {
-                    timeline.isBackgroundVisible = newIsBgVidible;
-                }
+                    timeline.isBackgroundVisible = newValue;
+                });
 
                 if (timelineManager.HasCameraLayer)
                 {
-                    var isCameraSync = view.DrawToggle("カメラ同期", config.isCameraSync, 80, 20, !currentLayer.isCameraLayer);
-                    if (isCameraSync != config.isCameraSync)
+                    view.DrawToggle("カメラ同期", config.isCameraSync, 80, 20, !currentLayer.isCameraLayer, newValue =>
                     {
-                        config.isCameraSync = isCameraSync;
+                        config.isCameraSync = newValue;
                         config.dirty = true;
-                    }
+                    });
                 }
 
                 if (studioHack.hasIkBoxVisible)
                 {
-                    var newIsIkBoxVisibleRoot = view.DrawToggle("中心点IK表示", studioHack.isIkBoxVisibleRoot, 100, 20);
-                    if (newIsIkBoxVisibleRoot != studioHack.isIkBoxVisibleRoot)
+                    view.DrawToggle("中心点IK表示", studioHack.isIkBoxVisibleRoot, 100, 20, newValue =>
                     {
-                        studioHack.isIkBoxVisibleRoot = newIsIkBoxVisibleRoot;
-                    }
+                        studioHack.isIkBoxVisibleRoot = newValue;
+                    });
 
-                    var newIsIkBoxVisibleBody = view.DrawToggle("関節IK表示", studioHack.isIkBoxVisibleBody, 100, 20);
-                    if (newIsIkBoxVisibleBody != studioHack.isIkBoxVisibleBody)
+                    view.DrawToggle("関節IK表示", studioHack.isIkBoxVisibleBody, 100, 20, newValue =>
                     {
-                        studioHack.isIkBoxVisibleBody = newIsIkBoxVisibleBody;
-                    }
+                        studioHack.isIkBoxVisibleBody = newValue;
+                    });
                 }
             }
             view.EndLayout();

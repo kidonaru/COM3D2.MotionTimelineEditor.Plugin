@@ -772,12 +772,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.DrawLabel(FingerBrendNames[(int)blendType], 40, 20);
 
-                var newEnabled = view.DrawToggle("有効", baseFinger.enabled, 60, 20);
-                if (newEnabled != baseFinger.enabled)
+                view.DrawToggle("有効", baseFinger.enabled, 60, 20, newValue =>
                 {
-                    baseFinger.enabled = newEnabled;
+                    baseFinger.enabled = newValue;
                     baseFinger.Apply();
-                }
+                });
 
                 if (view.DrawButton("更新", 50, 20))
                 {
@@ -887,11 +886,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (maidCache.IsYureSlot(slotName))
                 {
                     var yureState = maidCache.GetYureState(slotName);
-                    var newYureState = view.DrawToggle("揺れボーン", yureState, 120, 20);
-                    if (newYureState != yureState)
+                    view.DrawToggle("揺れボーン", yureState, 120, 20, newValue =>
                     {
-                        maidCache.SetYureState(slotName, newYureState);
-                    }
+                        maidCache.SetYureState(slotName, newValue);
+                    });
                 }
 
                 view.currentPos.x = view.viewRect.width - 130;
@@ -938,15 +936,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var enabled = timeline.HasExtendBoneName(slotNo, extendBoneName);
 
-                var newEnabled = view.DrawToggle(
-                    entity.boneName,
-                    enabled,
-                    -1,
-                    20);
-
-                if (newEnabled != enabled)
+                view.DrawToggle(entity.boneName, enabled, -1, 20, newValue =>
                 {
-                    if (newEnabled)
+                    if (newValue)
                     {
                         timeline.AddExtendBoneName(slotNo, extendBoneName);
                     }
@@ -954,9 +946,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         timeline.RemoveExtendBoneName(slotNo, extendBoneName);
                     }
-                }
+                });
 
-                _isExtendBoneAllEnabled &= newEnabled;
+                _isExtendBoneAllEnabled &= enabled;
             }
 
             view.SetEnabled(!view.IsComboBoxFocused());

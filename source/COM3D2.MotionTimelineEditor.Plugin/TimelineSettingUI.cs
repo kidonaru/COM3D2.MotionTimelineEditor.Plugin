@@ -131,34 +131,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _eyeMoveTypeComboBox.currentIndex = (int)timeline.eyeMoveType;
             _eyeMoveTypeComboBox.DrawButton("メイド目線", view);
 
-            var newUseHeadKey = view.DrawToggle("顔/瞳の固定化", timeline.useHeadKey, 120, 20);
-            if (newUseHeadKey != timeline.useHeadKey)
+            view.DrawToggle("顔/瞳の固定化", timeline.useHeadKey, 120, 20, newValue =>
             {
-                timeline.useHeadKey = newUseHeadKey;
-            }
+                timeline.useHeadKey = newValue;
+            });
 
             view.BeginHorizontal();
             {
-                var newUseAnimekeyMuneL = view.DrawToggle("胸(左)の物理無効", timeline.useMuneKeyL, 120, 20);
-                if (newUseAnimekeyMuneL != timeline.useMuneKeyL)
+                view.DrawToggle("胸(左)の物理無効", timeline.useMuneKeyL, 120, 20, newValue =>
                 {
-                    timeline.useMuneKeyL = newUseAnimekeyMuneL;
-                }
+                    timeline.useMuneKeyL = newValue;
+                });
 
-                var newUseAnimekeyMuneR = view.DrawToggle("胸(右)の物理無効", timeline.useMuneKeyR, 120, 20);
-                if (newUseAnimekeyMuneR != timeline.useMuneKeyR)
+                view.DrawToggle("胸(右)の物理無効", timeline.useMuneKeyR, 120, 20, newValue =>
                 {
-                    timeline.useMuneKeyR = newUseAnimekeyMuneR;
-                }
+                    timeline.useMuneKeyR = newValue;
+                });
             }
             view.EndLayout();
 
-            var newIsLoopAnm = view.DrawToggle("ループアニメーション", timeline.isLoopAnm, 150, 20);
-            if (newIsLoopAnm != timeline.isLoopAnm)
+            view.DrawToggle("ループアニメーション", timeline.isLoopAnm, 150, 20, newValue =>
             {
-                timeline.isLoopAnm = newIsLoopAnm;
+                timeline.isLoopAnm = newValue;
                 timelineManager.ApplyCurrentFrame(true);
-            }
+            });
 
             view.BeginHorizontal();
             {
@@ -295,30 +291,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginHorizontal();
             {
-                var newIsAutoScroll = view.DrawToggle("自動スクロール", config.isAutoScroll, 120, 20);
-                if (newIsAutoScroll != config.isAutoScroll)
+                view.DrawToggle("自動スクロール", config.isAutoScroll, 120, 20, newValue =>
                 {
-                    config.isAutoScroll = newIsAutoScroll;
+                    config.isAutoScroll = newValue;
                     config.dirty = true;
-                }
+                });
 
-                var newDisablePoseHistory = view.DrawToggle("ポーズ履歴無効", config.disablePoseHistory, 120, 20);
-                if (newDisablePoseHistory != config.disablePoseHistory)
+                view.DrawToggle("ポーズ履歴無効", config.disablePoseHistory, 120, 20, newValue =>
                 {
-                    config.disablePoseHistory = newDisablePoseHistory;
+                    config.disablePoseHistory = newValue;
                     config.dirty = true;
-                }
+                });
             }
             view.EndLayout();
 
             view.BeginHorizontal();
             {
-                var newIsAutoYureBone = view.DrawToggle("自動揺れボーン", config.isAutoYureBone, 120, 20);
-                if (newIsAutoYureBone != config.isAutoYureBone)
+                view.DrawToggle("自動揺れボーン", config.isAutoYureBone, 120, 20, newValue =>
                 {
-                    config.isAutoYureBone = newIsAutoYureBone;
+                    config.isAutoYureBone = newValue;
                     config.dirty = true;
-                }
+                });
             }
             view.EndLayout();
 
@@ -488,11 +481,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.DrawLabel("動画設定", 80, 20);
 
-                isEnabled = view.DrawToggle("有効", isEnabled, 60, 20);
-                if (isEnabled != timeline.videoEnabled)
+                view.DrawToggle("有効", isEnabled, 60, 20, newValue =>
                 {
-                    timeline.videoEnabled = isEnabled;
-                    if (isEnabled)
+                    timeline.videoEnabled = newValue;
+                    if (newValue)
                     {
                         movieManager.LoadMovie();
                     }
@@ -500,7 +492,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         movieManager.UnloadMovie();
                     }
-                }
+                });
             }
             view.EndLayout();
 

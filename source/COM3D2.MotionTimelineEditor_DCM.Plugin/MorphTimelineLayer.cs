@@ -451,7 +451,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             _tabType = view.DrawTabs(_tabType, 50, 20);
 
-            _isForceUpdate = view.DrawToggle("強制上書き", _isForceUpdate, 150, 20);
+            view.DrawToggle("強制上書き", _isForceUpdate, 150, 20, newValue =>
+            {
+                _isForceUpdate = newValue;
+            });
 
             view.DrawHorizontalLine(Color.gray);
 
@@ -523,12 +526,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var morphValue = GetMorphValue(morphName);
             var isOn = morphValue >= 1f;
 
-            var newIsOn = view.DrawToggle(displayName, isOn, 150, 20);
-
-            if (newIsOn != isOn)
+            view.DrawToggle(displayName, isOn, 150, 20, newValue =>
             {
-                SetMorphValue(morphName, newIsOn ? 1f : 0f);
-            }
+                SetMorphValue(morphName, newValue ? 1f : 0f);
+            });
         }
 
         public override ITransformData CreateTransformData(string name)

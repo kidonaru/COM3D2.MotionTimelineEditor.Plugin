@@ -60,8 +60,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var name = ikHoldManager.GetHoldTypeName(type);
                     var isHold = ikHoldManager.IsHold(type);
-                    var isHoldNew = view.DrawToggle(name, isHold, 80, 20);
-                    ikHoldManager.SetHold(type, isHoldNew);
+                    view.DrawToggle(name, isHold, 80, 20, newValue =>
+                    {
+                        ikHoldManager.SetHold(type, newValue);
+                    });
                 }
 
                 var isHolds = types.All(x => ikHoldManager.IsHold(x));
