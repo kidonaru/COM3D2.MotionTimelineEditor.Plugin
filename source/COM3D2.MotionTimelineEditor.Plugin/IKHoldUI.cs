@@ -54,7 +54,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             foreach (var types in typesList)
             {
-                view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+                view.BeginHorizontal();
 
                 foreach (var type in types)
                 {

@@ -118,7 +118,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             view.currentPos.x = 5;
             view.currentPos.y = 5;
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 var newVisible = view.DrawToggle(model.visible, 20, 20);
                 if (newVisible != model.visible)
@@ -130,7 +130,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
             view.EndLayout();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 // プラグイン選択
                 {
@@ -158,7 +158,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
             view.EndLayout();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 // メイド選択
                 {

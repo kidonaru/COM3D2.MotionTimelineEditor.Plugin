@@ -102,7 +102,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _buttonSubView.parent = view;
             _buttonSubView.Init(subViewRect);
 
-            _buttonSubView.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            _buttonSubView.BeginHorizontal();
             {
                 if (!string.IsNullOrEmpty(label))
                 {

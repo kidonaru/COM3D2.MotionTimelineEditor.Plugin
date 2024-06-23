@@ -15,7 +15,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
     public class VoiceTimeLineRow
     {
         public int frame;
-        public string oneTimeVoiceName;
+        public string voiceName;
+        public float startTime;
+        public float length;
+        public float fadeTime;
+        public float pitch;
         public string loopVoiceName;
     }
 
@@ -24,7 +28,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public int stFrame { get; set; }
         public int edFrame { get; set; }
 
-        public string oneTimeVoiceName;
+        public string voiceName;
+        public float startTime;
+        public float length;
+        public float fadeTime;
+        public float pitch;
         public string loopVoiceName;
     }
 
@@ -128,9 +136,13 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private void ApplyMotion(VoiceMotionData motion)
         {
-            maidCache.oneTimeVoiceName = motion.oneTimeVoiceName;
+            maidCache.oneShotVoiceName = motion.voiceName;
+            maidCache.oneShotVoiceStartTime = motion.startTime;
+            maidCache.oneShotVoiceLength = motion.length;
+            maidCache.voiceFadeTime = motion.fadeTime;
+            maidCache.voicePitch = motion.pitch;
             maidCache.loopVoiceName = motion.loopVoiceName;
-            maidCache.PlayOneTimeVoice();
+            maidCache.PlayOneShotVoice();
         }
 
         public override void OnEndPoseEdit()
@@ -149,7 +161,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
 
             var trans = CreateTransformData(VoiceBoneName);
-            trans.SetStrValue("oneTimeVoiceName", maidCache.oneTimeVoiceName);
+            trans.SetStrValue("voiceName", maidCache.oneShotVoiceName);
+            trans["startTime"].value = maidCache.oneShotVoiceStartTime;
+            trans["length"].value = maidCache.oneShotVoiceLength;
+            trans["fadeTime"].value = maidCache.voiceFadeTime;
+            trans["pitch"].value = maidCache.voicePitch;
             trans.SetStrValue("loopVoiceName", maidCache.loopVoiceName);
 
             var bone = frame.CreateBone(trans);
@@ -207,7 +223,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var row = new VoiceTimeLineRow
             {
                 frame = frame.frameNo,
-                oneTimeVoiceName = trans.GetStrValue("oneTimeVoiceName"),
+                voiceName = trans.GetStrValue("voiceName"),
+                startTime = trans["startTime"].value,
+                length = trans["length"].value,
+                fadeTime = trans["fadeTime"].value,
+                pitch = trans["pitch"].value,
                 loopVoiceName = trans.GetStrValue("loopVoiceName"),
             };
 
@@ -239,7 +259,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 {
                     stFrame = stFrame,
                     edFrame = edFrame,
-                    oneTimeVoiceName = start.oneTimeVoiceName,
+                    voiceName = start.voiceName,
+                    startTime = start.startTime,
+                    length = start.length,
+                    fadeTime = start.fadeTime,
+                    pitch = start.pitch,
                     loopVoiceName = start.loopVoiceName,
                 };
 
@@ -272,7 +296,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                 builder.Append(stTime.ToString("0.000") + ",");
                 builder.Append(edTime.ToString("0.000") + ",");
-                builder.Append(motion.oneTimeVoiceName + ",");
+                builder.Append(motion.voiceName + ",");
                 builder.Append(motion.loopVoiceName + ",");
                 builder.Append(slotNo.ToString());
                 builder.Append("\r\n");
@@ -332,42 +356,96 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
-            {
-                var oneTimeVoiceName = maidCache.oneTimeVoiceName;
-                var newOneTimeVoiceName = view.DrawTextField("ワンタイムボイス", oneTimeVoiceName, -1, 20);
-                if (oneTimeVoiceName != newOneTimeVoiceName)
-                {
-                    maidCache.oneTimeVoiceName = newOneTimeVoiceName;
-                }
-            }
+            view.DrawTextField("ボイス名", maidCache.oneShotVoiceName, -1, 20,
+                newText => maidCache.oneShotVoiceName = newText);
 
-            {
-                var loopVoiceName = maidCache.loopVoiceName;
-                var newLoopVoiceName = view.DrawTextField("ループボイス", loopVoiceName, -1, 20);
-                if (loopVoiceName != newLoopVoiceName)
+            view.DrawSliderValue(
+                new GUIView.SliderOption
                 {
-                    maidCache.loopVoiceName = newLoopVoiceName;
-                }
-            }
+                    label = "開始",
+                    labelWidth = 30,
+                    min = 0f,
+                    max = config.voiceMaxLength,
+                    step = 0.01f,
+                    defaultValue = 0f,
+                    value = maidCache.oneShotVoiceStartTime,
+                    onChanged = value => maidCache.oneShotVoiceStartTime = value,
+                });
+
+            view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "長さ",
+                    labelWidth = 30,
+                    min = 0f,
+                    max = config.voiceMaxLength,
+                    step = 0.01f,
+                    defaultValue = 0f,
+                    value = maidCache.oneShotVoiceLength,
+                    onChanged = value => maidCache.oneShotVoiceLength = value,
+                });
+
+            view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "Fade",
+                    labelWidth = 30,
+                    min = 0f,
+                    max = config.voiceMaxLength,
+                    step = 0.01f,
+                    defaultValue = 0.1f,
+                    value = maidCache.voiceFadeTime,
+                    onChanged = value => maidCache.voiceFadeTime = value,
+                });
+
+            view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "音程",
+                    labelWidth = 30,
+                    min = 0f,
+                    max = 2f,
+                    step = 0.01f,
+                    defaultValue = 1f,
+                    value = maidCache.voicePitch,
+                    onChanged = value => maidCache.voicePitch = value,
+                });
+
+            view.DrawTextField("ループボイス", maidCache.loopVoiceName, -1, 20,
+                newText => maidCache.loopVoiceName = newText);
 
             if (view.DrawButton("再生", 100, 20))
             {
-                maidCache.PlayOneTimeVoice();
+                maidCache.PlayOneShotVoice();
             }
 
-            if (view.DrawButton("ボイス一覧出力", 100, 20))
+            view.SetEnabled(!view.IsComboBoxFocused());
+
+            view.DrawHorizontalLine(Color.gray);
+
+            view.BeginHorizontal();
             {
-                PluginUtils.ShowConfirmDialog("ボイス一覧を出力しますか？\n※出力に数時間かかることがあります", () =>
+                if (view.DrawButton("ボイス一覧出力", 120, 20))
                 {
-                    GameMain.Instance.SysDlg.Close();
+                    PluginUtils.ShowConfirmDialog("ボイス一覧を出力しますか？\n※出力に数時間かかることがあります", () =>
+                    {
+                        GameMain.Instance.SysDlg.Close();
 
-                    string[] array = MyHelper.GetFileListAtExtension(".ks");
-                    //string[] array = new string[] { "yotogi\\24220_【カラオケ】ハーレム後背位\\a1\\a1_sya_07620a.ks" };
-                    ScriptLoader.OutputVoiceInfo(array);
+                        string[] array = MyHelper.GetFileListAtExtension(".ks");
+                        //string[] array = new string[] { "yotogi\\24220_【カラオケ】ハーレム後背位\\a1\\a1_sya_07620a.ks" };
+                        ScriptLoader.OutputVoiceInfo(array);
 
-                    PluginUtils.ShowDialog("ボイス一覧の出力が完了しました");
-                }, null);
+                        PluginUtils.ShowDialog("ボイス一覧の出力が完了しました");
+                    }, null);
+                }
+
+                var enabled = Directory.Exists(PluginUtils.PluginConfigDirPath);
+                if (view.DrawButton("出力先を開く", 120, 20, enabled))
+                {
+                    PluginUtils.OpenDirectory(PluginUtils.PluginConfigDirPath);
+                }
             }
+            view.EndLayout();
         }
 
         public override ITransformData CreateTransformData(string name)

@@ -23,6 +23,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int detailTangentCount = 32;
         public float positionRange = 5.0f;
         public float scaleRange = 5.0f;
+        public float voiceMaxLength = 20.0f;
         public bool isAutoYureBone = true;
         public bool disablePoseHistory = true;
         public int historyLimit = 20;

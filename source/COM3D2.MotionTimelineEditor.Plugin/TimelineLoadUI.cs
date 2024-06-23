@@ -46,7 +46,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 directoryName = directoryName.Substring(1);
             }
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 if (view.DrawButton("<", 20, 20, selectedItem.parent != null))
                 {
@@ -55,7 +55,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.DrawLabel(directoryName, -1, 20);
 
-                view.currentPos.x = WINDOW_WIDTH - 60;
+                view.currentPos.x = WINDOW_WIDTH - 60 - 60;
+
+                if (view.DrawButton("開く", 50, 20))
+                {
+                    PluginUtils.OpenDirectory(selectedItem.path);
+                }
 
                 if (view.DrawButton("更新", 50, 20))
                 {
@@ -64,7 +69,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.AddSpace(10);
+            view.DrawHorizontalLine(Color.gray);
+
+            view.AddSpace(5);
 
             var itemList = selectedItem.children;
             if (itemList.Count == 0)

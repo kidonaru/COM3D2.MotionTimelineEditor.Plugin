@@ -768,7 +768,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 view.DrawLabel(FingerBrendNames[(int)blendType], 40, 20);
 
@@ -786,7 +786,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 view.DrawLabel("ロック", 40, 20);
 
@@ -882,7 +882,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 .Where(entity => entity.slotName == slotName)
                 .ToList();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 if (maidCache.IsYureSlot(slotName))
                 {

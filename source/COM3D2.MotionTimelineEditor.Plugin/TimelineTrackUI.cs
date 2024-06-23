@@ -24,7 +24,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 if (view.DrawButton("追加", 80, 20))
                 {
@@ -70,7 +70,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.currentPos.x = 5;
             view.currentPos.y = 5;
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 bool isActive = timeline.activeTrack == track;
 
@@ -80,11 +80,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     timelineManager.SetActiveTrack(track, !isActive);
                 }
 
-                track.name = view.DrawTextField(track.name, width - 30 - view.currentPos.x, 20);
+                view.DrawTextField(track.name, width - 30 - view.currentPos.x, 20, newText => track.name = newText);
             }
             view.EndLayout();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 view.DrawLabel("範囲", 40, 20);
 

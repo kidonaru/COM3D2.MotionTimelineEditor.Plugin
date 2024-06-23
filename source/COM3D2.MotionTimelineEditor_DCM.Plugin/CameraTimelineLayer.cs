@@ -613,7 +613,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 }
             };
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 view.DrawLabel("対象メイド", 70, 20);
 
@@ -631,7 +631,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
             view.EndLayout();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 view.DrawLabel("対象ポイント", 70, 20);
 
@@ -654,7 +654,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 }
             };
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 view.DrawLabel("対象モデル", 70, 20);
 

@@ -718,7 +718,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawLabel("プリセット反映", 100, 20);
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
 
             for (int i = 0; i < tangentPresetTextures.Length; ++i)
             {

@@ -323,7 +323,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public Vector3 eyeEulerAngle;
 
-        public string oneTimeVoiceName = string.Empty;
+        public string oneShotVoiceName = string.Empty;
+        public float oneShotVoiceStartTime = 0f;
+        public float oneShotVoiceLength = 0f;
+        public float voiceFadeTime = 0.1f;
+        public float voicePitch = 1f;
         public string loopVoiceName = string.Empty;
 
         private static FieldInfo fieldLimbControlList = null;
@@ -553,7 +557,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             lookAtTargetIndex = 0;
             lookAtMaidPointType = MaidPointType.Head;
             eyeEulerAngle = Vector3.zero;
-            oneTimeVoiceName = string.Empty;
+            oneShotVoiceName = string.Empty;
+            oneShotVoiceStartTime = 0f;
+            oneShotVoiceLength = 0f;
+            voiceFadeTime = 0.1f;
+            voicePitch = 1f;
             loopVoiceName = string.Empty;
         }
 
@@ -976,13 +984,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return null;
         }
 
-        public void PlayOneTimeVoice()
+        public void PlayOneShotVoice()
         {
-            PlayVoice(oneTimeVoiceName, 0.1f, false);
+            PlayVoice(
+                oneShotVoiceName,
+                oneShotVoiceStartTime,
+                oneShotVoiceLength,
+                false);
             UpdateVoice();
         }
 
-        public void PlayVoice(string fileName, float fadeTime, bool isLoop)
+        private string _playingVoiceName = "";
+        private float _voiceStopTime = 0f;
+
+        public void PlayVoice(
+            string fileName,
+            float startTime,
+            float length,
+            bool isLoop)
         {
             if (maid == null)
             {
@@ -991,12 +1010,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (string.IsNullOrEmpty(fileName))
             {
-                maid.AudioMan.Stop();
+                maid.AudioMan.Stop(voiceFadeTime);
                 return;
             }
 
             var fixedFileName = EndsWith(fileName, ".ogg");
-            maid.AudioMan.LoadPlay(fixedFileName, fadeTime, false, isLoop);
+            maid.AudioMan.LoadPlay(fixedFileName, voiceFadeTime, false, isLoop);
+
+            if (maid.AudioMan.audiosource != null)
+            {
+                maid.AudioMan.audiosource.pitch = voicePitch;
+
+                if (startTime > 0f)
+                {
+                    maid.AudioMan.audiosource.time = startTime;
+                }
+            }
+
+            _playingVoiceName = fixedFileName;
+            _voiceStopTime = length > 0f ? startTime + length : 0f;
         }
 
         public void UpdateVoice()
@@ -1006,11 +1038,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
+            if (_voiceStopTime > 0f)
+            {
+                if (maid.AudioMan.FileName != _playingVoiceName)
+                {
+                    _voiceStopTime = 0f;
+                }
+                else if (maid.AudioMan.isPlay() && maid.AudioMan.audiosource.time >= _voiceStopTime)
+                {
+                    maid.AudioMan.Stop(voiceFadeTime);
+                    _voiceStopTime = 0f;
+                }
+            }
+
             if (!string.IsNullOrEmpty(loopVoiceName))
             {
                 if (!maid.AudioMan.isPlay())
                 {
-                    PlayVoice(loopVoiceName, 0.1f, true);
+                    PlayVoice(loopVoiceName, 0f, 0f, true);
                 }
             }
         }

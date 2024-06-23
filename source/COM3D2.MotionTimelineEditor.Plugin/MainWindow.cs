@@ -512,7 +512,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.margin = 0;
             view.padding = new Vector2(3, 3);
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 view.AddSpace(5);
 
@@ -571,9 +571,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
-                anmName = view.DrawTextField("アニメ名", anmName, 310, 20);
+                view.DrawTextField("アニメ名", anmName, 310, 20, newText => anmName = newText);
 
                 view.AddSpace(10);
 
@@ -598,7 +598,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 view.DrawLabel("フレーム操作", 100, 20);
 
@@ -684,7 +684,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 view.DrawLabel("キーフレーム", 100, 20);
 
@@ -730,7 +730,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 view.DrawLabel("選択操作", 100, 20);
 
@@ -758,7 +758,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 var layerInfo = timelineManager.GetLayerInfo(currentLayer.className);
                 _layerComboBox.currentIndex = layerInfo.index;
@@ -778,7 +778,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 var newAllowPrecisionEdit = view.DrawToggle("簡易表示", config.isEasyEdit, 80, 20);
                 if (newAllowPrecisionEdit != config.isEasyEdit)

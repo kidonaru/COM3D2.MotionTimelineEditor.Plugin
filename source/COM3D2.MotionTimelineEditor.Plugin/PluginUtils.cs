@@ -245,6 +245,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CombinePaths(PluginConfigDirPath, "Voice_" + personality.ToString() + ".csv");
         }
 
+        public static void OpenDirectory(string path)
+        {
+            path = Path.GetFullPath(path);
+
+            LogDebug("OpenDirectory: {0}", path);
+
+            if (!string.IsNullOrEmpty(path))
+            {
+                if (Directory.Exists(path))
+                {
+                    Process.Start("explorer.exe", path);
+                }
+                else
+                {
+                    LogWarning("指定されたディレクトリが存在しません: {0}", path);
+                }
+            }
+        }
+
         public readonly static byte[] Icon = Convert.FromBase64String(
                 "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAABYlAAAWJQFJUiTwAAAD" +
                 "E0lEQVRYhcWXvUvrUBjGn7apxVRaSlXwY/BjaECdi0ugbtpZREHUxU3Foa7eP0EzCAYHt24mOolL" +

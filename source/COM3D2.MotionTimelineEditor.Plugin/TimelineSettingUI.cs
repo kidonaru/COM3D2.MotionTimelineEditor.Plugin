@@ -104,9 +104,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.DrawLabel("個別設定", 80, 20);
 
             view.DrawLabel("格納ディレクトリ名", -1, 20);
-            timeline.directoryName = view.DrawTextField(timeline.directoryName, -1, 20);
+            view.DrawTextField(timeline.directoryName, -1, 20, newText => timeline.directoryName = newText);
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 var newFrameRate = view.DrawFloatField("フレームレート", timeline.frameRate, 150, 20);
 
@@ -137,7 +137,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timeline.useHeadKey = newUseHeadKey;
             }
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 var newUseAnimekeyMuneL = view.DrawToggle("胸(左)の物理無効", timeline.useMuneKeyL, 120, 20);
                 if (newUseAnimekeyMuneL != timeline.useMuneKeyL)
@@ -160,7 +160,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timelineManager.ApplyCurrentFrame(true);
             }
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 view.DrawLabel("オフセット時間", 70, 20);
 
@@ -180,7 +180,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 view.DrawLabel("フェード時間", 70, 20);
 
@@ -200,7 +200,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 if (view.DrawButton("初期化", 100, 20))
                 {
@@ -282,7 +282,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     },
                 });
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 var newIsAutoScroll = view.DrawToggle("自動スクロール", config.isAutoScroll, 120, 20);
                 if (newIsAutoScroll != config.isAutoScroll)
@@ -300,7 +300,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 var newIsAutoYureBone = view.DrawToggle("自動揺れボーン", config.isAutoYureBone, 120, 20);
                 if (newIsAutoYureBone != config.isAutoYureBone)
@@ -310,6 +310,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
             view.EndLayout();
+
+            view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "ボイス最大秒数",
+                    labelWidth = 100,
+                    min = 1f,
+                    max = 30f,
+                    step = 0,
+                    defaultValue = 20f,
+                    value = config.voiceMaxLength,
+                    onChanged = value =>
+                    {
+                        config.voiceMaxLength = value;
+                        config.dirty = true;
+                    },
+                });
 
             view.DrawSliderValue(
                 new GUIView.SliderOption
@@ -400,7 +417,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             view.DrawLabel("BGM設定", 80, 20);
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 view.DrawLabel("BGMパス", 50, 20);
 
@@ -428,7 +445,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            timeline.bgmPath = view.DrawTextField(timeline.bgmPath, 240, 20);
+            view.DrawTextField(timeline.bgmPath, 240, 20, newText => timeline.bgmPath = newText);
 
             view.AddSpace(10);
             view.DrawHorizontalLine(Color.gray);
@@ -456,7 +473,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var isEnabled = timeline.videoEnabled;
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 view.DrawLabel("動画設定", 80, 20);
 
@@ -481,7 +498,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.SetEnabled(isEnabled);
 
-            view.BeginLayout(GUIView.LayoutDirection.Horizontal);
+            view.BeginHorizontal();
             {
                 view.DrawLabel("動画パス", 50, 20);
 
@@ -509,7 +526,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            timeline.videoPath = view.DrawTextField(timeline.videoPath, 240, 20);
+            view.DrawTextField(timeline.videoPath, 240, 20, newText => timeline.videoPath = newText);
 
             view.DrawSliderValue(
                 new GUIView.SliderOption

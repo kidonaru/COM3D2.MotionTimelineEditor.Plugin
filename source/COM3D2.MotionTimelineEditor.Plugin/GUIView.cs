@@ -258,6 +258,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.layoutDirection = direction;
         }
 
+        public void BeginHorizontal()
+        {
+            BeginLayout(LayoutDirection.Horizontal);
+        }
+
         public void EndLayout()
         {
             this.currentPos.x = 0;
@@ -550,7 +555,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             DrawLabel(text, width, height, Color.white, null, null);
         }
 
-        public string DrawTextField(string label, string text, float width, float height)
+        public void DrawTextField(
+            string label,
+            string text,
+            float width,
+            float height,
+            Action<string> onChanged)
         {
             if (!string.IsNullOrEmpty(label))
             {
@@ -561,15 +571,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var drawRect = GetDrawRect(width, height);
-            text = GUI.TextField(drawRect, text, gsTextField);
+            var newText = GUI.TextField(drawRect, text, gsTextField);
             this.NextElement(drawRect);
 
-            return text;
+            if (newText != text)
+            {
+                onChanged(newText);
+            }
         }
 
-        public string DrawTextField(string text, float width, float height)
+        public void DrawTextField(
+            string text,
+            float width,
+            float height,
+            Action<string> onChanged)
         {
-            return DrawTextField(null, text, width, height);
+            DrawTextField(null, text, width, height, onChanged);
         }
 
         public int DrawIntField(string label, int value, float width, float height)
@@ -611,8 +628,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             float width,
             float height)
         {
-            var newText = DrawTextField(label, fieldCache.text, width, height);
-            if (newText != fieldCache.text)
+            DrawTextField(label, fieldCache.text, width, height, newText =>
             {
                 fieldCache.text = newText;
 
@@ -625,7 +641,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                     fieldCache.UpdateValue(newValue, false);
                 }
-            }
+            });
+
             return fieldCache.value;
         }
 
@@ -635,8 +652,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             float width,
             float height)
         {
-            var newText = DrawTextField(label, fieldCache.text, width, height);
-            if (newText != fieldCache.text)
+            DrawTextField(label, fieldCache.text, width, height, newText =>
             {
                 fieldCache.text = newText;
 
@@ -645,11 +661,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     fieldCache.UpdateColor(newColor, false);
                 }
-            }
+            });
+
             return fieldCache.color;
         }
 
-        public float DrawSlider(
+        private float DrawSlider(
             string label,
             float value,
             float min,
@@ -672,7 +689,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return value;
         }
 
-        public float DrawSlider(
+        private float DrawSlider(
             float value,
             float min,
             float max,
