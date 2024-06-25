@@ -406,6 +406,12 @@ DCMを導入している場合、レイヤーを切り替えることで、
 
 #### ボイス一覧出力
 
+
+
+https://github.com/kidonaru/COM3D2.MotionTimelineEditor.Plugin/assets/4057300/bd5078e1-57a4-414c-8129-49bb2eba1a19
+
+
+
 ボイス一覧出力ボタンを押すと、`Sybaris\UnityInjector\Config\MotionTimelineEditor`内に性格毎のボイス一覧がcsvで出力されます。
 
 全スクリプトをパースしているため、出力に数時間かかる場合があります。
