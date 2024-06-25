@@ -105,6 +105,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     else
                     {
                         timelineManager.LoadTimeline(item.name, directoryName);
+                        timelineManager.Play();
                     }
                 }
 

@@ -774,9 +774,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     timelineManager.DuplicateFrames(selectStartFrameNo, selectEndFrameNo);
                 }
 
-                view.AddSpace(10);
-
-                if (view.DrawButton("縦選択", 55, 20, !config.isEasyEdit))
+                if (view.DrawButton("縦選択", 60, 20, !config.isEasyEdit))
                 {
                     timelineManager.SelectVerticalBones();
                 }

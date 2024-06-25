@@ -599,6 +599,55 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             DrawTextField(null, text, width, height, onChanged);
         }
 
+        public struct TextFieldOption
+        {
+            public string label;
+            public float labelWidth;
+            public string value;
+            public Action<string> onChanged;
+        }
+
+        public void DrawTextField(TextFieldOption option)
+        {
+            var subViewRect = GetDrawRect(-1, 20);
+            var subView = new GUIView(subViewRect)
+            {
+                parent = this,
+                margin = 0,
+                padding = Vector2.zero
+            };
+
+            subView.BeginLayout(LayoutDirection.Horizontal);
+            {
+                if (!string.IsNullOrEmpty(option.label))
+                {
+                    subView.DrawLabel(option.label, option.labelWidth, 20);
+                }
+
+                var fieldWidth = subViewRect.width - subView.currentPos.x - 20 * 2;
+
+                subView.DrawTextField(
+                    "",
+                    option.value,
+                    fieldWidth,
+                    20,
+                    option.onChanged);
+
+                if (subView.DrawButton("C", 20, 20))
+                {
+                    GUIUtility.systemCopyBuffer = option.value;
+                }
+
+                if (subView.DrawButton("P", 20, 20))
+                {
+                    option.onChanged(GUIUtility.systemCopyBuffer);
+                }
+            }
+            subView.EndLayout();
+
+            NextElement(subViewRect);
+        }
+
         public int DrawIntField(string label, int value, float width, float height)
         {
             var fieldCache = GetIntFieldCache(label, value);

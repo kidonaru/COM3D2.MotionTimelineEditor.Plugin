@@ -408,11 +408,25 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     onChanged = value => maidCache.voicePitch = value,
                 });
 
-            view.DrawTextField("ボイス名", maidCache.oneShotVoiceName, -1, 20,
-                newText => maidCache.oneShotVoiceName = newText);
+            view.DrawTextField(
+                new GUIView.TextFieldOption
+                {
+                    label = "ボイス名",
+                    labelWidth = 75,
+                    value = maidCache.oneShotVoiceName,
+                    onChanged = value => maidCache.oneShotVoiceName = value,
+                }
+            );
 
-            view.DrawTextField("ループボイス", maidCache.loopVoiceName, -1, 20,
-                newText => maidCache.loopVoiceName = newText);
+            view.DrawTextField(
+                new GUIView.TextFieldOption
+                {
+                    label = "ループボイス",
+                    labelWidth = 75,
+                    value = maidCache.loopVoiceName,
+                    onChanged = value => maidCache.loopVoiceName = value,
+                }
+            );
 
             if (view.DrawButton("再生", 100, 20))
             {
@@ -431,6 +445,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     {
                         GameMain.Instance.SysDlg.Close();
 
+                        PluginUtils.Log("スクリプト一覧取得中...");
                         string[] array = MyHelper.GetFileListAtExtension(".ks");
                         //string[] array = new string[] { "yotogi\\24220_【カラオケ】ハーレム後背位\\a1\\a1_sya_07620a.ks" };
                         ScriptLoader.OutputVoiceInfo(array);

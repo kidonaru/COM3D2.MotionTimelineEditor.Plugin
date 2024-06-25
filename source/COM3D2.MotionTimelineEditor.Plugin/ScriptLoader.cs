@@ -450,13 +450,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var scriptName = scriptNames[i];
                 try
                 {
-                    if (i % 10 == 0)
+                    if (i % 10 == 0 && i > 0)
                     {
                         totalElapsed += stopwatch.Elapsed;
                         var averageTime = totalElapsed.TotalSeconds / i;
                         var remainingTime = TimeSpan.FromSeconds(averageTime * (length - i));
 
-                        PluginUtils.Log("スクリプト解析中: {0}/{1} - 経過時間: {2:hh\\:mm\\:ss} - 残り時間: {3:hh\\:mm\\:ss}",
+                        PluginUtils.Log("スクリプト解析中... {0}/{1} - 経過時間: {2:hh\\:mm\\:ss} - 残り時間: {3:hh\\:mm\\:ss}",
                             i, length, totalElapsed, remainingTime);
 
                         stopwatch.Reset();
