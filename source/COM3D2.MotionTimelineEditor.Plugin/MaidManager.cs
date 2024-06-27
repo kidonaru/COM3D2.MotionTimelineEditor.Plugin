@@ -277,6 +277,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public void AdjustFootGrounding(IKHoldType holdType)
+        {
+            var cache = this.maidCache;
+            if (cache != null)
+            {
+                cache.AdjustFootGrounding(holdType);
+            }
+        }
+
         public void PositonCorrection(IKHoldType holdType)
         {
             var cache = this.maidCache;

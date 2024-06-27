@@ -55,6 +55,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         };
 
         private bool resetPositionRequested = false;
+        private bool updatePositionRequested = false;
         private bool positionUpdated = false;
 
         private bool[] isHoldList
@@ -129,15 +130,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     continue;
                 }
 
-                var ikPosition = maidManager.GetIkPosition((IKHoldType) i);
-                if (prevIkPositions[i] != ikPosition)
+                var holdType = (IKHoldType) i;
+                var ikPosition = maidManager.GetIkPosition(holdType);
+                if (prevIkPositions[i] != ikPosition || updatePositionRequested)
                 {
-                    //PluginUtils.LogDebug("IKHoldUI：UpdateIkPosition: " + (IKHoldType) i);
-                    //PluginUtils.LogDebug("  current: " + ikPosition + "  target: " + initialEditIkPositions[i]);
-                    maidManager.UpdateIkPosition((IKHoldType) i, initialEditIkPositions[i]);
+                    var targetPosition = initialEditIkPositions[i];
+                    if (timeline.isFootGrounding)
+                    {
+                        targetPosition.y = timeline.floorHeight + timeline.footBaseOffset;
+                    }
+
+                    PluginUtils.LogDebug("IKHoldUI：UpdateIkPosition: " + holdType);
+                    PluginUtils.LogDebug("  current: " + ikPosition + "  target: " + targetPosition);
+                    maidManager.UpdateIkPosition(holdType, targetPosition);
                     positionUpdated = true;
+
+                    if (timeline.isFootGrounding)
+                    {
+                        maidManager.AdjustFootGrounding(holdType);
+                    }
                 }
             }
+
+            updatePositionRequested = false;
         }
 
         public void LateUpdate()
@@ -189,6 +204,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string GetHoldTypeName(IKHoldType type)
         {
             return IKHoldTypeNames[(int)type];
+        }
+
+        public void RequestUpdatePosition()
+        {
+            updatePositionRequested = true;
         }
 
         private void OnEditPoseUpdated()

@@ -134,6 +134,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             false,
         };
 
+        public bool isFootGrounding = false; // 足の接地処理を有効にするか
+        public float floorHeight = 0f; // 接地面の高さ
+        public float footBaseOffset = 0.05f; // 足の位置のオフセット
+        public float footStretchHeight = 0.1f; // 足を伸ばす高さ
+        public float footStretchAngle = 45f; // 足を伸ばしたときの角度
+        public float footGroundAngle = 90f; // 接地時の足の角度
+
         private bool _useMuneKeyL = false;
         public bool useMuneKeyL
         {
@@ -483,6 +490,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             //maxFrameNo = DefaultTimeline.maxFrameNo;
             frameRate = DefaultTimeline.frameRate;
             isHoldList = DefaultTimeline.isHoldList.ToArray();
+            isFootGrounding = DefaultTimeline.isFootGrounding;
+            floorHeight = DefaultTimeline.floorHeight;
+            footBaseOffset = DefaultTimeline.footBaseOffset;
+            footStretchHeight = DefaultTimeline.footStretchHeight;
+            footStretchAngle = DefaultTimeline.footStretchAngle;
+            footGroundAngle = DefaultTimeline.footGroundAngle;
             useMuneKeyL = DefaultTimeline.useMuneKeyL;
             useMuneKeyR = DefaultTimeline.useMuneKeyR;
             isLoopAnm = DefaultTimeline.isLoopAnm;
@@ -675,6 +688,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             anmName = xml.anmName;
             directoryName = xml.directoryName;
             isHoldList = xml.isHoldList;
+            isFootGrounding = xml.isFootGrounding;
+            floorHeight = xml.floorHeight;
+            footBaseOffset = xml.footBaseOffset;
+            footStretchHeight = xml.footStretchHeight;
+            footStretchAngle = xml.footStretchAngle;
+            footGroundAngle = xml.footGroundAngle;
             useMuneKeyL = xml.useMuneKeyL;
             useMuneKeyR = xml.useMuneKeyR;
             useHeadKey = xml.useHeadKey;
@@ -770,6 +789,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.anmName = anmName;
             xml.directoryName = directoryName;
             xml.isHoldList = isHoldList;
+            xml.isFootGrounding = isFootGrounding;
+            xml.floorHeight = floorHeight;
+            xml.footBaseOffset = footBaseOffset;
+            xml.footStretchHeight = footStretchHeight;
+            xml.footStretchAngle = footStretchAngle;
+            xml.footGroundAngle = footGroundAngle;
             xml.useMuneKeyL = useMuneKeyL;
             xml.useMuneKeyR = useMuneKeyR;
             xml.useHeadKey = useHeadKey;

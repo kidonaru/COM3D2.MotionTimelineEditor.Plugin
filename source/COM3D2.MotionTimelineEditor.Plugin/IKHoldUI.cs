@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -40,8 +41,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return;
             }
-
-            view.DrawLabel("IKを固定して中心点を移動できます", -1, 20);
 
             var typesList = new List<IKHoldType[]>
             {
@@ -91,28 +90,140 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.EndLayout();
             }
 
-            view.AddSpace(10);
-
-            var isAllHold = isHoldList.All(x => x);
-            if (isAllHold)
+            view.BeginHorizontal();
             {
-                if (view.DrawButton("全解除", 80, 20))
+                view.AddSpace(80, 20);
+                view.AddSpace(80, 20);
+
+                var isAllHold = isHoldList.All(x => x);
+                if (isAllHold)
                 {
-                    for (int i = 0; i < isHoldList.Length; i++)
+                    if (view.DrawButton("全解除", 80, 20))
                     {
-                        ikHoldManager.SetHold((IKHoldType) i, false);
+                        for (int i = 0; i < isHoldList.Length; i++)
+                        {
+                            ikHoldManager.SetHold((IKHoldType) i, false);
+                        }
+                    }
+                }
+                else
+                {
+                    if (view.DrawButton("全固定", 80, 20))
+                    {
+                        for (int i = 0; i < isHoldList.Length; i++)
+                        {
+                            ikHoldManager.SetHold((IKHoldType) i, true);
+                        }
                     }
                 }
             }
-            else
+            view.EndLayout();
+
+            view.DrawHorizontalLine(Color.gray);
+
+            bool paramUpdated = false;
+            bool isHoldFoot = ikHoldManager.IsHold(IKHoldType.Foot_L_Tip) || ikHoldManager.IsHold(IKHoldType.Foot_R_Tip);
+
+            view.BeginHorizontal();
             {
-                if (view.DrawButton("全固定", 80, 20))
+                view.DrawToggle("足の接地処理", timeline.isFootGrounding, 120, 20, newValue =>
                 {
-                    for (int i = 0; i < isHoldList.Length; i++)
+                    timeline.isFootGrounding = newValue;
+                    paramUpdated = true;
+                });
+
+                if (timeline.isFootGrounding && !isHoldFoot)
+                {
+                    view.DrawLabel("足首の固定化が必要です", -1, 20, Color.yellow);
+                }
+            }
+            view.EndLayout();
+
+            view.SetEnabled(!view.IsComboBoxFocused() && timeline.isFootGrounding && isHoldFoot);
+
+            paramUpdated |= view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "床の高さ",
+                    labelWidth = 60,
+                    min = -config.positionRange,
+                    max = config.positionRange,
+                    step = 0.01f,
+                    defaultValue = 0f,
+                    value = timeline.floorHeight,
+                    onChanged = newValue => timeline.floorHeight = newValue,
+                });
+
+            if (view.DrawButton("メイドの位置から推定", 150, 20))
+            {
+                var maidCache = maidManager.maidCache;
+                if (maidCache != null)
+                {
+                    var footL = maidCache.ikManager.GetBone(IKManager.BoneType.Foot_L);
+                    var footR = maidCache.ikManager.GetBone(IKManager.BoneType.Foot_R);
+                    if (footL != null && footR != null)
                     {
-                        ikHoldManager.SetHold((IKHoldType) i, true);
+                        timeline.floorHeight = (footL.transform.position.y + footR.transform.position.y) / 2f - timeline.footBaseOffset;
+                        paramUpdated = true;
                     }
                 }
+            }
+
+            paramUpdated |= view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "足の高さ",
+                    labelWidth = 60,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 0.05f,
+                    value = timeline.footBaseOffset,
+                    onChanged = newValue => timeline.footBaseOffset = newValue,
+                });
+            
+            paramUpdated |= view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "伸ばす高さ",
+                    labelWidth = 60,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 0.1f,
+                    value = timeline.footStretchHeight,
+                    onChanged = newValue => timeline.footStretchHeight = newValue,
+                });
+            
+            paramUpdated |= view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "伸ばす角度",
+                    labelWidth = 60,
+                    min = -180f,
+                    max = 180f,
+                    step = 1f,
+                    defaultValue = 45f,
+                    value = timeline.footStretchAngle,
+                    onChanged = newValue => timeline.footStretchAngle = newValue,
+                });
+            
+            paramUpdated |= view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "接地時角度",
+                    labelWidth = 60,
+                    min = -180f,
+                    max = 180f,
+                    step = 1f,
+                    defaultValue = 90f,
+                    value = timeline.footGroundAngle,
+                    onChanged = newValue => timeline.footGroundAngle = newValue,
+                });
+
+            if (paramUpdated)
+            {
+                ikHoldManager.RequestUpdatePosition();
             }
         }
     }
