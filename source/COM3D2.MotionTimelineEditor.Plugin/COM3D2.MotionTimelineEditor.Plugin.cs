@@ -91,6 +91,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static StudioLightManager lightManager
+        {
+            get
+            {
+                return StudioLightManager.instance;
+            }
+        }
+
         private static TimelineHistoryManager historyManager
         {
             get
@@ -383,6 +391,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
 
                     modelManager.LateUpdate(false);
+                    lightManager.LateUpdate(false);
                     timelineManager.LateUpdate();
                     ikHoldManager.LateUpdate();
                 }
@@ -545,6 +554,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             maidManager.OnPluginEnable();
             modelManager.OnPluginEnable();
+            lightManager.OnPluginEnable();
             movieManager.OnPluginEnable();
             timelineManager.OnPluginEnable();
         }
@@ -558,6 +568,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             maidManager.OnPluginDisable();
             modelManager.OnPluginDisable();
+            lightManager.OnPluginDisable();
             movieManager.OnPluginDisable();
             timelineManager.OnPluginDisable();
         }

@@ -307,45 +307,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
-            updateTransform |= view.DrawSliderValue(
-                new GUIView.SliderOption
-                {
-                    label = "R",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 1f,
-                    step = 0.01f,
-                    defaultValue = 0f,
-                    value = color.r,
-                    onChanged = x => color.r = x,
-                });
-
-            updateTransform |= view.DrawSliderValue(
-                new GUIView.SliderOption
-                {
-                    label = "G",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 1f,
-                    step = 0.01f,
-                    defaultValue = 0f,
-                    value = color.g,
-                    onChanged = y => color.g = y,
-                });
-
-            updateTransform |= view.DrawSliderValue(
-                new GUIView.SliderOption
-                {
-                    label = "B",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 1f,
-                    step = 0.01f,
-                    defaultValue = 0f,
-                    value = color.b,
-                    onChanged = z => color.b = z,
-                });
-
             updateTransform |= view.DrawColor(
                 _colorFieldValue,
                 color,

@@ -30,6 +30,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             attachPoint = model.attachPoint;
             attachMaidSlotNo = model.attachMaidSlotNo;
             pluginName = model.pluginName;
+            visible = model.visible;
         }
 
         public void FromXml(TimelineModelXml xml)
@@ -38,6 +39,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             attachPoint = xml.attachPoint;
             attachMaidSlotNo = xml.attachMaidSlotNo;
             pluginName = xml.pluginName;
+            visible = xml.visible;
         }
 
         public TimelineModelXml ToXml()
@@ -48,6 +50,44 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 attachPoint = attachPoint,
                 attachMaidSlotNo = attachMaidSlotNo,
                 pluginName = pluginName,
+                visible = visible,
+            };
+            return xml;
+        }
+    }
+
+    public class TimelineLightData
+    {
+        public string name;
+        public bool visible;
+
+        public TimelineLightData()
+        {
+        }
+
+        public TimelineLightData(StudioLightStat light)
+        {
+            FromStat(light);
+        }
+
+        public void FromStat(StudioLightStat light)
+        {
+            name = light.name;
+            visible = light.visible;
+        }
+
+        public void FromXml(TimelineLightXml xml)
+        {
+            name = xml.name;
+            visible = xml.visible;
+        }
+
+        public TimelineLightXml ToXml()
+        {
+            var xml = new TimelineLightXml
+            {
+                name = name,
+                visible = visible,
             };
             return xml;
         }
@@ -65,6 +105,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public List<TrackData> tracks = new List<TrackData>();
 
         public List<TimelineModelData> models = new List<TimelineModelData>();
+
+        public List<TimelineLightData> lights = new List<TimelineLightData>();
 
         // maidSlotNo -> shapeKeys
         public Dictionary<int, HashSet<string>> maidShapeKeysMap = new Dictionary<int, HashSet<string>>();
@@ -666,6 +708,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 models.Add(model);
             }
 
+            lights = new List<TimelineLightData>(xml.lights.Count);
+            foreach (var lightXml in xml.lights)
+            {
+                var light = new TimelineLightData();
+                light.FromXml(lightXml);
+                lights.Add(light);
+            }
+
             maidShapeKeysMap.Clear();
             foreach (var shapeKeyml in xml.maidShapeKeys)
             {
@@ -755,6 +805,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var modelXml = model.ToXml();
                 xml.models.Add(modelXml);
+            }
+
+            xml.lights = new List<TimelineLightXml>(lights.Count);
+            foreach (var light in lights)
+            {
+                var lightXml = light.ToXml();
+                xml.lights.Add(lightXml);
             }
 
             xml.maidShapeKeys = new List<TimelineMaidShapeKeyXml>();

@@ -88,6 +88,7 @@
     <Compile Include="ITransformData.cs" />
     <Compile Include="KeyBind.cs" />
     <Compile Include="KeyFrameUI.cs" />
+    <Compile Include="LightHackManager.cs" />
     <Compile Include="MaidBlendShape.cs" />
     <Compile Include="MaidBoneMenuItem.cs" />
     <Compile Include="MaidCache.cs" />
@@ -116,8 +117,11 @@
     <Compile Include="SceneCaptureHack.cs" />
     <Compile Include="StudioHackBase.cs" />
     <Compile Include="StudioHackManager.cs" />
+    <Compile Include="StudioLightManager.cs" />
+    <Compile Include="StudioLightStat.cs" />
     <Compile Include="StudioModelManager.cs" />
     <Compile Include="StudioModelStat.cs" />
+    <Compile Include="StudioWrapper.cs" />
     <Compile Include="SubWindow.cs" />
     <Compile Include="SubWindowUIBase.cs" />
     <Compile Include="TangentData.cs" />

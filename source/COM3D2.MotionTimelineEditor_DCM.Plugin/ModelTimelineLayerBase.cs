@@ -88,7 +88,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             view.AddSpace(5);
 
             view.padding = Vector2.zero;
-            var currentIndex = timeline.activeTrackIndex;
 
             view.DrawContentListView(
                 models,

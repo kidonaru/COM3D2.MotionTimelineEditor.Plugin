@@ -341,6 +341,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static StudioLightManager lightManager
+        {
+            get
+            {
+                return StudioLightManager.instance;
+            }
+        }
+
+        protected static LightHackManager lightHackManager
+        {
+            get
+            {
+                return LightHackManager.instance;
+            }
+        }
+
         protected static StudioHackBase studioHack
         {
             get
@@ -444,6 +460,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public virtual void OnCopyModel(StudioModelStat sourceModel, StudioModelStat newModel)
+        {
+            // do nothing
+        }
+
+        public virtual void OnLightAdded(StudioLightStat light)
+        {
+            // do nothing
+        }
+
+        public virtual void OnLightRemoved(StudioLightStat light)
+        {
+            // do nothing
+        }
+
+        public virtual void OnCopyLight(StudioLightStat sourceLight, StudioLightStat newLight)
         {
             // do nothing
         }
@@ -1259,6 +1290,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public readonly static int DrawMaskAll = 0;
         public readonly static int DrawMaskPositonAndRotation = (int) (TransformDrawType.移動 | TransformDrawType.回転);
         public readonly static int DrawMaskRotation = (int) (TransformDrawType.回転);
+        public readonly static int DrawMaskPosition = (int) (TransformDrawType.移動);
 
         protected bool IsDrawTransformType(
             TransformDrawType drawType,
@@ -1309,7 +1341,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return true;
         }
 
-        protected void DrawTransform(
+        protected bool DrawTransform(
             GUIView view,
             Transform transform,
             TransformEditType editType,
@@ -1320,22 +1352,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Vector3 initialScale)
         {
             var transformCache = view.GetTransformCache(transform);
+            var updateTransform = false;
+
             if (IsDrawTransformType(TransformDrawType.移動, editType, drawMask))
             {
-                DrawPosition(view, transformCache, editType, initialPosition);
+                updateTransform |= DrawPosition(view, transformCache, editType, initialPosition);
             }
             if (IsDrawTransformType(TransformDrawType.回転, editType, drawMask))
             {
-                DrawEulerAngles(view, transformCache, editType, boneName, initialEulerAngles);
+                updateTransform |= DrawEulerAngles(view, transformCache, editType, boneName, initialEulerAngles);
             }
             if (IsDrawTransformType(TransformDrawType.拡縮, editType, drawMask))
             {
-                DrawScale(view, transformCache, editType, initialScale);
-                DrawSimpleScale(view, transformCache, editType, initialScale);
+                updateTransform |= DrawScale(view, transformCache, editType, initialScale);
+                updateTransform |= DrawSimpleScale(view, transformCache, editType, initialScale);
             }
+
+            return updateTransform;
         }
 
-        protected void DrawPosition(
+        protected bool DrawPosition(
             GUIView view,
             TransformCache transform,
             TransformEditType editType,
@@ -1398,9 +1434,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 transform.position = position;
                 transform.Apply();
             }
+
+            return updateTransform;
         }
 
-        protected void DrawEulerAngles(
+        protected bool DrawEulerAngles(
             GUIView view,
             TransformCache transform,
             TransformEditType editType,
@@ -1468,9 +1506,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 transform.eulerAngles = angles;
                 transform.Apply();
             }
+
+            return updateTransform;
         }
 
-        protected void DrawScale(
+        protected bool DrawScale(
             GUIView view,
             TransformCache transform,
             TransformEditType editType,
@@ -1533,9 +1573,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 transform.scale = scale;
                 transform.Apply();
             }
+
+            return updateTransform;
         }
 
-        protected void DrawSimpleScale(
+        protected bool DrawSimpleScale(
             GUIView view,
             TransformCache transform,
             TransformEditType editType,
@@ -1571,6 +1613,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 transform.scale = scale;
                 transform.Apply();
             }
+
+            return updateTransform;
         }
     }
 }

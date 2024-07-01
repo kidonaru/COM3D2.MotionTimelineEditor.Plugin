@@ -7,13 +7,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using MTE = MotionTimelineEditor;
 
-    public abstract class StudioHackBase : IModelHack
+    public abstract class StudioHackBase : IModelHack, ILightHack
     {
         public abstract string pluginName { get; }
         public abstract int priority { get; }
         public abstract Maid selectedMaid { get; }
         public abstract List<Maid> allMaids { get; }
         public abstract List<StudioModelStat> modelList { get; }
+        public abstract List<StudioLightStat> lightList { get; }
         public abstract int selectedMaidSlotNo { get; }
         public abstract string outputAnmPath { get; }
         public abstract bool hasIkBoxVisible { get; }
@@ -97,6 +98,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return StudioModelManager.instance;
+            }
+        }
+
+        protected static StudioLightManager lightManager
+        {
+            get
+            {
+                return StudioLightManager.instance;
             }
         }
 
@@ -202,6 +211,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                  model.transform.gameObject.SetActive(visible);
             }
+        }
+
+        public virtual void DeleteAllLights()
+        {
+            // do nothing
+        }
+
+        public virtual void DeleteLight(StudioLightStat light)
+        {
+            // do nothing
+        }
+
+        public virtual void CreateLight(StudioLightStat light)
+        {
+            // do nothing
+        }
+
+        public virtual void ApplyLight(StudioLightStat stat)
+        {
+            // do nothing
         }
 
         private void DeleteBGObject()

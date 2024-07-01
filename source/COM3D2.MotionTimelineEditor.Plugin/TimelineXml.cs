@@ -16,6 +16,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int attachMaidSlotNo = -1;
         [XmlElement("PluginName")]
         public string pluginName;
+        [XmlElement("Visible")]
+        public bool visible = true;
+    }
+
+    public class TimelineLightXml
+    {
+        [XmlElement("Name")]
+        public string name;
+        [XmlElement("Visible")]
+        public bool visible = true;
     }
 
     public class TimelineMaidShapeKeyXml
@@ -53,6 +63,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlArray("Models")]
         [XmlArrayItem("Model")]
         public List<TimelineModelXml> models = new List<TimelineModelXml>();
+
+        [XmlArray("Lights")]
+        [XmlArrayItem("Light")]
+        public List<TimelineLightXml> lights = new List<TimelineLightXml>();
 
         [XmlArray("MaidShapeKeys")]
         [XmlArrayItem("MaidShapeKey")]

@@ -3,29 +3,15 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+
     public partial class StudioHack : StudioHackBase
     {
-        private PoseEditWindow poseEditWindow = null;
-        private PlacementWindow placementWindow = null;
-        private MotionWindow motionWindow = null;
-        private ObjectManagerWindow objectManagerWindow = null;
-        private BGWindow bgWindow = null;
-        private PhotoWindowManager photoManager = null;
-        private WindowPartsBoneCheckBox bodyBoneCheckBox = null;
-        private Dictionary<IKManager.BoneType, WFCheckBox> boneCheckBoxMap = new Dictionary<IKManager.BoneType, WFCheckBox>(78);
-
-        private FieldInfo fieldDataDic = null;
-        private FieldInfo fieldBoneDic = null;
-        private FieldInfo fieldIkboxVisibleDic = null;
-
-        public WFCheckBox ikBoxVisibleRoot = null;
-        public WFCheckBox ikBoxVisibleBody = null;
+        private StudioWrapper studio = new StudioWrapper();
 
         public override string pluginName
         {
@@ -47,15 +33,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return photoManager.select_maid;
-            }
-        }
-
-        public CreateBGObjectSubWindow createBgObjectWindow
-        {
-            get
-            {
-                return objectManagerWindow.createBgObjectWindow;
+                return studio.photoManager.select_maid;
             }
         }
 
@@ -79,14 +57,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         private List<StudioModelStat> _modelList = new List<StudioModelStat>();
-
         public override List<StudioModelStat> modelList
         {
             get
             {
                 _modelList.Clear();
 
-                foreach (var targetObj in objectManagerWindow.GetTargetList())
+                foreach (var targetObj in studio.objectManagerWindow.GetTargetList())
                 {
                     if (targetObj.obj == null || targetObj.type != PhotoTransTargetObject.Type.Prefab)
                     {
@@ -116,6 +93,42 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 return _modelList;
+            }
+        }
+
+        private List<StudioLightStat> _lightList = new List<StudioLightStat>();
+        public override List<StudioLightStat> lightList
+        {
+            get
+            {
+                _lightList.Clear();
+
+                foreach (var targetObj in studio.lightWindow.GetTargetList())
+                {
+                    Light light;
+                    Transform transform;
+
+                    if (targetObj.obj == null)
+                    {
+                        light = GameMain.Instance.MainLight.GetComponent<Light>();
+                        transform = GameMain.Instance.MainLight.transform;
+                    }
+                    else
+                    {
+                        light = targetObj.obj.GetComponentInChildren<Light>(false);
+                        transform = targetObj.obj.transform;
+                    }
+
+                    if (light == null || transform == null)
+                    {
+                        continue;
+                    }
+
+                    var stat = new StudioLightStat(light, transform, targetObj);
+                    _lightList.Add(stat);
+                }
+
+                return _lightList;
             }
         }
 
@@ -152,14 +165,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return ikBoxVisibleRoot.check;
+                return studio.ikBoxVisibleRoot.check;
             }
             set
             {
-                ikBoxVisibleRoot.check = value;
-                poseEditWindow.OnIKBOXVixibleCheckBox(ikBoxVisibleRoot);
+                studio.ikBoxVisibleRoot.check = value;
+                studio.poseEditWindow.OnIKBOXVixibleCheckBox(studio.ikBoxVisibleRoot);
 
-                SetMaidStoreDataAll(ikBoxVisibleRoot.name, value.ToString());
+                SetMaidStoreDataAll(studio.ikBoxVisibleRoot.name, value.ToString());
             }
         }
 
@@ -167,14 +180,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return ikBoxVisibleBody.check;
+                return studio.ikBoxVisibleBody.check;
             }
             set
             {
-                ikBoxVisibleBody.check = value;
-                poseEditWindow.OnIKBOXVixibleCheckBox(ikBoxVisibleBody);
+                studio.ikBoxVisibleBody.check = value;
+                studio.poseEditWindow.OnIKBOXVixibleCheckBox(studio.ikBoxVisibleBody);
 
-                SetMaidStoreDataAll(ikBoxVisibleBody.name, value.ToString());
+                SetMaidStoreDataAll(studio.ikBoxVisibleBody.name, value.ToString());
             }
         }
 
@@ -182,7 +195,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return poseEditWindow.CheckbtnUse.check;
+                return studio.poseEditWindow.CheckbtnUse.check;
             }
             set
             {
@@ -191,8 +204,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     isMotionPlaying = false;
                 }
 
-                poseEditWindow.CheckbtnUse.check = value;
-                poseEditWindow.OnClickUseCheckRun(value);
+                studio.poseEditWindow.CheckbtnUse.check = value;
+                studio.poseEditWindow.OnClickUseCheckRun(value);
                 maidStoreData["use"] = value.ToString();
             }
         }
@@ -201,7 +214,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return !motionWindow.CheckbtnStop.check;
+                return !studio.motionWindow.CheckbtnStop.check;
             }
             set
             {
@@ -210,8 +223,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     isPoseEditing = false;
                 }
 
-                motionWindow.CheckbtnStop.check = !value;
-                motionWindow.OnClickStopCheckRun(!value);
+                studio.motionWindow.CheckbtnStop.check = !value;
+                studio.motionWindow.OnClickStopCheckRun(!value);
 
                 SetMaidStoreDataAll("is_stop", value.ToString());
                 maidManager.SetMotionPlayingAll(value);
@@ -222,7 +235,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return poseEditWindow.GetMaidStoreData(selectedMaid);
+                return studio.poseEditWindow.GetMaidStoreData(selectedMaid);
             }
         }
 
@@ -230,9 +243,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             set
             {
-                var maxNum = motionWindow.Slider.MaxNum;
+                var maxNum = studio.motionWindow.Slider.MaxNum;
                 var current = Mathf.Clamp01(value) * maxNum;
-                motionWindow.Slider.value = current;
+                studio.motionWindow.Slider.value = current;
             }
         }
 
@@ -242,10 +255,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 SetMaidStoreDataAll("use_mune_key_l", value.ToString());
 
-                if (bodyBoneCheckBox != null)
+                if (studio.bodyBoneCheckBox != null)
                 {
-                    bodyBoneCheckBox.CheckBoxMuneLPhysics.check = value;
-                    bodyBoneCheckBox.OnClickCheckBoxMunePhysics(bodyBoneCheckBox.CheckBoxMuneLPhysics);
+                    studio.bodyBoneCheckBox.CheckBoxMuneLPhysics.check = value;
+                    studio.bodyBoneCheckBox.OnClickCheckBoxMunePhysics(studio.bodyBoneCheckBox.CheckBoxMuneLPhysics);
                 }
             }
         }
@@ -256,10 +269,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 SetMaidStoreDataAll("use_mune_key_r", value.ToString());
 
-                if (bodyBoneCheckBox != null)
+                if (studio.bodyBoneCheckBox != null)
                 {
-                    bodyBoneCheckBox.CheckBoxMuneRPhysics.check = value;
-                    bodyBoneCheckBox.OnClickCheckBoxMunePhysics(bodyBoneCheckBox.CheckBoxMuneRPhysics);
+                    studio.bodyBoneCheckBox.CheckBoxMuneRPhysics.check = value;
+                    studio.bodyBoneCheckBox.OnClickCheckBoxMunePhysics(studio.bodyBoneCheckBox.CheckBoxMuneRPhysics);
                 }
             }
         }
@@ -273,119 +286,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return false;
             }
 
+            if (!studio.Init())
             {
-                BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.InvokeMethod;
-
-                fieldDataDic = typeof(WindowPartsBoneCheckBox).GetField("data_dic_", bindingAttr);
-                PluginUtils.AssertNull(fieldDataDic != null, "fieldDataDic is null");
-
-                fieldBoneDic = typeof(IKManager).GetField("bone_dic_", bindingAttr);
-                PluginUtils.AssertNull(fieldBoneDic != null, "fieldBoneDic is null");
-
-                fieldIkboxVisibleDic = typeof(PoseEditWindow).GetField("ikbox_visible_dic_", bindingAttr);
-                PluginUtils.AssertNull(fieldIkboxVisibleDic != null, "fieldIkboxVisibleDic is null");
+                return false;
             }
 
             return true;
         }
 
-        private MethodInfo methodSelectMaid = null;
-        private void SetSelectMaid(Maid maid)
-        {
-            if (methodSelectMaid == null)
-            {
-                methodSelectMaid = typeof(PlacementWindow).GetMethod("SetSelectMaid", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.NonPublic);
-                PluginUtils.AssertNull(methodSelectMaid != null, "methodSelectMaid is null");
-            }
-
-            methodSelectMaid.Invoke(placementWindow, new object[] { maid });
-        }
-
-        private MethodInfo methodAddObject = null;
-        private void AddObject(PhotoBGObjectData add_bg_data, string create_time)
-        {
-            if (methodAddObject == null)
-            {
-                methodAddObject = typeof(CreateBGObjectSubWindow).GetMethod("AddObject", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.NonPublic);
-                PluginUtils.AssertNull(methodAddObject != null, "methodAddObject is null");
-            }
-
-            methodAddObject.Invoke(createBgObjectWindow, new object[] { add_bg_data, create_time });
-        }
-
         public override void ChangeMaid(Maid maid)
         {
-            SetSelectMaid(maid);
+            studio.SetSelectMaid(maid);
         }
 
         public override void OnSceneActive()
         {
             base.OnSceneActive();
-
-            {
-                var gameObject = GameObject.Find("PoseEditWindow");
-                poseEditWindow = gameObject.GetComponent<PoseEditWindow>();
-                PluginUtils.AssertNull(poseEditWindow != null, "poseEditWindow is null");
-            }
-
-            {
-                var gameObject = GameObject.Find("PlacementWindow");
-                placementWindow = gameObject.GetComponent<PlacementWindow>();
-                PluginUtils.AssertNull(placementWindow != null, "placementWindow is null");
-            }
-
-            {
-                var gameObject = GameObject.Find("MotionWindow");
-                motionWindow = gameObject.GetComponent<MotionWindow>();
-                PluginUtils.AssertNull(motionWindow != null, "motionWindow is null");
-            }
-            
-            {
-                var gameObject = GameObject.Find("ObjectManagerWindow");
-                objectManagerWindow = gameObject.GetComponent<ObjectManagerWindow>();
-                PluginUtils.AssertNull(objectManagerWindow != null, "objectManagerWindow is null");
-            }
-
-            {
-                var gameObject = GameObject.Find("BGWindow");
-                bgWindow = gameObject.GetComponent<BGWindow>();
-                PluginUtils.AssertNull(bgWindow != null, "bgWindow is null");
-            }
-
-            photoManager = poseEditWindow.mgr;
-            PluginUtils.AssertNull(photoManager != null, "photoManager is null");
-
-            foreach (var boneCheckBox in poseEditWindow.RotateCheckBoxArray)
-            {
-                if (boneCheckBox == null)
-                {
-                    continue;
-                }
-
-                if (boneCheckBox.BoneSetType == IKManager.BoneSetType.Body)
-                {
-                    bodyBoneCheckBox = boneCheckBox;
-                }
-
-                var dataDic = (Dictionary<IKManager.BoneType, WFCheckBox>) fieldDataDic.GetValue(boneCheckBox);
-                foreach (var pair in dataDic)
-                {
-                    boneCheckBoxMap[pair.Key] = pair.Value;
-                }
-            }
-
-            PluginUtils.AssertNull(bodyBoneCheckBox != null, "bodyBoneCheckBox is null");
-
-            {
-                var ikboxVisibleDic = (Dictionary<string, WFCheckBox>) fieldIkboxVisibleDic.GetValue(poseEditWindow);
-                PluginUtils.AssertNull(ikboxVisibleDic != null, "ikboxVisibleDic is null");
-
-                ikBoxVisibleRoot = ikboxVisibleDic["ik_box_visible_Root"];
-                PluginUtils.AssertNull(ikBoxVisibleRoot != null, "ikBoxVisibleRoot is null");
-
-                ikBoxVisibleBody = ikboxVisibleDic["ik_box_visible_Body"];
-                PluginUtils.AssertNull(ikBoxVisibleBody != null, "ikBoxVisibleBody is null");
-            }
+            studio.OnSceneActive();
         }
 
         public override void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
@@ -394,9 +311,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             isSceneActive = sceneName.name == "ScenePhotoMode";
         }
 
+        public override bool IsValid()
+        {
+            if (!base.IsValid())
+            {
+                return false;
+            }
+
+            if (!studio.active)
+            {
+                _errorMessage = "スタジオモードの初期化に失敗しました。";
+                return false;
+            }
+
+            return true;
+        }
+
         public override bool HasBoneRotateVisible(IKManager.BoneType boneType)
         {
-            return boneCheckBoxMap.ContainsKey(boneType);
+            return studio.boneCheckBoxMap.ContainsKey(boneType);
         }
 
         public override bool IsBoneRotateVisible(IKManager.BoneType boneType)
@@ -415,7 +348,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (isPoseEditing)
             {
                 WFCheckBox checkBox;
-                if (boneCheckBoxMap.TryGetValue(boneType, out checkBox))
+                if (studio.boneCheckBoxMap.TryGetValue(boneType, out checkBox))
                 {
                     if (checkBox.check == visible)
                     {
@@ -435,7 +368,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void ClearBoneRotateVisible()
         {
-            foreach (var pair in boneCheckBoxMap)
+            foreach (var pair in studio.boneCheckBoxMap)
             {
                 if (pair.Value.check)
                 {
@@ -464,7 +397,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void DeleteModel(StudioModelStat model)
         {
-            createBgObjectWindow.RemoveObject(model.transform.gameObject);
+            studio.createBgObjectWindow.RemoveObject(model.transform.gameObject);
         }
 
         public override void CreateModel(StudioModelStat model)
@@ -482,9 +415,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var date = DateTime.Now;
             var dateFormat = "yyyyMMddHHmmss";
-            var targetList = objectManagerWindow.GetTargetList();
+            var targetList = studio.objectManagerWindow.GetTargetList();
             var timeStr = date.ToString(dateFormat) + targetList.Count.ToString("D3");
-            AddObject(bgObject, timeStr);
+            studio.AddObject(bgObject, timeStr);
 
             foreach (var target in targetList)
             {
@@ -509,6 +442,68 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public override void DeleteAllLights()
+        {
+            foreach (var light in lightList)
+            {
+                DeleteLight(light);
+            }
+        }
+
+        public override void DeleteLight(StudioLightStat light)
+        {
+            var targetObj = light.obj as PhotoTransTargetObject;
+            if (targetObj != null && targetObj.obj != null)
+            {
+                studio.lightWindow.RemoveTransTargetObject(targetObj.obj);
+            }
+        }
+
+        public override void CreateLight(StudioLightStat stat)
+        {
+            if (stat.type != LightType.Spot || stat.type != LightType.Point)
+            {
+                return;
+            }
+
+            var lightObj = studio.InstantiateLight();
+
+            if (stat.type == LightType.Spot)
+            {
+                UTY.GetChildObject(lightObj, "LightPoint", false).SetActive(false);
+			    UTY.GetChildObject(lightObj, "LightSpot", false).SetActive(true);
+            }
+            else
+            {
+                UTY.GetChildObject(lightObj, "LightPoint", false).SetActive(true);
+			    UTY.GetChildObject(lightObj, "LightSpot", false).SetActive(false);
+            }
+
+            var light = lightObj.GetComponentInChildren<Light>(false);
+            stat.light = light;
+            ApplyLight(stat);
+
+            studio.lightWindow.AddTransTargetObject(lightObj, "◆", string.Empty, PhotoTransTargetObject.Type.Light);
+        }
+
+        public override void ApplyLight(StudioLightStat stat)
+        {
+            if (stat.type == LightType.Directional)
+            {
+                var directionalLightWindow = studio.directionalLightWindow;
+                var light = stat.light;
+                if (light == null)
+                {
+                    PluginUtils.LogError("ライトが見つかりません: " + stat.name);
+                    return;
+                }
+
+                directionalLightWindow.OnChangetIntensityValue(null, light.intensity);
+                directionalLightWindow.OnChangetShadowValue(null, light.shadowStrength);
+                directionalLightWindow.OnChangetColorValue(null, light.color);
+            }
+        }
+
         public override void ChangeBackground(string bgName)
         {
             var bgData = photoBGManager.GetPhotoBGData(bgName);
@@ -518,7 +513,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var woldStoreData = bgWindow.GetWoldStoreData();
+            var woldStoreData = studio.bgWindow.GetWoldStoreData();
             var dictionary = woldStoreData["ベース背景"];
             dictionary["id"] = bgData.id;
             dictionary["visible"] = true.ToString();
@@ -527,19 +522,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             dictionary["scale"] = Vector3.one.ToString("G9");
             dictionary["背景色"] = GameMain.Instance.MainCamera.camera.backgroundColor.ToString("G9");
 
-            bgWindow.OnDeserializeEvent();
+            studio.bgWindow.OnDeserializeEvent();
         }
 
         public override void SetBackgroundVisible(bool visible)
         {
-            bgWindow.CheckSolidColor.check = !visible;
-            bgWindow.OnClickCheckSolidColorCheckBox(bgWindow.CheckSolidColor);
+            studio.bgWindow.CheckSolidColor.check = !visible;
+            studio.bgWindow.OnClickCheckSolidColorCheckBox(studio.bgWindow.CheckSolidColor);
         }
 
         public override void OnMotionUpdated(Maid maid)
         {
-            motionWindow.UpdateAnimationData(maid);
-            poseEditWindow.OnMotionUpdate(maid);
+            studio.motionWindow.UpdateAnimationData(maid);
+            studio.poseEditWindow.OnMotionUpdate(maid);
             base.OnMotionUpdated(maid);
         }
 
@@ -547,11 +542,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!isExist)
             {
-                motionWindow.AddMyPose(anmPath);
+                studio.motionWindow.AddMyPose(anmPath);
             }
             else
             {
-                motionWindow.OnUpdateMyPose(anmPath);
+                studio.motionWindow.OnUpdateMyPose(anmPath);
             }
             base.OnUpdateMyPose(anmPath, isExist);
         }
@@ -560,7 +555,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             foreach (var maid in allMaids)
             {
-                var maidStoreData = poseEditWindow.GetMaidStoreData(maid);
+                var maidStoreData = studio.poseEditWindow.GetMaidStoreData(maid);
                 maidStoreData[key] = value;
             }
         }

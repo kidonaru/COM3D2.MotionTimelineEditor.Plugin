@@ -1,237 +1,17 @@
 using System;
 using System.IO;
-using System.Reflection;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 using COM3D2.MotionTimelineEditor.Plugin;
 using MeidoPhotoStudio.Plugin;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 {
-    using MPS = MeidoPhotoStudio.Plugin.MeidoPhotoStudio;
-    using MPSWindowManager = MeidoPhotoStudio.Plugin.WindowManager;
-
     public class MeidoPhotoStudioHack : StudioHackBase
     {
-        private MPS meidoPhotoStudio = null;
-
-        private FieldInfo fieldActive = null;
-        private FieldInfo fieldMeidoManager = null;
-        private FieldInfo fieldWindowManager = null;
-        private FieldInfo fieldPropManager = null;
-        private FieldInfo fieldMaidIKPane = null;
-        private FieldInfo fieldIKToggle = null;
-        private FieldInfo fieldReleaseIKToggle = null;
-        private FieldInfo fieldBoneIKToggle = null;
-        private FieldInfo fieldPropList = null;
-
-        private bool isActive
-        {
-            get
-            {
-                return (bool)fieldActive.GetValue(meidoPhotoStudio);
-            }
-        }
-
-        private MeidoManager meidoManager
-        {
-            get
-            {
-                return (MeidoManager)fieldMeidoManager.GetValue(meidoPhotoStudio);
-            }
-        }
-
-        private MPSWindowManager windowManager
-        {
-            get
-            {
-                return (MPSWindowManager) fieldWindowManager.GetValue(meidoPhotoStudio);
-            }
-        }
-
-        private PropManager propManager
-        {
-            get
-            {
-                return (PropManager)fieldPropManager.GetValue(meidoPhotoStudio);
-            }
-        }
-
-        private MeidoPhotoStudio.Plugin.MainWindow mainWindow
-        {
-            get
-            {
-                if (windowManager == null)
-                {
-                    return null;
-                }
-                return windowManager[Constants.Window.Main] as MeidoPhotoStudio.Plugin.MainWindow;
-            }
-        }
-
-        private PoseWindowPane poseWindowPane
-        {
-            get
-            {
-                if (mainWindow == null)
-                {
-                    return null;
-                }
-                return mainWindow[Constants.Window.Pose] as PoseWindowPane;
-            }
-        }
-
-        private MaidIKPane maidIKPane
-        {
-            get
-            {
-                return (MaidIKPane)fieldMaidIKPane.GetValue(poseWindowPane);
-            }
-        }
-
-        private Toggle ikToggle
-        {
-            get
-            {
-                return (Toggle)fieldIKToggle.GetValue(maidIKPane);
-            }
-        }
-
-        private Toggle releaseIKToggle
-        {
-            get
-            {
-                return (Toggle)fieldReleaseIKToggle.GetValue(maidIKPane);
-            }
-        }
-
-        private Toggle boneIKToggle
-        {
-            get
-            {
-                return (Toggle)fieldBoneIKToggle.GetValue(maidIKPane);
-            }
-        }
-
-        private List<DragPointProp> propList
-        {
-            get
-            {
-                return (List<DragPointProp>)fieldPropList.GetValue(propManager);
-            }
-        }
-
-        private bool isIK
-        {
-            get
-            {
-                var toggle = this.ikToggle;
-                if (toggle == null)
-                {
-                    return false;
-                }
-
-                return toggle.Value;
-            }
-            set
-            {
-                var toggle = this.ikToggle;
-                if (toggle == null)
-                {
-                    return;
-                }
-
-                toggle.SetValueOnly(value);
-
-                if (activeMeido != null)
-                {
-                    activeMeido.IK = value;
-                }
-            }
-        }
-
-        private bool isReleaseIK
-        {
-            get
-            {
-                var toggle = this.releaseIKToggle;
-                if (toggle == null)
-                {
-                    return false;
-                }
-
-                return toggle.Value;
-            }
-            set
-            {
-                var toggle = this.releaseIKToggle;
-                if (toggle == null)
-                {
-                    return;
-                }
-
-                toggle.SetValueOnly(value);
-            }
-        }
-
-        private bool isBoneIK
-        {
-            get
-            {
-                var toggle = this.boneIKToggle;
-                if (toggle == null)
-                {
-                    return false;
-                }
-
-                return toggle.Value;
-            }
-            set
-            {
-                var toggle = this.boneIKToggle;
-                if (toggle == null)
-                {
-                    return;
-                }
-
-                toggle.SetValueOnly(value);
-
-                if (activeMeido != null)
-                {
-                    activeMeido.Bone = value;
-                }
-            }
-        }
-
-        private Meido activeMeido
-        {
-            get
-            {
-                var meidoManager = this.meidoManager;
-                if (meidoManager == null)
-                {
-                    return null;
-                }
-
-                return meidoManager.ActiveMeido;
-            }
-        }
-
-        private List<Meido> activeMeidoList
-        {
-            get
-            {
-                var meidoManager = this.meidoManager;
-                if (meidoManager == null)
-                {
-                    return null;
-                }
-
-                return meidoManager.ActiveMeidoList;
-            }
-        }
+        private MeidoPhotoStudioWrapper mps = new MeidoPhotoStudioWrapper();
 
         private bool isStop
         {
@@ -269,7 +49,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
         {
             get
             {
-                var activeMeido = this.activeMeido;
+                var activeMeido = mps.activeMeido;
                 if (activeMeido == null)
                 {
                     return null;
@@ -285,7 +65,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             get
             {
                 _allMaids.Clear();
-                foreach (var meido in activeMeidoList)
+                foreach (var meido in mps.activeMeidoList)
                 {
                     if (meido != null)
                     {
@@ -303,7 +83,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             {
                 _modelList.Clear();
 
-                foreach (var prop in propList)
+                foreach (var prop in mps.propList)
                 {
                     var displayName = prop.Name;
                     var fileName = prop.Info.Filename;
@@ -332,6 +112,31 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                 }
 
                 return _modelList;
+            }
+        }
+
+        private List<StudioLightStat> _lightList = new List<StudioLightStat>();
+        public override List<StudioLightStat> lightList
+        {
+            get
+            {
+                _lightList.Clear();
+
+                foreach (var dragPointLight in mps.lightList)
+                {
+                    if (dragPointLight == null)
+                    {
+                        continue;
+                    }
+
+                    var light = dragPointLight.GetLight();
+
+                    var stat = new StudioLightStat(
+                        light, light.transform, dragPointLight);
+                    _lightList.Add(stat);
+                }
+
+                return _lightList;
             }
         }
 
@@ -392,7 +197,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
         {
             get
             {
-                return isReleaseIK;
+                return mps.isReleaseIK;
             }
             set
             {
@@ -401,9 +206,9 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                     isMotionPlaying = false;
                 }
 
-                isIK = value;
-                isBoneIK = value;
-                isReleaseIK = value;
+                mps.isIK = value;
+                mps.isBoneIK = value;
+                mps.isReleaseIK = value;
             }
         }
 
@@ -509,47 +314,9 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                 return false;
             }
 
+            if (!mps.Init())
             {
-                GameObject gameObject = GameObject.Find("BepInEx_Manager");
-                meidoPhotoStudio = gameObject.GetComponentInChildren<MPS>(true);
-                PluginUtils.AssertNull(meidoPhotoStudio != null, "meidoPhotoStudio is null");
-            }
-
-            if (meidoPhotoStudio == null)
-            {
-                PluginUtils.LogError("MeidoPhotoStudioが見つかりませんでした");
                 return false;
-            }
-
-            {
-                BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.InvokeMethod;
-
-                fieldActive = typeof(MPS).GetField("active", bindingAttr);
-                PluginUtils.AssertNull(fieldActive != null, "fieldActive is null");
-
-                fieldMeidoManager = typeof(MPS).GetField("meidoManager", bindingAttr);
-                PluginUtils.AssertNull(fieldMeidoManager != null, "fieldMeidoManager is null");
-
-                fieldWindowManager = typeof(MPS).GetField("windowManager", bindingAttr);
-                PluginUtils.AssertNull(fieldWindowManager != null, "fieldWindowManager is null");
-
-                fieldPropManager = typeof(MPS).GetField("propManager", bindingAttr);
-                PluginUtils.AssertNull(fieldPropManager != null, "fieldPropManager is null");
-
-                fieldMaidIKPane = typeof(PoseWindowPane).GetField("maidIKPane", bindingAttr);
-                PluginUtils.AssertNull(fieldMaidIKPane != null, "fieldMaidIKPane is null");
-
-                fieldIKToggle = typeof(MaidIKPane).GetField("ikToggle", bindingAttr);
-                PluginUtils.AssertNull(fieldIKToggle != null, "fieldIKToggle is null");
-
-                fieldReleaseIKToggle = typeof(MaidIKPane).GetField("releaseIKToggle", bindingAttr);
-                PluginUtils.AssertNull(fieldReleaseIKToggle != null, "fieldReleaseIKToggle is null");
-
-                fieldBoneIKToggle = typeof(MaidIKPane).GetField("boneIKToggle", bindingAttr);
-                PluginUtils.AssertNull(fieldBoneIKToggle != null, "fieldBoneIKToggle is null");
-
-                fieldPropList = typeof(PropManager).GetField("propList", bindingAttr);
-                PluginUtils.AssertNull(fieldPropList != null, "fieldPropList is null");
             }
 
             return true;
@@ -559,7 +326,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
         {
             var targetMaidSlotNo = allMaids.IndexOf(maid);
             PluginUtils.LogDebug("ChangeMaid: " + targetMaidSlotNo);
-            meidoManager.ChangeMaid(targetMaidSlotNo);
+            mps.meidoManager.ChangeMaid(targetMaidSlotNo);
         }
 
         public override void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
@@ -575,7 +342,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                 return false;
             }
 
-            if (!isActive)
+            if (!mps.active)
             {
                 _errorMessage = "MeidoPhotoStudioを有効化してください";
                 return false;
@@ -595,15 +362,15 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 
         public override void DeleteAllModels()
         {
-            propManager.DeleteAllProps();
+            mps.propManager.DeleteAllProps();
         }
 
         public override void DeleteModel(StudioModelStat model)
         {
-            var index = propList.FindIndex(p => p.MyObject == model.transform);
+            var index = mps.propList.FindIndex(p => p.MyObject == model.transform);
             if (index >= 0)
             {
-                propManager.RemoveProp(index);
+                mps.propManager.RemoveProp(index);
             }
         }
 
@@ -617,13 +384,13 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                 MyRoomID = model.info.myRoomId,
             };
 
-            if (!propManager.AddFromPropInfo(propInfo))
+            if (!mps.propManager.AddFromPropInfo(propInfo))
             {
                 PluginUtils.LogError("CreateModel: モデルの追加に失敗しました" + model.name);
                 return;
             }
 
-            var propList = this.propList;
+            var propList = mps.propList;
             var prop = propList.Last();
 
             model.transform = prop.MyObject;
@@ -643,7 +410,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 
             var attachPoint = ConvertAttachPoint(model.attachPoint);
             var attachMaidSlotNo = model.attachMaidSlotNo;
-            var attachMeido = GetMeido(attachMaidSlotNo);
+            var attachMeido = mps.GetMeido(attachMaidSlotNo);
             prop.AttachTo(attachMeido, attachPoint, false);
         }
 
@@ -659,15 +426,60 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             prop.Visible = visible;
         }
 
-        private Meido GetMeido(int slotNo)
+        public override void DeleteAllLights()
         {
-            var activeMeidoList = this.activeMeidoList;
-            if (slotNo < 0 || slotNo >= activeMeidoList.Count)
+            mps.lightManager.ClearLights();
+        }
+
+        public override void DeleteLight(StudioLightStat light)
+        {
+            var dragPointLight = light.obj as DragPointLight;
+            if (dragPointLight == null)
             {
-                return null;
+                PluginUtils.LogError("DeleteLight: ライトが見つかりません" + light.name);
+                return;
             }
 
-            return activeMeidoList[slotNo];
+            var lightList = mps.lightList;
+			for (int i = 1; i < lightList.Count; i++)
+			{
+				if (lightList[i] == dragPointLight)
+				{
+					mps.lightManager.DeleteLight(i, false);
+					return;
+				}
+			}
+        }
+
+        public override void CreateLight(StudioLightStat stat)
+        {
+            mps.lightManager.AddLight(null, false);
+
+            var dragPointLight = mps.lightManager.CurrentLight;
+            stat.obj = dragPointLight;
+            ApplyLight(stat);
+        }
+
+        public override void ApplyLight(StudioLightStat stat)
+        {
+            var dragPointLight = stat.obj as DragPointLight;
+            if (dragPointLight == null || stat.light == null || stat.transform == null)
+            {
+                PluginUtils.LogError("ApplyLight: ライトが見つかりません" + stat.name);
+                return;
+            }
+
+            var light = stat.light;
+            var transform = stat.transform;
+
+            dragPointLight.Rotation = transform.rotation;
+            dragPointLight.LightColour = light.color;
+            dragPointLight.Range = light.range;
+            dragPointLight.Intensity = light.intensity;
+            dragPointLight.SpotAngle = light.spotAngle;
+            dragPointLight.ShadowStrength = light.shadowStrength;
+            light.shadowBias = light.shadowBias;
+            light.enabled = stat.visible;
         }
 
         protected override void OnMaidChanged(int maidSlotNo, Maid maid)

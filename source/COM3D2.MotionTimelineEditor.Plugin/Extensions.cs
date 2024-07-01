@@ -314,17 +314,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return "#" + ColorUtility.ToHtmlStringRGBA(color);
         }
 
-        private static FieldInfo _targetListField = null;
+        private static FieldInfo _objectTargetListField = null;
 
         public static List<PhotoTransTargetObject> GetTargetList(this ObjectManagerWindow self)
         {
-            if (_targetListField == null)
+            if (_objectTargetListField == null)
             {
-                _targetListField = typeof(ObjectManagerWindow).GetField("target_list_",
+                _objectTargetListField = typeof(ObjectManagerWindow).GetField("target_list_",
                     BindingFlags.NonPublic | BindingFlags.Instance);
             }
 
-            return (List<PhotoTransTargetObject>) _targetListField.GetValue(self);
+            return (List<PhotoTransTargetObject>) _objectTargetListField.GetValue(self);
+        }
+
+        private static FieldInfo _lightTargetListField = null;
+
+        public static List<PhotoTransTargetObject> GetTargetList(this LightWindow self)
+        {
+            if (_lightTargetListField == null)
+            {
+                _lightTargetListField = typeof(LightWindow).GetField("targetList",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+            }
+
+            return (List<PhotoTransTargetObject>) _lightTargetListField.GetValue(self);
         }
 
         public static bool IsLock(this FingerBlend.BaseFinger baseFinger, int index)

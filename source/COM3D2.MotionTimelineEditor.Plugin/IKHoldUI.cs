@@ -122,7 +122,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.DrawHorizontalLine(Color.gray);
 
             bool paramUpdated = false;
-            bool isHoldFoot = ikHoldManager.IsHold(IKHoldType.Foot_L_Tip) || ikHoldManager.IsHold(IKHoldType.Foot_R_Tip);
+            bool isFootHold = ikHoldManager.IsHold(IKHoldType.Foot_L_Tip) || ikHoldManager.IsHold(IKHoldType.Foot_R_Tip);
 
             view.BeginHorizontal();
             {
@@ -132,14 +132,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     paramUpdated = true;
                 });
 
-                if (timeline.isFootGrounding && !isHoldFoot)
+                if (timeline.isFootGrounding && !isFootHold)
                 {
                     view.DrawLabel("足首の固定化が必要です", -1, 20, Color.yellow);
                 }
             }
             view.EndLayout();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && timeline.isFootGrounding && isHoldFoot);
+            view.SetEnabled(!view.IsComboBoxFocused() && timeline.isFootGrounding && isFootHold);
 
             paramUpdated |= view.DrawSliderValue(
                 new GUIView.SliderOption

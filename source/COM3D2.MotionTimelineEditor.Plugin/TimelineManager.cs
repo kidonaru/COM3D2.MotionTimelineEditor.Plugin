@@ -144,6 +144,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static StudioLightManager lightManager
+        {
+            get
+            {
+                return StudioLightManager.instance;
+            }
+        }
+
         private static ModelHackManager modelHackManager
         {
             get
@@ -208,6 +216,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             StudioModelManager.onModelAdded += OnModelAdded;
             StudioModelManager.onModelRemoved += OnModelRemoved;
             StudioModelManager.onModelUpdated += OnModelUpdated;
+            StudioLightManager.onLightAdded += OnLightAdded;
+            StudioLightManager.onLightRemoved += OnLightRemoved;
+            StudioLightManager.onLightUpdated += OnLightUpdated;
         }
 
         public void Update()
@@ -919,6 +930,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void Refresh()
         {
             UpdateTimelineModels();
+            UpdateTimelineLights();
 
             if (onRefresh != null)
             {
@@ -1767,6 +1779,70 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (IsValidData())
             {
                 UpdateTimelineModels();
+            }
+        }
+
+        private void UpdateTimelineLights()
+        {
+            if (timeline == null)
+            {
+                return;
+            }
+
+            var lights = lightManager.lights;
+            var timelineLights = timeline.lights;
+
+            if (lights.Count != timelineLights.Count)
+            {
+                timelineLights.Clear();
+                foreach (var light in lights)
+                {
+                    var timelineLight = new TimelineLightData(light);
+                    timelineLights.Add(timelineLight);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < lights.Count; i++)
+                {
+                    var light = lights[i];
+                    var timelineModel = timelineLights[i];
+                    timelineModel.FromStat(light);
+                }
+            }
+        }
+
+        private void OnLightAdded(StudioLightStat light)
+        {
+            if (IsValidData())
+            {
+                UpdateTimelineLights();
+
+                foreach (var layer in layers)
+                {
+                    layer.OnLightAdded(light);
+                }
+            }
+        }
+
+        private void OnLightRemoved(StudioLightStat light)
+        {
+            if (IsValidData())
+            {
+                UpdateTimelineLights();
+
+                foreach (var layer in layers)
+                {
+                    layer.OnLightRemoved(light);
+                }
+            }
+        }
+
+        private void OnLightUpdated(StudioLightStat light)
+        {
+            if (IsValidData())
+            {
+                UpdateTimelineLights();
             }
         }
 

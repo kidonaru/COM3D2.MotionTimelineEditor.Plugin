@@ -68,6 +68,8 @@
     <Compile Include="COM3D2.MotionTimelineEditor_DCM.Plugin.cs" />
     <Compile Include="DCMUtils.cs" />
     <Compile Include="EyesTimelineLayer.cs" />
+    <Compile Include="LightTimelineLayer.cs" />
+    <Compile Include="LightTimelineLayerBase.cs" />
     <Compile Include="ModelBoneMenuItem.cs" />
     <Compile Include="ModelBoneTimelineLayer.cs" />
     <Compile Include="ModelShapeKeyTimelineLayer.cs" />
@@ -83,6 +85,7 @@
     <Compile Include="TransformDataBGColor.cs" />
     <Compile Include="TransformDataCamera.cs" />
     <Compile Include="TransformDataEyes.cs" />
+    <Compile Include="TransformDataLight.cs" />
     <Compile Include="TransformDataLookAtTarget.cs" />
     <Compile Include="TransformDataModel.cs" />
     <Compile Include="TransformDataModelBone.cs" />

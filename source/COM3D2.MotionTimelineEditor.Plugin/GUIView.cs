@@ -1375,10 +1375,49 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Color resetColor,
             Action<Color> onColorChanged)
         {
-            fieldCache.UpdateColor(color, true);
-
             var newColor = color;
             var updated = false;
+
+            DrawSliderValue(
+                new SliderOption
+                {
+                    label = "R",
+                    labelWidth = 30,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = resetColor.r,
+                    value = color.r,
+                    onChanged = x => newColor.r = x,
+                });
+
+            DrawSliderValue(
+                new SliderOption
+                {
+                    label = "G",
+                    labelWidth = 30,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = resetColor.g,
+                    value = color.g,
+                    onChanged = y => newColor.g = y,
+                });
+
+            DrawSliderValue(
+                new SliderOption
+                {
+                    label = "B",
+                    labelWidth = 30,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = resetColor.b,
+                    value = color.b,
+                    onChanged = z => newColor.b = z,
+                });
+
+            fieldCache.UpdateColor(newColor, true);
 
             BeginLayout(LayoutDirection.Horizontal);
             {
@@ -1387,7 +1426,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     DrawLabel(fieldCache.label, 50, 20);
                 }
 
-                DrawTexture(texWhite, 20, 20, color);
+                DrawTexture(texWhite, 20, 20, newColor);
 
                 newColor = DrawColorFieldCache(null, fieldCache, 120, 20);
 

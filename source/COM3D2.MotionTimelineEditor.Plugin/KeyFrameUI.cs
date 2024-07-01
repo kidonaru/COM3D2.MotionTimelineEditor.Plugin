@@ -26,8 +26,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             items = Enumerable.Range(0, (int)MoveEasingType.Max).ToList(),
             getName = (type, index) => ((MoveEasingType)type).ToString(),
-            buttonSize = new Vector2(70, 20),
-            contentSize = new Vector2(110, 300),
         };
 
         private static HashSet<BoneData> selectedBones
@@ -99,6 +97,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             else
             {
+                view.BeginScrollView();
+
                 DrawTransform(view);
                 DrawCustomValues(view);
                 DrawStrValues(view);
@@ -118,6 +118,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 DrawTangent(view);
                 DrawEasing(view);
+
+                view.EndScrollView();
             }
         }
 
@@ -908,8 +910,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.AddSpace(10);
 
-            view.DrawLabel("補間曲線", 100, 20);
-
             Action<int> updateEasing = easing =>
             {
                 var max = (int) MoveEasingType.Max;
@@ -925,13 +925,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             };
 
             {
-                var subView = new GUIView(
-                    easingTex.width + 10,
-                    view.currentPos.y,
-                    WINDOW_WIDTH - easingTex.width,
-                    200);
-                subView.parent = view;
-
                 int easing = -1;
                 bool includeEasing = false;
 
@@ -948,14 +941,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
-                subView.DrawLabel("Easing", 50, 20);
-
                 easingComboBox.currentIndex = easing;
                 easingComboBox.onSelected = (_easing, index) =>
                 {
                     updateEasing(_easing);
                 };
-                easingComboBox.DrawButton(subView);
+                easingComboBox.DrawButton("補間曲線", view);
             }
 
             view.DrawTexture(easingTex);

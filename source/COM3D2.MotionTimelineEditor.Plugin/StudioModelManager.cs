@@ -358,15 +358,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     PluginUtils.Log("Create model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
                         model.info.type, model.displayName, model.name, model.info.label, model.info.fileName, model.info.myRoomId, model.info.bgObjectId);
                 }
-                else if (model.pluginName != modelData.pluginName)
-                {
-                    modelHackManager.ChangePluginName(model, modelData.pluginName);
-                }
                 else
                 {
                     model.attachPoint = modelData.attachPoint;
                     model.attachMaidSlotNo = modelData.attachMaidSlotNo;
-                    modelHackManager.UpdateAttachPoint(model);
+
+                    if (model.pluginName != modelData.pluginName)
+                    {
+                        modelHackManager.ChangePluginName(model, modelData.pluginName);
+                    }
+                    else
+                    {
+                        modelHackManager.UpdateAttachPoint(model);
+                        modelHackManager.SetModelVisible(model, modelData.visible);
+                    }
                 }
             }
 

@@ -63,7 +63,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="COM3D2.MotionTimelineEditor_MultipleMaids.Plugin.cs" />
+    <Compile Include="MultipleMaidsField.cs" />
     <Compile Include="MultipleMaidsHack.cs" />
+    <Compile Include="MultipleMaidsWrapper.cs" />
     <Compile Include="PluginInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

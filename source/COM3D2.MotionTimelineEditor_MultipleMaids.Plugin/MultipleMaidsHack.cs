@@ -15,243 +15,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
     public class MultipleMaidsHack : StudioHackBase
     {
-        private MultipleMaids multipleMaids = null;
-
-        private FieldInfo fieldMaidArray = null;
-        private FieldInfo fieldSelectMaidIndex = null;
-        private FieldInfo fieldIsIK = null;
-        private FieldInfo fieldIsLock = null;
-        private FieldInfo fieldUnLockFlg = null;
-        private FieldInfo fieldIsStop = null;
-        private FieldInfo fieldIsBone = null;
-        private FieldInfo fieldOkFlg = null;
-        private FieldInfo fieldDoguBObject = null;
-        private FieldInfo fieldDoguCnt = null;
-        private FieldInfo fieldMDogu = null;
-        private FieldInfo fieldGDogu = null;
-        private FieldInfo fieldMMaterial = null;
-        private FieldInfo fieldCubeSize = null;
-
-        private Maid[] maidArray
-        {
-            get
-            {
-                return (Maid[])fieldMaidArray.GetValue(multipleMaids);
-            }
-        }
-
-        private int selectMaidIndex
-        {
-            get
-            {
-                return (int)fieldSelectMaidIndex.GetValue(multipleMaids);
-            }
-            set
-            {
-                fieldSelectMaidIndex.SetValue(multipleMaids, value);
-            }
-        }
-
-        private bool[] isIKArray
-        {
-            get
-            {
-                return (bool[])fieldIsIK.GetValue(multipleMaids);
-            }
-        }
-
-        private bool isIK
-        {
-            get
-            {
-                var isIKArray = this.isIKArray;
-                var selectMaidIndex = this.selectMaidIndex;
-                if (selectMaidIndex >= 0 && selectMaidIndex < isIKArray.Length)
-                {
-                    return isIKArray[selectMaidIndex];
-                }
-
-                return false;
-            }
-            set
-            {
-                var isIKArray = this.isIKArray;
-                var selectMaidIndex = this.selectMaidIndex;
-                if (selectMaidIndex >= 0 && selectMaidIndex < isIKArray.Length)
-                {
-                    isIKArray[selectMaidIndex] = value;
-                }
-            }
-        }
-
-        private bool[] isLockArray
-        {
-            get
-            {
-                return (bool[])fieldIsLock.GetValue(multipleMaids);
-            }
-        }
-
-        private bool isLock
-        {
-            get
-            {
-                var isLockArray = this.isLockArray;
-                var selectMaidIndex = this.selectMaidIndex;
-                if (selectMaidIndex >= 0 && selectMaidIndex < isLockArray.Length)
-                {
-                    return isLockArray[selectMaidIndex];
-                }
-
-                return false;
-            }
-            set
-            {
-                var isLockArray = this.isLockArray;
-                var selectMaidIndex = this.selectMaidIndex;
-                if (selectMaidIndex >= 0 && selectMaidIndex < isLockArray.Length)
-                {
-                    isLockArray[selectMaidIndex] = value;
-                }
-            }
-        }
-
-        private bool unLockFlg
-        {
-            get
-            {
-                return (bool)fieldUnLockFlg.GetValue(multipleMaids);
-            }
-            set
-            {
-                fieldUnLockFlg.SetValue(multipleMaids, value);
-            }
-        }
-
-        private bool[] isStopArray
-        {
-            get
-            {
-                return (bool[])fieldIsStop.GetValue(multipleMaids);
-            }
-        }
-
-        private bool isStop
-        {
-            get
-            {
-                var isStopArray = this.isStopArray;
-                var selectMaidIndex = this.selectMaidIndex;
-                if (selectMaidIndex >= 0 && selectMaidIndex < isStopArray.Length)
-                {
-                    return isStopArray[selectMaidIndex];
-                }
-
-                return false;
-            }
-            set
-            {
-                var isStopArray = this.isStopArray;
-                for (int i = 0; i < isStopArray.Length; i++)
-                {
-                    isStopArray[i] = value;
-                }
-
-                maidManager.SetMotionPlayingAll(!value);
-            }
-        }
-
-        private bool[] isBoneArray
-        {
-            get
-            {
-                return (bool[])fieldIsBone.GetValue(multipleMaids);
-            }
-        }
-
-        private bool isBone
-        {
-            get
-            {
-                var isBoneArray = this.isBoneArray;
-                var selectMaidIndex = this.selectMaidIndex;
-                if (selectMaidIndex >= 0 && selectMaidIndex < isBoneArray.Length)
-                {
-                    return isBoneArray[selectMaidIndex];
-                }
-
-                return false;
-            }
-            set
-            {
-                var isBoneArray = this.isBoneArray;
-                var selectMaidIndex = this.selectMaidIndex;
-                if (selectMaidIndex >= 0 && selectMaidIndex < isBoneArray.Length)
-                {
-                    isBoneArray[selectMaidIndex] = value;
-                }
-            }
-        }
-
-        private bool okFlg
-        {
-            get
-            {
-                return (bool)fieldOkFlg.GetValue(multipleMaids);
-            }
-        }
-
-        private List<GameObject> doguBObject
-        {
-            get
-            {
-                return (List<GameObject>)fieldDoguBObject.GetValue(multipleMaids);
-            }
-        }
-
-        private int doguCnt
-        {
-            get
-            {
-                return (int)fieldDoguCnt.GetValue(multipleMaids);
-            }
-            set
-            {
-                fieldDoguCnt.SetValue(multipleMaids, value);
-            }
-        }
-
-        private MouseDrag6[] mDogu
-        {
-            get
-            {
-                return (MouseDrag6[])fieldMDogu.GetValue(multipleMaids);
-            }
-        }
-
-        private GameObject[] gDogu
-        {
-            get
-            {
-                return (GameObject[])fieldGDogu.GetValue(multipleMaids);
-            }
-        }
-
-        private Material m_material
-        {
-            get
-            {
-                return (Material)fieldMMaterial.GetValue(multipleMaids);
-            }
-        }
-
-        private float cubeSize
-        {
-            get
-            {
-                return (float)fieldCubeSize.GetValue(multipleMaids);
-            }
-        }
+        private MultipleMaidsWrapper multipleMaids = new MultipleMaidsWrapper();
 
         public override string pluginName
         {
@@ -269,12 +33,109 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
         }
 
+        private bool isIK
+        {
+            get
+            {
+                var isIKArray = multipleMaids.isIK;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < isIKArray.Length)
+                {
+                    return isIKArray[selectMaidIndex];
+                }
+
+                return false;
+            }
+            set
+            {
+                var isIKArray = multipleMaids.isIK;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < isIKArray.Length)
+                {
+                    isIKArray[selectMaidIndex] = value;
+                }
+            }
+        }
+
+        private bool isLock
+        {
+            get
+            {
+                var isLockArray = multipleMaids.isLock;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < isLockArray.Length)
+                {
+                    return isLockArray[selectMaidIndex];
+                }
+
+                return false;
+            }
+            set
+            {
+                var isLockArray = multipleMaids.isLock;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < isLockArray.Length)
+                {
+                    isLockArray[selectMaidIndex] = value;
+                }
+            }
+        }
+
+        private bool isStop
+        {
+            get
+            {
+                var isStopArray = multipleMaids.isStop;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < isStopArray.Length)
+                {
+                    return isStopArray[selectMaidIndex];
+                }
+
+                return false;
+            }
+            set
+            {
+                var isStopArray = multipleMaids.isStop;
+                for (int i = 0; i < isStopArray.Length; i++)
+                {
+                    isStopArray[i] = value;
+                }
+
+                maidManager.SetMotionPlayingAll(!value);
+            }
+        }
+
+        public bool isBone
+        {
+            get
+            {
+                var isBoneArray = multipleMaids.isBone;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < isBoneArray.Length)
+                {
+                    return isBoneArray[selectMaidIndex];
+                }
+
+                return false;
+            }
+            set
+            {
+                var isBoneArray = multipleMaids.isBone;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < isBoneArray.Length)
+                {
+                    isBoneArray[selectMaidIndex] = value;
+                }
+            }
+        }
+
         public override Maid selectedMaid
         {
             get
             {
-                var maidArray = this.maidArray;
-                var selectMaidIndex = this.selectMaidIndex;
+                var maidArray = multipleMaids.maidArray;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
                 if (selectMaidIndex < 0 || selectMaidIndex >= maidArray.Length)
                 {
                     return null;
@@ -290,7 +151,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             get
             {
                 _allMaids.Clear();
-                foreach (var maid in maidArray)
+                foreach (var maid in multipleMaids.maidArray)
                 {
                     if (maid != null)
                     {
@@ -309,7 +170,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             {
                 _modelList.Clear();
 
-                foreach (var dogu in doguBObject)
+                foreach (var dogu in multipleMaids.doguBObject)
                 {
                     if (dogu != null)
                     {
@@ -360,11 +221,35 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
         }
 
+        private List<StudioLightStat> _lightList = new List<StudioLightStat>();
+        public override List<StudioLightStat> lightList
+        {
+            get
+            {
+                _lightList.Clear();
+
+                foreach (var lightObj in multipleMaids.lightList)
+                {
+                    var light = lightObj.GetComponent<Light>();
+                    if (light == null)
+                    {
+                        continue;
+                    }
+
+                    var transform = lightObj.transform;
+                    var stat = new StudioLightStat(light, transform, lightObj);
+                    _lightList.Add(stat);
+                }
+
+                return _lightList;
+            }
+        }
+
         public override int selectedMaidSlotNo
         {
             get
             {
-                return selectMaidIndex;
+                return multipleMaids.selectMaidIndex;
             }
         }
 
@@ -429,7 +314,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                 isLock = value;
                 isBone = value;
                 isIK = value;
-                unLockFlg = value;
+                multipleMaids.unLockFlg = value;
             }
         }
 
@@ -487,62 +372,9 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                 return false;
             }
 
+            if (!multipleMaids.Init())
             {
-                GameObject gameObject = GameObject.Find("UnityInjector");
-                multipleMaids = gameObject.GetComponent<MultipleMaids>();
-                PluginUtils.AssertNull(multipleMaids != null, "multipleMaids is null");
-            }
-
-            if (multipleMaids == null)
-            {
-                PluginUtils.LogError("複数メイドプラグインが見つかりませんでした");
                 return false;
-            }
-
-            {
-                BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.InvokeMethod;
-
-                fieldMaidArray = typeof(MultipleMaids).GetField("maidArray", bindingAttr);
-                PluginUtils.AssertNull(fieldMaidArray != null, "fieldMaidArray is null");
-
-                fieldSelectMaidIndex = typeof(MultipleMaids).GetField("selectMaidIndex", bindingAttr);
-                PluginUtils.AssertNull(fieldSelectMaidIndex != null, "fieldSelectMaidIndex is null");
-
-                fieldIsIK = typeof(MultipleMaids).GetField("isIK", bindingAttr);
-                PluginUtils.AssertNull(fieldIsIK != null, "fieldIsIK is null");
-
-                fieldIsLock = typeof(MultipleMaids).GetField("isLock", bindingAttr);
-                PluginUtils.AssertNull(fieldIsLock != null, "fieldIsLock is null");
-
-                fieldUnLockFlg = typeof(MultipleMaids).GetField("unLockFlg", bindingAttr);
-                PluginUtils.AssertNull(fieldUnLockFlg != null, "fieldUnLockFlg is null");
-
-                fieldIsStop = typeof(MultipleMaids).GetField("isStop", bindingAttr);
-                PluginUtils.AssertNull(fieldIsStop != null, "fieldIsStop is null");
-
-                fieldIsBone = typeof(MultipleMaids).GetField("isBone", bindingAttr);
-                PluginUtils.AssertNull(fieldIsBone != null, "fieldIsBone is null");
-
-                fieldOkFlg = typeof(MultipleMaids).GetField("okFlg", bindingAttr);
-                PluginUtils.AssertNull(fieldOkFlg != null, "fieldOkFlg is null");
-
-                fieldDoguBObject = typeof(MultipleMaids).GetField("doguBObject", bindingAttr);
-                PluginUtils.AssertNull(fieldDoguBObject != null, "fieldDoguBObject is null");
-
-                fieldDoguCnt = typeof(MultipleMaids).GetField("doguCnt", bindingAttr);
-                PluginUtils.AssertNull(fieldDoguCnt != null, "fieldDoguCnt is null");
-
-                fieldMDogu = typeof(MultipleMaids).GetField("mDogu", bindingAttr);
-                PluginUtils.AssertNull(fieldMDogu != null, "fieldMDogu is null");
-
-                fieldGDogu = typeof(MultipleMaids).GetField("gDogu", bindingAttr);
-                PluginUtils.AssertNull(fieldGDogu != null, "fieldGDogu is null");
-
-                fieldMMaterial = typeof(MultipleMaids).GetField("m_material", bindingAttr);
-                PluginUtils.AssertNull(fieldMMaterial != null, "fieldMMaterial is null");
-
-                fieldCubeSize = typeof(MultipleMaids).GetField("cubeSize", bindingAttr);
-                PluginUtils.AssertNull(fieldCubeSize != null, "fieldCubeSize is null");
             }
 
             return true;
@@ -550,7 +382,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         public override void ChangeMaid(Maid maid)
         {
-            selectMaidIndex = allMaids.IndexOf(maid);
+            multipleMaids.selectMaidIndex = allMaids.IndexOf(maid);
         }
 
         public override void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
@@ -566,7 +398,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                 return false;
             }
 
-            if (!okFlg)
+            if (!multipleMaids.okFlg)
             {
                 _errorMessage = "複数メイドを有効化してください";
                 return false;
@@ -735,86 +567,89 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         private void AddDogu(GameObject obj, string assetName)
         {
             obj.name = assetName;
-            doguBObject.Add(obj);
+            multipleMaids.doguBObject.Add(obj);
 
-            this.doguCnt = this.doguBObject.Count - 1;
-            var doguCnt = this.doguCnt;
+            multipleMaids.doguCnt = multipleMaids.doguBObject.Count - 1;
+            var doguCnt = multipleMaids.doguCnt;
+            var gDogu = multipleMaids.gDogu;
+            var mDogu = multipleMaids.mDogu;
 
-            this.gDogu[doguCnt] = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            gDogu[doguCnt] = GameObject.CreatePrimitive(PrimitiveType.Cube);
             Vector3 localEulerAngles = obj.transform.localEulerAngles;
-            this.gDogu[doguCnt].transform.localEulerAngles = obj.transform.localEulerAngles;
-            this.gDogu[doguCnt].transform.position = obj.transform.position;
-            this.gDogu[doguCnt].GetComponent<Renderer>().material = this.m_material;
-            this.gDogu[doguCnt].layer = 8;
-            this.gDogu[doguCnt].GetComponent<Renderer>().enabled = false;
-            this.gDogu[doguCnt].SetActive(false);
-            this.gDogu[doguCnt].transform.position = obj.transform.position;
-            this.mDogu[doguCnt] = this.gDogu[doguCnt].AddComponent<MouseDrag6>();
-            this.mDogu[doguCnt].obj = this.gDogu[doguCnt];
-            this.mDogu[doguCnt].maid = obj;
-            this.mDogu[doguCnt].angles = localEulerAngles;
-            this.gDogu[doguCnt].transform.localScale = new Vector3(this.cubeSize, this.cubeSize, this.cubeSize);
-            this.mDogu[doguCnt].ido = 1;
-            this.mDogu[doguCnt].isScale = false;
+            gDogu[doguCnt].transform.localEulerAngles = obj.transform.localEulerAngles;
+            gDogu[doguCnt].transform.position = obj.transform.position;
+            gDogu[doguCnt].GetComponent<Renderer>().material = multipleMaids.m_material;
+            gDogu[doguCnt].layer = 8;
+            gDogu[doguCnt].GetComponent<Renderer>().enabled = false;
+            gDogu[doguCnt].SetActive(false);
+            gDogu[doguCnt].transform.position = obj.transform.position;
+            mDogu[doguCnt] = gDogu[doguCnt].AddComponent<MouseDrag6>();
+            mDogu[doguCnt].obj = gDogu[doguCnt];
+            mDogu[doguCnt].maid = obj;
+            mDogu[doguCnt].angles = localEulerAngles;
+            gDogu[doguCnt].transform.localScale = new Vector3(multipleMaids.cubeSize, multipleMaids.cubeSize, multipleMaids.cubeSize);
+            mDogu[doguCnt].ido = 1;
+            mDogu[doguCnt].isScale = false;
 
             if (assetName == "Particle/pLineY")
             {
-                this.mDogu[doguCnt].count = 180;
+                mDogu[doguCnt].count = 180;
             }
             if (assetName == "Particle/pLineP02")
             {
-                this.mDogu[doguCnt].count = 115;
+                mDogu[doguCnt].count = 115;
             }
             if (obj.name == "Particle/pLine_act2")
             {
-                this.mDogu[doguCnt].count = 80;
+                mDogu[doguCnt].count = 80;
                 obj.transform.localScale = new Vector3(3f, 3f, 3f);
             }
             if (obj.name == "Particle/pHeart01")
             {
-                this.mDogu[doguCnt].count = 80;
+                mDogu[doguCnt].count = 80;
             }
             if (assetName == "mirror1" || assetName == "mirror2" || assetName == "mirror3")
             {
-                this.mDogu[doguCnt].isScale = true;
-                this.mDogu[doguCnt].isScale2 = true;
-                this.mDogu[doguCnt].scale2 = obj.transform.localScale;
+                mDogu[doguCnt].isScale = true;
+                mDogu[doguCnt].isScale2 = true;
+                mDogu[doguCnt].scale2 = obj.transform.localScale;
                 if (assetName == "mirror1")
                 {
-                    this.mDogu[doguCnt].scale = new Vector3(obj.transform.localScale.x * 5f, obj.transform.localScale.y * 5f, obj.transform.localScale.z * 5f);
+                    mDogu[doguCnt].scale = new Vector3(obj.transform.localScale.x * 5f, obj.transform.localScale.y * 5f, obj.transform.localScale.z * 5f);
                 }
                 if (assetName == "mirror2")
                 {
-                    this.mDogu[doguCnt].scale = new Vector3(obj.transform.localScale.x * 10f, obj.transform.localScale.y * 10f, obj.transform.localScale.z * 10f);
+                    mDogu[doguCnt].scale = new Vector3(obj.transform.localScale.x * 10f, obj.transform.localScale.y * 10f, obj.transform.localScale.z * 10f);
                 }
                 if (assetName == "mirror3")
                 {
-                    this.mDogu[doguCnt].scale = new Vector3(obj.transform.localScale.x * 33f, obj.transform.localScale.y * 33f, obj.transform.localScale.z * 33f);
+                    mDogu[doguCnt].scale = new Vector3(obj.transform.localScale.x * 33f, obj.transform.localScale.y * 33f, obj.transform.localScale.z * 33f);
                 }
             }
             if (assetName == "Odogu_XmasTreeMini_photo_ver" || assetName == "Odogu_KadomatsuMini_photo_ver")
             {
-                this.mDogu[doguCnt].isScale2 = true;
-                this.mDogu[doguCnt].scale2 = obj.transform.localScale;
+                mDogu[doguCnt].isScale2 = true;
+                mDogu[doguCnt].scale2 = obj.transform.localScale;
             }
         }
 
         public override void DeleteAllModels()
         {
-            for (int l = 0; l < this.doguBObject.Count; l++)
+            for (int l = 0; l < multipleMaids.doguBObject.Count; l++)
             {
-                UnityEngine.Object.Destroy(this.doguBObject[l]);
+                UnityEngine.Object.Destroy(multipleMaids.doguBObject[l]);
             }
-            this.doguBObject.Clear();
-            this.doguCnt = 0;
+            multipleMaids.doguBObject.Clear();
+            multipleMaids.doguCnt = 0;
         }
 
         public override void DeleteModel(StudioModelStat model)
         {
+            var doguBObject = multipleMaids.doguBObject;
             var index = doguBObject.FindIndex(d => d.transform == model.transform);
             if (index >= 0)
             {
-                UnityEngine.Object.Destroy(this.doguBObject[index]);
+                UnityEngine.Object.Destroy(doguBObject[index]);
                 doguBObject.RemoveAt(index);
             }
         }
@@ -880,6 +715,145 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                 item.rotation = Quaternion.identity;
             }
             item.localScale = localScale;
+        }
+
+        public override void DeleteAllLights()
+        {
+            var lightList = multipleMaids.lightList;
+            for (int l = 0; l < lightList.Count; l++)
+            {
+                UnityEngine.Object.Destroy(lightList[l]);
+            }
+            lightList.Clear();
+
+            multipleMaids.lightColorR.Clear();
+            multipleMaids.lightColorG.Clear();
+            multipleMaids.lightColorB.Clear();
+            multipleMaids.lightIndex.Clear();
+            multipleMaids.lightX.Clear();
+            multipleMaids.lightY.Clear();
+            multipleMaids.lightAkarusa.Clear();
+            multipleMaids.lightKage.Clear();
+            multipleMaids.lightRange.Clear();
+            multipleMaids.selectLightIndex = 0;
+            UpdateLightCombo();
+        }
+
+        public override void DeleteLight(StudioLightStat light)
+        {
+            var lightObj = light.obj as GameObject;
+            var lightList = multipleMaids.lightList;
+            var index = lightList.FindIndex(d => d == lightObj);
+            if (index >= 0)
+            {
+                UnityEngine.Object.Destroy(lightList[index]);
+                multipleMaids.lightList.RemoveAt(index);
+                multipleMaids.lightColorR.RemoveAt(index);
+                multipleMaids.lightColorG.RemoveAt(index);
+                multipleMaids.lightColorB.RemoveAt(index);
+                multipleMaids.lightIndex.RemoveAt(index);
+                multipleMaids.lightX.RemoveAt(index);
+                multipleMaids.lightY.RemoveAt(index);
+                multipleMaids.lightAkarusa.RemoveAt(index);
+                multipleMaids.lightKage.RemoveAt(index);
+                multipleMaids.lightRange.RemoveAt(index);
+                multipleMaids.selectLightIndex = lightList.Count - 1;
+                UpdateLightCombo();
+            }
+        }
+
+        private void UpdateLightCombo()
+        {
+            var lightList = multipleMaids.lightList;
+            multipleMaids.lightComboList = new GUIContent[lightList.Count];
+            for (int i = 0; i < lightList.Count; i++)
+            {
+                if (i == 0)
+                {
+                    multipleMaids.lightComboList[i] = new GUIContent("メイン");
+                }
+                else
+                {
+                    multipleMaids.lightComboList[i] = new GUIContent("追加" + i);
+                }
+            }
+            multipleMaids.lightCombo.selectedItemIndex = multipleMaids.selectLightIndex;
+        }
+
+        public override void CreateLight(StudioLightStat stat)
+        {
+            var gameObject = new GameObject("Light");
+			var light = gameObject.AddComponent<Light>();
+            var lightList = multipleMaids.lightList;
+            multipleMaids.lightList.Add(gameObject);
+            multipleMaids.lightColorR.Add(1f);
+            multipleMaids.lightColorG.Add(1f);
+            multipleMaids.lightColorB.Add(1f);
+            multipleMaids.lightIndex.Add(0);
+            multipleMaids.lightX.Add(40f);
+            multipleMaids.lightY.Add(180f);
+            multipleMaids.lightAkarusa.Add(0.95f);
+            multipleMaids.lightKage.Add(0.098f);
+            multipleMaids.lightRange.Add(50f);
+            gameObject.transform.position = GameMain.Instance.MainLight.transform.position;
+            multipleMaids.selectLightIndex = lightList.Count - 1;
+            UpdateLightCombo();
+
+            stat.light = light;
+            ApplyLight(stat);
+
+            var gLight = multipleMaids.gLight;
+            var mLight = multipleMaids.mLight;
+            var selectLightIndex = multipleMaids.selectLightIndex;
+
+            if (gLight[selectLightIndex] == null)
+            {
+                gLight[selectLightIndex] = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                Material material = new Material(Shader.Find("Transparent/Diffuse"));
+                material.color = new Color(0.5f, 0.5f, 1f, 0.8f);
+                gLight[selectLightIndex].GetComponent<Renderer>().material = material;
+                gLight[selectLightIndex].layer = 8;
+                gLight[selectLightIndex].GetComponent<Renderer>().enabled = false;
+                gLight[selectLightIndex].SetActive(false);
+                gLight[selectLightIndex].transform.position = gameObject.transform.position;
+                mLight[selectLightIndex] = gLight[selectLightIndex].AddComponent<MouseDrag6>();
+                mLight[selectLightIndex].obj = gLight[selectLightIndex];
+                mLight[selectLightIndex].maid = gameObject.gameObject;
+                mLight[selectLightIndex].angles = gameObject.gameObject.transform.eulerAngles;
+                gLight[selectLightIndex].transform.localScale = new Vector3(0.12f, 0.12f, 0.12f);
+                mLight[selectLightIndex].ido = 1;
+                mLight[selectLightIndex].isScale = false;
+            }
+        }
+
+        public override void ApplyLight(StudioLightStat stat)
+        {
+            var lightObj = stat.obj as GameObject;
+            if (lightObj == null || stat.light == null || stat.transform == null)
+            {
+                PluginUtils.LogError("ApplyLight: ライトが見つかりません" + stat.name);
+                return;
+            }
+
+            var lightList = multipleMaids.lightList;
+            var lightIndex = lightList.FindIndex(d => d == lightObj);
+            if (lightIndex < 0)
+            {
+                PluginUtils.LogError("ApplyLight: ライトが見つかりません" + stat.name);
+                return;
+            }
+
+            var light = stat.light;
+            var transform = stat.transform;
+
+            multipleMaids.lightColorR[lightIndex] = light.color.r;
+            multipleMaids.lightColorG[lightIndex] = light.color.g;
+            multipleMaids.lightColorB[lightIndex] = light.color.b;
+            multipleMaids.lightX[lightIndex] = transform.eulerAngles.x;
+            multipleMaids.lightY[lightIndex] = transform.eulerAngles.y;
+            multipleMaids.lightAkarusa[lightIndex] = light.intensity;
+            multipleMaids.lightKage[lightIndex] = light.shadowStrength;
+            multipleMaids.lightRange[lightIndex] = light.spotAngle;
         }
 
         protected override void OnMaidChanged(int maidSlotNo, Maid maid)
