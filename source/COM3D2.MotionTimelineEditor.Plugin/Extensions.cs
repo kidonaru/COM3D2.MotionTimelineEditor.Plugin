@@ -515,6 +515,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             return parent.GetFullPath(root) + "/" + transform.name;
         }
+
+        public static float[] GetInTangents(this ValueData[] values)
+        {
+            var ret = new float[values.Length];
+            for (int i = 0; i < values.Length; i++)
+            {
+                ret[i] = values[i].inTangent.value;
+            }
+
+            return ret;
+        }
+
+        public static float[] GetOutTangents(this ValueData[] values)
+        {
+            var ret = new float[values.Length];
+            for (int i = 0; i < values.Length; i++)
+            {
+                ret[i] = values[i].outTangent.value;
+            }
+
+            return ret;
+        }
+
+        public static Vector3 ToVector3(this float[] values)
+        {
+            if (values.Length != 3)
+            {
+                PluginUtils.LogError("ToVector3: 不正なfloat配列です length={0}", values.Length);
+                return Vector3.zero;
+            }
+            return new Vector3(values[0], values[1], values[2]);
+        }
     }
 
 }

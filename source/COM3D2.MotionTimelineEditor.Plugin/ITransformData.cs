@@ -39,6 +39,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         bool hasEasing { get; }
         bool hasTangent { get; }
         bool isHidden { get; }
+        bool isGlobal { get; }
 
         ValueData[] positionValues { get; }
         ValueData[] rotationValues { get; }
@@ -46,6 +47,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         ValueData[] scaleValues { get; }
         ValueData[] colorValues { get; }
         ValueData easingValue { get; }
+        ValueData[] tangentValues { get; }
 
         Vector3 initialPosition { get; }
         Quaternion initialRotation { get; }

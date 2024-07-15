@@ -95,7 +95,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static void LogError(string format, params object[] args)
         {
             string message = string.Format(format, args);
+#if DEBUG
+            UnityEngine.Debug.LogError(PluginInfo.PluginName + ": " + message + "\n" + Environment.StackTrace);
+#else
             UnityEngine.Debug.LogError(PluginInfo.PluginName + ": " + message);
+#endif
         }
 
         public static void AssertNull(bool condition, string message)
@@ -262,6 +266,63 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     LogWarning("指定されたディレクトリが存在しません: {0}", path);
                 }
             }
+        }
+
+        // エルミート曲線の補間計算
+        public static float Hermite(
+            float t0,
+            float t1,
+            float v0,
+            float v1,
+            float outTangent,
+            float inTangent,
+            float t)
+        {
+            float dt = t1 - t0;
+            if (dt == 0) return v0; // 時間差がない場合は開始値を返す
+
+            float t2 = t * t;
+            float t3 = t2 * t;
+
+            // エルミート基底関数
+            float h00 = 2f * t3 - 3f * t2 + 1f;
+            float h10 = t3 - 2f * t2 + t;
+            float h01 = -2f * t3 + 3f * t2;
+            float h11 = t3 - t2;
+
+            // エルミート補間の計算
+            float y = h00 * v0 +
+                      h10 * dt * outTangent +
+                      h01 * v1 +
+                      h11 * dt * inTangent;
+
+            return y;
+        }
+
+        // エルミート曲線の補間計算（簡略化版）
+        public static float HermiteSimplified(
+            float outTangent,
+            float inTangent,
+            float t)
+        {
+            return Hermite(0, 1, 0, 1, outTangent, inTangent, t);
+        }
+
+        // Vector3の補間
+        public static Vector3 HermiteVector3(
+            float t0,
+            float t1,
+            Vector3 startPoint,
+            Vector3 endPoint,
+            Vector3 outTangent,
+            Vector3 inTangent,
+            float t)
+        {
+            return new Vector3(
+                Hermite(t0, t1, startPoint.x, endPoint.x, outTangent.x, inTangent.x, t),
+                Hermite(t0, t1, startPoint.y, endPoint.y, outTangent.y, inTangent.y, t),
+                Hermite(t0, t1, startPoint.z, endPoint.z, outTangent.z, inTangent.z, t)
+            );
         }
 
         public readonly static byte[] Icon = Convert.FromBase64String(

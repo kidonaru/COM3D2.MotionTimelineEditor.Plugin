@@ -53,11 +53,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override ValueData[] scaleValues
+        public override ValueData[] tangentValues
         {
             get
             {
-                return new ValueData[] { values[7], values[8], values[9] };
+                return values;
             }
         }
 

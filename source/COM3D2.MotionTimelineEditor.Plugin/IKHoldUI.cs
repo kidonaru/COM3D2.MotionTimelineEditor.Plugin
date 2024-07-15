@@ -15,19 +15,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private bool[] isHoldList
+        private static MaidCache maidCache
         {
             get
             {
-                return timeline.isHoldList;
-            }
-        }
-
-        private static IKHoldManager ikHoldManager
-        {
-            get
-            {
-                return IKHoldManager.instance;
+                return maidManager.maidCache;
             }
         }
 
@@ -37,10 +29,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void DrawContent(GUIView view)
         {
-            if (timeline == null)
+            if (timeline == null || maidCache == null)
             {
                 return;
             }
+
+            view.DrawToggle("IKのアニメ制御", timeline.isIKAnime, 150, 20, newValue =>
+            {
+                timeline.isIKAnime = newValue;
+            });
+
+            view.DrawHorizontalLine(Color.gray);
+
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
             var typesList = new List<IKHoldType[]>
             {
@@ -57,22 +58,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 foreach (var type in types)
                 {
-                    var name = ikHoldManager.GetHoldTypeName(type);
-                    var isHold = ikHoldManager.IsHold(type);
+                    var name = IKHoldEntity.GetHoldTypeName(type);
+                    var isHold = IsHold(type);
                     view.DrawToggle(name, isHold, 80, 20, newValue =>
                     {
-                        ikHoldManager.SetHold(type, newValue);
+                        SetHold(type, newValue);
                     });
                 }
 
-                var isHolds = types.All(x => ikHoldManager.IsHold(x));
+                var isHolds = types.All(x => IsHold(x));
                 if (isHolds)
                 {
                     if (view.DrawButton("解除", 50, 20))
                     {
                         foreach (var type in types)
                         {
-                            ikHoldManager.SetHold(type, false);
+                            SetHold(type, false);
                         }
                     }
                 }
@@ -82,7 +83,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         foreach (var type in types)
                         {
-                            ikHoldManager.SetHold(type, true);
+                            SetHold(type, true);
                         }
                     }
                 }
@@ -95,14 +96,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.AddSpace(80, 20);
                 view.AddSpace(80, 20);
 
-                var isAllHold = isHoldList.All(x => x);
+                var isAllHold = MaidCache.ikHoldTypeMap.Values.All(x => IsHold(x));
                 if (isAllHold)
                 {
                     if (view.DrawButton("全解除", 80, 20))
                     {
-                        for (int i = 0; i < isHoldList.Length; i++)
+                        foreach (var holdType in MaidCache.ikHoldTypeMap.Values)
                         {
-                            ikHoldManager.SetHold((IKHoldType) i, false);
+                            SetHold(holdType, false);
                         }
                     }
                 }
@@ -110,9 +111,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     if (view.DrawButton("全固定", 80, 20))
                     {
-                        for (int i = 0; i < isHoldList.Length; i++)
+                        foreach (var holdType in MaidCache.ikHoldTypeMap.Values)
                         {
-                            ikHoldManager.SetHold((IKHoldType) i, true);
+                            SetHold(holdType, true);
                         }
                     }
                 }
@@ -122,24 +123,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.DrawHorizontalLine(Color.gray);
 
             bool paramUpdated = false;
-            bool isFootHold = ikHoldManager.IsHold(IKHoldType.Foot_L_Tip) || ikHoldManager.IsHold(IKHoldType.Foot_R_Tip);
+            bool isFootHold = IsHold(IKHoldType.Foot_L_Tip) || IsHold(IKHoldType.Foot_R_Tip);
 
             view.BeginHorizontal();
             {
-                view.DrawToggle("足の接地処理", timeline.isFootGrounding, 120, 20, newValue =>
+                view.DrawToggle("足の接地処理", maidCache.isFootGrounding, 120, 20, newValue =>
                 {
-                    timeline.isFootGrounding = newValue;
+                    maidCache.isFootGrounding = newValue;
                     paramUpdated = true;
                 });
 
-                if (timeline.isFootGrounding && !isFootHold)
+                if (maidCache.isFootGrounding && !isFootHold)
                 {
                     view.DrawLabel("足首の固定化が必要です", -1, 20, Color.yellow);
                 }
             }
             view.EndLayout();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && timeline.isFootGrounding && isFootHold);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing && maidCache.isFootGrounding && isFootHold);
 
             paramUpdated |= view.DrawSliderValue(
                 new GUIView.SliderOption
@@ -150,20 +151,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     max = config.positionRange,
                     step = 0.01f,
                     defaultValue = 0f,
-                    value = timeline.floorHeight,
-                    onChanged = newValue => timeline.floorHeight = newValue,
+                    value = maidCache.floorHeight,
+                    onChanged = newValue => maidCache.floorHeight = newValue,
                 });
 
             if (view.DrawButton("メイドの位置から推定", 150, 20))
             {
-                var maidCache = maidManager.maidCache;
                 if (maidCache != null)
                 {
                     var footL = maidCache.ikManager.GetBone(IKManager.BoneType.Foot_L);
                     var footR = maidCache.ikManager.GetBone(IKManager.BoneType.Foot_R);
                     if (footL != null && footR != null)
                     {
-                        timeline.floorHeight = (footL.transform.position.y + footR.transform.position.y) / 2f - timeline.footBaseOffset;
+                        maidCache.floorHeight = (footL.transform.position.y + footR.transform.position.y) / 2f - maidCache.footBaseOffset;
                         paramUpdated = true;
                     }
                 }
@@ -178,8 +178,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     max = 1f,
                     step = 0.01f,
                     defaultValue = 0.05f,
-                    value = timeline.footBaseOffset,
-                    onChanged = newValue => timeline.footBaseOffset = newValue,
+                    value = maidCache.footBaseOffset,
+                    onChanged = newValue => maidCache.footBaseOffset = newValue,
                 });
             
             paramUpdated |= view.DrawSliderValue(
@@ -191,8 +191,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     max = 1f,
                     step = 0.01f,
                     defaultValue = 0.1f,
-                    value = timeline.footStretchHeight,
-                    onChanged = newValue => timeline.footStretchHeight = newValue,
+                    value = maidCache.footStretchHeight,
+                    onChanged = newValue => maidCache.footStretchHeight = newValue,
                 });
             
             paramUpdated |= view.DrawSliderValue(
@@ -204,8 +204,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     max = 180f,
                     step = 1f,
                     defaultValue = 45f,
-                    value = timeline.footStretchAngle,
-                    onChanged = newValue => timeline.footStretchAngle = newValue,
+                    value = maidCache.footStretchAngle,
+                    onChanged = newValue => maidCache.footStretchAngle = newValue,
                 });
             
             paramUpdated |= view.DrawSliderValue(
@@ -217,14 +217,41 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     max = 180f,
                     step = 1f,
                     defaultValue = 90f,
-                    value = timeline.footGroundAngle,
-                    onChanged = newValue => timeline.footGroundAngle = newValue,
+                    value = maidCache.footGroundAngle,
+                    onChanged = newValue => maidCache.footGroundAngle = newValue,
                 });
 
             if (paramUpdated)
             {
-                ikHoldManager.RequestUpdatePosition();
+                ResetTargetPosition(IKHoldType.Foot_L_Tip);
+                ResetTargetPosition(IKHoldType.Foot_R_Tip);
             }
+        }
+
+        private void ResetTargetPosition(IKHoldType type)
+        {
+            var idHoldEntity = maidCache.GetIKHoldEntity(type);
+            if (idHoldEntity != null)
+            {
+                idHoldEntity.ResetTargetPosition();
+            }
+        }
+
+        private void SetHold(IKHoldType type, bool hold)
+        {
+            var idHoldEntity = maidCache.GetIKHoldEntity(type);
+            if (idHoldEntity == null || idHoldEntity.isHold == hold)
+            {
+                return;
+            }
+
+            idHoldEntity.isHold = hold;
+            idHoldEntity.ResetTargetPosition();
+        }
+
+        private bool IsHold(IKHoldType type)
+        {
+            return maidCache.GetIKHoldEntity(type).isHold;
         }
     }
 }

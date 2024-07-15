@@ -15,6 +15,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         List<FrameData> keyFrames { get; }
 
         Maid maid { get; }
+        MaidCache maidCache { get; }
         int playingFrameNo { get; }
         float playingFrameNoFloat { get; }
         float playingTime { get; }

@@ -91,23 +91,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("IsHold")]
         public bool[] isHoldList = new bool[(int) IKHoldType.Max];
 
-        [XmlElement("IsFootGrounding")]
-        public bool isFootGrounding = false;
-
-        [XmlElement("FloorHeight")]
-        public float floorHeight = 0f;
-
-        [XmlElement("FootBaseOffset")]
-        public float footBaseOffset = 0.05f;
-
-        [XmlElement("FootStretchHeight")]
-        public float footStretchHeight = 0.1f;
-
-        [XmlElement("FootStretchAngle")]
-        public float footStretchAngle = 45f;
-
-        [XmlElement("FootGroundAngle")]
-        public float footGroundAngle = 90f;
+        [XmlElement("IsIKAnime")]
+        public bool isIKAnime = false;
 
         [XmlElement("UseMuneKeyL")]
         public bool useMuneKeyL;

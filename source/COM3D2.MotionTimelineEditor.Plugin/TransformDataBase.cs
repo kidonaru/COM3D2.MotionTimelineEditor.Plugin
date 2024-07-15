@@ -210,6 +210,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public virtual bool isGlobal
+        {
+            get
+            {
+                return false;
+            }
+        }
+
         public virtual ValueData[] positionValues
         {
             get
@@ -250,6 +258,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return new ValueData();
+            }
+        }
+
+        public virtual ValueData[] tangentValues
+        {
+            get
+            {
+                return new ValueData[0];
             }
         }
 
@@ -500,9 +516,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var prevValues = prevTransform.values;
-            var currentValues = this.values;
-            var nextValues = nextTransform.values;
+            var prevValues = prevTransform.tangentValues;
+            var currentValues = this.tangentValues;
+            var nextValues = nextTransform.tangentValues;
             float dt0 = currentTime - prevTime;
             float dt1 = nextTime - currentTime;
             float dt = dt0 + dt1;

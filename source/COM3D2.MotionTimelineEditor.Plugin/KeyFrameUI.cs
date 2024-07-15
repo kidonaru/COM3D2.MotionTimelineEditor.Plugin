@@ -952,17 +952,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.DrawTexture(easingTex);
         }
 
-        // ヘルミート曲線の計算
-        private static float Hermite(
-            float t,
-            float outTangent,
-            float inTangent)
-        {
-            float t2 = t * t;
-            float t3 = t2 * t;
-            return (t3 - 2 * t2 + t) * outTangent + (-2 * t3 + 3 * t2) * 1 + (t3 - t2) * inTangent;
-        }
-
         private static void UpdateTangentTexture(
             Texture2D texture,
             float outTangent,
@@ -977,7 +966,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             for (int x = 0; x < width; x++)
             {
                 float t = x / (float)width;
-                int y = (int)(Hermite(t, outTangent, inTangent) * height);
+                int y = (int)(PluginUtils.HermiteSimplified(outTangent, inTangent, t) * height);
 
                 y -= halfLineWidth;
                 for (int i = 0; i < lineWidth; i++)

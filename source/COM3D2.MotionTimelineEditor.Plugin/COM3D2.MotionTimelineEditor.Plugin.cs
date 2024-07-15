@@ -155,14 +155,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static IKHoldManager ikHoldManager
-        {
-            get
-            {
-                return IKHoldManager.instance;
-            }
-        }
-
         private static WindowManager windowManager
         {
             get
@@ -356,7 +348,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     studioHack.Update();
                     timelineManager.Update();
                     bgmManager.Update();
-                    ikHoldManager.Update();
                     configManager.Update();
                 }
             }
@@ -390,10 +381,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         return;
                     }
 
+                    maidManager.LateUpdate();
                     modelManager.LateUpdate(false);
                     lightManager.LateUpdate(false);
                     timelineManager.LateUpdate();
-                    ikHoldManager.LateUpdate();
                 }
             }
             catch (Exception e)
@@ -457,7 +448,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 boneMenuManager.Init();
                 bgmManager.Init();
                 movieManager.Init();
-                ikHoldManager.Init();
                 timelineLoadManager.Init();
 
                 AddGearMenu();

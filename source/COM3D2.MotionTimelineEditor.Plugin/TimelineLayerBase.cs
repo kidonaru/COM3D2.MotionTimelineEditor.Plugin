@@ -613,6 +613,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var currentTime = timeline.GetFrameTimeSeconds(frame.frameNo);
             foreach (var bone in frame.bones)
             {
+                if (!bone.transform.hasTangent)
+                {
+                    continue;
+                }
+
                 int prevFrameNo;
                 var prevBone = GetPrevBone(frame.frameNo, bone.name, out prevFrameNo);
 

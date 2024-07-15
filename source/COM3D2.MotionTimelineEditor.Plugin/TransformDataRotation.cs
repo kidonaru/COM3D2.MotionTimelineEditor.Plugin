@@ -36,6 +36,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public override ValueData[] tangentValues
+        {
+            get
+            {
+                return values;
+            }
+        }
+
         public override Quaternion initialRotation
         {
             get

@@ -18,6 +18,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public bool boolValue
+        {
+            get
+            {
+                return value != 0f;
+            }
+            set
+            {
+                this.value = value == true ? 1f : 0f;
+            }
+        }
+
         public void FromValue(ValueData value)
         {
             this.value = value.value;

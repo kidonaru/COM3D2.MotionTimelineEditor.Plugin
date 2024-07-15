@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using RootMotion.FinalIK;
 using UnityEngine;
@@ -39,9 +40,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public CacheBoneDataArray cacheBoneData;
         public IKManager ikManager = null;
         public ExtendBoneCache extendBoneCache = null;
+        public Dictionary<IKHoldType, IKHoldEntity> ikHoldEntities = new Dictionary<IKHoldType, IKHoldEntity>(6);
+
+        public bool isFootGrounding = false; // 足の接地処理を有効にするか
+        public float floorHeight = 0f; // 接地面の高さ
+        public float footBaseOffset = 0.05f; // 足の位置のオフセット
+        public float footStretchHeight = 0.1f; // 足を伸ばす高さ
+        public float footStretchAngle = 45f; // 足を伸ばしたときの角度
+        public float footGroundAngle = 90f; // 接地時の足の角度
 
         public static event UnityAction<int, Maid> onMaidChanged;
         public static event UnityAction<int, string> onAnmChanged;
+
+        public static readonly Dictionary<string, IKHoldType> ikHoldTypeMap = Enum.GetValues(typeof(IKHoldType))
+                .Cast<IKHoldType>()
+                .Where(t => t != IKHoldType.Max)
+                .ToDictionary(t => t.ToString(), t => t);
 
         public Animation animation
         {
@@ -410,62 +424,51 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.slotNo = slotNo;
         }
 
-        public LimbControl GetLimbControl(LimbControl.Type type)
+        public IKHoldEntity GetIKHoldEntity(IKHoldType holdType)
         {
-            return limbControlList.Find(l => l.type == type);
-        }
-
-        public LimbControl GetLimbControl(IKHoldType type)
-        {
-            switch (type)
+            if (holdType == IKHoldType.Max)
             {
-                case IKHoldType.Arm_L_Joint:
-                case IKHoldType.Arm_L_Tip:
-                    return GetLimbControl(LimbControl.Type.Arm_L);
-                case IKHoldType.Arm_R_Joint:
-                case IKHoldType.Arm_R_Tip:
-                    return GetLimbControl(LimbControl.Type.Arm_R);
-                case IKHoldType.Foot_L_Joint:
-                case IKHoldType.Foot_L_Tip:
-                    return GetLimbControl(LimbControl.Type.Foot_L);
-                case IKHoldType.Foot_R_Joint:
-                case IKHoldType.Foot_R_Tip:
-                    return GetLimbControl(LimbControl.Type.Foot_R);
+                return null;
             }
-            return null;
-        }
 
-        public FABRIK GetIkFabrik(IKHoldType type)
-        {
-            return GetLimbControl(type).GetIkFabrik();
-        }
-
-        public IKDragPoint GetDragPoint(IKHoldType type)
-        {
-            switch (type)
+            IKHoldEntity entity;
+            if (!ikHoldEntities.TryGetValue(holdType, out entity))
             {
-                case IKHoldType.Arm_R_Joint:
-                case IKHoldType.Arm_L_Joint:
-                case IKHoldType.Foot_R_Joint:
-                case IKHoldType.Foot_L_Joint:
-                    return GetLimbControl(type).GetJointDragPoint();
-                case IKHoldType.Arm_R_Tip:
-                case IKHoldType.Arm_L_Tip:
-                case IKHoldType.Foot_R_Tip:
-                case IKHoldType.Foot_L_Tip:
-                    return GetLimbControl(type).GetTipDragPoint();
+                entity = new IKHoldEntity(holdType, this);
+                ikHoldEntities[holdType] = entity;
             }
-            return null;
+            return entity;
+        }
+
+        public static IKHoldType GetIKHoldType(string holdName)
+        {
+            IKHoldType holdType;
+            if (ikHoldTypeMap.TryGetValue(holdName, out holdType))
+            {
+                return holdType;
+            }
+            return IKHoldType.Max;
+        }
+
+        public IKHoldEntity GetIKHoldEntity(string holdName)
+        {
+            var holdType = GetIKHoldType(holdName);
+            return GetIKHoldEntity(holdType);
+        }
+
+        public FABRIK GetIkFabrik(IKHoldType holdType)
+        {
+            return GetIKHoldEntity(holdType).fabrik;
+        }
+
+        public IKDragPoint GetDragPoint(IKHoldType holdType)
+        {
+            return GetIKHoldEntity(holdType).dragPoint;
         }
 
         public Vector3 GetIkPosition(IKHoldType holdType)
         {
-            var dragPoint = GetDragPoint(holdType);
-            if (dragPoint != null && dragPoint.target_ik_point_trans != null)
-            {
-                return dragPoint.target_ik_point_trans.position;
-            }
-            return Vector3.zero;
+            return GetIKHoldEntity(holdType).position;
         }
 
         public bool IsIkDragging(IKHoldType holdType)
@@ -478,131 +481,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return false;
         }
 
-        public void UpdateIkPosition(IKHoldType holdType, Vector3 targetPosition)
+        public Vector3 GetInitialPosition(IKManager.BoneType boneType)
         {
-            var limbControl = GetLimbControl(holdType);
-            var ikFabrik = GetIkFabrik(holdType);
-            var dragPoint = GetDragPoint(holdType);
-
-            if (limbControl != null && ikFabrik != null && dragPoint != null)
-            {
-                limbControl.joint_lock = false;
-                dragPoint.drag_start_event.Invoke();
-                dragPoint.transform.position = targetPosition;
-                ikFabrik.solver.maxIterations = 4;
-                ikFabrik.solver.Update();
-                dragPoint.drag_end_event.Invoke();
-            }
-        }
-
-        public void PositonCorrection(IKHoldType holdType)
-        {
-            var boneType = holdType.ConvertBoneType();
-            var bone = ikManager.GetBone(boneType);
-            var pos = GetInitialEditPosition(boneType);
-            bone.transform.localPosition = pos;
-        }
-
-        public void AdjustFootGrounding(IKHoldType holdType)
-        {
-            if (maid == null || ikManager == null)
-            {
-                return;
-            }
-
-            var footBone = ikManager.GetBone(holdType == IKHoldType.Foot_L_Tip ? IKManager.BoneType.Foot_L : IKManager.BoneType.Foot_R);
-            if (footBone == null)
-            {
-                return;
-            }
-
-            float floorHeight = timeline.floorHeight;
-            float footBaseOffset = timeline.footBaseOffset;
-            float footStretchHeight = timeline.footStretchHeight;
-            float footStretchAngle = timeline.footStretchAngle;
-            float footGroundAngle = timeline.footGroundAngle;
-
-            // 地面と並行となるZ角度を計算
-            float targetAngle;
-            {
-                var worldRotation = footBone.transform.rotation;
-                var forward = worldRotation * Vector3.forward;
-                forward.y = 0; // Y成分を0にして水平にする
-                forward.Normalize();
-
-                var targetRotation = Quaternion.LookRotation(forward, Vector3.up);
-                var localTargetRotation = Quaternion.Inverse(footBone.transform.parent.rotation) * targetRotation;
-
-                var localEulerAngles = localTargetRotation.eulerAngles;
-                targetAngle = localEulerAngles.z + footGroundAngle;
-            }
-
-            // 足が地面より上にある場合、足を伸ばす
-            Vector3 footPos = footBone.transform.position;
-            float heightDifference = footPos.y - floorHeight - footBaseOffset;
-            if (heightDifference > 0f)
-            {
-                // 近い方の角度を採用
-                int diffAngle = (int) (footStretchAngle - targetAngle);
-                if (diffAngle > 180)
-                {
-                    footStretchAngle -= (diffAngle + 180) / 360 * 360;
-                }
-                else if (diffAngle < -180)
-                {
-                    footStretchAngle -= (diffAngle - 180) / 360 * 360;
-                }
-
-                var heightRate = Mathf.Clamp01(heightDifference / footStretchHeight);
-                targetAngle = Mathf.Lerp(targetAngle, footStretchAngle, heightRate);
-            }
-
-            // 角度を足首に適用
-            Vector3 footRotation = footBone.transform.localEulerAngles;
-            footRotation.z = targetAngle;
-            footBone.transform.localEulerAngles = footRotation;
-        }
-
-        private Dictionary<IKManager.BoneType, Vector3> _initialEditPositions = new Dictionary<IKManager.BoneType, Vector3>();
-
-        public void SetInitialEditPosition(IKManager.BoneType boneType, Vector3 pos)
-        {
-            _initialEditPositions[boneType] = pos;
-        }
-
-        public Vector3 GetInitialEditPosition(IKManager.BoneType boneType)
-        {
-            Vector3 pos;
-            if (_initialEditPositions.TryGetValue(boneType, out pos))
-            {
-                return pos;
-            }
-            return Vector3.zero;
-        }
-
-        public void SaveInitialEditPosition()
-        {
-            var boneTypes = new List<IKManager.BoneType>
-            {
-                IKManager.BoneType.UpperArm_L,
-                IKManager.BoneType.Forearm_L,
-                IKManager.BoneType.Thigh_L,
-                IKManager.BoneType.Calf_L,
-
-                IKManager.BoneType.UpperArm_R,
-                IKManager.BoneType.Forearm_R,
-                IKManager.BoneType.Thigh_R,
-                IKManager.BoneType.Calf_R,
-            };
-
-            foreach (var boneType in boneTypes)
-            {
-                var bone = ikManager.GetBone(boneType);
-                if (bone != null)
-                {
-                    SetInitialEditPosition(boneType, bone.transform.localPosition);
-                }
-            }
+            return info.GetInitialPosition(boneType);
         }
 
         public void Reset()
@@ -615,6 +496,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             cacheBoneData = null;
             ikManager = null;
             extendBoneCache = null;
+            ikHoldEntities.Clear();
             _blendShapeCache.Clear();
             lookAtTargetType = LookAtTargetType.None;
             lookAtTargetIndex = 0;
@@ -682,6 +564,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             UpdateEyeEulerAngle();
             UpdateVoice();
+        }
+
+        public void LateUpdate()
+        {
+            if (maid == null)
+            {
+                return;
+            }
+
+            foreach (var ikHoldEntity in ikHoldEntities.Values)
+            {
+                ikHoldEntity.LateUpdate();
+            }
         }
 
         public void PlayAnm(long id, byte[] anmData)
@@ -913,6 +808,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     return entity.transform;
                 }
+            }
+
+            var ikHoldEntity = GetIKHoldEntity(boneName);
+            if (ikHoldEntity != null)
+            {
+                return ikHoldEntity.transform;
             }
 
             return null;
@@ -1186,6 +1087,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (onAnmChanged != null)
             {
                 onAnmChanged(slotNo, anmName);
+            }
+        }
+
+        public void OnEditPoseUpdated()
+        {
+            foreach (var ikHoldEntity in ikHoldEntities.Values)
+            {
+                if (!isFootGrounding)
+                {
+                    ikHoldEntity.ResetTargetPosition();
+                }
             }
         }
     }

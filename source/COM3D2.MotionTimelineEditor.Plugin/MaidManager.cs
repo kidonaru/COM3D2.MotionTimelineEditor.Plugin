@@ -142,6 +142,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             SceneManager.sceneLoaded += OnChangedSceneLevel;
             TimelineManager.onRefresh += OnRefresh;
+            TimelineManager.onEditPoseUpdated += OnEditPoseUpdated;
         }
 
         public Maid GetMaid(int slotNo)
@@ -244,6 +245,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public void LateUpdate()
+        {
+            if (!IsValid())
+            {
+                return;
+            }
+
+            foreach (var cache in maidCaches)
+            {
+                cache.LateUpdate();
+            }
+        }
+
         public void OnPluginDisable()
         {
             foreach (var cache in maidCaches)
@@ -266,33 +280,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return cache.GetIkPosition(holdType);
             }
             return Vector3.zero;
-        }
-
-        public void UpdateIkPosition(IKHoldType holdType, Vector3 targetPosition)
-        {
-            var cache = this.maidCache;
-            if (cache != null)
-            {
-                cache.UpdateIkPosition(holdType, targetPosition);
-            }
-        }
-
-        public void AdjustFootGrounding(IKHoldType holdType)
-        {
-            var cache = this.maidCache;
-            if (cache != null)
-            {
-                cache.AdjustFootGrounding(holdType);
-            }
-        }
-
-        public void PositonCorrection(IKHoldType holdType)
-        {
-            var cache = this.maidCache;
-            if (cache != null)
-            {
-                cache.PositonCorrection(holdType);
-            }
         }
 
         public MaidCache GetMaidCache(int slotNo)
@@ -395,6 +382,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             ResetAnm();
             Update();
+        }
+
+        private void OnEditPoseUpdated()
+        {
+            foreach (var cache in maidCaches)
+            {
+                cache.OnEditPoseUpdated();
+            }
         }
     }
 }

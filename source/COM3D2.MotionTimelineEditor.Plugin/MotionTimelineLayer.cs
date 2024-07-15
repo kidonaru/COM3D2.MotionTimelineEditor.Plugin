@@ -8,6 +8,9 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+    using IKHoldPlayData = MotionPlayData<IKHoldMotionData>;
+    using GroundingPlayData = MotionPlayData<GroundingMotionData>;
+
     public class PoseTimeLineRow
     {
         public float time;
@@ -19,6 +22,54 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Vector3 rotation;
         public Maid.EyeMoveType eyeMoveType;
         public string option;
+    }
+
+    public class IKHoldTimeLineRow
+    {
+        public int frame;
+        public string name;
+        public Vector3 position;
+        public Vector3 inTangents;
+        public Vector3 outTangents;
+        public bool isHold;
+    }
+
+    public class IKHoldMotionData : IMotionData
+    {
+        public int stFrame { get; set; }
+        public int edFrame { get; set; }
+
+        public string name;
+        public Vector3 stPos;
+        public Vector3 edPos;
+        public Vector3 outTangents;
+        public Vector3 inTangents;
+        public bool isHold;
+    }
+
+    public class GroundingTimeLineRow
+    {
+        public int frame;
+
+        public bool isFootGrounding;
+        public float floorHeight;
+        public float footBaseOffset;
+        public float footStretchHeight;
+        public float footStretchAngle;
+        public float footGroundAngle;
+    }
+
+    public class GroundingMotionData : IMotionData
+    {
+        public int stFrame { get; set; }
+        public int edFrame { get; set; }
+
+        public bool isFootGrounding;
+        public float floorHeight;
+        public float footBaseOffset;
+        public float footStretchHeight;
+        public float footStretchAngle;
+        public float footGroundAngle;
     }
 
     [LayerDisplayName("メイドアニメ")]
@@ -48,6 +99,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public static string GroundingBoneName = "Grounding";
+        public static string GroundingDisplayName = "接地";
+
         private List<string> _allBoneNames = null;
         public override List<string> allBoneNames
         {
@@ -57,11 +111,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     _allBoneNames = new List<string>(BoneUtils.saveBoneNames);
                     _allBoneNames.AddRange(timeline.GetExtendBoneNames(slotNo));
+                    _allBoneNames.AddRange(MaidCache.ikHoldTypeMap.Keys);
+                    _allBoneNames.Add(GroundingBoneName);
                 }
                 return _allBoneNames;
             }
         }
 
+        private Dictionary<string, List<IKHoldTimeLineRow>> _ikTimelineRowsMap = new Dictionary<string, List<IKHoldTimeLineRow>>();
+        private Dictionary<string, IKHoldPlayData> _ikPlayDataMap = new Dictionary<string, IKHoldPlayData>();
+        private List<GroundingTimeLineRow> _groundingTimelineRows = new List<GroundingTimeLineRow>();
+        private GroundingPlayData _groundingPlayData = new GroundingPlayData();
         private List<PoseTimeLineRow> _dcmOutputRows = new List<PoseTimeLineRow>();
         private List<string> _extendSlotNames = new List<string>();
 
@@ -137,6 +197,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             _extendSlotNames.AddRange(slotMenuItemMap.Keys);
+
+            var ikSetMenuItem = new BoneSetMenuItem("IK", "IK");
+            allMenuItems.Add(ikSetMenuItem);
+
+            foreach (var pair in MaidCache.ikHoldTypeMap)
+            {
+                var boneName = pair.Key;
+                var holdType = pair.Value;
+                var displayName = IKHoldEntity.GetHoldTypeName(holdType);
+
+                var menuItem = new BoneMenuItem(boneName, displayName);
+                ikSetMenuItem.AddChild(menuItem);
+            }
+
+            var groundingMenuItem = new BoneMenuItem(GroundingBoneName, GroundingDisplayName);
+            allMenuItems.Add(groundingMenuItem);
         }
 
         public override bool IsValidData()
@@ -161,6 +237,90 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override void LateUpdate()
         {
             base.LateUpdate();
+
+            if (!studioHack.isPoseEditing)
+            {
+                ApplyPlayData();
+            }
+        }
+
+        private void ApplyPlayData()
+        {
+            PluginUtils.LogDebug("ApplyPlayData");
+            var playingFrameNoFloat = this.playingFrameNoFloat;
+
+            foreach (var boneName in _ikPlayDataMap.Keys)
+            {
+                if (!MaidCache.ikHoldTypeMap.ContainsKey(boneName))
+                {
+                    continue;
+                }
+
+                var playData = _ikPlayDataMap[boneName];
+
+                playData.Update(playingFrameNoFloat);
+
+                var current = playData.current;
+                if (current != null)
+                {
+                    ApplyIKHoldMotion(current, playData.lerpFrame);
+                }
+            }
+
+            {
+                var playData = _groundingPlayData;
+
+                playData.Update(playingFrameNoFloat);
+
+                var current = playData.current;
+                if (current != null)
+                {
+                    ApplyGroundingMotion(current);
+                }
+            }
+        }
+
+        private void ApplyIKHoldMotion(IKHoldMotionData motion, float lerpFrame)
+        {
+            if (!timeline.isIKAnime)
+            {
+                return;
+            }
+
+            var ikHoldEntity = maidCache.GetIKHoldEntity(motion.name);
+            if (ikHoldEntity == null)
+            {
+                return;
+            }
+
+            var t0 = motion.stFrame * timeline.frameDuration;
+            var t1 = motion.edFrame * timeline.frameDuration;
+
+            ikHoldEntity.isHold = motion.isHold;
+            ikHoldEntity.targetPosition = PluginUtils.HermiteVector3(
+                t0,
+                t1,
+                motion.stPos,
+                motion.edPos,
+                motion.outTangents,
+                motion.inTangents,
+                lerpFrame);
+        }
+
+        private void ApplyGroundingMotion(GroundingMotionData motion)
+        {
+            PluginUtils.LogDebug("ApplyGroundingMotion: frame={0}", motion.stFrame);
+            if (!timeline.isIKAnime)
+            {
+                return;
+            }
+
+            maidCache.isFootGrounding = motion.isFootGrounding;
+            maidCache.floorHeight = motion.floorHeight;
+            maidCache.footBaseOffset = motion.footBaseOffset;
+            maidCache.footStretchHeight = motion.footStretchHeight;
+            maidCache.footStretchAngle = motion.footStretchAngle;
+            maidCache.footGroundAngle = motion.footGroundAngle;
         }
 
         public override void OnMaidChanged(Maid maid)
@@ -215,21 +375,64 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 rootBone.transform.rotation = targetRotation;
             }
 
+            var maidCache = this.maidCache;
+
             foreach (var name in allBoneNames)
             {
-                var transform = maidCache.GetBoneTransform(name);
-                if (transform == null)
-                {
-                    PluginUtils.LogDebug("UpdateFrame: ボーンがないのでスキップしました name={0}", name);
-                    continue;
-                }
+                ITransformData trans;
 
-                var trans = CreateTransformData(name);
-                if (trans.hasPosition)
+                var holdtype = MaidCache.GetIKHoldType(name);
+                if (holdtype != IKHoldType.Max)
                 {
-                    trans.position = transform.localPosition;
+                    if (!timeline.isIKAnime && frame.frameNo != 0)
+                    {
+                        continue;
+                    }
+
+                    var ikHoldEntity = maidCache.GetIKHoldEntity(name);
+                    if (ikHoldEntity == null)
+                    {
+                        continue;
+                    }
+
+                    trans = CreateTransformData(name);
+                    trans.position = ikHoldEntity.position;
+                    trans["isHold"].boolValue = ikHoldEntity.isHold;
                 }
-                trans.rotation = transform.localRotation;
+                else if (name == GroundingBoneName)
+                {
+                    if (!timeline.isIKAnime && frame.frameNo != 0)
+                    {
+                        continue;
+                    }
+
+                    trans = CreateTransformData(name);
+                    trans["isFootGrounding"].boolValue = maidCache.isFootGrounding;
+                    trans["floorHeight"].value = maidCache.floorHeight;
+                    trans["footBaseOffset"].value = maidCache.footBaseOffset;
+                    trans["footStretchHeight"].value = maidCache.footStretchHeight;
+                    trans["footStretchAngle"].value = maidCache.footStretchAngle;
+                    trans["footGroundAngle"].value = maidCache.footGroundAngle;
+                }
+                else
+                {
+                    var transform = maidCache.GetBoneTransform(name);
+                    if (transform == null)
+                    {
+                        PluginUtils.LogDebug("UpdateFrame: ボーンがないのでスキップしました name={0}", name);
+                        continue;
+                    }
+
+                    trans = CreateTransformData(name);
+                    if (trans.hasPosition)
+                    {
+                        trans.position = transform.localPosition;
+                    }
+                    if (trans.hasRotation)
+                    {
+                        trans.rotation = transform.localRotation;
+                    }
+                }
 
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
@@ -238,6 +441,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void ApplyAnm(long id, byte[] anmData)
         {
+            PluginUtils.LogDebug("ApplyAnm: id={0}", id);
             if (anmData == null)
             {
                 return;
@@ -277,6 +481,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
             }
+
+            ApplyPlayData();
         }
 
         public override void ApplyCurrentFrame(bool motionUpdate)
@@ -288,6 +494,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             else
             {
                 maidCache.playingFrameNo = timelineManager.currentFrameNo;
+                ApplyPlayData();
             }
         }
 
@@ -313,6 +520,101 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 PluginUtils.LogException(e);
                 PluginUtils.ShowDialog("モーションの出力に失敗しました");
+            }
+        }
+
+        private void BuildPlayData(bool forOutput)
+        {
+            PluginUtils.LogDebug("BuildPlayData");
+            _ikPlayDataMap.Clear();
+
+            bool warpFrameEnabled = forOutput || !studioHack.isPoseEditing;
+
+            foreach (var pair in _ikTimelineRowsMap)
+            {
+                var name = pair.Key;
+                var rows = pair.Value;
+
+                IKHoldPlayData playData;
+                if (!_ikPlayDataMap.TryGetValue(name, out playData))
+                {
+                    playData = new IKHoldPlayData
+                    {
+                        motions = new List<IKHoldMotionData>(rows.Count),
+                    };
+                    _ikPlayDataMap[name] = playData;
+                }
+
+                playData.ResetIndex();
+                playData.motions.Clear();
+
+                bool isWarpFrame = false;
+
+                for (var i = 0; i < rows.Count - 1; i++)
+                {
+                    var start = rows[i];
+                    var end = rows[i + 1];
+
+                    var stFrame = start.frame;
+                    var edFrame = end.frame;
+
+                    if (!isWarpFrame && warpFrameEnabled && stFrame + 1 == edFrame)
+                    {
+                        isWarpFrame = true;
+                        continue;
+                    }
+
+                    if (isWarpFrame)
+                    {
+                        stFrame--;
+                        isWarpFrame = false;
+                    }
+
+                    var motion = new IKHoldMotionData
+                    {
+                        name = name,
+                        stFrame = stFrame,
+                        edFrame = edFrame,
+                        stPos = start.position,
+                        edPos = end.position,
+                        outTangents = start.outTangents,
+                        inTangents = end.inTangents,
+                        isHold = start.isHold,
+                    };
+
+                    playData.motions.Add(motion);
+                }
+            }
+
+            {
+                var rows = _groundingTimelineRows;
+                var playData = _groundingPlayData;
+
+                playData.ResetIndex();
+                playData.motions.Clear();
+
+                for (var i = 0; i < rows.Count - 1; i++)
+                {
+                    var start = rows[i];
+                    var end = rows[i + 1];
+
+                    var stFrame = start.frame;
+                    var edFrame = end.frame;
+
+                    var motion = new GroundingMotionData
+                    {
+                        stFrame = stFrame,
+                        edFrame = edFrame,
+                        isFootGrounding = start.isFootGrounding,
+                        floorHeight = start.floorHeight,
+                        footBaseOffset = start.footBaseOffset,
+                        footStretchHeight = start.footStretchHeight,
+                        footStretchAngle = start.footStretchAngle,
+                        footGroundAngle = start.footGroundAngle,
+                    };
+
+                    playData.motions.Add(motion);
+                }
             }
         }
 
@@ -405,6 +707,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             binaryWriter.Write(1001);
             foreach (var name in allBoneNames)
             {
+                if (MaidCache.ikHoldTypeMap.ContainsKey(name))
+                {
+                    continue;
+                }
+                if (name == GroundingBoneName)
+                {
+                    continue;
+                }
+
                 var bone = firstFrame.GetBone(name);
                 if (bone == null)
                 {
@@ -427,7 +738,79 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 maidCache.anmEndFrameNo = endFrameNo;
             }
 
+            {
+                _ikTimelineRowsMap.Clear();
+                _groundingTimelineRows.Clear();
+
+                foreach (var keyFrame in keyFrames)
+                {
+                    AppendTimelineRow(keyFrame);
+                }
+
+                AppendTimelineRow(_dummyLastFrame);
+
+                BuildPlayData(forOutput);
+            }
+
             return result;
+        }
+
+        private void AppendTimelineRow(FrameData frame)
+        {
+            foreach (var name in MaidCache.ikHoldTypeMap.Keys)
+            {
+                var bone = frame.GetBone(name);
+                if (bone == null)
+                {
+                    continue;
+                }
+
+                List<IKHoldTimeLineRow> rows;
+                if (!_ikTimelineRowsMap.TryGetValue(name, out rows))
+                {
+                    rows = new List<IKHoldTimeLineRow>();
+                    _ikTimelineRowsMap[name] = rows;
+                }
+
+                var trans = bone.transform;
+
+                var row = new IKHoldTimeLineRow
+                {
+                    frame = frame.frameNo,
+                    name = bone.name,
+                    position = trans.position,
+                    inTangents = trans.positionValues.GetInTangents().ToVector3(),
+                    outTangents = trans.positionValues.GetOutTangents().ToVector3(),
+                    isHold = trans["isHold"].boolValue,
+                };
+
+                rows.Add(row);
+            }
+
+            {
+                var bone = frame.GetBone(GroundingBoneName);
+                if (bone == null)
+                {
+                    return;
+                }
+
+                var rows = _groundingTimelineRows;
+
+                var trans = bone.transform;
+
+                var row = new GroundingTimeLineRow
+                {
+                    frame = frame.frameNo,
+                    isFootGrounding = trans["isFootGrounding"].boolValue,
+                    floorHeight = trans["floorHeight"].value,
+                    footBaseOffset = trans["footBaseOffset"].value, 
+                    footStretchHeight = trans["footStretchHeight"].value,
+                    footStretchAngle = trans["footStretchAngle"].value,
+                    footGroundAngle = trans["footGroundAngle"].value,
+                };
+
+                rows.Add(row);
+            }
         }
 
         public void SavePoseTimeLine(
@@ -958,7 +1341,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override ITransformData CreateTransformData(string name)
         {
             ITransformData transform;
-            if (name == "Bip01")
+
+            var holdtype = MaidCache.GetIKHoldType(name);
+            if (holdtype != IKHoldType.Max)
+            {
+                transform = new TransformDataIKHold();
+            }
+            else if (name == GroundingBoneName)
+            {
+                transform = new TransformDataGrounding();
+            }
+            else if (name == "Bip01")
             {
                 transform = new TransformDataRoot();
             }

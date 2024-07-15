@@ -539,8 +539,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     subWindow.SetSubWindowType(SubWindowType.KeyFrame);
                 }
 
-                var ikColor = editEnabled && timeline.isHoldActive ? Color.green : Color.white;
-                if (view.DrawButton("IK固定", 60, 20, editEnabled, ikColor))
+                if (view.DrawButton("IK固定", 60, 20, editEnabled))
                 {
                     subWindow.SetSubWindowType(SubWindowType.IKHold);
                 }

@@ -82,7 +82,7 @@
     <Compile Include="GUIComboBox.cs" />
     <Compile Include="GUIView.cs" />
     <Compile Include="IBoneMenuItem.cs" />
-    <Compile Include="IKHoldManager.cs" />
+    <Compile Include="IKHoldEntity.cs" />
     <Compile Include="IKHoldUI.cs" />
     <Compile Include="ITimelineLayer.cs" />
     <Compile Include="ITransformData.cs" />
@@ -143,6 +143,8 @@
     <Compile Include="TrackData.cs" />
     <Compile Include="TransformCache.cs" />
     <Compile Include="TransformDataBase.cs" />
+    <Compile Include="TransformDataGrounding.cs" />
+    <Compile Include="TransformDataIKHold.cs" />
     <Compile Include="TransformDataRoot.cs" />
     <Compile Include="TransformDataRotation.cs" />
     <Compile Include="TransformXml.cs" />
