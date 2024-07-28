@@ -451,6 +451,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             maidManager.ChangeMaid(currentLayer.maid);
             modelManager.SetupModels(timeline.models);
+            lightManager.SetupLights(timeline.lights);
 
             CreateAndApplyAnmAll();
             SeekCurrentFrame(0);
@@ -510,6 +511,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             currentLayer.OnActive();
 
             modelManager.SetupModels(timeline.models);
+            lightManager.SetupLights(timeline.lights);
 
             CreateAndApplyAnmAll();
             Refresh();
@@ -1636,6 +1638,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 timeline.OnPluginEnable();
                 modelManager.SetupModels(timeline.models);
+                lightManager.SetupLights(timeline.lights);
             }
         }
 

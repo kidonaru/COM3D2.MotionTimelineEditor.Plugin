@@ -451,11 +451,27 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 			}
         }
 
+        private DragPointLight.MPSLightType ConvertLightType(LightType lightType)
+        {
+            switch (lightType)
+            {
+                case LightType.Directional:
+                    return DragPointLight.MPSLightType.Normal;
+                case LightType.Point:
+                    return DragPointLight.MPSLightType.Point;
+                case LightType.Spot:
+                    return DragPointLight.MPSLightType.Spot;
+                default:
+                    return DragPointLight.MPSLightType.Normal;
+            }
+        }
+
         public override void CreateLight(StudioLightStat stat)
         {
             mps.lightManager.AddLight(null, false);
 
             var dragPointLight = mps.lightManager.CurrentLight;
+            dragPointLight.SetLightType(ConvertLightType(stat.type));
             stat.obj = dragPointLight;
             ApplyLight(stat);
         }

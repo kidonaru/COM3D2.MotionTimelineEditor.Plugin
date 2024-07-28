@@ -79,6 +79,7 @@
     <Compile Include="MorphUtils.cs" />
     <Compile Include="MoveTimelineLayer.cs" />
     <Compile Include="PluginInfo.cs" />
+    <Compile Include="SeTimelineLayer.cs" />
     <Compile Include="ShapeKeyTimelineLayer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransformDataBG.cs" />
@@ -91,6 +92,7 @@
     <Compile Include="TransformDataModelBone.cs" />
     <Compile Include="TransformDataMorph.cs" />
     <Compile Include="TransformDataMove.cs" />
+    <Compile Include="TransformDataSe.cs" />
     <Compile Include="TransformDataShapeKey.cs" />
     <Compile Include="TransformDataVoice.cs" />
     <Compile Include="VoiceTimelineLayer.cs" />
