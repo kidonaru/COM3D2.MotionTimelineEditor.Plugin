@@ -89,7 +89,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _prevUpdateFrame = Time.frameCount;
 
             var lightList = lightHackManager.lightList;
-            FixGroup(lightList);
 
             var addedLights = new List<StudioLightStat>();
             var removedLights = new List<StudioLightStat>();
@@ -119,7 +118,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (cachedLight.light != light.light ||
                     cachedLight.transform != light.transform ||
-                    cachedLight.obj != light.obj)
+                    cachedLight.obj != light.obj ||
+                    cachedLight.type != light.type)
                 {
                     cachedLight.FromStat(light);
                     updatedLights.Add(cachedLight);
@@ -158,12 +158,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 lights.Sort((light1, light2) =>
                 {
-                    var c = light1.typeOrder - light2.typeOrder;
-                    if (c != 0)
-                    {
-                        return c;
-                    }
-                    return light1.group - light2.group;
+                    return light1.index - light2.index;
                 });
 
                 foreach (var light in lights)
@@ -209,13 +204,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             LateUpdate(true);
 
+            var index = 0;
             foreach (var lightData in lightDataList)
             {
-                var light = GetLight(lightData.name);
+                var light = GetLight(index);
                 if (light == null)
                 {
                     light = CreateLightStat(
-                        lightData.name,
+                        index,
+                        lightData.lightType,
                         lightData.visible);
                     lightHackManager.CreateLight(light);
 
@@ -227,11 +224,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     light.visible = lightData.visible;
                     lightHackManager.ApplyLight(light);
                 }
+                index++;
             }
 
             foreach (var light in lights)
             {
-                if (lightDataList.FindIndex(data => data.name == light.name) < 0)
+                if (lightDataList.FindIndex(data => index == light.index) < 0)
                 {
                     lightHackManager.DeleteLight(light);
 
@@ -264,23 +262,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public StudioLightStat CreateLightStat(
-            string lightName,
+            int index,
+            LightType lightType,
             bool visible)
         {
-            var typeName = lightName;
-
-            var group = StudioModelManager.ExtractGroup(lightName);
-            if (group != 0)
-            {
-                typeName = StudioModelManager.RemoveGroupSuffix(typeName);
-            }
-
-            var lightType = (LightType) Enum.Parse(typeof(LightType), typeName);
-
             return new StudioLightStat
             {
                 type = lightType,
-                group = group,
+                index = index,
                 visible = visible,
             };
         }
@@ -305,33 +294,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             lightHackManager.ApplyLight(stat);
             //LateUpdate(true);
-        }
-
-        private Dictionary<LightType, int> _lightGroupMap = new Dictionary<LightType, int>();
-
-        /// <summary>
-        /// groupの修正
-        /// </summary>
-        /// <param name="lights"></param>
-        private void FixGroup(List<StudioLightStat> lights)
-        {
-            _lightGroupMap.Clear();
-
-            foreach (var light in lights)
-            {
-                //PluginUtils.Log("FixGroup: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
-                //        light.info.type, light.displayName, light.name, light.info.label, light.info.fileName, light.info.myRoomId, light.info.bgObjectId);
-                int group = 0;
-
-                if (_lightGroupMap.TryGetValue(light.type, out group))
-                {
-                    group++;
-                    if (group == 1) group++; // 1は使わない
-                }
-
-                light.group = group;
-                _lightGroupMap[light.type] = group;
-            }
         }
 
         private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)

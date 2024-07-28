@@ -122,6 +122,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             {
                 _lightList.Clear();
 
+                int index = 0;
                 foreach (var dragPointLight in mps.lightList)
                 {
                     if (dragPointLight == null)
@@ -131,8 +132,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 
                     var light = dragPointLight.GetLight();
 
-                    var stat = new StudioLightStat(
-                        light, light.transform, dragPointLight);
+                    var stat = new StudioLightStat(light, light.transform, dragPointLight, index++);
                     _lightList.Add(stat);
                 }
 
@@ -471,7 +471,6 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             mps.lightManager.AddLight(null, false);
 
             var dragPointLight = mps.lightManager.CurrentLight;
-            dragPointLight.SetLightType(ConvertLightType(stat.type));
             stat.obj = dragPointLight;
             ApplyLight(stat);
         }
@@ -487,6 +486,12 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 
             var light = stat.light;
             var transform = stat.transform;
+
+            var targetType = ConvertLightType(light.type);
+            if (targetType != dragPointLight.SelectedLightType)
+            {
+                dragPointLight.SetLightType(targetType);
+            }
 
             dragPointLight.Rotation = transform.rotation;
             dragPointLight.LightColour = light.color;

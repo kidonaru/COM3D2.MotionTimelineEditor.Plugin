@@ -59,6 +59,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public class TimelineLightData
     {
         public string name;
+        public LightType lightType;
         public bool visible;
 
         public TimelineLightData()
@@ -73,12 +74,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void FromStat(StudioLightStat light)
         {
             name = light.name;
+            lightType = light.type;
             visible = light.visible;
         }
 
         public void FromXml(TimelineLightXml xml)
         {
             name = xml.name;
+            lightType = xml.lightType;
             visible = xml.visible;
         }
 
@@ -87,6 +90,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var xml = new TimelineLightXml
             {
                 name = name,
+                lightType = lightType,
                 visible = visible,
             };
             return xml;
