@@ -720,21 +720,21 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         public override void DeleteAllLights()
         {
             var lightList = multipleMaids.lightList;
-            for (int l = 0; l < lightList.Count; l++)
+            for (int l = 1; l < lightList.Count; l++)
             {
                 UnityEngine.Object.Destroy(lightList[l]);
             }
-            lightList.Clear();
+            lightList.RemoveAllButFirst();
 
-            multipleMaids.lightColorR.Clear();
-            multipleMaids.lightColorG.Clear();
-            multipleMaids.lightColorB.Clear();
-            multipleMaids.lightIndex.Clear();
-            multipleMaids.lightX.Clear();
-            multipleMaids.lightY.Clear();
-            multipleMaids.lightAkarusa.Clear();
-            multipleMaids.lightKage.Clear();
-            multipleMaids.lightRange.Clear();
+            multipleMaids.lightColorR.RemoveAllButFirst();
+            multipleMaids.lightColorG.RemoveAllButFirst();
+            multipleMaids.lightColorB.RemoveAllButFirst();
+            multipleMaids.lightIndex.RemoveAllButFirst();
+            multipleMaids.lightX.RemoveAllButFirst();
+            multipleMaids.lightY.RemoveAllButFirst();
+            multipleMaids.lightAkarusa.RemoveAllButFirst();
+            multipleMaids.lightKage.RemoveAllButFirst();
+            multipleMaids.lightRange.RemoveAllButFirst();
             multipleMaids.selectLightIndex = 0;
             UpdateLightCombo();
         }
@@ -744,7 +744,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             var lightObj = light.obj as GameObject;
             var lightList = multipleMaids.lightList;
             var index = lightList.FindIndex(d => d == lightObj);
-            if (index >= 0)
+            if (index > 0)
             {
                 UnityEngine.Object.Destroy(lightList[index]);
                 multipleMaids.lightList.RemoveAt(index);
@@ -757,7 +757,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                 multipleMaids.lightAkarusa.RemoveAt(index);
                 multipleMaids.lightKage.RemoveAt(index);
                 multipleMaids.lightRange.RemoveAt(index);
-                multipleMaids.selectLightIndex = lightList.Count - 1;
+                multipleMaids.selectLightIndex = 0;
                 UpdateLightCombo();
             }
         }
@@ -780,6 +780,21 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             multipleMaids.lightCombo.selectedItemIndex = multipleMaids.selectLightIndex;
         }
 
+        public int ConvertLightType(LightType lightType)
+        {
+            switch (lightType)
+            {
+                case LightType.Directional:
+                    return 0;
+                case LightType.Spot:
+                    return 1;
+                case LightType.Point:
+                    return 2;
+                default:
+                    return 0;
+            }
+        }
+
         public override void CreateLight(StudioLightStat stat)
         {
             var gameObject = new GameObject("Light");
@@ -789,17 +804,19 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             multipleMaids.lightColorR.Add(1f);
             multipleMaids.lightColorG.Add(1f);
             multipleMaids.lightColorB.Add(1f);
-            multipleMaids.lightIndex.Add(0);
+            multipleMaids.lightIndex.Add(ConvertLightType(stat.type));
             multipleMaids.lightX.Add(40f);
             multipleMaids.lightY.Add(180f);
             multipleMaids.lightAkarusa.Add(0.95f);
             multipleMaids.lightKage.Add(0.098f);
             multipleMaids.lightRange.Add(50f);
             gameObject.transform.position = GameMain.Instance.MainLight.transform.position;
-            multipleMaids.selectLightIndex = lightList.Count - 1;
+            //multipleMaids.selectLightIndex = lightList.Count - 1;
+            multipleMaids.selectLightIndex = 0;
             UpdateLightCombo();
 
             stat.light = light;
+            light.type = stat.type;
             ApplyLight(stat);
 
             var gLight = multipleMaids.gLight;
@@ -854,6 +871,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             multipleMaids.lightAkarusa[lightIndex] = light.intensity;
             multipleMaids.lightKage[lightIndex] = light.shadowStrength;
             multipleMaids.lightRange[lightIndex] = light.spotAngle;
+            light.enabled = stat.visible;
         }
 
         protected override void OnMaidChanged(int maidSlotNo, Maid maid)

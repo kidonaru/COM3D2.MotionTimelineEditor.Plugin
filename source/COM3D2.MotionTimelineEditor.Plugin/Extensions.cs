@@ -557,6 +557,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             return new Vector4(values[0], values[1], values[2], values[3]);
         }
+
+        public static void RemoveAllButFirst<T>(this List<T> list)
+        {
+            if (list == null)
+            {
+                PluginUtils.LogError("RemoveAllButFirst: list is null");
+                return;
+            }
+
+            if (list.Count <= 1)
+            {
+                return;
+            }
+
+            T first = list[0];
+            list.Clear();
+            list.Add(first);
+        }
     }
 
 }

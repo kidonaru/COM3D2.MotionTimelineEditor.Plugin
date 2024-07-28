@@ -450,12 +450,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void DeleteLight(StudioLightStat light)
+        public override void DeleteLight(StudioLightStat stat)
         {
-            var targetObj = light.obj as PhotoTransTargetObject;
-            if (targetObj != null && targetObj.obj != null)
+            var targetObj = stat.obj as PhotoTransTargetObject;
+            if (targetObj != null && targetObj.obj != null && stat.light != null)
             {
-                studio.lightWindow.RemoveTransTargetObject(targetObj.obj);
+                stat.light.enabled = false;
+                //studio.lightWindow.RemoveTransTargetObject(targetObj.obj);
             }
         }
 
@@ -488,20 +489,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void ApplyLight(StudioLightStat stat)
         {
+            var light = stat.light;
+            if (light == null)
+            {
+                PluginUtils.LogError("ライトが見つかりません: " + stat.name);
+                return;
+            }
+
             if (stat.type == LightType.Directional)
             {
                 var directionalLightWindow = studio.directionalLightWindow;
-                var light = stat.light;
-                if (light == null)
-                {
-                    PluginUtils.LogError("ライトが見つかりません: " + stat.name);
-                    return;
-                }
-
                 directionalLightWindow.OnChangetIntensityValue(null, light.intensity);
                 directionalLightWindow.OnChangetShadowValue(null, light.shadowStrength);
                 directionalLightWindow.OnChangetColorValue(null, light.color);
             }
+
+            light.enabled = stat.visible;
         }
 
         public override void ChangeBackground(string bgName)
