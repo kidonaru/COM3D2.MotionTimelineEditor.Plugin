@@ -143,6 +143,7 @@
     <Compile Include="TrackData.cs" />
     <Compile Include="TransformCache.cs" />
     <Compile Include="TransformDataBase.cs" />
+    <Compile Include="TransformDataExtendBone.cs" />
     <Compile Include="TransformDataGrounding.cs" />
     <Compile Include="TransformDataIKHold.cs" />
     <Compile Include="TransformDataRoot.cs" />

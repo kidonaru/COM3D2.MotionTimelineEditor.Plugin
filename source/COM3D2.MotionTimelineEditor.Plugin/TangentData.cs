@@ -12,8 +12,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Y回転,
         Z回転,
         W回転,
+        X拡縮,
+        Y拡縮,
+        Z拡縮,
         移動,
         回転,
+        拡縮,
         すべて,
     }
 

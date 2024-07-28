@@ -269,6 +269,113 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private ValueData[] _baseValues = null;
+
+        public ValueData[] baseValues
+        {
+            get
+            {
+                if (_baseValues == null)
+                {
+                    var length = 0;
+                    if (hasPosition) length += 3;
+                    if (hasRotation) length += 4;
+                    if (hasScale) length += 3;
+                    _baseValues = new ValueData[length];
+                }
+
+                int index = 0;
+                if (hasPosition)
+                {
+                    var positionValues = this.positionValues;
+                    _baseValues[index++] = positionValues[0];
+                    _baseValues[index++] = positionValues[1];
+                    _baseValues[index++] = positionValues[2];
+                }
+                if (hasRotation)
+                {
+                    var rotationValues = this.rotationValues;
+                    _baseValues[index++] = rotationValues[0];
+                    _baseValues[index++] = rotationValues[1];
+                    _baseValues[index++] = rotationValues[2];
+                    _baseValues[index++] = rotationValues[3];
+                }
+                if (hasScale)
+                {
+                    var scaleValues = this.scaleValues;
+                    _baseValues[index++] = scaleValues[0];
+                    _baseValues[index++] = scaleValues[1];
+                    _baseValues[index++] = scaleValues[2];
+                }
+
+                return _baseValues;
+            }
+        }
+
+        public float[] positionInTangents
+        {
+            get
+            {
+                return positionValues.GetInTangents();
+            }
+        }
+
+        public float[] positionOutTangents
+        {
+            get
+            {
+                return positionValues.GetOutTangents();
+            }
+        }
+
+        public float[] rotationInTangents
+        {
+            get
+            {
+                return rotationValues.GetInTangents();
+            }
+        }
+
+        public float[] rotationOutTangents
+        {
+            get
+            {
+                return rotationValues.GetOutTangents();
+            }
+        }
+
+        public float[] eulerAnglesInTangents
+        {
+            get
+            {
+                return eulerAnglesValues.GetInTangents();
+            }
+        }
+
+        public float[] eulerAnglesOutTangents
+        {
+            get
+            {
+                return eulerAnglesValues.GetOutTangents();
+            }
+        }
+
+        public float[] scaleInTangents
+        {
+            get
+            {
+                return scaleValues.GetInTangents();
+            }
+        }
+
+        public float[] scaleOutTangents
+        {
+            get
+            {
+                return scaleValues.GetOutTangents();
+            }
+        }
+
         public virtual Vector3 initialPosition
         {
             get
@@ -974,8 +1081,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         return rotationValues;
                     }
                     break;
+                case TangentValueType.X拡縮:
+                    if (hasScale)
+                    {
+                        return new ValueData[] { scaleValues[0] };
+                    }
+                    break;
+                case TangentValueType.Y拡縮:
+                    if (hasScale)
+                    {
+                        return new ValueData[] { scaleValues[1] };
+                    }
+                    break;
+                case TangentValueType.Z拡縮:
+                    if (hasScale)
+                    {
+                        return new ValueData[] { scaleValues[2] };
+                    }
+                    break;
+                case TangentValueType.拡縮:
+                    if (hasScale)
+                    {
+                        return scaleValues;
+                    }
+                    break;
                 case TangentValueType.すべて:
-                    return values;
+                    return baseValues;
             }
 
             return new ValueData[0];

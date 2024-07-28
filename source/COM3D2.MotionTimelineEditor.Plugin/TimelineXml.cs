@@ -280,6 +280,64 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
             }
+
+            if (version < 9)
+            {
+                // MotionTimelineLayerのExtendBoneにposition/scaleを追加
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "MotionTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+                                var boneName = transform.name;
+                                
+                                var holdtype = MaidCache.GetIKHoldType(boneName);
+                                var isDefaultBoneName = BoneUtils.IsDefaultBoneName(boneName);
+                                if (holdtype != IKHoldType.Max)
+                                {
+                                    continue;
+                                }
+                                else if (boneName == MotionTimelineLayer.GroundingBoneName)
+                                {
+                                    continue;
+                                }
+                                else if (isDefaultBoneName)
+                                {
+                                    continue;
+                                }
+
+                                var values = new List<float>(transform.values);
+                                if (values.Count == 4)
+                                {
+                                    PluginUtils.LogDebug("Add Position/Scale to MotionTimelineLayer name={0}", transform.name);
+                                    values.Add(float.MinValue);
+                                    values.Add(float.MinValue);
+                                    values.Add(float.MinValue);
+                                    values.Add(1f);
+                                    values.Add(1f);
+                                    values.Add(1f);
+                                }
+                                transform.values = values.ToArray();
+
+                                if (transform.inSmoothBit == 15)
+                                {
+                                    transform.inSmoothBit = 1023;
+                                }
+                                if (transform.outSmoothBit == 15)
+                                {
+                                    transform.outSmoothBit = 1023;
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+                
+            }
         }
     }
 }

@@ -49,6 +49,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         ValueData easingValue { get; }
         ValueData[] tangentValues { get; }
 
+        float[] positionInTangents { get; }
+        float[] positionOutTangents { get; }
+        float[] rotationInTangents { get; }
+        float[] rotationOutTangents { get; }
+        float[] eulerAnglesInTangents { get; }
+        float[] eulerAnglesOutTangents { get; }
+        float[] scaleInTangents { get; }
+        float[] scaleOutTangents { get; }
+
         Vector3 initialPosition { get; }
         Quaternion initialRotation { get; }
         Vector3 initialEulerAngles { get; }

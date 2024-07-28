@@ -325,6 +325,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             );
         }
 
+        // Quaternionの補間
+        public static Quaternion HermiteQuaternion(
+            float t0,
+            float t1,
+            Quaternion startPoint,
+            Quaternion endPoint,
+            Vector4 outTangent,
+            Vector4 inTangent,
+            float t)
+        {
+            return new Quaternion(
+                Hermite(t0, t1, startPoint.x, endPoint.x, outTangent.x, inTangent.x, t),
+                Hermite(t0, t1, startPoint.y, endPoint.y, outTangent.y, inTangent.y, t),
+                Hermite(t0, t1, startPoint.z, endPoint.z, outTangent.z, inTangent.z, t),
+                Hermite(t0, t1, startPoint.w, endPoint.w, outTangent.w, inTangent.w, t)
+            );
+        }
+
         public readonly static byte[] Icon = Convert.FromBase64String(
                 "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAABYlAAAWJQFJUiTwAAAD" +
                 "E0lEQVRYhcWXvUvrUBjGn7apxVRaSlXwY/BjaECdi0ugbtpZREHUxU3Foa7eP0EzCAYHt24mOolL" +

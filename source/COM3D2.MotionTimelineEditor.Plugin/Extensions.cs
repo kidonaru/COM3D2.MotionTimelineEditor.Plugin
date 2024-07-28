@@ -547,6 +547,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             return new Vector3(values[0], values[1], values[2]);
         }
+
+        public static Vector4 ToVector4(this float[] values)
+        {
+            if (values.Length != 4)
+            {
+                PluginUtils.LogError("ToVector4: 不正なfloat配列です length={0}", values.Length);
+                return Vector4.zero;
+            }
+            return new Vector4(values[0], values[1], values[2], values[3]);
+        }
     }
 
 }
