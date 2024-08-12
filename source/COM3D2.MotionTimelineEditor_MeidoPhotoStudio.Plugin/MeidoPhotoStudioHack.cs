@@ -472,7 +472,8 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             mps.lightManager.AddLight(null, false);
 
             var dragPointLight = mps.lightManager.CurrentLight;
-            dragPointLight.SetLightType(ConvertLightType(stat.type));
+            stat.light = dragPointLight.GetLight();
+            stat.transform = stat.light.transform;
             stat.obj = dragPointLight;
             ApplyLight(stat);
         }
@@ -484,6 +485,12 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             {
                 PluginUtils.LogError("ApplyLight: ライトが見つかりません" + stat.name);
                 return;
+            }
+
+            var lightType = ConvertLightType(stat.type);
+            if (lightType != dragPointLight.SelectedLightType)
+            {
+                dragPointLight.SetLightType(lightType);
             }
 
             var light = stat.light;

@@ -817,7 +817,8 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             UpdateLightCombo();
 
             stat.light = light;
-            light.type = stat.type;
+            stat.transform = gameObject.transform;
+            stat.obj = gameObject;
             ApplyLight(stat);
 
             var gLight = multipleMaids.gLight;
@@ -864,6 +865,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             var light = stat.light;
             var transform = stat.transform;
 
+            light.type = stat.type;
             multipleMaids.lightColorR[lightIndex] = light.color.r;
             multipleMaids.lightColorG[lightIndex] = light.color.g;
             multipleMaids.lightColorB[lightIndex] = light.color.b;
