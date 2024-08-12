@@ -122,6 +122,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             {
                 _lightList.Clear();
 
+                int index = 0;
                 foreach (var dragPointLight in mps.lightList)
                 {
                     if (dragPointLight == null)
@@ -130,9 +131,9 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                     }
 
                     var light = dragPointLight.GetLight();
+                    var transform = light.transform;
 
-                    var stat = new StudioLightStat(
-                        light, light.transform, dragPointLight);
+                    var stat = new StudioLightStat(light, transform, dragPointLight, index++);
                     _lightList.Add(stat);
                 }
 

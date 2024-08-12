@@ -112,11 +112,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void DeleteAllModels()
         {
-            studioHack.DeleteAllModels();
+            if (studioHack != null && studioHack.IsValid())
+            {
+                studioHack.DeleteAllModels();
+            }
 
             foreach (var modelHack in modelHackMap.Values)
             {
-                modelHack.DeleteAllModels();
+                if (modelHack.IsValid())
+                {
+                    modelHack.DeleteAllModels();
+                }
             }
         }
 

@@ -103,6 +103,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 _lightList.Clear();
 
+                int index = 0;
                 foreach (var targetObj in studio.lightWindow.GetTargetList())
                 {
                     Light light;
@@ -124,7 +125,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         continue;
                     }
 
-                    var stat = new StudioLightStat(light, transform, targetObj);
+                    var stat = new StudioLightStat(light, transform, targetObj, index++);
                     _lightList.Add(stat);
                 }
 
@@ -462,49 +463,43 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void CreateLight(StudioLightStat stat)
         {
-            if (stat.type != LightType.Spot || stat.type != LightType.Point)
-            {
-                return;
-            }
-
-            var lightObj = studio.InstantiateLight();
-
-            if (stat.type == LightType.Spot)
-            {
-                UTY.GetChildObject(lightObj, "LightPoint", false).SetActive(false);
-			    UTY.GetChildObject(lightObj, "LightSpot", false).SetActive(true);
-            }
-            else
-            {
-                UTY.GetChildObject(lightObj, "LightPoint", false).SetActive(true);
-			    UTY.GetChildObject(lightObj, "LightSpot", false).SetActive(false);
-            }
-
-            var light = lightObj.GetComponentInChildren<Light>(false);
-            stat.light = light;
-            ApplyLight(stat);
-
-            studio.lightWindow.AddTransTargetObject(lightObj, "◆", string.Empty, PhotoTransTargetObject.Type.Light);
+            return;
         }
 
         public override void ApplyLight(StudioLightStat stat)
         {
-            var light = stat.light;
-            if (light == null)
+            var targetObj = stat.obj as PhotoTransTargetObject;
+            if (targetObj == null || stat.light == null)
             {
                 PluginUtils.LogError("ライトが見つかりません: " + stat.name);
                 return;
             }
 
+            if (stat.light.type != stat.type)
+            {
+                if (stat.type == LightType.Spot)
+                {
+                    UTY.GetChildObject(targetObj.obj, "LightPoint", false).SetActive(false);
+                    UTY.GetChildObject(targetObj.obj, "LightSpot", false).SetActive(true);
+                }
+                else if (stat.type == LightType.Point)
+                {
+                    UTY.GetChildObject(targetObj.obj, "LightPoint", false).SetActive(true);
+                    UTY.GetChildObject(targetObj.obj, "LightSpot", false).SetActive(false);
+                }
+                stat.light = targetObj.obj.GetComponentInChildren<Light>(false);
+                stat.transform = targetObj.obj.transform;
+            }
+
             if (stat.type == LightType.Directional)
             {
                 var directionalLightWindow = studio.directionalLightWindow;
-                directionalLightWindow.OnChangetIntensityValue(null, light.intensity);
-                directionalLightWindow.OnChangetShadowValue(null, light.shadowStrength);
-                directionalLightWindow.OnChangetColorValue(null, light.color);
+                directionalLightWindow.OnChangetIntensityValue(null, stat.light.intensity);
+                directionalLightWindow.OnChangetShadowValue(null, stat.light.shadowStrength);
+                directionalLightWindow.OnChangetColorValue(null, stat.light.color);
             }
 
-            light.enabled = stat.visible;
+            stat.light.enabled = stat.visible;
         }
 
         public override void ChangeBackground(string bgName)

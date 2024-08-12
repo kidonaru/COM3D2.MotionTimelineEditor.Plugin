@@ -181,6 +181,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             ApplyCurrentFrame(true);
         }
 
+        public override void OnLightUpdated(StudioLightStat light)
+        {
+            InitMenuItems();
+            ApplyCurrentFrame(true);
+        }
+
         public override void OnCopyLight(StudioLightStat sourceLight, StudioLightStat newLight)
         {
             var sourceLightName = sourceLight.name;
@@ -427,7 +433,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 }
 
                 builder.Append(light.type + ",");
-                builder.Append(light.group + ",");
+                builder.Append(light.index + ",");
                 builder.Append(stTime.ToString("0.000") + ",");
                 builder.Append(motion.myTm.stPos.x.ToString("0.000") + ",");
                 builder.Append(motion.myTm.stPos.y.ToString("0.000") + ",");

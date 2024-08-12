@@ -30,25 +30,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Light light = null;
         public Transform transform = null;
         public object obj = null;
-        private int _group = 0;
-        public int group
+        private int _index = 0;
+        public int index
         {
             get
             {
-                return _group;
+                return _index;
             }
             set
             {
-                if (_group == value)
+                if (_index == value)
                 {
                     return;
                 }
 
-                _group = value;
+                _index = value;
                 InitName();
             }
         }
-        public string name = "Directional";
+        public string name = "Light";
         public string displayName = "通常";
 
         public int typeOrder
@@ -85,27 +85,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
         }
 
-        public StudioLightStat(Light light, Transform transform, object obj)
+        public StudioLightStat(Light light, Transform transform, object obj, int index)
         {
             this.type = light.type;
             this.visible = light.enabled;
             this.light = light;
-            this.group = 0;
+            this.index = index;
             this.transform = transform;
             this.obj = obj;
         }
 
-        public void InitName()
+        public StudioLightStat(LightType type, bool visible, int index)
         {
-            var groupSuffix = StudioModelManager.GetGroupSuffix(group);
-            this.name = type.ToString() + groupSuffix;
-            this.displayName = LightTypeNames[type] + groupSuffix;
+            this.type = type;
+            this.visible = visible;
+            this.index = index;
         }
 
-        public string GetNameByGroup(int group)
+        public void InitName()
         {
-            var groupSuffix = StudioModelManager.GetGroupSuffix(group);
-            return type.ToString() + groupSuffix;
+            var groupSuffix = StudioModelManager.GetGroupSuffix(index);
+            this.name = "Light" + groupSuffix;
+            this.displayName = LightTypeNames[type] + groupSuffix;
         }
 
         public void FromStat(StudioLightStat stat)
@@ -116,7 +117,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             light = stat.light;
             transform = stat.transform;
             obj = stat.obj;
-            group = stat.group;
+            index = stat.index;
         }
     }
 }

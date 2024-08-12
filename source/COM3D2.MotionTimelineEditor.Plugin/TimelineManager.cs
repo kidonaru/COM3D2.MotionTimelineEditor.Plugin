@@ -1844,6 +1844,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (IsValidData())
             {
                 UpdateTimelineLights();
+
+                foreach (var layer in layers)
+                {
+                    layer.OnLightUpdated(light);
+                }
             }
         }
 

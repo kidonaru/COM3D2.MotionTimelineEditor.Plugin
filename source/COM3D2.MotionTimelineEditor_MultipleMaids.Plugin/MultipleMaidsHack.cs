@@ -228,6 +228,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             {
                 _lightList.Clear();
 
+                int index = 0;
                 foreach (var lightObj in multipleMaids.lightList)
                 {
                     var light = lightObj.GetComponent<Light>();
@@ -237,7 +238,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                     }
 
                     var transform = lightObj.transform;
-                    var stat = new StudioLightStat(light, transform, lightObj);
+                    var stat = new StudioLightStat(light, transform, lightObj, index++);
                     _lightList.Add(stat);
                 }
 

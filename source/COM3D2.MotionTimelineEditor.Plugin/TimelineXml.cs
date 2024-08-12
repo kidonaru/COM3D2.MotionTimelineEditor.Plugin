@@ -24,6 +24,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         [XmlElement("Name")]
         public string name;
+        [XmlElement("Type")]
+        public LightType type;
         [XmlElement("Visible")]
         public bool visible = true;
     }

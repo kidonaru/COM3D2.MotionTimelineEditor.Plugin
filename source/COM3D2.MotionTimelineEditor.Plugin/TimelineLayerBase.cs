@@ -474,6 +474,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // do nothing
         }
 
+        public virtual void OnLightUpdated(StudioLightStat light)
+        {
+            // do nothing
+        }
+
         public virtual void OnCopyLight(StudioLightStat sourceLight, StudioLightStat newLight)
         {
             // do nothing
