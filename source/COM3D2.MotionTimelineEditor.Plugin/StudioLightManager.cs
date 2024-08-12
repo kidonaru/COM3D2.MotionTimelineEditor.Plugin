@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -184,6 +185,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void SetupLights(List<TimelineLightData> lightDataList)
         {
+            lightDataList = lightDataList.ToList(); // 更新される可能性があるので複製
+            PluginUtils.LogDebug("SetupLights: count={0}", lightDataList.Count);
             LateUpdate(true);
 
             int index = 0;
@@ -224,6 +227,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             LateUpdate(true);
         }
 
+        public bool CanCreateLight()
+        {
+            return lightHackManager.CanCreateLight();
+        }
+
         public void OnPluginDisable()
         {
             Reset();
@@ -241,10 +249,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             lightNames.Clear();
             _prevUpdateFrame = -1;
 
-            if (studioHack != null && studioHack.IsValid())
-            {
-                studioHack.DeleteAllLights();
-            }
+            lightHackManager.DeleteAllLights();
         }
 
         public StudioLightStat CreateLightStat(

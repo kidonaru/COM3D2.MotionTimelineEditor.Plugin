@@ -172,7 +172,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             paramUpdated |= view.DrawSliderValue(
                 new GUIView.SliderOption
                 {
-                    label = "足の高さ",
+                    label = "足首の高さ",
                     labelWidth = 60,
                     min = 0f,
                     max = 1f,

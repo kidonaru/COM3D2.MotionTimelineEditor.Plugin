@@ -75,6 +75,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
             view.EndLayout();
 
+            view.SetEnabled(light.index > 0 && lightManager.CanCreateLight());
+
             view.BeginHorizontal();
             {
                 if (view.DrawButton("複製", 45, 20))
@@ -88,6 +90,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 }
             }
             view.EndLayout();
+
+            view.SetEnabled(true);
 
             view.DrawHorizontalLine(Color.gray);
         }

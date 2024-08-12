@@ -7,6 +7,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         List<StudioLightStat> lightList { get; }
 
+        bool CanCreateLight();
         void DeleteAllLights();
         void DeleteLight(StudioLightStat stat);
         void CreateLight(StudioLightStat stat);
@@ -52,24 +53,50 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
         }
 
+        public bool IsValid()
+        {
+            return studioHack != null && studioHack.IsValid();
+        }
+
+        public bool CanCreateLight()
+        {
+            if (IsValid())
+            {
+                return studioHack.CanCreateLight();
+            }
+            return false;
+        }
+
         public void DeleteAllLights()
         {
-            studioHack.DeleteAllLights();
+            if (IsValid())
+            {
+                studioHack.DeleteAllLights();
+            }
         }
 
         public void DeleteLight(StudioLightStat stat)
         {
-            studioHack.DeleteLight(stat);
+            if (IsValid())
+            {
+                studioHack.DeleteLight(stat);
+            }
         }
 
         public void CreateLight(StudioLightStat stat)
         {
-            studioHack.CreateLight(stat);
+            if (IsValid())
+            {
+                studioHack.CreateLight(stat);
+            }
         }
 
         public void ApplyLight(StudioLightStat stat)
         {
-            studioHack.ApplyLight(stat);
+            if (IsValid())
+            {
+                studioHack.ApplyLight(stat);
+            }
         }
 
         public void Update()

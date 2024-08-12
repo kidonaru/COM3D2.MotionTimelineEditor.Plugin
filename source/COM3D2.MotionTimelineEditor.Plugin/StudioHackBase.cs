@@ -213,6 +213,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public virtual bool CanCreateLight()
+        {
+            return false;
+        }
+
         public virtual void DeleteAllLights()
         {
             // do nothing

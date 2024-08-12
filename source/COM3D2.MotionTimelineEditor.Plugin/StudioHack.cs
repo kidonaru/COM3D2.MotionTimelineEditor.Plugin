@@ -443,6 +443,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public override bool CanCreateLight()
+        {
+            return false;
+        }
+
         public override void DeleteAllLights()
         {
             foreach (var light in lightList)
@@ -453,6 +458,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void DeleteLight(StudioLightStat stat)
         {
+            if (stat.index == 0)
+            {
+                return;
+            }
+
             var targetObj = stat.obj as PhotoTransTargetObject;
             if (targetObj != null && targetObj.obj != null && stat.light != null)
             {
@@ -463,7 +473,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void CreateLight(StudioLightStat stat)
         {
-            return;
+            var targetList = studio.lightWindow.GetTargetList();
+            if (stat.index >= targetList.Count)
+            {
+                return;
+            }
+
+            var targetObj = targetList[stat.index];
+            if (targetObj != null && targetObj.obj != null)
+            {
+                stat.light = targetObj.obj.GetComponentInChildren<Light>(false);
+                stat.transform = targetObj.obj.transform;
+                stat.obj = targetObj;
+                ApplyLight(stat);
+            }
         }
 
         public override void ApplyLight(StudioLightStat stat)

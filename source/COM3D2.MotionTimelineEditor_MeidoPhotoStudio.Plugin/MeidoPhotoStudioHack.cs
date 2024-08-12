@@ -427,6 +427,11 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             prop.Visible = visible;
         }
 
+        public override bool CanCreateLight()
+        {
+            return true;
+        }
+
         public override void DeleteAllLights()
         {
             mps.lightManager.ClearLights();

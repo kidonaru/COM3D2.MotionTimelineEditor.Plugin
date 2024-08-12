@@ -718,6 +718,11 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             item.localScale = localScale;
         }
 
+        public override bool CanCreateLight()
+        {
+            return true;
+        }
+
         public override void DeleteAllLights()
         {
             var lightList = multipleMaids.lightList;

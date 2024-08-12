@@ -349,14 +349,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        protected static LightHackManager lightHackManager
-        {
-            get
-            {
-                return LightHackManager.instance;
-            }
-        }
-
         protected static StudioHackBase studioHack
         {
             get

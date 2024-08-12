@@ -41,7 +41,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 new CustomValueInfo
                 {
                     index = 2,
-                    name = "足の高さ",
+                    name = "足首の高さ",
                     defaultValue = 0.05f,
                 }
             },
