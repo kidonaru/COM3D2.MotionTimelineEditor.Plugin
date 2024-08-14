@@ -148,6 +148,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.limbControl = GetLimbControl(holdType);
         }
 
+        public bool isFootGroundingEnabled
+        {
+            get
+            {
+                if (!maidCache.isFootGrounding)
+                {
+                    return false;
+                }
+                if (holdType != IKHoldType.Foot_L_Tip && holdType != IKHoldType.Foot_R_Tip)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
         public void LateUpdate()
         {
             if (isHold)
@@ -164,7 +180,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 var targetPosition = this.targetPosition;
-                if (maidCache.isFootGrounding)
+                if (isFootGroundingEnabled)
                 {
                     targetPosition.y = maidCache.floorHeight + maidCache.footBaseOffset;
                 }
@@ -173,7 +189,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 //PluginUtils.LogDebug("  target: " + targetPosition);
                 UpdateIKPosition(targetPosition);
 
-                if (maidCache.isFootGrounding)
+                if (isFootGroundingEnabled)
                 {
                     AdjustFootGrounding();
                 }
