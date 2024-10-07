@@ -8,7 +8,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
     {
         public const string PluginName = "MotionTimelineEditor_DCM";
         public const string PluginFullName = "COM3D2." + PluginName + ".Plugin";
-        public const string PluginVersion = "2.7.0.1";
+        public const string PluginVersion = "2.7.0.2";
         public const string WindowName = PluginName + " " + PluginVersion;
     }
 }

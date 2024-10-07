@@ -60,7 +60,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     continue;
                 }
 
-                var skinMesh = bodySkin.obj.GetComponentInChildren<SkinnedMeshRenderer>();
+                var skinMesh = bodySkin.obj.GetComponentInChildren<SkinnedMeshRenderer>(true);
                 if (skinMesh == null || skinMesh.bones == null)
                 {
                     continue;
