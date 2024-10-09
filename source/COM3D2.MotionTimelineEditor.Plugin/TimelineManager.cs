@@ -1327,6 +1327,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         currentLayer.UpdateBones(frameNo, tmpFrame.bones);
                     }
 
+                    timeline.AdjustMaxFrameNo();
+
                     if (flip)
                     {
                         RequestHistory("反転ペースト");

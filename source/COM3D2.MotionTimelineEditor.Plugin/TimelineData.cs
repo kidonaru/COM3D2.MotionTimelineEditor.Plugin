@@ -132,7 +132,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     return;
                 }
 
-                _maxFrameNo = Mathf.Max(value, maxExistFrameNo, 1);
+                _maxFrameNo = value;
+                AdjustMaxFrameNo();
             }
         }
 
@@ -660,6 +661,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     layer.OnBoneNameRemoved(extendBoneName);
                 }
             }
+        }
+
+        public void AdjustMaxFrameNo()
+        {
+            _maxFrameNo = Mathf.Max(_maxFrameNo, maxExistFrameNo, 1);
         }
 
         public void FromXml(TimelineXml xml)
