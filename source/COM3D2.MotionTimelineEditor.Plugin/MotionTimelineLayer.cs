@@ -236,6 +236,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             foreach (var extendBoneName in timeline.GetExtendBoneNames(slotNo))
             {
+                if (maidCache == null)
+                {
+                    break;
+                }
                 var entity = maidCache.extendBoneCache.GetEntity(extendBoneName);
                 if (entity == null)
                 {
@@ -356,6 +360,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void ApplyMotion(MotionData motion, float lerpFrame)
         {
+            if (maidCache == null)
+            {
+                return;
+            }
+
             var boneName = motion.name;
             var bone = maidCache.GetBoneTransform(boneName);
             if (bone == null)
@@ -396,7 +405,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void ApplyIKHoldMotion(IKHoldMotionData motion, float lerpFrame)
         {
-            if (!timeline.isIKAnime)
+            if (!timeline.isIKAnime || maidCache == null)
             {
                 return;
             }
