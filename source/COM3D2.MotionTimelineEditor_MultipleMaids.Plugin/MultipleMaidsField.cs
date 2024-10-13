@@ -35,6 +35,28 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         public FieldInfo gLight;
         public FieldInfo lightCombo;
         public FieldInfo lightComboList;
+        
+        public FieldInfo isWear;
+        public FieldInfo isSkirt;
+        public FieldInfo isBra;
+        public FieldInfo isPanz;
+        public FieldInfo isMaid;
+        public FieldInfo isMekure1;
+        public FieldInfo isMekure2;
+        public FieldInfo isZurasi;
+        public FieldInfo isMekure1a;
+        public FieldInfo isMekure2a;
+        public FieldInfo isZurasia;
+        public FieldInfo isHeadset;
+        public FieldInfo isAccUde;
+        public FieldInfo isStkg;
+        public FieldInfo isShoes;
+        public FieldInfo isGlove;
+        public FieldInfo isMegane;
+        public FieldInfo isAccSenaka;
+        public FieldInfo mekure1;
+        public FieldInfo mekure2;
+        public FieldInfo zurasi;
 
         public bool Init()
         {

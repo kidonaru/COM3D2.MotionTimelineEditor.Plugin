@@ -94,7 +94,9 @@
     <Compile Include="TransformDataMove.cs" />
     <Compile Include="TransformDataSe.cs" />
     <Compile Include="TransformDataShapeKey.cs" />
+    <Compile Include="TransformDataUndress.cs" />
     <Compile Include="TransformDataVoice.cs" />
+    <Compile Include="UndressTimelineLayer.cs" />
     <Compile Include="VoiceTimelineLayer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

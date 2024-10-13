@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -267,6 +266,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var bgObject = GameMain.Instance.BgMgr.current_bg_object;
             return bgObject != null && bgObject.activeSelf;
+        }
+
+        public virtual void UpdateUndress(DressSlotID slotId, bool isVisible)
+        {
+            // do nothing
         }
 
         public int GetMaidSlotNo(string guid)

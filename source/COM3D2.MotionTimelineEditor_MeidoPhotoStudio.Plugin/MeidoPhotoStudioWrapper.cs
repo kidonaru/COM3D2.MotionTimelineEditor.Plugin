@@ -89,6 +89,18 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
         }
 
+        public MaidDressingPane maidDressingPane
+        {
+            get
+            {
+                if (poseWindowPane == null)
+                {
+                    return null;
+                }
+                return (MaidDressingPane)field.maidDressingPane.GetValue(poseWindowPane);
+            }
+        }
+
         public Toggle ikToggle
         {
             get

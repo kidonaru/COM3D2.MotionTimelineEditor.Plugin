@@ -72,6 +72,7 @@
     <Compile Include="COM3D2.MotionTimelineEditor.Plugin.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="ConfigManager.cs" />
+    <Compile Include="DressUtils.cs" />
     <Compile Include="EasyMenuItem.cs" />
     <Compile Include="ExtendBoneCache.cs" />
     <Compile Include="ExtendBoneMenuItem.cs" />

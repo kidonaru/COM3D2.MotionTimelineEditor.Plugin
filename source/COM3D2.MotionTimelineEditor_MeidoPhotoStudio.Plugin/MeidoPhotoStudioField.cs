@@ -15,6 +15,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
         public FieldInfo propManager;
         public FieldInfo lightManager;
         public FieldInfo maidIKPane;
+        public FieldInfo maidDressingPane;
         public FieldInfo ikToggle;
         public FieldInfo releaseIKToggle;
         public FieldInfo boneIKToggle;
@@ -29,6 +30,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             { "propManager", typeof(MPS) },
             { "lightManager", typeof(MPS) },
             { "maidIKPane", typeof(PoseWindowPane) },
+            { "maidDressingPane", typeof(PoseWindowPane) },
             { "ikToggle", typeof(MaidIKPane) },
             { "releaseIKToggle", typeof(MaidIKPane) },
             { "boneIKToggle", typeof(MaidIKPane) },

@@ -882,6 +882,132 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             light.enabled = stat.visible;
         }
 
+        private bool mekure1
+        {
+            get
+            {
+                var mekure1Array = multipleMaids.mekure1;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < mekure1Array.Length)
+                {
+                    return mekure1Array[selectMaidIndex];
+                }
+
+                return false;
+            }
+            set
+            {
+                var mekure1Array = multipleMaids.mekure1;
+                for (int i = 0; i < mekure1Array.Length; i++)
+                {
+                    mekure1Array[i] = value;
+                }
+            }
+        }
+
+        private bool mekure2
+        {
+            get
+            {
+                var mekure2Array = multipleMaids.mekure2;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < mekure2Array.Length)
+                {
+                    return mekure2Array[selectMaidIndex];
+                }
+
+                return false;
+            }
+            set
+            {
+                var mekure2Array = multipleMaids.mekure2;
+                for (int i = 0; i < mekure2Array.Length; i++)
+                {
+                    mekure2Array[i] = value;
+                }
+            }
+        }
+
+        private bool zurasi
+        {
+            get
+            {
+                var zurasiArray = multipleMaids.zurasi;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < zurasiArray.Length)
+                {
+                    return zurasiArray[selectMaidIndex];
+                }
+
+                return false;
+            }
+            set
+            {
+                var zurasiArray = multipleMaids.zurasi;
+                for (int i = 0; i < zurasiArray.Length; i++)
+                {
+                    zurasiArray[i] = value;
+                }
+            }
+        }
+
+        public override void UpdateUndress(DressSlotID slotId, bool isVisible)
+        {
+            switch (slotId)
+            {
+                case DressSlotID.wear:
+                case DressSlotID.onepiece:
+                case DressSlotID.mizugi:
+                    multipleMaids.isWear = isVisible;
+                    break;
+                case DressSlotID.skirt:
+                    multipleMaids.isSkirt = isVisible;
+                    break;
+                case DressSlotID.bra:
+                    multipleMaids.isBra = isVisible;
+                    break;
+                case DressSlotID.panz:
+                    multipleMaids.isPanz = isVisible;
+                    break;
+                case DressSlotID.undressfront:
+                    mekure1 = isVisible;
+                    break;
+                case DressSlotID.undressback:
+                    mekure2 = isVisible;
+                    break;
+                case DressSlotID.undressshift:
+                    zurasi = isVisible;
+                    break;
+                case DressSlotID.headset:
+                case DressSlotID.accHead:
+                case DressSlotID.accKami_1_:
+                case DressSlotID.accKami_2_:
+                case DressSlotID.accKami_3_:
+                case DressSlotID.accKamiSubL:
+                case DressSlotID.accKamiSubR:
+                    multipleMaids.isHeadset = isVisible;
+                    break;
+                case DressSlotID.accUde:
+                    multipleMaids.isAccUde = isVisible;
+                    break;
+                case DressSlotID.stkg:
+                    multipleMaids.isStkg = isVisible;
+                    break;
+                case DressSlotID.shoes:
+                    multipleMaids.isShoes = isVisible;
+                    break;
+                case DressSlotID.glove:
+                    multipleMaids.isGlove = isVisible;
+                    break;
+                case DressSlotID.megane:
+                    multipleMaids.isMegane = isVisible;
+                    break;
+                case DressSlotID.accSenaka:
+                    multipleMaids.isAccSenaka = isVisible;
+                    break;
+            }
+        }
+
         protected override void OnMaidChanged(int maidSlotNo, Maid maid)
         {
             base.OnMaidChanged(maidSlotNo, maid);

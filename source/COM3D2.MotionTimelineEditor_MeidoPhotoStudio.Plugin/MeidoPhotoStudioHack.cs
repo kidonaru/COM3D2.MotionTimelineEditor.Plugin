@@ -511,6 +511,11 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             light.enabled = stat.visible;
         }
 
+        public override void UpdateUndress(DressSlotID slotId, bool isVisible)
+        {
+            mps.maidDressingPane.UpdatePane();
+        }
+
         protected override void OnMaidChanged(int maidSlotNo, Maid maid)
         {
             base.OnMaidChanged(maidSlotNo, maid);
