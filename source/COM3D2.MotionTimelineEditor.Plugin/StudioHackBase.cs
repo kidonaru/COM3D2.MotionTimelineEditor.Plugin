@@ -268,7 +268,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return bgObject != null && bgObject.activeSelf;
         }
 
-        public virtual void UpdateUndress(DressSlotID slotId, bool isVisible)
+        public virtual void UpdateUndress(Maid maid, DressSlotID slotId, bool isVisible)
         {
             // do nothing
         }

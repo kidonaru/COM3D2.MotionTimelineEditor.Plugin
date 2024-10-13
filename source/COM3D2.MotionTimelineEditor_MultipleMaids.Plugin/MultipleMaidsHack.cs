@@ -951,8 +951,13 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
         }
 
-        public override void UpdateUndress(DressSlotID slotId, bool isVisible)
+        public override void UpdateUndress(Maid maid, DressSlotID slotId, bool isVisible)
         {
+            if (maid != selectedMaid)
+            {
+                return;
+            }
+
             switch (slotId)
             {
                 case DressSlotID.wear:
