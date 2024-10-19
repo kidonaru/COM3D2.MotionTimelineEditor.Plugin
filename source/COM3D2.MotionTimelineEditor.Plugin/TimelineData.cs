@@ -300,10 +300,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float videoScale = 1f;
         public float videoStartTime = 0f;
         public float videoVolume = 0.5f;
+        public float videoAlpha = 1f;
         public Vector2 videoGUIPosition = new Vector2(0, 0);
         public float videoGUIScale = 1f;
         public float videoGUIAlpha = 1f;
         public Vector2 videoBackmostPosition = new Vector2(0, 0);
+        public float videoBackmostScale = 1f;
+        public float videoBackmostAlpha = 0.5f;
+        public Vector2 videoFrontmostPosition = new Vector2(-0.8f, 0.8f);
+        public float videoFrontmostScale = 0.38f;
+        public float videoFrontmostAlpha = 1f;
 
         public int maxFrameCount
         {
@@ -736,10 +742,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             videoScale = xml.videoScale;
             videoStartTime = xml.videoStartTime;
             videoVolume = xml.videoVolume;
+            videoAlpha = xml.videoAlpha;
             videoGUIPosition = xml.videoGUIPosition;
             videoGUIScale = xml.videoGUIScale;
             videoGUIAlpha = xml.videoGUIAlpha;
             videoBackmostPosition = xml.videoBackmostPosition;
+            videoBackmostScale = xml.videoBackmostScale;
+            videoBackmostAlpha = xml.videoBackmostAlpha;
 
             layers = new List<ITimelineLayer>(xml.layers.Count);
             foreach (var layerXml in xml.layers)
@@ -838,10 +847,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.videoScale = videoScale;
             xml.videoStartTime = videoStartTime;
             xml.videoVolume = videoVolume;
+            xml.videoAlpha = videoAlpha;
             xml.videoGUIPosition = videoGUIPosition;
             xml.videoGUIScale = videoGUIScale;
             xml.videoGUIAlpha = videoGUIAlpha;
             xml.videoBackmostPosition = videoBackmostPosition;
+            xml.videoBackmostScale = videoBackmostScale;
+            xml.videoBackmostAlpha = videoBackmostAlpha;
 
             return xml;
         }

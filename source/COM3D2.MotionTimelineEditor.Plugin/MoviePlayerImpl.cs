@@ -1,5 +1,6 @@
 using UnityEngine;
 using RenderHeads.Media.AVProVideo;
+using System.Collections;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -8,6 +9,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private MediaPlayer _mediaPlayer = null;
         private DisplayIMGUI _displayIMGUI = null;
         private MeshFilter _meshFilter = null;
+        private MeshRenderer _meshRenderer = null;
+        private ApplyToMaterial _applyToMaterial = null;
+
         private bool _isAnmPlaying = false;
         private bool _isStarted = false;
         private float _prevTime = 0f;
@@ -15,6 +19,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private float _duration = 0f;
         private float _frameRate = 60f;
         private bool _metaUpdated = false;
+        private Material _gridMaterial = null;
 
         private static TimelineManager timelineManager
         {
@@ -40,6 +45,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static StudioHackBase studioHack
+        {
+            get
+            {
+                return StudioHackManager.studioHack;
+            }
+        }
+
+        private static Config config
+        {
+            get
+            {
+                return ConfigManager.config;
+            }
+        }
+
         public bool isDisplayOnGUI
         {
             get
@@ -53,6 +74,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return timeline.videoDisplayType == VideoDisplayType.Backmost;
+            }
+        }
+
+        public bool isDisplayFrontmost
+        {
+            get
+            {
+                return timeline.videoDisplayType == VideoDisplayType.Frontmost;
             }
         }
 
@@ -94,16 +123,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             else
             {
-                MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
+                _meshRenderer = gameObject.AddComponent<MeshRenderer>();
                 _meshFilter = gameObject.AddComponent<MeshFilter>();
                 _meshFilter.mesh = CreateQuadMesh();
 
-                Material videoMaterial = new Material(Shader.Find("Unlit/Texture"));
-                meshRenderer.material = videoMaterial;
+                Material material = new Material(Shader.Find(config.videoShaderName));
+                _meshRenderer.material = material;
 
-                ApplyToMaterial applyToMaterial = gameObject.AddComponent<ApplyToMaterial>();
-                applyToMaterial.Material = videoMaterial;
-                applyToMaterial.Player = _mediaPlayer;
+                _applyToMaterial = gameObject.AddComponent<ApplyToMaterial>();
+                _applyToMaterial.Material = material;
+                _applyToMaterial.Player = _mediaPlayer;
+            }
+
+            CreateGridMaterial();
+        }
+
+        private void CreateGridMaterial()
+        {
+            if (_gridMaterial == null)
+            {
+                Shader shader = Shader.Find("Hidden/Internal-Colored");
+                _gridMaterial = new Material(shader);
+                _gridMaterial.hideFlags = HideFlags.HideAndDontSave;
+                _gridMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                _gridMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                _gridMaterial.SetInt("_Cull", (int)UnityEngine.Rendering.CullMode.Off);
+                _gridMaterial.SetInt("_ZWrite", 0);
             }
         }
 
@@ -112,6 +157,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _mediaPlayer = null;
             _displayIMGUI = null;
             _meshFilter = null;
+            _meshRenderer = null;
         }
 
         public void LoadMovie(string videoPath)
@@ -127,7 +173,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             UpdateVolume();
             UpdateTransform();
-            UpdateColor();
             UpdateSpeed();
         }
 
@@ -160,8 +205,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void LateUpdate()
         {
-            if (isDisplayBackmost)
+            if (isDisplayBackmost || isDisplayFrontmost)
             {
+                // ビルボードの更新のため毎フレーム呼び出す
                 UpdateTransform();
             }
         }
@@ -188,17 +234,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         _displayIMGUI._height = timeline.videoGUIScale;
                     }
                 }
-                else if (isDisplayBackmost)
+                else if (isDisplayBackmost || isDisplayFrontmost)
                 {
                     var transform = gameObject.transform;
                     var camera = Camera.main;
-                    var distanceFromCamera = camera.farClipPlane - 10f;
+                    var distanceFromCamera = isDisplayBackmost ? (camera.farClipPlane - 10f) : (camera.nearClipPlane + 0.1f);
 
                     // アスペクト比調整
                     var scale = Vector3.one;
                     scale.y = 2f * distanceFromCamera *
                             Mathf.Tan(camera.fieldOfView * 0.5f * Mathf.Deg2Rad);
                     scale.x = scale.y * _aspectRatio;
+                    scale *= isDisplayBackmost ? timeline.videoBackmostScale : timeline.videoFrontmostScale;
                     transform.localScale = scale;
 
                     // 位置調整
@@ -266,15 +313,75 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void UpdateColor()
+        private Color videoColor
         {
-            if (_displayIMGUI != null)
+            get
             {
                 var color = Color.white;
-                color.a = timeline.videoGUIAlpha;
-                _displayIMGUI._alphaBlend = color.a != 1f;
-                _displayIMGUI._color = color;
+                if (isDisplayOnGUI)
+                {
+                    color.a = timeline.videoGUIAlpha;
+                }
+                else if (isDisplayBackmost)
+                {
+                    color.a = timeline.videoBackmostAlpha;
+                }
+                else if (isDisplayFrontmost)
+                {
+                    color.a = timeline.videoFrontmostAlpha;
+                }
+                else
+                {
+                    color.a = timeline.videoAlpha;
+                }
+                return color;
             }
+        }
+
+        public void UpdateColor()
+        {
+            if (isDisplayOnGUI)
+            {
+                if (_displayIMGUI != null)
+                {
+                    var color = videoColor;
+                    _displayIMGUI._alphaBlend = color.a != 1f;
+                    _displayIMGUI._color = color;
+                }
+            }
+            else
+            {
+                if (_meshRenderer != null)
+                {
+                    var color = videoColor;
+                    _meshRenderer.material.SetColor("_Color", color);
+                    _meshRenderer.material.SetFloat("_ZWrite", (color.a == 1f) ? 1f : 0f);
+                    _meshRenderer.sortingOrder = GetSortingOrder();
+                }
+            }
+        }
+
+        private int GetSortingOrder()
+        {
+            if (isDisplayBackmost)
+            {
+                return 0;
+            }
+            if (isDisplayFrontmost)
+            {
+                return 9001;
+            }
+            if (timeline.videoAlpha < 1f)
+            {
+                return 3000;
+            }
+            return 2000;
+        }
+
+        private IEnumerator UpdateColorAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            UpdateColor();
         }
 
         public void UpdateMesh()
@@ -288,6 +395,106 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
                 _meshFilter.mesh = CreateQuadMesh();
             }
+        }
+
+        public void UpdateShader()
+        {
+            var shader = Shader.Find(config.videoShaderName);
+            if (shader == null)
+            {
+                PluginUtils.LogError("MoviePlayerImpl：シェーダーが見つかりませんでした：" + name);
+                return;
+            }
+
+            if (_meshRenderer == null || _applyToMaterial == null)
+            {
+                return;
+            }
+
+            Material videoMaterial = new Material(shader);
+            _meshRenderer.material = videoMaterial;
+            _applyToMaterial.Material = videoMaterial;
+        }
+
+        private bool IsGridVisible()
+        {
+            if (_gridMaterial == null || studioHack == null)
+            {
+                return false;
+            }
+            if (!config.isGridVisible || !config.isGridVisibleInVideo || isDisplayOnGUI)
+            {
+                return false;
+            }
+            if (config.isGridVisibleOnlyEdit && !studioHack.isPoseEditing)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public void OnRenderObject()
+        {
+            if (!IsGridVisible())
+            {
+                return;
+            }
+
+            _gridMaterial.SetPass(0);
+
+            GL.PushMatrix();
+            GL.MultMatrix(transform.localToWorldMatrix);
+
+            GL.Begin(GL.LINES);
+
+            Color gridColor = config.gridColorInVideo;
+            gridColor.a = config.gridAlpha;
+            GL.Color(gridColor);
+
+            int gridCount = config.gridCount;
+            float cellSize = 1f / gridCount;
+            float half = 0.5f;
+
+            var offset = new Vector3(0, 0, 0);
+            if (isDisplayBackmost)
+            {
+                offset = new Vector3(-timeline.videoBackmostPosition.x, timeline.videoBackmostPosition.y, 0);
+            }
+            else if (isDisplayFrontmost)
+            {
+                offset = new Vector3(-timeline.videoFrontmostPosition.x, timeline.videoFrontmostPosition.y, 0);
+            }
+            else
+            {
+                offset = new Vector3(0, 0.5f, 0);
+            }
+
+            System.Action<Vector3, Vector3> drawLine = (start, end) =>
+            {
+                start += offset;
+                end += offset;
+
+                GL.Vertex3(start.x, start.y, start.z);
+                GL.Vertex3(end.x, end.y, end.z);
+            }; 
+
+            // 縦線を描画
+            for (int i = 0; i <= gridCount; i++)
+            {
+                float x = i * cellSize - half;
+                drawLine(new Vector3(x, -half, 0), new Vector3(x, half, 0));
+            }
+
+            // 横線を描画
+            for (int j = 0; j <= gridCount; j++)
+            {
+                float y = j * cellSize - half;
+                drawLine(new Vector3(-half, y, 0), new Vector3(half, y, 0));
+            }
+
+            GL.End();
+            GL.PopMatrix();
         }
 
         private void OnVideoEvent(
@@ -307,6 +514,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 _isStarted = true;
                 UpdateSeekTime();
+                StartCoroutine(UpdateColorAfterDelay(1f));
             }
 
             if (et == MediaPlayerEvent.EventType.MetaDataReady)
@@ -341,6 +549,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 mesh.vertices = vertices;
             }
+            else if (isDisplayFrontmost)
+            {
+                var vertices = new Vector3[] {
+                    new Vector3(-0.5f, -0.5f, 0),
+                    new Vector3(0.5f, -0.5f, 0),
+                    new Vector3(-0.5f, 0.5f, 0),
+                    new Vector3(0.5f, 0.5f, 0),
+                };
+
+                for (var i = 0; i < vertices.Length; i++)
+                {
+                    var vertex = vertices[i];
+                    vertex.x -= timeline.videoFrontmostPosition.x;
+                    vertex.y += timeline.videoFrontmostPosition.y;
+                    vertices[i] = vertex;
+                }
+
+                mesh.vertices = vertices;
+            }
             else
             {
                 mesh.vertices = new Vector3[] {
@@ -365,4 +592,5 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return mesh;
         }
     }
+    
 }

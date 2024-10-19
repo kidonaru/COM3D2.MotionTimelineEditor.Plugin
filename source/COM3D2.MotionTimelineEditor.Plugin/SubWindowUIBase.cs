@@ -95,7 +95,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return BGMManager.instance;
             }
         }
-        
+
+        protected static GridViewManager gridViewManager
+        {
+            get
+            {
+                return GridViewManager.instance;
+            }
+        }
+
         protected static ITimelineLayer currentLayer
         {
             get

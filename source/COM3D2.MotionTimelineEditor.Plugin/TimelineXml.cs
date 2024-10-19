@@ -156,6 +156,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("VideoVolume")]
         public float videoVolume = 0.5f;
 
+        [XmlElement("VideoAlpha")]
+        public float videoAlpha = 1f;
+
         [XmlElement("VideoGUIPosition")]
         public Vector2 videoGUIPosition = new Vector2(0, 0);
 
@@ -167,6 +170,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         [XmlElement("VideoBackmostPosition")]
         public Vector2 videoBackmostPosition = new Vector2(0, 0);
+
+        [XmlElement("VideoBackmostScale")]
+        public float videoBackmostScale = 1f;
+
+        [XmlElement("VideoBackmostAlpha")]
+        public float videoBackmostAlpha = 1f;
 
         public TimelineXml()
         {

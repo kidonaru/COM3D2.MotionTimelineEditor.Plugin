@@ -29,6 +29,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int historyLimit = 20;
         public float keyRepeatTimeFirst = 0.15f;
         public float keyRepeatTime = 1f / 30f;
+        public string videoShaderName = "CM3D2/Unlit_Texture_Photo_MyObject";
 
         // 表示設定
         public int frameWidth = 11;
@@ -41,6 +42,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int windowPosX = -1;
         public int windowPosY = -1;
         public int menuWidth = 100;
+
+        // グリッド
+        public bool isGridVisible = true;
+        public bool isGridVisibleInDisplay = true;
+        public bool isGridVisibleInWorld = true;
+        public bool isGridVisibleInVideo = true;
+        public bool isGridVisibleOnlyEdit = true;
+        public int gridCount = 4;
+        public float gridAlpha = 0.3f;
+        public float gridLineWidth = 1.0f;
+        public int gridCountInWorld = 20;
+        public float gridAlphaInWorld = 0.3f;
+        public float gridLineWidthInWorld = 1.0f;
+        public float gridCellSize = 0.5f;
 
         // 色設定
         public Color timelineBgColor1 = new Color(0 / 255f, 0 / 255f, 0 / 255f);
@@ -56,6 +71,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Color curveLineSmoothColor = new Color(90 / 255f, 255 / 255f, 25 / 255f);
         public Color curveBgColor = new Color(0 / 255f, 0 / 255f, 0 / 255f, 0.3f);
         public Color windowHoverColor = new Color(48 / 255f, 48 / 255f, 48 / 255f, 224 / 255f);
+        public Color gridColorInDisplay = new Color(1, 1, 1);
+        public Color gridColorInWorld = new Color(1, 1, 1);
+        public Color gridColorInVideo = new Color(1, 1, 1);
 
         [XmlIgnore]
         public Dictionary<KeyBindType, KeyBind> keyBinds = new Dictionary<KeyBindType, KeyBind>

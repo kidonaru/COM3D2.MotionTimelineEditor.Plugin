@@ -195,6 +195,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static GridViewManager gridViewManager
+        {
+            get
+            {
+                return GridViewManager.instance;
+            }
+        }
+
         public MotionTimelineEditor()
         {
         }
@@ -449,6 +457,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 bgmManager.Init();
                 movieManager.Init();
                 timelineLoadManager.Init();
+                gridViewManager.Init();
 
                 AddGearMenu();
             }
@@ -547,6 +556,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             lightManager.OnPluginEnable();
             movieManager.OnPluginEnable();
             timelineManager.OnPluginEnable();
+            gridViewManager.OnPluginEnable();
         }
 
         private void OnPluginDisable()
@@ -561,6 +571,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             lightManager.OnPluginDisable();
             movieManager.OnPluginDisable();
             timelineManager.OnPluginDisable();
+            gridViewManager.OnPluginDisable();
         }
     }
 }

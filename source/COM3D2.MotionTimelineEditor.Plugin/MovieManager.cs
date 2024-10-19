@@ -7,6 +7,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         GUI,
         Mesh,
         Backmost,
+        Frontmost,
     }
 
     public class MovieManager
@@ -212,6 +213,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (_moviePlayerImpl != null)
             {
                 _moviePlayerImpl.UpdateMesh();
+            }
+        }
+
+        public void UpdateShader()
+        {
+            if (_moviePlayerImpl != null)
+            {
+                _moviePlayerImpl.UpdateShader();
             }
         }
 

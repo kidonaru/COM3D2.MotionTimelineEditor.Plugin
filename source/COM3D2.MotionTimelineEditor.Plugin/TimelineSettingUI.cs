@@ -23,6 +23,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             共通,
             BGM,
             動画,
+            ｸﾞﾘｯﾄﾞ,
         }
 
         private TabType _tabType = TabType.個別;
@@ -82,6 +83,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawHorizontalLine(Color.gray);
 
+            view.AddSpace(5);
+
+            view.BeginScrollView();
+
             switch (_tabType)
             {
                 case TabType.個別:
@@ -96,12 +101,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 case TabType.動画:
                     DrawVideoSetting(view);
                     break;
+                case TabType.ｸﾞﾘｯﾄﾞ:
+                    DrawGridSetting(view);
+                    break;
             }
+
+            view.EndScrollView();
         }
 
         private void DrawSongSetting(GUIView view)
         {
-            view.DrawLabel("個別設定", 80, 20);
+            view.DrawLabel("個別設定", 100, 20);
 
             view.DrawLabel("格納ディレクトリ名", -1, 20);
             view.DrawTextField(timeline.directoryName, -1, 20, newText => timeline.directoryName = newText);
@@ -233,7 +243,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void DrawCommonSetting(GUIView view)
         {
-            view.DrawLabel("共通設定", 80, 20);
+            view.DrawLabel("共通設定", 100, 20);
 
             _defaultTangentTypeComboBox.currentIndex = (int)config.defaultTangentType;
             _defaultTangentTypeComboBox.DrawButton("初期補間曲線", view);
@@ -419,7 +429,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void DrawBGMSetting(GUIView view)
         {
-            view.DrawLabel("BGM設定", 80, 20);
+            view.DrawLabel("BGM設定", 100, 20);
 
             view.BeginHorizontal();
             {
@@ -460,6 +470,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             "GUI",
             "3Dビュー",
             "最背面",
+            "最前面",
         };
 
         private GUIComboBox<VideoDisplayType> _videoDisplayTypeComboBox = new GUIComboBox<VideoDisplayType>
@@ -479,7 +490,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginHorizontal();
             {
-                view.DrawLabel("動画設定", 80, 20);
+                view.DrawLabel("動画設定", 100, 20);
 
                 view.DrawToggle("有効", isEnabled, 60, 20, newValue =>
                 {
@@ -680,6 +691,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             movieManager.UpdateTransform();
                         },
                     });
+                
+                view.DrawSliderValue(
+                    new GUIView.SliderOption
+                    {
+                        label = "透過度",
+                        labelWidth = 60,
+                        min = 0f,
+                        max = 1f,
+                        step = 0.01f,
+                        defaultValue = 1f,
+                        value = timeline.videoAlpha,
+                        onChanged = value =>
+                        {
+                            timeline.videoAlpha = value;
+                            movieManager.UpdateColor();
+                        },
+                    });
             }
             if (timeline.videoDisplayType == VideoDisplayType.Backmost)
             {
@@ -708,6 +736,103 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     timeline.videoBackmostPosition = newPosition;
                     movieManager.UpdateMesh();
                 }
+
+                view.DrawSliderValue(
+                    new GUIView.SliderOption
+                    {
+                        label = "表示サイズ",
+                        labelWidth = 60,
+                        min = 0f,
+                        max = 2f,
+                        step = 0.1f,
+                        defaultValue = 1f,
+                        value = timeline.videoBackmostScale,
+                        onChanged = value =>
+                        {
+                            timeline.videoBackmostScale = value;
+                            movieManager.UpdateTransform();
+                        },
+                    });
+
+                view.DrawSliderValue(
+                    new GUIView.SliderOption
+                    {
+                        label = "透過度",
+                        labelWidth = 60,
+                        min = 0f,
+                        max = 1f,
+                        step = 0.01f,
+                        defaultValue = 1f,
+                        value = timeline.videoBackmostAlpha,
+                        onChanged = value =>
+                        {
+                            timeline.videoBackmostAlpha = value;
+                            movieManager.UpdateColor();
+                        },
+                    });
+            }
+
+            if (timeline.videoDisplayType == VideoDisplayType.Frontmost)
+            {
+                var position = timeline.videoFrontmostPosition;
+                var newPosition = position;
+                for (var i = 0; i < 2; i++)
+                {
+                    var value = position[i];
+
+                    view.DrawSliderValue(
+                        new GUIView.SliderOption
+                        {
+                            label = TransformDataBase.PositionNames[i],
+                            labelWidth = 60,
+                            min = -2f,
+                            max = 2f,
+                            step = 0.01f,
+                            defaultValue = i == 0 ? -0.8f : 0.8f,
+                            value = value,
+                            onChanged = newValue => newPosition[i] = newValue,
+                        });
+                }
+
+                if (newPosition != position)
+                {
+                    timeline.videoFrontmostPosition = newPosition;
+                    movieManager.UpdateMesh();
+                }
+
+                view.DrawSliderValue(
+                    new GUIView.SliderOption
+                    {
+                        label = "表示サイズ",
+                        labelWidth = 60,
+                        min = 0f,
+                        max = 2f,
+                        step = 0.1f,
+                        defaultValue = 0.38f,
+                        value = timeline.videoFrontmostScale,
+                        onChanged = value =>
+                        {
+                            timeline.videoFrontmostScale = value;
+                            movieManager.UpdateTransform();
+                        },
+                    });
+
+                view.DrawSliderValue(
+                    new GUIView.SliderOption
+                    {
+                        label = "透過度",
+                        labelWidth = 60,
+                        min = 0f,
+                        max = 1f,
+                        step = 0.01f,
+                        defaultValue = 1f,
+                        value = timeline.videoFrontmostAlpha,
+                        onChanged = value =>
+                        {
+                            timeline.videoFrontmostAlpha = value;
+                            movieManager.UpdateColor();
+                        },
+                    });
             }
 
             view.DrawSliderValue(
@@ -727,7 +852,179 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     },
                 });
 
+            /*view.DrawTextField("シェーダー", config.videoShaderName, -1, 20, newText =>
+            {
+                config.videoShaderName = newText;
+                movieManager.UpdateShader();
+            });*/
+
             view.SetEnabled(true);
+        }
+
+        private void DrawGridSetting(GUIView view)
+        {
+            view.BeginHorizontal();
+            {
+                view.DrawLabel("グリッド設定", 100, 20);
+
+                view.DrawToggle("有効", config.isGridVisible, 60, 20, newValue =>
+                {
+                    config.isGridVisible = newValue;
+                    config.dirty = true;
+                });
+            }
+            view.EndLayout();
+
+            view.SetEnabled(config.isGridVisible);
+
+            view.DrawToggle("画面上に表示", config.isGridVisibleInDisplay, 120, 20, newValue =>
+            {
+                config.isGridVisibleInDisplay = newValue;
+                config.dirty = true;
+            });
+
+            view.DrawToggle("3D上に表示", config.isGridVisibleInWorld, 120, 20, newValue =>
+            {
+                config.isGridVisibleInWorld = newValue;
+                config.dirty = true;
+            });
+
+            view.DrawToggle("動画上に表示", config.isGridVisibleInVideo, 120, 20, newValue =>
+            {
+                config.isGridVisibleInVideo = newValue;
+                config.dirty = true;
+            });
+
+            view.DrawToggle("編集中のみ表示", config.isGridVisibleOnlyEdit, 120, 20, newValue =>
+            {
+                config.isGridVisibleOnlyEdit = newValue;
+                config.dirty = true;
+            });
+
+            view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "分割数",
+                    labelWidth = 60,
+                    fieldType = FloatFieldType.Int,
+                    min = 1,
+                    max = 20,
+                    step = 1,
+                    defaultValue = 4,
+                    value = config.gridCount,
+                    onChanged = value =>
+                    {
+                        config.gridCount = (int) value;
+                        config.dirty = true;
+                        gridViewManager.UpdateGridLines();
+                    },
+                });
+
+            view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "透過度",
+                    labelWidth = 60,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 0.3f,
+                    value = config.gridAlpha,
+                    onChanged = value =>
+                    {
+                        config.gridAlpha = value;
+                        config.dirty = true;
+                    },
+                });
+
+            view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "線幅",
+                    labelWidth = 60,
+                    min = 0f,
+                    max = 10f,
+                    step = 0.1f,
+                    defaultValue = 1f,
+                    value = config.gridLineWidth,
+                    onChanged = value =>
+                    {
+                        config.gridLineWidth = value;
+                        config.dirty = true;
+                        gridViewManager.UpdateGridLines();
+                    },
+                });
+
+            view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "3D分割数",
+                    labelWidth = 60,
+                    fieldType = FloatFieldType.Int,
+                    min = 1,
+                    max = 100,
+                    step = 1,
+                    defaultValue = 10,
+                    value = config.gridCountInWorld,
+                    onChanged = value =>
+                    {
+                        config.gridCountInWorld = (int) value;
+                        config.dirty = true;
+                        gridViewManager.UpdateGridLines();
+                    },
+                });
+
+            view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "3D透過度",
+                    labelWidth = 60,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 0.3f,
+                    value = config.gridAlphaInWorld,
+                    onChanged = value =>
+                    {
+                        config.gridAlphaInWorld = value;
+                        config.dirty = true;
+                    },
+                });
+
+            view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "3D線幅",
+                    labelWidth = 60,
+                    min = 0f,
+                    max = 10f,
+                    step = 0.1f,
+                    defaultValue = 1f,
+                    value = config.gridLineWidthInWorld,
+                    onChanged = value =>
+                    {
+                        config.gridLineWidthInWorld = value;
+                        config.dirty = true;
+                        gridViewManager.UpdateGridLines();
+                    },
+                });
+
+            view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "セルサイズ",
+                    labelWidth = 60,
+                    min = 0f,
+                    max = 10f,
+                    step = 0.01f,
+                    defaultValue = 0.5f,
+                    value = config.gridCellSize,
+                    onChanged = value =>
+                    {
+                        config.gridCellSize = value;
+                        config.dirty = true;
+                    },
+                });
         }
     }
 }
