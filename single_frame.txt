@@ -1,0 +1,24 @@
+@startuml
+scale 1 as 20 pixels
+
+concise "スキップなし" as N
+concise "前フレーム拡張" as P
+concise "次フレーム拡張" as F
+
+@N
+0 is A
+10 is B
+11 is C
+20 is {hidden}
+
+@P
+0 is A
+11 is C
+20 is {hidden}
+
+@F
+0 is A
+10 is C
+20 is {hidden}
+
+@enduml

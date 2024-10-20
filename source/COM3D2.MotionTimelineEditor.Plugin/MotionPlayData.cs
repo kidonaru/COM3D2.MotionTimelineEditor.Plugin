@@ -7,22 +7,58 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         int stFrame { get; set; }
         int edFrame { get; set; }
+        int stFrameInEdit { get; set; }
+        int edFrameInEdit { get; set; }
+        int stFrameActive { get; }
+        int edFrameActive { get; }
     }
 
-    public class MotionPlayData<T> where T : IMotionData
+    public abstract class MotionDataBase : IMotionData
+    {
+        public int stFrame { get; set; }
+        public int edFrame { get; set; }
+        public int stFrameInEdit { get; set; }
+        public int edFrameInEdit { get; set; }
+
+        private static StudioHackBase studioHack
+        {
+            get
+            {
+                return StudioHackManager.studioHack;
+            }
+        }
+
+        public int stFrameActive
+        {
+            get
+            {
+                return studioHack.isPoseEditing ? stFrameInEdit : stFrame;
+            }
+        }
+
+        public int edFrameActive
+        {
+            get
+            {
+                return studioHack.isPoseEditing ? edFrameInEdit : edFrame;
+            }
+        }
+    }
+
+    public class MotionPlayData<T> where T : class, IMotionData
     {
         public int listIndex = -1;
         public float lerpFrame = 0f;
         public float prevPlayingFrame = 0f;
         public List<T> motions = new List<T>();
-        public T current = default(T);
+        public T current = null;
 
         public void ResetIndex()
         {
             listIndex = -1;
             lerpFrame = 0f;
             prevPlayingFrame = 0f;
-            current = default(T);
+            current = null;
         }
 
         public bool Update(float playingFrame)
@@ -30,6 +66,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (motions.Count == 0)
             {
                 return false;
+            }
+
+            if (current != null && (int) playingFrame < current.stFrameActive)
+            {
+                ResetIndex();
             }
 
             if (playingFrame < prevPlayingFrame)
@@ -40,7 +81,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             bool indexUpdated = false;
 
             while (listIndex + 1 < motions.Count &&
-                playingFrame >= motions[listIndex + 1].stFrame)
+                playingFrame >= motions[listIndex + 1].stFrameActive)
             {
                 listIndex++;
                 indexUpdated = true;
@@ -55,8 +96,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 current = motions[listIndex];
                 lerpFrame = CalcLerpFrame(
                     playingFrame,
-                    current.stFrame,
-                    current.edFrame);
+                    current.stFrameActive,
+                    current.edFrameActive);
             }
             else
             {
@@ -85,6 +126,44 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 lerpFrame = (float)(frameFloat - stFrame) / deltaFrame;
             }
             return Mathf.Clamp01(lerpFrame);
+        }
+
+        public void Setup(SingleFrameType singleFrameType)
+        {
+            foreach (var motion in motions)
+            {
+                motion.stFrameInEdit = motion.stFrame;
+                motion.edFrameInEdit = motion.edFrame;
+            }
+
+            if (singleFrameType == SingleFrameType.None)
+            {
+                return;
+            }
+
+            for (var i = 0; i < motions.Count - 1; i++)
+            {
+                var prev = i > 1 ? motions[i - 1] : null;
+                var current = motions[i];
+                var next = motions[i + 1];
+
+                if (current.stFrame + 1 == next.stFrame)
+                {
+                    if (singleFrameType == SingleFrameType.ExtendPrevFrame)
+                    {
+                        if (prev != null)
+                        {
+                            prev.edFrame = current.edFrame;
+                        }
+                    }
+                    if (singleFrameType == SingleFrameType.ExtendNextFrame)
+                    {
+                        next.stFrame = current.stFrame;
+                    }
+                    motions.Remove(current);
+                    i--;
+                }
+            }
         }
     }
 }

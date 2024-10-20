@@ -25,11 +25,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public int easing;
     }
 
-    public class CameraMotionData : IMotionData
+    public class CameraMotionData : MotionDataBase
     {
-        public int stFrame { get; set; }
-        public int edFrame { get; set; }
-
         public MyTransform myTm;
         public int easing;
     }
@@ -249,48 +246,30 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             _playData.motions.Clear();
 
-            bool warpFrameEnabled = forOutput || !studioHack.isPoseEditing;
-
-            foreach (var row in _timelineRows)
+            for (var i = 0; i < _timelineRows.Count - 1; i++)
             {
+                var start = _timelineRows[i];
+                var end = _timelineRows[i + 1];
+
                 var motion = new CameraMotionData
                 {
-                    stFrame = row.frame,
-                    edFrame = row.frame,
+                    stFrame = start.frame,
+                    edFrame = end.frame,
                     myTm = new MyTransform
                     {
-                        stPos = row.position,
-                        edPos = row.position,
-                        stRot = row.rotation,
-                        edRot = row.rotation,
-                        stSca = new Vector3(row.distance, row.viewAngle, 0f),
-                        edSca = new Vector3(row.distance, row.viewAngle, 0f)
-                    }
+                        stPos = start.position,
+                        edPos = end.position,
+                        stRot = start.rotation,
+                        edRot = end.rotation,
+                        stSca = new Vector3(start.distance, start.viewAngle, 0f),
+                        edSca = new Vector3(end.distance, end.viewAngle, 0f)
+                    },
+                    easing = end.easing
                 };
                 _playData.motions.Add(motion);
-
-                if (row.frame != 0)
-                {
-                    int prevIndex = _playData.motions.Count() - 2;
-                    var prevMotion = _playData.motions[prevIndex];
-                    if (row.frame - prevMotion.stFrame == 1 && warpFrameEnabled)
-                    {
-                        int stFrame = prevMotion.stFrame;
-                        _playData.motions.Remove(prevMotion);
-                        prevMotion = _playData.motions[prevIndex];
-                        prevMotion.stFrame = stFrame;
-                        prevMotion.edFrame = stFrame;
-                    }
-                    else
-                    {
-                        prevMotion.edFrame = row.frame;
-                        prevMotion.myTm.edPos = row.position;
-                        prevMotion.myTm.edRot = row.rotation;
-                        prevMotion.myTm.edSca = new Vector3(row.distance, row.viewAngle, 0f);
-                        prevMotion.easing = row.easing;
-                    }
-                }
             }
+
+            _playData.Setup(timeline.singleFrameType);
         }
 
         public void SaveCameraTimeLine(

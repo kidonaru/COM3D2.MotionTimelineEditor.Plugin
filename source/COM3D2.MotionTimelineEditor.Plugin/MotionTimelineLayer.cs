@@ -40,11 +40,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Vector3 scaleOutTangents;
     }
 
-    public class MotionData : IMotionData
+    public class MotionData : MotionDataBase
     {
-        public int stFrame { get; set; }
-        public int edFrame { get; set; }
-
         public string name;
         public Vector3 stPos;
         public Vector3 edPos;
@@ -70,11 +67,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool isHold;
     }
 
-    public class IKHoldMotionData : IMotionData
+    public class IKHoldMotionData : MotionDataBase
     {
-        public int stFrame { get; set; }
-        public int edFrame { get; set; }
-
         public string name;
         public Vector3 stPos;
         public Vector3 edPos;
@@ -95,11 +89,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float footGroundAngle;
     }
 
-    public class GroundingMotionData : IMotionData
+    public class GroundingMotionData : MotionDataBase
     {
-        public int stFrame { get; set; }
-        public int edFrame { get; set; }
-
         public bool isFootGrounding;
         public float floorHeight;
         public float footBaseOffset;
@@ -654,8 +645,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             PluginUtils.LogDebug("BuildPlayData");
             _ikPlayDataMap.Clear();
 
-            bool warpFrameEnabled = forOutput || !studioHack.isPoseEditing;
-
             foreach (var pair in _motionTimelineRowsMap)
             {
                 var name = pair.Key;
@@ -674,8 +663,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 playData.ResetIndex();
                 playData.motions.Clear();
 
-                bool isWarpFrame = false;
-
                 for (var i = 0; i < rows.Count - 1; i++)
                 {
                     var start = rows[i];
@@ -683,18 +670,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     var stFrame = start.frame;
                     var edFrame = end.frame;
-
-                    if (!isWarpFrame && warpFrameEnabled && stFrame + 1 == edFrame)
-                    {
-                        isWarpFrame = true;
-                        continue;
-                    }
-
-                    if (isWarpFrame)
-                    {
-                        stFrame--;
-                        isWarpFrame = false;
-                    }
 
                     var motion = new MotionData
                     {
@@ -719,6 +694,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
+            foreach (var pair in _motionPlayDataMap)
+            {
+                var playData = pair.Value;
+                playData.Setup(timeline.singleFrameType);
+            }
+
             foreach (var pair in _ikTimelineRowsMap)
             {
                 var name = pair.Key;
@@ -737,8 +718,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 playData.ResetIndex();
                 playData.motions.Clear();
 
-                bool isWarpFrame = false;
-
                 for (var i = 0; i < rows.Count - 1; i++)
                 {
                     var start = rows[i];
@@ -746,18 +725,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     var stFrame = start.frame;
                     var edFrame = end.frame;
-
-                    if (!isWarpFrame && warpFrameEnabled && stFrame + 1 == edFrame)
-                    {
-                        isWarpFrame = true;
-                        continue;
-                    }
-
-                    if (isWarpFrame)
-                    {
-                        stFrame--;
-                        isWarpFrame = false;
-                    }
 
                     var motion = new IKHoldMotionData
                     {
@@ -773,6 +740,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     playData.motions.Add(motion);
                 }
+            }
+
+            foreach (var pair in _ikPlayDataMap)
+            {
+                var playData = pair.Value;
+                playData.Setup(timeline.singleFrameType);
             }
 
             {
@@ -805,6 +778,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     playData.motions.Add(motion);
                 }
             }
+
+            _groundingPlayData.Setup(SingleFrameType.None);
         }
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)

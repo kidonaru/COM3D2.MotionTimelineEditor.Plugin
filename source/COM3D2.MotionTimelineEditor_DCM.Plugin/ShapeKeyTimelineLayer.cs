@@ -20,11 +20,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public int easing;
     }
 
-    public class ShapeKeyMotionData : IMotionData
+    public class ShapeKeyMotionData : MotionDataBase
     {
-        public int stFrame { get; set; }
-        public int edFrame { get; set; }
-
         public string tag;
         public string slotName;
         public int maidSlotNo;
@@ -232,8 +229,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             PluginUtils.LogDebug("BuildPlayData");
             _playDataMap.Clear();
 
-            bool warpFrameEnabled = forOutput || !studioHack.isPoseEditing;
-
             foreach (var pair in _timelineRowsMap)
             {
                 var name = pair.Key;
@@ -252,8 +247,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 playData.ResetIndex();
                 playData.motions.Clear();
 
-                bool isWarpFrame = false;
-
                 for (var i = 0; i < rows.Count - 1; i++)
                 {
                     var start = rows[i];
@@ -261,18 +254,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                     var stFrame = start.frame;
                     var edFrame = end.frame;
-
-                    if (!isWarpFrame && warpFrameEnabled && stFrame + 1 == edFrame)
-                    {
-                        isWarpFrame = true;
-                        continue;
-                    }
-
-                    if (isWarpFrame)
-                    {
-                        stFrame--;
-                        isWarpFrame = false;
-                    }
 
                     var motion = new ShapeKeyMotionData
                     {
@@ -287,6 +268,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                     playData.motions.Add(motion);
                 }
+            }
+
+            foreach (var pair in _playDataMap)
+            {
+                var playData = pair.Value;
+                playData.Setup(timeline.singleFrameType);
             }
         }
 

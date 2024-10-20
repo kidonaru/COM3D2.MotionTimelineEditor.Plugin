@@ -20,11 +20,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public bool isVisible;
     }
 
-    public class UndressMotionData : IMotionData
+    public class UndressMotionData : MotionDataBase
     {
-        public int stFrame { get; set; }
-        public int edFrame { get; set; }
-
         public DressSlotID slotId;
         public bool isVisible;
     }
@@ -298,6 +295,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                         prevMotion.edFrame = row.frame;
                     }
                 }
+            }
+
+            foreach (var pair in _playDataMap)
+            {
+                var playData = pair.Value;
+                playData.Setup(SingleFrameType.None);
             }
         }
 

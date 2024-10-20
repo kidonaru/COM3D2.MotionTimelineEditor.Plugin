@@ -20,11 +20,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public bool isLoop;
     }
 
-    public class SoundMotionData : IMotionData
+    public class SoundMotionData : MotionDataBase
     {
-        public int stFrame { get; set; }
-        public int edFrame { get; set; }
-
         public string fileName;
         public float interval;
         public bool isLoop;
@@ -261,6 +258,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                 _playData.motions.Add(motion);
             }
+
+            _playData.Setup(SingleFrameType.None);
         }
 
         public void SaveMotions(

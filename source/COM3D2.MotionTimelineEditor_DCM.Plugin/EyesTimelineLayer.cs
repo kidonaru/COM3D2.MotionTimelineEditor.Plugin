@@ -35,11 +35,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public MaidPointType maidPointType;
     }
 
-    public class EyesMotionData : IMotionData
+    public class EyesMotionData : MotionDataBase
     {
-        public int stFrame { get; set; }
-        public int edFrame { get; set; }
-
         public string name;
         public float startHorizon;
         public float startVertical;
@@ -530,6 +527,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                         prevMotion.endVertical = row.vertical;
                     }
                 }
+            }
+
+            foreach (var playData in _playDataMap.Values)
+            {
+                playData.Setup(SingleFrameType.None);
             }
         }
 

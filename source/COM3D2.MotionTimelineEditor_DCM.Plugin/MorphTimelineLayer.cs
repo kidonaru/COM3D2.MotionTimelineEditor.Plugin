@@ -19,11 +19,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public float morphValue;
     }
 
-    public class MorphMotionData : IMotionData
+    public class MorphMotionData : MotionDataBase
     {
-        public int stFrame { get; set; }
-        public int edFrame { get; set; }
-
         public float startValue;
         public float endValue;
     }
@@ -349,6 +346,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                         prevMotion.endValue = row.morphValue;
                     }
                 }
+            }
+
+            foreach (var pair in _playDataMap)
+            {
+                var playData = pair.Value;
+                playData.Setup(SingleFrameType.None);
             }
         }
 

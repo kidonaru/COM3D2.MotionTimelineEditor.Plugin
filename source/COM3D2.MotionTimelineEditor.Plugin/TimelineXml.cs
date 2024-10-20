@@ -123,6 +123,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("EndFadeTime")]
         public float endFadeTime = 0f;
 
+        [XmlElement("SingleFrameType")]
+        public SingleFrameType singleFrameType = SingleFrameType.ExtendPrevFrame;
+
         [XmlElement("ActiveTrackIndex")]
         public int activeTrackIndex = -1;
 
@@ -347,7 +350,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         break;
                     }
                 }
-                
+            }
+
+            if (version < 10)
+            {
+                // 前のバージョンでは次のフレームを拡張する仕様
+                singleFrameType = SingleFrameType.ExtendNextFrame;
             }
         }
     }

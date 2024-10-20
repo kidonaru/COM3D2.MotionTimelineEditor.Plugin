@@ -22,11 +22,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public Vector3 scale;
     }
 
-    public class BGMotionData : IMotionData
+    public class BGMotionData : MotionDataBase
     {
-        public int stFrame { get; set; }
-        public int edFrame { get; set; }
-
         public string name;
         public MyTransform myTm;
     }
@@ -335,6 +332,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 var name = pair.Key;
                 var playData = pair.Value;
+                playData.Setup(SingleFrameType.None);
                 //PluginUtils.LogDebug("PlayData: name={0}, count={1}", name, playData.motions.Count);
             }
         }

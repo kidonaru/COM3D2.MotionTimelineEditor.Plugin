@@ -7,6 +7,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using AttachPoint = PhotoTransTargetObject.AttachPoint;
 
+    public enum SingleFrameType
+    {
+        None, // なし
+        ExtendPrevFrame, // 前のフレームを拡張
+        ExtendNextFrame, // 次のフレームを拡張
+    }
+
     public class TimelineModelData
     {
         public string name;
@@ -99,7 +106,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class TimelineData
     {
-        public static readonly int CurrentVersion = 9;
+        public static readonly int CurrentVersion = 10;
         public static readonly TimelineData DefaultTimeline = new TimelineData();
 
         public int version = 0;
@@ -287,6 +294,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 maidManager.UpdateHeadLook();
             }
         }
+
+        public SingleFrameType singleFrameType = SingleFrameType.ExtendPrevFrame;
 
         public int activeTrackIndex = -1;
 
@@ -732,6 +741,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             endOffsetTime = xml.endOffsetTime;
             startFadeTime = xml.startFadeTime;
             endFadeTime = xml.endFadeTime;
+            singleFrameType = xml.singleFrameType;
             activeTrackIndex = xml.activeTrackIndex;
             bgmPath = xml.bgmPath;
             videoEnabled = xml.videoEnabled;
@@ -837,6 +847,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.endOffsetTime = endOffsetTime;
             xml.startFadeTime = startFadeTime;
             xml.endFadeTime = endFadeTime;
+            xml.singleFrameType = singleFrameType;
             xml.activeTrackIndex = activeTrackIndex;
             xml.bgmPath = bgmPath;
             xml.videoEnabled = videoEnabled;

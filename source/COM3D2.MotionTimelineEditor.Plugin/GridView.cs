@@ -9,6 +9,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Material _gridMaterial;
         private LineRenderer[] _gridLinesInDisplay;
         private LineRenderer[] _gridLinesInWorld;
+        private LineRenderer _yAxisLine;
 
         private static Config config
         {
@@ -67,6 +68,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _gridLinesInWorld[i] = CreateLine(i, true);
                 }
             }
+
+            _yAxisLine = CreateLine(0, true);
         }
 
         private LineRenderer CreateLine(int index, bool isWorld)
@@ -106,6 +109,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 _gridLinesInWorld = null;
             }
+
+            if (_yAxisLine != null)
+            {
+                Destroy(_yAxisLine.gameObject);
+                _yAxisLine = null;
+            }
         }
 
         public void OnDestroy()
@@ -139,18 +148,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 SetGridLinesVisibility(_gridLinesInDisplay, false);
                 SetGridLinesVisibility(_gridLinesInWorld, false);
+                _yAxisLine.enabled = false;
                 return;
             }
 
+            SetGridLinesVisibility(_gridLinesInDisplay, config.isGridVisibleInDisplay);
+            SetGridLinesVisibility(_gridLinesInWorld, config.isGridVisibleInWorld);
+            _yAxisLine.enabled = config.isGridVisibleInWorld;
+
             if (config.isGridVisibleInDisplay)
             {
-                SetGridLinesVisibility(_gridLinesInDisplay, true);
                 UpdateDisplayGrid();
             }
 
             if (config.isGridVisibleInWorld)
             {
-                SetGridLinesVisibility(_gridLinesInWorld, true);
                 UpdateWorldGrid();
             }
         }
@@ -167,10 +179,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var gridColor = config.gridColorInDisplay;
             gridColor.a = config.gridAlpha;
 
+            var centerColor = config.gridCenterColorInDisplay;
+            centerColor.a = config.gridAlpha;
+
             var gridCount = config.gridCount;
             var cellSize = 1.0f / gridCount;
 
             int lineIndex = 0;
+            var centerIndex = (gridCount % 2 == 0) ? gridCount / 2 : -1;
 
             // カメラからの距離に基づいてwidthMultiplierを計算
             float distanceToCamera = Vector3.Distance(center, Camera.main.transform.position);
@@ -185,8 +201,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 float x = (i * cellSize - 0.5f) * width;
                 Vector3 start = center + right * x - up * height * 0.5f;
                 Vector3 end = center + right * x + up * height * 0.5f;
+                var color = i == centerIndex ? centerColor : gridColor;
 
-                UpdateLineProp(_gridLinesInDisplay[lineIndex], start, end, gridColor, widthMultiplier);
+                UpdateLineProp(_gridLinesInDisplay[lineIndex], start, end, color, widthMultiplier);
                 lineIndex++;
             }
 
@@ -196,8 +213,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 float y = (j * cellSize - 0.5f) * height;
                 Vector3 start = center - right * width * 0.5f + up * y;
                 Vector3 end = center + right * width * 0.5f + up * y;
+                var color = j == centerIndex ? centerColor : gridColor;
 
-                UpdateLineProp(_gridLinesInDisplay[lineIndex], start, end, gridColor, widthMultiplier);
+                UpdateLineProp(_gridLinesInDisplay[lineIndex], start, end, color, widthMultiplier);
                 lineIndex++;
             }
         }
@@ -207,11 +225,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var gridColor = config.gridColorInWorld;
             gridColor.a = config.gridAlphaInWorld;
 
+            var centerColor = config.gridCenterColorInWorld;
+            centerColor.a = config.gridAlphaInWorld;
+
             var cellSize = config.gridCellSize;
             var gridCount = config.gridCountInWorld;
             var halfSize = gridCount * cellSize * 0.5f;
 
             int lineIndex = 0;
+            var centerIndex = (gridCount % 2 == 0) ? gridCount / 2 : -1;
 
             // カメラからの距離に基づいてwidthMultiplierを計算
             float distanceToCamera = Vector3.Distance(transform.position, Camera.main.transform.position);
@@ -223,8 +245,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 float x = i * cellSize - halfSize;
                 Vector3 start = new Vector3(x, 0, -halfSize);
                 Vector3 end = new Vector3(x, 0, halfSize);
+                var color = i == centerIndex ? centerColor : gridColor;
 
-                UpdateLineProp(_gridLinesInWorld[lineIndex], start, end, gridColor, widthMultiplier);
+                UpdateLineProp(_gridLinesInWorld[lineIndex], start, end, color, widthMultiplier);
                 lineIndex++;
             }
 
@@ -234,9 +257,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 float z = j * cellSize - halfSize;
                 Vector3 start = new Vector3(-halfSize, 0, z);
                 Vector3 end = new Vector3(halfSize, 0, z);
+                var color = j == centerIndex ? centerColor : gridColor;
 
-                UpdateLineProp(_gridLinesInWorld[lineIndex], start, end, gridColor, widthMultiplier);
+                UpdateLineProp(_gridLinesInWorld[lineIndex], start, end, color, widthMultiplier);
                 lineIndex++;
+            }
+
+            // Y軸のラインを更新
+            if (_yAxisLine != null)
+            {
+                Vector3 start = new Vector3(0, 0, 0);
+                Vector3 end = new Vector3(0, halfSize, 0);
+                UpdateLineProp(_yAxisLine, start, end, centerColor, widthMultiplier);
             }
         }
 

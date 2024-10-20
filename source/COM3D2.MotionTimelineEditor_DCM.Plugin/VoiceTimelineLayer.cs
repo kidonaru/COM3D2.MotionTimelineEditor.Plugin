@@ -23,11 +23,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public string loopVoiceName;
     }
 
-    public class VoiceMotionData : IMotionData
+    public class VoiceMotionData : MotionDataBase
     {
-        public int stFrame { get; set; }
-        public int edFrame { get; set; }
-
         public string voiceName;
         public float startTime;
         public float length;
@@ -269,6 +266,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                 _playData.motions.Add(motion);
             }
+
+            _playData.Setup(SingleFrameType.None);
         }
 
         public List<VoiceMotionData> GetVoiceMotionData()

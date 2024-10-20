@@ -20,11 +20,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public int easing;
     }
 
-    public class MoveMotionData : IMotionData
+    public class MoveMotionData : MotionDataBase
     {
-        public int stFrame { get; set; }
-        public int edFrame { get; set; }
-
         public MyTransform myTm;
         public int easing;
     }
@@ -224,8 +221,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             PluginUtils.LogDebug("BuildPlayData");
 
-            bool warpFrameEnabled = forOutput || !studioHack.isPoseEditing;
-
             var maid = this.maid;
             if (maid == null)
             {
@@ -235,8 +230,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             _playData.ResetIndex();
             _playData.motions.Clear();
 
-            bool isWarpFrame = false;
-
             for (var i = 0; i < _timelineRows.Count - 1; i++)
             {
                 var start = _timelineRows[i];
@@ -244,18 +237,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                 var stFrame = start.frame;
                 var edFrame = end.frame;
-
-                if (!isWarpFrame && warpFrameEnabled && stFrame + 1 == edFrame)
-                {
-                    isWarpFrame = true;
-                    continue;
-                }
-
-                if (isWarpFrame)
-                {
-                    stFrame--;
-                    isWarpFrame = false;
-                }
 
                 var motion = new MoveMotionData
                 {
@@ -273,6 +254,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                 _playData.motions.Add(motion);
             }
+
+            _playData.Setup(timeline.singleFrameType);
 
             //PluginUtils.LogDebug("PlayData: name={0}, count={1}", maid.name, _playData.motions.Count);
         }

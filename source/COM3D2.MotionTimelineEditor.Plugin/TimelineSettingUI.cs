@@ -58,7 +58,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 timeline.eyeMoveType = type;
             },
-        }; 
+        };
+
+        private static string[] SingleFrameTypeNames = new string[]
+        {
+            "なし",
+            "前フレームを拡張",
+            "後フレームを拡張",
+        };
+
+        private GUIComboBox<SingleFrameType> _singleFrameTypeComboBox = new GUIComboBox<SingleFrameType>
+        {
+            items = Enum.GetValues(typeof(SingleFrameType)).Cast<SingleFrameType>().ToList(),
+            getName = (type, index) => SingleFrameTypeNames[index],
+            onSelected = (type, index) =>
+            {
+                timeline.singleFrameType = type;
+                timelineManager.ApplyCurrentFrame(true);
+            },
+        };
 
         private static MainWindow mainWindow
         {
@@ -140,6 +158,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             _eyeMoveTypeComboBox.currentIndex = (int)timeline.eyeMoveType;
             _eyeMoveTypeComboBox.DrawButton("メイド目線", view);
+
+            _singleFrameTypeComboBox.currentIndex = (int)timeline.singleFrameType;
+            _singleFrameTypeComboBox.DrawButton("1フレーム調整", view);
 
             view.DrawToggle("顔/瞳の固定化", timeline.useHeadKey, 120, 20, newValue =>
             {

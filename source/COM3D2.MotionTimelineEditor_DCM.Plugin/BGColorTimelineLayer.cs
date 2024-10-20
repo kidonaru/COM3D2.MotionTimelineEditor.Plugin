@@ -18,11 +18,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public Color color;
     }
 
-    public class BGColorMotionData : IMotionData
+    public class BGColorMotionData : MotionDataBase
     {
-        public int stFrame { get; set; }
-        public int edFrame { get; set; }
-
         public Color color;
     }
 
@@ -223,6 +220,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                 _playData.motions.Add(motion);
             }
+
+            _playData.Setup(SingleFrameType.None);
 
             //PluginUtils.LogDebug("PlayData: name={0}, count={1}", BoneName, _playData.motions.Count);
         }
