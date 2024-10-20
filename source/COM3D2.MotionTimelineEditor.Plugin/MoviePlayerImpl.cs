@@ -254,7 +254,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     transform.position = position;
 
                     // ビルボード補正
-                    transform.LookAt(camera.transform);
+                    transform.LookAt(camera.transform, camera.transform.up);
                 }
                 else
                 {
