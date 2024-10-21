@@ -10,8 +10,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public enum SingleFrameType
     {
         None, // なし
-        ExtendPrevFrame, // 前のフレームを拡張
-        ExtendNextFrame, // 次のフレームを拡張
+        Delay, // 1F遅らせる
+        Advance, // 1F早める
     }
 
     public class TimelineModelData
@@ -295,7 +295,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public SingleFrameType singleFrameType = SingleFrameType.ExtendPrevFrame;
+        public SingleFrameType singleFrameType = SingleFrameType.Delay;
 
         public int activeTrackIndex = -1;
 
@@ -759,6 +759,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             videoBackmostPosition = xml.videoBackmostPosition;
             videoBackmostScale = xml.videoBackmostScale;
             videoBackmostAlpha = xml.videoBackmostAlpha;
+            videoFrontmostPosition = xml.videoFrontmostPosition;
+            videoFrontmostScale = xml.videoFrontmostScale;
+            videoFrontmostAlpha = xml.videoFrontmostAlpha;
 
             layers = new List<ITimelineLayer>(xml.layers.Count);
             foreach (var layerXml in xml.layers)

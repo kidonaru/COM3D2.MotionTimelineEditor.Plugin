@@ -9,7 +9,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Material _gridMaterial;
         private LineRenderer[] _gridLinesInDisplay;
         private LineRenderer[] _gridLinesInWorld;
-        private LineRenderer _yAxisLine;
+        private LineRenderer[] _axisLines;
 
         private static Config config
         {
@@ -69,7 +69,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            _yAxisLine = CreateLine(0, true);
+            {
+                int totalLines = 3;
+                _axisLines = new LineRenderer[totalLines];
+                for (int i = 0; i < totalLines; i++)
+                {
+                    _axisLines[i] = CreateLine(i, true);
+                }
+            }
         }
 
         private LineRenderer CreateLine(int index, bool isWorld)
@@ -110,10 +117,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _gridLinesInWorld = null;
             }
 
-            if (_yAxisLine != null)
+            if (_axisLines != null)
             {
-                Destroy(_yAxisLine.gameObject);
-                _yAxisLine = null;
+                foreach (var line in _axisLines)
+                {
+                    Destroy(line.gameObject);
+                }
+
+                _axisLines = null;
             }
         }
 
@@ -148,13 +159,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 SetGridLinesVisibility(_gridLinesInDisplay, false);
                 SetGridLinesVisibility(_gridLinesInWorld, false);
-                _yAxisLine.enabled = false;
+                SetGridLinesVisibility(_axisLines, false);
                 return;
             }
 
             SetGridLinesVisibility(_gridLinesInDisplay, config.isGridVisibleInDisplay);
             SetGridLinesVisibility(_gridLinesInWorld, config.isGridVisibleInWorld);
-            _yAxisLine.enabled = config.isGridVisibleInWorld;
+            SetGridLinesVisibility(_axisLines, config.isGridVisibleInWorld);
 
             if (config.isGridVisibleInDisplay)
             {
@@ -179,9 +190,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var gridColor = config.gridColorInDisplay;
             gridColor.a = config.gridAlpha;
 
-            var centerColor = config.gridCenterColorInDisplay;
-            centerColor.a = config.gridAlpha;
-
             var gridCount = config.gridCount;
             var cellSize = 1.0f / gridCount;
 
@@ -201,9 +209,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 float x = (i * cellSize - 0.5f) * width;
                 Vector3 start = center + right * x - up * height * 0.5f;
                 Vector3 end = center + right * x + up * height * 0.5f;
-                var color = i == centerIndex ? centerColor : gridColor;
 
-                UpdateLineProp(_gridLinesInDisplay[lineIndex], start, end, color, widthMultiplier);
+                UpdateLineProp(_gridLinesInDisplay[lineIndex], start, end, gridColor, widthMultiplier);
                 lineIndex++;
             }
 
@@ -213,9 +220,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 float y = (j * cellSize - 0.5f) * height;
                 Vector3 start = center - right * width * 0.5f + up * y;
                 Vector3 end = center + right * width * 0.5f + up * y;
-                var color = j == centerIndex ? centerColor : gridColor;
 
-                UpdateLineProp(_gridLinesInDisplay[lineIndex], start, end, color, widthMultiplier);
+                UpdateLineProp(_gridLinesInDisplay[lineIndex], start, end, gridColor, widthMultiplier);
                 lineIndex++;
             }
         }
@@ -224,9 +230,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var gridColor = config.gridColorInWorld;
             gridColor.a = config.gridAlphaInWorld;
-
-            var centerColor = config.gridCenterColorInWorld;
-            centerColor.a = config.gridAlphaInWorld;
+            var centerColor = new Color(0, 0, 0, 0);
 
             var cellSize = config.gridCellSize;
             var gridCount = config.gridCountInWorld;
@@ -263,12 +267,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 lineIndex++;
             }
 
-            // Y軸のラインを更新
-            if (_yAxisLine != null)
+            // 軸のラインを更新
             {
-                Vector3 start = new Vector3(0, 0, 0);
-                Vector3 end = new Vector3(0, halfSize, 0);
-                UpdateLineProp(_yAxisLine, start, end, centerColor, widthMultiplier);
+                var red = Color.red;
+                red.a = config.gridAlphaInWorld;
+                var blue = Color.blue;
+                blue.a = config.gridAlphaInWorld;
+                var green = Color.green;
+                green.a = config.gridAlphaInWorld;
+
+                UpdateLineProp(_axisLines[0], new Vector3(-halfSize, 0, 0), new Vector3(halfSize, 0, 0), red, widthMultiplier);
+                UpdateLineProp(_axisLines[1], new Vector3(0, -halfSize, 0), new Vector3(0, halfSize, 0), green, widthMultiplier);
+                UpdateLineProp(_axisLines[2], new Vector3(0, 0, -halfSize), new Vector3(0, 0, halfSize), blue, widthMultiplier);
             }
         }
 

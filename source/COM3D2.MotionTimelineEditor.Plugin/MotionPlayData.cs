@@ -149,14 +149,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (current.stFrame + 1 == next.stFrame)
                 {
-                    if (singleFrameType == SingleFrameType.ExtendPrevFrame)
+                    if (singleFrameType == SingleFrameType.Delay)
                     {
                         if (prev != null)
                         {
                             prev.edFrame = current.edFrame;
                         }
                     }
-                    if (singleFrameType == SingleFrameType.ExtendNextFrame)
+                    if (singleFrameType == SingleFrameType.Advance)
                     {
                         next.stFrame = current.stFrame;
                     }

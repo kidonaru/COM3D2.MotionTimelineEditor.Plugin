@@ -63,8 +63,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private static string[] SingleFrameTypeNames = new string[]
         {
             "なし",
-            "前フレームを拡張",
-            "後フレームを拡張",
+            "1F遅らせる",
+            "1F早める",
         };
 
         private GUIComboBox<SingleFrameType> _singleFrameTypeComboBox = new GUIComboBox<SingleFrameType>
@@ -783,7 +783,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         min = 0f,
                         max = 1f,
                         step = 0.01f,
-                        defaultValue = 1f,
+                        defaultValue = 0.5f,
                         value = timeline.videoBackmostAlpha,
                         onChanged = value =>
                         {
@@ -985,7 +985,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     min = 1,
                     max = 100,
                     step = 1,
-                    defaultValue = 10,
+                    defaultValue = 20,
                     value = config.gridCountInWorld,
                     onChanged = value =>
                     {

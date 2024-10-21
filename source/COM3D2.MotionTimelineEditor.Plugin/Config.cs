@@ -74,8 +74,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Color gridColorInDisplay = new Color(1, 1, 1);
         public Color gridColorInWorld = new Color(1, 1, 1);
         public Color gridColorInVideo = new Color(1, 1, 1);
-        public Color gridCenterColorInDisplay = new Color(1, 1, 1);
-        public Color gridCenterColorInWorld = new Color(1, 0, 0);
 
         [XmlIgnore]
         public Dictionary<KeyBindType, KeyBind> keyBinds = new Dictionary<KeyBindType, KeyBind>

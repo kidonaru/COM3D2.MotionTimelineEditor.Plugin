@@ -124,7 +124,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float endFadeTime = 0f;
 
         [XmlElement("SingleFrameType")]
-        public SingleFrameType singleFrameType = SingleFrameType.ExtendPrevFrame;
+        public SingleFrameType singleFrameType = SingleFrameType.Delay;
 
         [XmlElement("ActiveTrackIndex")]
         public int activeTrackIndex = -1;
@@ -178,7 +178,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float videoBackmostScale = 1f;
 
         [XmlElement("VideoBackmostAlpha")]
-        public float videoBackmostAlpha = 1f;
+        public float videoBackmostAlpha = 0.5f;
+
+        [XmlElement("VideoFrontmostPosition")]
+        public Vector2 videoFrontmostPosition = new Vector2(-0.8f, 0.8f);
+
+        [XmlElement("VideoFrontmostScale")]
+        public float videoFrontmostScale = 0.38f;
+
+        [XmlElement("VideoFrontmostAlpha")]
+        public float videoFrontmostAlpha = 1f;
 
         public TimelineXml()
         {
@@ -355,7 +364,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (version < 10)
             {
                 // 前のバージョンでは次のフレームを拡張する仕様
-                singleFrameType = SingleFrameType.ExtendNextFrame;
+                singleFrameType = SingleFrameType.Advance;
             }
         }
     }

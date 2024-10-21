@@ -2,8 +2,8 @@
 scale 1 as 20 pixels
 
 concise "調整なし" as N
-concise "前フレーム拡張" as P
-concise "後フレーム拡張" as F
+concise "1F遅らせる" as P
+concise "1F早める" as F
 
 @N
 0 is A #bef3fe
