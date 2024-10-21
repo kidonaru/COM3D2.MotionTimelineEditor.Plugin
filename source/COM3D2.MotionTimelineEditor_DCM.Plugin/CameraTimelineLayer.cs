@@ -133,7 +133,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            //PluginUtils.LogDebug("ApplyCamera: lerpFrame={0}, listIndex={1}", playData.lerpFrame, playData.listIndex);
+            //PluginUtils.LogDebug("ApplyCamera: lerpFrame={0}, listIndex={1}, playingFrameNo={2}",
+            //    _playData.lerpFrame, _playData.listIndex, playingFrameNoFloat);
 
             ApplyMotion(_playData.current);
         }

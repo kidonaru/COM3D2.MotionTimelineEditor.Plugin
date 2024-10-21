@@ -47,6 +47,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class MotionPlayData<T> where T : class, IMotionData
     {
+        private const float FRAME_TOLERANCE = 0.001f; // 誤差許容値
+
         public int listIndex = -1;
         public float lerpFrame = 0f;
         public float prevPlayingFrame = 0f;
@@ -68,7 +70,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return false;
             }
 
-            if (current != null && (int) playingFrame < current.stFrameActive)
+            if (current != null && (int) playingFrame < current.stFrameActive - FRAME_TOLERANCE)
             {
                 ResetIndex();
             }
@@ -81,7 +83,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             bool indexUpdated = false;
 
             while (listIndex + 1 < motions.Count &&
-                playingFrame >= motions[listIndex + 1].stFrameActive)
+                playingFrame >= motions[listIndex + 1].stFrameActive - FRAME_TOLERANCE)
             {
                 listIndex++;
                 indexUpdated = true;
