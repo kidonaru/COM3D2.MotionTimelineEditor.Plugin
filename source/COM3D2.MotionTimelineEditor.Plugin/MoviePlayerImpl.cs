@@ -21,46 +21,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private bool _metaUpdated = false;
         private Material _gridMaterial = null;
 
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
-
-        private static TimelineData timeline
-        {
-            get
-            {
-                return timelineManager.timeline;
-            }
-        }
-
-        private static ITimelineLayer currentLayer
-        {
-            get
-            {
-                return timelineManager.currentLayer;
-            }
-        }
-
-        private static StudioHackBase studioHack
-        {
-            get
-            {
-                return StudioHackManager.studioHack;
-            }
-        }
-
-        private static Config config
-        {
-            get
-            {
-                return ConfigManager.config;
-            }
-        }
-
         public bool isDisplayOnGUI
         {
             get
@@ -109,6 +69,54 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static TimelineManager timelineManager
+        {
+            get
+            {
+                return TimelineManager.instance;
+            }
+        }
+
+        private static TimelineData timeline
+        {
+            get
+            {
+                return timelineManager.timeline;
+            }
+        }
+
+        private static ITimelineLayer currentLayer
+        {
+            get
+            {
+                return timelineManager.currentLayer;
+            }
+        }
+
+        private static StudioHackBase studioHack
+        {
+            get
+            {
+                return StudioHackManager.studioHack;
+            }
+        }
+
+        private static Config config
+        {
+            get
+            {
+                return ConfigManager.config;
+            }
+        }
+
+        private static Camera subCamera
+        {
+            get
+            {
+                return studioHack.subCamera;
+            }
+        }
+
         public void Awake()
         {
             _mediaPlayer = gameObject.AddComponent<MediaPlayer>();
@@ -123,6 +131,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             else
             {
+                gameObject.layer = isDisplayFrontmost ? LayerMask.NameToLayer("NGUI") : LayerMask.NameToLayer("Default");
                 _meshRenderer = gameObject.AddComponent<MeshRenderer>();
                 _meshFilter = gameObject.AddComponent<MeshFilter>();
                 _meshFilter.mesh = CreateQuadMesh();
@@ -437,6 +446,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void OnRenderObject()
         {
             if (!IsGridVisible())
+            {
+                return;
+            }
+
+            if (isDisplayFrontmost && Camera.current != subCamera)
             {
                 return;
             }

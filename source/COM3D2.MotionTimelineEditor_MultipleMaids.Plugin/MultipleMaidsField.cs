@@ -35,6 +35,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         public FieldInfo gLight;
         public FieldInfo lightCombo;
         public FieldInfo lightComboList;
+        public FieldInfo subcamera;
         
         public FieldInfo isWear;
         public FieldInfo isSkirt;

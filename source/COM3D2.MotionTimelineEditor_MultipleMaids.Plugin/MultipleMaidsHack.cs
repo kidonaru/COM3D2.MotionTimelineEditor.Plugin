@@ -360,6 +360,14 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
         }
 
+        public override Camera subCamera
+        {
+            get
+            {
+                return multipleMaids.subcamera;
+            }
+        }
+
         public MultipleMaidsHack()
         {
         }

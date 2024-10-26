@@ -53,6 +53,14 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
         }
 
+        public CameraManager cameraManager
+        {
+            get
+            {
+                return (CameraManager)field.cameraManager.GetValue(meidoPhotoStudio);
+            }
+        }
+
         public MeidoPhotoStudio.Plugin.MainWindow mainWindow
         {
             get
@@ -268,6 +276,18 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                 }
 
                 return meidoManager.ActiveMeidoList;
+            }
+        }
+
+        public Camera subCamera
+        {
+            get
+            {
+                if (cameraManager == null)
+                {
+                    return null;
+                }
+                return (Camera)field.subCamera.GetValue(cameraManager);
             }
         }
 

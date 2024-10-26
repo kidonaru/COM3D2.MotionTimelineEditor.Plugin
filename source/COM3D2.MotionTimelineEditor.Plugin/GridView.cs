@@ -82,6 +82,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private LineRenderer CreateLine(int index, bool isWorld)
         {
             GameObject lineObj = new GameObject("GridLine_" + index);
+            lineObj.layer = isWorld ? LayerMask.NameToLayer("Default") : LayerMask.NameToLayer("NGUI");
             lineObj.transform.SetParent(this.transform, false);
             LineRenderer line = lineObj.AddComponent<LineRenderer>();
 

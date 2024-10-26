@@ -278,6 +278,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private Camera _subCamera = null;
+        public override Camera subCamera
+        {
+            get
+            {
+                return _subCamera;
+            }
+        }
+
         public override bool Init()
         {
             PluginUtils.Log("StudioHack初期化中...");
@@ -295,6 +304,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return true;
         }
 
+        public override void Update()
+        {
+            base.Update();
+
+            if (_subCamera != null)
+            {
+                _subCamera.fieldOfView = Camera.main.fieldOfView;
+            }
+        }
+
         public override void ChangeMaid(Maid maid)
         {
             studio.SetSelectMaid(maid);
@@ -304,6 +323,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.OnSceneActive();
             studio.OnSceneActive();
+            CreateSubCamera();
+        }
+
+        public override void OnSceneDeactive()
+        {
+            base.OnSceneDeactive();
+            DestroySubCamera();
+        }
+
+        private void CreateSubCamera()
+        {
+            if (_subCamera != null)
+            {
+                return;
+            }
+
+            GameObject go = new GameObject("subcam");
+            _subCamera = go.AddComponent<Camera>();
+            _subCamera.CopyFrom(Camera.main);
+            _subCamera.clearFlags = CameraClearFlags.Depth;
+            _subCamera.cullingMask = 256;
+            _subCamera.depth = 1f;
+            _subCamera.transform.parent = Camera.main.transform;
+        }
+
+        private void DestroySubCamera()
+        {
+            if (_subCamera != null)
+            {
+                GameObject.Destroy(_subCamera.gameObject);
+                _subCamera = null;
+            }
         }
 
         public override void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)

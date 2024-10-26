@@ -24,6 +24,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public abstract float motionSliderRate { set; }
         public abstract bool useMuneKeyL { set; }
         public abstract bool useMuneKeyR { set; }
+        public abstract Camera subCamera { get; }
 
         protected string _errorMessage = "";
         public string errorMessage

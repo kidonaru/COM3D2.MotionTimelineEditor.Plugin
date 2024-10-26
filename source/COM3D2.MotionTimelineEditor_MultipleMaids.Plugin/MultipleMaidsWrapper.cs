@@ -262,6 +262,14 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
         }
 
+        public Camera subcamera
+        {
+            get
+            {
+                return (Camera)field.subcamera.GetValue(multipleMaids);
+            }
+        }
+
         public bool isWear
         {
             get { return (bool)field.isWear.GetValue(multipleMaids); }

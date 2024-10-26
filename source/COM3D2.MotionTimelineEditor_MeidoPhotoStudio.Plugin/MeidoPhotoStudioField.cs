@@ -14,6 +14,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
         public FieldInfo windowManager;
         public FieldInfo propManager;
         public FieldInfo lightManager;
+        public FieldInfo cameraManager;
         public FieldInfo maidIKPane;
         public FieldInfo maidDressingPane;
         public FieldInfo ikToggle;
@@ -21,6 +22,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
         public FieldInfo boneIKToggle;
         public FieldInfo propList;
         public FieldInfo lightList;
+        public FieldInfo subCamera;
 
         private Dictionary<string, System.Type> _ownerTypes = new Dictionary<string, System.Type>
         {
@@ -29,6 +31,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             { "windowManager", typeof(MPS) },
             { "propManager", typeof(MPS) },
             { "lightManager", typeof(MPS) },
+            { "cameraManager", typeof(MPS) },
             { "maidIKPane", typeof(PoseWindowPane) },
             { "maidDressingPane", typeof(PoseWindowPane) },
             { "ikToggle", typeof(MaidIKPane) },
@@ -36,6 +39,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             { "boneIKToggle", typeof(MaidIKPane) },
             { "propList", typeof(PropManager) },
             { "lightList", typeof(LightManager) },
+            { "subCamera", typeof(CameraManager) },
         };
 
         public bool Init()

@@ -255,6 +255,14 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
         }
 
+        public override Camera subCamera
+        {
+            get
+            {
+                return mps.subCamera;
+            }
+        }
+
         public MeidoPhotoStudioHack()
         {
         }

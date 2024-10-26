@@ -69,6 +69,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
+        private static Camera subCamera
+        {
+            get
+            {
+                return studioHack.subCamera;
+            }
+        }
+
         public static string CameraBoneName = "camera";
         public static string CameraDisplayName = "カメラ";
 
@@ -205,6 +213,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             uoCamera.SetAroundAngle(new Vector2(rotation.y, rotation.x));
             Camera.main.SetRotationZ(rotation.z);
             Camera.main.fieldOfView = viewAngle;
+            subCamera.fieldOfView = viewAngle;
 
             //PluginUtils.LogDebug("ApplyMotion: position={0}, rotation={1}, distance={2}, viewAngle={3}", position, rotation, distance, viewAngle);
         }
