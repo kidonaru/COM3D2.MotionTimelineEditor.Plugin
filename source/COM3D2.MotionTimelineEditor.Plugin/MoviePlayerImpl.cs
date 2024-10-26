@@ -371,11 +371,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return 9001;
             }
-            if (timeline.videoAlpha < 1f)
+            if (videoColor.a < 1f)
             {
                 return 3000;
             }
-            return 2000;
+            return 0;
         }
 
         private IEnumerator UpdateColorAfterDelay(float delay)

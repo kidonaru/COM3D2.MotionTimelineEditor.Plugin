@@ -126,6 +126,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("SingleFrameType")]
         public SingleFrameType singleFrameType = SingleFrameType.Delay;
 
+        [XmlElement("IsTangentCamera")]
+        public bool isTangentCamera = false;
+
         [XmlElement("ActiveTrackIndex")]
         public int activeTrackIndex = -1;
 

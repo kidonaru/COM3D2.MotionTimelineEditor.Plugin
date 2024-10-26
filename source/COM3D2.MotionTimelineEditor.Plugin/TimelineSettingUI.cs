@@ -181,10 +181,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.DrawToggle("ループアニメーション", timeline.isLoopAnm, 150, 20, newValue =>
+            view.DrawToggle("ループアニメーション", timeline.isLoopAnm, 200, 20, newValue =>
             {
                 timeline.isLoopAnm = newValue;
                 timelineManager.ApplyCurrentFrame(true);
+            });
+
+            view.DrawToggle("カメラの補間にTangentを使用", timeline.isTangentCamera, 200, 20, newValue =>
+            {
+                timeline.isTangentCamera = newValue;
+
+                var cameraLayer = timelineManager.GetLayer("CameraTimelineLayer", 0);
+                if (cameraLayer != null)
+                {
+                    cameraLayer.InitTangent();
+                    cameraLayer.ApplyCurrentFrame(true);
+                }
             });
 
             view.BeginHorizontal();

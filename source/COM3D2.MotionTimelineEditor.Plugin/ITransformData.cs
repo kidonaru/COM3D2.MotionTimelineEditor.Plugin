@@ -64,6 +64,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Vector3 initialScale { get; }
         Color initialColor { get; }
 
+        SingleFrameType singleFrameType { get; }
+
         ValueData this[string name] { get; }
 
         void Initialize(string name);
@@ -78,6 +80,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             float nextTime);
 
         void FromTransformData(ITransformData transform);
+
+        void InitTangent();
 
         void FromXml(TransformXml xml);
         TransformXml ToXml();

@@ -20,15 +20,26 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public int frame;
         public Vector3 position;
         public Vector3 rotation;
-        public float distance;
-        public float viewAngle;
+        public Vector3 scale;
         public int easing;
+        public Vector3 positionInTangents;
+        public Vector3 positionOutTangents;
+        public Vector3 eulerAnglesInTangents;
+        public Vector3 eulerAnglesOutTangents;
+        public Vector3 scaleInTangents;
+        public Vector3 scaleOutTangents;
     }
 
     public class CameraMotionData : MotionDataBase
     {
         public MyTransform myTm;
         public int easing;
+        public Vector3 posOutTangents;
+        public Vector3 posInTangents;
+        public Vector3 rotOutTangents;
+        public Vector3 rotInTangents;
+        public Vector3 scaleOutTangents;
+        public Vector3 scaleInTangents;
     }
 
     [LayerDisplayName("カメラ")]
@@ -139,13 +150,54 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             ApplyMotion(_playData.current);
         }
 
-        private void ApplyMotion(CameraMotionData  motion)
+        private void ApplyMotion(CameraMotionData motion)
         {
-            float easing = CalcEasingValue(_playData.lerpFrame, motion.easing);
-            var position = Vector3.Lerp(motion.myTm.stPos, motion.myTm.edPos, easing);
-            var rotation = Vector3.Lerp(motion.myTm.stRot, motion.myTm.edRot, easing);
-            var distance = Mathf.Lerp(motion.myTm.stSca.x, motion.myTm.edSca.x, easing);
-            var viewAngle = Mathf.Lerp(motion.myTm.stSca.y, motion.myTm.edSca.y, easing);
+            Vector3 position, rotation;
+            float distance, viewAngle;
+
+            if (timeline.isTangentCamera)
+            {
+                var t0 = motion.stFrame * timeline.frameDuration;
+                var t1 = motion.edFrame * timeline.frameDuration;
+
+                position = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    motion.myTm.stPos,
+                    motion.myTm.edPos,
+                    motion.posOutTangents,
+                    motion.posInTangents,
+                    _playData.lerpFrame);
+
+                rotation = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    motion.myTm.stRot,
+                    motion.myTm.edRot,
+                    motion.rotOutTangents,
+                    motion.rotInTangents,
+                    _playData.lerpFrame);
+
+                var tempScale = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    motion.myTm.stSca,
+                    motion.myTm.edSca,
+                    motion.scaleOutTangents,
+                    motion.scaleInTangents,
+                    _playData.lerpFrame);
+
+                distance = tempScale.x;
+                viewAngle = tempScale.y;
+            }
+            else
+            {
+                float easing = CalcEasingValue(_playData.lerpFrame, motion.easing);
+                position = Vector3.Lerp(motion.myTm.stPos, motion.myTm.edPos, easing);
+                rotation = Vector3.Lerp(motion.myTm.stRot, motion.myTm.edRot, easing);
+                distance = Mathf.Lerp(motion.myTm.stSca.x, motion.myTm.edSca.x, easing);
+                viewAngle = Mathf.Lerp(motion.myTm.stSca.y, motion.myTm.edSca.y, easing);
+            }
 
             var uoCamera = MyHelper.GetUOCamera();
             uoCamera.SetTargetPos(position);
@@ -168,8 +220,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             trans.position = target.position;
             trans.eulerAngles = new Vector3(angle.y, angle.x, rotZ);
             trans.easing = GetEasing(frame.frameNo, CameraBoneName);
-            trans["distance"].value = uOCamera.distance;
-            trans["viewAngle"].value = Camera.main.fieldOfView;
+            trans.scale = new Vector3(uOCamera.distance, Camera.main.fieldOfView, 0);
 
             var bone = frame.CreateBone(trans);
             frame.UpdateBone(bone);
@@ -236,8 +287,13 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 position = trans.position,
                 rotation = trans.eulerAngles,
                 easing = trans.easing,
-                distance = trans["distance"].value,
-                viewAngle = trans["viewAngle"].value
+                scale = trans.scale,
+                positionInTangents = trans.positionInTangents.ToVector3(),
+                positionOutTangents = trans.positionOutTangents.ToVector3(),
+                eulerAnglesInTangents = trans.eulerAnglesInTangents.ToVector3(),
+                eulerAnglesOutTangents = trans.eulerAnglesOutTangents.ToVector3(),
+                scaleInTangents = trans.scaleInTangents.ToVector3(),
+                scaleOutTangents = trans.scaleOutTangents.ToVector3(),
             };
 
             _timelineRows.Add(row);
@@ -262,10 +318,16 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                         edPos = end.position,
                         stRot = start.rotation,
                         edRot = end.rotation,
-                        stSca = new Vector3(start.distance, start.viewAngle, 0f),
-                        edSca = new Vector3(end.distance, end.viewAngle, 0f)
+                        stSca = start.scale,
+                        edSca = end.scale,
                     },
-                    easing = end.easing
+                    easing = end.easing,
+                    posOutTangents = start.positionOutTangents,
+                    posInTangents = end.positionInTangents,
+                    rotOutTangents = start.eulerAnglesOutTangents,
+                    rotInTangents = end.eulerAnglesInTangents,
+                    scaleOutTangents = start.scaleOutTangents,
+                    scaleInTangents = end.scaleInTangents,
                 };
                 _playData.motions.Add(motion);
             }
@@ -300,8 +362,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 builder.Append(row.rotation.x.ToString("0.000") + ",");
                 builder.Append(row.rotation.y.ToString("0.000") + ",");
                 builder.Append(row.rotation.z.ToString("0.000") + ",");
-                builder.Append(row.distance.ToString("0.000") + ",");
-                builder.Append(row.viewAngle.ToString("0.000") + ",");
+                builder.Append(row.scale.x.ToString("0.000") + ",");
+                builder.Append(row.scale.y.ToString("0.000") + ",");
                 builder.Append(row.easing.ToString());
                 builder.Append("\r\n");
             };

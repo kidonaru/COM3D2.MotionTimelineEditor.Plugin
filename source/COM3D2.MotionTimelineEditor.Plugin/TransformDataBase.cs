@@ -416,6 +416,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public virtual SingleFrameType singleFrameType
+        {
+            get
+            {
+                return timeline.singleFrameType;
+            }
+        }
+
         public ValueData this[string name]
         {
             get
@@ -704,6 +712,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             for (int i = 0; i < strValueCount; i++)
             {
                 strValues[i] = transform.strValues[i];
+            }
+        }
+
+        public void InitTangent()
+        {
+            if (hasTangent)
+            {
+                var tangentPair = config.defaultTangentPair;
+
+                foreach (var value in _values)
+                {
+                    value.inTangent = new TangentData
+                    {
+                        normalizedValue = tangentPair.inTangent,
+                        isSmooth = tangentPair.isSmooth,
+                    };
+                    value.outTangent = new TangentData
+                    {
+                        normalizedValue = tangentPair.outTangent,
+                        isSmooth = tangentPair.isSmooth,
+                    };
+                }
+            }
+
+            if (hasEasing)
+            {
+                easing = (int) config.defaultEasingType;
             }
         }
 
@@ -1056,17 +1091,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         return new ValueData[] { rotationValues[0] };
                     }
+                    if (hasEulerAngles)
+                    {
+                        return new ValueData[] { eulerAnglesValues[0] };
+                    }
                     break;
                 case TangentValueType.Y回転:
                     if (hasRotation)
                     {
                         return new ValueData[] { rotationValues[1] };
                     }
+                    if (hasEulerAngles)
+                    {
+                        return new ValueData[] { eulerAnglesValues[1] };
+                    }
                     break;
                 case TangentValueType.Z回転:
                     if (hasRotation)
                     {
                         return new ValueData[] { rotationValues[2] };
+                    }
+                    if (hasEulerAngles)
+                    {
+                        return new ValueData[] { eulerAnglesValues[2] };
                     }
                     break;
                 case TangentValueType.W回転:
@@ -1079,6 +1126,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     if (hasRotation)
                     {
                         return rotationValues;
+                    }
+                    if (hasEulerAngles)
+                    {
+                        return eulerAnglesValues;
                     }
                     break;
                 case TangentValueType.X拡縮:

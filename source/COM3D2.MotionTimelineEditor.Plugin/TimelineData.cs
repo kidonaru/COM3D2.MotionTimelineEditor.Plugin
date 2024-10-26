@@ -297,6 +297,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public SingleFrameType singleFrameType = SingleFrameType.Delay;
 
+        public bool isTangentCamera = false;
+
         public int activeTrackIndex = -1;
 
         public string bgmPath = "";
@@ -742,6 +744,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             startFadeTime = xml.startFadeTime;
             endFadeTime = xml.endFadeTime;
             singleFrameType = xml.singleFrameType;
+            isTangentCamera = xml.isTangentCamera;
             activeTrackIndex = xml.activeTrackIndex;
             bgmPath = xml.bgmPath;
             videoEnabled = xml.videoEnabled;
@@ -851,6 +854,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.startFadeTime = startFadeTime;
             xml.endFadeTime = endFadeTime;
             xml.singleFrameType = singleFrameType;
+            xml.isTangentCamera = isTangentCamera;
             xml.activeTrackIndex = activeTrackIndex;
             xml.bgmPath = bgmPath;
             xml.videoEnabled = videoEnabled;

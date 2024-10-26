@@ -93,6 +93,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public override SingleFrameType singleFrameType
+        {
+            get
+            {
+                return SingleFrameType.None;
+            }
+        }
+
         public TransformDataRoot()
         {
         }

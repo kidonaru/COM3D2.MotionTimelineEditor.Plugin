@@ -101,6 +101,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         void InsertFrames(int startFrameNo, int endFrameNo);
         void DuplicateFrames(int startFrameNo, int endFrameNo);
         void DeleteFrames(int startFrameNo, int endFrameNo);
+        void InitTangent();
 
         void FromXml(TimelineLayerXml xml);
         TimelineLayerXml ToXml();

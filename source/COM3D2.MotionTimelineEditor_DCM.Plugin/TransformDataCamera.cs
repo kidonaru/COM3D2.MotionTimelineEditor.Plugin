@@ -10,7 +10,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             get
             {
-                return 9;
+                return 10;
             }
         }
 
@@ -30,11 +30,27 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override bool hasEasing
+        public override bool hasScale
         {
             get
             {
                 return true;
+            }
+        }
+
+        public override bool hasEasing
+        {
+            get
+            {
+                return !timeline.isTangentCamera;
+            }
+        }
+
+        public override bool hasTangent
+        {
+            get
+            {
+                return timeline.isTangentCamera;
             }
         }
 
@@ -54,6 +70,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
+        public override ValueData[] scaleValues
+        {
+            get
+            {
+                return new ValueData[] { values[7], values[8], values[9] };
+            }
+        }
+
         public override ValueData easingValue
         {
             get
@@ -62,33 +86,24 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public TransformDataCamera()
+        public override ValueData[] tangentValues
         {
+            get
+            {
+                return values;
+            }
         }
 
-        private readonly static Dictionary<string, CustomValueInfo> CustomValueInfoMap = new Dictionary<string, CustomValueInfo>
+        public override Vector3 initialScale
         {
+            get
             {
-                "distance", new CustomValueInfo
-                {
-                    index = 7,
-                    name = "距離",
-                    defaultValue = 1f,
-                }
-            },
-            {
-                "viewAngle", new CustomValueInfo
-                {
-                    index = 8,
-                    name = "FoV",
-                    defaultValue = 35f,
-                }
-            },
-        };
+                return new Vector3(1f, 35f, 0f); // 距離, FoV, ダミー
+            }
+        }
 
-        public override Dictionary<string, CustomValueInfo> GetCustomValueInfoMap()
+        public TransformDataCamera()
         {
-            return CustomValueInfoMap;
         }
     }
 }

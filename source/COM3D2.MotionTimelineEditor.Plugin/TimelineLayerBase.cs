@@ -633,6 +633,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     nextFrameNo = frame.frameNo + 1;
                 }
 
+                // 1フレーム補間が有効な場合は自身を使用
+                if (bone.transform.singleFrameType == SingleFrameType.Delay ||
+                    bone.transform.singleFrameType == SingleFrameType.Advance)
+                {
+                    if (frame.frameNo - prevFrameNo == 1)
+                    {
+                        prevBone = bone;
+                    }
+                    if (nextFrameNo - frame.frameNo == 1)
+                    {
+                        nextBone = bone;
+                    }
+                }
+
                 var prevTrans = prevBone.transform;
                 var nextTrans = nextBone.transform;
 
@@ -1209,6 +1223,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (frame != null)
                 {
                     frame.frameNo -= length;
+                }
+            }
+        }
+
+        public void InitTangent()
+        {
+            foreach (var frame in _keyFrames)
+            {
+                foreach (var bone in frame.bones)
+                {
+                    bone.transform.InitTangent();
                 }
             }
         }
