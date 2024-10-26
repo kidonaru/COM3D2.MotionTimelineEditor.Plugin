@@ -10,7 +10,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             get
             {
-                return 15;
+                return 16;
             }
         }
 
@@ -122,6 +122,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     index = 14,
                     name = "影距",
                     defaultValue = 0.01f,
+                }
+            },
+            {
+                "maidSlotNo", new CustomValueInfo
+                {
+                    index = 15,
+                    name = "追従",
+                    defaultValue = -1f,
                 }
             },
         };

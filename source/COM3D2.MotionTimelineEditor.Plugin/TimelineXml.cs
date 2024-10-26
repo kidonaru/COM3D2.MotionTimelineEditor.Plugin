@@ -129,6 +129,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("IsTangentCamera")]
         public bool isTangentCamera = false;
 
+        [XmlElement("IsLightColorEasing")]
+        public bool isLightColorEasing = true;
+
         [XmlElement("ActiveTrackIndex")]
         public int activeTrackIndex = -1;
 
@@ -368,6 +371,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 // 前のバージョンでは次のフレームを拡張する仕様
                 singleFrameType = SingleFrameType.Advance;
+            }
+
+            if (version < 11)
+            {
+                // LightTimelineLayerにmaidSlotIdを追加
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "LightTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+                                var values = new List<float>(transform.values);
+                                if (values.Count == 15)
+                                {
+                                    PluginUtils.LogDebug("Add maidSlotId to LightTimelineLayer name={0}", transform.name);
+                                    values.Add(-1f);
+                                }
+                                transform.values = values.ToArray();
+                            }
+                        }
+                        break;
+                    }
+                }
             }
         }
     }

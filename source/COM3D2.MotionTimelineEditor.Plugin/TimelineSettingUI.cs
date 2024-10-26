@@ -199,6 +199,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             });
 
+            view.DrawToggle("ライトで色補間を有効化", timeline.isLightColorEasing, 200, 20, newValue =>
+            {
+                timeline.isLightColorEasing = newValue;
+            });
+
             view.BeginHorizontal();
             {
                 view.DrawLabel("オフセット時間", 70, 20);

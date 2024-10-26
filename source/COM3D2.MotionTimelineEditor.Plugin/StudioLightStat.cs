@@ -4,6 +4,83 @@ using UnityEngine.Rendering;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+    public class MaidFollowLight : MonoBehaviour
+    {
+        private Light light;
+        public int maidSlotNo = -1;
+
+        public Vector3 offset = Vector3.zero;
+
+        protected static MaidManager maidManager
+        {
+            get
+            {
+                return MaidManager.instance;
+            }
+        }
+
+        public MaidCache maidCache
+        {
+            get
+            {
+                return maidManager.GetMaidCache(maidSlotNo);
+            }
+        }
+
+        public Maid maid
+        {
+            get
+            {
+                if (maidCache != null)
+                {
+                    return maidCache.maid;
+                }
+                return null;
+            }
+        }
+
+        private static StudioHackBase studioHack
+        {
+            get
+            {
+                return StudioHackManager.studioHack;
+            }
+        }
+
+        public bool isFollow
+        {
+            get
+            {
+                return maid != null;
+            }
+        }
+
+        public static MaidFollowLight GetOrAddComponent(Light light)
+        {
+            var go = light.gameObject;
+            var component = go.GetComponent<MaidFollowLight>();
+            if (component == null)
+            {
+                component = go.AddComponent<MaidFollowLight>();
+                component.light = light;
+            }
+            return component;
+        }
+
+        private void LateUpdate()
+        {
+            if (studioHack == null)
+            {
+                return;
+            }
+
+            if (isFollow && light != null && maid != null)
+            {
+                light.transform.position = maid.body0.Pelvis.position + offset;
+            }
+        }
+    }
+
     public class StudioLightStat
     {
         private LightType _type = LightType.Directional;
@@ -25,7 +102,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public int maidSlotNo = -1;
         public bool visible = true;
         public Light light = null;
         public Transform transform = null;
@@ -66,6 +142,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     default:
                         return 3;
                 }
+            }
+        }
+
+        private MaidFollowLight _followLight = null;
+        public MaidFollowLight followLight
+        {
+            get
+            {
+                if (_followLight == null)
+                {
+                    _followLight = MaidFollowLight.GetOrAddComponent(light);
+                }
+                return _followLight;
             }
         }
 
@@ -112,7 +201,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void FromStat(StudioLightStat stat)
         {
             type = stat.type;
-            maidSlotNo = stat.maidSlotNo;
             visible = stat.visible;
             light = stat.light;
             transform = stat.transform;

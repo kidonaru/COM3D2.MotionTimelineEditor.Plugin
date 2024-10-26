@@ -106,7 +106,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class TimelineData
     {
-        public static readonly int CurrentVersion = 10;
+        public static readonly int CurrentVersion = 11;
         public static readonly TimelineData DefaultTimeline = new TimelineData();
 
         public int version = 0;
@@ -298,6 +298,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public SingleFrameType singleFrameType = SingleFrameType.Delay;
 
         public bool isTangentCamera = false;
+
+        public bool isLightColorEasing = true;
 
         public int activeTrackIndex = -1;
 
@@ -745,6 +747,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             endFadeTime = xml.endFadeTime;
             singleFrameType = xml.singleFrameType;
             isTangentCamera = xml.isTangentCamera;
+            isLightColorEasing = xml.isLightColorEasing;
             activeTrackIndex = xml.activeTrackIndex;
             bgmPath = xml.bgmPath;
             videoEnabled = xml.videoEnabled;
@@ -855,6 +858,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.endFadeTime = endFadeTime;
             xml.singleFrameType = singleFrameType;
             xml.isTangentCamera = isTangentCamera;
+            xml.isLightColorEasing = isLightColorEasing;
             xml.activeTrackIndex = activeTrackIndex;
             xml.bgmPath = bgmPath;
             xml.videoEnabled = videoEnabled;

@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using COM3D2.DanceCameraMotion.Plugin;
 using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
+    using MyTransform = DanceCameraMotion.Plugin.MyTransform;
     using LightPlayData = MotionPlayData<LightMotionData>;
 
     public class LightTimeLineRow
@@ -144,22 +144,43 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         private void ApplyMotion(LightMotionData motion, StudioLightStat stat, float lerpTime)
         {
             var light = stat.light;
+            var followLight = stat.followLight;
             var transform = stat.transform;
-            if (stat == null || light == null || transform == null)
+            if (stat == null || light == null || followLight == null || transform == null)
             {
                 return;
             }
 
             float easingTime = CalcEasingValue(lerpTime, motion.easing);
-            transform.position = Vector3.Lerp(motion.myTm.stPos, motion.myTm.edPos, easingTime);
-            transform.rotation = Quaternion.Euler(Vector3.Lerp(motion.myTm.stRot, motion.myTm.edRot, easingTime));
-            light.color = Color.Lerp(motion.stColor, motion.edColor, easingTime);
+
+            followLight.maidSlotNo = motion.maidSlotNo;
+
+            var position = Vector3.Lerp(motion.myTm.stPos, motion.myTm.edPos, easingTime);
+            if (followLight.isFollow)
+            {
+                followLight.offset = position;
+            }
+            else
+            {
+                transform.localPosition = position;
+            }
+
+            transform.localEulerAngles = Vector3.Lerp(motion.myTm.stRot, motion.myTm.edRot, easingTime);
+
+            if (timeline.isLightColorEasing)
+            {
+                light.color = Color.Lerp(motion.stColor, motion.edColor, easingTime);
+            }
+            else
+            {
+                light.color = motion.stColor;
+            }
+
             light.range = motion.range;
             light.intensity = motion.intensity;
             light.spotAngle = motion.spotAngle;
             light.shadowStrength = motion.shadowStrength;
             light.shadowBias = motion.shadowBias;
-            stat.maidSlotNo = motion.maidSlotNo;
 
             lightManager.ApplyLight(stat);
         }
@@ -213,9 +234,16 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var lightName = stat.name;
                 var light = stat.light;
                 var transform = stat.transform;
+                var followLight = stat.followLight;
+
+                var position = transform.localPosition;
+                if (followLight.isFollow)
+                {
+                    position = followLight.offset;
+                }
 
                 var trans = CreateTransformData(lightName);
-                trans.position = transform.localPosition;
+                trans.position = position;
                 trans.eulerAngles = transform.localEulerAngles;
                 trans.color = light.color;
                 trans["range"].value = light.range;
@@ -223,6 +251,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 trans["spotAngle"].value = light.spotAngle;
                 trans["shadowStrength"].value = light.shadowStrength;
                 trans["shadowBias"].value = light.shadowBias;
+                trans["maidSlotNo"].value = followLight.maidSlotNo;
                 trans.easing = GetEasing(frame.frameNo, lightName);
 
                 var bone = frame.CreateBone(trans);
@@ -283,7 +312,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     spotAngle = trans["spotAngle"].value,
                     shadowStrength = trans["shadowStrength"].value,
                     shadowBias = trans["shadowBias"].value,
-                    maidSlotNo = -1,
+                    maidSlotNo = trans["maidSlotNo"].intValue,
                     easing = trans.easing,
                 };
 
@@ -492,6 +521,13 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             getName = (type, index) => type.ToString(),
         };
 
+        private GUIComboBox<MaidCache> _maidComboBox = new GUIComboBox<MaidCache>
+        {
+            getName = (maidCache, _) => maidCache == null ? "未選択" : maidCache.fullName,
+            buttonSize = new Vector2(100, 20),
+            contentSize = new Vector2(150, 300),
+        };
+
         private ColorFieldCache _colorFieldValue = new ColorFieldCache("Color", false);
 
         private enum TabType
@@ -552,7 +588,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 view.DrawLabel(stat.displayName, 200, 20);
 
                 var light = stat.light;
+                var followLight = stat.followLight;
                 var transform = stat.transform;
+                var position = transform.localPosition;
                 var initialPosition = StudioLightStat.DefaultPosition;
                 var initialEulerAngles = StudioLightStat.DefaultRotation;
                 var initialScale = Vector3.one;
@@ -571,6 +609,71 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     default:
                         drawMask = DrawMaskPosition;
                         break;
+                }
+
+                if (followLight.isFollow)
+                {
+                    if (IsDrawTransformType(TransformDrawType.移動, editType, drawMask))
+                    {
+                        initialPosition = new Vector3(0f, 0f, 0f);
+                        position = followLight.offset;
+                        var isFull = editType == TransformEditType.全て || editType == TransformEditType.移動;
+
+                        if (isFull || editType == TransformEditType.X)
+                        {
+                            updateTransform |= view.DrawSliderValue(
+                                new GUIView.SliderOption
+                                {
+                                    label = "X",
+                                    labelWidth = 30,
+                                    min = -config.positionRange,
+                                    max = config.positionRange,
+                                    step = 0.01f,
+                                    defaultValue = initialPosition.x,
+                                    value = position.x,
+                                    onChanged = x => position.x = x,
+                                });
+                        }
+
+                        if (isFull || editType == TransformEditType.Y)
+                        {
+                            updateTransform |= view.DrawSliderValue(
+                                new GUIView.SliderOption
+                                {
+                                    label = "Y",
+                                    labelWidth = 30,
+                                    min = -config.positionRange,
+                                    max = config.positionRange,
+                                    step = 0.01f,
+                                    defaultValue = initialPosition.y,
+                                    value = position.y,
+                                    onChanged = x => position.y = x,
+                                });
+                        }
+
+                        if (isFull || editType == TransformEditType.Z)
+                        {
+                            updateTransform |= view.DrawSliderValue(
+                                new GUIView.SliderOption
+                                {
+                                    label = "Z",
+                                    labelWidth = 30,
+                                    min = -config.positionRange,
+                                    max = config.positionRange,
+                                    step = 0.01f,
+                                    defaultValue = initialPosition.z,
+                                    value = position.z,
+                                    onChanged = x => position.z = x,
+                                });
+                        }
+
+                        if (updateTransform)
+                        {
+                            followLight.offset = position;
+                        }
+
+                        drawMask &= DrawMaskRotation;
+                    }
                 }
 
                 updateTransform |= DrawTransform(
@@ -661,6 +764,27 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                             value = light.shadowBias,
                             onChanged = newValue => light.shadowBias = newValue,
                         });
+                }
+
+                if (stat.type != LightType.Directional)
+                {
+                    view.BeginHorizontal();
+                    {
+                        view.DrawLabel("追従メイド", 70, 20);
+
+                        view.DrawToggle("", followLight.maidSlotNo >= 0, 20, 20, newValue =>
+                        {
+                            followLight.maidSlotNo = newValue ? _maidComboBox.currentIndex : -1;
+                        });
+
+                        _maidComboBox.items = maidManager.maidCaches;
+                        _maidComboBox.onSelected = (maidCache, index) =>
+                        {
+                            followLight.maidSlotNo = index;
+                        };
+                        _maidComboBox.DrawButton(view);
+                    }
+                    view.EndLayout();
                 }
 
                 if (updateTransform)

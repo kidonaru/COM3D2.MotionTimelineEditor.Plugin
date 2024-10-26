@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 using UnityInjector;
 using UnityInjector.Attributes;
 using System.Collections;
+using System.Diagnostics;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -543,6 +544,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void OnPluginEnable()
         {
+            DumpAllCameraInfo();
+            DumpLayerInfo();
+
             studioHackManager.Update();
             modelHackManager.Update();
 
@@ -573,5 +577,84 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             timelineManager.OnPluginDisable();
             gridViewManager.OnPluginDisable();
         }
+
+        [Conditional("DEBUG")]
+        private void DumpAllCameraInfo()
+        {
+            Camera[] allCameras = Camera.allCameras;
+            PluginUtils.LogDebug("カメラの総数: " + allCameras.Length);
+
+            for (int i = 0; i < allCameras.Length; i++)
+            {
+                Camera cam = allCameras[i];
+                PluginUtils.LogDebug("カメラ " + (i + 1) + ":");
+                PluginUtils.LogDebug("  名前: " + cam.name);
+                PluginUtils.LogDebug("  有効: " + cam.enabled);
+                PluginUtils.LogDebug("  位置: " + cam.transform.position);
+                PluginUtils.LogDebug("  回転: " + cam.transform.rotation.eulerAngles);
+                PluginUtils.LogDebug("  視野角: " + cam.fieldOfView);
+                PluginUtils.LogDebug("  ニアクリップ: " + cam.nearClipPlane);
+                PluginUtils.LogDebug("  ファークリップ: " + cam.farClipPlane);
+                PluginUtils.LogDebug("  深度: " + cam.depth);
+                PluginUtils.LogDebug("  カリングマスク: " + cam.cullingMask);
+                PluginUtils.LogDebug("  レンダリングパス: " + cam.renderingPath);
+                PluginUtils.LogDebug("  描画レイヤー: " + GetLayerNames(cam.cullingMask));
+                PluginUtils.LogDebug("  ---");
+            }
+        }
+
+        private string GetLayerNames(int cullingMask)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            for (int i = 0; i < 32; i++)
+            {
+                if ((cullingMask & (1 << i)) != 0)
+                {
+                    if (sb.Length > 0)
+                        sb.Append(", ");
+                    sb.Append(LayerMask.LayerToName(i));
+                }
+            }
+            return sb.ToString();
+        }
+
+        [Conditional("DEBUG")]
+        private void DumpLayerInfo()
+        {
+            PluginUtils.Log("レイヤー情報:");
+
+            for (int i = 0; i < 32; i++)
+            {
+                string layerName = LayerMask.LayerToName(i);
+                if (!string.IsNullOrEmpty(layerName))
+                {
+                    PluginUtils.Log("レイヤー " + i + ":");
+                    PluginUtils.Log("  名前: " + layerName);
+                    PluginUtils.Log("  ビットマスク: " + (1 << i));
+
+                    // レイヤーの衝突マトリックス情報を取得
+                    string collisions = GetLayerCollisions(i);
+                    PluginUtils.Log("  衝突するレイヤー: " + collisions);
+
+                    PluginUtils.Log("  ---");
+                }
+            }
+        }
+
+        private string GetLayerCollisions(int layer)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            for (int i = 0; i < 32; i++)
+            {
+                if (!Physics.GetIgnoreLayerCollision(layer, i))
+                {
+                    if (sb.Length > 0)
+                        sb.Append(", ");
+                    sb.Append(LayerMask.LayerToName(i));
+                }
+            }
+            return sb.ToString();
+        }
+
     }
 }

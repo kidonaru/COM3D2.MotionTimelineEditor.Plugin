@@ -1314,7 +1314,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             拡縮 = 4,
         }
 
-        public readonly static int DrawMaskAll = 0;
+        public readonly static int DrawMaskNone = 0;
+        public readonly static int DrawMaskAll = (int) (TransformDrawType.移動 | TransformDrawType.回転 | TransformDrawType.拡縮);
         public readonly static int DrawMaskPositonAndRotation = (int) (TransformDrawType.移動 | TransformDrawType.回転);
         public readonly static int DrawMaskRotation = (int) (TransformDrawType.回転);
         public readonly static int DrawMaskPosition = (int) (TransformDrawType.移動);
@@ -1346,7 +1347,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     break;
             }
 
-            if (drawMask != 0)
             {
                 if (drawType == TransformDrawType.移動 &&
                     (drawMask & (int) TransformDrawType.移動) == 0)
