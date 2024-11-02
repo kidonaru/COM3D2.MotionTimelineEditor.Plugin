@@ -39,5 +39,34 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
             return (Light) fieldLight.GetValue(dragPointLight);
         }
+
+        public class DragDetector : MonoBehaviour
+        {
+            public bool isDragging = false;
+
+            void OnMouseDown()
+            {
+                isDragging = true;
+                PluginUtils.Log("OnMouseDown");
+            }
+
+            void OnMouseUp()
+            {
+                isDragging = false;
+                PluginUtils.Log("OnMouseUp");
+            }
+        }
+
+        public static bool IsDragging(this DragPointMeido dragPoint)
+        {
+            var detector = dragPoint.GetOrAddComponent<DragDetector>();
+            if (detector == null)
+            {
+                PluginUtils.LogError("Detector is null");
+                return false;
+            }
+
+            return detector.isDragging;
+        }
     }
 }

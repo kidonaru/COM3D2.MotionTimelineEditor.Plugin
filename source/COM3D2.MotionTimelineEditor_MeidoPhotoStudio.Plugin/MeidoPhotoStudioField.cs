@@ -24,6 +24,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
         public FieldInfo propList;
         public FieldInfo lightList;
         public FieldInfo subCamera;
+        public FieldInfo dragPoints;
 
         private Dictionary<string, System.Type> _ownerTypes = new Dictionary<string, System.Type>
         {
@@ -42,6 +43,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             { "propList", typeof(PropManager) },
             { "lightList", typeof(LightManager) },
             { "subCamera", typeof(CameraManager) },
+            { "dragPoints", typeof(MeidoDragPointManager) },
         };
 
         public bool Init()

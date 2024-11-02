@@ -2,11 +2,105 @@ using UnityEngine;
 using COM3D2.MotionTimelineEditor.Plugin;
 using MeidoPhotoStudio.Plugin;
 using System.Collections.Generic;
+using System.Reflection;
+using System;
 
 namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 {
     using MPS = MeidoPhotoStudio.Plugin.MeidoPhotoStudio;
     using MPSWindowManager = MeidoPhotoStudio.Plugin.WindowManager;
+
+    public enum MeidoBoneType
+    {
+        Head,
+        HeadNub,
+        ClavicleL,
+        ClavicleR,
+        UpperArmL,
+        UpperArmR,
+        ForearmL,
+        ForearmR,
+        HandL,
+        HandR,
+        MuneL,
+        MuneSubL,
+        MuneR,
+        MuneSubR,
+        Neck,
+        Spine,
+        Spine0a,
+        Spine1,
+        Spine1a,
+        ThighL,
+        ThighR,
+        Pelvis,
+        Hip,
+        CalfL,
+        CalfR,
+        FootL,
+        FootR,
+        Cube,
+        Body,
+        Torso,
+        Finger0L,
+        Finger01L,
+        Finger02L,
+        Finger0NubL,
+        Finger1L,
+        Finger11L,
+        Finger12L,
+        Finger1NubL,
+        Finger2L,
+        Finger21L,
+        Finger22L,
+        Finger2NubL,
+        Finger3L,
+        Finger31L,
+        Finger32L,
+        Finger3NubL,
+        Finger4L,
+        Finger41L,
+        Finger42L,
+        Finger4NubL,
+        Finger0R,
+        Finger01R,
+        Finger02R,
+        Finger0NubR,
+        Finger1R,
+        Finger11R,
+        Finger12R,
+        Finger1NubR,
+        Finger2R,
+        Finger21R,
+        Finger22R,
+        Finger2NubR,
+        Finger3R,
+        Finger31R,
+        Finger32R,
+        Finger3NubR,
+        Finger4R,
+        Finger41R,
+        Finger42R,
+        Finger4NubR,
+        Toe0L,
+        Toe01L,
+        Toe0NubL,
+        Toe1L,
+        Toe11L,
+        Toe1NubL,
+        Toe2L,
+        Toe21L,
+        Toe2NubL,
+        Toe0R,
+        Toe01R,
+        Toe0NubR,
+        Toe1R,
+        Toe11R,
+        Toe1NubR,
+        Toe2R,
+        Toe21R,
+        Toe2NubR
+    }
 
     public class MeidoPhotoStudioWrapper
     {
@@ -320,6 +414,31 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
 
             return activeMeidoList[slotNo];
+        }
+
+        public System.Collections.IDictionary GetDragPoints(Meido meido)
+        {
+            if (meido == null)
+            {
+                return null;
+            }
+            var ikManager = meido.IKManager;
+            return (System.Collections.IDictionary) field.dragPoints.GetValue(ikManager);
+        }
+
+        private static readonly System.Type boneEnumType = typeof(MeidoDragPointManager).GetNestedType("Bone", BindingFlags.NonPublic);
+
+        public DragPointMeido GetDragPoint(Meido meido, MeidoBoneType boneType)
+        {
+            var dragPoints = GetDragPoints(meido);
+            if (dragPoints == null)
+            {
+                PluginUtils.LogError("dragPoints is null");
+                return null;
+            }
+
+            var boneValue = Enum.ToObject(boneEnumType, (int)boneType);
+            return (DragPointMeido) dragPoints[boneValue];
         }
 
         public bool Init()

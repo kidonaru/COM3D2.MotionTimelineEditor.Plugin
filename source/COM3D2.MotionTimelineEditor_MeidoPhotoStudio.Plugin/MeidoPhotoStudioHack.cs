@@ -543,5 +543,43 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
         {
             base.Update();
         }
+
+        private MeidoBoneType ConvertMeidoBoneType(IKHoldType iKHoldType)
+        {
+            switch (iKHoldType)
+            {
+                case IKHoldType.Arm_L_Tip:
+                    return MeidoBoneType.HandL;
+                case IKHoldType.Arm_R_Tip:
+                    return MeidoBoneType.HandR;
+                case IKHoldType.Arm_L_Joint:
+                    return MeidoBoneType.ForearmL;
+                case IKHoldType.Arm_R_Joint:
+                    return MeidoBoneType.ForearmR;
+                case IKHoldType.Foot_L_Tip:
+                    return MeidoBoneType.FootL;
+                case IKHoldType.Foot_R_Tip:
+                    return MeidoBoneType.FootR;
+                case IKHoldType.Foot_L_Joint:
+                    return MeidoBoneType.CalfL;
+                case IKHoldType.Foot_R_Joint:
+                    return MeidoBoneType.CalfR;
+            }
+
+            return MeidoBoneType.Body;
+        }
+
+        public override bool IsIKDragging(IKHoldType iKHoldType)
+        {
+            var activeMeido = mps.activeMeido;
+            var dragPoint = mps.GetDragPoint(activeMeido, ConvertMeidoBoneType(iKHoldType));
+            if (dragPoint == null)
+            {
+                PluginUtils.LogError("dragPoint is null");
+                return false;
+            }
+
+            return dragPoint.IsDragging();
+        }
     }
 }

@@ -105,6 +105,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public bool isDragging
+        {
+            get
+            {
+                return studioHack.IsIKDragging(holdType);
+            }
+        }
+
         private readonly static string[] IKHoldTypeNames = new string[(int) IKHoldType.Max]
         {
             "肘(右)",
@@ -172,6 +180,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (!timeline.isIKAnime && !studioHack.isPoseEditing)
                 {
+                    return;
+                }
+
+                if (isDragging)
+                {
+                    this.targetPosition = position;
                     return;
                 }
 

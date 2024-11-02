@@ -329,5 +329,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             // do nothing
         }
+
+        public virtual bool IsIKDragging(IKHoldType iKHoldType)
+        {
+            return false;
+        }
     }
 }

@@ -967,6 +967,126 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
         }
 
+        public MouseDrag mHandL
+        {
+            get
+            {
+                var dragArray = multipleMaids.mHandL;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < dragArray.Length)
+                {
+                    return dragArray[selectMaidIndex];
+                }
+
+                return null;
+            }
+        }
+
+        public MouseDrag mHandR
+        {
+            get
+            {
+                var dragArray = multipleMaids.mHandR;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < dragArray.Length)
+                {
+                    return dragArray[selectMaidIndex];
+                }
+
+                return null;
+            }
+        }
+
+        public MouseDrag mArmL
+        {
+            get
+            {
+                var dragArray = multipleMaids.mArmL;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < dragArray.Length)
+                {
+                    return dragArray[selectMaidIndex];
+                }
+
+                return null;
+            }
+        }
+
+        public MouseDrag mArmR
+        {
+            get
+            {
+                var dragArray = multipleMaids.mArmR;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < dragArray.Length)
+                {
+                    return dragArray[selectMaidIndex];
+                }
+
+                return null;
+            }
+        }
+
+        public MouseDrag mFootL
+        {
+            get
+            {
+                var dragArray = multipleMaids.mFootL;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < dragArray.Length)
+                {
+                    return dragArray[selectMaidIndex];
+                }
+
+                return null;
+            }
+        }
+
+        public MouseDrag mFootR
+        {
+            get
+            {
+                var dragArray = multipleMaids.mFootR;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < dragArray.Length)
+                {
+                    return dragArray[selectMaidIndex];
+                }
+
+                return null;
+            }
+        }
+
+        public MouseDrag mHizaL
+        {
+            get
+            {
+                var dragArray = multipleMaids.mHizaL;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < dragArray.Length)
+                {
+                    return dragArray[selectMaidIndex];
+                }
+
+                return null;
+            }
+        }
+
+        public MouseDrag mHizaR
+        {
+            get
+            {
+                var dragArray = multipleMaids.mHizaR;
+                var selectMaidIndex = multipleMaids.selectMaidIndex;
+                if (selectMaidIndex >= 0 && selectMaidIndex < dragArray.Length)
+                {
+                    return dragArray[selectMaidIndex];
+                }
+
+                return null;
+            }
+        }
+
         public override void UpdateUndress(Maid maid, DressSlotID slotId, bool isVisible)
         {
             if (maid != selectedMaid)
@@ -1058,6 +1178,40 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                 multipleMaids.depth3 = dof.aperture;
                 multipleMaids.depth4 = dof.maxBlurSize;
             }
+        }
+
+        public override bool IsIKDragging(IKHoldType iKHoldType)
+        {
+            MouseDrag drag = null;
+            switch (iKHoldType)
+            {
+                case IKHoldType.Arm_L_Tip:
+                    drag = mHandL;
+                    break;
+                case IKHoldType.Arm_R_Tip:
+                    drag = mHandR;
+                    break;
+                case IKHoldType.Arm_L_Joint:
+                    drag = mArmL;
+                    break;
+                case IKHoldType.Arm_R_Joint:
+                    drag = mArmR;
+                    break;
+                case IKHoldType.Foot_L_Tip:
+                    drag = mFootL;
+                    break;
+                case IKHoldType.Foot_R_Tip:
+                    drag = mFootR;
+                    break;
+                case IKHoldType.Foot_L_Joint:
+                    drag = mHizaL;
+                    break;
+                case IKHoldType.Foot_R_Joint:
+                    drag = mHizaR;
+                    break;
+            }
+
+            return drag != null && drag.isMouseDown;
         }
     }
 }

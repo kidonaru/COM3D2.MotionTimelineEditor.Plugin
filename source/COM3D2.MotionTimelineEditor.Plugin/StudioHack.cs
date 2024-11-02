@@ -631,5 +631,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 maidStoreData[key] = value;
             }
         }
+
+        public override bool IsIKDragging(IKHoldType iKHoldType)
+        {
+            var maidCache = maidManager.maidCache;
+            if (maidCache != null)
+            {
+                return maidCache.GetAxisObj(iKHoldType).is_drag;
+            }
+            return false;
+        }
     }
 }

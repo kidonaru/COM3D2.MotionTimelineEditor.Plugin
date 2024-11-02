@@ -66,6 +66,15 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         public FieldInfo depth3;
         public FieldInfo depth4;
 
+        public FieldInfo mHandL;
+        public FieldInfo mHandR;
+        public FieldInfo mArmL;
+        public FieldInfo mArmR;
+        public FieldInfo mFootL;
+        public FieldInfo mFootR;
+        public FieldInfo mHizaL;
+        public FieldInfo mHizaR;
+
         public bool Init()
         {
             var bindingAttr = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.InvokeMethod;

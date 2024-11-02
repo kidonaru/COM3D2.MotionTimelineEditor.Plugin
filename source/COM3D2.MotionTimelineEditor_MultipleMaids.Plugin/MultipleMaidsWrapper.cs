@@ -440,6 +440,54 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             set { field.depth4.SetValue(multipleMaids, value); }
         }
 
+        public MouseDrag[] mHandL
+        {
+            get { return (MouseDrag[])field.mHandL.GetValue(multipleMaids); }
+            set { field.mHandL.SetValue(multipleMaids, value); }
+        }
+
+        public MouseDrag[] mHandR
+        {
+            get { return (MouseDrag[])field.mHandR.GetValue(multipleMaids); }
+            set { field.mHandR.SetValue(multipleMaids, value); }
+        }
+
+        public MouseDrag[] mArmL
+        {
+            get { return (MouseDrag[])field.mArmL.GetValue(multipleMaids); }
+            set { field.mArmL.SetValue(multipleMaids, value); }
+        }
+
+        public MouseDrag[] mArmR
+        {
+            get { return (MouseDrag[])field.mArmR.GetValue(multipleMaids); }
+            set { field.mArmR.SetValue(multipleMaids, value); }
+        }
+
+        public MouseDrag[] mFootL
+        {
+            get { return (MouseDrag[])field.mFootL.GetValue(multipleMaids); }
+            set { field.mFootL.SetValue(multipleMaids, value); }
+        }
+
+        public MouseDrag[] mFootR
+        {
+            get { return (MouseDrag[])field.mFootR.GetValue(multipleMaids); }
+            set { field.mFootR.SetValue(multipleMaids, value); }
+        }
+
+        public MouseDrag[] mHizaL
+        {
+            get { return (MouseDrag[])field.mHizaL.GetValue(multipleMaids); }
+            set { field.mHizaL.SetValue(multipleMaids, value); }
+        }
+
+        public MouseDrag[] mHizaR
+        {
+            get { return (MouseDrag[])field.mHizaR.GetValue(multipleMaids); }
+            set { field.mHizaR.SetValue(multipleMaids, value); }
+        }
+
         public bool Init()
         {
             {

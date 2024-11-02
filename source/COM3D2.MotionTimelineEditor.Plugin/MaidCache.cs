@@ -467,6 +467,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return GetIKHoldEntity(holdType).dragPoint;
         }
 
+        public WorldTransformAxis GetAxisObj(IKHoldType holdType)
+        {
+            return GetDragPoint(holdType).axis_obj;
+        }
+
         public Vector3 GetIkPosition(IKHoldType holdType)
         {
             return GetIKHoldEntity(holdType).position;
