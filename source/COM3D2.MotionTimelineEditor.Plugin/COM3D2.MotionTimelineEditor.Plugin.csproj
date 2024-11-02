@@ -113,6 +113,7 @@
     <Compile Include="PhotoBGManager.cs" />
     <Compile Include="PluginInfo.cs" />
     <Compile Include="PluginUtils.cs" />
+    <Compile Include="PostEffectManager.cs" />
     <Compile Include="ScriptLoader.cs" />
     <Compile Include="StopwatchDebug.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

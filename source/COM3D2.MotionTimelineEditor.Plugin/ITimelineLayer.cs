@@ -12,6 +12,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         int slotNo { get; }
         bool hasSlotNo { get; }
         bool isCameraLayer { get; }
+        bool isPostEffectLayer { get; }
         List<FrameData> keyFrames { get; }
 
         Maid maid { get; }

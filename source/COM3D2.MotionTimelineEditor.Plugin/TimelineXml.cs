@@ -398,6 +398,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
             }
+
+            if (version < 12)
+            {
+                // MotionTimelineLayerにisGroundingFootRを追加
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "MotionTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                if (bone.transform.name != MotionTimelineLayer.GroundingBoneName)
+                                    continue;
+
+                                var transform = bone.transform;
+                                var values = new List<float>(transform.values);
+                                if (values.Count == 6)
+                                {
+                                    PluginUtils.LogDebug("Add isGroundingFootR to MotionTimelineLayer name={0}", transform.name);
+                                    values.Add(values[0]);
+                                }
+                                transform.values = values.ToArray();
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 }

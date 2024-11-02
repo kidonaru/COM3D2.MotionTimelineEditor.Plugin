@@ -60,6 +60,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private string _loadedBgmPath = "";
         private float _prevMotionTime = 0f;
 
+        public int volumeDance
+        {
+            get
+            {
+                return soundMgr.GetVolumeDance();
+            }
+            set
+            {
+                soundMgr.SetVolumeDance(value);
+                UpdateVolume();
+            }
+        }
+
         private BGMManager()
         {
         }
@@ -179,11 +192,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (IsLoaded())
             {
-                var volume = soundMgr.GetVolumeDance();
-
                 _audioMgr.audiosource.outputAudioMixerGroup = soundMgr.mix_mgr[AudioMixerMgr.Group.Dance];
                 _audioMgr.audiosource.mute = false;
-                _audioMgr.audiosource.volume = volume / 100f;
+                _audioMgr.audiosource.volume = volumeDance / 100f;
             }
         }
 

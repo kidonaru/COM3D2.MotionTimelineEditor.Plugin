@@ -32,6 +32,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public virtual bool isPostEffectLayer
+        {
+            get
+            {
+                return false;
+            }
+        }
+
         protected List<FrameData> _keyFrames = new List<FrameData>();
         public List<FrameData> keyFrames
         {

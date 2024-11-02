@@ -7,7 +7,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public enum FileMenuType
     {
         New,
-        Save,
         OutputAnm,
         OutputDCM,
     }
@@ -174,7 +173,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             items = new List<FileMenuType>
             {
                 FileMenuType.New,
-                FileMenuType.Save,
                 FileMenuType.OutputAnm,
                 FileMenuType.OutputDCM,
             },
@@ -184,8 +182,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     case FileMenuType.New:
                         return "新規作成";
-                    case FileMenuType.Save:
-                        return "セーブ";
                     case FileMenuType.OutputAnm:
                         return "アニメ出力";
                     case FileMenuType.OutputDCM:
@@ -198,7 +194,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 switch (type)
                 {
-                    case FileMenuType.Save:
                     case FileMenuType.OutputAnm:
                     case FileMenuType.OutputDCM:
                         return timelineManager.IsValidData();
@@ -212,9 +207,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     case FileMenuType.New:
                         timelineManager.CreateNewTimeline();
-                        break;
-                    case FileMenuType.Save:
-                        timelineManager.SaveTimeline();
                         break;
                     case FileMenuType.OutputAnm:
                         timelineManager.OutputAnm();
@@ -519,6 +511,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 fileMenuComboBox.currentIndex = -1;
                 fileMenuComboBox.DrawButton(view);
 
+                if (view.DrawButton("セーブ", 60, 20, editEnabled))
+                {
+                    if (!studioHack.IsValid())
+                    {
+                        PluginUtils.ShowDialog(studioHack.errorMessage);
+                        return;
+                    }
+                    if (!timelineManager.IsValidData())
+                    {
+                        PluginUtils.ShowDialog(timelineManager.errorMessage);
+                        return;
+                    }
+                    timelineManager.SaveTimeline();
+                }
+                
                 if (view.DrawButton("ロード", 60, 20))
                 {
                     if (!studioHack.IsValid())
@@ -830,6 +837,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     view.DrawToggle("カメラ同期", config.isCameraSync, 80, 20, !currentLayer.isCameraLayer, newValue =>
                     {
                         config.isCameraSync = newValue;
+                        config.dirty = true;
+                    });
+                }
+
+                if (timelineManager.HasPostEffectLayer)
+                {
+                    view.DrawToggle("ポストエフェクト", config.isPostEffectSync, 100, 20, !currentLayer.isPostEffectLayer, newValue =>
+                    {
+                        config.isPostEffectSync = newValue;
                         config.dirty = true;
                     });
                 }

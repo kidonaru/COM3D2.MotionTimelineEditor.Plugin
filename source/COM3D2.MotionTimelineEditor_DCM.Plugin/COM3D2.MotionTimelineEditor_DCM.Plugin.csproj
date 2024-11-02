@@ -79,12 +79,15 @@
     <Compile Include="MorphUtils.cs" />
     <Compile Include="MoveTimelineLayer.cs" />
     <Compile Include="PluginInfo.cs" />
+    <Compile Include="PostEffectTimelineLayer.cs" />
+    <Compile Include="PostEffectUtils.cs" />
     <Compile Include="SeTimelineLayer.cs" />
     <Compile Include="ShapeKeyTimelineLayer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransformDataBG.cs" />
     <Compile Include="TransformDataBGColor.cs" />
     <Compile Include="TransformDataCamera.cs" />
+    <Compile Include="TransformDataDepthOfField.cs" />
     <Compile Include="TransformDataEyes.cs" />
     <Compile Include="TransformDataLight.cs" />
     <Compile Include="TransformDataLookAtTarget.cs" />

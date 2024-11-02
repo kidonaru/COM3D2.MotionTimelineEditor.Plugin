@@ -61,6 +61,26 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
         }
 
+        public EffectManager effectManager
+        {
+            get
+            {
+                return (EffectManager)field.effectManager.GetValue(meidoPhotoStudio);
+            }
+        }
+
+        public DepthOfFieldEffectManager depthOfFieldEffectManager
+        {
+            get
+            {
+                if (effectManager == null)
+                {
+                    return null;
+                }
+                return effectManager.Get<DepthOfFieldEffectManager>();
+            }
+        }
+
         public MeidoPhotoStudio.Plugin.MainWindow mainWindow
         {
             get

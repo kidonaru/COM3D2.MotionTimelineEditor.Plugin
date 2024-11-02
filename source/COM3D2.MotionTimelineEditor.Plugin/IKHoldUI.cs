@@ -123,24 +123,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.DrawHorizontalLine(Color.gray);
 
             bool paramUpdated = false;
-            bool isFootHold = IsHold(IKHoldType.Foot_L_Tip) || IsHold(IKHoldType.Foot_R_Tip);
 
             view.BeginHorizontal();
             {
-                view.DrawToggle("足の接地処理", maidCache.isFootGrounding, 120, 20, newValue =>
+                view.DrawToggle("左足の接地", maidCache.isGroundingFootL, 80, 20, newValue =>
                 {
-                    maidCache.isFootGrounding = newValue;
+                    maidCache.isGroundingFootL = newValue;
                     paramUpdated = true;
                 });
 
-                if (maidCache.isFootGrounding && !isFootHold)
+                view.DrawToggle("右足の接地", maidCache.isGroundingFootR, 80, 20, newValue =>
                 {
-                    view.DrawLabel("足首の固定化が必要です", -1, 20, Color.yellow);
+                    maidCache.isGroundingFootR = newValue;
+                    paramUpdated = true;
+                });
+
+                if ((maidCache.isGroundingFootL && !IsHold(IKHoldType.Foot_L_Tip)) ||
+                    (maidCache.isGroundingFootR && !IsHold(IKHoldType.Foot_R_Tip)))
+                {
+                    view.DrawLabel("足首の固定化が必要", -1, 20, Color.yellow);
                 }
             }
             view.EndLayout();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing && maidCache.isFootGrounding && isFootHold);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing && (maidCache.isGroundingFootL || maidCache.isGroundingFootR));
 
             paramUpdated |= view.DrawSliderValue(
                 new GUIView.SliderOption

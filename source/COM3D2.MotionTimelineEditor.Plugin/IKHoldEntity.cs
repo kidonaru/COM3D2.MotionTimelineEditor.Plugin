@@ -152,15 +152,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (!maidCache.isFootGrounding)
+                if (holdType == IKHoldType.Foot_L_Tip && maidCache.isGroundingFootL)
                 {
-                    return false;
+                    return true;
                 }
-                if (holdType != IKHoldType.Foot_L_Tip && holdType != IKHoldType.Foot_R_Tip)
+
+                if (holdType == IKHoldType.Foot_R_Tip && maidCache.isGroundingFootR)
                 {
-                    return false;
+                    return true;
                 }
-                return true;
+
+                return false;
             }
         }
 

@@ -107,6 +107,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public bool HasPostEffectLayer
+        {
+            get
+            {
+                return layers.Any(layer => layer.isPostEffectLayer);
+            }
+        }
+
         private static TimelineManager _instance;
         public static TimelineManager instance
         {

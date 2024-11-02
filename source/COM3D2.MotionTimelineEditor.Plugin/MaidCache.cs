@@ -42,7 +42,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public ExtendBoneCache extendBoneCache = null;
         public Dictionary<IKHoldType, IKHoldEntity> ikHoldEntities = new Dictionary<IKHoldType, IKHoldEntity>(6);
 
-        public bool isFootGrounding = false; // 足の接地処理を有効にするか
+        public bool isGroundingFootL = false; // 左足の接地を有効
+        public bool isGroundingFootR = false; // 右足の接地を有効
         public float floorHeight = 0f; // 接地面の高さ
         public float footBaseOffset = 0.05f; // 足の位置のオフセット
         public float footStretchHeight = 0.1f; // 足を伸ばす高さ
@@ -1094,7 +1095,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             foreach (var ikHoldEntity in ikHoldEntities.Values)
             {
-                if (!isFootGrounding)
+                if (!ikHoldEntity.isFootGroundingEnabled)
                 {
                     ikHoldEntity.ResetTargetPosition();
                 }

@@ -6,7 +6,7 @@ cd /d %~dp0
 set PLUGIN_NAME=COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 set CSC_PATH="C:\Windows\Microsoft.NET\Framework\v3.5\csc"
 set LIB_PATHS="/lib:..\..\..\..\COM3D2x64_Data\Managed" "/lib:..\..\.." "/lib:..\..\..\lib" "/lib:..\..\..\UnityInjector" "/lib:..\..\..\..\BepInEx\plugins\COM3D2.MeidoPhotoStudio" "/lib:..\..\..\..\BepInEx\core"
-set REFERENCES="/r:UnityEngine.dll" "/r:UnityInjector.dll" "/r:Assembly-CSharp.dll" "/r:Assembly-CSharp-firstpass.dll" "/r:COM3D2.MotionTimelineEditor.Plugin.dll" "/r:MeidoPhotoStudio.Plugin.dll" "/r:BepInEx.dll"
+set REFERENCES="/r:UnityEngine.dll" "/r:UnityInjector.dll" "/r:Assembly-CSharp.dll" "/r:Assembly-CSharp-firstpass.dll" "/r:Assembly-UnityScript-firstpass.dll" "/r:COM3D2.MotionTimelineEditor.Plugin.dll" "/r:MeidoPhotoStudio.Plugin.dll" "/r:BepInEx.dll"
 set SOURCE_DIR=%~dp0
 set MAIN_FILE=%SOURCE_DIR%%PLUGIN_NAME%.cs
 

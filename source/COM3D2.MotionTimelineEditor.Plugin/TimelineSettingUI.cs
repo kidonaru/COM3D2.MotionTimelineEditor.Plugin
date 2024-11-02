@@ -499,6 +499,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawTextField(timeline.bgmPath, 240, 20, newText => timeline.bgmPath = newText);
 
+            view.DrawSliderValue(
+                new GUIView.SliderOption
+                {
+                    label = "音量",
+                    labelWidth = 50,
+                    fieldType = FloatFieldType.Int,
+                    min = 0,
+                    max = 100,
+                    step = 0,
+                    defaultValue = 100,
+                    value = bgmManager.volumeDance,
+                    onChanged = value =>
+                    {
+                        bgmManager.volumeDance = (int) value;
+                        config.dirty = true;
+                    },
+                });
+
             view.AddSpace(10);
             view.DrawHorizontalLine(Color.gray);
         }

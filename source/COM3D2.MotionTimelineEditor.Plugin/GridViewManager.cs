@@ -65,5 +65,4 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
     }
-    
 }

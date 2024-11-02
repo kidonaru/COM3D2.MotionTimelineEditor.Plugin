@@ -270,6 +270,14 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
         }
 
+        public DepthOfFieldScatter depth_field_
+        {
+            get
+            {
+                return (DepthOfFieldScatter)field.depth_field_.GetValue(multipleMaids);
+            }
+        }
+
         public bool isWear
         {
             get { return (bool)field.isWear.GetValue(multipleMaids); }
@@ -394,6 +402,42 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         {
             get { return (bool[])field.zurasi.GetValue(multipleMaids); }
             set { field.zurasi.SetValue(multipleMaids, value); }
+        }
+
+        public bool isDepth
+        {
+            get { return (bool)field.isDepth.GetValue(multipleMaids); }
+            set { field.isDepth.SetValue(multipleMaids, value); }
+        }
+
+        public bool isDepthA
+        {
+            get { return (bool)field.isDepthA.GetValue(multipleMaids); }
+            set { field.isDepthA.SetValue(multipleMaids, value); }
+        }
+
+        public float depth1
+        {
+            get { return (float)field.depth1.GetValue(multipleMaids); }
+            set { field.depth1.SetValue(multipleMaids, value); }
+        }
+
+        public float depth2
+        {
+            get { return (float)field.depth2.GetValue(multipleMaids); }
+            set { field.depth2.SetValue(multipleMaids, value); }
+        }
+
+        public float depth3
+        {
+            get { return (float)field.depth3.GetValue(multipleMaids); }
+            set { field.depth3.SetValue(multipleMaids, value); }
+        }
+
+        public float depth4
+        {
+            get { return (float)field.depth4.GetValue(multipleMaids); }
+            set { field.depth4.SetValue(multipleMaids, value); }
         }
 
         public bool Init()

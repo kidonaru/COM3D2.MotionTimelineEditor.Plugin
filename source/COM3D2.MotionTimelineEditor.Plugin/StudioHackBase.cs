@@ -61,6 +61,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public virtual DepthOfFieldScatter depthOfField
+        {
+            get
+            {
+                return GameMain.Instance.MainCamera.gameObject.GetComponent<DepthOfFieldScatter>();
+            }
+        }
+
         protected static MaidManager maidManager
         {
             get
@@ -313,6 +321,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public virtual void OnUpdateMyPose(string anmPath, bool isExist)
+        {
+            // do nothing
+        }
+
+        public virtual void OnUpdateDepthOfField()
         {
             // do nothing
         }

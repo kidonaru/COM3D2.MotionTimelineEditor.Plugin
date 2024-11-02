@@ -8,7 +8,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return 6;
+                return 7;
             }
         }
 
@@ -19,11 +19,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private readonly static Dictionary<string, CustomValueInfo> CustomValueInfoMap = new Dictionary<string, CustomValueInfo>
         {
             {
-                "isFootGrounding",
+                "isGroundingFootL",
                 new CustomValueInfo
                 {
                     index = 0,
-                    name = "足の接地処理",
+                    name = "左足の接地",
                     defaultValue = 0,
                 }
             },
@@ -72,7 +72,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     defaultValue = 90f,
                 }
             },
-
+            {
+                "isGroundingFootR",
+                new CustomValueInfo
+                {
+                    index = 6,
+                    name = "右足の接地",
+                    defaultValue = 0,
+                }
+            },
         };
 
         public override Dictionary<string, CustomValueInfo> GetCustomValueInfoMap()

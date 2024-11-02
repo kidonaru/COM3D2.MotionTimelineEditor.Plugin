@@ -368,6 +368,14 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
         }
 
+        public override DepthOfFieldScatter depthOfField
+        {
+            get
+            {
+                return multipleMaids.depth_field_;
+            }
+        }
+
         public MultipleMaidsHack()
         {
         }
@@ -1034,6 +1042,22 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         public override void Update()
         {
             base.Update();
+        }
+
+        public override void OnUpdateDepthOfField()
+        {
+            base.OnUpdateDepthOfField();
+
+            var dof = multipleMaids.depth_field_;
+            if (dof != null)
+            {
+                multipleMaids.isDepth = dof.enabled;
+                multipleMaids.isDepthA = dof.visualizeFocus;
+                multipleMaids.depth1 = dof.focalLength;
+                multipleMaids.depth2 = dof.focalSize;
+                multipleMaids.depth3 = dof.aperture;
+                multipleMaids.depth4 = dof.maxBlurSize;
+            }
         }
     }
 }

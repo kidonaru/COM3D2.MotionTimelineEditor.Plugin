@@ -14,6 +14,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public ObjectManagerWindow objectManagerWindow = null;
         public LightWindow lightWindow = null;
         public BGWindow bgWindow = null;
+        public WindowPartsEffectDepthBlur effectDepthBlur = null;
         public PhotoWindowManager photoManager = null;
         public WindowPartsBoneCheckBox bodyBoneCheckBox = null;
         public Dictionary<IKManager.BoneType, WFCheckBox> boneCheckBoxMap = new Dictionary<IKManager.BoneType, WFCheckBox>(78);

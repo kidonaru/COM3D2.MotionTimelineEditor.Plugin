@@ -36,6 +36,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         public FieldInfo lightCombo;
         public FieldInfo lightComboList;
         public FieldInfo subcamera;
+        public FieldInfo depth_field_;
         
         public FieldInfo isWear;
         public FieldInfo isSkirt;
@@ -58,6 +59,12 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         public FieldInfo mekure1;
         public FieldInfo mekure2;
         public FieldInfo zurasi;
+        public FieldInfo isDepth;
+        public FieldInfo isDepthA;
+        public FieldInfo depth1;
+        public FieldInfo depth2;
+        public FieldInfo depth3;
+        public FieldInfo depth4;
 
         public bool Init()
         {

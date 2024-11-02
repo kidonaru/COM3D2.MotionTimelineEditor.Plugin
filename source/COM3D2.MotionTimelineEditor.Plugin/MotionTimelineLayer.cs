@@ -81,7 +81,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public int frame;
 
-        public bool isFootGrounding;
+        public bool isGroundingFootL;
+        public bool isGroundingFootR;
         public float floorHeight;
         public float footBaseOffset;
         public float footStretchHeight;
@@ -91,7 +92,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class GroundingMotionData : MotionDataBase
     {
-        public bool isFootGrounding;
+        public bool isGroundingFootL;
+        public bool isGroundingFootR;
         public float floorHeight;
         public float footBaseOffset;
         public float footStretchHeight;
@@ -428,7 +430,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            maidCache.isFootGrounding = motion.isFootGrounding;
+            maidCache.isGroundingFootL = motion.isGroundingFootL;
+            maidCache.isGroundingFootR = motion.isGroundingFootR;
             maidCache.floorHeight = motion.floorHeight;
             maidCache.footBaseOffset = motion.footBaseOffset;
             maidCache.footStretchHeight = motion.footStretchHeight;
@@ -520,7 +523,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
 
                     trans = CreateTransformData(name);
-                    trans["isFootGrounding"].boolValue = maidCache.isFootGrounding;
+                    trans["isGroundingFootL"].boolValue = maidCache.isGroundingFootL;
+                    trans["isGroundingFootR"].boolValue = maidCache.isGroundingFootR;
                     trans["floorHeight"].value = maidCache.floorHeight;
                     trans["footBaseOffset"].value = maidCache.footBaseOffset;
                     trans["footStretchHeight"].value = maidCache.footStretchHeight;
@@ -767,7 +771,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         stFrame = stFrame,
                         edFrame = edFrame,
-                        isFootGrounding = start.isFootGrounding,
+                        isGroundingFootL = start.isGroundingFootL,
+                        isGroundingFootR = start.isGroundingFootR,
                         floorHeight = start.floorHeight,
                         footBaseOffset = start.footBaseOffset,
                         footStretchHeight = start.footStretchHeight,
@@ -1003,7 +1008,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var row = new GroundingTimeLineRow
                 {
                     frame = frame.frameNo,
-                    isFootGrounding = trans["isFootGrounding"].boolValue,
+                    isGroundingFootL = trans["isGroundingFootL"].boolValue,
+                    isGroundingFootR = trans["isGroundingFootR"].boolValue,
                     floorHeight = trans["floorHeight"].value,
                     footBaseOffset = trans["footBaseOffset"].value, 
                     footStretchHeight = trans["footStretchHeight"].value,

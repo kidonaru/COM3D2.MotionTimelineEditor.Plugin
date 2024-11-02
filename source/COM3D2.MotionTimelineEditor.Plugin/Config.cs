@@ -16,6 +16,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool pluginEnabled = true;
         public bool isEasyEdit = false;
         public bool isCameraSync = true;
+        public bool isPostEffectSync = true;
         public bool isAutoScroll = false;
         public TangentType defaultTangentType = TangentType.Smooth;
         public MoveEasingType defaultEasingType = MoveEasingType.SineInOut;
@@ -30,6 +31,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float keyRepeatTimeFirst = 0.15f;
         public float keyRepeatTime = 1f / 30f;
         public string videoShaderName = "CM3D2/Unlit_Texture_Photo_MyObject";
+        public bool dofHighResolution = false;
+        public bool dofNearBlur = false;
+        public bool dofVisualizeFocus = false;
 
         // 表示設定
         public int frameWidth = 11;

@@ -204,6 +204,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static PostEffectManager postEffectManager
+        {
+            get
+            {
+                return PostEffectManager.instance;
+            }
+        }
+
         public MotionTimelineEditor()
         {
         }
@@ -459,6 +467,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 movieManager.Init();
                 timelineLoadManager.Init();
                 gridViewManager.Init();
+                postEffectManager.Init();
 
                 AddGearMenu();
             }
@@ -555,12 +564,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
+            DumpDoFInfo();
+
             maidManager.OnPluginEnable();
             modelManager.OnPluginEnable();
             lightManager.OnPluginEnable();
             movieManager.OnPluginEnable();
             timelineManager.OnPluginEnable();
             gridViewManager.OnPluginEnable();
+            postEffectManager.OnPluginEnable();
         }
 
         private void OnPluginDisable()
@@ -576,6 +588,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             movieManager.OnPluginDisable();
             timelineManager.OnPluginDisable();
             gridViewManager.OnPluginDisable();
+            postEffectManager.OnPluginDisable();
         }
 
         [Conditional("DEBUG")]
@@ -656,5 +669,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return sb.ToString();
         }
 
+        [Conditional("DEBUG")]
+        private void DumpDoFInfo()
+        {
+            PluginUtils.Log("DoF情報:");
+
+            if (studioHack == null || !studioHack.IsValid())
+            {
+                return;
+            }
+
+            var dof = studioHack.depthOfField;
+            if (dof != null)
+            {
+                PluginUtils.Log("  有効: " + dof.enabled);
+                PluginUtils.Log("  焦点距離: " + dof.focalLength);
+                PluginUtils.Log("  焦点サイズ: " + dof.focalSize);
+                PluginUtils.Log("  絞り値: " + dof.aperture);
+                PluginUtils.Log("  ブラーサイズ: " + dof.maxBlurSize);
+                PluginUtils.Log("  高解像度: " + dof.highResolution);
+                PluginUtils.Log("  サンプル数: " + dof.blurSampleCount);
+                PluginUtils.Log("  近距離: " + dof.nearBlur);
+            }
+        }
     }
 }
