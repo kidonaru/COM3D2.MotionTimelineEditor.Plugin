@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
@@ -99,6 +101,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var files = Directory.GetFiles(basePath, "*.xml");
+            Array.Sort(files, new NaturalStringComparer());
+
             foreach (var path in files)
             {
                 var anmName = Path.GetFileNameWithoutExtension(path);
@@ -119,6 +123,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var dirs = Directory.GetDirectories(basePath);
+            Array.Sort(dirs, new NaturalStringComparer());
+
             foreach (var path in dirs)
             {
                 var dirName = Path.GetFileName(path);
@@ -156,6 +162,52 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 item.children.Clear();
             }
+        }
+    }
+
+    // 自然順序での比較
+    public class NaturalStringComparer : IComparer<string>
+    {
+        public int Compare(string x, string y)
+        {
+            if (x == null && y == null) return 0;
+            if (x == null) return -1;
+            if (y == null) return 1;
+
+            int len1 = x.Length;
+            int len2 = y.Length;
+            int marker1 = 0;
+            int marker2 = 0;
+
+            while (marker1 < len1 && marker2 < len2)
+            {
+                char ch1 = x[marker1];
+                char ch2 = y[marker2];
+
+                var space1 = new StringBuilder();
+                var space2 = new StringBuilder();
+
+                while (marker1 < len1 && char.IsDigit(x[marker1]))
+                    space1.Append(x[marker1++]);
+                while (marker2 < len2 && char.IsDigit(y[marker2]))
+                    space2.Append(y[marker2++]);
+
+                if (space1.Length > 0 && space2.Length > 0)
+                {
+                    int numericResult = int.Parse(space1.ToString()).CompareTo(int.Parse(space2.ToString()));
+                    if (numericResult != 0)
+                        return numericResult;
+                }
+                else
+                {
+                    if (ch1 != ch2)
+                        return ch1.CompareTo(ch2);
+                    marker1++;
+                    marker2++;
+                }
+            }
+
+            return len1 - len2;
         }
     }
 }

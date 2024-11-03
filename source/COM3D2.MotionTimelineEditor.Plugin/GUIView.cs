@@ -174,6 +174,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         };
         public static GUIStyle gsTileLabel = new GUIStyle("button")
         {
+            fontSize = 12,
+            alignment = TextAnchor.LowerCenter,
+            wordWrap = true,
             normal = {
                 background = CreateColorTexture(new Color(0, 0, 0, 0))
             },
@@ -1075,7 +1078,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             DrawTileThumb(content.thum, 0, 0, drawRect.width, drawRect.height - 20);
 
-            var labelRect = new Rect(drawRect.x, drawRect.y + drawRect.height - 20, drawRect.width, 20);
+            var labelRect = new Rect(drawRect.x, drawRect.y + drawRect.height - 40, drawRect.width, 40);
             GUI.Label(labelRect, content.name, gsTileLabel);
 
             if (onMouseOver != null)
@@ -1127,7 +1130,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     thumbHeight);
             }
 
-            var labelRect = new Rect(drawRect.x, drawRect.y + drawRect.height - 20, drawRect.width, 20);
+            var labelRect = new Rect(drawRect.x, drawRect.y + drawRect.height - 40, drawRect.width, 40);
             GUI.Label(labelRect, content.name, gsTileLabel);
 
             if (onMouseOver != null)
