@@ -256,6 +256,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         SetPlayingFrameNoAll(activeTrack.startFrameNo);
                     }
+                    if (currentFrameNo == activeTrack.endFrameNo && defaultLayer.isAnmPlaying)
+                    {
+                        SetPlayingFrameNoAll(activeTrack.startFrameNo);
+                    }
                 }
             }
 
