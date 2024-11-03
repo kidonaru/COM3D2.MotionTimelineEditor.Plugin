@@ -68,6 +68,7 @@
     <Compile Include="BoneSetMenuItem.cs" />
     <Compile Include="BoneUtils.cs" />
     <Compile Include="BoneXml.cs" />
+    <Compile Include="CameraManager.cs" />
     <Compile Include="COM3D2.GUIExt.cs" />
     <Compile Include="COM3D2.MotionTimelineEditor.Plugin.cs" />
     <Compile Include="Config.cs" />
@@ -91,6 +92,7 @@
     <Compile Include="ITransformData.cs" />
     <Compile Include="KeyBind.cs" />
     <Compile Include="KeyFrameUI.cs" />
+    <Compile Include="LetterBoxView.cs" />
     <Compile Include="LightHackManager.cs" />
     <Compile Include="MaidBlendShape.cs" />
     <Compile Include="MaidBoneMenuItem.cs" />

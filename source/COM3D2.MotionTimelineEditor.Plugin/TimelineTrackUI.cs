@@ -90,26 +90,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.DrawLabel("範囲", 40, 20);
 
-                var newStartFrameNo = view.DrawIntField(track.startFrameNo, 50, 20);
+                var updated = false;
+                updated |= view.DrawIntField(new GUIView.IntFieldOption
+                {
+                    value = track.startFrameNo,
+                    width = 50,
+                    height = 20,
+                    onChanged = x => track.startFrameNo = x
+                });
 
                 view.DrawLabel("～", 15, 20);
 
-                var newEndFrameNo = view.DrawIntField(track.endFrameNo, 50, 20);
+                updated |= view.DrawIntField(new GUIView.IntFieldOption
+                {
+                    value = track.endFrameNo,
+                    width = 50,
+                    height = 20,
+                    onChanged = x => track.endFrameNo = x
+                });
 
                 if (view.DrawButton("削除", 50, 20))
                 {
                     timelineManager.RemoveTrack(track);
                 }
 
-                if (newStartFrameNo != track.startFrameNo || newEndFrameNo != track.endFrameNo)
+                if (updated && track == timeline.activeTrack)
                 {
-                    track.startFrameNo = newStartFrameNo;
-                    track.endFrameNo = newEndFrameNo;
-
-                    if (track == timeline.activeTrack)
-                    {
-                        timelineManager.ApplyCurrentFrame(true);
-                    }
+                    timelineManager.ApplyCurrentFrame(true);
                 }
             }
             view.EndLayout();

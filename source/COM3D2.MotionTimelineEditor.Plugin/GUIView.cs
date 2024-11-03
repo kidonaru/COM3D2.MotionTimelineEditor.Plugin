@@ -565,8 +565,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             DrawLabel(text, width, height, Color.white, null, null);
         }
 
-        public void DrawTextField(
+        public bool DrawTextField(
             string label,
+            float labelWidth,
             string text,
             float width,
             float height,
@@ -574,6 +575,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!string.IsNullOrEmpty(label))
             {
+                if (labelWidth <= 0f)
+                {
+                    labelWidth = this.labelWidth;
+                }
+
                 var labelRect = GetDrawRect(labelWidth, height);
                 GUI.Label(labelRect, label, gsLabel);
                 currentPos.x += labelWidth + margin;
@@ -584,10 +590,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var newText = GUI.TextField(drawRect, text, gsTextField);
             this.NextElement(drawRect);
 
+            var updated = false;
             if (newText != text)
             {
                 onChanged(newText);
+                updated = true;
             }
+
+            return updated;
         }
 
         public void DrawTextField(
@@ -596,7 +606,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             float height,
             Action<string> onChanged)
         {
-            DrawTextField(null, text, width, height, onChanged);
+            DrawTextField(null, 0f, text, width, height, onChanged);
         }
 
         public struct TextFieldOption
@@ -628,6 +638,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 subView.DrawTextField(
                     "",
+                    0f,
                     option.value,
                     fieldWidth,
                     20,
@@ -648,61 +659,84 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             NextElement(subViewRect);
         }
 
-        public int DrawIntField(string label, int value, float width, float height)
+        public struct FloatFieldOption
         {
-            var fieldCache = GetIntFieldCache(label, value);
-            return (int) DrawFloatFieldCache(label, fieldCache, width, height);
+            public string label;
+            public float labelWidth;
+            public FloatFieldType fieldType;
+            public float value;
+            public float minValue;
+            public float maxValue;
+            public float width;
+            public float height;
+            public FloatFieldCache fieldCache;
+            public Action<float> onChanged;
         }
 
-        public int DrawIntField(int value, float width, float height)
+        public bool DrawFloatField(FloatFieldOption option)
         {
-            return DrawIntField(null, value, width, height);
-        }
+            var fieldCache = option.fieldCache;
+            if (fieldCache == null)
+            {
+                fieldCache = GetFieldCache(option.label, option.fieldType);
+                fieldCache.UpdateValue(option.value);
+            }
 
-        public float DrawFloatField(string label, float value, float width, float height)
-        {
-            var fieldCache = GetFieldCache(label, value);
-            return DrawFloatFieldCache(label, fieldCache, width, height);
-        }
-
-        public float DrawFloatField(float value, float width, float height)
-        {
-            return DrawFloatField(null, value, width, height);
-        }
-
-        private float DrawFloatFieldCache(
-            string label,
-            FloatFieldCache fieldCache,
-            float width,
-            float height)
-        {
-            return DrawFloatFieldCache(label, fieldCache, 0f, 0f, width, height);
-        }
-
-        private float DrawFloatFieldCache(
-            string label,
-            FloatFieldCache fieldCache,
-            float minValue,
-            float maxValue,
-            float width,
-            float height)
-        {
-            DrawTextField(label, fieldCache.text, width, height, newText =>
+            var updated = false;
+            DrawTextField(
+                option.label,
+                option.labelWidth,
+                fieldCache.text,
+                option.width,
+                option.height,
+                newText =>
             {
                 fieldCache.text = newText;
 
                 float newValue;
                 if (float.TryParse(newText, out newValue))
                 {
-                    if (minValue != 0f || maxValue != 0f)
+                    if (option.minValue != 0f || option.maxValue != 0f)
                     {
-                        newValue = Mathf.Clamp(newValue, minValue, maxValue);
+                        newValue = Mathf.Clamp(newValue, option.minValue, option.maxValue);
                     }
                     fieldCache.UpdateValue(newValue, false);
+                    option.onChanged(newValue);
+                    updated = true;
                 }
             });
 
-            return fieldCache.value;
+            return updated;
+        }
+
+        public struct IntFieldOption
+        {
+            public string label;
+            public float labelWidth;
+            public float value;
+            public float minValue;
+            public float maxValue;
+            public float width;
+            public float height;
+            public FloatFieldCache fieldCache;
+            public Action<int> onChanged;
+        }
+
+        public bool DrawIntField(IntFieldOption option)
+        {
+            return DrawFloatField(new FloatFieldOption
+            {
+                label = option.label,
+                labelWidth = option.labelWidth,
+                fieldType = FloatFieldType.Int,
+                value = option.value,
+                minValue = option.minValue,
+                maxValue = option.maxValue,
+                width = option.width,
+                height = option.height,
+                fieldCache = option.fieldCache,
+                onChanged = value => option.onChanged((int) value),
+            });
         }
 
         public Color DrawColorFieldCache(
@@ -711,7 +745,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             float width,
             float height)
         {
-            DrawTextField(label, fieldCache.text, width, height, newText =>
+            DrawTextField(label, 0f, fieldCache.text, width, height, newText =>
             {
                 fieldCache.text = newText;
 
@@ -1243,11 +1277,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     diffValue = -step1;
                 }
 
-                newValue = subView.DrawFloatFieldCache(
-                    null,
-                    fieldCache,
-                    50,
-                    20);
+                subView.DrawFloatField(new FloatFieldOption
+                {
+                    value = value,
+                    width = 50,
+                    height = 20,
+                    fieldCache = fieldCache,
+                    onChanged = x => newValue = x,
+                });
 
                 if (subView.DrawRepeatButton(">", 20, 20))
                 {
@@ -1324,13 +1361,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     sliderWidth -= option.labelWidth;
                 }
 
-                newValue = subView.DrawFloatFieldCache(
-                    null,
-                    fieldCache,
-                    option.min,
-                    option.max,
-                    50,
-                    20);
+                subView.DrawFloatField(new FloatFieldOption
+                {
+                    value = option.value,
+                    minValue = option.min,
+                    maxValue = option.max,
+                    width = 50,
+                    height = 20,
+                    fieldCache = fieldCache,
+                    onChanged = x => newValue = x,
+                });
 
                 if (option.step > 0f)
                 {

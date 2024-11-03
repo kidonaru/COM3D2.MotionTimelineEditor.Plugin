@@ -138,6 +138,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("BGMPath")]
         public string bgmPath = "";
 
+        [XmlElement("AspectWidth")]
+        public float aspectWidth = 0f;
+
+        [XmlElement("AspectHeight")]
+        public float aspectHeight = 0f;
+
         [XmlElement("VideoEnabled")]
         public bool videoEnabled = true;
 

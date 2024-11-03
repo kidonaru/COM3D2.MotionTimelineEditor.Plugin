@@ -579,7 +579,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginHorizontal();
             {
-                view.DrawTextField("アニメ名", anmName, 310, 20, newText => anmName = newText);
+                view.DrawTextField("アニメ名", 0, anmName, 310, 20, newText => anmName = newText);
 
                 view.AddSpace(10);
 
@@ -629,7 +629,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     newFrameNo--;
                 }
 
-                newFrameNo = view.DrawIntField(newFrameNo, 50, 20);
+                view.DrawIntField(new GUIView.IntFieldOption
+                {
+                    value = newFrameNo,
+                    width = 50,
+                    height = 20,
+                    onChanged = value => newFrameNo = value,
+                });
 
                 if (view.DrawRepeatButton(">", 25, 20))
                 {
@@ -740,17 +746,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.DrawLabel("範囲操作", 100, 20);
 
-                selectStartFrameNo = view.DrawIntField(
-                    selectStartFrameNo,
-                    50,
-                    20);
+                view.DrawIntField(new GUIView.IntFieldOption
+                {
+                    value = selectStartFrameNo,
+                    width = 50,
+                    height = 20,
+                    onChanged = value => selectStartFrameNo = value,
+                });
 
                 view.DrawLabel("～", 15, 20);
 
-                selectEndFrameNo = view.DrawIntField(
-                    selectEndFrameNo,
-                    50,
-                    20);
+                view.DrawIntField(new GUIView.IntFieldOption
+                {
+                    value = selectEndFrameNo,
+                    width = 50,
+                    height = 20,
+                    onChanged = value => selectEndFrameNo = value,
+                });
 
                 if (view.DrawButton("R", 20, 20))
                 {

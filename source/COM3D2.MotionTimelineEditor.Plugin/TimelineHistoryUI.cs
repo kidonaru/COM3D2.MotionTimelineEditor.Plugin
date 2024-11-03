@@ -33,12 +33,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginHorizontal();
             {
-                var newHistoryLimit = view.DrawIntField("最大履歴数", config.historyLimit, 150, 20);
-                if (newHistoryLimit != config.historyLimit)
+                view.DrawIntField(new GUIView.IntFieldOption
                 {
-                    config.historyLimit = newHistoryLimit;
-                    config.dirty = true;
-                }
+                    label = "最大履歴数",
+                    value = config.historyLimit,
+                    width = 150,
+                    height = 20,
+                    onChanged = x =>
+                    {
+                        config.historyLimit = x;
+                        config.dirty = true;
+                    }
+                });
 
                 if (view.DrawButton("クリア", 50, 20))
                 {

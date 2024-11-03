@@ -179,15 +179,39 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static Camera frontCamera
+        {
+            get
+            {
+                return CameraManager.instance.frontCamera;
+            }
+        }
+
         private void UpdateDisplayGrid()
         {
-            var cam = Camera.main;
+            var cam = frontCamera;
+
             float distance = cam.nearClipPlane + distanceFromNearPlane;
             Vector3 center = cam.transform.position + cam.transform.forward * distance;
-            
-            float height = 2.0f * distance * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
-            float width = height * cam.aspect;
-            
+
+            float width, height, widthMultiplier;
+            if (cam.orthographic)
+            {
+                height = cam.orthographicSize * 2f;
+                width = height * cam.aspect;
+
+                widthMultiplier = 0.005f;
+            }
+            else
+            {
+                height = 2.0f * distance * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
+                width = height * cam.aspect;
+
+                // カメラからの距離に基づいてwidthMultiplierを計算
+                float distanceToCamera = Vector3.Distance(center, Camera.main.transform.position);
+                widthMultiplier = distanceToCamera * 0.001f;
+            }
+
             var gridColor = config.gridColorInDisplay;
             gridColor.a = config.gridAlpha;
 
@@ -196,10 +220,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             int lineIndex = 0;
             var centerIndex = (gridCount % 2 == 0) ? gridCount / 2 : -1;
-
-            // カメラからの距離に基づいてwidthMultiplierを計算
-            float distanceToCamera = Vector3.Distance(center, Camera.main.transform.position);
-            float widthMultiplier = distanceToCamera * 0.001f;
 
             var right = cam.transform.right;
             var up = cam.transform.up;

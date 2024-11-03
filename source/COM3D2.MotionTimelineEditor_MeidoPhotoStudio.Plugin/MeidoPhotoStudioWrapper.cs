@@ -9,6 +9,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 {
     using MPS = MeidoPhotoStudio.Plugin.MeidoPhotoStudio;
     using MPSWindowManager = MeidoPhotoStudio.Plugin.WindowManager;
+    using CameraManager = MeidoPhotoStudio.Plugin.CameraManager;
 
     public enum MeidoBoneType
     {

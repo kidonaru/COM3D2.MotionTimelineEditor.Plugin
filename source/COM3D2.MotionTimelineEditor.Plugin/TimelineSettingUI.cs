@@ -136,7 +136,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginHorizontal();
             {
-                var newFrameRate = view.DrawFloatField("フレームレート", timeline.frameRate, 150, 20);
+                var newFrameRate = timeline.frameRate;
+
+                view.DrawFloatField(new GUIView.FloatFieldOption
+                {
+                    label = "フレームレート",
+                    value = timeline.frameRate,
+                    width = 150,
+                    height = 20,
+                    onChanged = x => newFrameRate = x,
+                });
 
                 if (view.DrawButton("30", 30, 20))
                 {
@@ -208,19 +217,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.DrawLabel("オフセット時間", 70, 20);
 
-                view.DrawLabel("開始", 30, 20);
-                var newDcmStartOffset = view.DrawFloatField(timeline.startOffsetTime, 50, 20);
-                if (newDcmStartOffset != timeline.startOffsetTime)
+                view.DrawFloatField(new GUIView.FloatFieldOption
                 {
-                    timeline.startOffsetTime = newDcmStartOffset;
-                }
+                    label = "開始",
+                    labelWidth = 30,
+                    value = timeline.startOffsetTime,
+                    width = 80,
+                    height = 20,
+                    onChanged = x => timeline.startOffsetTime = x,
+                });
 
-                view.DrawLabel("終了", 30, 20);
-                var newDcmEndOffset = view.DrawFloatField(timeline.endOffsetTime, 50, 20);
-                if (newDcmEndOffset != timeline.endOffsetTime)
+                view.DrawFloatField(new GUIView.FloatFieldOption
                 {
-                    timeline.endOffsetTime = newDcmEndOffset;
-                }
+                    label = "終了",
+                    labelWidth = 30,
+                    value = timeline.endOffsetTime,
+                    width = 80,
+                    height = 20,
+                    onChanged = x => timeline.endOffsetTime = x,
+                });
             }
             view.EndLayout();
 
@@ -228,19 +243,51 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.DrawLabel("フェード時間", 70, 20);
 
-                view.DrawLabel("開始", 30, 20);
-                var newDcmStartFade = view.DrawFloatField(timeline.startFadeTime, 50, 20);
-                if (newDcmStartFade != timeline.startFadeTime)
+                view.DrawFloatField(new GUIView.FloatFieldOption
                 {
-                    timeline.startFadeTime = newDcmStartFade;
-                }
+                    label = "開始",
+                    labelWidth = 30,
+                    value = timeline.startFadeTime,
+                    width = 80,
+                    height = 20,
+                    onChanged = x => timeline.startFadeTime = x,
+                });
 
-                view.DrawLabel("終了", 30, 20);
-                var newDcmEndFade = view.DrawFloatField(timeline.endFadeTime, 50, 20);
-                if (newDcmEndFade != timeline.endFadeTime)
+                view.DrawFloatField(new GUIView.FloatFieldOption
                 {
-                    timeline.endFadeTime = newDcmEndFade;
-                }
+                    label = "終了",
+                    labelWidth = 30,
+                    value = timeline.endFadeTime,
+                    width = 80,
+                    height = 20,
+                    onChanged = x => timeline.endFadeTime = x,
+                });
+            }
+            view.EndLayout();
+
+            view.BeginHorizontal();
+            {
+                view.DrawLabel("アスペクト", 70, 20);
+
+                view.DrawFloatField(new GUIView.FloatFieldOption
+                {
+                    label = "幅",
+                    labelWidth = 30,
+                    value = timeline.aspectWidth,
+                    width = 80,
+                    height = 20,
+                    onChanged = x => timeline.aspectWidth = x,
+                });
+
+                view.DrawFloatField(new GUIView.FloatFieldOption
+                {
+                    label = "高さ",
+                    labelWidth = 30,
+                    value = timeline.aspectHeight,
+                    width = 80,
+                    height = 20,
+                    onChanged = x => timeline.aspectHeight = x,
+                });
             }
             view.EndLayout();
 
@@ -289,19 +336,31 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _defaultEasingTypeComboBox.currentIndex = (int)config.defaultEasingType;
             _defaultEasingTypeComboBox.DrawButton("初期イージング", view);
 
-            var newDetailTransformCount = view.DrawIntField("Trans詳細表示数", config.detailTransformCount, 150, 20);
-            if (newDetailTransformCount != config.detailTransformCount)
+            view.DrawIntField(new GUIView.IntFieldOption
             {
-                config.detailTransformCount = newDetailTransformCount;
-                config.dirty = true;
-            }
+                label = "Trans詳細表示数",
+                value = config.detailTransformCount,
+                width = 150,
+                height = 20,
+                onChanged = x =>
+                {
+                    config.detailTransformCount = x;
+                    config.dirty = true;
+                }
+            });
 
-            var newDetailTangentCount = view.DrawIntField("Tangent表示数", config.detailTangentCount, 150, 20);
-            if (newDetailTangentCount != config.detailTangentCount)
+            view.DrawIntField(new GUIView.IntFieldOption
             {
-                config.detailTangentCount = newDetailTangentCount;
-                config.dirty = true;
-            }
+                label = "Tangent表示数",
+                value = config.detailTangentCount,
+                width = 150,
+                height = 20,
+                onChanged = x =>
+                {
+                    config.detailTangentCount = x;
+                    config.dirty = true;
+                }
+            });
 
             view.DrawSliderValue(
                 new GUIView.SliderOption

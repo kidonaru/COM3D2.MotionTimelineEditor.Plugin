@@ -172,6 +172,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static CameraManager cameraManager
+        {
+            get
+            {
+                return CameraManager.instance;
+            }
+        }
+
         private static Config config
         {
             get
@@ -366,6 +374,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     timelineManager.Update();
                     bgmManager.Update();
                     configManager.Update();
+                    cameraManager.Update();
                 }
             }
             catch (Exception e)
@@ -468,6 +477,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timelineLoadManager.Init();
                 gridViewManager.Init();
                 postEffectManager.Init();
+                cameraManager.Init();
 
                 AddGearMenu();
             }
@@ -573,6 +583,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             timelineManager.OnPluginEnable();
             gridViewManager.OnPluginEnable();
             postEffectManager.OnPluginEnable();
+            cameraManager.OnPluginEnable();
         }
 
         private void OnPluginDisable()
@@ -589,6 +600,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             timelineManager.OnPluginDisable();
             gridViewManager.OnPluginDisable();
             postEffectManager.OnPluginDisable();
+            cameraManager.OnPluginDisable();
         }
 
         [Conditional("DEBUG")]
@@ -603,6 +615,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 PluginUtils.LogDebug("カメラ " + (i + 1) + ":");
                 PluginUtils.LogDebug("  名前: " + cam.name);
                 PluginUtils.LogDebug("  有効: " + cam.enabled);
+                PluginUtils.LogDebug("  平行投影: " + cam.orthographic);
+                PluginUtils.LogDebug("  平行投影サイズ: " + cam.orthographicSize);
                 PluginUtils.LogDebug("  位置: " + cam.transform.position);
                 PluginUtils.LogDebug("  回転: " + cam.transform.rotation.eulerAngles);
                 PluginUtils.LogDebug("  視野角: " + cam.fieldOfView);
@@ -611,6 +625,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 PluginUtils.LogDebug("  深度: " + cam.depth);
                 PluginUtils.LogDebug("  カリングマスク: " + cam.cullingMask);
                 PluginUtils.LogDebug("  レンダリングパス: " + cam.renderingPath);
+                PluginUtils.LogDebug("  クリアフラグ: " + cam.clearFlags);
                 PluginUtils.LogDebug("  描画レイヤー: " + GetLayerNames(cam.cullingMask));
                 PluginUtils.LogDebug("  ---");
             }

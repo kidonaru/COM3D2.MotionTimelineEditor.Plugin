@@ -305,6 +305,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public string bgmPath = "";
 
+        public float aspectWidth = 0f;
+        public float aspectHeight = 0f;
+
+        // 動画
         public bool videoEnabled = true;
         public VideoDisplayType videoDisplayType = VideoDisplayType.GUI;
         public string videoPath = "";
@@ -399,6 +403,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return PluginUtils.GetDcmSongListFilePath(dcmSongName);
+            }
+        }
+
+        public float aspectRatio
+        {
+            get
+            {
+                if (aspectHeight == 0f)
+                {
+                    return 0f;
+                }
+                return aspectWidth / aspectHeight;
             }
         }
 
@@ -750,6 +766,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             isLightColorEasing = xml.isLightColorEasing;
             activeTrackIndex = xml.activeTrackIndex;
             bgmPath = xml.bgmPath;
+            aspectWidth = xml.aspectWidth;
+            aspectHeight = xml.aspectHeight;
             videoEnabled = xml.videoEnabled;
             videoDisplayType = xml.videoDisplayType;
             videoPath = xml.videoPath;
@@ -861,6 +879,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.isLightColorEasing = isLightColorEasing;
             xml.activeTrackIndex = activeTrackIndex;
             xml.bgmPath = bgmPath;
+            xml.aspectWidth = aspectWidth;
+            xml.aspectHeight = aspectHeight;
             xml.videoEnabled = videoEnabled;
             xml.videoDisplayType = videoDisplayType;
             xml.videoPath = videoPath;

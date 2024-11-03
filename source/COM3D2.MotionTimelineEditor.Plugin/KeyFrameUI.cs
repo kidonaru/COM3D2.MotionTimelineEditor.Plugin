@@ -504,6 +504,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawTextField(
                 label,
+                0,
                 value,
                 -1,
                 20,

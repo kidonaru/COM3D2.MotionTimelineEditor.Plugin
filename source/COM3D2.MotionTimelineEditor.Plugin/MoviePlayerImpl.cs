@@ -69,6 +69,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public Camera targetCamera
+        {
+            get
+            {
+                if (isDisplayFrontmost)
+                {
+                    return cameraManager.frontCamera;
+                }
+                return Camera.main;
+            }
+        }
+
+        public int layerMask
+        {
+            get
+            {
+                if (isDisplayFrontmost)
+                {
+                    return LayerMask.NameToLayer("NGUI");
+                }
+                return LayerMask.NameToLayer("Default");
+            }
+        }
+
         private static TimelineManager timelineManager
         {
             get
@@ -109,11 +133,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static Camera subCamera
+        private static CameraManager cameraManager
         {
             get
             {
-                return studioHack.subCamera;
+                return CameraManager.instance;
             }
         }
 
@@ -131,7 +155,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             else
             {
-                gameObject.layer = isDisplayFrontmost ? LayerMask.NameToLayer("NGUI") : LayerMask.NameToLayer("Default");
+                gameObject.layer = layerMask;
                 _meshRenderer = gameObject.AddComponent<MeshRenderer>();
                 _meshFilter = gameObject.AddComponent<MeshFilter>();
                 _meshFilter.mesh = CreateQuadMesh();
@@ -214,9 +238,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void LateUpdate()
         {
-            if (isDisplayBackmost || isDisplayFrontmost)
+            if (isDisplayBackmost)
             {
-                // ビルボードの更新のため毎フレーム呼び出す
+                // カメラの位置に合わせて毎フレーム更新
                 UpdateTransform();
             }
         }
@@ -243,18 +267,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         _displayIMGUI._height = timeline.videoGUIScale;
                     }
                 }
-                else if (isDisplayBackmost || isDisplayFrontmost)
+                else if (isDisplayBackmost)
                 {
                     var transform = gameObject.transform;
-                    var camera = Camera.main;
-                    var distanceFromCamera = isDisplayBackmost ? (camera.farClipPlane - 10f) : (camera.nearClipPlane + 0.1f);
+                    var camera = targetCamera;
+                    var distanceFromCamera = camera.farClipPlane - 10f;
 
                     // アスペクト比調整
                     var scale = Vector3.one;
-                    scale.y = 2f * distanceFromCamera *
-                            Mathf.Tan(camera.fieldOfView * 0.5f * Mathf.Deg2Rad);
+                    scale.y = 2f * distanceFromCamera * Mathf.Tan(camera.fieldOfView * 0.5f * Mathf.Deg2Rad);
                     scale.x = scale.y * _aspectRatio;
-                    scale *= isDisplayBackmost ? timeline.videoBackmostScale : timeline.videoFrontmostScale;
+
+                    // スケール調整
+                    scale *= timeline.videoBackmostScale;
                     transform.localScale = scale;
 
                     // 位置調整
@@ -262,8 +287,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     position += camera.transform.forward * distanceFromCamera;
                     transform.position = position;
 
-                    // ビルボード補正
                     transform.LookAt(camera.transform, camera.transform.up);
+                }
+                else if (isDisplayFrontmost)
+                {
+                    var transform = gameObject.transform;
+                    var camera = targetCamera;
+                    var distanceFromCamera = camera.nearClipPlane + 0.1f;
+
+                    // アスペクト比調整
+                    var scale = Vector3.one;
+                    scale.y = camera.orthographicSize * 2f;
+                    scale.x = scale.y * _aspectRatio;
+
+                    // スケール調整
+                    scale *= timeline.videoFrontmostScale;
+                    transform.localScale = scale;
+
+                    // 位置調整
+                    var position = camera.transform.position;
+                    position += camera.transform.forward * distanceFromCamera;
+                    transform.position = position;
                 }
                 else
                 {
@@ -450,7 +494,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            if (isDisplayFrontmost && Camera.current != subCamera)
+            if (Camera.current != targetCamera)
             {
                 return;
             }
@@ -477,7 +521,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             else if (isDisplayFrontmost)
             {
-                offset = new Vector3(-timeline.videoFrontmostPosition.x, timeline.videoFrontmostPosition.y, 0);
+                offset = new Vector3(timeline.videoFrontmostPosition.x, timeline.videoFrontmostPosition.y, 0);
             }
             else
             {
@@ -566,16 +610,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             else if (isDisplayFrontmost)
             {
                 var vertices = new Vector3[] {
-                    new Vector3(-0.5f, -0.5f, 0),
                     new Vector3(0.5f, -0.5f, 0),
-                    new Vector3(-0.5f, 0.5f, 0),
+                    new Vector3(-0.5f, -0.5f, 0),
                     new Vector3(0.5f, 0.5f, 0),
+                    new Vector3(-0.5f, 0.5f, 0),
                 };
 
                 for (var i = 0; i < vertices.Length; i++)
                 {
                     var vertex = vertices[i];
-                    vertex.x -= timeline.videoFrontmostPosition.x;
+                    vertex.x += timeline.videoFrontmostPosition.x;
                     vertex.y += timeline.videoFrontmostPosition.y;
                     vertices[i] = vertex;
                 }

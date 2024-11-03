@@ -6,6 +6,7 @@ using MeidoPhotoStudio.Plugin;
 namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 {
     using MPS = MeidoPhotoStudio.Plugin.MeidoPhotoStudio;
+    using CameraManager = MeidoPhotoStudio.Plugin.CameraManager;
 
     public class MeidoPhotoStudioField
     {
