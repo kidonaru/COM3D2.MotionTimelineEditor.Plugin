@@ -106,7 +106,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class TimelineData
     {
-        public static readonly int CurrentVersion = 12;
+        public static readonly int CurrentVersion = 13;
         public static readonly TimelineData DefaultTimeline = new TimelineData();
 
         public int version = 0;
@@ -175,8 +175,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string anmName = "";
 
         public string directoryName = "";
-
-        public bool isIKAnime = false;
 
         private bool _useMuneKeyL = false;
         public bool useMuneKeyL
@@ -546,7 +544,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             //maxFrameNo = DefaultTimeline.maxFrameNo;
             frameRate = DefaultTimeline.frameRate;
-            isIKAnime = DefaultTimeline.isIKAnime;
             useMuneKeyL = DefaultTimeline.useMuneKeyL;
             useMuneKeyR = DefaultTimeline.useMuneKeyR;
             isLoopAnm = DefaultTimeline.isLoopAnm;
@@ -751,7 +748,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             frameRate = xml.frameRate;
             anmName = xml.anmName;
             directoryName = xml.directoryName;
-            isIKAnime = xml.isIKAnime;
             useMuneKeyL = xml.useMuneKeyL;
             useMuneKeyR = xml.useMuneKeyR;
             useHeadKey = xml.useHeadKey;
@@ -864,7 +860,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.frameRate = frameRate;
             xml.anmName = anmName;
             xml.directoryName = directoryName;
-            xml.isIKAnime = isIKAnime;
             xml.useMuneKeyL = useMuneKeyL;
             xml.useMuneKeyR = useMuneKeyR;
             xml.useHeadKey = useHeadKey;

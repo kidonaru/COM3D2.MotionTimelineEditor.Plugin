@@ -113,7 +113,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void LateUpdate()
         {
-            if (timeline.aspectRatio == 0f)
+            if (timeline == null || timeline.aspectRatio == 0f)
             {
                 SetLetterBoxVisibility(false);
                 return;

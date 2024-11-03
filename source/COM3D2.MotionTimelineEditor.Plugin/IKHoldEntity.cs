@@ -21,6 +21,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public IKHoldType holdType;
         public Vector3 targetPosition;
         public bool isHold;
+        public bool isAnime;
         public bool resetTargetPositionRequested;
 
         private MaidCache maidCache;
@@ -178,7 +179,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (isHold)
             {
-                if (!timeline.isIKAnime && !studioHack.isPoseEditing)
+                if (!isAnime && !studioHack.isPoseEditing)
                 {
                     return;
                 }

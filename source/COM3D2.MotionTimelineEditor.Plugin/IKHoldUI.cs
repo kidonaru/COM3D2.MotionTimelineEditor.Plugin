@@ -34,11 +34,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            view.DrawToggle("IKのアニメ制御", timeline.isIKAnime, 150, 20, newValue =>
-            {
-                timeline.isIKAnime = newValue;
-            });
-
             view.DrawHorizontalLine(Color.gray);
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
@@ -51,6 +46,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 new IKHoldType[] { IKHoldType.Foot_L_Joint, IKHoldType.Foot_R_Joint },
                 new IKHoldType[] { IKHoldType.Foot_L_Tip, IKHoldType.Foot_R_Tip },
             };
+
+            view.DrawLabel("IK固定", -1, 20, Color.white);
 
             foreach (var types in typesList)
             {
@@ -66,8 +63,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     });
                 }
 
-                var isHolds = types.All(x => IsHold(x));
-                if (isHolds)
+                if (types.All(x => IsHold(x)))
                 {
                     if (view.DrawButton("解除", 50, 20))
                     {
@@ -91,34 +87,47 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.EndLayout();
             }
 
-            view.BeginHorizontal();
-            {
-                view.AddSpace(80, 20);
-                view.AddSpace(80, 20);
+            view.DrawHorizontalLine(Color.gray);
 
-                var isAllHold = MaidCache.ikHoldTypeMap.Values.All(x => IsHold(x));
-                if (isAllHold)
+            view.DrawLabel("IKアニメ", -1, 20, Color.white);
+
+            foreach (var types in typesList)
+            {
+                view.BeginHorizontal();
+
+                foreach (var type in types)
                 {
-                    if (view.DrawButton("全解除", 80, 20))
+                    var name = IKHoldEntity.GetHoldTypeName(type);
+                    var isAnime = IsAnime(type);
+                    view.DrawToggle(name, isAnime, 80, 20, newValue =>
                     {
-                        foreach (var holdType in MaidCache.ikHoldTypeMap.Values)
+                        SetIsAnime(type, newValue);
+                    });
+                }
+
+                if (types.All(x => IsAnime(x)))
+                {
+                    if (view.DrawButton("無効", 50, 20))
+                    {
+                        foreach (var type in types)
                         {
-                            SetHold(holdType, false);
+                            SetIsAnime(type, false);
                         }
                     }
                 }
                 else
                 {
-                    if (view.DrawButton("全固定", 80, 20))
+                    if (view.DrawButton("有効", 50, 20))
                     {
-                        foreach (var holdType in MaidCache.ikHoldTypeMap.Values)
+                        foreach (var type in types)
                         {
-                            SetHold(holdType, true);
+                            SetIsAnime(type, true);
                         }
                     }
                 }
+
+                view.EndLayout();
             }
-            view.EndLayout();
 
             view.DrawHorizontalLine(Color.gray);
 
@@ -255,9 +264,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             idHoldEntity.ResetTargetPosition();
         }
 
+        private void SetIsAnime(IKHoldType type, bool isAnime)
+        {
+            var idHoldEntity = maidCache.GetIKHoldEntity(type);
+            if (idHoldEntity == null || idHoldEntity.isAnime == isAnime)
+            {
+                return;
+            }
+
+            idHoldEntity.isAnime = isAnime;
+        }
+
         private bool IsHold(IKHoldType type)
         {
             return maidCache.GetIKHoldEntity(type).isHold;
+        }
+
+        private bool IsAnime(IKHoldType type)
+        {
+            return maidCache.GetIKHoldEntity(type).isAnime;
         }
     }
 }

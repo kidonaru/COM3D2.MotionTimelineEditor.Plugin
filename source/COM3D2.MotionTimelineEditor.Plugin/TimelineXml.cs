@@ -433,6 +433,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
             }
+
+            if (version < 13)
+            {
+                // MotionTimelineLayerにisAnimeを追加
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "MotionTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+                                var boneName = transform.name;
+
+                                var holdtype = MaidCache.GetIKHoldType(boneName);
+                                if (holdtype == IKHoldType.Max)
+                                {
+                                    continue;
+                                }
+
+                                var values = new List<float>(transform.values);
+                                if (values.Count == 4)
+                                {
+                                    PluginUtils.LogDebug("Add isAnime to MotionTimelineLayer name={0}", transform.name);
+                                    values.Add(isIKAnime ? 1f : 0f);
+                                }
+                                transform.values = values.ToArray();
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 }

@@ -65,6 +65,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Vector3 inTangents;
         public Vector3 outTangents;
         public bool isHold;
+        public bool isAnime;
     }
 
     public class IKHoldMotionData : MotionDataBase
@@ -75,6 +76,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Vector3 outTangents;
         public Vector3 inTangents;
         public bool isHold;
+        public bool isAnime;
     }
 
     public class GroundingTimeLineRow
@@ -398,7 +400,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void ApplyIKHoldMotion(IKHoldMotionData motion, float lerpFrame)
         {
-            if (!timeline.isIKAnime || maidCache == null)
+            if (maidCache == null)
             {
                 return;
             }
@@ -413,6 +415,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var t1 = motion.edFrame * timeline.frameDuration;
 
             ikHoldEntity.isHold = motion.isHold;
+            ikHoldEntity.isAnime = motion.isAnime;
             ikHoldEntity.targetPosition = PluginUtils.HermiteVector3(
                 t0,
                 t1,
@@ -425,11 +428,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void ApplyGroundingMotion(GroundingMotionData motion)
         {
-            if (!timeline.isIKAnime)
-            {
-                return;
-            }
-
             maidCache.isGroundingFootL = motion.isGroundingFootL;
             maidCache.isGroundingFootR = motion.isGroundingFootR;
             maidCache.floorHeight = motion.floorHeight;
@@ -500,11 +498,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var holdtype = MaidCache.GetIKHoldType(name);
                 if (holdtype != IKHoldType.Max)
                 {
-                    if (!timeline.isIKAnime && frame.frameNo != 0)
-                    {
-                        continue;
-                    }
-
                     var ikHoldEntity = maidCache.GetIKHoldEntity(name);
                     if (ikHoldEntity == null)
                     {
@@ -514,14 +507,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     trans = CreateTransformData(name);
                     trans.position = ikHoldEntity.position;
                     trans["isHold"].boolValue = ikHoldEntity.isHold;
+                    trans["isAnime"].boolValue = ikHoldEntity.isAnime;
                 }
                 else if (name == GroundingBoneName)
                 {
-                    if (!timeline.isIKAnime && frame.frameNo != 0)
-                    {
-                        continue;
-                    }
-
                     trans = CreateTransformData(name);
                     trans["isGroundingFootL"].boolValue = maidCache.isGroundingFootL;
                     trans["isGroundingFootR"].boolValue = maidCache.isGroundingFootR;
@@ -740,6 +729,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         outTangents = start.outTangents,
                         inTangents = end.inTangents,
                         isHold = start.isHold,
+                        isAnime = start.isAnime,
                     };
 
                     playData.motions.Add(motion);
@@ -989,6 +979,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     inTangents = trans.positionInTangents.ToVector3(),
                     outTangents = trans.positionOutTangents.ToVector3(),
                     isHold = trans["isHold"].boolValue,
+                    isAnime = trans["isAnime"].boolValue,
                 };
 
                 rows.Add(row);

@@ -8,7 +8,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return 4;
+                return 5;
             }
         }
 
@@ -64,6 +64,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 3,
                     name = "IK固定",
+                    defaultValue = 0,
+                }
+            },
+            {
+                "isAnime",
+                new CustomValueInfo
+                {
+                    index = 4,
+                    name = "IKアニメ",
                     defaultValue = 0,
                 }
             },
