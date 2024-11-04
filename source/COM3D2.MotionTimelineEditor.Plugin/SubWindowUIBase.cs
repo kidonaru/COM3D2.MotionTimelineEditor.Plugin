@@ -104,6 +104,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static CameraManager cameraManager
+        {
+            get
+            {
+                return CameraManager.instance;
+            }
+        }
+
         protected static ITimelineLayer currentLayer
         {
             get

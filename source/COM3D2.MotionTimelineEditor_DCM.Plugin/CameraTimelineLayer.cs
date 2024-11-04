@@ -207,6 +207,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 viewAngle = Mathf.Lerp(motion.myTm.stSca.y, motion.myTm.edSca.y, easing);
             }
 
+            if (config.isFixedFoV && !isCurrent && studioHack.isPoseEditing)
+            {
+                viewAngle = 35;
+            }
+
             var uoCamera = MyHelper.GetUOCamera();
             uoCamera.SetTargetPos(position);
             uoCamera.SetDistance(distance);

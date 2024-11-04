@@ -846,16 +846,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (timelineManager.HasCameraLayer)
                 {
-                    view.DrawToggle("カメラ同期", config.isCameraSync, 80, 20, !currentLayer.isCameraLayer, newValue =>
+                    var cameraUpdated = false;
+                    cameraUpdated |= view.DrawToggle("カメラ同期", config.isCameraSync, 80, 20, !currentLayer.isCameraLayer, newValue =>
                     {
                         config.isCameraSync = newValue;
                         config.dirty = true;
                     });
+
+                    cameraUpdated |= view.DrawToggle("視野角固定", config.isFixedFoV, 80, 20, !currentLayer.isCameraLayer && studioHack.isPoseEditing, newValue =>
+                    {
+                        config.isFixedFoV = newValue;
+                        config.dirty = true;
+                    });
+
+                    if (cameraUpdated)
+                    {
+                        var cameraLayer = timelineManager.GetLayer("CameraTimelineLayer", 0);
+                        if (cameraLayer != null)
+                        {
+                            cameraLayer.ApplyCurrentFrame(false);
+                        }
+                    }
                 }
 
                 if (timelineManager.HasPostEffectLayer)
                 {
-                    view.DrawToggle("ポストエフェクト", config.isPostEffectSync, 100, 20, !currentLayer.isPostEffectLayer, newValue =>
+                    view.DrawToggle("ポスプロ同期", config.isPostEffectSync, 100, 20, !currentLayer.isPostEffectLayer, newValue =>
                     {
                         config.isPostEffectSync = newValue;
                         config.dirty = true;

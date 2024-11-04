@@ -291,6 +291,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "ﾚﾀｰﾎﾞｯｸｽ透過度",
+                labelWidth = 100,
+                min = 0f,
+                max = 1f,
+                defaultValue = 1f,
+                value = timeline.letterBoxAlpha,
+                onChanged = value =>
+                {
+                    timeline.letterBoxAlpha = value;
+                    cameraManager.ResetCache();
+                },
+            });
+
             view.BeginHorizontal();
             {
                 var dirPath = PluginUtils.GetDcmSongDirPath(timeline.dcmSongName);
@@ -362,39 +377,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             });
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "移動範囲",
+                labelWidth = 50,
+                min = 1f,
+                max = 10f,
+                step = 0.1f,
+                defaultValue = 5f,
+                value = config.positionRange,
+                onChanged = value =>
                 {
-                    label = "移動範囲",
-                    labelWidth = 50,
-                    min = 1f,
-                    max = 10f,
-                    step = 0.1f,
-                    defaultValue = 5f,
-                    value = config.positionRange,
-                    onChanged = value =>
-                    {
-                        config.positionRange = value;
-                        config.dirty = true;
-                    },
-                });
+                    config.positionRange = value;
+                    config.dirty = true;
+                },
+            });
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "拡縮範囲",
+                labelWidth = 50,
+                min = 1f,
+                max = 10f,
+                step = 0.1f,
+                defaultValue = 5f,
+                value = config.scaleRange,
+                onChanged = value =>
                 {
-                    label = "拡縮範囲",
-                    labelWidth = 50,
-                    min = 1f,
-                    max = 10f,
-                    step = 0.1f,
-                    defaultValue = 5f,
-                    value = config.scaleRange,
-                    onChanged = value =>
-                    {
-                        config.scaleRange = value;
-                        config.dirty = true;
-                    },
-                });
+                    config.scaleRange = value;
+                    config.dirty = true;
+                },
+            });
 
             view.BeginHorizontal();
             {
@@ -422,96 +435,91 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "ボイス最大秒数",
+                labelWidth = 100,
+                min = 1f,
+                max = 30f,
+                step = 0,
+                defaultValue = 20f,
+                value = config.voiceMaxLength,
+                onChanged = value =>
                 {
-                    label = "ボイス最大秒数",
-                    labelWidth = 100,
-                    min = 1f,
-                    max = 30f,
-                    step = 0,
-                    defaultValue = 20f,
-                    value = config.voiceMaxLength,
-                    onChanged = value =>
-                    {
-                        config.voiceMaxLength = value;
-                        config.dirty = true;
-                    },
-                });
+                    config.voiceMaxLength = value;
+                    config.dirty = true;
+                },
+            });
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "背景透過度",
+                labelWidth = 100,
+                min = 0f,
+                max = 1f,
+                step = 0,
+                defaultValue = 0.5f,
+                value = config.timelineBgAlpha,
+                onChanged = value =>
                 {
-                    label = "背景透過度",
-                    labelWidth = 100,
-                    min = 0f,
-                    max = 1f,
-                    step = 0,
-                    defaultValue = 0.5f,
-                    value = config.timelineBgAlpha,
-                    onChanged = value =>
-                    {
-                        config.timelineBgAlpha = value;
-                        config.dirty = true;
-                    },
-                });
+                    config.timelineBgAlpha = value;
+                    config.dirty = true;
+                },
+            });
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "メニュー幅",
+                labelWidth = 100,
+                fieldType = FloatFieldType.Int,
+                min = 100,
+                max = 300,
+                step = 0,
+                defaultValue = 100,
+                value = config.menuWidth,
+                onChanged = value =>
                 {
-                    label = "メニュー幅",
-                    labelWidth = 100,
-                    fieldType = FloatFieldType.Int,
-                    min = 100,
-                    max = 300,
-                    step = 0,
-                    defaultValue = 100,
-                    value = config.menuWidth,
-                    onChanged = value =>
-                    {
-                        config.menuWidth = (int) value;
-                        mainWindow.UpdateTexture();
-                        config.dirty = true;
-                    },
-                });
+                    config.menuWidth = (int) value;
+                    mainWindow.UpdateTexture();
+                    config.dirty = true;
+                },
+            });
             
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "ウィンドウ幅",
+                labelWidth = 100,
+                fieldType = FloatFieldType.Int,
+                min = MainWindow.MIN_WINDOW_WIDTH,
+                max = UnityEngine.Screen.width,
+                step = 0,
+                defaultValue = MainWindow.MIN_WINDOW_WIDTH,
+                value = config.windowWidth,
+                onChanged = value =>
                 {
-                    label = "ウィンドウ幅",
-                    labelWidth = 100,
-                    fieldType = FloatFieldType.Int,
-                    min = MainWindow.MIN_WINDOW_WIDTH,
-                    max = UnityEngine.Screen.width,
-                    step = 0,
-                    defaultValue = MainWindow.MIN_WINDOW_WIDTH,
-                    value = config.windowWidth,
-                    onChanged = value =>
-                    {
-                        config.windowWidth = (int) value;
-                        mainWindow.UpdateTexture();
-                        config.dirty = true;
-                    },
-                });
+                    config.windowWidth = (int) value;
+                    mainWindow.UpdateTexture();
+                    config.dirty = true;
+                },
+            });
             
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "ウィンドウ高さ",
+                labelWidth = 100,
+                fieldType = FloatFieldType.Int,
+                min = MainWindow.MIN_WINDOW_HEIGHT,
+                max = UnityEngine.Screen.height,
+                step = 0,
+                defaultValue = MainWindow.MIN_WINDOW_HEIGHT,
+                value = config.windowHeight,
+                onChanged = value =>
                 {
-                    label = "ウィンドウ高さ",
-                    labelWidth = 100,
-                    fieldType = FloatFieldType.Int,
-                    min = MainWindow.MIN_WINDOW_HEIGHT,
-                    max = UnityEngine.Screen.height,
-                    step = 0,
-                    defaultValue = MainWindow.MIN_WINDOW_HEIGHT,
-                    value = config.windowHeight,
-                    onChanged = value =>
-                    {
-                        config.windowHeight = (int) value;
-                        mainWindow.UpdateTexture();
-                        config.dirty = true;
-                    },
-                });
+                    config.windowHeight = (int) value;
+                    mainWindow.UpdateTexture();
+                    config.dirty = true;
+                },
+            });
 
             if (view.DrawButton("初期化", 100, 20))
             {
@@ -558,23 +566,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawTextField(timeline.bgmPath, 240, 20, newText => timeline.bgmPath = newText);
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "音量",
+                labelWidth = 50,
+                fieldType = FloatFieldType.Int,
+                min = 0,
+                max = 100,
+                step = 0,
+                defaultValue = 100,
+                value = bgmManager.volumeDance,
+                onChanged = value =>
                 {
-                    label = "音量",
-                    labelWidth = 50,
-                    fieldType = FloatFieldType.Int,
-                    min = 0,
-                    max = 100,
-                    step = 0,
-                    defaultValue = 100,
-                    value = bgmManager.volumeDance,
-                    onChanged = value =>
-                    {
-                        bgmManager.volumeDance = (int) value;
-                        config.dirty = true;
-                    },
-                });
+                    bgmManager.volumeDance = (int) value;
+                    config.dirty = true;
+                },
+            });
 
             view.AddSpace(10);
             view.DrawHorizontalLine(Color.gray);
@@ -657,22 +664,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawTextField(timeline.videoPath, 240, 20, newText => timeline.videoPath = newText);
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "開始位置",
+                labelWidth = 60,
+                min = -1f,
+                max = movieManager.duration,
+                step = movieManager.frameRate > 0f ? 1f / movieManager.frameRate : 0.01f,
+                defaultValue = 0f,
+                value = timeline.videoStartTime,
+                onChanged = newValue =>
                 {
-                    label = "開始位置",
-                    labelWidth = 60,
-                    min = -1f,
-                    max = movieManager.duration,
-                    step = movieManager.frameRate > 0f ? 1f / movieManager.frameRate : 0.01f,
-                    defaultValue = 0f,
-                    value = timeline.videoStartTime,
-                    onChanged = newValue =>
-                    {
-                        timeline.videoStartTime = newValue;
-                        movieManager.UpdateSeekTime();
-                    },
-                });
+                    timeline.videoStartTime = newValue;
+                    movieManager.UpdateSeekTime();
+                },
+            });
 
             if (timeline.videoDisplayType == VideoDisplayType.GUI)
             {
@@ -682,18 +688,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var value = guiPosition[i];
 
-                    view.DrawSliderValue(
-                        new GUIView.SliderOption
-                        {
-                            label = TransformDataBase.PositionNames[i],
-                            labelWidth = 60,
-                            min = -1f,
-                            max = 1f,
-                            step = 0.01f,
-                            defaultValue = 0f,
-                            value = value,
-                            onChanged = newValue => newGUIPosition[i] = newValue,
-                        });
+                    view.DrawSliderValue(new GUIView.SliderOption
+                    {
+                        label = TransformDataBase.PositionNames[i],
+                        labelWidth = 60,
+                        min = -1f,
+                        max = 1f,
+                        step = 0.01f,
+                        defaultValue = 0f,
+                        value = value,
+                        onChanged = newValue => newGUIPosition[i] = newValue,
+                    });
                 }
 
                 if (newGUIPosition != guiPosition)
@@ -702,39 +707,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     movieManager.UpdateTransform();
                 }
 
-                view.DrawSliderValue(
-                    new GUIView.SliderOption
+                view.DrawSliderValue(new GUIView.SliderOption
+                {
+                    label = "表示サイズ",
+                    labelWidth = 60,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 1f,
+                    value = timeline.videoGUIScale,
+                    onChanged = value =>
                     {
-                        label = "表示サイズ",
-                        labelWidth = 60,
-                        min = 0f,
-                        max = 1f,
-                        step = 0.01f,
-                        defaultValue = 1f,
-                        value = timeline.videoGUIScale,
-                        onChanged = value =>
-                        {
-                            timeline.videoGUIScale = value;
-                            movieManager.UpdateTransform();
-                        },
-                    });
+                        timeline.videoGUIScale = value;
+                        movieManager.UpdateTransform();
+                    },
+                });
                 
-                view.DrawSliderValue(
-                    new GUIView.SliderOption
+                view.DrawSliderValue(new GUIView.SliderOption
+                {
+                    label = "透過度",
+                    labelWidth = 60,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 1f,
+                    value = timeline.videoGUIAlpha,
+                    onChanged = value =>
                     {
-                        label = "透過度",
-                        labelWidth = 60,
-                        min = 0f,
-                        max = 1f,
-                        step = 0.01f,
-                        defaultValue = 1f,
-                        value = timeline.videoGUIAlpha,
-                        onChanged = value =>
-                        {
-                            timeline.videoGUIAlpha = value;
-                            movieManager.UpdateColor();
-                        },
-                    });
+                        timeline.videoGUIAlpha = value;
+                        movieManager.UpdateColor();
+                    },
+                });
             }
             if (timeline.videoDisplayType == VideoDisplayType.Mesh)
             {
@@ -744,18 +747,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var value = position[i];
 
-                    view.DrawSliderValue(
-                        new GUIView.SliderOption
-                        {
-                            label = TransformDataBase.PositionNames[i],
-                            labelWidth = 60,
-                            min = -config.positionRange,
-                            max = config.positionRange,
-                            step = 0.01f,
-                            defaultValue = 0f,
-                            value = value,
-                            onChanged = newValue => newPosition[i] = newValue,
-                        });
+                    view.DrawSliderValue(new GUIView.SliderOption
+                    {
+                        label = TransformDataBase.PositionNames[i],
+                        labelWidth = 60,
+                        min = -config.positionRange,
+                        max = config.positionRange,
+                        step = 0.01f,
+                        defaultValue = 0f,
+                        value = value,
+                        onChanged = newValue => newPosition[i] = newValue,
+                    });
                 }
 
                 if (newPosition != position)
@@ -770,18 +772,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var value = rotation[i];
 
-                    view.DrawSliderValue(
-                        new GUIView.SliderOption
-                        {
-                            label = TransformDataBase.RotationNames[i],
-                            labelWidth = 60,
-                            min = -180f,
-                            max = 180f,
-                            step = 1f,
-                            defaultValue = 0f,
-                            value = value,
-                            onChanged = newValue => newRotation[i] = newValue,
-                        });
+                    view.DrawSliderValue(new GUIView.SliderOption
+                    {
+                        label = TransformDataBase.RotationNames[i],
+                        labelWidth = 60,
+                        min = -180f,
+                        max = 180f,
+                        step = 1f,
+                        defaultValue = 0f,
+                        value = value,
+                        onChanged = newValue => newRotation[i] = newValue,
+                    });
                 }
 
                 if (newRotation != rotation)
@@ -790,39 +791,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     movieManager.UpdateTransform();
                 }
 
-                view.DrawSliderValue(
-                    new GUIView.SliderOption
+                view.DrawSliderValue(new GUIView.SliderOption
+                {
+                    label = "表示サイズ",
+                    labelWidth = 60,
+                    min = 0f,
+                    max = 5f,
+                    step = 0.01f,
+                    defaultValue = 1f,
+                    value = timeline.videoScale,
+                    onChanged = value =>
                     {
-                        label = "表示サイズ",
-                        labelWidth = 60,
-                        min = 0f,
-                        max = 5f,
-                        step = 0.01f,
-                        defaultValue = 1f,
-                        value = timeline.videoScale,
-                        onChanged = value =>
-                        {
-                            timeline.videoScale = value;
-                            movieManager.UpdateTransform();
-                        },
-                    });
+                        timeline.videoScale = value;
+                        movieManager.UpdateTransform();
+                    },
+                });
                 
-                view.DrawSliderValue(
-                    new GUIView.SliderOption
+                view.DrawSliderValue(new GUIView.SliderOption
+                {
+                    label = "透過度",
+                    labelWidth = 60,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 1f,
+                    value = timeline.videoAlpha,
+                    onChanged = value =>
                     {
-                        label = "透過度",
-                        labelWidth = 60,
-                        min = 0f,
-                        max = 1f,
-                        step = 0.01f,
-                        defaultValue = 1f,
-                        value = timeline.videoAlpha,
-                        onChanged = value =>
-                        {
-                            timeline.videoAlpha = value;
-                            movieManager.UpdateColor();
-                        },
-                    });
+                        timeline.videoAlpha = value;
+                        movieManager.UpdateColor();
+                    },
+                });
             }
             if (timeline.videoDisplayType == VideoDisplayType.Backmost)
             {
@@ -832,18 +831,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var value = position[i];
 
-                    view.DrawSliderValue(
-                        new GUIView.SliderOption
-                        {
-                            label = TransformDataBase.PositionNames[i],
-                            labelWidth = 60,
-                            min = -2f,
-                            max = 2f,
-                            step = 0.01f,
-                            defaultValue = 0f,
-                            value = value,
-                            onChanged = newValue => newPosition[i] = newValue,
-                        });
+                    view.DrawSliderValue(new GUIView.SliderOption
+                    {
+                        label = TransformDataBase.PositionNames[i],
+                        labelWidth = 60,
+                        min = -2f,
+                        max = 2f,
+                        step = 0.01f,
+                        defaultValue = 0f,
+                        value = value,
+                        onChanged = newValue => newPosition[i] = newValue,
+                    });
                 }
 
                 if (newPosition != position)
@@ -852,39 +850,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     movieManager.UpdateMesh();
                 }
 
-                view.DrawSliderValue(
-                    new GUIView.SliderOption
+                view.DrawSliderValue(new GUIView.SliderOption
+                {
+                    label = "表示サイズ",
+                    labelWidth = 60,
+                    min = 0f,
+                    max = 2f,
+                    step = 0.1f,
+                    defaultValue = 1f,
+                    value = timeline.videoBackmostScale,
+                    onChanged = value =>
                     {
-                        label = "表示サイズ",
-                        labelWidth = 60,
-                        min = 0f,
-                        max = 2f,
-                        step = 0.1f,
-                        defaultValue = 1f,
-                        value = timeline.videoBackmostScale,
-                        onChanged = value =>
-                        {
-                            timeline.videoBackmostScale = value;
-                            movieManager.UpdateTransform();
-                        },
-                    });
+                        timeline.videoBackmostScale = value;
+                        movieManager.UpdateTransform();
+                    },
+                });
 
-                view.DrawSliderValue(
-                    new GUIView.SliderOption
+                view.DrawSliderValue(new GUIView.SliderOption
+                {
+                    label = "透過度",
+                    labelWidth = 60,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 0.5f,
+                    value = timeline.videoBackmostAlpha,
+                    onChanged = value =>
                     {
-                        label = "透過度",
-                        labelWidth = 60,
-                        min = 0f,
-                        max = 1f,
-                        step = 0.01f,
-                        defaultValue = 0.5f,
-                        value = timeline.videoBackmostAlpha,
-                        onChanged = value =>
-                        {
-                            timeline.videoBackmostAlpha = value;
-                            movieManager.UpdateColor();
-                        },
-                    });
+                        timeline.videoBackmostAlpha = value;
+                        movieManager.UpdateColor();
+                    },
+                });
             }
 
             if (timeline.videoDisplayType == VideoDisplayType.Frontmost)
@@ -895,18 +891,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var value = position[i];
 
-                    view.DrawSliderValue(
-                        new GUIView.SliderOption
-                        {
-                            label = TransformDataBase.PositionNames[i],
-                            labelWidth = 60,
-                            min = -2f,
-                            max = 2f,
-                            step = 0.01f,
-                            defaultValue = i == 0 ? -0.8f : 0.8f,
-                            value = value,
-                            onChanged = newValue => newPosition[i] = newValue,
-                        });
+                    view.DrawSliderValue(new GUIView.SliderOption
+                    {
+                        label = TransformDataBase.PositionNames[i],
+                        labelWidth = 60,
+                        min = -2f,
+                        max = 2f,
+                        step = 0.01f,
+                        defaultValue = i == 0 ? -0.8f : 0.8f,
+                        value = value,
+                        onChanged = newValue => newPosition[i] = newValue,
+                    });
                 }
 
                 if (newPosition != position)
@@ -915,57 +910,54 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     movieManager.UpdateMesh();
                 }
 
-                view.DrawSliderValue(
-                    new GUIView.SliderOption
-                    {
-                        label = "表示サイズ",
-                        labelWidth = 60,
-                        min = 0f,
-                        max = 2f,
-                        step = 0.1f,
-                        defaultValue = 0.38f,
-                        value = timeline.videoFrontmostScale,
-                        onChanged = value =>
-                        {
-                            timeline.videoFrontmostScale = value;
-                            movieManager.UpdateTransform();
-                        },
-                    });
-
-                view.DrawSliderValue(
-                    new GUIView.SliderOption
-                    {
-                        label = "透過度",
-                        labelWidth = 60,
-                        min = 0f,
-                        max = 1f,
-                        step = 0.01f,
-                        defaultValue = 1f,
-                        value = timeline.videoFrontmostAlpha,
-                        onChanged = value =>
-                        {
-                            timeline.videoFrontmostAlpha = value;
-                            movieManager.UpdateColor();
-                        },
-                    });
-            }
-
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+                view.DrawSliderValue(new GUIView.SliderOption
                 {
-                    label = "音量",
+                    label = "表示サイズ",
+                    labelWidth = 60,
+                    min = 0f,
+                    max = 2f,
+                    step = 0.1f,
+                    defaultValue = 0.38f,
+                    value = timeline.videoFrontmostScale,
+                    onChanged = value =>
+                    {
+                        timeline.videoFrontmostScale = value;
+                        movieManager.UpdateTransform();
+                    },
+                });
+
+                view.DrawSliderValue(new GUIView.SliderOption
+                {
+                    label = "透過度",
                     labelWidth = 60,
                     min = 0f,
                     max = 1f,
                     step = 0.01f,
-                    defaultValue = 0.5f,
-                    value = timeline.videoVolume,
-                    onChanged = newValue =>
+                    defaultValue = 1f,
+                    value = timeline.videoFrontmostAlpha,
+                    onChanged = value =>
                     {
-                        timeline.videoVolume = newValue;
-                        movieManager.UpdateVolume();
+                        timeline.videoFrontmostAlpha = value;
+                        movieManager.UpdateColor();
                     },
                 });
+            }
+
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "音量",
+                labelWidth = 60,
+                min = 0f,
+                max = 1f,
+                step = 0.01f,
+                defaultValue = 0.5f,
+                value = timeline.videoVolume,
+                onChanged = newValue =>
+                {
+                    timeline.videoVolume = newValue;
+                    movieManager.UpdateVolume();
+                },
+            });
 
             /*view.DrawTextField("シェーダー", config.videoShaderName, -1, 20, newText =>
             {
@@ -1016,130 +1008,123 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 config.dirty = true;
             });
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "分割数",
+                labelWidth = 60,
+                fieldType = FloatFieldType.Int,
+                min = 1,
+                max = 20,
+                step = 1,
+                defaultValue = 4,
+                value = config.gridCount,
+                onChanged = value =>
                 {
-                    label = "分割数",
-                    labelWidth = 60,
-                    fieldType = FloatFieldType.Int,
-                    min = 1,
-                    max = 20,
-                    step = 1,
-                    defaultValue = 4,
-                    value = config.gridCount,
-                    onChanged = value =>
-                    {
-                        config.gridCount = (int) value;
-                        config.dirty = true;
-                        gridViewManager.UpdateGridLines();
-                    },
-                });
+                    config.gridCount = (int) value;
+                    config.dirty = true;
+                    gridViewManager.UpdateGridLines();
+                },
+            });
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "透過度",
+                labelWidth = 60,
+                min = 0f,
+                max = 1f,
+                step = 0.01f,
+                defaultValue = 0.3f,
+                value = config.gridAlpha,
+                onChanged = value =>
                 {
-                    label = "透過度",
-                    labelWidth = 60,
-                    min = 0f,
-                    max = 1f,
-                    step = 0.01f,
-                    defaultValue = 0.3f,
-                    value = config.gridAlpha,
-                    onChanged = value =>
-                    {
-                        config.gridAlpha = value;
-                        config.dirty = true;
-                    },
-                });
+                    config.gridAlpha = value;
+                    config.dirty = true;
+                },
+            });
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "線幅",
+                labelWidth = 60,
+                min = 0f,
+                max = 10f,
+                step = 0.1f,
+                defaultValue = 1f,
+                value = config.gridLineWidth,
+                onChanged = value =>
                 {
-                    label = "線幅",
-                    labelWidth = 60,
-                    min = 0f,
-                    max = 10f,
-                    step = 0.1f,
-                    defaultValue = 1f,
-                    value = config.gridLineWidth,
-                    onChanged = value =>
-                    {
-                        config.gridLineWidth = value;
-                        config.dirty = true;
-                        gridViewManager.UpdateGridLines();
-                    },
-                });
+                    config.gridLineWidth = value;
+                    config.dirty = true;
+                    gridViewManager.UpdateGridLines();
+                },
+            });
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "3D分割数",
+                labelWidth = 60,
+                fieldType = FloatFieldType.Int,
+                min = 1,
+                max = 100,
+                step = 1,
+                defaultValue = 20,
+                value = config.gridCountInWorld,
+                onChanged = value =>
                 {
-                    label = "3D分割数",
-                    labelWidth = 60,
-                    fieldType = FloatFieldType.Int,
-                    min = 1,
-                    max = 100,
-                    step = 1,
-                    defaultValue = 20,
-                    value = config.gridCountInWorld,
-                    onChanged = value =>
-                    {
-                        config.gridCountInWorld = (int) value;
-                        config.dirty = true;
-                        gridViewManager.UpdateGridLines();
-                    },
-                });
+                    config.gridCountInWorld = (int) value;
+                    config.dirty = true;
+                    gridViewManager.UpdateGridLines();
+                },
+            });
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "3D透過度",
+                labelWidth = 60,
+                min = 0f,
+                max = 1f,
+                step = 0.01f,
+                defaultValue = 0.3f,
+                value = config.gridAlphaInWorld,
+                onChanged = value =>
                 {
-                    label = "3D透過度",
-                    labelWidth = 60,
-                    min = 0f,
-                    max = 1f,
-                    step = 0.01f,
-                    defaultValue = 0.3f,
-                    value = config.gridAlphaInWorld,
-                    onChanged = value =>
-                    {
-                        config.gridAlphaInWorld = value;
-                        config.dirty = true;
-                    },
-                });
+                    config.gridAlphaInWorld = value;
+                    config.dirty = true;
+                },
+            });
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "3D線幅",
+                labelWidth = 60,
+                min = 0f,
+                max = 10f,
+                step = 0.1f,
+                defaultValue = 1f,
+                value = config.gridLineWidthInWorld,
+                onChanged = value =>
                 {
-                    label = "3D線幅",
-                    labelWidth = 60,
-                    min = 0f,
-                    max = 10f,
-                    step = 0.1f,
-                    defaultValue = 1f,
-                    value = config.gridLineWidthInWorld,
-                    onChanged = value =>
-                    {
-                        config.gridLineWidthInWorld = value;
-                        config.dirty = true;
-                        gridViewManager.UpdateGridLines();
-                    },
-                });
+                    config.gridLineWidthInWorld = value;
+                    config.dirty = true;
+                    gridViewManager.UpdateGridLines();
+                },
+            });
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "セルサイズ",
+                labelWidth = 60,
+                min = 0f,
+                max = 10f,
+                step = 0.01f,
+                defaultValue = 0.5f,
+                value = config.gridCellSize,
+                onChanged = value =>
                 {
-                    label = "セルサイズ",
-                    labelWidth = 60,
-                    min = 0f,
-                    max = 10f,
-                    step = 0.01f,
-                    defaultValue = 0.5f,
-                    value = config.gridCellSize,
-                    onChanged = value =>
-                    {
-                        config.gridCellSize = value;
-                        config.dirty = true;
-                    },
-                });
+                    config.gridCellSize = value;
+                    config.dirty = true;
+                },
+            });
         }
     }
 }

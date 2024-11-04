@@ -144,6 +144,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("AspectHeight")]
         public float aspectHeight = 0f;
 
+        [XmlElement("LetterBoxAlpha")]
+        public float letterBoxAlpha = 1f;
+
         [XmlElement("VideoEnabled")]
         public bool videoEnabled = true;
 

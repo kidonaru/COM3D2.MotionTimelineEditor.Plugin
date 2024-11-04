@@ -498,7 +498,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return result;
         }
 
-        public void DrawToggle(
+        public bool DrawToggle(
             string label,
             bool value,
             float width,
@@ -517,17 +517,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (newValue != value)
             {
                 onChanged(newValue);
+                return true;
             }
+            return false;
         }
 
-        public void DrawToggle(string label, bool value, float width, float height, Action<bool> onChanged)
+        public bool DrawToggle(string label, bool value, float width, float height, Action<bool> onChanged)
         {
-            DrawToggle(label, value, width, height, true, onChanged);
+            return DrawToggle(label, value, width, height, true, onChanged);
         }
 
-        public void DrawToggle(bool value, float width, float height, Action<bool> onChanged)
+        public bool DrawToggle(bool value, float width, float height, Action<bool> onChanged)
         {
-            DrawToggle(null, value, width, height, true, onChanged);
+            return DrawToggle(null, value, width, height, true, onChanged);
         }
 
         public void DrawLabel(

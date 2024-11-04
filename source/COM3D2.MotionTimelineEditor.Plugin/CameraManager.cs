@@ -30,30 +30,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static StudioHackBase studioHack
-        {
-            get
-            {
-                return StudioHackManager.studioHack;
-            }
-        }
-
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
-
-        private static TimelineData timeline
-        {
-            get
-            {
-                return timelineManager.timeline;
-            }
-        }
-
         private CameraManager()
         {
         }
@@ -75,6 +51,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Update()
         {
+        }
+
+        public void ResetCache()
+        {
+            if (_letterBoxView != null)
+            {
+                _letterBoxView.ResetCache();
+            }
         }
 
         private void CreateCamera()

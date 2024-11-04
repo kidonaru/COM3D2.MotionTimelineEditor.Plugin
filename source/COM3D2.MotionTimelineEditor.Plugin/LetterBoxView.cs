@@ -48,6 +48,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             CreateLetterBoxLines();
         }
 
+        public void ResetCache()
+        {
+            _currentAspect = -1f;
+            _targetAspect = -1f;
+        }
+
         void CreateLetterBoxMaterial()
         {
             if (!_letterBoxMaterial)
@@ -156,7 +162,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             float width = height * cam.aspect;
 
             float widthMultiplier = 1f;
-            var letterBoxColor = Color.black;
+            var color = Color.black;
+            color.a = timeline.letterBoxAlpha;
 
             if (currentAspect > targetAspect)
             {
@@ -166,11 +173,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 Vector3 leftStart = center - cam.transform.right * width * 0.5f;
                 Vector3 leftEnd = leftStart + cam.transform.right * barWidth;
-                UpdateLetterBoxLine(_letterBoxLines[0], leftStart, leftEnd, height, letterBoxColor, widthMultiplier);
+                UpdateLetterBoxLine(_letterBoxLines[0], leftStart, leftEnd, height, color, widthMultiplier);
 
                 Vector3 rightStart = center + cam.transform.right * width * 0.5f;
                 Vector3 rightEnd = rightStart - cam.transform.right * barWidth;
-                UpdateLetterBoxLine(_letterBoxLines[1], rightStart, rightEnd, height, letterBoxColor, widthMultiplier);
+                UpdateLetterBoxLine(_letterBoxLines[1], rightStart, rightEnd, height, color, widthMultiplier);
             }
             else
             {
@@ -180,11 +187,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 Vector3 topStart = center + cam.transform.up * height * 0.5f;
                 Vector3 topEnd = topStart - cam.transform.up * barHeight;
-                UpdateLetterBoxLine(_letterBoxLines[0], topStart, topEnd, width, letterBoxColor, widthMultiplier);
+                UpdateLetterBoxLine(_letterBoxLines[0], topStart, topEnd, width, color, widthMultiplier);
 
                 Vector3 bottomStart = center - cam.transform.up * height * 0.5f;
                 Vector3 bottomEnd = bottomStart + cam.transform.up * barHeight;
-                UpdateLetterBoxLine(_letterBoxLines[1], bottomStart, bottomEnd, width, letterBoxColor, widthMultiplier);
+                UpdateLetterBoxLine(_letterBoxLines[1], bottomStart, bottomEnd, width, color, widthMultiplier);
             }
         }
 
