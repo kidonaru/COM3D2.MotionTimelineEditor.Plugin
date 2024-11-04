@@ -470,6 +470,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
             }
+
+            if (version < 14)
+            {
+                // MotionTimelineLayerにFingerBlendを追加
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "MotionTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            if (keyFrame.frameNo == 0)
+                            {
+                                foreach (var name in MotionTimelineLayer.FingerBlendBoneNames)
+                                {
+                                    var transform = new TransformXml
+                                    {
+                                        name = name,
+                                        values = new float[] {},
+                                    };
+                                    keyFrame.bones.Add(new BoneXml
+                                    {
+                                        transform = transform,
+                                    });
+                                    PluginUtils.LogDebug("Add FingerBlend to MotionTimelineLayer name={0}", name);
+                                }
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 }

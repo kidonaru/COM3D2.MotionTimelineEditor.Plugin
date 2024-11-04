@@ -148,6 +148,7 @@
     <Compile Include="TimelineXml.cs" />
     <Compile Include="TrackData.cs" />
     <Compile Include="TransformCache.cs" />
+    <Compile Include="TransformDataFingerBlend.cs" />
     <Compile Include="TransformDataBase.cs" />
     <Compile Include="TransformDataExtendBone.cs" />
     <Compile Include="TransformDataGrounding.cs" />

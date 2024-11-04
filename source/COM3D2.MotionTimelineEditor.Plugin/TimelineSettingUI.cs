@@ -267,7 +267,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginHorizontal();
             {
-                view.DrawLabel("アスペクト", 70, 20);
+                view.DrawLabel("アスペクト比", 70, 20);
 
                 view.DrawFloatField(new GUIView.FloatFieldOption
                 {

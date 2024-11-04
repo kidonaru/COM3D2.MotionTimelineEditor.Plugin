@@ -11,6 +11,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     using MotionPlayData = MotionPlayData<MotionData>;
     using IKHoldPlayData = MotionPlayData<IKHoldMotionData>;
     using GroundingPlayData = MotionPlayData<GroundingMotionData>;
+    using FingerBlendPlayData = MotionPlayData<FingerBlendMotionData>;
 
     public class PoseTimeLineRow
     {
@@ -103,6 +104,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float footGroundAngle;
     }
 
+    public class FingerBlendTimeLineRow
+    {
+        public int frame;
+
+        public WindowPartsFingerBlend.Type type;
+        public float value_open;
+        public float value_fist;
+        public bool lock_enabled0;
+        public bool lock_enabled1;
+        public bool lock_enabled2;
+        public bool lock_enabled3;
+        public bool lock_enabled4;
+        public Vector2 lock_value0;
+        public Vector2 lock_value1;
+        public Vector2 lock_value2;
+        public Vector2 lock_value3;
+        public Vector2 lock_value4;
+    }
+
+    public class FingerBlendMotionData : MotionDataBase
+    {
+        public FingerBlendTimeLineRow row;
+    }
+
     [LayerDisplayName("メイドアニメ")]
     public class MotionTimelineLayer : TimelineLayerBase
     {
@@ -144,6 +169,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _allBoneNames.AddRange(timeline.GetExtendBoneNames(slotNo));
                     _allBoneNames.AddRange(MaidCache.ikHoldTypeMap.Keys);
                     _allBoneNames.Add(GroundingBoneName);
+                    _allBoneNames.AddRange(FingerBlendBoneNames);
                 }
                 return _allBoneNames;
             }
@@ -155,6 +181,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private Dictionary<string, IKHoldPlayData> _ikPlayDataMap = new Dictionary<string, IKHoldPlayData>();
         private List<GroundingTimeLineRow> _groundingTimelineRows = new List<GroundingTimeLineRow>();
         private GroundingPlayData _groundingPlayData = new GroundingPlayData();
+        private Dictionary<string, List<FingerBlendTimeLineRow>> _fingerBlendTimelineRowsMap = new Dictionary<string, List<FingerBlendTimeLineRow>>();
+        private Dictionary<string, FingerBlendPlayData> _fingerBlendPlayDataMap = new Dictionary<string, FingerBlendPlayData>();
+
         private List<PoseTimeLineRow> _dcmOutputRows = new List<PoseTimeLineRow>();
         private List<string> _extendSlotNames = new List<string>();
 
@@ -274,6 +303,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var groundingMenuItem = new BoneMenuItem(GroundingBoneName, GroundingDisplayName);
             allMenuItems.Add(groundingMenuItem);
+
+            var fingerBlendSetMenuItem = new BoneSetMenuItem("FingerBlend", "指ブレンド");
+            allMenuItems.Add(fingerBlendSetMenuItem);
+
+            foreach (var boneName in FingerBlendBoneNames)
+            {
+                var blendType = ConvertToFingerBlendType(boneName);
+                var blendName = FingerBrendNames[(int)blendType];
+                var menuItem = new BoneMenuItem(boneName, blendName);
+                fingerBlendSetMenuItem.AddChild(menuItem);
+            }
         }
 
         public override bool IsValidData()
@@ -349,6 +389,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (current != null)
                 {
                     ApplyGroundingMotion(current);
+                }
+            }
+
+            foreach (var boneName in _fingerBlendPlayDataMap.Keys)
+            {
+                var playData = _fingerBlendPlayDataMap[boneName];
+
+                playData.Update(playingFrameNoFloat);
+
+                var current = playData.current;
+                if (current != null)
+                {
+                    ApplyFingerBlendMotion(current);
                 }
             }
         }
@@ -437,6 +490,75 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             maidCache.footGroundAngle = motion.footGroundAngle;
         }
 
+        private void ApplyFingerBlendMotion(FingerBlendMotionData motion)
+        {
+            // 指ブレンドはポーズ編集中のみ反映
+            if (!studioHack.isPoseEditing)
+            {
+                return;
+            }
+
+            PluginUtils.LogDebug("ApplyFingerBlendMotion: type={0} stFrame={1}", motion.row.type, motion.stFrame);
+
+            switch (motion.row.type)
+            {
+                case WindowPartsFingerBlend.Type.RightArm:
+                case WindowPartsFingerBlend.Type.LeftArm:
+                    ApplyArmFingerBlendMotion(motion);
+                    break;
+                case WindowPartsFingerBlend.Type.RightLeg:
+                case WindowPartsFingerBlend.Type.LeftLeg:
+                    ApplyLegFingerBlendMotion(motion);
+                    break;
+            }
+        }
+
+        private void ApplyArmFingerBlendMotion(FingerBlendMotionData motion)
+        {
+            var row = motion.row;
+            var armFinger = GetBaseFinger(row.type) as FingerBlend.ArmFinger;
+            if (armFinger == null)
+            {
+                return;
+            }
+
+            armFinger.lock_enabled0 = row.lock_enabled0;
+            armFinger.lock_enabled1 = row.lock_enabled1;
+            armFinger.lock_enabled2 = row.lock_enabled2;
+            armFinger.lock_enabled3 = row.lock_enabled3;
+            armFinger.lock_enabled4 = row.lock_enabled4;
+
+            armFinger.lock_value0 = row.lock_value0;
+            armFinger.lock_value1 = row.lock_value1;
+            armFinger.lock_value2 = row.lock_value2;
+            armFinger.lock_value3 = row.lock_value3;
+            armFinger.lock_value4 = row.lock_value4;
+
+            armFinger.SetValueOpenOnly(row.value_open);
+            armFinger.SetValueFistOnly(row.value_fist);
+        }
+
+        private void ApplyLegFingerBlendMotion(FingerBlendMotionData motion)
+        {
+            var row = motion.row;
+            var legFinger = GetBaseFinger(row.type) as FingerBlend.LegFinger;
+            if (legFinger == null)
+            {
+                return;
+            }
+
+            legFinger.lock_enabled0 = row.lock_enabled0;
+            legFinger.lock_enabled1 = row.lock_enabled1;
+            legFinger.lock_enabled2 = row.lock_enabled2;
+
+            legFinger.lock_value0 = row.lock_value0;
+            legFinger.lock_value1 = row.lock_value1;
+            legFinger.lock_value2 = row.lock_value2;
+
+            legFinger.SetValueOpenOnly(row.value_open);
+            legFinger.SetValueFistOnly(row.value_fist);
+        }
+
         public override void OnMaidChanged(Maid maid)
         {
             InitMenuItems();
@@ -491,61 +613,158 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var maidCache = this.maidCache;
 
-            foreach (var name in allBoneNames)
+            foreach (var name in BoneUtils.saveBoneNames)
             {
-                ITransformData trans;
-
-                var holdtype = MaidCache.GetIKHoldType(name);
-                if (holdtype != IKHoldType.Max)
+                var transform = maidCache.GetBoneTransform(name);
+                if (transform == null)
                 {
-                    var ikHoldEntity = maidCache.GetIKHoldEntity(name);
-                    if (ikHoldEntity == null)
-                    {
-                        continue;
-                    }
-
-                    trans = CreateTransformData(name);
-                    trans.position = ikHoldEntity.position;
-                    trans["isHold"].boolValue = ikHoldEntity.isHold;
-                    trans["isAnime"].boolValue = ikHoldEntity.isAnime;
+                    PluginUtils.LogDebug("UpdateFrame: ボーンがないのでスキップしました name={0}", name);
+                    continue;
                 }
-                else if (name == GroundingBoneName)
-                {
-                    trans = CreateTransformData(name);
-                    trans["isGroundingFootL"].boolValue = maidCache.isGroundingFootL;
-                    trans["isGroundingFootR"].boolValue = maidCache.isGroundingFootR;
-                    trans["floorHeight"].value = maidCache.floorHeight;
-                    trans["footBaseOffset"].value = maidCache.footBaseOffset;
-                    trans["footStretchHeight"].value = maidCache.footStretchHeight;
-                    trans["footStretchAngle"].value = maidCache.footStretchAngle;
-                    trans["footGroundAngle"].value = maidCache.footGroundAngle;
-                }
-                else
-                {
-                    var transform = maidCache.GetBoneTransform(name);
-                    if (transform == null)
-                    {
-                        PluginUtils.LogDebug("UpdateFrame: ボーンがないのでスキップしました name={0}", name);
-                        continue;
-                    }
 
-                    trans = CreateTransformData(name);
-                    if (trans.hasPosition)
-                    {
-                        trans.position = transform.localPosition;
-                    }
-                    if (trans.hasRotation)
-                    {
-                        trans.rotation = transform.localRotation;
-                    }
-                    if (trans.hasScale)
-                    {
-                        trans.scale = transform.localScale;
-                    }
+                var trans = CreateTransformData(name);
+                if (trans.hasPosition)
+                {
+                    trans.position = transform.localPosition;
+                }
+                if (trans.hasRotation)
+                {
+                    trans.rotation = transform.localRotation;
+                }
+                if (trans.hasScale)
+                {
+                    trans.scale = transform.localScale;
                 }
 
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
+            }
+
+            foreach (var name in timeline.GetExtendBoneNames(slotNo))
+            {
+                var transform = maidCache.GetBoneTransform(name);
+                if (transform == null)
+                {
+                    PluginUtils.LogDebug("UpdateFrame: ボーンがないのでスキップしました name={0}", name);
+                    continue;
+                }
+
+                var trans = CreateTransformData(name);
+                if (trans.hasPosition)
+                {
+                    trans.position = transform.localPosition;
+                }
+                if (trans.hasRotation)
+                {
+                    trans.rotation = transform.localRotation;
+                }
+                if (trans.hasScale)
+                {
+                    trans.scale = transform.localScale;
+                }
+
+                var bone = frame.CreateBone(trans);
+                frame.UpdateBone(bone);
+            }
+
+            foreach (var name in MaidCache.ikHoldTypeMap.Keys)
+            {
+                var ikHoldEntity = maidCache.GetIKHoldEntity(name);
+                if (ikHoldEntity == null)
+                {
+                    continue;
+                }
+
+                var trans = CreateTransformData(name);
+                trans.position = ikHoldEntity.position;
+                trans["isHold"].boolValue = ikHoldEntity.isHold;
+                trans["isAnime"].boolValue = ikHoldEntity.isAnime;
+
+                var bone = frame.CreateBone(trans);
+                frame.UpdateBone(bone);
+            }
+
+            {
+                var name = GroundingBoneName;
+
+                var trans = CreateTransformData(name);
+                trans["isGroundingFootL"].boolValue = maidCache.isGroundingFootL;
+                trans["isGroundingFootR"].boolValue = maidCache.isGroundingFootR;
+                trans["floorHeight"].value = maidCache.floorHeight;
+                trans["footBaseOffset"].value = maidCache.footBaseOffset;
+                trans["footStretchHeight"].value = maidCache.footStretchHeight;
+                trans["footStretchAngle"].value = maidCache.footStretchAngle;
+                trans["footGroundAngle"].value = maidCache.footGroundAngle;
+
+                var bone = frame.CreateBone(trans);
+                frame.UpdateBone(bone);
+            }
+
+            foreach (var name in FingerBlendBoneNames)
+            {
+                var blendType = ConvertToFingerBlendType(name);
+
+                if (blendType == WindowPartsFingerBlend.Type.RightArm ||
+                    blendType == WindowPartsFingerBlend.Type.LeftArm)
+                {
+                    var fingerBlend = GetBaseFinger(blendType) as FingerBlend.ArmFinger;
+                    if (fingerBlend == null)
+                    {
+                        continue;
+                    }
+
+                    var trans = CreateTransformData(name);
+                    trans["value_open"].value = fingerBlend.value_open;
+                    trans["value_fist"].value = fingerBlend.value_fist;
+
+                    trans["lock_enabled0"].boolValue = fingerBlend.lock_enabled0;
+                    trans["lock_enabled1"].boolValue = fingerBlend.lock_enabled1;
+                    trans["lock_enabled2"].boolValue = fingerBlend.lock_enabled2;
+                    trans["lock_enabled3"].boolValue = fingerBlend.lock_enabled3;
+                    trans["lock_enabled4"].boolValue = fingerBlend.lock_enabled4;
+
+                    trans["lock_value_open0"].value = fingerBlend.lock_value0.x;
+                    trans["lock_value_open1"].value = fingerBlend.lock_value1.x;
+                    trans["lock_value_open2"].value = fingerBlend.lock_value2.x;
+                    trans["lock_value_open3"].value = fingerBlend.lock_value3.x;
+                    trans["lock_value_open4"].value = fingerBlend.lock_value4.x;
+
+                    trans["lock_value_fist0"].value = fingerBlend.lock_value0.y;
+                    trans["lock_value_fist1"].value = fingerBlend.lock_value1.y;
+                    trans["lock_value_fist2"].value = fingerBlend.lock_value2.y;
+                    trans["lock_value_fist3"].value = fingerBlend.lock_value3.y;
+                    trans["lock_value_fist4"].value = fingerBlend.lock_value4.y;
+
+                    var bone = frame.CreateBone(trans);
+                    frame.UpdateBone(bone);
+                }
+                else
+                {
+                    var fingerBlend = GetBaseFinger(blendType) as FingerBlend.LegFinger;
+                    if (fingerBlend == null)
+                    {
+                        continue;
+                    }
+
+                    var trans = CreateTransformData(name);
+                    trans["value_open"].value = fingerBlend.value_open;
+                    trans["value_fist"].value = fingerBlend.value_fist;
+
+                    trans["lock_enabled0"].boolValue = fingerBlend.lock_enabled0;
+                    trans["lock_enabled1"].boolValue = fingerBlend.lock_enabled1;
+                    trans["lock_enabled2"].boolValue = fingerBlend.lock_enabled2;
+
+                    trans["lock_value_open0"].value = fingerBlend.lock_value0.x;
+                    trans["lock_value_open1"].value = fingerBlend.lock_value1.x;
+                    trans["lock_value_open2"].value = fingerBlend.lock_value2.x;
+
+                    trans["lock_value_fist0"].value = fingerBlend.lock_value0.y;
+                    trans["lock_value_fist1"].value = fingerBlend.lock_value1.y;
+                    trans["lock_value_fist2"].value = fingerBlend.lock_value2.y;
+
+                    var bone = frame.CreateBone(trans);
+                    frame.UpdateBone(bone);
+                }
             }
         }
 
@@ -775,6 +994,45 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             _groundingPlayData.Setup(SingleFrameType.None);
+
+            foreach (var pair in _fingerBlendTimelineRowsMap)
+            {
+                var name = pair.Key;
+                var rows = pair.Value;
+
+                FingerBlendPlayData playData;
+                if (!_fingerBlendPlayDataMap.TryGetValue(name, out playData))
+                {
+                    playData = new FingerBlendPlayData
+                    {
+                        motions = new List<FingerBlendMotionData>(rows.Count),
+                    };
+                    _fingerBlendPlayDataMap[name] = playData;
+                }
+
+                playData.ResetIndex();
+                playData.motions.Clear();
+
+                for (var i = 0; i < rows.Count - 1; i++)
+                {
+                    var start = rows[i];
+                    var end = rows[i + 1];
+
+                    var stFrame = start.frame;
+                    var edFrame = end.frame;
+
+                    var motion = new FingerBlendMotionData
+                    {
+                        stFrame = stFrame,
+                        edFrame = edFrame,
+                        row = start,
+                    };
+
+                    playData.motions.Add(motion);
+                }
+
+                playData.Setup(SingleFrameType.None);
+            }
         }
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
@@ -874,6 +1132,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     continue;
                 }
+                if (IsFingerBlendBone(name))
+                {
+                    continue;
+                }
 
                 var bone = firstFrame.GetBone(name);
                 if (bone == null)
@@ -901,6 +1163,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _motionTimelineRowsMap.Clear();
                 _ikTimelineRowsMap.Clear();
                 _groundingTimelineRows.Clear();
+                _fingerBlendTimelineRowsMap.Clear();
 
                 foreach (var keyFrame in keyFrames)
                 {
@@ -987,25 +1250,62 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             {
                 var bone = frame.GetBone(GroundingBoneName);
+                if (bone != null)
+                {
+                    var rows = _groundingTimelineRows;
+
+                    var trans = bone.transform;
+
+                    var row = new GroundingTimeLineRow
+                    {
+                        frame = frame.frameNo,
+                        isGroundingFootL = trans["isGroundingFootL"].boolValue,
+                        isGroundingFootR = trans["isGroundingFootR"].boolValue,
+                        floorHeight = trans["floorHeight"].value,
+                        footBaseOffset = trans["footBaseOffset"].value, 
+                        footStretchHeight = trans["footStretchHeight"].value,
+                        footStretchAngle = trans["footStretchAngle"].value,
+                        footGroundAngle = trans["footGroundAngle"].value,
+                    };
+
+                    rows.Add(row);
+                }
+            }
+
+            foreach (var name in FingerBlendBoneNames)
+            {
+                var bone = frame.GetBone(name);
                 if (bone == null)
                 {
-                    return;
+                    continue;
                 }
 
-                var rows = _groundingTimelineRows;
+                List<FingerBlendTimeLineRow> rows;
+                if (!_fingerBlendTimelineRowsMap.TryGetValue(name, out rows))
+                {
+                    rows = new List<FingerBlendTimeLineRow>();
+                    _fingerBlendTimelineRowsMap[name] = rows;
+                }
 
                 var trans = bone.transform;
+                var blendType = ConvertToFingerBlendType(name);
 
-                var row = new GroundingTimeLineRow
+                var row = new FingerBlendTimeLineRow
                 {
                     frame = frame.frameNo,
-                    isGroundingFootL = trans["isGroundingFootL"].boolValue,
-                    isGroundingFootR = trans["isGroundingFootR"].boolValue,
-                    floorHeight = trans["floorHeight"].value,
-                    footBaseOffset = trans["footBaseOffset"].value, 
-                    footStretchHeight = trans["footStretchHeight"].value,
-                    footStretchAngle = trans["footStretchAngle"].value,
-                    footGroundAngle = trans["footGroundAngle"].value,
+                    type = blendType,
+                    value_open = trans["value_open"].value,
+                    value_fist = trans["value_fist"].value,
+                    lock_enabled0 = trans["lock_enabled0"].boolValue,
+                    lock_enabled1 = trans["lock_enabled1"].boolValue,
+                    lock_enabled2 = trans["lock_enabled2"].boolValue,
+                    lock_enabled3 = trans["lock_enabled3"].boolValue,
+                    lock_enabled4 = trans["lock_enabled4"].boolValue,
+                    lock_value0 = new Vector2(trans["lock_value_open0"].value, trans["lock_value_fist0"].value),
+                    lock_value1 = new Vector2(trans["lock_value_open1"].value, trans["lock_value_fist1"].value),
+                    lock_value2 = new Vector2(trans["lock_value_open2"].value, trans["lock_value_fist2"].value),
+                    lock_value3 = new Vector2(trans["lock_value_open3"].value, trans["lock_value_fist3"].value),
+                    lock_value4 = new Vector2(trans["lock_value_open4"].value, trans["lock_value_fist4"].value),
                 };
 
                 rows.Add(row);
@@ -1344,6 +1644,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public static readonly string[] FingerBlendBoneNames = new string[]
+        {
+            "ArmFingerBlendR",
+            "ArmFingerBlendL",
+            "LegFingerBlendR",
+            "LegFingerBlendL",
+        };
+
+        public static readonly Dictionary<string, WindowPartsFingerBlend.Type> FingerBlendBoneTypeMap =
+            new Dictionary<string, WindowPartsFingerBlend.Type>
+            {
+                { "ArmFingerBlendR", WindowPartsFingerBlend.Type.RightArm },
+                { "ArmFingerBlendL", WindowPartsFingerBlend.Type.LeftArm },
+                { "LegFingerBlendR", WindowPartsFingerBlend.Type.RightLeg },
+                { "LegFingerBlendL", WindowPartsFingerBlend.Type.LeftLeg },
+            };
+
         private static readonly string[] FingerBrendNames = new string[]
         {
             "右手",
@@ -1368,7 +1685,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             "小",
         };
 
-        private FingerBlend.BaseFinger GetBaseFingerClass(WindowPartsFingerBlend.Type type)
+        private static WindowPartsFingerBlend.Type ConvertToFingerBlendType(string boneName)
+        {
+            WindowPartsFingerBlend.Type type;
+            if (FingerBlendBoneTypeMap.TryGetValue(boneName, out type))
+            {
+                return type;
+            }
+
+            PluginUtils.LogError("ConvertToFingerBlendType: 不明なボーン名です boneName={0}", boneName);
+            return WindowPartsFingerBlend.Type.RightArm;
+        }
+
+        private static bool IsFingerBlendBone(string boneName)
+        {
+            return FingerBlendBoneTypeMap.ContainsKey(boneName);
+        }
+
+        private FingerBlend.BaseFinger GetBaseFinger(WindowPartsFingerBlend.Type type)
         {
             var finger_blend = maidManager.ikManager.finger_blend;
             FingerBlend.BaseFinger result = null;
@@ -1397,7 +1731,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             WindowPartsFingerBlend.Type blendType,
             WindowPartsFingerBlend.Type otherBlendType)
         {
-            var baseFinger = GetBaseFingerClass(blendType);
+            var baseFinger = GetBaseFinger(blendType);
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
@@ -1485,7 +1819,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var otherName = FingerBrendNames[(int)otherBlendType];
             if (view.DrawButton(otherName + "にコピー", 100, 20))
             {
-                var otherBaseFinger = GetBaseFingerClass(otherBlendType);
+                var otherBaseFinger = GetBaseFinger(otherBlendType);
                 otherBaseFinger.CopyFrom(baseFinger);
                 baseFinger.Apply();
             }
@@ -1593,7 +1927,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ITransformData transform;
 
             var holdtype = MaidCache.GetIKHoldType(name);
-            var isDefaultBoneName = BoneUtils.IsDefaultBoneName(name);
             if (holdtype != IKHoldType.Max)
             {
                 transform = new TransformDataIKHold();
@@ -1606,9 +1939,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 transform = new TransformDataRoot();
             }
-            else if (isDefaultBoneName)
+            else if (BoneUtils.IsDefaultBoneName(name))
             {
                 transform = new TransformDataRotation();
+            }
+            else if (IsFingerBlendBone(name))
+            {
+                transform = new TransformDataFingerBlend();
             }
             else
             {

@@ -340,6 +340,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return (List<PhotoTransTargetObject>) _lightTargetListField.GetValue(self);
         }
 
+        private static FieldInfo _valueOpenField = null;
+
+        public static void SetValueOpenOnly(this FingerBlend.BaseFinger self, float value)
+        {
+            if (_valueOpenField == null)
+            {
+                _valueOpenField = typeof(FingerBlend.BaseFinger).GetField("value_open_",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+            }
+
+            _valueOpenField.SetValue(self, value);
+        }
+
+        private static FieldInfo _valueFistField = null;
+
+        public static void SetValueFistOnly(this FingerBlend.BaseFinger self, float value)
+        {
+            if (_valueFistField == null)
+            {
+                _valueFistField = typeof(FingerBlend.BaseFinger).GetField("value_fist_",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+            }
+
+            _valueFistField.SetValue(self, value);
+        }
+
         public static bool IsLock(this FingerBlend.BaseFinger baseFinger, int index)
         {
             var armFinger = baseFinger as FingerBlend.ArmFinger;
