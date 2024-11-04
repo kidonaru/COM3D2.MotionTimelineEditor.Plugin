@@ -558,11 +558,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var tmpFrame = CreateFrame(timelineManager.currentFrameNo);
             UpdateFrame(tmpFrame);
 
-            foreach (var bone in tmpFrame.bones)
-            {
-                PluginUtils.LogDebug("current trans: {0}", bone.transform.ToString());
-            }
-
             var diffBones = tmpFrame.GetDiffBones(timelineManager.initialEditFrame);
             if (diffBones.Count == 0)
             {
@@ -575,6 +570,63 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyCurrentFrame(true);
 
             timelineManager.RequestHistory("キーフレーム登録");
+        }
+
+        public void AddKeyFrames(IEnumerable<string> boneNames)
+        {
+            if (timelineManager.initialEditFrame == null)
+            {
+                PluginUtils.Log("編集モード中のみキーフレームの登録ができます");
+                return;
+            }
+
+            var maid = this.maid;
+            if (maid == null)
+            {
+                PluginUtils.LogError("メイドが配置されていません");
+                return;
+            }
+
+            var tmpFrame = CreateFrame(timelineManager.currentFrameNo);
+            UpdateFrame(tmpFrame);
+
+            var filterBones = tmpFrame.GetFilterBones(boneNames);
+            if (filterBones.Count == 0)
+            {
+                PluginUtils.Log("対象のキーフレームがありません");
+                return;
+            }
+
+            UpdateBones(timelineManager.currentFrameNo, filterBones);
+
+            ApplyCurrentFrame(true);
+
+            timelineManager.RequestHistory("キーフレーム登録");
+        }
+
+        public void RemoveKeyFrames(IEnumerable<string> boneNames)
+        {
+            var frame = GetFrame(timelineManager.currentFrameNo);
+            if (frame == null)
+            {
+                PluginUtils.LogWarning("削除するフレームがありません");
+                return;
+            }
+
+            var filterBones = frame.GetFilterBones(boneNames);
+            if (filterBones.Count == 0)
+            {
+                PluginUtils.LogWarning("対象のキーフレームがありません");
+                return;
+            }
+
+            frame.RemoveBones(filterBones);
+
+            CleanFrames();
+
+            ApplyCurrentFrame(true);
+
+            timelineManager.RequestHistory("キーフレーム削除");
         }
 
         protected void FixRotationFrame(FrameData frame)

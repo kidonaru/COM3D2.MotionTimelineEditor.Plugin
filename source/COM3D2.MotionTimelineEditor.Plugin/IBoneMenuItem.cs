@@ -15,10 +15,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         List<IBoneMenuItem> children { get; }
 
         void SelectMenu(bool isMultiSelect);
-        bool HasBone(FrameData frame);
-        bool HasFullBone(FrameData frame);
+        bool HasVisibleBone(FrameData frame);
+        bool IsFullBones(FrameData frame);
         bool IsTargetBone(BoneData bone);
         bool IsSelectedFrame(FrameData frame);
         void SelectFrame(FrameData frame, bool isMultiSelect);
+        void AddKey();
+        void RemoveKey();
     }
 }

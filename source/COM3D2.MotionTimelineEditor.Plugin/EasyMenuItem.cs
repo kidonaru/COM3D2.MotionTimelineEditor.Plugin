@@ -82,17 +82,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static ITimelineLayer currentLayer
+        {
+            get
+            {
+                return timelineManager.currentLayer;
+            }
+        }
+
         public void SelectMenu(bool isMultiSelect)
         {
             // do nothing
         }
 
-        public bool HasBone(FrameData frame)
+        public bool HasVisibleBone(FrameData frame)
         {
             return frame != null && frame.bones.Count > 0;
         }
 
-        public bool HasFullBone(FrameData frame)
+        public bool IsFullBones(FrameData frame)
         {
             return frame != null && frame.isFullBone;
         }
@@ -110,6 +118,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void SelectFrame(FrameData frame, bool isMultiSelect)
         {
             timelineManager.SelectBones(frame.bones.ToList(), isMultiSelect);
+        }
+
+        public void AddKey()
+        {
+            currentLayer.AddKeyFrameAll();
+        }
+
+        public void RemoveKey()
+        {
+            currentLayer.RemoveKeyFrames(currentLayer.allBoneNames);
         }
     }
 }

@@ -69,6 +69,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static ITimelineLayer currentLayer
+        {
+            get
+            {
+                return timelineManager.currentLayer;
+            }
+        }
+
         protected static StudioModelManager modelManager
         {
             get
@@ -111,15 +119,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             isSelectedMenu = !prevSelected;
         }
 
-        public bool HasBone(FrameData frame)
+        public bool HasVisibleBone(FrameData frame)
         {
-            var bone = frame.GetBone(name);
+            var bone = frame != null ? frame.GetBone(name) : null;
             return bone != null;
         }
 
-        public bool HasFullBone(FrameData frame)
+        public bool IsFullBones(FrameData frame)
         {
-            return HasBone(frame);
+            return HasVisibleBone(frame);
         }
 
         public bool IsTargetBone(BoneData bone)
@@ -143,6 +151,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var bones = new List<BoneData> { bone };
             timelineManager.SelectBones(bones, isMultiSelect);
+        }
+
+        public void AddKey()
+        {
+            var boneNames = new List<string> { name };
+            currentLayer.AddKeyFrames(boneNames);
+        }
+
+        public void RemoveKey()
+        {
+            var boneNames = new List<string> { name };
+            currentLayer.RemoveKeyFrames(boneNames);
         }
     }
 }

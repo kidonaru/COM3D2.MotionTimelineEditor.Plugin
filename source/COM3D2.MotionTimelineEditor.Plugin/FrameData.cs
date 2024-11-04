@@ -185,6 +185,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return diffBones;
         }
 
+        public List<BoneData> GetFilterBones(IEnumerable<string> boneNames)
+        {
+            var diffBones = new List<BoneData>(_boneMap.Count);
+            var boneNamesSet = new HashSet<string>(boneNames);
+            foreach (var pair in _boneMap)
+            {
+                var name = pair.Key;
+                var bone = pair.Value;
+
+                if (bone.transform.isHidden)
+                {
+                    continue;
+                }
+
+                if (boneNamesSet.Contains(name))
+                {
+                    diffBones.Add(bone);
+                }
+            }
+            return diffBones;
+        }
+
         private static bool initializedBoneTypes = false;
         private static HashSet<IKManager.BoneType> notFlipTypes = null;
         private static Dictionary<IKManager.BoneType, IKManager.BoneType> swapFlipDic = null;

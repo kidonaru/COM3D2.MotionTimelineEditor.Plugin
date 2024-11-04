@@ -1033,7 +1033,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         continue;
                     }
 
-                    if (!menuItem.HasBone(frame))
+                    if (!menuItem.HasVisibleBone(frame))
                     {
                         continue;
                     }
@@ -1065,7 +1065,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     var keyFrameColor = isSelected ? Color.red : Color.white;
 
-                    if (!menuItem.HasFullBone(frame))
+                    if (!menuItem.IsFullBones(frame))
                     {
                         keyFrameColor *= Color.gray;
                     }
@@ -1286,13 +1286,45 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     diplayName,
                     config.menuWidth - 20,
                     20,
-                    isSelected ? config.timelineMenuSelectTextColor : Color.white,
-                    null,
-                    () =>
+                    isSelected ? config.timelineMenuSelectTextColor : Color.white
+                );
+
+                view.InvokeActionOnEvent(
+                    config.menuWidth - 40,
+                    20,
+                    EventType.MouseDown,
+                    (pos) =>
                     {
                         menuItem.SelectMenu(isMultiSelect);
-                    }
-                );
+                    });
+
+                if (studioHack.isPoseEditing)
+                {
+                    view.InvokeActionOnMouse(
+                        config.menuWidth - 20,
+                        20,
+                        _ =>
+                        {
+                            view.currentPos.x = config.menuWidth - 20;
+
+                            var frame = currentLayer.GetFrame(timelineManager.currentFrameNo);
+                            if (menuItem.IsFullBones(frame))
+                            {
+                                if (view.DrawButton("D", 20, 20))
+                                {
+                                    menuItem.RemoveKey();
+                                }
+                            }
+                            else
+                            {
+                                if (view.DrawButton("A", 20, 20))
+                                {
+                                    menuItem.AddKey();
+                                }
+                            }
+                        });
+                }
+                
             }
 
             view.EndScrollView();
