@@ -160,6 +160,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             fontSize = 12,
             alignment = TextAnchor.MiddleLeft
         };
+        public static GUIStyle gsTextArea = new GUIStyle("textArea")
+        {
+            fontSize = 12,
+            alignment = TextAnchor.UpperLeft,
+        };
         public static GUIStyle gsTile = new GUIStyle("button")
         {
             normal = {
@@ -576,7 +581,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             string text,
             float width,
             float height,
-            Action<string> onChanged)
+            Action<string> onChanged,
+            bool hasNewLine)
         {
             if (!string.IsNullOrEmpty(label))
             {
@@ -592,7 +598,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var drawRect = GetDrawRect(width, height);
-            var newText = GUI.TextField(drawRect, text, gsTextField);
+            var newText = text;
+            if (hasNewLine)
+            {
+                newText = GUI.TextArea(drawRect, text, gsTextArea);
+            }
+            else
+            {
+                newText = GUI.TextField(drawRect, text, gsTextField);
+            }
             this.NextElement(drawRect);
 
             var updated = false;
@@ -603,6 +617,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             return updated;
+        }
+
+        public bool DrawTextField(
+            string label,
+            float labelWidth,
+            string text,
+            float width,
+            float height,
+            Action<string> onChanged)
+        {
+            return DrawTextField(label, labelWidth, text, width, height, onChanged, false);
         }
 
         public void DrawTextField(
@@ -620,17 +645,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             public float labelWidth;
             public string value;
             public Action<string> onChanged;
+            public int maxLines;
         }
 
-        public void DrawTextField(TextFieldOption option)
+        public bool DrawTextField(TextFieldOption option)
         {
-            var subViewRect = GetDrawRect(-1, 20);
+            var height = option.maxLines > 1 ? 20 * option.maxLines : 20;
+            var subViewRect = GetDrawRect(-1, height);
             var subView = new GUIView(subViewRect)
             {
                 parent = this,
                 margin = 0,
                 padding = Vector2.zero
             };
+
+            var updated = false;
 
             subView.BeginLayout(LayoutDirection.Horizontal);
             {
@@ -641,13 +670,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var fieldWidth = subViewRect.width - subView.currentPos.x - 20 * 2;
 
-                subView.DrawTextField(
+                updated = subView.DrawTextField(
                     "",
                     0f,
                     option.value,
                     fieldWidth,
-                    20,
-                    option.onChanged);
+                    height,
+                    option.onChanged,
+                    option.maxLines > 1);
 
                 if (subView.DrawButton("C", 20, 20))
                 {
@@ -662,6 +692,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             subView.EndLayout();
 
             NextElement(subViewRect);
+
+            return updated;
         }
 
         public struct FloatFieldOption
@@ -1439,44 +1471,56 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var newColor = color;
             var updated = false;
 
-            DrawSliderValue(
-                new SliderOption
-                {
-                    label = "R",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 1f,
-                    step = 0.01f,
-                    defaultValue = resetColor.r,
-                    value = color.r,
-                    onChanged = x => newColor.r = x,
-                });
+            DrawSliderValue(new SliderOption
+            {
+                label = "R",
+                labelWidth = 30,
+                min = 0f,
+                max = 1f,
+                step = 0.01f,
+                defaultValue = resetColor.r,
+                value = color.r,
+                onChanged = x => newColor.r = x,
+            });
 
-            DrawSliderValue(
-                new SliderOption
-                {
-                    label = "G",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 1f,
-                    step = 0.01f,
-                    defaultValue = resetColor.g,
-                    value = color.g,
-                    onChanged = y => newColor.g = y,
-                });
+            DrawSliderValue(new SliderOption
+            {
+                label = "G",
+                labelWidth = 30,
+                min = 0f,
+                max = 1f,
+                step = 0.01f,
+                defaultValue = resetColor.g,
+                value = color.g,
+                onChanged = y => newColor.g = y,
+            });
 
-            DrawSliderValue(
-                new SliderOption
+            DrawSliderValue(new SliderOption
+            {
+                label = "B",
+                labelWidth = 30,
+                min = 0f,
+                max = 1f,
+                step = 0.01f,
+                defaultValue = resetColor.b,
+                value = color.b,
+                onChanged = z => newColor.b = z,
+            });
+
+            if (fieldCache.hasAlpha)
+            {
+                DrawSliderValue(new SliderOption
                 {
-                    label = "B",
+                    label = "A",
                     labelWidth = 30,
                     min = 0f,
                     max = 1f,
                     step = 0.01f,
-                    defaultValue = resetColor.b,
-                    value = color.b,
-                    onChanged = z => newColor.b = z,
+                    defaultValue = resetColor.a,
+                    value = color.a,
+                    onChanged = z => newColor.a = z,
                 });
+            }
 
             fieldCache.UpdateColor(newColor, true);
 

@@ -281,7 +281,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             // do nothing
         }
 
-        private void AddMotion(FrameData frame)
+        private void AppendTimeLineRow(FrameData frame)
         {
             foreach (var name in allBoneNames)
             {
@@ -399,10 +399,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             foreach (var keyFrame in keyFrames)
             {
-                AddMotion(keyFrame);
+                AppendTimeLineRow(keyFrame);
             }
 
-            AddMotion(_dummyLastFrame);
+            AppendTimeLineRow(_dummyLastFrame);
 
             BuildPlayData(forOutput);
 

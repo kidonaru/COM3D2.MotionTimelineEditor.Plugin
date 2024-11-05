@@ -306,6 +306,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float aspectWidth = 0f;
         public float aspectHeight = 0f;
         public float letterBoxAlpha = 1f;
+        public int textCount = 1;
 
         // 動画
         public bool videoEnabled = true;
@@ -766,6 +767,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             aspectWidth = xml.aspectWidth;
             aspectHeight = xml.aspectHeight;
             letterBoxAlpha = xml.letterBoxAlpha;
+            textCount = xml.textCount;
             videoEnabled = xml.videoEnabled;
             videoDisplayType = xml.videoDisplayType;
             videoPath = xml.videoPath;
@@ -879,6 +881,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.aspectWidth = aspectWidth;
             xml.aspectHeight = aspectHeight;
             xml.letterBoxAlpha = letterBoxAlpha;
+            xml.textCount = textCount;
             xml.videoEnabled = videoEnabled;
             xml.videoDisplayType = videoDisplayType;
             xml.videoPath = videoPath;

@@ -6,7 +6,7 @@ cd /d %~dp0
 set PLUGIN_NAME=COM3D2.MotionTimelineEditor_DCM.Plugin
 set CSC_PATH="C:\Windows\Microsoft.NET\Framework\v3.5\csc"
 set LIB_PATHS="/lib:..\..\..\..\COM3D2x64_Data\Managed" "/lib:..\..\.." "/lib:..\..\..\lib" "/lib:..\..\..\UnityInjector"
-set REFERENCES="/r:UnityEngine.dll" "/r:UnityInjector.dll" "/r:Assembly-CSharp.dll" "/r:Assembly-CSharp-firstpass.dll" "/r:COM3D2.MotionTimelineEditor.Plugin.dll" "/r:COM3D2.DanceCameraMotion.Plugin.dll"
+set REFERENCES="/r:UnityEngine.dll" "/r:UnityEngine.UI.dll" "/r:UnityInjector.dll" "/r:Assembly-CSharp.dll" "/r:Assembly-CSharp-firstpass.dll" "/r:COM3D2.MotionTimelineEditor.Plugin.dll" "/r:COM3D2.DanceCameraMotion.Plugin.dll"
 set SOURCE_DIR=%~dp0
 set MAIN_FILE=%SOURCE_DIR%%PLUGIN_NAME%.cs
 

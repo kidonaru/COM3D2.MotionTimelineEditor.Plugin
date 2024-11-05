@@ -1458,6 +1458,36 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return updateTransform;
         }
 
+        protected bool DrawTransformRect(
+            GUIView view,
+            Transform transform,
+            TransformEditType editType,
+            int drawMask,
+            string boneName,
+            Vector3 initialPosition,
+            Vector3 initialEulerAngles,
+            Vector3 initialScale)
+        {
+            var transformCache = view.GetTransformCache(transform);
+            var updateTransform = false;
+
+            if (IsDrawTransformType(TransformDrawType.移動, editType, drawMask))
+            {
+                updateTransform |= DrawPositionRect(view, transformCache, editType, initialPosition);
+            }
+            if (IsDrawTransformType(TransformDrawType.回転, editType, drawMask))
+            {
+                updateTransform |= DrawEulerAngles(view, transformCache, editType, boneName, initialEulerAngles);
+            }
+            if (IsDrawTransformType(TransformDrawType.拡縮, editType, drawMask))
+            {
+                updateTransform |= DrawScale(view, transformCache, editType, initialScale);
+                updateTransform |= DrawSimpleScale(view, transformCache, editType, initialScale);
+            }
+
+            return updateTransform;
+        }
+
         protected bool DrawPosition(
             GUIView view,
             TransformCache transform,
@@ -1510,6 +1540,76 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         min = -config.positionRange,
                         max = config.positionRange,
                         step = 0.01f,
+                        defaultValue = initialPosition.z,
+                        value = position.z,
+                        onChanged = z => position.z = z,
+                    });
+            }
+
+            if (updateTransform)
+            {
+                transform.position = position;
+                transform.Apply();
+            }
+
+            return updateTransform;
+        }
+
+        protected bool DrawPositionRect(
+            GUIView view,
+            TransformCache transform,
+            TransformEditType editType,
+            Vector3 initialPosition)
+        {
+            var position = transform.position;
+            var updateTransform = false;
+            var isFull = editType == TransformEditType.全て || editType == TransformEditType.移動;
+
+            if (isFull || editType == TransformEditType.X)
+            {
+                updateTransform |= view.DrawSliderValue(
+                    new GUIView.SliderOption
+                    {
+                        label = "X",
+                        labelWidth = 30,
+                        fieldType = FloatFieldType.Int,
+                        min = -1000,
+                        max = 1000,
+                        step = 1,
+                        defaultValue = initialPosition.x,
+                        value = position.x,
+                        onChanged = x => position.x = x,
+                    });
+            }
+
+            if (isFull || editType == TransformEditType.Y)
+            {
+                updateTransform |= view.DrawSliderValue(
+                    new GUIView.SliderOption
+                    {
+                        label = "Y",
+                        labelWidth = 30,
+                        fieldType = FloatFieldType.Int,
+                        min = -1000,
+                        max = 1000,
+                        step = 1,
+                        defaultValue = initialPosition.y,
+                        value = position.y,
+                        onChanged = y => position.y = y,
+                    });
+            }
+
+            if (isFull || editType == TransformEditType.Z)
+            {
+                updateTransform |= view.DrawSliderValue(
+                    new GUIView.SliderOption
+                    {
+                        label = "Z",
+                        labelWidth = 30,
+                        fieldType = FloatFieldType.Int,
+                        min = -1000,
+                        max = 1000,
+                        step = 1,
                         defaultValue = initialPosition.z,
                         value = position.z,
                         onChanged = z => position.z = z,

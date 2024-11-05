@@ -14,6 +14,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public int index;
         public string name;
+        public string defaultValue;
     }
 
     public interface ITransformData

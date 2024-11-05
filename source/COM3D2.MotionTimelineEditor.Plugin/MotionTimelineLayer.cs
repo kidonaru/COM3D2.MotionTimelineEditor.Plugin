@@ -1630,7 +1630,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.DrawLabel(displayName, 200, 20);
 
             transformCache.position = ikHoldEntity.targetPosition;
-            var updateTransform = DrawPosition(view, transformCache, editType, initialPosition);
+            var updateTransform = DrawPosition(
+                view,
+                transformCache,
+                editType,
+                initialPosition);
 
             view.DrawHorizontalLine(Color.gray);
 

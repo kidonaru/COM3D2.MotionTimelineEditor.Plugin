@@ -89,7 +89,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawHorizontalLine(Color.gray);
 
-            view.DrawLabel("IKアニメ", -1, 20, Color.white);
+            view.DrawLabel("IKアニメーション", -1, 20, Color.white);
 
             foreach (var types in typesList)
             {

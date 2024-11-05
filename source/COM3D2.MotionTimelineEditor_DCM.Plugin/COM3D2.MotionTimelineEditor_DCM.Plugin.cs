@@ -85,6 +85,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             timelineManager.RegisterLayer(
                 typeof(PostEffectTimelineLayer), PostEffectTimelineLayer.Create
             );
+            timelineManager.RegisterLayer(
+                typeof(TextTimelineLayer), TextTimelineLayer.Create
+            );
         }
     }
 }

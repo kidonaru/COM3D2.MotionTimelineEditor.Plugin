@@ -147,6 +147,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("LetterBoxAlpha")]
         public float letterBoxAlpha = 1f;
 
+        [XmlElement("TextCount")]
+        public int textCount = 1;
+
         [XmlElement("VideoEnabled")]
         public bool videoEnabled = true;
 
