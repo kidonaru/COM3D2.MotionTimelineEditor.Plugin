@@ -231,11 +231,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Update()
         {
-            foreach (var layer in layers)
-            {
-                layer.Update();
-            }
-
             if (defaultLayer.isAnmSyncing)
             {
                 var playingFrameNo = defaultLayer.playingFrameNo;
@@ -275,6 +270,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     SetAnmSpeedAll(anmSpeed);
                 }
+            }
+
+            foreach (var layer in layers)
+            {
+                layer.Update();
             }
 
             var isPoseEditing = studioHack.isPoseEditing;

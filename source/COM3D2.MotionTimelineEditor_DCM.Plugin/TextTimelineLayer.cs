@@ -78,7 +78,19 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         private Dictionary<string, List<TextTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<TextTimeLineRow>>();
         private Dictionary<string, TextPlayData> _playDataMap = new Dictionary<string, TextPlayData>();
 
-        private TextManager _textManager = new TextManager(0);
+        private TextManager _textManager = null;
+
+        private TextManager textManager
+        {
+            get
+            {
+                if (_textManager == null)
+                {
+                    _textManager = new TextManager(0);
+                }
+                return _textManager;
+            }
+        }
 
         private TextTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -107,6 +119,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
+        public override void Dispose()
+        {
+            base.Dispose();
+            ReleaseTextManager();
+        }
+
         public override bool IsValidData()
         {
             errorMessage = "";
@@ -122,7 +140,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             base.LateUpdate();
 
-            if (_textManager.TextData.Length != timeline.textCount)
+            if (textManager.TextData.Length != timeline.textCount)
             {
                 InitTextManager();
                 InitMenuItems();
@@ -133,6 +151,16 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 ApplyPlayData();
             }
+        }
+
+        public override void OnPluginEnable()
+        {
+            InitTextManager();
+        }
+
+        public override void OnPluginDisable()
+        {
+            ReleaseTextManager();
         }
 
         private void ApplyPlayData()
@@ -175,7 +203,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 }
                 if (!string.IsNullOrEmpty(start.text) && (flag || (text.font != null && text.font.name != start.font)))
                 {
-                    text.font = _textManager.GetFont(start.font);
+                    text.font = textManager.GetFont(start.font);
                 }
                 text.fontSize = start.fontSize;
                 rect.localPosition = start.position;
@@ -206,18 +234,23 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 			UpdateFreeTextSet(start.index, freeTextSet);
 		}
 
-        private void InitTextManager()
+        private void ReleaseTextManager()
         {
-            if (_textManager.TextData.Length == timeline.textCount)
-            {
-                return;
-            }
-
             if (_textManager != null)
             {
                 _textManager.ReleaseDanceText();
                 _textManager = null;
             }
+        }
+
+        private void InitTextManager()
+        {
+            if (_textManager != null && _textManager.TextData.Length == timeline.textCount)
+            {
+                return;
+            }
+
+            ReleaseTextManager();
 
             _textManager = new TextManager(timeline.textCount);
 
@@ -247,17 +280,17 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private bool IsValidIndex(int index)
         {
-            return index >= 0 && index < _textManager.TextData.Length;
+            return index >= 0 && index < textManager.TextData.Length;
         }
 
         private FreeTextSet GetFreeTextSet(int index)
         {
-            return _textManager.TextData[index];
+            return textManager.TextData[index];
         }
 
         private void UpdateFreeTextSet(int index, FreeTextSet freeTextSet)
         {
-            _textManager.TextData[index] = freeTextSet;
+            textManager.TextData[index] = freeTextSet;
         }
 
         public override void UpdateFrame(FrameData frame)
@@ -535,7 +568,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             _fontNameComboBox.currentIndex = _fontNames.IndexOf(text.font != null ? text.font.name : "");
             _fontNameComboBox.onSelected = (fontName, _) =>
             {
-                text.font = _textManager.GetFont(fontName);
+                text.font = textManager.GetFont(fontName);
             };
 
             _fontNameComboBox.DrawButton("フォント", view);
