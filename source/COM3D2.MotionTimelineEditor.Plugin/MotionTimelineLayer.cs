@@ -1479,6 +1479,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     break;
                 case TabType.手指:
                     view.DrawHorizontalLine(Color.gray);
+
+                    view.DrawToggle("ブレンド有効", timeline.fingerBlendEnabled, -1, 20, newValue =>
+                    {
+                        timeline.fingerBlendEnabled = newValue;
+                    });
+
                     DrawFingerBlend(
                         view,
                         FingerSlotNames,
@@ -1492,6 +1498,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     break;
                 case TabType.足指:
                     view.DrawHorizontalLine(Color.gray);
+
+                    view.DrawToggle("ブレンド有効", timeline.fingerBlendEnabled, -1, 20, newValue =>
+                    {
+                        timeline.fingerBlendEnabled = newValue;
+                    });
+
                     DrawFingerBlend(
                         view,
                         LegSlotNames,
@@ -1726,6 +1738,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 result = finger_blend.left_leg_finger;
             }
+
+            if (result.enabled != timeline.fingerBlendEnabled)
+            {
+                result.SetEnabledOnly(timeline.fingerBlendEnabled);
+            }
+
             return result;
         }
 
@@ -1737,17 +1755,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var baseFinger = GetBaseFinger(blendType);
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing && timeline.fingerBlendEnabled);
 
             view.BeginHorizontal();
             {
                 view.DrawLabel(FingerBrendNames[(int)blendType], 40, 20);
-
-                view.DrawToggle("有効", baseFinger.enabled, 60, 20, newValue =>
-                {
-                    baseFinger.enabled = newValue;
-                    baseFinger.Apply();
-                });
 
                 if (view.DrawButton("更新", 50, 20))
                 {

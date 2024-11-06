@@ -237,6 +237,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 rect.localScale = Vector3.one;
                 rect.sizeDelta = new Vector2(1000, 1000);
             }
+
+            if (_fontNames.Count == 0)
+            {
+                _textManager.GetFontNames();
+                _fontNames = _textManager.FontNames;
+            }
         }
 
         private bool IsValidIndex(int index)
@@ -457,7 +463,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private static List<string> _fontNames = new List<string>
         {
-            DefaultFontName,
         };
 
         public override void DrawWindow(GUIView view)
@@ -534,12 +539,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             };
 
             _fontNameComboBox.DrawButton("フォント", view);
-
-            if (view.DrawButton("フォント一覧取得", 120, 20))
-            {
-                _textManager.GetFontNames();
-                _fontNames = _textManager.FontNames;
-            }
 
             view.DrawSliderValue(new GUIView.SliderOption
             {

@@ -150,6 +150,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("TextCount")]
         public int textCount = 1;
 
+        [XmlElement("FingerBlendEnabled")]
+        public bool fingerBlendEnabled = true;
+
         [XmlElement("VideoEnabled")]
         public bool videoEnabled = true;
 

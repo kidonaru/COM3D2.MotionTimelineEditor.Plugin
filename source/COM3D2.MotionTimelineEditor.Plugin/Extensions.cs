@@ -366,6 +366,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _valueFistField.SetValue(self, value);
         }
 
+        private static FieldInfo _blendEnabledField = null;
+
+        public static void SetEnabledOnly(this FingerBlend.BaseFinger self, bool value)
+        {
+            if (_blendEnabledField == null)
+            {
+                _blendEnabledField = typeof(FingerBlend.BaseFinger).GetField("enabled_",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+            }
+
+            _blendEnabledField.SetValue(self, value);
+        }
+
         public static bool IsLock(this FingerBlend.BaseFinger baseFinger, int index)
         {
             var armFinger = baseFinger as FingerBlend.ArmFinger;
