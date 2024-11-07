@@ -457,9 +457,87 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
+        public void SavePlayData(string filePath)
+        {
+            var offsetTime = timeline.startOffsetTime;
+
+            var builder = new StringBuilder();
+            builder.Append("index,text,font,fontSize,stTime,stPosX,stPosY,stRotZ,stScaX,stScaY,stColR,stColG,stColB,stColA,edTime,edPosX,edPosY,edRotZ,edScaX,edScaY,edColR,edColG,edColB,edColA,easing,lineSpacing,alignment,sizeDeltaX,sizeDeltaY\r\n");
+
+            Action<TextMotionData> appendMotion = motion =>
+            {
+                var stTime = motion.stFrame * timeline.frameDuration;
+                var edTime = motion.edFrame * timeline.frameDuration;
+
+                stTime += offsetTime;
+                edTime += offsetTime;
+
+                var start = motion.start;
+                var end = motion.end;
+                var stColor = (Color32) start.color;
+                var edColor = (Color32) end.color;
+
+                builder.Append(start.index + ",");
+                builder.Append(start.text + ",");
+                builder.Append(start.font + ",");
+                builder.Append(start.fontSize + ",");
+                builder.Append(stTime.ToString("0.000") + ",");
+                builder.Append(start.position.x.ToString("0.000") + ",");
+                builder.Append(start.position.y.ToString("0.000") + ",");
+                builder.Append(start.rotation.z.ToString("0.000") + ",");
+                builder.Append(start.scale.x.ToString("0.000") + ",");
+                builder.Append(start.scale.y.ToString("0.000") + ",");
+                builder.Append(stColor.r + ",");
+                builder.Append(stColor.g + ",");
+                builder.Append(stColor.b + ",");
+                builder.Append(stColor.a + ",");
+                builder.Append(edTime.ToString("0.000") + ",");
+                builder.Append(end.position.x.ToString("0.000") + ",");
+                builder.Append(end.position.y.ToString("0.000") + ",");
+                builder.Append(end.rotation.z.ToString("0.000") + ",");
+                builder.Append(end.scale.x.ToString("0.000") + ",");
+                builder.Append(end.scale.y.ToString("0.000") + ",");
+                builder.Append(edColor.r + ",");
+                builder.Append(edColor.g + ",");
+                builder.Append(edColor.b + ",");
+                builder.Append(edColor.a + ",");
+                builder.Append(start.easing + ",");
+                builder.Append(start.lineSpacing + ",");
+                builder.Append((int) start.alignment + ",");
+                builder.Append(start.sizeDelta.x.ToString("0.000") + ",");
+                builder.Append(start.sizeDelta.y.ToString("0.000"));
+                builder.Append("\r\n");
+            };
+
+            foreach (var playData in _playDataMap)
+            {
+                foreach (var motion in playData.Value.motions)
+                {
+                    appendMotion(motion);
+                }
+            }
+
+            using (var streamWriter = new StreamWriter(filePath, false))
+            {
+                streamWriter.Write(builder.ToString());
+            }
+        }
+
         public override void OutputDCM(XElement songElement)
         {
-            // TODO:
+            try
+            {
+                var outputFileName = "text.csv";
+                var outputPath = timeline.GetDcmSongFilePath(outputFileName);
+                SavePlayData(outputPath);
+
+                songElement.Add(new XElement("changeText", outputFileName));
+            }
+            catch (Exception e)
+            {
+                PluginUtils.LogException(e);
+                PluginUtils.ShowDialog("テキストチェンジの出力に失敗しました");
+            }
         }
 
         public override float CalcEasingValue(float t, int easing)
