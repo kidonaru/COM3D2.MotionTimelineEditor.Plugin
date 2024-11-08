@@ -308,10 +308,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginHorizontal();
             {
-                var dirPath = PluginUtils.GetDcmSongDirPath(timeline.dcmSongName);
-                var enabled = Directory.Exists(dirPath);
+                var enabled = PluginUtils.IsExistsDcmSongDirPath(timeline.dcmSongName);
                 if (view.DrawButton("DCM出力先を開く", 150, 20, enabled))
                 {
+                    var dirPath = PluginUtils.GetDcmSongDirPath(timeline.dcmSongName);
                     PluginUtils.OpenDirectory(dirPath);
                 }
             }

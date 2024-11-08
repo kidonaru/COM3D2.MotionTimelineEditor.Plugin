@@ -210,6 +210,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return path;
         }
 
+        public static bool IsExistsDcmSongDirPath(string songName)
+        {
+            var path = CombinePaths(DCMConfigPath, "song", songName);
+            return Directory.Exists(path);
+        }
+
         public static string GetDcmSongListDirPath()
         {
             var path = CombinePaths(DCMConfigPath, "songList");
