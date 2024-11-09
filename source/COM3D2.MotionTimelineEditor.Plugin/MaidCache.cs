@@ -1111,7 +1111,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             foreach (var ikHoldEntity in ikHoldEntities.Values)
             {
-                if (!ikHoldEntity.isFootGroundingEnabled)
+                if (!ikHoldEntity.isAnime)
                 {
                     ikHoldEntity.ResetTargetPosition();
                 }
