@@ -194,17 +194,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (space1.Length > 0 && space2.Length > 0)
                 {
-                    int numericResult = int.Parse(space1.ToString()).CompareTo(int.Parse(space2.ToString()));
-                    if (numericResult != 0)
-                        return numericResult;
+                    int num1, num2;
+                    if (int.TryParse(space1.ToString(), out num1) && 
+                        int.TryParse(space2.ToString(), out num2))
+                    {
+                        int result = num1.CompareTo(num2);
+                        if (result != 0) return result;
+                    }
                 }
-                else
-                {
-                    if (ch1 != ch2)
-                        return ch1.CompareTo(ch2);
-                    marker1++;
-                    marker2++;
-                }
+
+                if (ch1 != ch2) return ch1.CompareTo(ch2);
+                marker1++;
+                marker2++;
             }
 
             return len1 - len2;
