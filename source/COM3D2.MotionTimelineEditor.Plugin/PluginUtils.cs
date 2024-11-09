@@ -13,6 +13,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public static readonly string UserDataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Config");
 
+        public const string PluginVersion = PluginInfo.PluginVersion;
+
         public static string ConfigPath
         {
             get

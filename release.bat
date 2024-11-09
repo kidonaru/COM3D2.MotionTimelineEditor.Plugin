@@ -43,7 +43,9 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-set VERSION=3.0.0.2
+for /f "tokens=*" %%i in ('powershell -Command "$content = Get-Content 'source/COM3D2.MotionTimelineEditor.Plugin/PluginInfo.cs'; $version = [regex]::Match($content, 'PluginVersion = \""(.*?)\""').Groups[1].Value; echo $version"') do set VERSION=%%i
+echo VERSION: %VERSION%
+
 set PLUGIN_NAME=COM3D2.MotionTimelineEditor.Plugin
 
 if exist output rmdir /s /q output
