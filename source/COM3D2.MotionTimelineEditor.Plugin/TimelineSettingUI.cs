@@ -469,7 +469,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawSliderValue(new GUIView.SliderOption
             {
-                label = "メニュー幅",
+                label = "ボーンリスト幅",
                 labelWidth = 100,
                 fieldType = FloatFieldType.Int,
                 min = 100,
