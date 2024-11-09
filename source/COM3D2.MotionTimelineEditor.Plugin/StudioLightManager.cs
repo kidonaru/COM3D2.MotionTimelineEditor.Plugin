@@ -206,10 +206,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
                 else
                 {
-                    stat.type = lightData.type;
-                    stat.visible = lightData.visible;
-                    stat.index = index++;
-                    lightHackManager.ApplyLight(stat);
+                    var newStat = stat.Clone();
+                    newStat.type = lightData.type;
+                    newStat.visible = lightData.visible;
+                    newStat.index = index++;
+                    lightHackManager.ApplyLight(newStat);
                 }
             }
 

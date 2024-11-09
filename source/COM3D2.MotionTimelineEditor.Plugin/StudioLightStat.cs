@@ -6,9 +6,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class MaidFollowLight : MonoBehaviour
     {
-        private Light light;
+        public Light light;
+        public Transform targetTransform;
         public int maidSlotNo = -1;
-
         public Vector3 offset = Vector3.zero;
 
         protected static MaidManager maidManager
@@ -55,18 +55,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static MaidFollowLight GetOrAddComponent(Light light)
-        {
-            var go = light.gameObject;
-            var component = go.GetComponent<MaidFollowLight>();
-            if (component == null)
-            {
-                component = go.AddComponent<MaidFollowLight>();
-                component.light = light;
-            }
-            return component;
-        }
-
         private void LateUpdate()
         {
             if (studioHack == null)
@@ -74,9 +62,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            if (isFollow && light != null && maid != null)
+            if (isFollow && light != null && maid != null && targetTransform != null)
             {
-                light.transform.position = maid.body0.Pelvis.position + offset;
+                targetTransform.position = maid.body0.Pelvis.position + offset;
             }
         }
     }
@@ -152,8 +140,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_followLight == null)
                 {
-                    _followLight = MaidFollowLight.GetOrAddComponent(light);
+                    _followLight = transform.GetOrAddComponent<MaidFollowLight>();
                 }
+
+                _followLight.light = light;
+                _followLight.targetTransform = transform;
                 return _followLight;
             }
         }
@@ -206,6 +197,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             transform = stat.transform;
             obj = stat.obj;
             index = stat.index;
+
+            _followLight = null;
+        }
+
+        public StudioLightStat Clone()
+        {
+            var stat = new StudioLightStat();
+            stat.FromStat(this);
+            return stat;
         }
     }
 }

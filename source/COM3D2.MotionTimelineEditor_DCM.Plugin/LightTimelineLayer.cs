@@ -515,10 +515,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private GUIComboBox<TransformEditType> _transComboBox = new GUIComboBox<TransformEditType>
+        private GUIComboBox<StudioLightStat> _lightComboBox = new GUIComboBox<StudioLightStat>
         {
-            items = Enum.GetValues(typeof(TransformEditType)).Cast<TransformEditType>().ToList(),
-            getName = (type, index) => type.ToString(),
+            getName = (stat, index) => stat.displayName,
         };
 
         private GUIComboBox<MaidCache> _maidComboBox = new GUIComboBox<MaidCache>
@@ -566,9 +565,16 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             view.SetEnabled(!view.IsComboBoxFocused());
 
-            _transComboBox.DrawButton("操作種類", view);
+            _lightComboBox.items = lights;
+            _lightComboBox.DrawButton("対象", view);
 
-            var editType = _transComboBox.currentItem;
+            var stat = _lightComboBox.currentItem;
+
+            if (stat == null || stat.light == null || stat.transform == null)
+            {
+                view.DrawLabel("ライトを選択してください", 200, 20);
+                return;
+            }
 
             view.DrawHorizontalLine(Color.gray);
 
@@ -578,13 +584,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
-            foreach (var stat in lights)
             {
-                if (stat == null || stat.light == null || stat.transform == null)
-                {
-                    continue;
-                }
-
                 view.DrawLabel(stat.displayName, 200, 20);
 
                 var light = stat.light;
@@ -595,6 +595,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var initialEulerAngles = StudioLightStat.DefaultRotation;
                 var initialScale = Vector3.one;
                 var updateTransform = false;
+                var editType = TransformEditType.全て;
 
                 int drawMask;
                 switch (stat.type)
@@ -617,55 +618,45 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     {
                         initialPosition = new Vector3(0f, 0f, 0f);
                         position = followLight.offset;
-                        var isFull = editType == TransformEditType.全て || editType == TransformEditType.移動;
 
-                        if (isFull || editType == TransformEditType.X)
-                        {
-                            updateTransform |= view.DrawSliderValue(
-                                new GUIView.SliderOption
-                                {
-                                    label = "X",
-                                    labelWidth = 30,
-                                    min = -config.positionRange,
-                                    max = config.positionRange,
-                                    step = 0.01f,
-                                    defaultValue = initialPosition.x,
-                                    value = position.x,
-                                    onChanged = x => position.x = x,
-                                });
-                        }
+                        updateTransform |= view.DrawSliderValue(
+                            new GUIView.SliderOption
+                            {
+                                label = "X",
+                                labelWidth = 30,
+                                min = -config.positionRange,
+                                max = config.positionRange,
+                                step = 0.01f,
+                                defaultValue = initialPosition.x,
+                                value = position.x,
+                                onChanged = x => position.x = x,
+                            });
 
-                        if (isFull || editType == TransformEditType.Y)
-                        {
-                            updateTransform |= view.DrawSliderValue(
-                                new GUIView.SliderOption
-                                {
-                                    label = "Y",
-                                    labelWidth = 30,
-                                    min = -config.positionRange,
-                                    max = config.positionRange,
-                                    step = 0.01f,
-                                    defaultValue = initialPosition.y,
-                                    value = position.y,
-                                    onChanged = x => position.y = x,
-                                });
-                        }
+                        updateTransform |= view.DrawSliderValue(
+                            new GUIView.SliderOption
+                            {
+                                label = "Y",
+                                labelWidth = 30,
+                                min = -config.positionRange,
+                                max = config.positionRange,
+                                step = 0.01f,
+                                defaultValue = initialPosition.y,
+                                value = position.y,
+                                onChanged = x => position.y = x,
+                            });
 
-                        if (isFull || editType == TransformEditType.Z)
-                        {
-                            updateTransform |= view.DrawSliderValue(
-                                new GUIView.SliderOption
-                                {
-                                    label = "Z",
-                                    labelWidth = 30,
-                                    min = -config.positionRange,
-                                    max = config.positionRange,
-                                    step = 0.01f,
-                                    defaultValue = initialPosition.z,
-                                    value = position.z,
-                                    onChanged = x => position.z = x,
-                                });
-                        }
+                        updateTransform |= view.DrawSliderValue(
+                            new GUIView.SliderOption
+                            {
+                                label = "Z",
+                                labelWidth = 30,
+                                min = -config.positionRange,
+                                max = config.positionRange,
+                                step = 0.01f,
+                                defaultValue = initialPosition.z,
+                                value = position.z,
+                                onChanged = x => position.z = x,
+                            });
 
                         if (updateTransform)
                         {
