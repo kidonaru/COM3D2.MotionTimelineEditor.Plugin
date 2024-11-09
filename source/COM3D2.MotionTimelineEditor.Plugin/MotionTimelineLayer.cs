@@ -200,6 +200,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Init();
 
+            if (maidCache == null)
+            {
+                return;
+            }
+
+            maidCache.ResetIkHoldEntities();
+            maidCache.ResetGrounding();
+
             foreach (var frame in keyFrames)
             {
                 foreach (var extendBoneName in timeline.GetExtendBoneNames(slotNo))
@@ -481,6 +489,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void ApplyGroundingMotion(GroundingMotionData motion)
         {
+            if (maidCache == null)
+            {
+                return;
+            }
+
             maidCache.isGroundingFootL = motion.isGroundingFootL;
             maidCache.isGroundingFootR = motion.isGroundingFootR;
             maidCache.floorHeight = motion.floorHeight;

@@ -425,6 +425,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.slotNo = slotNo;
         }
 
+        public void ResetIkHoldEntities()
+        {
+            ikHoldEntities.Clear();
+        }
+
+        public void ResetGrounding()
+        {
+            isGroundingFootL = false;
+            isGroundingFootR = false;
+        }
+
         public IKHoldEntity GetIKHoldEntity(IKHoldType holdType)
         {
             if (holdType == IKHoldType.Max)
