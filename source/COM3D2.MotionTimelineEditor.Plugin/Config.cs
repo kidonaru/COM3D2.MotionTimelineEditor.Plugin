@@ -86,6 +86,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             { KeyBindType.PluginToggle, new KeyBind("Ctrl+M") },
             { KeyBindType.Visible, new KeyBind("Tab") },
             { KeyBindType.AddKeyFrame, new KeyBind("Return") },
+            { KeyBindType.AddKeyFrameAll, new KeyBind("Shift+Return") },
             { KeyBindType.RemoveKeyFrame, new KeyBind("Backspace") },
             { KeyBindType.Play, new KeyBind("Space") },
             { KeyBindType.EditMode, new KeyBind("F1") },

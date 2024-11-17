@@ -9,6 +9,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         PluginToggle,
         Visible,
         AddKeyFrame,
+        AddKeyFrameAll,
         RemoveKeyFrame,
         Play,
         EditMode,

@@ -292,6 +292,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         currentLayer.AddKeyFrameDiff();
                     }
+                    if (config.GetKeyDown(KeyBindType.AddKeyFrameAll))
+                    {
+                        currentLayer.AddKeyFrameAll();
+                    }
                     if (config.GetKeyDown(KeyBindType.RemoveKeyFrame))
                     {
                         timelineManager.RemoveSelectedFrame();
@@ -453,6 +457,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             try
             {
                 PluginUtils.Log("初期化中...");
+                PluginUtils.LogDebug("Unity Version: " + Application.unityVersion);
 
                 configManager.Init();
 
