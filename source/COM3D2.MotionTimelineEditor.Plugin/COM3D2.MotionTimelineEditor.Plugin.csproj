@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;COM3D2</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -26,7 +26,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;COM3D2</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -117,10 +117,13 @@
     <Compile Include="PluginUtils.cs" />
     <Compile Include="PostEffectManager.cs" />
     <Compile Include="ScriptLoader.cs" />
+    <Compile Include="../../UnityProject/Assets/StageLight.cs" />
+    <Compile Include="../../UnityProject/Assets/StageLightController.cs" />
+    <Compile Include="StageLightManager.cs" />
+    <Compile Include="StageLightTimelineLayer.cs" />
     <Compile Include="StopwatchDebug.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StudioHack.cs" />
-    <Compile Include="SceneCaptureHack.cs" />
     <Compile Include="StudioHackBase.cs" />
     <Compile Include="StudioHackManager.cs" />
     <Compile Include="StudioLightManager.cs" />
@@ -133,6 +136,7 @@
     <Compile Include="TangentData.cs" />
     <Compile Include="TangentPair.cs" />
     <Compile Include="TextureUtils.cs" />
+    <Compile Include="TimelineBundleManager.cs" />
     <Compile Include="TimelineData.cs" />
     <Compile Include="TimelineHistoryManager.cs" />
     <Compile Include="TimelineHistoryUI.cs" />
@@ -155,6 +159,8 @@
     <Compile Include="TransformDataIKHold.cs" />
     <Compile Include="TransformDataRoot.cs" />
     <Compile Include="TransformDataRotation.cs" />
+    <Compile Include="TransformDataStageLight.cs" />
+    <Compile Include="TransformDataStageLightController.cs" />
     <Compile Include="TransformXml.cs" />
     <Compile Include="ValueData.cs" />
     <Compile Include="WindowManager.cs" />

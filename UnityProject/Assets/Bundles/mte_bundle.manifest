@@ -1,0 +1,22 @@
+ManifestFileVersion: 0
+CRC: 4225132798
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 02ae05158cda19c2fda6a091823a362d
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: d1ae6e26fb0b4d11fccd18da598542fa
+HashAppended: 0
+ClassTypes:
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+Assets:
+- Assets/Shaders/MTE/StageLight.shader
+- Assets/Resources/MTE/NoiseTexture.png
+- Assets/Shaders/MTE/StageLight.mat
+Dependencies: []

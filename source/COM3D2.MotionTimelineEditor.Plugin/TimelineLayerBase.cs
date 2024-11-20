@@ -11,7 +11,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public static readonly long TimelineAnmId = 26925014;
 
-        public abstract int priority { get; }
         public abstract string className { get; }
 
         public int slotNo { get; protected set; }
@@ -357,6 +356,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static StageLightManager stageLightManager
+        {
+            get
+            {
+                return StageLightManager.instance;
+            }
+        }
+
         protected static StudioHackBase studioHack
         {
             get
@@ -370,6 +377,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return PhotoBGManager.instance;
+            }
+        }
+
+        protected static TimelineBundleManager bundleManager
+        {
+            get
+            {
+                return TimelineBundleManager.instance;
             }
         }
 
@@ -480,6 +495,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public virtual void OnCopyLight(StudioLightStat sourceLight, StudioLightStat newLight)
+        {
+            // do nothing
+        }
+
+        public virtual void OnStageLightAdded(string lightName)
+        {
+            // do nothing
+        }
+
+        public virtual void OnStageLightRemoved(string lightName)
         {
             // do nothing
         }

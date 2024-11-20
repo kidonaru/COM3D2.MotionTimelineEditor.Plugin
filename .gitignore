@@ -5,3 +5,6 @@ source/*/bin
 source/*/obj
 *.pdb
 output/
+UnityProject/Library
+UnityProject/Temp
+UnityProject/obj

@@ -23,17 +23,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public Color color;
     }
 
-    [LayerDisplayName("背景色")]
+    [TimelineLayerDesc("背景色", 32)]
     public partial class BGColorTimelineLayer : TimelineLayerBase
     {
-        public override int priority
-        {
-            get
-            {
-                return 32;
-            }
-        }
-
         public override string className
         {
             get

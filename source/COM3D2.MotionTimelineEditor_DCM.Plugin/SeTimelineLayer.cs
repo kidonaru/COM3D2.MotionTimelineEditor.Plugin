@@ -27,17 +27,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public bool isLoop;
     }
 
-    [LayerDisplayName("効果音")]
+    [TimelineLayerDesc("効果音", 43)]
     public partial class SeTimelineLayer : TimelineLayerBase
     {
-        public override int priority
-        {
-            get
-            {
-                return 42;
-            }
-        }
-
         public override string className
         {
             get

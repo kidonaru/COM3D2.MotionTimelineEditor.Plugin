@@ -26,17 +26,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public bool isVisible;
     }
 
-    [LayerDisplayName("メイド脱衣")]
+    [TimelineLayerDesc("メイド脱衣", 15)]
     public class UndressTimelineLayer : TimelineLayerBase
     {
-        public override int priority
-        {
-            get
-            {
-                return 15;
-            }
-        }
-
         public override string className
         {
             get

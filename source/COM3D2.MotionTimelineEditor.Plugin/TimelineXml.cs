@@ -132,6 +132,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("IsLightColorEasing")]
         public bool isLightColorEasing = true;
 
+        [XmlElement("StageLightCountList")]
+        public List<int> stageLightCountList = new List<int>();
+
         [XmlElement("ActiveTrackIndex")]
         public int activeTrackIndex = -1;
 

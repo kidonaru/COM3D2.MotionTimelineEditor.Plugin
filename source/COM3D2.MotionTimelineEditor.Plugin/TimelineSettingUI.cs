@@ -382,7 +382,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 label = "移動範囲",
                 labelWidth = 50,
                 min = 1f,
-                max = 10f,
+                max = 100f,
                 step = 0.1f,
                 defaultValue = 5f,
                 value = config.positionRange,

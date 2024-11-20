@@ -28,17 +28,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public int easing;
     }
 
-    [LayerDisplayName("モデルシェイプ")]
+    [TimelineLayerDesc("モデルシェイプ", 23)]
     public partial class ModelShapeKeyTimelineLayer : ModelTimelineLayerBase
     {
-        public override int priority
-        {
-            get
-            {
-                return 23;
-            }
-        }
-
         public override string className
         {
             get

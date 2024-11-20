@@ -48,17 +48,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public MaidPointType maidPointType;
     }
 
-    [LayerDisplayName("メイド瞳")]
+    [TimelineLayerDesc("メイド瞳", 12)]
     public class EyesTimelineLayer : TimelineLayerBase
     {
-        public override int priority
-        {
-            get
-            {
-                return 12;
-            }
-        }
-
         public override string className
         {
             get

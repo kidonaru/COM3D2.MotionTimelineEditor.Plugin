@@ -128,17 +128,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public FingerBlendTimeLineRow row;
     }
 
-    [LayerDisplayName("メイドアニメ")]
+    [TimelineLayerDesc("メイドアニメ", 0)]
     public class MotionTimelineLayer : TimelineLayerBase
     {
-        public override int priority
-        {
-            get
-            {
-                return 0;
-            }
-        }
-
         public override string className
         {
             get

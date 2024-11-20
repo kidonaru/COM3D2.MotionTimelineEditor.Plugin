@@ -299,6 +299,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool isLightColorEasing = true;
 
+        public List<int> stageLightCountList = new List<int>();
+
         public int activeTrackIndex = -1;
 
         public string bgmPath = "";
@@ -763,6 +765,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             singleFrameType = xml.singleFrameType;
             isTangentCamera = xml.isTangentCamera;
             isLightColorEasing = xml.isLightColorEasing;
+            stageLightCountList = xml.stageLightCountList;
             activeTrackIndex = xml.activeTrackIndex;
             bgmPath = xml.bgmPath;
             aspectWidth = xml.aspectWidth;
@@ -878,6 +881,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.singleFrameType = singleFrameType;
             xml.isTangentCamera = isTangentCamera;
             xml.isLightColorEasing = isLightColorEasing;
+            xml.stageLightCountList = stageLightCountList;
             xml.activeTrackIndex = activeTrackIndex;
             xml.bgmPath = bgmPath;
             xml.aspectWidth = aspectWidth;

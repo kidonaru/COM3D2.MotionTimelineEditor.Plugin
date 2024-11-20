@@ -54,6 +54,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public Vector3 subPosition
+        {
+            get
+            {
+                return subPositionValues.ToVector3();
+            }
+            set
+            {
+                subPositionValues.FromVector3(value);
+            }
+        }
+
         public Quaternion rotation
         {
             get
@@ -63,6 +75,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set
             {
                 rotationValues.FromQuaternion(value);
+            }
+        }
+
+        public Quaternion subRotation
+        {
+            get
+            {
+                return subRotationValues.ToQuaternion();
+            }
+            set
+            {
+                subRotationValues.FromQuaternion(value);
             }
         }
 
@@ -93,11 +117,46 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public Vector3 subEulerAngles
+        {
+            get
+            {
+                if (hasSubEulerAngles)
+                {
+                    return subEulerAnglesValues.ToVector3();
+                }
+                else if (hasSubRotation)
+                {
+                    return subRotation.eulerAngles;
+                }
+                return Vector3.zero;
+            }
+            set
+            {
+                if (hasSubEulerAngles)
+                {
+                    subEulerAnglesValues.FromVector3(value);
+                }
+                else if (hasSubRotation)
+                {
+                    subRotation = Quaternion.Euler(value);
+                }
+            }
+        }
+
         public Vector3 normalizedEulerAngles
         {
             get
             {
                 return GetNormalizedEulerAngles(eulerAngles);
+            }
+        }
+
+        public Vector3 normalizedSubEulerAngles
+        {
+            get
+            {
+                return GetNormalizedEulerAngles(subEulerAngles);
             }
         }
 
@@ -125,6 +184,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public Color subColor
+        {
+            get
+            {
+                return subColorValues.ToColor();
+            }
+            set
+            {
+                subColorValues.FromColor(value);
+            }
+        }
+
+        public bool visible
+        {
+            get
+            {
+                return visibleValue.boolValue;
+            }
+            set
+            {
+                visibleValue.boolValue = value;
+            }
+        }
+
         public int easing
         {
             get
@@ -144,6 +227,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return false;
             }
         }
+        public virtual bool hasSubPosition
+        {
+            get
+            {
+                return false;
+            }
+        }
         public virtual bool hasRotation
         {
             get
@@ -151,7 +241,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return false;
             }
         }
+        public virtual bool hasSubRotation
+        {
+            get
+            {
+                return false;
+            }
+        }
         public virtual bool hasEulerAngles
+        {
+            get
+            {
+                return false;
+            }
+        }
+        public virtual bool hasSubEulerAngles
         {
             get
             {
@@ -166,6 +270,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
         public virtual bool hasColor
+        {
+            get
+            {
+                return false;
+            }
+        }
+        public virtual bool hasSubColor
+        {
+            get
+            {
+                return false;
+            }
+        }
+        public virtual bool hasVisible
         {
             get
             {
@@ -225,6 +343,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return new ValueData[0];
             }
         }
+        public virtual ValueData[] subPositionValues
+        {
+            get
+            {
+                return new ValueData[0];
+            }
+        }
         public virtual ValueData[] rotationValues
         {
             get
@@ -232,7 +357,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return new ValueData[0];
             }
         }
+        public virtual ValueData[] subRotationValues
+        {
+            get
+            {
+                return new ValueData[0];
+            }
+        }
         public virtual ValueData[] eulerAnglesValues
+        {
+            get
+            {
+                return new ValueData[0];
+            }
+        }
+        public virtual ValueData[] subEulerAnglesValues
         {
             get
             {
@@ -251,6 +390,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return new ValueData[0];
+            }
+        }
+        public virtual ValueData[] subColorValues
+        {
+            get
+            {
+                return new ValueData[0];
+            }
+        }
+        public virtual ValueData visibleValue
+        {
+            get
+            {
+                return new ValueData();
             }
         }
         public virtual ValueData easingValue
@@ -344,6 +497,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public float[] colorInTangents
+        {
+            get
+            {
+                return colorValues.GetInTangents();
+            }
+        }
+
+        public float[] colorOutTangents
+        {
+            get
+            {
+                return colorValues.GetOutTangents();
+            }
+        }
+
         public float[] eulerAnglesInTangents
         {
             get
@@ -384,6 +553,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public virtual Vector3 initialSubPosition
+        {
+            get
+            {
+                return Vector3.zero;
+            }
+        }
+
         public virtual Quaternion initialRotation
         {
             get
@@ -392,7 +569,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public virtual Quaternion initialSubRotation
+        {
+            get
+            {
+                return Quaternion.identity;
+            }
+        }
+
         public virtual Vector3 initialEulerAngles
+        {
+            get
+            {
+                return Vector3.zero;
+            }
+        }
+
+        public virtual Vector3 initialSubEulerAngles
         {
             get
             {
@@ -413,6 +606,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return Color.white;
+            }
+        }
+
+        public virtual Color initialSubColor
+        {
+            get
+            {
+                return Color.white;
+            }
+        }
+
+        public virtual bool initialVisible
+        {
+            get
+            {
+                return true;
             }
         }
 
@@ -1191,13 +1400,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 position = initialPosition;
             }
+            if (hasSubPosition)
+            {
+                subPosition = initialSubPosition;
+            }
             if (hasRotation)
             {
                 rotation = initialRotation;
             }
+            if (hasSubRotation)
+            {
+                subRotation = initialSubRotation;
+            }
             if (hasEulerAngles)
             {
                 eulerAngles = initialEulerAngles;
+            }
+            if (hasSubEulerAngles)
+            {
+                subEulerAngles = initialSubEulerAngles;
             }
             if (hasScale)
             {
@@ -1206,6 +1427,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (hasColor)
             {
                 color = initialColor;
+            }
+            if (hasSubColor)
+            {
+                subColor = initialSubColor;
+            }
+            if (hasVisible)
+            {
+                visible = initialVisible;
             }
             if (hasEasing)
             {

@@ -597,6 +597,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 width -= labelWidth + margin;
             }
 
+            if (onChanged == null) GUI.enabled = false;
+
             var drawRect = GetDrawRect(width, height);
             var newText = text;
             if (hasNewLine)
@@ -608,6 +610,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 newText = GUI.TextField(drawRect, text, gsTextField);
             }
             this.NextElement(drawRect);
+
+            if (onChanged == null) GUI.enabled = guiEnabled;
 
             var updated = false;
             if (newText != text)
@@ -720,28 +724,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var updated = false;
+
+            Action<string> onChanged = null;
+            if (option.onChanged != null)
+            {
+                onChanged = newText =>
+                {
+                    fieldCache.text = newText;
+
+                    float newValue;
+                    if (float.TryParse(newText, out newValue))
+                    {
+                        if (option.minValue != 0f || option.maxValue != 0f)
+                        {
+                            newValue = Mathf.Clamp(newValue, option.minValue, option.maxValue);
+                        }
+                        fieldCache.UpdateValue(newValue, false);
+                        option.onChanged(newValue);
+                        updated = true;
+                    }
+                };
+            }
+
             DrawTextField(
                 option.label,
                 option.labelWidth,
                 fieldCache.text,
                 option.width,
                 option.height,
-                newText =>
-            {
-                fieldCache.text = newText;
-
-                float newValue;
-                if (float.TryParse(newText, out newValue))
-                {
-                    if (option.minValue != 0f || option.maxValue != 0f)
-                    {
-                        newValue = Mathf.Clamp(newValue, option.minValue, option.maxValue);
-                    }
-                    fieldCache.UpdateValue(newValue, false);
-                    option.onChanged(newValue);
-                    updated = true;
-                }
-            });
+                onChanged);
 
             return updated;
         }
@@ -761,7 +772,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool DrawIntField(IntFieldOption option)
         {
-            return DrawFloatField(new FloatFieldOption
+            var floatOption = new FloatFieldOption
             {
                 label = option.label,
                 labelWidth = option.labelWidth,
@@ -772,8 +783,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 width = option.width,
                 height = option.height,
                 fieldCache = option.fieldCache,
-                onChanged = value => option.onChanged((int) value),
-            });
+            };
+            if (option.onChanged != null)
+            {
+                floatOption.onChanged = value => option.onChanged((int) value);
+            }
+            return DrawFloatField(floatOption);
         }
 
         public Color DrawColorFieldCache(

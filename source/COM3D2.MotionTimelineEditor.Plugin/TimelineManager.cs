@@ -160,6 +160,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static StageLightManager stageLightManager
+        {
+            get
+            {
+                return StageLightManager.instance;
+            }
+        }
+
         private static ModelHackManager modelHackManager
         {
             get
@@ -227,6 +235,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             StudioLightManager.onLightAdded += OnLightAdded;
             StudioLightManager.onLightRemoved += OnLightRemoved;
             StudioLightManager.onLightUpdated += OnLightUpdated;
+            StageLightManager.onLightAdded += OnStageLightAdded;
+            StageLightManager.onLightRemoved += OnStageLightRemoved;
         }
 
         public void Update()
@@ -464,6 +474,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             maidManager.ChangeMaid(currentLayer.maid);
             modelManager.SetupModels(timeline.models);
             lightManager.SetupLights(timeline.lights);
+            stageLightManager.SetupLights(timeline.stageLightCountList);
 
             CreateAndApplyAnmAll();
             SeekCurrentFrame(0);
@@ -524,6 +535,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             modelManager.SetupModels(timeline.models);
             lightManager.SetupLights(timeline.lights);
+            stageLightManager.SetupLights(timeline.stageLightCountList);
 
             CreateAndApplyAnmAll();
             Refresh();
@@ -1588,12 +1600,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Type layerType,
             Func<int, ITimelineLayer> createLayer)
         {
-            var index = layerInfoList.Count;
-            layerInfoList.Add(new TimelineLayerInfo(
-                index,
+            var info = new TimelineLayerInfo(
                 layerType,
                 createLayer
-            ));
+            );
+
+            if (!info.ValidateLayer())
+            {
+                PluginUtils.LogError("レイヤークラスの登録に失敗しました: {0}", layerType.Name);
+                return;
+            }
+
+            layerInfoList.Add(info);
+
+            layerInfoList.Sort((a, b) => a.priority - b.priority);
+
+            for (var i = 0; i < layerInfoList.Count; i++)
+            {
+                layerInfoList[i].index = i;
+            }
         }
 
         public ITimelineLayer CreateLayer(string className, int slotNo)
@@ -1653,6 +1678,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timeline.OnPluginEnable();
                 modelManager.SetupModels(timeline.models);
                 lightManager.SetupLights(timeline.lights);
+                stageLightManager.SetupLights(timeline.stageLightCountList);
             }
         }
 
@@ -1827,6 +1853,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private void UpdateStageLightCount()
+        {
+            timeline.stageLightCountList.Clear();
+
+            foreach (var controller in stageLightManager.controllers)
+            {
+                timeline.stageLightCountList.Add(controller.lights.Count);
+            }
+        }
+
         private void OnLightAdded(StudioLightStat light)
         {
             if (IsValidData())
@@ -1862,6 +1898,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 foreach (var layer in layers)
                 {
                     layer.OnLightUpdated(light);
+                }
+            }
+        }
+
+        private void OnStageLightAdded(string lightName)
+        {
+            if (IsValidData())
+            {
+                UpdateStageLightCount();
+
+                foreach (var layer in layers)
+                {
+                    layer.OnStageLightAdded(lightName);
+                }
+            }
+        }
+
+        private void OnStageLightRemoved(string lightName)
+        {
+            if (IsValidData())
+            {
+                UpdateStageLightCount();
+
+                foreach (var layer in layers)
+                {
+                    layer.OnStageLightRemoved(lightName);
                 }
             }
         }

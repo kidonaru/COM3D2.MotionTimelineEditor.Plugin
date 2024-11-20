@@ -333,6 +333,72 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             );
         }
 
+        // Vector3の補間
+        public static Vector3 HermiteVector3(
+            float t0,
+            float t1,
+            Vector3 startPoint,
+            Vector3 endPoint,
+            float[] outTangent,
+            float[] inTangent,
+            float t)
+        {
+            return HermiteVector3(
+                t0,
+                t1,
+                startPoint,
+                endPoint,
+                outTangent.ToVector3(),
+                inTangent.ToVector3(),
+                t
+            );
+        }
+
+        // Vector4の補間
+        public static Vector4 HermiteVector4(
+            float t0,
+            float t1,
+            Vector4 startPoint,
+            Vector4 endPoint,
+            Vector4 outTangent,
+            Vector4 inTangent,
+            float t)
+        {
+            return new Vector4(
+                Hermite(t0, t1, startPoint.x, endPoint.x, outTangent.x, inTangent.x, t),
+                Hermite(t0, t1, startPoint.y, endPoint.y, outTangent.y, inTangent.y, t),
+                Hermite(t0, t1, startPoint.z, endPoint.z, outTangent.z, inTangent.z, t),
+                Hermite(t0, t1, startPoint.w, endPoint.w, outTangent.w, inTangent.w, t)
+            );
+        }
+
+        // Colorの補間
+        public static Color HermiteColor(
+            float t0,
+            float t1,
+            Color startColor,
+            Color endColor,
+            float[] outTangent,
+            float[] inTangent,
+            float t)
+        {
+            if (outTangent.Length == 4 && inTangent.Length == 4)
+            {
+                return new Color(
+                    Hermite(t0, t1, startColor.r, endColor.r, outTangent[0], inTangent[0], t),
+                    Hermite(t0, t1, startColor.g, endColor.g, outTangent[1], inTangent[1], t),
+                    Hermite(t0, t1, startColor.b, endColor.b, outTangent[2], inTangent[2], t),
+                    Hermite(t0, t1, startColor.a, endColor.a, outTangent[3], inTangent[3], t)
+                );
+            }
+            
+            return new Color(
+                Hermite(t0, t1, startColor.r, endColor.r, outTangent[0], inTangent[0], t),
+                Hermite(t0, t1, startColor.g, endColor.g, outTangent[1], inTangent[1], t),
+                Hermite(t0, t1, startColor.b, endColor.b, outTangent[2], inTangent[2], t)
+            );
+        }
+
         // Quaternionの補間
         public static Quaternion HermiteQuaternion(
             float t0,
@@ -348,6 +414,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 Hermite(t0, t1, startPoint.y, endPoint.y, outTangent.y, inTangent.y, t),
                 Hermite(t0, t1, startPoint.z, endPoint.z, outTangent.z, inTangent.z, t),
                 Hermite(t0, t1, startPoint.w, endPoint.w, outTangent.w, inTangent.w, t)
+            );
+        }
+
+        // Quaternionの補間
+        public static Quaternion HermiteQuaternion(
+            float t0,
+            float t1,
+            Quaternion startPoint,
+            Quaternion endPoint,
+            float[] outTangent,
+            float[] inTangent,
+            float t)
+        {
+            return HermiteQuaternion(
+                t0,
+                t1,
+                startPoint,
+                endPoint,
+                outTangent.ToVector4(),
+                inTangent.ToVector4(),
+                t
             );
         }
 

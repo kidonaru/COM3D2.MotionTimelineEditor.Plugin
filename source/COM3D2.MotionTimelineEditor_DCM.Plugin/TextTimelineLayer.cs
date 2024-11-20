@@ -35,17 +35,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public TextTimeLineRow end;
     }
 
-    [LayerDisplayName("テキスト")]
+    [TimelineLayerDesc("テキスト", 45)]
     public partial class TextTimelineLayer : TimelineLayerBase
     {
-        public override int priority
-        {
-            get
-            {
-                return 44;
-            }
-        }
-
         public override string className
         {
             get

@@ -9,6 +9,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string defaultName;
         public int currentIndex = 0;
         public Vector2 buttonPos;
+        public float labelWidth = 100;
         public Vector2 buttonSize = new Vector2(110, 20);
         public Vector2 contentSize = new Vector2(110, 300);
         public bool showArrow = true;
@@ -91,7 +92,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var subViewWidth = buttonSize.x;
             if (!string.IsNullOrEmpty(label))
             {
-                subViewWidth += view.labelWidth;
+                subViewWidth += labelWidth;
             }
             if (showArrow)
             {
@@ -106,7 +107,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (!string.IsNullOrEmpty(label))
                 {
-                    _buttonSubView.DrawLabel(label, _buttonSubView.labelWidth, buttonSize.y);
+                    _buttonSubView.DrawLabel(label, labelWidth, buttonSize.y);
                 }
 
                 if (showArrow)

@@ -30,17 +30,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public DepthOfFieldData edDepthOfField;
     }
 
-    [LayerDisplayName("ポストエフェクト")]
+    [TimelineLayerDesc("ポストエフェクト", 44)]
     public class PostEffectTimelineLayer : TimelineLayerBase
     {
-        public override int priority
-        {
-            get
-            {
-                return 43;
-            }
-        }
-
         public override string className
         {
             get

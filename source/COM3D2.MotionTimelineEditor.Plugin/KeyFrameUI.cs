@@ -165,6 +165,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 transform => transform.color.ToVector3(),
                 (transform, color) => transform.color = color.ToColor()
             );
+            DrawBoolValue(
+                view,
+                "表示",
+                transform => transform.hasVisible,
+                transform => transform.visible,
+                (transform, visible) => transform.visible = visible
+            );
         }
 
         private void DrawCustomValues(GUIView view)
@@ -441,6 +448,76 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             // 新値の適用
             if (!float.IsNaN(newValue) && newValue != value)
+            {
+                foreach (var selectedBone in selectedBones)
+                {
+                    var transform = selectedBone.transform;
+                    if (hasValue(transform))
+                    {
+                        setValue(transform, newValue);
+                    }
+                }
+
+                PluginUtils.LogDebug("新値を適用します：" + newValue);
+                currentLayer.ApplyCurrentFrame(true);
+            }
+        }
+
+        private void DrawBoolValue(
+            GUIView view,
+            string label,
+            Func<ITransformData, bool> hasValue,
+            Func<ITransformData, bool> getValue,
+            Action<ITransformData, bool> setValue)
+        {
+            bool value = false;
+            var boneCount = 0;
+
+            foreach (var bone in selectedBones)
+            {
+                var transform = bone.transform;
+                var isNan = false;
+
+                if (hasValue(transform))
+                {
+                    var _value = getValue(transform);
+                    if (boneCount == 0)
+                    {
+                        value = _value;
+                    }
+                    else
+                    {
+                        if (_value != value)
+                        {
+                            value = false;
+                            isNan = true;
+                        }
+                    }
+
+                    boneCount++;
+                    if (boneCount >= config.detailTransformCount || isNan)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if (boneCount == 0)
+            {
+                return;
+            }
+
+            var newValue = value;
+
+            view.DrawToggle(
+                label,
+                value,
+                100,
+                20,
+                _newValue => newValue = _newValue);
+
+            // 新値の適用
+            if (newValue != value)
             {
                 foreach (var selectedBone in selectedBones)
                 {

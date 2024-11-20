@@ -25,17 +25,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public float endValue;
     }
 
-    [LayerDisplayName("メイド表情")]
+    [TimelineLayerDesc("メイド表情", 10)]
     public class MorphTimelineLayer : TimelineLayerBase
     {
-        public override int priority
-        {
-            get
-            {
-                return 10;
-            }
-        }
-
         public override string className
         {
             get

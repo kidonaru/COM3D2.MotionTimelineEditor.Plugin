@@ -26,17 +26,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public int easing;
     }
 
-    [LayerDisplayName("メイド移動")]
+    [TimelineLayerDesc("メイド移動", 11)]
     public partial class MoveTimelineLayer : TimelineLayerBase
     {
-        public override int priority
-        {
-            get
-            {
-                return 11;
-            }
-        }
-
         public override string className
         {
             get

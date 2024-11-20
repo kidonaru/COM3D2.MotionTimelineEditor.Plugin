@@ -33,17 +33,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public string loopVoiceName;
     }
 
-    [LayerDisplayName("メイドボイス")]
+    [TimelineLayerDesc("メイドボイス", 14)]
     public partial class VoiceTimelineLayer : TimelineLayerBase
     {
-        public override int priority
-        {
-            get
-            {
-                return 14;
-            }
-        }
-
         public override string className
         {
             get

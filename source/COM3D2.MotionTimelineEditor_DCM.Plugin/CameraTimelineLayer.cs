@@ -42,17 +42,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public Vector3 scaleInTangents;
     }
 
-    [LayerDisplayName("カメラ")]
+    [TimelineLayerDesc("カメラ", 20)]
     public class CameraTimelineLayer : TimelineLayerBase
     {
-        public override int priority
-        {
-            get
-            {
-                return 20;
-            }
-        }
-
         public override string className
         {
             get

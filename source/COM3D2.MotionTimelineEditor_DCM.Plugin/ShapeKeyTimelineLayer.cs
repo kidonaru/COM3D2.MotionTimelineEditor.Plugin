@@ -46,17 +46,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         }
     }
 
-    [LayerDisplayName("メイドシェイプ")]
+    [TimelineLayerDesc("メイドシェイプ", 13)]
     public partial class ShapeKeyTimelineLayer : TimelineLayerBase
     {
-        public override int priority
-        {
-            get
-            {
-                return 13;
-            }
-        }
-
         public override string className
         {
             get

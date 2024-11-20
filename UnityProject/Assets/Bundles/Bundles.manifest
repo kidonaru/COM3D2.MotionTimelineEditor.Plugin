@@ -1,0 +1,7 @@
+ManifestFileVersion: 0
+CRC: 3098496210
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: mte_bundle
+      Dependencies: {}

@@ -168,4 +168,50 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
     }
+
+    public class TimeLineRow
+    {
+        public int frame;
+        public ITransformData transform;
+
+        public TimeLineRow()
+        {
+        }
+
+        public TimeLineRow(BoneData bone)
+        {
+            this.frame = bone.parentFrame.frameNo;
+            this.transform = bone.transform;
+        }
+    }
+
+    public class DefaultMotionData : MotionDataBase
+    {
+        public TimeLineRow start;
+        public TimeLineRow end;
+
+        public DefaultMotionData()
+        {
+        }
+
+        public DefaultMotionData(TimeLineRow start, TimeLineRow end)
+        {
+            this.start = start;
+            this.end = end;
+            stFrame = start.frame;
+            edFrame = end.frame;
+        }
+    }
+
+    public class DefaultPlayData : MotionPlayData<DefaultMotionData>
+    {
+        public DefaultPlayData()
+        {
+        }
+
+        public DefaultPlayData(int capacity)
+        {
+            motions = new List<DefaultMotionData>(capacity);
+        }
+    }
 }

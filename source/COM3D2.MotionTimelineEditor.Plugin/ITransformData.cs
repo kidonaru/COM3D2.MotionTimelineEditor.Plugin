@@ -25,28 +25,44 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         int strValueCount { get; }
         string[] strValues { get; }
         Vector3 position { get; set; }
+        Vector3 subPosition { get; set; }
         Quaternion rotation { get; set; }
+        Quaternion subRotation { get; set; }
         Vector3 eulerAngles { get; set; }
+        Vector3 subEulerAngles { get; set; }
         Vector3 normalizedEulerAngles { get; }
+        Vector3 normalizedSubEulerAngles { get; }
         Vector3 scale { get; set; }
         Color color { get; set; }
+        Color subColor { get; set; }
+        bool visible { get; set; }
         int easing { get; set; }
 
         bool hasPosition { get; }
+        bool hasSubPosition { get; }
         bool hasRotation { get; }
+        bool hasSubRotation { get; }
         bool hasEulerAngles { get; }
+        bool hasSubEulerAngles { get; }
         bool hasScale { get; }
         bool hasColor { get; }
+        bool hasSubColor { get; }
+        bool hasVisible { get; }
         bool hasEasing { get; }
         bool hasTangent { get; }
         bool isHidden { get; }
         bool isGlobal { get; }
 
         ValueData[] positionValues { get; }
+        ValueData[] subPositionValues { get; }
         ValueData[] rotationValues { get; }
+        ValueData[] subRotationValues { get; }
         ValueData[] eulerAnglesValues { get; }
+        ValueData[] subEulerAnglesValues { get; }
         ValueData[] scaleValues { get; }
         ValueData[] colorValues { get; }
+        ValueData[] subColorValues { get; }
+        ValueData visibleValue { get; }
         ValueData easingValue { get; }
         ValueData[] tangentValues { get; }
 
@@ -54,16 +70,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         float[] positionOutTangents { get; }
         float[] rotationInTangents { get; }
         float[] rotationOutTangents { get; }
+        float[] colorInTangents { get; }
+        float[] colorOutTangents { get; }
         float[] eulerAnglesInTangents { get; }
         float[] eulerAnglesOutTangents { get; }
         float[] scaleInTangents { get; }
         float[] scaleOutTangents { get; }
 
         Vector3 initialPosition { get; }
+        Vector3 initialSubPosition { get; }
         Quaternion initialRotation { get; }
+        Quaternion initialSubRotation { get; }
         Vector3 initialEulerAngles { get; }
+        Vector3 initialSubEulerAngles { get; }
         Vector3 initialScale { get; }
         Color initialColor { get; }
+        Color initialSubColor { get; }
+        bool initialVisible { get; }
 
         SingleFrameType singleFrameType { get; }
 

@@ -28,17 +28,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public MyTransform myTm;
     }
 
-    [LayerDisplayName("背景")]
+    [TimelineLayerDesc("背景", 31)]
     public partial class BGTimelineLayer : TimelineLayerBase
     {
-        public override int priority
-        {
-            get
-            {
-                return 31;
-            }
-        }
-
         public override string className
         {
             get

@@ -29,17 +29,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public int easing;
     }
 
-    [LayerDisplayName("モデルボーン")]
+    [TimelineLayerDesc("モデルボーン", 22)]
     public partial class ModelBoneTimelineLayer : ModelTimelineLayerBase
     {
-        public override int priority
-        {
-            get
-            {
-                return 22;
-            }
-        }
-
         public override string className
         {
             get

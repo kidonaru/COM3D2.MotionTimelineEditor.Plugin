@@ -100,6 +100,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static StageLightManager stageLightManager
+        {
+            get
+            {
+                return StageLightManager.instance;
+            }
+        }
+
         private static TimelineHistoryManager historyManager
         {
             get
@@ -474,6 +482,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timelineManager.RegisterLayer(
                     typeof(MotionTimelineLayer), MotionTimelineLayer.Create
                 );
+                timelineManager.RegisterLayer(
+                    typeof(StageLightTimelineLayer), StageLightTimelineLayer.Create
+                );
 
                 windowManager.Init();
                 boneMenuManager.Init();
@@ -584,6 +595,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             maidManager.OnPluginEnable();
             modelManager.OnPluginEnable();
             lightManager.OnPluginEnable();
+            stageLightManager.OnPluginEnable();
             movieManager.OnPluginEnable();
             timelineManager.OnPluginEnable();
             gridViewManager.OnPluginEnable();
@@ -601,6 +613,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             maidManager.OnPluginDisable();
             modelManager.OnPluginDisable();
             lightManager.OnPluginDisable();
+            stageLightManager.OnPluginDisable();
             movieManager.OnPluginDisable();
             timelineManager.OnPluginDisable();
             gridViewManager.OnPluginDisable();
