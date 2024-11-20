@@ -1,6 +1,6 @@
 # COM3D2.MotionTimelineEditor.Plugin
 
-v3.0.0.3
+v3.0.1.0
 
 
 - [COM3D2.MotionTimelineEditor.Plugin](#com3d2motiontimelineeditorplugin)
