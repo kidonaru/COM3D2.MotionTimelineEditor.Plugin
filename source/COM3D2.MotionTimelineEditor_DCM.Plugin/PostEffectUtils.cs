@@ -1,20 +1,29 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using COM3D2.DanceCameraMotion.Plugin;
+using COM3D2.MotionTimelineEditor.Plugin;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
     public enum PostEffectType
     {
         DepthOfField,
+        Paraffin,
     }
 
     public static class PostEffectUtils
     {
+        private static TimelineData timeline
+        {
+            get
+            {
+                return TimelineManager.instance.timeline;
+            }
+        }
+
         public static readonly Dictionary<PostEffectType, string> PostEffectTypeToJpNameMap = new Dictionary<PostEffectType, string>
         {
             { PostEffectType.DepthOfField, "被写界深度" },
+            { PostEffectType.Paraffin, "パラフィン" },
         };
 
         public static string ToJpName(PostEffectType postEffectType)
@@ -43,11 +52,20 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public static string ToJpName(string postEffectName)
         {
+            var groupIndex = PluginUtils.ExtractGroup(postEffectName);
+            var groupSuffix = "";
+            if (groupIndex > 0)
+            {
+                groupSuffix = PluginUtils.GetGroupSuffix(groupIndex);
+                postEffectName = PluginUtils.RemoveGroupSuffix(postEffectName);
+            }
+
             if (PostEffectNameToJpNameMap.ContainsKey(postEffectName))
             {
-                return PostEffectNameToJpNameMap[postEffectName];
+                postEffectName = PostEffectNameToJpNameMap[postEffectName];
             }
-            return postEffectName;
+
+            return postEffectName + groupSuffix;
         }
 
         public static readonly Dictionary<string, PostEffectType> PostEffectNameToTypeMap =
@@ -55,6 +73,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public static PostEffectType ToEffectType(string postEffectName)
         {
+            postEffectName = PluginUtils.RemoveGroupSuffix(postEffectName);
             if (PostEffectNameToTypeMap.ContainsKey(postEffectName))
             {
                 return PostEffectNameToTypeMap[postEffectName];
@@ -73,6 +92,38 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 }
                 return _postEffectNames;
             }
+        }
+
+        public static bool IsValidParaffinIndex(int index)
+        {
+            if (index < 0 || index >= timeline.paraffinCount)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static string GetParaffinName(int index)
+        {
+            if (!IsValidParaffinIndex(index))
+            {
+                return "";
+            }
+
+            var suffix = PluginUtils.GetGroupSuffix(index);
+            return ToEffectName(PostEffectType.Paraffin) + suffix;
+        }
+
+        public static string GetParaffinJpName(int index)
+        {
+            if (!IsValidParaffinIndex(index))
+            {
+                return "";
+            }
+
+            var suffix = PluginUtils.GetGroupSuffix(index);
+            return ToJpName(PostEffectType.Paraffin) + suffix;
         }
     }
 }

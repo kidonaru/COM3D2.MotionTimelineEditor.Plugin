@@ -11,7 +11,7 @@ public class NoiseTextureGenerator : EditorWindow
     private float persistence = 0.5f;
     private float lacunarity = 2f;
     private bool seamless = true;
-    private string fileName = "Resources/MTE/NoiseTexture";
+    private string fileName = "Resources/noise_texture";
 
     // プリセット用の列挙型
     private enum NoisePreset

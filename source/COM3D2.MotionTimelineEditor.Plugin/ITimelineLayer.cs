@@ -52,8 +52,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         void OnLightRemoved(StudioLightStat light);
         void OnLightUpdated(StudioLightStat light);
         void OnCopyLight(StudioLightStat sourceLight, StudioLightStat newLight);
-        void OnStageLightAdded(string lightName);
-        void OnStageLightRemoved(string lightName);
         void OnShapeKeyAdded(string shapeKey);
         void OnShapeKeyRemoved(string shapeKey);
         void OnBoneNameAdded(string extendBoneName);

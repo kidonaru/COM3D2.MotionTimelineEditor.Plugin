@@ -184,7 +184,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void InitName()
         {
-            var groupSuffix = StudioModelManager.GetGroupSuffix(index);
+            var groupSuffix = PluginUtils.GetGroupSuffix(index);
             this.name = "Light" + groupSuffix;
             this.displayName = LightTypeNames[type] + groupSuffix;
         }

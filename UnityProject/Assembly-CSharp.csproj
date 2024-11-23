@@ -46,11 +46,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\CreateAssetBundles.cs" />
-     <Compile Include="Assets\NoiseTextureGenerator.cs" />
-     <Compile Include="Assets\StageLight.cs" />
-     <Compile Include="Assets\StageLightController.cs" />
-     <None Include="Assets\Shaders\MTE\StageLight.shader" />
+     <Compile Include="Assets\Scripts\ColorParaffinEffect.cs" />
+     <Compile Include="Assets\Scripts\CreateAssetBundles.cs" />
+     <Compile Include="Assets\Scripts\NoiseTextureGenerator.cs" />
+     <Compile Include="Assets\Scripts\StageLight.cs" />
+     <Compile Include="Assets\Scripts\StageLightController.cs" />
+     <None Include="Assets\Shaders\StageLight.shader" />
+     <None Include="Assets\Shaders\ColorParaffin.shader" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Hub/Editor/5.6.4f1/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

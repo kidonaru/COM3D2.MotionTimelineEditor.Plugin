@@ -284,6 +284,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return new Color(vector.x, vector.y, vector.z);
         }
 
+        public static Vector4 ToHSVA(this Color color)
+        {
+            Vector4 hsv = Vector4.zero;
+            Color.RGBToHSV(color, out hsv.x, out hsv.y, out hsv.z);
+            hsv.w = color.a;
+            return hsv;
+        }
+
+        public static Color FromHSVA(this Vector4 hsv)
+        {
+            var color = Color.HSVToRGB(hsv.x, hsv.y, hsv.z);
+            color.a = hsv.w;
+            return color;
+        }
+
         public static int IntR(this Color color)
         {
             return Mathf.Clamp(Mathf.RoundToInt(color.r * 255f), 0, 255);

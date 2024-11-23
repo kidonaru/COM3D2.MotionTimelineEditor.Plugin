@@ -401,7 +401,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var material = bundleManager.LoadMaterial("StageLight");
 #else
                 var material = new Material(Shader.Find("MTE/StageLight"));
-                material.SetTexture("_MainTex", Resources.Load<Texture2D>("MTE/NoiseTexture"));
+                material.SetTexture("_MainTex", Resources.Load<Texture2D>("noise_texture"));
 #endif
                 _meshRenderer.sharedMaterial = material;
             }

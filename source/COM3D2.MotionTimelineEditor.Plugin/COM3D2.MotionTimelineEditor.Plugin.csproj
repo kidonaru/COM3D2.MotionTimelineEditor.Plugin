@@ -117,8 +117,9 @@
     <Compile Include="PluginUtils.cs" />
     <Compile Include="PostEffectManager.cs" />
     <Compile Include="ScriptLoader.cs" />
-    <Compile Include="../../UnityProject/Assets/StageLight.cs" />
-    <Compile Include="../../UnityProject/Assets/StageLightController.cs" />
+    <Compile Include="../../UnityProject/Assets/Scripts/StageLight.cs" />
+    <Compile Include="../../UnityProject/Assets/Scripts/StageLightController.cs" />
+    <Compile Include="../../UnityProject/Assets/Scripts/ColorParaffinEffect.cs" />
     <Compile Include="StageLightManager.cs" />
     <Compile Include="StageLightTimelineLayer.cs" />
     <Compile Include="StopwatchDebug.cs" />

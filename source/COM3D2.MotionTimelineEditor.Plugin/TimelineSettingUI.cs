@@ -213,6 +213,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timeline.isLightColorEasing = newValue;
             });
 
+            view.DrawToggle("拡張パラフィンを有効化", timeline.useParaffinExtra, 200, 20, newValue =>
+            {
+                timeline.useParaffinExtra = newValue;
+            });
+
             view.BeginHorizontal();
             {
                 view.DrawLabel("オフセット時間", 70, 20);

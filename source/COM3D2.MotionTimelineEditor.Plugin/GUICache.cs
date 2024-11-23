@@ -80,6 +80,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string label = null;
         public string text = "";
         public bool hasAlpha = false;
+        public bool useHSV = false;
 
         private Color _color = Color.white;
         public Color color
@@ -87,6 +88,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return _color;
+            }
+        }
+
+        private Vector4 _hsv = Vector4.zero;
+        public Vector4 hsv
+        {
+            get
+            {
+                return _hsv;
+            }
+        }
+
+        private Color _defaultColor = Color.white;
+        public Color defaultColor
+        {
+            get
+            {
+                return _color;
+            }
+        }
+
+        private Vector4 _defaultHSV = Color.white.ToHSVA();
+        public Vector4 defaultHSV
+        {
+            get
+            {
+                return _defaultHSV;
             }
         }
 
@@ -98,6 +126,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             _color = color;
+            _hsv = color.ToHSVA();
 
             if (updateText)
             {
@@ -110,6 +139,45 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     text = color.ToHexRGB();
                 }
             }
+        }
+
+        public void UpdateHSV(Vector4 hsv, bool updateText)
+        {
+            if (hsv == this._hsv && text.Length > 0)
+            {
+                return;
+            }
+
+            _hsv = hsv;
+            _color = hsv.FromHSVA();
+
+            if (updateText)
+            {
+                text = _color.ToHexRGB();
+            }
+        }
+
+        public void UpdateDefaultColor(Color defaultColor)
+        {
+            if (defaultColor == _defaultColor)
+            {
+                return;
+            }
+
+            _defaultColor = defaultColor;
+            _defaultHSV = defaultColor.ToHSVA();
+        }
+
+        public void ResetColor()
+        {
+            if (_color == _defaultColor)
+            {
+                return;
+            }
+
+            _color = _defaultColor;
+            _hsv = _defaultHSV;
+            text = _color.ToHexRGB();
         }
 
         public ColorFieldCache()

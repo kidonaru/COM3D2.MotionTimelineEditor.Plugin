@@ -14,11 +14,27 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
+        public override bool hasVisible
+        {
+            get
+            {
+                return true;
+            }
+        }
+
         public override bool hasEasing
         {
             get
             {
                 return true;
+            }
+        }
+
+        public override ValueData visibleValue
+        {
+            get
+            {
+                return values[1];
             }
         }
 
@@ -36,14 +52,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private readonly static Dictionary<string, CustomValueInfo> CustomValueInfoMap = new Dictionary<string, CustomValueInfo>
         {
-            {
-                "enabled", new CustomValueInfo
-                {
-                    index = 1,
-                    name = "有効",
-                    defaultValue = 0f,
-                }
-            },
             {
                 "focalLength", new CustomValueInfo
                 {

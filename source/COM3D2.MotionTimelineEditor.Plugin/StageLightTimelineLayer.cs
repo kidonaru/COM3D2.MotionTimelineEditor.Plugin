@@ -52,6 +52,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return bundleManager.IsValid();
         }
 
+        public override void Init()
+        {
+            base.Init();
+
+            StageLightManager.onSetup += OnLightSetup;
+            StageLightManager.onControllerAdded += OnControllerAdded;
+            StageLightManager.onControllerRemoved += OnControllerRemoved;
+            StageLightManager.onLightAdded += OnLightAdded;
+            StageLightManager.onLightRemoved += OnLightRemoved;
+
+            InitMenuItems();
+        }
+
         protected override void InitMenuItems()
         {
             _allBoneNames = null;
@@ -75,6 +88,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     setMenuItem.AddChild(menuItem);
                 }
             }
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            StageLightManager.onSetup -= OnLightSetup;
+            StageLightManager.onControllerAdded -= OnControllerAdded;
+            StageLightManager.onControllerRemoved -= OnControllerRemoved;
+            StageLightManager.onLightAdded -= OnLightAdded;
+            StageLightManager.onLightRemoved -= OnLightRemoved;
         }
 
         public override bool IsValidData()
@@ -251,14 +275,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             controller.autoLightInfo = stTrans["autoLightInfo"].boolValue;
         }
 
-        public override void OnStageLightAdded(string lightName)
+        public void OnLightSetup()
+        {
+            InitMenuItems();
+            AddFirstBones(allBoneNames);
+            ApplyCurrentFrame(true);
+        }
+
+        public void OnControllerAdded(string controllerName)
+        {
+            InitMenuItems();
+            AddFirstBones(new List<string> { controllerName });
+            ApplyCurrentFrame(true);
+        }
+
+        public void OnControllerRemoved(string controllerName)
+        {
+            InitMenuItems();
+            RemoveAllBones(new List<string> { controllerName });
+            ApplyCurrentFrame(true);
+        }
+
+        public void OnLightAdded(string lightName)
         {
             InitMenuItems();
             AddFirstBones(new List<string> { lightName });
             ApplyCurrentFrame(true);
         }
 
-        public override void OnStageLightRemoved(string lightName)
+        public void OnLightRemoved(string lightName)
         {
             InitMenuItems();
             RemoveAllBones(new List<string> { lightName });
@@ -537,20 +582,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.DrawIntField(new GUIView.IntFieldOption
                 {
                     value = stageLightManager.controllers.Count,
-                    width = view.viewRect.width - (view.labelWidth + 100 + view.padding.x * 2),
+                    width = view.viewRect.width - (view.labelWidth + 40 + view.padding.x * 2),
                     height = 20,
                 });
 
-                if (view.DrawButton("追加", 50, 20))
+                if (view.DrawButton("-", 20, 20))
                 {
-                    stageLightManager.AddController();
+                    stageLightManager.RemoveController(true);
                 }
-                if (view.DrawButton("削除", 50, 20))
+                if (view.DrawButton("+", 20, 20))
                 {
-                    if (stageLightManager.controllers.Count > 0)
-                    {
-                        stageLightManager.RemoveController();
-                    }
+                    stageLightManager.AddController(true);
                 }
 
                 view.margin = GUIView.defaultMargin;
@@ -583,20 +625,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.DrawIntField(new GUIView.IntFieldOption
                 {
                     value = controller.lights.Count,
-                    width = view.viewRect.width - (view.labelWidth + 100 + view.padding.x * 2),
+                    width = view.viewRect.width - (view.labelWidth + 40 + view.padding.x * 2),
                     height = 20,
                 });
 
-                if (view.DrawRepeatButton("追加", 50, 20))
+                if (view.DrawButton("-", 20, 20))
                 {
-                    stageLightManager.AddLight(controller.groupIndex);
+                    stageLightManager.RemoveLight(controller.groupIndex, true);
                 }
-                if (view.DrawRepeatButton("削除", 50, 20))
+                if (view.DrawButton("+", 20, 20))
                 {
-                    if (controller.lights.Count > 0)
-                    {
-                        stageLightManager.RemoveLight(controller.groupIndex);
-                    }
+                    stageLightManager.AddLight(controller.groupIndex, true);
                 }
 
                 view.margin = GUIView.defaultMargin;

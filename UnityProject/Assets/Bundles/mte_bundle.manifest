@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 4225132798
+CRC: 3789273222
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 02ae05158cda19c2fda6a091823a362d
+    Hash: a527d03e34f2bafd520112b56f82c8b7
   TypeTreeHash:
     serializedVersion: 2
-    Hash: d1ae6e26fb0b4d11fccd18da598542fa
+    Hash: 2ba8c92af2093cc583317c61ec0c8748
 HashAppended: 0
 ClassTypes:
 - Class: 21
@@ -15,8 +15,18 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 48
   Script: {instanceID: 0}
+- Class: 49
+  Script: {instanceID: 0}
 Assets:
-- Assets/Shaders/MTE/StageLight.shader
-- Assets/Resources/MTE/NoiseTexture.png
-- Assets/Shaders/MTE/StageLight.mat
+- Assets/Shaders/StageLight.shader
+- Assets/Resources/update_icon.png
+- Assets/Resources/lock_icon.png
+- Assets/Resources/unlock_icon.png
+- Assets/Resources/change_icon.png
+- Assets/Resources/icon.png.bytes
+- Assets/Resources/song.ogg.bytes
+- Assets/Resources/noise_texture.png
+- Assets/Shaders/StageLight.mat
+- Assets/Shaders/ColorParaffin.shader
+- Assets/Shaders/ColorParaffin.mat
 Dependencies: []

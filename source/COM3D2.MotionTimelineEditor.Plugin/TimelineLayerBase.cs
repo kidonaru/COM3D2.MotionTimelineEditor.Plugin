@@ -499,16 +499,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // do nothing
         }
 
-        public virtual void OnStageLightAdded(string lightName)
-        {
-            // do nothing
-        }
-
-        public virtual void OnStageLightRemoved(string lightName)
-        {
-            // do nothing
-        }
-
         public virtual void OnShapeKeyAdded(string shapeKey)
         {
             // do nothing

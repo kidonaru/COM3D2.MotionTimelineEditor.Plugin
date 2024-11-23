@@ -99,6 +99,7 @@
     <Compile Include="TransformDataModelBone.cs" />
     <Compile Include="TransformDataMorph.cs" />
     <Compile Include="TransformDataMove.cs" />
+    <Compile Include="TransformDataParaffin.cs" />
     <Compile Include="TransformDataSe.cs" />
     <Compile Include="TransformDataShapeKey.cs" />
     <Compile Include="TransformDataText.cs" />

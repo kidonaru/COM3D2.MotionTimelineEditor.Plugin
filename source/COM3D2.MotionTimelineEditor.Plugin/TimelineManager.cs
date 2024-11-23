@@ -224,6 +224,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static TimelineBundleManager bundleManager
+        {
+            get
+            {
+                return TimelineBundleManager.instance;
+            }
+        }
+
         private TimelineManager()
         {
             SceneManager.sceneLoaded += OnChangedSceneLevel;
@@ -235,8 +243,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             StudioLightManager.onLightAdded += OnLightAdded;
             StudioLightManager.onLightRemoved += OnLightRemoved;
             StudioLightManager.onLightUpdated += OnLightUpdated;
-            StageLightManager.onLightAdded += OnStageLightAdded;
-            StageLightManager.onLightRemoved += OnStageLightRemoved;
         }
 
         public void Update()
@@ -1074,7 +1080,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // BGMの追加
             {
                 var bgmName = "song.ogg";
-                var bgmData = PluginUtils.DefaultBgmData;
+                var bgmData = bundleManager.LoadBytes(bgmName);
 
                 if (File.Exists(timeline.bgmPath))
                 {
@@ -1853,16 +1859,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void UpdateStageLightCount()
-        {
-            timeline.stageLightCountList.Clear();
-
-            foreach (var controller in stageLightManager.controllers)
-            {
-                timeline.stageLightCountList.Add(controller.lights.Count);
-            }
-        }
-
         private void OnLightAdded(StudioLightStat light)
         {
             if (IsValidData())
@@ -1898,32 +1894,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 foreach (var layer in layers)
                 {
                     layer.OnLightUpdated(light);
-                }
-            }
-        }
-
-        private void OnStageLightAdded(string lightName)
-        {
-            if (IsValidData())
-            {
-                UpdateStageLightCount();
-
-                foreach (var layer in layers)
-                {
-                    layer.OnStageLightAdded(lightName);
-                }
-            }
-        }
-
-        private void OnStageLightRemoved(string lightName)
-        {
-            if (IsValidData())
-            {
-                UpdateStageLightCount();
-
-                foreach (var layer in layers)
-                {
-                    layer.OnStageLightRemoved(lightName);
                 }
             }
         }

@@ -17,17 +17,16 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public int frame;
         public string name;
         public PostEffectType type;
+        public int index;
         public int easing;
         public DepthOfFieldData depthOfField;
+        public ParaffinData paraffin;
     }
 
     public class PostEffectMotionData : MotionDataBase
     {
-        public string name;
-        public PostEffectType type;
-        public int easing;
-        public DepthOfFieldData stDepthOfField;
-        public DepthOfFieldData edDepthOfField;
+        public PostEffectTimeLineRow start;
+        public PostEffectTimeLineRow end;
     }
 
     [TimelineLayerDesc("ポストエフェクト", 44)]
@@ -49,17 +48,23 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
+        private List<string> _allBoneNames = null;
         public override List<string> allBoneNames
         {
             get
             {
-                return PostEffectUtils.PostEffectNames;
+                if (_allBoneNames == null)
+                {
+                    _allBoneNames = new List<string>(1 + timeline.paraffinCount);
+                    _allBoneNames.Add("DepthOfField");
+                    _allBoneNames.AddRange(paraffinNames);
+                }
+                return _allBoneNames;
             }
         }
 
         private Dictionary<string, List<PostEffectTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<PostEffectTimeLineRow>>();
         private Dictionary<string, PostEffectPlayData> _playDataMap = new Dictionary<string, PostEffectPlayData>();
-        private List<PostEffectMotionData> _outputMotions = new List<PostEffectMotionData>(128);
 
         private static PostEffectManager postEffectManager
         {
@@ -76,6 +81,25 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public static PostEffectTimelineLayer Create(int slotNo)
         {
             return new PostEffectTimelineLayer(0);
+        }
+
+        public override void Init()
+        {
+            base.Init();
+            InitParrifinEffect();
+            AddFirstBones(allBoneNames);
+        }
+
+        private void InitParrifinEffect()
+        {
+            while (postEffectManager.GetParaffinCount() < timeline.paraffinCount)
+            {
+                postEffectManager.AddParaffinData(new ParaffinData());
+            }
+            while (postEffectManager.GetParaffinCount() > timeline.paraffinCount)
+            {
+                postEffectManager.RemoveParaffinData();
+            }
         }
 
         protected override void InitMenuItems()
@@ -105,6 +129,15 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             base.LateUpdate();
 
+            var boneCount = 1 + timeline.paraffinCount;
+            if (allBoneNames.Count != boneCount)
+            {
+                _allBoneNames = null;
+                InitParrifinEffect();
+                InitMenuItems();
+                AddFirstBones(allBoneNames);
+            }
+
             if (!studioHack.isPoseEditing)
             {
                 ApplyPlayData();
@@ -116,6 +149,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             if (!isCurrent && !config.isPostEffectSync)
             {
                 postEffectManager.DisableDepthOfField();
+                postEffectManager.DisableParaffin();
                 return;
             }
 
@@ -139,10 +173,13 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private void ApplyMotion(PostEffectMotionData motion, float lerpTime)
         {
-            switch (motion.type)
+            switch (motion.start.type)
             {
                 case PostEffectType.DepthOfField:
                     ApplyDepthOfField(motion, lerpTime);
+                    break;
+                case PostEffectType.Paraffin:
+                    ApplyParaffin(motion, lerpTime);
                     break;
             }
         }
@@ -151,36 +188,91 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             var depthOfField = postEffectManager.GetDepthOfFieldData();
 
-            float easingTime = CalcEasingValue(lerpTime, motion.easing);
-            depthOfField.enabled = motion.stDepthOfField.enabled;
-            depthOfField.focalLength = Mathf.Lerp(motion.stDepthOfField.focalLength, motion.edDepthOfField.focalLength, easingTime);
-            depthOfField.focalSize = Mathf.Lerp(motion.stDepthOfField.focalSize, motion.edDepthOfField.focalSize, easingTime);
-            depthOfField.aperture = Mathf.Lerp(motion.stDepthOfField.aperture, motion.edDepthOfField.aperture, easingTime);
-            depthOfField.maxBlurSize = Mathf.Lerp(motion.stDepthOfField.maxBlurSize, motion.edDepthOfField.maxBlurSize, easingTime);
-            depthOfField.maidSlotNo = motion.stDepthOfField.maidSlotNo;
+            var start = motion.start;
+            var end = motion.end;
+
+            var stData = start.depthOfField;
+            var edData = end.depthOfField;
+
+            float easingTime = CalcEasingValue(lerpTime, start.easing);
+            depthOfField.enabled = stData.enabled;
+            depthOfField.focalLength = Mathf.Lerp(stData.focalLength, edData.focalLength, easingTime);
+            depthOfField.focalSize = Mathf.Lerp(stData.focalSize, edData.focalSize, easingTime);
+            depthOfField.aperture = Mathf.Lerp(stData.aperture, edData.aperture, easingTime);
+            depthOfField.maxBlurSize = Mathf.Lerp(stData.maxBlurSize, edData.maxBlurSize, easingTime);
+            depthOfField.maidSlotNo = stData.maidSlotNo;
 
             postEffectManager.ApplyDepthOfField(depthOfField);
         }
 
+        private void ApplyParaffin(PostEffectMotionData motion, float lerpTime)
+        {
+            var index = motion.start.index;
+            var paraffin = postEffectManager.GetParaffinData(index);
+
+            var start = motion.start;
+            var end = motion.end;
+
+            var stData = start.paraffin;
+            var edData = end.paraffin;
+
+            float easingTime = CalcEasingValue(lerpTime, start.easing);
+            paraffin.enabled = stData.enabled;
+            paraffin.color1 = Color.Lerp(stData.color1, edData.color1, easingTime);
+            paraffin.color2 = Color.Lerp(stData.color2, edData.color2, easingTime);
+            paraffin.centerPosition = Vector2.Lerp(stData.centerPosition, edData.centerPosition, easingTime);
+            paraffin.radiusFar = Mathf.Lerp(stData.radiusFar, edData.radiusFar, easingTime);
+            paraffin.radiusNear = Mathf.Lerp(stData.radiusNear, edData.radiusNear, easingTime);
+            paraffin.radiusScale = Vector2.Lerp(stData.radiusScale, edData.radiusScale, easingTime);
+            paraffin.useNormal = Mathf.Lerp(stData.useNormal, edData.useNormal, easingTime);
+            paraffin.useAdd = Mathf.Lerp(stData.useAdd, edData.useAdd, easingTime);
+            paraffin.useMultiply = Mathf.Lerp(stData.useMultiply, edData.useMultiply, easingTime);
+            paraffin.useOverlay = Mathf.Lerp(stData.useOverlay, edData.useOverlay, easingTime);
+            paraffin.useSubstruct = Mathf.Lerp(stData.useSubstruct, edData.useSubstruct, easingTime);
+
+            postEffectManager.ApplyParaffin(index, paraffin);
+        }
+
         public override void UpdateFrame(FrameData frame)
         {
-            var depthOfField = postEffectManager.GetDepthOfFieldData();
-
             foreach (var effectName in allBoneNames)
             {
                 var effectType = PostEffectUtils.ToEffectType(effectName);
                 var trans = CreateTransformData(effectName);
+                var index = PluginUtils.ExtractGroup(effectName);
 
                 switch (effectType)
                 {
                     case PostEffectType.DepthOfField:
-                        trans["enabled"].boolValue = depthOfField.enabled;
+                    {
+                        var depthOfField = postEffectManager.GetDepthOfFieldData();
+                        trans.visible = depthOfField.enabled;
                         trans["focalLength"].value = depthOfField.focalLength;
                         trans["focalSize"].value = depthOfField.focalSize;
                         trans["aperture"].value = depthOfField.aperture;
                         trans["maxBlurSize"].value = depthOfField.maxBlurSize;
                         trans["maidSlotNo"].intValue = depthOfField.maidSlotNo;
                         break;
+                    }
+                    case PostEffectType.Paraffin:
+                    {
+                        var paraffin = postEffectManager.GetParaffinData(index);
+                        trans.visible = paraffin.enabled;
+                        trans.color = paraffin.color1;
+                        trans.subColor = paraffin.color2;
+                        trans["centerPositionX"].value = paraffin.centerPosition.x;
+                        trans["centerPositionY"].value = paraffin.centerPosition.y;
+                        trans["radiusFar"].value = paraffin.radiusFar;
+                        trans["radiusNear"].value = paraffin.radiusNear;
+                        trans["radiusScaleX"].value = paraffin.radiusScale.x;
+                        trans["radiusScaleY"].value = paraffin.radiusScale.y;
+                        trans["useNormal"].value = paraffin.useNormal;
+                        trans["useAdd"].value = paraffin.useAdd;
+                        trans["useMultiply"].value = paraffin.useMultiply;
+                        trans["useOverlay"].value = paraffin.useOverlay;
+                        trans["useSubstruct"].value = paraffin.useSubstruct;
+                        break;
+                    }
                 }
 
                 trans.easing = GetEasing(frame.frameNo, effectName);
@@ -212,7 +304,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             // do nothing
         }
 
-        private void AddMotion(FrameData frame)
+        private void AddTimelineRow(FrameData frame)
         {
             foreach (var name in allBoneNames)
             {
@@ -231,12 +323,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                 var trans = bone.transform;
                 var effectType = PostEffectUtils.ToEffectType(name);
+                var index = PluginUtils.ExtractGroup(name);
 
                 var row = new PostEffectTimeLineRow
                 {
                     frame = frame.frameNo,
                     name = bone.name,
                     type = effectType,
+                    index = index,
                     easing = trans.easing,
                 };
 
@@ -245,12 +339,29 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     case PostEffectType.DepthOfField:
                         row.depthOfField = new DepthOfFieldData
                         {
-                            enabled = trans["enabled"].boolValue,
+                            enabled = trans.visible,
                             focalLength = trans["focalLength"].value,
                             focalSize = trans["focalSize"].value,
                             aperture = trans["aperture"].value,
                             maxBlurSize = trans["maxBlurSize"].value,
                             maidSlotNo = trans["maidSlotNo"].intValue,
+                        };
+                        break;
+                    case PostEffectType.Paraffin:
+                        row.paraffin = new ParaffinData
+                        {
+                            enabled = trans.visible,
+                            color1 = trans.color,
+                            color2 = trans.subColor,
+                            centerPosition = new Vector2(trans["centerPositionX"].value, trans["centerPositionY"].value),
+                            radiusFar = trans["radiusFar"].value,
+                            radiusNear = trans["radiusNear"].value,
+                            radiusScale = new Vector2(trans["radiusScaleX"].value, trans["radiusScaleY"].value),
+                            useNormal = trans["useNormal"].value,
+                            useAdd = trans["useAdd"].value,
+                            useMultiply = trans["useMultiply"].value,
+                            useOverlay = trans["useOverlay"].value,
+                            useSubstruct = trans["useSubstruct"].value,
                         };
                         break;
                 }
@@ -262,7 +373,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         private void BuildPlayData(bool forOutput)
         {
             PluginUtils.LogDebug("BuildPlayData");
-            _playDataMap.Clear();
+
+            foreach (var playData in _playDataMap.Values)
+            {
+                playData.ResetIndex();
+                playData.motions.Clear();
+            }
 
             foreach (var pair in _timelineRowsMap)
             {
@@ -279,9 +395,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     _playDataMap[name] = playData;
                 }
 
-                playData.ResetIndex();
-                playData.motions.Clear();
-
                 for (var i = 0; i < rows.Count - 1; i++)
                 {
                     var start = rows[i];
@@ -292,25 +405,16 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                     var motion = new PostEffectMotionData
                     {
-                        name = name,
-                        type = start.type,
                         stFrame = stFrame,
                         edFrame = edFrame,
-                        easing = end.easing,
-                        stDepthOfField = start.depthOfField,
-                        edDepthOfField = end.depthOfField,
+                        start = start,
+                        end = end,
                     };
 
                     playData.motions.Add(motion);
                 }
-            }
 
-            foreach (var pair in _playDataMap)
-            {
-                var name = pair.Key;
-                var playData = pair.Value;
                 playData.Setup(timeline.singleFrameType);
-                //PluginUtils.LogDebug("PlayData: name={0}, count={1}", name, playData.motions.Count);
             }
         }
 
@@ -320,10 +424,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             foreach (var keyFrame in keyFrames)
             {
-                AddMotion(keyFrame);
+                AddTimelineRow(keyFrame);
             }
 
-            AddMotion(_dummyLastFrame);
+            AddTimelineRow(_dummyLastFrame);
 
             BuildPlayData(forOutput);
 
@@ -347,37 +451,46 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             contentSize = new Vector2(150, 300),
         };
 
+        private GUIComboBox<string> _paraffinNameComboBox = new GUIComboBox<string>
+        {
+            getName = (boneName, index) => PostEffectUtils.GetParaffinJpName(index),
+        };
+
+        private ColorFieldCache _color1FieldValue = new ColorFieldCache("Color1", true);
+        private ColorFieldCache _color2FieldValue = new ColorFieldCache("Color2", true);
+
         private enum TabType
         {
             被写界深度,
+            パラフィン,
         }
 
         private TabType _tabType = TabType.被写界深度;
 
         public override void DrawWindow(GUIView view)
         {
-            _tabType = view.DrawTabs(_tabType, 50, 20);
-
-            view.SetEnabled(!view.IsComboBoxFocused());
-            view.DrawHorizontalLine(Color.gray);
-            view.AddSpace(5);
-            view.BeginScrollView();
+            _tabType = view.DrawTabs(_tabType, 80, 20);
 
             switch (_tabType)
             {
                 case TabType.被写界深度:
                     DrawDepthOfField(view);
                     break;
+                case TabType.パラフィン:
+                    DrawParaffin(view);
+                    break;
             }
-
-            view.SetEnabled(!view.IsComboBoxFocused());
-            view.EndScrollView();
 
             view.DrawComboBox();
         }
         
         public void DrawDepthOfField(GUIView view)
         {
+            view.SetEnabled(!view.IsComboBoxFocused());
+            view.DrawHorizontalLine(Color.gray);
+            view.AddSpace(5);
+            view.BeginScrollView();
+
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
             var depthOfField = postEffectManager.GetDepthOfFieldData();
@@ -389,57 +502,53 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 updateTransform = true;
             });
 
-            updateTransform |= view.DrawSliderValue(
-                new GUIView.SliderOption
-                {
-                    label = "焦点距離",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = config.positionRange,
-                    step = 0.1f,
-                    defaultValue = 10f,
-                    value = depthOfField.focalLength,
-                    onChanged = newValue => depthOfField.focalLength = newValue,
-                });
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "焦点距離",
+                labelWidth = 30,
+                min = 0f,
+                max = config.positionRange,
+                step = 0.1f,
+                defaultValue = 10f,
+                value = depthOfField.focalLength,
+                onChanged = newValue => depthOfField.focalLength = newValue,
+            });
             
-            updateTransform |= view.DrawSliderValue(
-                new GUIView.SliderOption
-                {
-                    label = "焦点サイズ",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 2f,
-                    step = 0.01f,
-                    defaultValue = 0.05f,
-                    value = depthOfField.focalSize,
-                    onChanged = newValue => depthOfField.focalSize = newValue,
-                });
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "焦点サイズ",
+                labelWidth = 30,
+                min = 0f,
+                max = 2f,
+                step = 0.01f,
+                defaultValue = 0.05f,
+                value = depthOfField.focalSize,
+                onChanged = newValue => depthOfField.focalSize = newValue,
+            });
 
-            updateTransform |= view.DrawSliderValue(
-                new GUIView.SliderOption
-                {
-                    label = "絞り値",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 60f,
-                    step = 0.1f,
-                    defaultValue = 11.5f,
-                    value = depthOfField.aperture,
-                    onChanged = newValue => depthOfField.aperture = newValue,
-                });
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "絞り値",
+                labelWidth = 30,
+                min = 0f,
+                max = 60f,
+                step = 0.1f,
+                defaultValue = 11.5f,
+                value = depthOfField.aperture,
+                onChanged = newValue => depthOfField.aperture = newValue,
+            });
 
-            updateTransform |= view.DrawSliderValue(
-                new GUIView.SliderOption
-                {
-                    label = "最大ブラー",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 10f,
-                    step = 0.1f,
-                    defaultValue = 2f,
-                    value = depthOfField.maxBlurSize,
-                    onChanged = newValue => depthOfField.maxBlurSize = newValue,
-                });
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "最大ブラー",
+                labelWidth = 30,
+                min = 0f,
+                max = 10f,
+                step = 0.1f,
+                defaultValue = 2f,
+                value = depthOfField.maxBlurSize,
+                onChanged = newValue => depthOfField.maxBlurSize = newValue,
+            });
 
             view.BeginHorizontal();
             {
@@ -496,6 +605,268 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 postEffectManager.ApplyDepthOfField(depthOfField);
             }
+
+            view.SetEnabled(!view.IsComboBoxFocused());
+            view.EndScrollView();
+        }
+
+        private List<string> _paraffinNames = new List<string>();
+        private List<string> paraffinNames
+        {
+            get
+            {
+                var paraffinCount = timeline.paraffinCount;
+                if (_paraffinNames.Count != paraffinCount)
+                {
+                    _paraffinNames.Clear();
+                    for (var i = 0; i < paraffinCount; i++)
+                    {
+                        _paraffinNames.Add(PostEffectUtils.GetParaffinName(i));
+                    }
+                }
+
+                return _paraffinNames;
+            }
+        }
+
+        public void DrawParaffin(GUIView view)
+        {
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+
+            view.BeginHorizontal();
+            {
+                view.margin = 0;
+
+                view.DrawLabel("エフェクト数", view.labelWidth, 20);
+
+                view.DrawIntField(new GUIView.IntFieldOption
+                {
+                    value = timeline.paraffinCount,
+                    width = view.viewRect.width - (view.labelWidth + 40 + view.padding.x * 2),
+                    height = 20,
+                    onChanged = x => timeline.paraffinCount = x,
+                });
+
+                if (view.DrawButton("-", 20, 20))
+                {
+                    timeline.paraffinCount--;
+                }
+                if (view.DrawButton("+", 20, 20))
+                {
+                    timeline.paraffinCount++;
+                }
+
+                timeline.paraffinCount = Mathf.Clamp(timeline.paraffinCount, 0, 4);
+
+                view.margin = GUIView.defaultMargin;
+            }
+            view.EndLayout();
+
+            if (timeline.paraffinCount == 0)
+            {
+                view.DrawLabel("エフェクトを追加してください", 200, 20);
+                return;
+            }
+
+            _paraffinNameComboBox.items = paraffinNames;
+            _paraffinNameComboBox.DrawButton("対象", view);
+
+            var boneName = _paraffinNameComboBox.currentItem;
+            var index = _paraffinNameComboBox.currentIndex;
+
+            var paraffin = postEffectManager.GetParaffinData(index);
+            if (paraffin == null)
+            {
+                view.DrawLabel("エフェクトを選択してください", 200, 20);
+                return;
+            }
+
+            view.SetEnabled(!view.IsComboBoxFocused());
+            view.DrawHorizontalLine(Color.gray);
+            view.AddSpace(5);
+            view.BeginScrollView();
+
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+
+            var updateTransform = false;
+
+            updateTransform = view.DrawToggle("有効化", paraffin.enabled, 80, 20, newValue =>
+            {
+                paraffin.enabled = newValue;
+            });
+
+            if (timeline.useParaffinExtra)
+            {
+                updateTransform |= view.DrawColor(
+                    _color1FieldValue,
+                    paraffin.color1,
+                    Color.white,
+                    newValue => paraffin.color1 = newValue
+                );
+
+                updateTransform |= view.DrawColor(
+                    _color2FieldValue,
+                    paraffin.color2,
+                    new Color(1f, 1f, 1f, 0f),
+                    newValue => paraffin.color2 = newValue
+                );
+            }
+            else
+            {
+                updateTransform |= view.DrawColor(
+                    _color1FieldValue,
+                    paraffin.color1,
+                    Color.white,
+                    newValue =>
+                    {
+                        paraffin.color1 = newValue;
+                        paraffin.color2 = newValue;
+                        paraffin.color2.a = 0f;
+                    }
+                );
+            }
+
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "X",
+                labelWidth = 30,
+                min = -1f,
+                max = 2f,
+                step = 0.01f,
+                defaultValue = 0.5f,
+                value = paraffin.centerPosition.x,
+                onChanged = newValue => paraffin.centerPosition.x = newValue,
+            });
+
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "Y",
+                labelWidth = 30,
+                min = -1f,
+                max = 2f,
+                step = 0.01f,
+                defaultValue = 0.5f,
+                value = paraffin.centerPosition.y,
+                onChanged = newValue => paraffin.centerPosition.y = newValue,
+            });
+            
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "外側半径",
+                labelWidth = 30,
+                min = 0f,
+                max = 1f,
+                step = 0.01f,
+                defaultValue = 1f,
+                value = paraffin.radiusFar,
+                onChanged = newValue => paraffin.radiusFar = newValue,
+            });
+
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "内側半径",
+                labelWidth = 30,
+                min = 0f,
+                max = 1f,
+                step = 0.01f,
+                defaultValue = 0f,
+                value = paraffin.radiusNear,
+                onChanged = newValue => paraffin.radiusNear = newValue,
+            });
+
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "SX",
+                labelWidth = 30,
+                min = 0f,
+                max = 5f,
+                step = 0.01f,
+                defaultValue = 1f,
+                value = paraffin.radiusScale.x,
+                onChanged = newValue => paraffin.radiusScale.x = newValue,
+            });
+
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "SY",
+                labelWidth = 30,
+                min = 0f,
+                max = 5f,
+                step = 0.01f,
+                defaultValue = 1f,
+                value = paraffin.radiusScale.y,
+                onChanged = newValue => paraffin.radiusScale.y = newValue,
+            });
+
+            view.DrawLabel("ブレンドモード", 100, 20);
+
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "通常",
+                labelWidth = 30,
+                min = 0f,
+                max = 1f,
+                step = 0.01f,
+                defaultValue = 0f,
+                value = paraffin.useNormal,
+                onChanged = newValue => paraffin.useNormal = newValue,
+            });
+
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "加算",
+                labelWidth = 30,
+                min = 0f,
+                max = 1f,
+                step = 0.01f,
+                defaultValue = 0f,
+                value = paraffin.useAdd,
+                onChanged = newValue => paraffin.useAdd = newValue,
+            });
+
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "乗算",
+                labelWidth = 30,
+                min = 0f,
+                max = 1f,
+                step = 0.01f,
+                defaultValue = 0f,
+                value = paraffin.useMultiply,
+                onChanged = newValue => paraffin.useMultiply = newValue,
+            });
+
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "オーバーレイ",
+                labelWidth = 30,
+                min = 0f,
+                max = 1f,
+                step = 0.01f,
+                defaultValue = 0f,
+                value = paraffin.useOverlay,
+                onChanged = newValue => paraffin.useOverlay = newValue,
+            });
+
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "減算",
+                labelWidth = 30,
+                min = 0f,
+                max = 1f,
+                step = 0.01f,
+                defaultValue = 0f,
+                value = paraffin.useSubstruct,
+                onChanged = newValue => paraffin.useSubstruct = newValue,
+            });
+
+            if (updateTransform)
+            {
+                postEffectManager.ApplyParaffin(index, paraffin);
+            }
+
+            view.SetEnabled(!view.IsComboBoxFocused());
+            view.EndScrollView();
         }
 
         public override ITransformData CreateTransformData(string name)
@@ -507,6 +878,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 case PostEffectType.DepthOfField:
                     transform = new TransformDataDepthOfField();
+                    transform.Initialize(name);
+                    break;
+                case PostEffectType.Paraffin:
+                    transform = new TransformDataParaffin();
                     transform.Initialize(name);
                     break;
             }

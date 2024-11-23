@@ -112,6 +112,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static TimelineBundleManager bundleManager
+        {
+            get
+            {
+                return TimelineBundleManager.instance;
+            }
+        }
+
         protected static ITimelineLayer currentLayer
         {
             get
@@ -149,8 +157,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private GUIView _contentView = new GUIView(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         private GUIComboBox<SubWindowType> _subWindowTypeComboBox = null;
 
-        public static Texture2D texLock = null;
-
         public virtual void InitWindow()
         {
             if (_subWindowTypeComboBox == null)
@@ -164,12 +170,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     buttonSize = new Vector2(40, 20),
                     contentSize = new Vector2(140, 300),
                 };
-            }
-
-            if (texLock == null)
-            {
-                texLock = new Texture2D(0, 0);
-                texLock.LoadImage(PluginUtils.LockIcon);
             }
 
             _contentView.ResetLayout();
@@ -211,8 +211,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     windowManager.AddSubWindow();
                 }
 
-                var lockColor = subWindow.isPositionLocked ? Color.white : Color.gray;
-                if (view.DrawTextureButton(texLock, 20, 20, lockColor))
+                var icon = subWindow.isPositionLocked ? bundleManager.lockIcon : bundleManager.unlockIcon;
+                if (view.DrawTextureButton(icon, 20, 20))
                 {
                     subWindow.isPositionLocked = !subWindow.isPositionLocked;
                 }

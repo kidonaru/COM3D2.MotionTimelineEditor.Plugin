@@ -589,11 +589,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     }
                 });
 
-                if (view.DrawRepeatButton("<", 20, 20))
+                if (view.DrawButton("-", 20, 20))
                 {
                     timeline.textCount--;
                 }
-                if (view.DrawRepeatButton(">", 20, 20))
+                if (view.DrawButton("+", 20, 20))
                 {
                     timeline.textCount++;
                 }

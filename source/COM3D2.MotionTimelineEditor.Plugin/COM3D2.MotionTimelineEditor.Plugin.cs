@@ -228,6 +228,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected static TimelineBundleManager bundleManager
+        {
+            get
+            {
+                return TimelineBundleManager.instance;
+            }
+        }
+
         public MotionTimelineEditor()
         {
         }
@@ -510,7 +518,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             gearMenuIcon = GUIExtBase.GUIExt.Add(
                 PluginInfo.PluginName,
                 PluginInfo.PluginName,
-                PluginUtils.Icon,
+                bundleManager.LoadBytes("icon.png"),
                 (go) => {
                     if (studioHack == null)
                     {

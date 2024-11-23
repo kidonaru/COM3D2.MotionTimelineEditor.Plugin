@@ -121,7 +121,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void InitName()
         {
-            var groupSuffix = StudioModelManager.GetGroupSuffix(group);
+            var groupSuffix = PluginUtils.GetGroupSuffix(group);
             this.name = info.fileName + groupSuffix;
             this.displayName = info.label + groupSuffix;
         }
@@ -134,7 +134,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public string GetNameByGroup(int group)
         {
-            var groupSuffix = StudioModelManager.GetGroupSuffix(group);
+            var groupSuffix = PluginUtils.GetGroupSuffix(group);
             return info.fileName + groupSuffix;
         }
 

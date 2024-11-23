@@ -16,6 +16,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Dictionary<string, StageLight> lightMap = new Dictionary<string, StageLight>();
         public List<string> lightNames = new List<string>();
 
+        public static event UnityAction onSetup;
+        public static event UnityAction<string> onControllerAdded;
+        public static event UnityAction<string> onControllerRemoved;
         public static event UnityAction<string> onLightAdded;
         public static event UnityAction<string> onLightRemoved;
 
@@ -39,6 +42,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return StudioHackManager.studioHack;
+            }
+        }
+
+        private static TimelineData timeline
+        {
+            get
+            {
+                return TimelineManager.instance.timeline;
             }
         }
 
@@ -119,20 +130,42 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 PluginUtils.LogDebug("light: displayName={0} name={1}",
                     light.displayName, light.name);
             }
+
+            UpdateLightCount();
+        }
+
+        private void UpdateLightCount()
+        {
+            if (timeline == null)
+            {
+                return;
+            }
+
+            timeline.stageLightCountList.Clear();
+
+            foreach (var controller in controllers)
+            {
+                timeline.stageLightCountList.Add(controller.lights.Count);
+            }
         }
 
         public void SetupLights(List<int> lightCounts)
         {
             lightCounts = new List<int>(lightCounts);
 
+            for (var i = 0; i < lightCounts.Count; i++)
+            {
+                PluginUtils.LogDebug("StageLight.SetupLights: [{0}]={1}", i, lightCounts[i]);
+            }
+
             while (controllers.Count < lightCounts.Count)
             {
-                AddController();
+                AddController(false);
             }
 
             while (controllers.Count > lightCounts.Count)
             {
-                RemoveController();
+                RemoveController(false);
             }
 
             for (int i = 0; i < lightCounts.Count; i++)
@@ -142,16 +175,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 while (controller.lights.Count < lightCount)
                 {
-                    AddLight(i);
+                    AddLight(i, false);
                 }
 
                 while (controller.lights.Count > lightCount)
                 {
-                    RemoveLight(i);
+                    RemoveLight(i, false);
                 }
             }
 
             UpdateLights();
+
+            if (onSetup != null)
+            {
+                onSetup.Invoke();
+            }
         }
 
         public void OnPluginDisable()
@@ -175,7 +213,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             UpdateLights();
         }
 
-        public void AddController()
+        public void AddController(bool notify)
         {
             var groupIndex = controllers.Count;
             var go = new GameObject("StageLightController");
@@ -183,43 +221,76 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var controller = go.AddComponent<StageLightController>();
             controller.groupIndex = groupIndex;
             controllers.Add(controller);
+            
+            if (notify)
+            {
+                UpdateLights();
 
-            UpdateLights();
+                if (onControllerAdded != null)
+                {
+                    onControllerAdded.Invoke(controller.name);
+                }
+            }
+            
         }
 
-        public void RemoveController()
+        public void RemoveController(bool notify)
         {
-            if (controllers.Count > 0)
+            if (controllers.Count == 0)
             {
-                var controller = controllers[controllers.Count - 1];
-                controllers.Remove(controller);
-                GameObject.Destroy(controller.gameObject);
+                return;
+            }
 
+            var controller = controllers[controllers.Count - 1];
+            var controllerName = controller.name;
+            controllers.Remove(controller);
+            GameObject.Destroy(controller.gameObject);
+            
+            if (notify)
+            {
                 UpdateLights();
+
+                if (onControllerRemoved != null)
+                {
+                    onControllerRemoved.Invoke(controllerName);
+                }
             }
         }
 
-        public void AddLight(int groupIndex)
+        public void AddLight(int groupIndex, bool notify)
         {
             var controller = controllers[groupIndex];
             var lightName = controller.AddLight();
-            UpdateLights();
-
-            if (onLightAdded != null)
+            
+            if (notify)
             {
-                onLightAdded.Invoke(lightName);
+                UpdateLights();
+
+                if (onLightAdded != null)
+                {
+                    onLightAdded.Invoke(lightName);
+                }
             }
         }
 
-        public void RemoveLight(int groupIndex)
+        public void RemoveLight(int groupIndex, bool notify)
         {
             var controller = controllers[groupIndex];
-            var lightName = controller.RemoveLight();
-            UpdateLights();
-
-            if (onLightRemoved != null)
+            if (controller.lights.Count == 0)
             {
-                onLightRemoved.Invoke(lightName);
+                return;
+            }
+
+            var lightName = controller.RemoveLight();
+
+            if (notify)
+            {
+                UpdateLights();
+
+                if (onLightRemoved != null)
+                {
+                    onLightRemoved.Invoke(lightName);
+                }
             }
         }
 

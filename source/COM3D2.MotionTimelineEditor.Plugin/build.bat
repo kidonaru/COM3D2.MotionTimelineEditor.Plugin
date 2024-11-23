@@ -9,7 +9,7 @@ set LIB_PATHS="/lib:..\..\..\..\COM3D2x64_Data\Managed" "/lib:..\..\.." "/lib:..
 set REFERENCES="/r:UnityEngine.dll" "/r:UnityInjector.dll" "/r:Assembly-CSharp.dll" "/r:Assembly-CSharp-firstpass.dll" "/r:Assembly-UnityScript-firstpass.dll" "/r:COM3D2.SceneCapture.Plugin.dll"
 set RESOURCES="/resource:..\..\UnityProject\Assets\Bundles\mte_bundle"
 set SOURCE_DIR=%~dp0
-set SOURCE_DIR2=%~dp0\..\..\UnityProject\Assets
+set SOURCE_DIR2=%~dp0\..\..\UnityProject\Assets\Scripts
 set MAIN_FILE=%SOURCE_DIR%%PLUGIN_NAME%.cs
 
 set DEBUG_OPTION=

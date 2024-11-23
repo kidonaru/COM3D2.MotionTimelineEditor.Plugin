@@ -428,16 +428,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var label = displayName;
             var fileName = modelName;
 
-            var group = ExtractGroup(label);
+            var group = PluginUtils.ExtractGroup(label);
             if (group != 0)
             {
-                label = RemoveGroupSuffix(label);
-                fileName = RemoveGroupSuffix(fileName);
+                label = PluginUtils.RemoveGroupSuffix(label);
+                fileName = PluginUtils.RemoveGroupSuffix(fileName);
             }
 
             if (!string.IsNullOrEmpty(fileName) && fileName.StartsWith("MYR_", System.StringComparison.Ordinal))
             {
-                myRoomId = ExtractMyRoomId(fileName);
+                myRoomId = PluginUtils.ExtractMyRoomId(fileName);
             }
 
             var info = FindOfficialObject(label, fileName, myRoomId, bgObjectId);
@@ -739,55 +739,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 PluginUtils.LogException(e);
             }
-        }
-
-        private static readonly Regex _regexGroup = new Regex(@"\(\d+\)$", RegexOptions.Compiled);
-        private static readonly Regex _regexMyRoomId = new Regex(@"MYR_\d+", RegexOptions.Compiled);
-
-        public static int ExtractGroup(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-            {
-                return 0;
-            }
-            var match = _regexGroup.Match(input);
-            if (match.Success)
-            {
-                return int.Parse(match.Value.Substring(1, match.Value.Length - 2));
-            }
-            return 0;
-        }
-
-        public static string RemoveGroupSuffix(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-            {
-                return input;
-            }
-            return _regexGroup.Replace(input, "").Trim();
-        }
-
-        public static int ExtractMyRoomId(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-            {
-                return 0;
-            }
-            var match = _regexMyRoomId.Match(input);
-            if (match.Success)
-            {
-                return int.Parse(match.Value.Substring(4));
-            }
-            return 0;
-        }
-
-        public static string GetGroupSuffix(int group)
-        {
-            if (group > 0)
-            {
-                return string.Format(" ({0})", group);
-            }
-            return "";
         }
 
         private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)

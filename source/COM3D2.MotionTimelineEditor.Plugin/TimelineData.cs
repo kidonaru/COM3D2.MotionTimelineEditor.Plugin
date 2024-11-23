@@ -106,7 +106,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class TimelineData
     {
-        public static readonly int CurrentVersion = 14;
+        public static readonly int CurrentVersion = 15;
         public static readonly TimelineData DefaultTimeline = new TimelineData();
 
         public int version = 0;
@@ -310,6 +310,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float letterBoxAlpha = 1f;
         public int textCount = 1;
         public bool fingerBlendEnabled = true;
+        public bool useParaffinExtra = false;
+        public int paraffinCount = 1;
 
         // 動画
         public bool videoEnabled = true;
@@ -765,7 +767,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             singleFrameType = xml.singleFrameType;
             isTangentCamera = xml.isTangentCamera;
             isLightColorEasing = xml.isLightColorEasing;
-            stageLightCountList = xml.stageLightCountList;
+            stageLightCountList = xml.stageLightCountList.ToList();
             activeTrackIndex = xml.activeTrackIndex;
             bgmPath = xml.bgmPath;
             aspectWidth = xml.aspectWidth;
@@ -773,6 +775,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             letterBoxAlpha = xml.letterBoxAlpha;
             textCount = xml.textCount;
             fingerBlendEnabled = xml.fingerBlendEnabled;
+            useParaffinExtra = xml.useParaffinExtra;
+            paraffinCount = xml.paraffinCount;
             videoEnabled = xml.videoEnabled;
             videoDisplayType = xml.videoDisplayType;
             videoPath = xml.videoPath;
@@ -881,7 +885,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.singleFrameType = singleFrameType;
             xml.isTangentCamera = isTangentCamera;
             xml.isLightColorEasing = isLightColorEasing;
-            xml.stageLightCountList = stageLightCountList;
+            xml.stageLightCountList = stageLightCountList.ToList();
             xml.activeTrackIndex = activeTrackIndex;
             xml.bgmPath = bgmPath;
             xml.aspectWidth = aspectWidth;
@@ -889,6 +893,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.letterBoxAlpha = letterBoxAlpha;
             xml.textCount = textCount;
             xml.fingerBlendEnabled = fingerBlendEnabled;
+            xml.useParaffinExtra = useParaffinExtra;
+            xml.paraffinCount = paraffinCount;
             xml.videoEnabled = videoEnabled;
             xml.videoDisplayType = videoDisplayType;
             xml.videoPath = videoPath;
@@ -904,6 +910,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.videoBackmostPosition = videoBackmostPosition;
             xml.videoBackmostScale = videoBackmostScale;
             xml.videoBackmostAlpha = videoBackmostAlpha;
+            xml.videoFrontmostPosition = videoFrontmostPosition;
+            xml.videoFrontmostScale = videoFrontmostScale;
+            xml.videoFrontmostAlpha = videoFrontmostAlpha;
 
             return xml;
         }

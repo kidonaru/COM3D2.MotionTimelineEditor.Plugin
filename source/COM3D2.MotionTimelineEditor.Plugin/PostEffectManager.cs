@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
@@ -44,6 +45,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public int depthOfFieldMaidSlotId = -1;
 
+        private ColorParaffinEffect _paraffin = null;
+        public ColorParaffinEffect paraffin
+        {
+            get
+            {
+                if (_paraffin == null)
+                {
+                    _paraffin = mainCamera.GetComponent<ColorParaffinEffect>();
+                    if (_paraffin == null)
+                    {
+                        _paraffin = mainCamera.gameObject.AddComponent<ColorParaffinEffect>();
+                        _paraffin.enabled = false;
+                    }
+                }
+
+                return _paraffin;
+            }
+        }
+
         private static MaidManager maidManager
         {
             get
@@ -68,6 +88,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static CameraMain mainCamera
+        {
+            get
+            {
+                return GameMain.Instance.MainCamera;
+            }
+        }
+
+        private static TimelineData timeline
+        {
+            get
+            {
+                return TimelineManager.instance.timeline;
+            }
+        }
+
         private PostEffectManager()
         {
         }
@@ -89,6 +125,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private void ResetCache()
         {
             _depthOfField = null;
+            _paraffin = null;
         }
 
         public DepthOfFieldData GetDepthOfFieldData()
@@ -132,6 +169,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             depthOfField.focalTransform = focalTransform;
 
             studioHack.OnUpdateDepthOfField();
+        }
+
+        public int GetParaffinCount()
+        {
+            return paraffin.GetParaffinCount();
+        }
+        
+        public void AddParaffinData(ParaffinData data)
+        {
+            paraffin.AddParaffinData(data);
+        }
+
+        public void RemoveParaffinData()
+        {
+            paraffin.RemoveLastParaffinData();
+        }
+
+        public ParaffinData GetParaffinData(int index)
+        {
+            return paraffin.GetParaffinData(index);
+        }
+
+        public void DisableParaffin()
+        {
+            paraffin.enabled = false;
+        }
+
+        public void ApplyParaffin(int index, ParaffinData data)
+        {
+            if (data.enabled)
+            {
+                paraffin.enabled = true;
+            }
+            paraffin.SetParaffinData(index, data);
         }
     }
 }

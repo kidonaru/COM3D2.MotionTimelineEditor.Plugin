@@ -213,6 +213,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static TimelineBundleManager bundleManager
+        {
+            get
+            {
+                return TimelineBundleManager.instance;
+            }
+        }
+
         public enum LayoutDirection
         {
             Vertical,
@@ -430,14 +438,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool DrawTextureButton(
             Texture2D texture,
             float width,
-            float height,
-            Color color)
+            float height)
         {
             var drawRect = GetDrawRect(width, height);
-            BeginColor(color);
             bool result = GUI.Button(drawRect, "", gsButton);
+            if (!GUI.enabled) BeginColor(new Color(1f, 1f, 1f, 0.5f));
             DrawTileThumb(texture, 0, 0, drawRect.width, drawRect.height);
-            EndColor();
+            if (!GUI.enabled) EndColor();
             NextElement(drawRect);
             return result;
         }
@@ -1483,61 +1490,124 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Color resetColor,
             Action<Color> onColorChanged)
         {
-            var newColor = color;
-            var updated = false;
+            fieldCache.UpdateColor(color, true);
+            fieldCache.UpdateDefaultColor(resetColor);
 
-            DrawSliderValue(new SliderOption
+            if (fieldCache.useHSV)
             {
-                label = "R",
-                labelWidth = 30,
-                min = 0f,
-                max = 1f,
-                step = 0.01f,
-                defaultValue = resetColor.r,
-                value = color.r,
-                onChanged = x => newColor.r = x,
-            });
+                var newHSV = fieldCache.hsv;
+                var defaultHSV = fieldCache.defaultHSV;
 
-            DrawSliderValue(new SliderOption
-            {
-                label = "G",
-                labelWidth = 30,
-                min = 0f,
-                max = 1f,
-                step = 0.01f,
-                defaultValue = resetColor.g,
-                value = color.g,
-                onChanged = y => newColor.g = y,
-            });
-
-            DrawSliderValue(new SliderOption
-            {
-                label = "B",
-                labelWidth = 30,
-                min = 0f,
-                max = 1f,
-                step = 0.01f,
-                defaultValue = resetColor.b,
-                value = color.b,
-                onChanged = z => newColor.b = z,
-            });
-
-            if (fieldCache.hasAlpha)
-            {
                 DrawSliderValue(new SliderOption
                 {
-                    label = "A",
+                    label = "H",
                     labelWidth = 30,
                     min = 0f,
                     max = 1f,
                     step = 0.01f,
-                    defaultValue = resetColor.a,
-                    value = color.a,
-                    onChanged = z => newColor.a = z,
+                    defaultValue = defaultHSV.x,
+                    value = newHSV.x,
+                    onChanged = x => newHSV.x = x,
                 });
-            }
 
-            fieldCache.UpdateColor(newColor, true);
+                DrawSliderValue(new SliderOption
+                {
+                    label = "S",
+                    labelWidth = 30,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = defaultHSV.y,
+                    value = newHSV.y,
+                    onChanged = y => newHSV.y = y,
+                });
+
+                DrawSliderValue(new SliderOption
+                {
+                    label = "V",
+                    labelWidth = 30,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = defaultHSV.z,
+                    value = newHSV.z,
+                    onChanged = z => newHSV.z = z,
+                });
+
+                if (fieldCache.hasAlpha)
+                {
+                    DrawSliderValue(new SliderOption
+                    {
+                        label = "A",
+                        labelWidth = 30,
+                        min = 0f,
+                        max = 1f,
+                        step = 0.01f,
+                        defaultValue = defaultHSV.w,
+                        value = newHSV.w,
+                        onChanged = z => newHSV.w = z,
+                    });
+                }
+
+                fieldCache.UpdateHSV(newHSV, true);
+            }
+            else
+            {
+                var newColor = color;
+
+                DrawSliderValue(new SliderOption
+                {
+                    label = "R",
+                    labelWidth = 30,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = resetColor.r,
+                    value = color.r,
+                    onChanged = x => newColor.r = x,
+                });
+
+                DrawSliderValue(new SliderOption
+                {
+                    label = "G",
+                    labelWidth = 30,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = resetColor.g,
+                    value = color.g,
+                    onChanged = y => newColor.g = y,
+                });
+
+                DrawSliderValue(new SliderOption
+                {
+                    label = "B",
+                    labelWidth = 30,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = resetColor.b,
+                    value = color.b,
+                    onChanged = z => newColor.b = z,
+                });
+
+                if (fieldCache.hasAlpha)
+                {
+                    DrawSliderValue(new SliderOption
+                    {
+                        label = "A",
+                        labelWidth = 30,
+                        min = 0f,
+                        max = 1f,
+                        step = 0.01f,
+                        defaultValue = resetColor.a,
+                        value = color.a,
+                        onChanged = z => newColor.a = z,
+                    });
+                }
+
+                fieldCache.UpdateColor(newColor, true);
+            }
 
             BeginLayout(LayoutDirection.Horizontal);
             {
@@ -1546,20 +1616,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     DrawLabel(fieldCache.label, 50, 20);
                 }
 
-                DrawTexture(texWhite, 20, 20, newColor);
+                DrawTexture(texWhite, 20, 20, color);
 
-                newColor = DrawColorFieldCache(null, fieldCache, 120, 20);
+                DrawColorFieldCache(null, fieldCache, 120, 20);
 
                 if (DrawButton("R", 20, 20))
                 {
-                    newColor = resetColor;
+                    fieldCache.ResetColor();
+                }
+
+                if (DrawTextureButton(bundleManager.changeIcon, 20, 20))
+                {
+                    fieldCache.useHSV = !fieldCache.useHSV;
                 }
             }
             EndLayout();
 
-            if (newColor != color)
+            var updated = false;
+            if (fieldCache.color != color)
             {
-                onColorChanged(newColor);
+                onColorChanged(fieldCache.color);
                 updated = true;
             }
 
