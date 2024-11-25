@@ -1,4 +1,4 @@
-Shader "MTE/ColorParaffin"
+Shader "MTE/ColorParaffinDebug"
 {
     Properties
     {
@@ -66,16 +66,6 @@ Shader "MTE/ColorParaffin"
                 return centeredUV + 0.5;
             }
 
-            float4 BlendOverlay(float4 base, float4 blend)
-            {
-                float4 result;
-                result.rgb = base.rgb < 0.5 ? 
-                    2.0 * base.rgb * blend.rgb :
-                    1.0 - 2.0 * (1.0 - base.rgb) * (1.0 - blend.rgb);
-                result.a = base.a;
-                return result;
-            }
-
             float4 CalculateGradientColor(ParaffinBuffer data, float2 uv)
             {
                 float2 adjustedUV = AdjustUV(uv, data.radiusScale);
@@ -84,18 +74,11 @@ Shader "MTE/ColorParaffin"
                 return lerp(data.color1, data.color2, t);
             }
 
-            float4 CalculateBlend(float4 col, ParaffinBuffer data, float2 uv)
+            float4 CalculateDebugBlend(ParaffinBuffer data, float2 uv)
             {
-                float4 gradientColor = CalculateGradientColor(data, uv);
-
-                float4 blendDiff = float4(0, 0, 0, 0);
-                blendDiff += (gradientColor - col) * data.useNormal;
-                blendDiff += (col + gradientColor - col) * data.useAdd;
-                blendDiff += (col * gradientColor - col) * data.useMultiply;
-                blendDiff += (BlendOverlay(col, gradientColor) - col) * data.useOverlay;
-                blendDiff += (col - gradientColor - col) * data.useSubstruct;
-
-                return blendDiff * gradientColor.a;
+                float4 blend = CalculateGradientColor(data, uv);
+                blend.rgb *= blend.a;
+                return blend;
             }
 
             fixed4 frag (v2f i) : SV_Target
@@ -106,10 +89,10 @@ Shader "MTE/ColorParaffin"
                 [loop]
                 for(int idx = 0; idx < _ParaffinCount; idx++)
                 {
-                    blend += CalculateBlend(col, _ParaffinBuffer[idx], i.uv);
+                    blend += CalculateDebugBlend(_ParaffinBuffer[idx], i.uv);
                 }
 
-                float4 result = col + blend;
+                float4 result = blend;
                 result.a = col.a;
                 return result;
             }

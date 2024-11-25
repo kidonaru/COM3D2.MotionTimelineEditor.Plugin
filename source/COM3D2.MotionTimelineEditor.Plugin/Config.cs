@@ -35,6 +35,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool dofHighResolution = false;
         public bool dofNearBlur = false;
         public bool dofVisualizeFocus = false;
+        public bool paraffinDebug = false;
 
         // 表示設定
         public int frameWidth = 11;

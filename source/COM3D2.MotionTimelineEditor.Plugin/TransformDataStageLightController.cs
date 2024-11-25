@@ -9,7 +9,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return 35;
+                return 36;
             }
         }
 
@@ -288,6 +288,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 34,
                     name = "一括情報",
+                    defaultValue = 0f,
+                }
+            },
+            {
+                "autoVisible", new CustomValueInfo
+                {
+                    index = 35,
+                    name = "一括表示",
                     defaultValue = 0f,
                 }
             },

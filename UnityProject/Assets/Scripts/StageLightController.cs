@@ -21,7 +21,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float offsetRange = 0.5f;
         public float segmentAngle = 1f;
         public int segmentRange = 10;
-        public bool visible = true;
     }
 
     [ExecuteInEditMode]
@@ -45,6 +44,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public string displayName;
         public List<StageLight> lights = new List<StageLight>();
+
+        [Header("一括位置設定")]
+        public bool autoVisible = false;
+        public bool visible = true;
 
         [Header("一括位置設定")]
         public bool autoPosition = false;
@@ -158,6 +161,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 // 0.0から1.0の間で均等に分布する値を計算
                 float t = count > 1 ? (float)i / (count - 1) : 0.5f;
 
+                if (autoVisible)
+                {
+                    light.visible = visible;
+                }
+
                 if (autoPosition)
                 {
                     light.transform.localPosition = new Vector3(
@@ -194,7 +202,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     light.offsetRange = lightInfo.offsetRange;
                     light.segmentAngle = lightInfo.segmentAngle;
                     light.segmentRange = lightInfo.segmentRange;
-                    light.visible = lightInfo.visible;
                 }
             }
         }

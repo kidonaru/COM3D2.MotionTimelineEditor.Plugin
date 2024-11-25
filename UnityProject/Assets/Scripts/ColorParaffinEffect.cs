@@ -24,6 +24,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		public float useMultiply = 0f;
 		public float useOverlay = 0f;
 		public float useSubstruct = 0f;
+
+		public void CopyFrom(ParaffinData data)
+		{
+			enabled = data.enabled;
+			color1 = data.color1;
+			color2 = data.color2;
+			centerPosition = data.centerPosition;
+			radiusFar = data.radiusFar;
+			radiusNear = data.radiusNear;
+			radiusScale = data.radiusScale;
+			useNormal = data.useNormal;
+			useAdd = data.useAdd;
+			useMultiply = data.useMultiply;
+			useOverlay = data.useOverlay;
+			useSubstruct = data.useSubstruct;
+		}
 	}
 
 	[ExecuteInEditMode]
@@ -35,6 +51,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         [Header("Aspect Ratio")]
         public float targetAspect = 0f;
+
+        [Header("Debug")]
+        [SerializeField]
+        private bool _isDebug = false;
+        public bool isDebug
+        {
+            get
+            {
+                return _isDebug;
+            }
+            set
+            {
+                if (_isDebug == value)
+                {
+                    return;
+                }
+                _isDebug = value;
+
+                InitMaterial();
+            }
+        }
 
 		public static readonly int MAX_PARAFFIN_COUNT = 4;
 
@@ -73,13 +110,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		void OnEnable()
 		{
 			computeBuffer = new ComputeBuffer(MAX_PARAFFIN_COUNT, sizeof(float) * 24);
-
-#if COM3D2
-			material = bundleManager.LoadMaterial("ColorParaffin");
-#else
-			material = new Material(Shader.Find("MTE/ColorParaffin"));
-#endif
-			material.hideFlags = HideFlags.HideAndDontSave;
+            InitMaterial();
 		}
 
 		void OnDisable()
@@ -89,26 +120,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 				computeBuffer.Release();
 				computeBuffer = null;
 			}
-			if (material != null)
-			{
-				DestroyImmediate(material);
-				material = null;
-			}
+			DeleteMaterial();
 		}
 
-		void Update()
-		{
-		}
+        private void InitMaterial()
+        {
+            DeleteMaterial();
+            var materialName = isDebug ? "ColorParaffinDebug" : "ColorParaffin";
+#if COM3D2
+			material = bundleManager.LoadMaterial(materialName);
+#else
+			material = new Material(Shader.Find("MTE/" + materialName));
+#endif
+			material.hideFlags = HideFlags.HideAndDontSave;
+        }
+
+        private void DeleteMaterial()
+        {
+            if (material != null)
+            {
+                DestroyImmediate(material);
+                material = null;
+            }
+        }
 
 		void OnValidate()
 		{
+            InitMaterial();
 		}
 
 		private void OnRenderImage(RenderTexture source, RenderTexture destination)
 		{
 			BuildParaffinBuffers();
 
-			if (paraffinDataList.Count == 0)
+			if (enabledCount == 0)
 			{
 				Graphics.Blit(source, destination);
 				return;
@@ -136,7 +181,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			{
 				return;
 			}
-			paraffinDataList[index] = data;
+			paraffinDataList[index].CopyFrom(data);
 		}
 
 		public void AddParaffinData(ParaffinData data)
@@ -188,7 +233,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 					continue;
 				}
 
-				paraffinBuffers[i] = ConvertToBuffer(data);
+				paraffinBuffers[enabledCount] = ConvertToBuffer(data);
 				++enabledCount;
 			}
 		}

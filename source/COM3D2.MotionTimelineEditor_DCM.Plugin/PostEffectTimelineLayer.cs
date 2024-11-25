@@ -453,7 +453,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private GUIComboBox<string> _paraffinNameComboBox = new GUIComboBox<string>
         {
-            getName = (boneName, index) => PostEffectUtils.GetParaffinJpName(index),
+            getName = (name, index) => name,
+        };
+
+        private GUIComboBox<string> _copyToParaffinComboBox = new GUIComboBox<string>
+        {
+            getName = (name, index) => name,
         };
 
         private ColorFieldCache _color1FieldValue = new ColorFieldCache("Color1", true);
@@ -489,7 +494,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             view.SetEnabled(!view.IsComboBoxFocused());
             view.DrawHorizontalLine(Color.gray);
             view.AddSpace(5);
-            view.BeginScrollView();
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
@@ -605,9 +609,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 postEffectManager.ApplyDepthOfField(depthOfField);
             }
-
-            view.SetEnabled(!view.IsComboBoxFocused());
-            view.EndScrollView();
         }
 
         private List<string> _paraffinNames = new List<string>();
@@ -626,6 +627,25 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 }
 
                 return _paraffinNames;
+            }
+        }
+
+        private List<string> _paraffinJpNames = new List<string>();
+        private List<string> paraffinJpNames
+        {
+            get
+            {
+                var paraffinCount = timeline.paraffinCount;
+                if (_paraffinJpNames.Count != paraffinCount)
+                {
+                    _paraffinJpNames.Clear();
+                    for (var i = 0; i < paraffinCount; i++)
+                    {
+                        _paraffinJpNames.Add(PostEffectUtils.GetParaffinJpName(i));
+                    }
+                }
+
+                return _paraffinJpNames;
             }
         }
 
@@ -668,10 +688,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            _paraffinNameComboBox.items = paraffinNames;
+            _paraffinNameComboBox.items = paraffinJpNames;
             _paraffinNameComboBox.DrawButton("対象", view);
 
-            var boneName = _paraffinNameComboBox.currentItem;
             var index = _paraffinNameComboBox.currentIndex;
 
             var paraffin = postEffectManager.GetParaffinData(index);
@@ -858,6 +877,32 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 defaultValue = 0f,
                 value = paraffin.useSubstruct,
                 onChanged = newValue => paraffin.useSubstruct = newValue,
+            });
+
+            view.DrawHorizontalLine(Color.gray);
+
+            _copyToParaffinComboBox.items = _paraffinJpNames;
+            _copyToParaffinComboBox.DrawButton("コピー先", view);
+
+            if (view.DrawButton("コピー", 60, 20))
+            {
+                var copyToIndex = _copyToParaffinComboBox.currentIndex;
+                if (copyToIndex != -1 && copyToIndex != index)
+                {
+                    postEffectManager.ApplyParaffin(copyToIndex, paraffin);
+                }
+            }
+
+            view.SetEnabled(!view.IsComboBoxFocused());
+
+            view.DrawHorizontalLine(Color.gray);
+
+            view.DrawLabel("共通設定", 100, 20);
+
+            updateTransform = view.DrawToggle("デバッグ表示", config.paraffinDebug, 150, 20, newValue =>
+            {
+                config.paraffinDebug = newValue;
+                config.dirty = true;
             });
 
             if (updateTransform)

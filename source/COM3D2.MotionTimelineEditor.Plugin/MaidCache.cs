@@ -109,7 +109,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             set
             {
-                PluginUtils.LogDebug("Update motionSliderRate slot={0} rate={1}", slotNo, value);
+                //PluginUtils.LogDebug("Update motionSliderRate slot={0} rate={1}", slotNo, value);
                 _motionSliderRate = value;
 
                 if (animationState != null)

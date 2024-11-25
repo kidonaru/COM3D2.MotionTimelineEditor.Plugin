@@ -204,25 +204,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 edTrans.rotationInTangents,
                 lerpTime);
 
-            if (timeline.isLightColorEasing)
-            {
-                light.color = PluginUtils.HermiteColor(
-                    t0,
-                    t1,
-                    stTrans.color,
-                    edTrans.color,
-                    stTrans.colorOutTangents,
-                    edTrans.colorInTangents,
-                    lerpTime);
-            }
-            else
-            {
-                light.color = stTrans.color;
-            }
+            light.color = PluginUtils.HermiteColor(
+                t0,
+                t1,
+                stTrans.color,
+                edTrans.color,
+                stTrans.colorOutTangents,
+                edTrans.colorInTangents,
+                lerpTime);
+
+            light.spotAngle = PluginUtils.HermiteValue(
+                t0,
+                t1,
+                stTrans["spotAngle"],
+                edTrans["spotAngle"],
+                lerpTime);
+            
+            light.spotRange = PluginUtils.HermiteValue(
+                t0,
+                t1,
+                stTrans["spotRange"],
+                edTrans["spotRange"],
+                lerpTime);
 
             light.visible = stTrans.visible;
-            light.spotAngle = stTrans["spotAngle"].value;
-            light.spotRange = stTrans["spotRange"].value;
             light.rangeMultiplier = stTrans["rangeMultiplier"].value;
             light.falloffExp = stTrans["falloffExp"].value;
             light.noiseStrength = stTrans["noiseStrength"].value;
@@ -249,6 +254,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var stTrans = start.transform;
             var edTrans = end.transform;
 
+            controller.visible = stTrans.visible;
             controller.positionMin = stTrans.position;
             controller.positionMax = stTrans.subPosition;
             controller.rotationMin = stTrans.eulerAngles;
@@ -257,7 +263,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             controller.colorMax = stTrans.subColor;
 
             var lightInfo = controller.lightInfo;
-            lightInfo.visible = stTrans.visible;
+            
             lightInfo.spotAngle = stTrans["spotAngle"].value;
             lightInfo.spotRange = stTrans["spotRange"].value;
             lightInfo.rangeMultiplier = stTrans["rangeMultiplier"].value;
@@ -273,6 +279,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             controller.autoRotation = stTrans["autoRotation"].boolValue;
             controller.autoColor = stTrans["autoColor"].boolValue;
             controller.autoLightInfo = stTrans["autoLightInfo"].boolValue;
+            controller.autoVisible = stTrans["autoVisible"].boolValue;
         }
 
         public void OnLightSetup()
@@ -324,7 +331,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var trans = CreateTransformData(lightName);
                 trans.position = transform.localPosition;
-                trans.rotation = transform.rotation;
+                trans.rotation = transform.localRotation;
                 trans.color = light.color;
                 trans.visible = light.visible;
                 trans["spotAngle"].value = light.spotAngle;
@@ -359,7 +366,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 trans.subEulerAngles = controller.rotationMax;
                 trans.color = controller.colorMin;
                 trans.subColor = controller.colorMax;
-                trans.visible = lightInfo.visible;
+                trans.visible = controller.visible;
                 trans["spotAngle"].value = lightInfo.spotAngle;
                 trans["spotRange"].value = lightInfo.spotRange;
                 trans["rangeMultiplier"].value = lightInfo.rangeMultiplier;
@@ -374,6 +381,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 trans["autoRotation"].boolValue = controller.autoRotation;
                 trans["autoColor"].boolValue = controller.autoColor;
                 trans["autoLightInfo"].boolValue = controller.autoLightInfo;
+                trans["autoVisible"].boolValue = controller.autoVisible;
 
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
@@ -542,7 +550,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             contentSize = new Vector2(150, 300),
         };
 
-        private ColorFieldCache _colorFieldValue = new ColorFieldCache("Color", true);
+        private ColorFieldCache _color1FieldValue = new ColorFieldCache("Color1", true);
+        private ColorFieldCache _color2FieldValue = new ColorFieldCache("Color2", true);
 
         private enum TabType
         {
@@ -650,11 +659,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
+            view.DrawToggle("一括表示設定", controller.autoVisible, 200, 20, newValue =>
+            {
+                controller.autoVisible = newValue;
+            });
+
+            if (controller.autoVisible)
+            {
+                view.DrawToggle("表示", controller.visible, 120, 20, newValue =>
+                {
+                    controller.visible = newValue;
+                });
+            }
+
             view.DrawToggle("一括位置設定", controller.autoPosition, 200, 20, newValue =>
             {
                 controller.autoPosition = newValue;
             });
 
+            if (controller.autoPosition)
             {
                 var initialPosition = new Vector3(-15f, 10f, 0f);
                 var transformCache = view.GetTransformCache(null);
@@ -672,16 +695,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     controller.positionMin = transformCache.position;
                 }
-            }
 
-            {
-                var initialPosition = new Vector3(15f, 10f, 0f);
-                var transformCache = view.GetTransformCache(null);
+                initialPosition = new Vector3(15f, 10f, 0f);
+                transformCache = view.GetTransformCache(null);
                 transformCache.position = controller.positionMax;
 
                 view.DrawLabel("最大位置", 200, 20);
 
-                var updateTransform = DrawPosition(
+                updateTransform = DrawPosition(
                     view,
                     transformCache,
                     TransformEditType.全て,
@@ -698,8 +719,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 controller.autoRotation = newValue;
             });
 
+            if (controller.autoRotation)
             {
-                var initialEulerAngles = new Vector3(0f, 0f, 0f);
+                var initialEulerAngles = new Vector3(90f, 0f, 0f);
                 var transformCache = view.GetTransformCache(null);
                 transformCache.eulerAngles = controller.rotationMin;
 
@@ -716,16 +738,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     controller.rotationMin = transformCache.eulerAngles;
                 }
-            }
 
-            {
-                var initialEulerAngles = new Vector3(0f, 0f, 0f);
-                var transformCache = view.GetTransformCache(null);
+                transformCache = view.GetTransformCache(null);
                 transformCache.eulerAngles = controller.rotationMax;
 
                 view.DrawLabel("最大回転", 200, 20);
 
-                var updateTransform = DrawEulerAngles(
+                updateTransform = DrawEulerAngles(
                     view,
                     transformCache,
                     TransformEditType.全て,
@@ -743,21 +762,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 controller.autoColor = newValue;
             });
 
+            if (controller.autoColor)
             {
                 view.DrawLabel("最小色", 200, 20);
 
                 view.DrawColor(
-                    _colorFieldValue,
+                    _color1FieldValue,
                     controller.colorMin,
                     Color.white,
                     c => controller.colorMin = c);
-            }
 
-            {
                 view.DrawLabel("最大色", 200, 20);
 
                 view.DrawColor(
-                    _colorFieldValue,
+                    _color2FieldValue,
                     controller.colorMax,
                     Color.white,
                     c => controller.colorMax = c);
@@ -768,14 +786,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 controller.autoLightInfo = newValue;
             });
 
+            if (controller.autoLightInfo)
             {
                 var lightInfo = controller.lightInfo;
                 var updateTransform = false;
-
-                view.DrawToggle("表示", lightInfo.visible, 120, 20, newValue =>
-                {
-                    lightInfo.visible = newValue;
-                });
 
                 updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
                 {
@@ -950,38 +964,46 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
+            view.DrawLabel(light.displayName, 200, 20);
+
+            if (!controller.autoVisible)
             {
-                view.DrawLabel(light.displayName, 200, 20);
-
-                var transform = light.transform;
-                var transformCache = view.GetTransformCache(transform);
-                var position = transform.localPosition;
-                var initialPosition = StageLight.DefaultPosition;
-                var initialEulerAngles = StageLight.DefaultEulerAngles;
-                var initialScale = Vector3.one;
-                var updateTransform = false;
-                var editType = TransformEditType.全て;
-
-                view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing && !controller.autoPosition);
-                updateTransform |= DrawPosition(view, transformCache, editType, initialPosition);
-
-                view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing && !controller.autoRotation);
-                updateTransform |= DrawEulerAngles(view, transformCache, editType, light.name, initialEulerAngles);
-
-                view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing && !controller.autoColor);
-                updateTransform |= view.DrawColor(
-                    _colorFieldValue,
-                    light.color,
-                    Color.white,
-                    c => light.color = c);
-
-                view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing && !controller.autoLightInfo);
-
                 view.DrawToggle("表示", light.visible, 120, 20, newValue =>
                 {
                     light.visible = newValue;
                 });
+            }
 
+            var transform = light.transform;
+            var transformCache = view.GetTransformCache(transform);
+            var position = transform.localPosition;
+            var initialPosition = StageLight.DefaultPosition;
+            var initialEulerAngles = StageLight.DefaultEulerAngles;
+            var initialScale = Vector3.one;
+            var updateTransform = false;
+            var editType = TransformEditType.全て;
+
+            if (!controller.autoPosition)
+            {
+                updateTransform |= DrawPosition(view, transformCache, editType, initialPosition);
+            }
+
+            if (!controller.autoRotation)
+            {
+                updateTransform |= DrawEulerAngles(view, transformCache, editType, light.name, initialEulerAngles);
+            }
+
+            if (!controller.autoColor)
+            {
+                updateTransform |= view.DrawColor(
+                    _color1FieldValue,
+                    light.color,
+                    Color.white,
+                    c => light.color = c);
+            }
+
+            if (!controller.autoLightInfo)
+            {
                 updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
                 {
                     label = "角度",
@@ -1102,9 +1124,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     value = light.segmentRange,
                     onChanged = newValue => light.segmentRange = (int) newValue,
                 });
+            }
 
-                view.DrawHorizontalLine(Color.gray);
+            view.DrawHorizontalLine(Color.gray);
 
+            {
                 _copyToLightComboBox.items = lights;
                 _copyToLightComboBox.DrawButton("コピー先", view);
 

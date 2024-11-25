@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using UnityEngine;
@@ -517,6 +518,42 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
             }
+
+            /*if (version < 16)
+            {
+                // StageLightTimelineLayerのrotationをeulerAnglesに変更
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "StageLightTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+                                if (transform.name.StartsWith("StageLightController", StringComparison.Ordinal))
+                                {
+                                    continue;
+                                }
+
+                                var values = new List<float>(transform.values);
+                                if (values.Count > 6)
+                                {
+                                    PluginUtils.LogDebug("Change rotation to eulerAngles in StageLightTimelineLayer name={0}", transform.name);
+                                    var rotation = new Quaternion(values[3], values[4], values[5], values[6]);
+                                    var eulerAngles = rotation.eulerAngles;
+                                    values[3] = eulerAngles.x;
+                                    values[4] = eulerAngles.y;
+                                    values[5] = eulerAngles.z;
+                                    values[6] = 0f; // easing
+                                }
+                                transform.values = values.ToArray();
+                            }
+                        }
+                        break;
+                    }
+                }
+            }*/
         }
     }
 }

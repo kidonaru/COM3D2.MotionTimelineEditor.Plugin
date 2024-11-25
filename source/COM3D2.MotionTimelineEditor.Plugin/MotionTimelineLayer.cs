@@ -503,7 +503,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            PluginUtils.LogDebug("ApplyFingerBlendMotion: type={0} stFrame={1}", motion.row.type, motion.stFrame);
+            //PluginUtils.LogDebug("ApplyFingerBlendMotion: type={0} stFrame={1}", motion.row.type, motion.stFrame);
 
             switch (motion.row.type)
             {

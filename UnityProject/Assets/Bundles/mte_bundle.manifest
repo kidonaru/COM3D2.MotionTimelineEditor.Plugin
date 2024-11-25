@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 3789273222
+CRC: 878241744
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: a527d03e34f2bafd520112b56f82c8b7
+    Hash: b3eb1d09b3d4785a17ca39e953093a93
   TypeTreeHash:
     serializedVersion: 2
     Hash: 2ba8c92af2093cc583317c61ec0c8748
@@ -25,7 +25,9 @@ Assets:
 - Assets/Resources/change_icon.png
 - Assets/Resources/icon.png.bytes
 - Assets/Resources/song.ogg.bytes
+- Assets/Shaders/ColorParaffinDebug.mat
 - Assets/Resources/noise_texture.png
+- Assets/Shaders/ColorParaffinDebug.shader
 - Assets/Shaders/StageLight.mat
 - Assets/Shaders/ColorParaffin.shader
 - Assets/Shaders/ColorParaffin.mat

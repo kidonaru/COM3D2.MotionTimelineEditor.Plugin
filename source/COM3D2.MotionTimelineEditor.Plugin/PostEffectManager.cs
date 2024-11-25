@@ -203,6 +203,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 paraffin.enabled = true;
             }
             paraffin.SetParaffinData(index, data);
+            paraffin.isDebug = config.paraffinDebug;
         }
     }
 }

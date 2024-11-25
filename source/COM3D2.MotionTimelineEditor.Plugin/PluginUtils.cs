@@ -366,6 +366,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return Hermite(0, 1, 0, 1, outTangent, inTangent, t);
         }
 
+        // ValueDataの補間
+        public static float HermiteValue(
+            float t0,
+            float t1,
+            ValueData start,
+            ValueData end,
+            float t)
+        {
+            return Hermite(
+                t0,
+                t1,
+                start.value,
+                end.value,
+                start.outTangent.value,
+                end.inTangent.value,
+                t);
+        }
+
         // Vector3の補間
         public static Vector3 HermiteVector3(
             float t0,
