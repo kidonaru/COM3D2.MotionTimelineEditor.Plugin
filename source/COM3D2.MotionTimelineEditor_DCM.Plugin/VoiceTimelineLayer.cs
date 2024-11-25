@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
-    using VoicePlayData = MotionPlayData<VoiceMotionData>;
+    using VoicePlayData = PlayDataBase<VoiceMotionData>;
 
     public class VoiceTimeLineRow
     {

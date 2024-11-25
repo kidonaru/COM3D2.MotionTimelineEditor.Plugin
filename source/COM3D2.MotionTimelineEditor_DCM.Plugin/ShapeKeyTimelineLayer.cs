@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
-    using ShapeKeyPlayData = MotionPlayData<ShapeKeyMotionData>;
+    using ShapeKeyPlayData = PlayDataBase<ShapeKeyMotionData>;
 
     public class ShapeKeyTimeLineRow
     {

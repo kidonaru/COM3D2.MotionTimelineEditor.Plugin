@@ -11,7 +11,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
     using TimelineMotionEasing = DanceCameraMotion.Plugin.TimelineMotionEasing;
     using EasingType = DanceCameraMotion.Plugin.EasingType;
-    using EyesPlayData = MotionPlayData<EyesMotionData>;
+    using EyesPlayData = PlayDataBase<EyesMotionData>;
 
     public enum MotionEyesType
     {

@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
-    using BGColorPlayData = MotionPlayData<BGColorMotionData>;
+    using BGColorPlayData = PlayDataBase<BGColorMotionData>;
 
     public class BGColorTimeLineRow
     {

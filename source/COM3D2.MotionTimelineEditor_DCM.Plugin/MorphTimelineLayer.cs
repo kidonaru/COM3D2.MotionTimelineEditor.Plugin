@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
-    using MorphPlayData = MotionPlayData<MorphMotionData>;
+    using MorphPlayData = PlayDataBase<MorphMotionData>;
 
     public class MorphTimeLineRow
     {

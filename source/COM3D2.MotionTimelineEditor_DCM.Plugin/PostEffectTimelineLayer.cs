@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
-    using PostEffectPlayData = MotionPlayData<PostEffectMotionData>;
+    using PostEffectPlayData = PlayDataBase<PostEffectMotionData>;
 
     public class PostEffectTimeLineRow
     {

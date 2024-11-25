@@ -3,49 +3,7 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public interface IMotionData
-    {
-        int stFrame { get; set; }
-        int edFrame { get; set; }
-        int stFrameInEdit { get; set; }
-        int edFrameInEdit { get; set; }
-        int stFrameActive { get; }
-        int edFrameActive { get; }
-    }
-
-    public abstract class MotionDataBase : IMotionData
-    {
-        public int stFrame { get; set; }
-        public int edFrame { get; set; }
-        public int stFrameInEdit { get; set; }
-        public int edFrameInEdit { get; set; }
-
-        private static StudioHackBase studioHack
-        {
-            get
-            {
-                return StudioHackManager.studioHack;
-            }
-        }
-
-        public int stFrameActive
-        {
-            get
-            {
-                return studioHack.isPoseEditing ? stFrameInEdit : stFrame;
-            }
-        }
-
-        public int edFrameActive
-        {
-            get
-            {
-                return studioHack.isPoseEditing ? edFrameInEdit : edFrame;
-            }
-        }
-    }
-
-    public class MotionPlayData<T> where T : class, IMotionData
+    public class PlayDataBase<T> where T : class, IMotionData
     {
         private const float FRAME_TOLERANCE = 0.001f; // 誤差許容値
 
@@ -169,49 +127,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
     }
 
-    public class TimeLineRow
+    public class MotionPlayData : PlayDataBase<MotionData>
     {
-        public int frame;
-        public ITransformData transform;
-
-        public TimeLineRow()
+        public MotionPlayData(int capacity)
         {
-        }
-
-        public TimeLineRow(BoneData bone)
-        {
-            this.frame = bone.parentFrame.frameNo;
-            this.transform = bone.transform;
-        }
-    }
-
-    public class DefaultMotionData : MotionDataBase
-    {
-        public TimeLineRow start;
-        public TimeLineRow end;
-
-        public DefaultMotionData()
-        {
-        }
-
-        public DefaultMotionData(TimeLineRow start, TimeLineRow end)
-        {
-            this.start = start;
-            this.end = end;
-            stFrame = start.frame;
-            edFrame = end.frame;
-        }
-    }
-
-    public class DefaultPlayData : MotionPlayData<DefaultMotionData>
-    {
-        public DefaultPlayData()
-        {
-        }
-
-        public DefaultPlayData(int capacity)
-        {
-            motions = new List<DefaultMotionData>(capacity);
+            motions = new List<MotionData>(capacity);
         }
     }
 }

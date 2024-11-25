@@ -104,8 +104,9 @@
     <Compile Include="ModelBoneController.cs" />
     <Compile Include="ModelHackBase.cs" />
     <Compile Include="ModelHackManager.cs" />
-    <Compile Include="MotionPlayData.cs" />
     <Compile Include="ModMenuLoader.cs" />
+    <Compile Include="MotionData.cs" />
+    <Compile Include="MotionPlayData.cs" />
     <Compile Include="MotionTimelineLayer.cs" />
     <Compile Include="MoveEasingType.cs" />
     <Compile Include="MovieManager.cs" />

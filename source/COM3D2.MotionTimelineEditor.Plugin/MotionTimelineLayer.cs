@@ -8,10 +8,7 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MotionPlayData = MotionPlayData<MotionData>;
-    using IKHoldPlayData = MotionPlayData<IKHoldMotionData>;
-    using GroundingPlayData = MotionPlayData<GroundingMotionData>;
-    using FingerBlendPlayData = MotionPlayData<FingerBlendMotionData>;
+    using FingerBlendPlayData = PlayDataBase<FingerBlendMotionData>;
 
     public class PoseTimeLineRow
     {
@@ -24,84 +21,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Vector3 rotation;
         public Maid.EyeMoveType eyeMoveType;
         public string option;
-    }
-
-    public class MotionTimeLineRow
-    {
-        public int frame;
-        public string name;
-        public Vector3 position;
-        public Quaternion rotation;
-        public Vector3 scale;
-        public Vector3 positionInTangents;
-        public Vector3 positionOutTangents;
-        public Vector4 rotationInTangents;
-        public Vector4 rotationOutTangents;
-        public Vector3 scaleInTangents;
-        public Vector3 scaleOutTangents;
-    }
-
-    public class MotionData : MotionDataBase
-    {
-        public string name;
-        public Vector3 stPos;
-        public Vector3 edPos;
-        public Quaternion stRot;
-        public Quaternion edRot;
-        public Vector3 stScale;
-        public Vector3 edScale;
-        public Vector3 posOutTangents;
-        public Vector3 posInTangents;
-        public Vector4 rotOutTangents;
-        public Vector4 rotInTangents;
-        public Vector3 scaleOutTangents;
-        public Vector3 scaleInTangents;
-    }
-    
-    public class IKHoldTimeLineRow
-    {
-        public int frame;
-        public string name;
-        public Vector3 position;
-        public Vector3 inTangents;
-        public Vector3 outTangents;
-        public bool isHold;
-        public bool isAnime;
-    }
-
-    public class IKHoldMotionData : MotionDataBase
-    {
-        public string name;
-        public Vector3 stPos;
-        public Vector3 edPos;
-        public Vector3 outTangents;
-        public Vector3 inTangents;
-        public bool isHold;
-        public bool isAnime;
-    }
-
-    public class GroundingTimeLineRow
-    {
-        public int frame;
-
-        public bool isGroundingFootL;
-        public bool isGroundingFootR;
-        public float floorHeight;
-        public float footBaseOffset;
-        public float footStretchHeight;
-        public float footStretchAngle;
-        public float footGroundAngle;
-    }
-
-    public class GroundingMotionData : MotionDataBase
-    {
-        public bool isGroundingFootL;
-        public bool isGroundingFootR;
-        public float floorHeight;
-        public float footBaseOffset;
-        public float footStretchHeight;
-        public float footStretchAngle;
-        public float footGroundAngle;
     }
 
     public class FingerBlendTimeLineRow
@@ -167,12 +86,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Dictionary<string, List<MotionTimeLineRow>> _motionTimelineRowsMap = new Dictionary<string, List<MotionTimeLineRow>>();
+        private Dictionary<string, List<BoneData>> _motionTimelineRowsMap = new Dictionary<string, List<BoneData>>();
         private Dictionary<string, MotionPlayData> _motionPlayDataMap = new Dictionary<string, MotionPlayData>(); 
-        private Dictionary<string, List<IKHoldTimeLineRow>> _ikTimelineRowsMap = new Dictionary<string, List<IKHoldTimeLineRow>>();
-        private Dictionary<string, IKHoldPlayData> _ikPlayDataMap = new Dictionary<string, IKHoldPlayData>();
-        private List<GroundingTimeLineRow> _groundingTimelineRows = new List<GroundingTimeLineRow>();
-        private GroundingPlayData _groundingPlayData = new GroundingPlayData();
+        private Dictionary<string, List<BoneData>> _ikTimelineRowsMap = new Dictionary<string, List<BoneData>>();
+        private Dictionary<string, MotionPlayData> _ikPlayDataMap = new Dictionary<string, MotionPlayData>();
+        private List<BoneData> _groundingTimelineRows = new List<BoneData>();
+        private MotionPlayData _groundingPlayData = new MotionPlayData(64);
         private Dictionary<string, List<FingerBlendTimeLineRow>> _fingerBlendTimelineRowsMap = new Dictionary<string, List<FingerBlendTimeLineRow>>();
         private Dictionary<string, FingerBlendPlayData> _fingerBlendPlayDataMap = new Dictionary<string, FingerBlendPlayData>();
 
@@ -358,7 +277,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var current = playData.current;
                 if (current != null)
                 {
-                    ApplyMotion(current, playData.lerpFrame);
+                    ApplyMotion(boneName, current, playData.lerpFrame);
                 }
             }
 
@@ -376,7 +295,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var current = playData.current;
                 if (current != null)
                 {
-                    ApplyIKHoldMotion(current, playData.lerpFrame);
+                    ApplyIKHoldMotion(boneName, current, playData.lerpFrame);
                 }
             }
 
@@ -406,19 +325,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyMotion(MotionData motion, float lerpFrame)
+        private void ApplyMotion(string boneName, MotionData motion, float lerpFrame)
         {
             if (maidCache == null)
             {
                 return;
             }
 
-            var boneName = motion.name;
             var bone = maidCache.GetBoneTransform(boneName);
             if (bone == null)
             {
                 return;
             }
+
+            var start = motion.start;
+            var end = motion.end;
+
+            var stTrans = start.transform;
+            var edTrans = end.transform;
 
             var t0 = motion.stFrame * timeline.frameDuration;
             var t1 = motion.edFrame * timeline.frameDuration;
@@ -426,73 +350,68 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             bone.localPosition = PluginUtils.HermiteVector3(
                 t0,
                 t1,
-                motion.stPos,
-                motion.edPos,
-                motion.posOutTangents,
-                motion.posInTangents,
+                stTrans.positionValues,
+                edTrans.positionValues,
                 lerpFrame);
-
-            /*bone.localRotation = PluginUtils.HermiteQuaternion(
-                t0,
-                t1,
-                motion.stRot,
-                motion.edRot,
-                motion.rotOutTangents,
-                motion.rotInTangents,
-                lerpFrame);*/
 
             bone.localScale = PluginUtils.HermiteVector3(
                 t0,
                 t1,
-                motion.stScale,
-                motion.edScale,
-                motion.scaleOutTangents,
-                motion.scaleInTangents,
+                stTrans.scaleValues,
+                edTrans.scaleValues,
                 lerpFrame);
         }
 
-        private void ApplyIKHoldMotion(IKHoldMotionData motion, float lerpFrame)
+        private void ApplyIKHoldMotion(string boneName, MotionData motion, float lerpFrame)
         {
             if (maidCache == null)
             {
                 return;
             }
 
-            var ikHoldEntity = maidCache.GetIKHoldEntity(motion.name);
+            var ikHoldEntity = maidCache.GetIKHoldEntity(boneName);
             if (ikHoldEntity == null)
             {
                 return;
             }
 
+            var start = motion.start;
+            var end = motion.end;
+
+            var stTrans = start.transform;
+            var edTrans = end.transform;
+
             var t0 = motion.stFrame * timeline.frameDuration;
             var t1 = motion.edFrame * timeline.frameDuration;
 
-            ikHoldEntity.isHold = motion.isHold;
-            ikHoldEntity.isAnime = motion.isAnime;
+            ikHoldEntity.isHold = stTrans["isHold"].boolValue;
+            ikHoldEntity.isAnime = stTrans["isAnime"].boolValue;
+
             ikHoldEntity.targetPosition = PluginUtils.HermiteVector3(
                 t0,
                 t1,
-                motion.stPos,
-                motion.edPos,
-                motion.outTangents,
-                motion.inTangents,
+                stTrans.positionValues,
+                edTrans.positionValues,
                 lerpFrame);
         }
 
-        private void ApplyGroundingMotion(GroundingMotionData motion)
+        private void ApplyGroundingMotion(MotionData motion)
         {
             if (maidCache == null)
             {
                 return;
             }
 
-            maidCache.isGroundingFootL = motion.isGroundingFootL;
-            maidCache.isGroundingFootR = motion.isGroundingFootR;
-            maidCache.floorHeight = motion.floorHeight;
-            maidCache.footBaseOffset = motion.footBaseOffset;
-            maidCache.footStretchHeight = motion.footStretchHeight;
-            maidCache.footStretchAngle = motion.footStretchAngle;
-            maidCache.footGroundAngle = motion.footGroundAngle;
+            var start = motion.start;
+            var stTrans = start.transform;
+
+            maidCache.isGroundingFootL = stTrans["isGroundingFootL"].boolValue;
+            maidCache.isGroundingFootR = stTrans["isGroundingFootR"].boolValue;
+            maidCache.floorHeight = stTrans["floorHeight"].value;
+            maidCache.footBaseOffset = stTrans["footBaseOffset"].value;
+            maidCache.footStretchHeight = stTrans["footStretchHeight"].value;
+            maidCache.footStretchAngle = stTrans["footStretchAngle"].value;
+            maidCache.footGroundAngle = stTrans["footGroundAngle"].value;
         }
 
         private void ApplyFingerBlendMotion(FingerBlendMotionData motion)
@@ -870,10 +789,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 MotionPlayData playData;
                 if (!_motionPlayDataMap.TryGetValue(name, out playData))
                 {
-                    playData = new MotionPlayData
-                    {
-                        motions = new List<MotionData>(rows.Count),
-                    };
+                    playData = new MotionPlayData(rows.Count);
                     _motionPlayDataMap[name] = playData;
                 }
 
@@ -885,29 +801,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var start = rows[i];
                     var end = rows[i + 1];
 
-                    var stFrame = start.frame;
-                    var edFrame = end.frame;
-
-                    var motion = new MotionData
-                    {
-                        name = name,
-                        stFrame = stFrame,
-                        edFrame = edFrame,
-                        stPos = start.position,
-                        edPos = end.position,
-                        stRot = start.rotation,
-                        edRot = end.rotation,
-                        stScale = start.scale,
-                        edScale = end.scale,
-                        posOutTangents = start.positionOutTangents,
-                        posInTangents = end.positionInTangents,
-                        rotOutTangents = start.rotationOutTangents,
-                        rotInTangents = end.rotationInTangents,
-                        scaleOutTangents = start.scaleOutTangents,
-                        scaleInTangents = end.scaleInTangents,
-                    };
-
-                    playData.motions.Add(motion);
+                    playData.motions.Add(new MotionData(start, end));
                 }
             }
 
@@ -922,13 +816,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var name = pair.Key;
                 var rows = pair.Value;
 
-                IKHoldPlayData playData;
+                MotionPlayData playData;
                 if (!_ikPlayDataMap.TryGetValue(name, out playData))
                 {
-                    playData = new IKHoldPlayData
-                    {
-                        motions = new List<IKHoldMotionData>(rows.Count),
-                    };
+                    playData = new MotionPlayData(rows.Count);
                     _ikPlayDataMap[name] = playData;
                 }
 
@@ -939,24 +830,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var start = rows[i];
                     var end = rows[i + 1];
-
-                    var stFrame = start.frame;
-                    var edFrame = end.frame;
-
-                    var motion = new IKHoldMotionData
-                    {
-                        name = name,
-                        stFrame = stFrame,
-                        edFrame = edFrame,
-                        stPos = start.position,
-                        edPos = end.position,
-                        outTangents = start.outTangents,
-                        inTangents = end.inTangents,
-                        isHold = start.isHold,
-                        isAnime = start.isAnime,
-                    };
-
-                    playData.motions.Add(motion);
+                    playData.motions.Add(new MotionData(start, end));
                 }
             }
 
@@ -977,24 +851,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var start = rows[i];
                     var end = rows[i + 1];
-
-                    var stFrame = start.frame;
-                    var edFrame = end.frame;
-
-                    var motion = new GroundingMotionData
-                    {
-                        stFrame = stFrame,
-                        edFrame = edFrame,
-                        isGroundingFootL = start.isGroundingFootL,
-                        isGroundingFootR = start.isGroundingFootR,
-                        floorHeight = start.floorHeight,
-                        footBaseOffset = start.footBaseOffset,
-                        footStretchHeight = start.footStretchHeight,
-                        footStretchAngle = start.footStretchAngle,
-                        footGroundAngle = start.footGroundAngle,
-                    };
-
-                    playData.motions.Add(motion);
+                    playData.motions.Add(new MotionData(start, end));
                 }
             }
 
@@ -1195,31 +1052,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     continue;
                 }
 
-                List<MotionTimeLineRow> rows;
+                List<BoneData> rows;
                 if (!_motionTimelineRowsMap.TryGetValue(name, out rows))
                 {
-                    rows = new List<MotionTimeLineRow>();
+                    rows = new List<BoneData>();
                     _motionTimelineRowsMap[name] = rows;
                 }
 
-                var trans = bone.transform;
-
-                var row = new MotionTimeLineRow
-                {
-                    frame = frame.frameNo,
-                    name = bone.name,
-                    position = trans.position,
-                    rotation = trans.rotation,
-                    scale = trans.scale,
-                    positionInTangents = trans.positionInTangents.ToVector3(),
-                    positionOutTangents = trans.positionOutTangents.ToVector3(),
-                    rotationInTangents = trans.rotationInTangents.ToVector4(),
-                    rotationOutTangents = trans.rotationOutTangents.ToVector4(),
-                    scaleInTangents = trans.scaleInTangents.ToVector3(),
-                    scaleOutTangents = trans.scaleOutTangents.ToVector3(),
-                };
-
-                rows.Add(row);
+                rows.Add(bone);
             }
 
             foreach (var name in MaidCache.ikHoldTypeMap.Keys)
@@ -1230,27 +1070,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     continue;
                 }
 
-                List<IKHoldTimeLineRow> rows;
+                List<BoneData> rows;
                 if (!_ikTimelineRowsMap.TryGetValue(name, out rows))
                 {
-                    rows = new List<IKHoldTimeLineRow>();
+                    rows = new List<BoneData>();
                     _ikTimelineRowsMap[name] = rows;
                 }
 
-                var trans = bone.transform;
-
-                var row = new IKHoldTimeLineRow
-                {
-                    frame = frame.frameNo,
-                    name = bone.name,
-                    position = trans.position,
-                    inTangents = trans.positionInTangents.ToVector3(),
-                    outTangents = trans.positionOutTangents.ToVector3(),
-                    isHold = trans["isHold"].boolValue,
-                    isAnime = trans["isAnime"].boolValue,
-                };
-
-                rows.Add(row);
+                rows.Add(bone);
             }
 
             {
@@ -1258,22 +1085,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (bone != null)
                 {
                     var rows = _groundingTimelineRows;
-
-                    var trans = bone.transform;
-
-                    var row = new GroundingTimeLineRow
-                    {
-                        frame = frame.frameNo,
-                        isGroundingFootL = trans["isGroundingFootL"].boolValue,
-                        isGroundingFootR = trans["isGroundingFootR"].boolValue,
-                        floorHeight = trans["floorHeight"].value,
-                        footBaseOffset = trans["footBaseOffset"].value, 
-                        footStretchHeight = trans["footStretchHeight"].value,
-                        footStretchAngle = trans["footStretchAngle"].value,
-                        footGroundAngle = trans["footGroundAngle"].value,
-                    };
-
-                    rows.Add(row);
+                    rows.Add(bone);
                 }
             }
 

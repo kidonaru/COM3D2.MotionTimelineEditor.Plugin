@@ -85,6 +85,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private List<ValueData> _tangentValues = null;
+        public override ValueData[] tangentValues
+        {
+            get
+            {
+                if (_tangentValues == null)
+                {
+                    _tangentValues = new List<ValueData>();
+                    _tangentValues.AddRange(positionValues);
+                    _tangentValues.AddRange(rotationValues);
+                    _tangentValues.AddRange(colorValues);
+                    _tangentValues.AddRange(new ValueData[] { values[12], values[13] });
+                }
+                return _tangentValues.ToArray();
+            }
+        }
+
         public override Vector3 initialPosition
         {
             get

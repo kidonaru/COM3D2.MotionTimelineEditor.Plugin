@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
-    using SePlayData = MotionPlayData<SoundMotionData>;
+    using SePlayData = PlayDataBase<SoundMotionData>;
 
     public class SeTimeLineRow
     {

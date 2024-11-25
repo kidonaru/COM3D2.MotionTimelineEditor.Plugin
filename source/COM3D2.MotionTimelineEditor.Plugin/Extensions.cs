@@ -612,6 +612,31 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return new Vector4(values[0], values[1], values[2], values[3]);
         }
 
+        public static Quaternion ToQuaternion(this float[] values)
+        {
+            if (values.Length != 4)
+            {
+                PluginUtils.LogError("ToQuaternion: 不正なfloat配列です length={0}", values.Length);
+                return Quaternion.identity;
+            }
+            return new Quaternion(values[0], values[1], values[2], values[3]);
+        }
+
+        public static Color ToColor(this float[] values)
+        {
+            if (values.Length == 4)
+            {
+                return new Color(values[0], values[1], values[2], values[3]);
+            }
+            if (values.Length == 3)
+            {
+                return new Color(values[0], values[1], values[2]);
+            }
+
+            PluginUtils.LogError("ToColor: 不正なfloat配列です length={0}", values.Length);
+            return Color.white;
+        }
+
         public static void RemoveAllButFirst<T>(this List<T> list)
         {
             if (list == null)

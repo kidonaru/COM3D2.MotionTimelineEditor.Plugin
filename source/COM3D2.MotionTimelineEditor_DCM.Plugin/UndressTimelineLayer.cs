@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
-    using UndressPlayData = MotionPlayData<UndressMotionData>;
+    using UndressPlayData = PlayDataBase<UndressMotionData>;
 
     public class UndressTimeLineRow
     {

@@ -32,11 +32,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Dictionary<string, List<TimeLineRow>> _lightTimelineRowsMap = new Dictionary<string, List<TimeLineRow>>();
-        private Dictionary<string, DefaultPlayData> _lightPlayDataMap = new Dictionary<string, DefaultPlayData>();
+        private Dictionary<string, List<BoneData>> _lightTimelineRowsMap = new Dictionary<string, List<BoneData>>();
+        private Dictionary<string, MotionPlayData> _lightPlayDataMap = new Dictionary<string, MotionPlayData>();
 
-        private Dictionary<string, List<TimeLineRow>> _controllerTimelineRowsMap = new Dictionary<string, List<TimeLineRow>>();
-        private Dictionary<string, DefaultPlayData> _controllerPlayDataMap = new Dictionary<string, DefaultPlayData>();
+        private Dictionary<string, List<BoneData>> _controllerTimelineRowsMap = new Dictionary<string, List<BoneData>>();
+        private Dictionary<string, MotionPlayData> _controllerPlayDataMap = new Dictionary<string, MotionPlayData>();
 
         private StageLightTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -169,10 +169,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyLightMotion(DefaultMotionData motion, StageLight light, float lerpTime)
+        private void ApplyLightMotion(MotionData motion, StageLight light, float lerpTime)
         {
             var transform = light.transform;
-            if (light == null || transform == null)
+            var controller = light.controller;
+
+            if (light == null || transform == null || controller == null)
             {
                 return;
             }
@@ -186,60 +188,73 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var t0 = motion.stFrame * timeline.frameDuration;
             var t1 = motion.edFrame * timeline.frameDuration;
 
-            transform.localPosition = PluginUtils.HermiteVector3(
-                t0,
-                t1,
-                stTrans.position,
-                edTrans.position,
-                stTrans.positionOutTangents,
-                edTrans.positionInTangents,
-                lerpTime);
+            if (!controller.autoVisible)
+            {
+                light.visible = stTrans.visible;
+            }
 
-            transform.localRotation = PluginUtils.HermiteQuaternion(
-                t0,
-                t1,
-                stTrans.rotation,
-                edTrans.rotation,
-                stTrans.rotationOutTangents,
-                edTrans.rotationInTangents,
-                lerpTime);
+            if (!controller.autoPosition)
+            {
+                transform.localPosition = PluginUtils.HermiteValues(
+                    t0,
+                    t1,
+                    stTrans.positionValues,
+                    edTrans.positionValues,
+                    lerpTime
+                ).ToVector3();
+            }
 
-            light.color = PluginUtils.HermiteColor(
-                t0,
-                t1,
-                stTrans.color,
-                edTrans.color,
-                stTrans.colorOutTangents,
-                edTrans.colorInTangents,
-                lerpTime);
+            if (!controller.autoRotation)
+            {
+                transform.localRotation = PluginUtils.HermiteValues(
+                    t0,
+                    t1,
+                    stTrans.rotationValues,
+                    edTrans.rotationValues,
+                    lerpTime
+                ).ToQuaternion();
+            }
 
-            light.spotAngle = PluginUtils.HermiteValue(
-                t0,
-                t1,
-                stTrans["spotAngle"],
-                edTrans["spotAngle"],
-                lerpTime);
-            
-            light.spotRange = PluginUtils.HermiteValue(
-                t0,
-                t1,
-                stTrans["spotRange"],
-                edTrans["spotRange"],
-                lerpTime);
+            if (!controller.autoColor)
+            {
+                light.color = PluginUtils.HermiteValues(
+                    t0,
+                    t1,
+                    stTrans.colorValues,
+                    edTrans.colorValues,
+                    lerpTime
+                ).ToColor();
+            }
 
-            light.visible = stTrans.visible;
-            light.rangeMultiplier = stTrans["rangeMultiplier"].value;
-            light.falloffExp = stTrans["falloffExp"].value;
-            light.noiseStrength = stTrans["noiseStrength"].value;
-            light.noiseScale = stTrans["noiseScale"].value;
-            light.coreRadius = stTrans["coreRadius"].value;
-            light.offsetRange = stTrans["offsetRange"].value;
-            light.segmentAngle = stTrans["segmentAngle"].value;
-            light.segmentRange = stTrans["segmentRange"].intValue;
+            if (!controller.autoLightInfo)
+            {
+                light.spotAngle = PluginUtils.HermiteValue(
+                    t0,
+                    t1,
+                    stTrans["spotAngle"],
+                    edTrans["spotAngle"],
+                    lerpTime);
+
+                light.spotRange = PluginUtils.HermiteValue(
+                    t0,
+                    t1,
+                    stTrans["spotRange"],
+                    edTrans["spotRange"],
+                    lerpTime);
+
+                light.rangeMultiplier = stTrans["rangeMultiplier"].value;
+                light.falloffExp = stTrans["falloffExp"].value;
+                light.noiseStrength = stTrans["noiseStrength"].value;
+                light.noiseScale = stTrans["noiseScale"].value;
+                light.coreRadius = stTrans["coreRadius"].value;
+                light.offsetRange = stTrans["offsetRange"].value;
+                light.segmentAngle = stTrans["segmentAngle"].value;
+                light.segmentRange = stTrans["segmentRange"].intValue;
+            }
         }
 
         private void ApplyControllerMotion(
-            DefaultMotionData motion,
+            MotionData motion,
             StageLightController controller,
             float lerpTime)
         {
@@ -254,18 +269,75 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var stTrans = start.transform;
             var edTrans = end.transform;
 
+            var t0 = motion.stFrame * timeline.frameDuration;
+            var t1 = motion.edFrame * timeline.frameDuration;
+
             controller.visible = stTrans.visible;
-            controller.positionMin = stTrans.position;
-            controller.positionMax = stTrans.subPosition;
-            controller.rotationMin = stTrans.eulerAngles;
-            controller.rotationMax = stTrans.subEulerAngles;
-            controller.colorMin = stTrans.color;
-            controller.colorMax = stTrans.subColor;
+
+            controller.positionMin = PluginUtils.HermiteValues(
+                t0,
+                t1,
+                stTrans.positionValues,
+                edTrans.positionValues,
+                lerpTime
+            ).ToVector3();
+
+            controller.positionMax = PluginUtils.HermiteValues(
+                t0,
+                t1,
+                stTrans.subPositionValues,
+                edTrans.subPositionValues,
+                lerpTime
+            ).ToVector3();
+
+            controller.rotationMin = PluginUtils.HermiteValues(
+                t0,
+                t1,
+                stTrans.eulerAnglesValues,
+                edTrans.eulerAnglesValues,
+                lerpTime
+            ).ToVector3();
+
+            controller.rotationMax = PluginUtils.HermiteValues(
+                t0,
+                t1,
+                stTrans.subEulerAnglesValues,
+                edTrans.subEulerAnglesValues,
+                lerpTime
+            ).ToVector3();
+
+            controller.colorMin = PluginUtils.HermiteValues(
+                t0,
+                t1,
+                stTrans.colorValues,
+                edTrans.colorValues,
+                lerpTime
+            ).ToColor();
+
+            controller.colorMax = PluginUtils.HermiteValues(
+                t0,
+                t1,
+                stTrans.subColorValues,
+                edTrans.subColorValues,
+                lerpTime
+            ).ToColor();
 
             var lightInfo = controller.lightInfo;
-            
-            lightInfo.spotAngle = stTrans["spotAngle"].value;
-            lightInfo.spotRange = stTrans["spotRange"].value;
+
+            lightInfo.spotAngle = PluginUtils.HermiteValue(
+                t0,
+                t1,
+                stTrans["spotAngle"],
+                edTrans["spotAngle"],
+                lerpTime);
+
+            lightInfo.spotRange = PluginUtils.HermiteValue(
+                t0,
+                t1,
+                stTrans["spotRange"],
+                edTrans["spotRange"],
+                lerpTime);
+
             lightInfo.rangeMultiplier = stTrans["rangeMultiplier"].value;
             lightInfo.falloffExp = stTrans["falloffExp"].value;
             lightInfo.noiseStrength = stTrans["noiseStrength"].value;
@@ -417,14 +489,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var bone = frame.GetBone(name);
                 if (bone == null) continue;
 
-                List<TimeLineRow> rows;
+                List<BoneData> rows;
                 if (!_lightTimelineRowsMap.TryGetValue(name, out rows))
                 {
-                    rows = new List<TimeLineRow>();
+                    rows = new List<BoneData>();
                     _lightTimelineRowsMap[name] = rows;
                 }
 
-                rows.Add(new TimeLineRow(bone));
+                rows.Add(bone);
             }
 
             foreach (var name in stageLightManager.controllerNames)
@@ -432,14 +504,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var bone = frame.GetBone(name);
                 if (bone == null) continue;
 
-                List<TimeLineRow> rows;
+                List<BoneData> rows;
                 if (!_controllerTimelineRowsMap.TryGetValue(name, out rows))
                 {
-                    rows = new List<TimeLineRow>();
+                    rows = new List<BoneData>();
                     _controllerTimelineRowsMap[name] = rows;
                 }
 
-                rows.Add(new TimeLineRow(bone));
+                rows.Add(bone);
             }
         }
 
@@ -458,10 +530,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var name = pair.Key;
                 var rows = pair.Value;
 
-                DefaultPlayData playData;
+                MotionPlayData playData;
                 if (!_lightPlayDataMap.TryGetValue(name, out playData))
                 {
-                    playData = new DefaultPlayData(rows.Count);
+                    playData = new MotionPlayData(rows.Count);
                     _lightPlayDataMap[name] = playData;
                 }
 
@@ -469,7 +541,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var start = rows[i];
                     var end = rows[i + 1];
-                    playData.motions.Add(new DefaultMotionData(start, end));
+                    playData.motions.Add(new MotionData(start, end));
                 }
 
                 playData.Setup(timeline.singleFrameType);
@@ -486,10 +558,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var name = pair.Key;
                 var rows = pair.Value;
 
-                DefaultPlayData playData;
+                MotionPlayData playData;
                 if (!_controllerPlayDataMap.TryGetValue(name, out playData))
                 {
-                    playData = new DefaultPlayData(rows.Count);
+                    playData = new MotionPlayData(rows.Count);
                     _controllerPlayDataMap[name] = playData;
                 }
 
@@ -497,7 +569,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var start = rows[i];
                     var end = rows[i + 1];
-                    playData.motions.Add(new DefaultMotionData(start, end));
+                    playData.motions.Add(new MotionData(start, end));
                 }
 
                 playData.Setup(timeline.singleFrameType);

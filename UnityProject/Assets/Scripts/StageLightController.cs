@@ -119,7 +119,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var index = lights.Count;
             var light = new GameObject("StageLight").AddComponent<StageLight>();
-            light.groupIndex = groupIndex;
+            light.controller = this;
             light.index = index;
             light.transform.SetParent(transform);
             light.transform.localPosition = StageLight.DefaultPosition;

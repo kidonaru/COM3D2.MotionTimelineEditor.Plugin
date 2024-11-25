@@ -10,7 +10,7 @@ using UnityEngine;
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
     using MyTransform = DanceCameraMotion.Plugin.MyTransform;
-    using LightPlayData = MotionPlayData<LightMotionData>;
+    using LightPlayData = PlayDataBase<LightMotionData>;
 
     public class LightTimeLineRow
     {

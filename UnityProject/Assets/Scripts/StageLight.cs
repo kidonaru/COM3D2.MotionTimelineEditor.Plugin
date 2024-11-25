@@ -9,17 +9,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public class StageLight : MonoBehaviour
     {
         [SerializeField]
-        private int _groupIndex = 0;
-        public int groupIndex
+        public StageLightController _controller;
+        public StageLightController controller
         {
             get
             {
-                return _groupIndex;
+                return _controller;
             }
             set
             {
-                if (_groupIndex == value) return;
-                _groupIndex = value;
+                if (_controller == value) return;
+                _controller = value;
                 UpdateName();
             }
         }
@@ -243,6 +243,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     _meshObject.SetActive(value);
                 }
+            }
+        }
+
+        public int groupIndex
+        {
+            get
+            {
+                if (_controller != null)
+                {
+                    return _controller.groupIndex;
+                }
+                return 0;
             }
         }
 

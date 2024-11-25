@@ -69,6 +69,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public override bool hasTangent
+        {
+            get
+            {
+                return true;
+            }
+        }
+
         public override ValueData[] positionValues
         {
             get
@@ -122,6 +130,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 return values[20];
+            }
+        }
+
+        private List<ValueData> _tangentValues = null;
+        public override ValueData[] tangentValues
+        {
+            get
+            {
+                if (_tangentValues == null)
+                {
+                    _tangentValues = new List<ValueData>();
+                    _tangentValues.AddRange(positionValues);
+                    _tangentValues.AddRange(subPositionValues);
+                    _tangentValues.AddRange(eulerAnglesValues);
+                    _tangentValues.AddRange(subEulerAnglesValues);
+                    _tangentValues.AddRange(colorValues);
+                    _tangentValues.AddRange(subColorValues);
+                    _tangentValues.AddRange(new ValueData[] { values[21], values[22] });
+                }
+                return _tangentValues.ToArray();
             }
         }
 
