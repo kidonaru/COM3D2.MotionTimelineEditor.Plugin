@@ -1,14 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Xml.Linq;
-using COM3D2.DanceCameraMotion.Plugin;
-using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using PostEffectPlayData = PlayDataBase<PostEffectMotionData>;
 
@@ -372,8 +367,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private void BuildPlayData(bool forOutput)
         {
-            PluginUtils.LogDebug("BuildPlayData");
-
             foreach (var playData in _playDataMap.Values)
             {
                 playData.ResetIndex();
@@ -384,6 +377,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 var name = pair.Key;
                 var rows = pair.Value;
+
+                if (rows.Count == 0)
+                {
+                    continue;
+                }
 
                 PostEffectPlayData playData;
                 if (!_playDataMap.TryGetValue(name, out playData))
@@ -420,7 +418,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            _timelineRowsMap.Clear();
+            foreach (var rows in _timelineRowsMap.Values)
+            {
+                rows.Clear();
+            }
 
             foreach (var keyFrame in keyFrames)
             {
@@ -437,11 +438,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public override void OutputDCM(XElement songElement)
         {
             // do nothing
-        }
-
-        public override float CalcEasingValue(float t, int easing)
-        {
-            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
         private GUIComboBox<MaidCache> _maidComboBox = new GUIComboBox<MaidCache>

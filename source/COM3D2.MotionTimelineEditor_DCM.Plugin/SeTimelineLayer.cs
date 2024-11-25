@@ -226,8 +226,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private void BuildPlayData(bool forOutput)
         {
-            PluginUtils.LogDebug("BuildPlayData");
-
             _playData.ResetIndex();
             _playData.motions.Clear();
 
@@ -310,11 +308,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 PluginUtils.LogException(e);
                 PluginUtils.ShowDialog("効果音の出力に失敗しました");
             }
-        }
-
-        public override float CalcEasingValue(float t, int easing)
-        {
-            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
         private GUIComboBox<string> _seNameComboBox = new GUIComboBox<string>

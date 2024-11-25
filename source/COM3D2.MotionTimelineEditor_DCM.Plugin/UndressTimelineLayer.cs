@@ -199,7 +199,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            _timelineRowsMap.Clear();
+            foreach (var rows in _timelineRowsMap.Values)
+            {
+                rows.Clear();
+            }
 
             foreach (var keyFrame in keyFrames)
             {
@@ -252,12 +255,21 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private void BuildPlayData()
         {
-            _playDataMap.Clear();
+            foreach (var playData in _playDataMap.Values)
+            {
+                playData.ResetIndex();
+                playData.motions.Clear();
+            }
 
             foreach (var pair in _timelineRowsMap)
             {
                 var name = pair.Key;
                 var rows = pair.Value;
+
+                if (rows.Count == 0)
+                {
+                    continue;
+                }
 
                 UndressPlayData playData;
                 if (!_playDataMap.TryGetValue(name, out playData))
@@ -287,11 +299,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                         prevMotion.edFrame = row.frame;
                     }
                 }
-            }
 
-            foreach (var pair in _playDataMap)
-            {
-                var playData = pair.Value;
                 playData.Setup(SingleFrameType.None);
             }
         }
@@ -369,11 +377,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 PluginUtils.LogException(e);
                 PluginUtils.ShowDialog("脱衣モーションの出力に失敗しました");
             }
-        }
-
-        public override float CalcEasingValue(float t, int easing)
-        {
-            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
         private enum TabType

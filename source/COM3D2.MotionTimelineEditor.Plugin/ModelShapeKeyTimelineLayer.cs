@@ -4,30 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using COM3D2.DanceCameraMotion.Plugin;
-using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using ModelShapeKeyPlayData = PlayDataBase<ModelShapeKeyMotionData>;
-
-    public class ModelShapeKeyTimeLineRow
-    {
-        public int frame;
-        public string name;
-        public float weight;
-        public int easing;
-    }
-
-    public class ModelShapeKeyMotionData : MotionDataBase
-    {
-        public string name;
-        public float stWeight;
-        public float edWeight;
-        public int easing;
-    }
-
     [TimelineLayerDesc("モデルシェイプ", 23)]
     public partial class ModelShapeKeyTimelineLayer : ModelTimelineLayerBase
     {
@@ -47,8 +27,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private Dictionary<string, List<ModelShapeKeyTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<ModelShapeKeyTimeLineRow>>();
-        private Dictionary<string, ModelShapeKeyPlayData> _playDataMap = new Dictionary<string, ModelShapeKeyPlayData>();
+        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
+        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
 
         private ModelShapeKeyTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -134,10 +114,16 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private void ApplyMotion(ModelShapeKeyMotionData motion, ModelBlendShape blendShape, float lerpTime)
+        private void ApplyMotion(MotionData motion, ModelBlendShape blendShape, float lerpTime)
         {
-            float easingTime = CalcEasingValue(lerpTime, motion.easing);
-            var weight = Mathf.Lerp(motion.stWeight, motion.edWeight, easingTime);
+            var start = motion.start;
+            var end = motion.end;
+
+            var stTrans = start.transform;
+            var edTrans = end.transform;
+
+            float easingTime = CalcEasingValue(lerpTime, stTrans.easing);
+            var weight = Mathf.Lerp(stTrans["weight"].value, edTrans["weight"].value, easingTime);
             blendShape.weight = weight;
         }
 
@@ -221,13 +207,21 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private void BuildPlayData(bool forOutput)
         {
-            PluginUtils.LogDebug("BuildPlayData");
-            _playDataMap.Clear();
+            foreach (var playData in _playDataMap.Values)
+            {
+                playData.ResetIndex();
+                playData.motions.Clear();
+            }
 
             foreach (var pair in _timelineRowsMap)
             {
                 var name = pair.Key;
                 var rows = pair.Value;
+
+                if (rows.Count == 0)
+                {
+                    continue;
+                }
 
                 var blendShape = modelManager.GetBlendShape(name);
                 if (blendShape == null)
@@ -235,54 +229,30 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     continue;
                 }
 
-                ModelShapeKeyPlayData playData;
+                MotionPlayData playData;
                 if (!_playDataMap.TryGetValue(name, out playData))
                 {
-                    playData = new ModelShapeKeyPlayData
-                    {
-                        motions = new List<ModelShapeKeyMotionData>(rows.Count),
-                    };
+                    playData = new MotionPlayData(rows.Count);
                     _playDataMap[name] = playData;
                 }
-
-                playData.ResetIndex();
-                playData.motions.Clear();
 
                 for (var i = 0; i < rows.Count - 1; i++)
                 {
                     var start = rows[i];
                     var end = rows[i + 1];
-
-                    var stFrame = start.frame;
-                    var edFrame = end.frame;
-
-                    var motion = new ModelShapeKeyMotionData
-                    {
-                        name = name,
-                        stFrame = stFrame,
-                        edFrame = edFrame,
-
-                        stWeight = start.weight,
-                        edWeight = end.weight,
-                        easing = end.easing,
-                    };
-
-                    playData.motions.Add(motion);
+                    playData.motions.Add(new MotionData(start, end));
                 }
-            }
 
-            foreach (var pair in _playDataMap)
-            {
-                var name = pair.Key;
-                var playData = pair.Value;
                 playData.Setup(timeline.singleFrameType);
-                //PluginUtils.LogDebug("PlayData: name={0}, count={1}", name, playData.motions.Count);
             }
         }
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            _timelineRowsMap.Clear();
+            foreach (var rows in _timelineRowsMap.Values)
+            {
+                rows.Clear();
+            }
 
             foreach (var keyFrame in keyFrames)
             {
@@ -306,24 +276,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     continue;
                 }
 
-                List<ModelShapeKeyTimeLineRow> rows;
+                List<BoneData> rows;
                 if (!_timelineRowsMap.TryGetValue(name, out rows))
                 {
-                    rows = new List<ModelShapeKeyTimeLineRow>();
+                    rows = new List<BoneData>();
                     _timelineRowsMap[name] = rows;
                 }
 
-                var trans = bone.transform;
-
-                var row = new ModelShapeKeyTimeLineRow
-                {
-                    frame = frame.frameNo,
-                    name = bone.name,
-                    weight = trans["weight"].value,
-                    easing = trans.easing
-                };
-
-                rows.Add(row);
+                rows.Add(bone);
             }
         }
 

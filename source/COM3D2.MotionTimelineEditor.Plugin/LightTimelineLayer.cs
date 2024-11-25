@@ -4,12 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MyTransform = DanceCameraMotion.Plugin.MyTransform;
     using LightPlayData = PlayDataBase<LightMotionData>;
 
     public class LightTimeLineRow
@@ -307,13 +305,21 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private void BuildPlayData(bool forOutput)
         {
-            PluginUtils.LogDebug("BuildPlayData");
-            _playDataMap.Clear();
+            foreach (var playData in _playDataMap.Values)
+            {
+                playData.ResetIndex();
+                playData.motions.Clear();
+            }
 
             foreach (var pair in _timelineRowsMap)
             {
                 var name = pair.Key;
                 var rows = pair.Value;
+
+                if (rows.Count == 0)
+                {
+                    continue;
+                }
 
                 var light = lightManager.GetLight(name);
                 if (light == null || light.light == null)
@@ -330,9 +336,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     };
                     _playDataMap[name] = playData;
                 }
-
-                playData.ResetIndex();
-                playData.motions.Clear();
 
                 for (var i = 0; i < rows.Count - 1; i++)
                 {
@@ -352,20 +355,17 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                     playData.motions.Add(motion);
                 }
-            }
 
-            foreach (var pair in _playDataMap)
-            {
-                var name = pair.Key;
-                var playData = pair.Value;
                 playData.Setup(timeline.singleFrameType);
-                //PluginUtils.LogDebug("PlayData: name={0}, count={1}", name, playData.motions.Count);
             }
         }
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            _timelineRowsMap.Clear();
+            foreach (var rows in _timelineRowsMap.Values)
+            {
+                rows.Clear();
+            }
 
             foreach (var keyFrame in keyFrames)
             {

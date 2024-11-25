@@ -1,14 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Xml.Linq;
-using COM3D2.DanceCameraMotion.Plugin;
-using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using AttachPoint = PhotoTransTargetObject.AttachPoint;
 
@@ -16,11 +10,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
     {
         protected ModelTimelineLayerBase(int slotNo) : base(slotNo)
         {
-        }
-
-        public override float CalcEasingValue(float t, int easing)
-        {
-            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
         private List<GUIComboBox<string>> _pluginComboBoxList = new List<GUIComboBox<string>>();

@@ -1,18 +1,11 @@
-using COM3D2.DanceCameraMotion.Plugin;
-using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public abstract class LightTimelineLayerBase : TimelineLayerBase
     {
         protected LightTimelineLayerBase(int slotNo) : base(slotNo)
         {
-        }
-
-        public override float CalcEasingValue(float t, int easing)
-        {
-            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
         protected void DrawLightManage(GUIView view)

@@ -4,11 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using COM3D2.DanceCameraMotion.Plugin;
-using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using VoicePlayData = PlayDataBase<VoiceMotionData>;
 
@@ -225,8 +223,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private void BuildPlayData(bool forOutput)
         {
-            PluginUtils.LogDebug("BuildPlayData");
-
             var maid = this.maid;
             if (maid == null)
             {
@@ -332,11 +328,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override float CalcEasingValue(float t, int easing)
-        {
-            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
-        }
-
         public override void DrawWindow(GUIView view)
         {
             if (maidCache == null)
@@ -437,7 +428,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                         GameMain.Instance.SysDlg.Close();
 
                         PluginUtils.Log("スクリプト一覧取得中...");
-                        string[] array = MyHelper.GetFileListAtExtension(".ks");
+                        string[] array = GetFileListAtExtension(".ks");
                         //string[] array = new string[] { "yotogi\\24220_【カラオケ】ハーレム後背位\\a1\\a1_sya_07620a.ks" };
                         ScriptLoader.OutputVoiceInfo(array);
 
@@ -452,6 +443,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 }
             }
             view.EndLayout();
+        }
+
+        public static string[] GetFileListAtExtension(string extention)
+        {
+            return GameUty.FileSystem.GetFileListAtExtension(extention).Concat(GameUty.FileSystemOld.GetFileListAtExtension(extention)).ToArray();
         }
 
         public override ITransformData CreateTransformData(string name)

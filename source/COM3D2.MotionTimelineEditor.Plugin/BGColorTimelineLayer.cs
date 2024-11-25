@@ -4,11 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using COM3D2.DanceCameraMotion.Plugin;
-using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
     using BGColorPlayData = PlayDataBase<BGColorMotionData>;
 
@@ -193,8 +191,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private void BuildPlayData(bool forOutput)
         {
-            PluginUtils.LogDebug("BuildPlayData");
-
             _playData.ResetIndex();
             _playData.motions.Clear();
 
@@ -278,11 +274,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 PluginUtils.LogException(e);
                 PluginUtils.ShowDialog("背景色チェンジの出力に失敗しました");
             }
-        }
-
-        public override float CalcEasingValue(float t, int easing)
-        {
-            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
         private ColorFieldCache _colorFieldValue = new ColorFieldCache("Color", false);

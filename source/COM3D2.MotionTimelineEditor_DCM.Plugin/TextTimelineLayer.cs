@@ -343,7 +343,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            _timelineRowsMap.Clear();
+            foreach (var rows in _timelineRowsMap.Values)
+            {
+                rows.Clear();
+            }
 
             foreach (var keyFrame in keyFrames)
             {
@@ -399,13 +402,21 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private void BuildPlayData(bool forOutput)
         {
-            PluginUtils.LogDebug("BuildPlayData");
-            _playDataMap.Clear();
+            foreach (var playData in _playDataMap.Values)
+            {
+                playData.ResetIndex();
+                playData.motions.Clear();
+            }
 
             foreach (var pair in _timelineRowsMap)
             {
                 var name = pair.Key;
                 var rows = pair.Value;
+
+                if (rows.Count == 0)
+                {
+                    continue;
+                }
 
                 TextPlayData playData;
                 if (!_playDataMap.TryGetValue(name, out playData))
@@ -416,9 +427,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     };
                     _playDataMap[name] = playData;
                 }
-
-                playData.ResetIndex();
-                playData.motions.Clear();
 
                 for (var i = 0; i < rows.Count - 1; i++)
                 {
@@ -438,14 +446,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                     playData.motions.Add(motion);
                 }
-            }
 
-            foreach (var pair in _playDataMap)
-            {
-                var name = pair.Key;
-                var playData = pair.Value;
                 playData.Setup(timeline.singleFrameType);
-                //PluginUtils.LogDebug("PlayData: name={0}, count={1}", name, playData.motions.Count);
             }
         }
 
@@ -530,11 +532,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 PluginUtils.LogException(e);
                 PluginUtils.ShowDialog("テキストチェンジの出力に失敗しました");
             }
-        }
-
-        public override float CalcEasingValue(float t, int easing)
-        {
-            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
         private GUIComboBox<string> _boneNameComboBox = new GUIComboBox<string>

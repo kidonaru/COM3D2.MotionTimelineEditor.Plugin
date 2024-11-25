@@ -4,13 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using TimelineMotionEasing = DanceCameraMotion.Plugin.TimelineMotionEasing;
-    using EasingType = DanceCameraMotion.Plugin.EasingType;
     using EyesPlayData = PlayDataBase<EyesMotionData>;
 
     public enum MotionEyesType
@@ -119,7 +116,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         private Dictionary<string, List<EyesTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<EyesTimeLineRow>>();
         private Dictionary<string, EyesPlayData> _playDataMap = new Dictionary<string, EyesPlayData>();
         private List<EyesMotionData> _dcmOutputMotions = new List<EyesMotionData>(128);
-        private DanceCameraMotion.Plugin.MaidManager _dcmMaidManager = new DanceCameraMotion.Plugin.MaidManager();
 
         private EyesTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -404,7 +400,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            _timelineRowsMap.Clear();
+            foreach (var rows in _timelineRowsMap.Values)
+            {
+                rows.Clear();
+            }
 
             foreach (var keyFrame in keyFrames)
             {
@@ -474,12 +473,21 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         
         private void BuildPlayData()
         {
-            _playDataMap.Clear();
+            foreach (var playData in _playDataMap.Values)
+            {
+                playData.ResetIndex();
+                playData.motions.Clear();
+            }
 
             foreach (var pair in _timelineRowsMap)
             {
                 var name = pair.Key;
                 var rows = pair.Value;
+
+                if (rows.Count == 0)
+                {
+                    continue;
+                }
 
                 EyesPlayData playData;
                 if (!_playDataMap.TryGetValue(name, out playData))
@@ -519,10 +527,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                         prevMotion.endVertical = row.vertical;
                     }
                 }
-            }
 
-            foreach (var playData in _playDataMap.Values)
-            {
                 playData.Setup(SingleFrameType.None);
             }
         }
@@ -610,11 +615,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 PluginUtils.LogException(e);
                 PluginUtils.ShowDialog("瞳モーションの出力に失敗しました");
             }
-        }
-
-        public override float CalcEasingValue(float t, int easing)
-        {
-            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
         private Texture2D _eyesPositionTex = null;

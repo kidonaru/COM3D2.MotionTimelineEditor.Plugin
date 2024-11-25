@@ -654,6 +654,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             list.Clear();
             list.Add(first);
         }
+
+        public static float GetRotationZ(this Camera camera)
+        {
+            return camera.transform.eulerAngles.z;
+        }
+
+        public static void SetRotationZ(this Camera camera, float z)
+        {
+            Vector3 eulerAngles = camera.transform.eulerAngles;
+            eulerAngles.z = z;
+            camera.transform.eulerAngles = eulerAngles;
+        }
     }
 
 }

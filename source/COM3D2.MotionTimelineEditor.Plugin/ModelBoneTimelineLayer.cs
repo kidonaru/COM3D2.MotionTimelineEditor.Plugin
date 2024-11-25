@@ -4,31 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using COM3D2.DanceCameraMotion.Plugin;
-using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using ModelBonePlayData = PlayDataBase<ModelBoneMotionData>;
-
-    public class ModelBoneTimeLineRow
-    {
-        public int frame;
-        public string name;
-        public Vector3 position;
-        public Vector3 rotation;
-        public Vector3 scale;
-        public int easing;
-    }
-
-    public class ModelBoneMotionData : MotionDataBase
-    {
-        public string name;
-        public MyTransform myTm;
-        public int easing;
-    }
-
     [TimelineLayerDesc("モデルボーン", 22)]
     public partial class ModelBoneTimelineLayer : ModelTimelineLayerBase
     {
@@ -48,8 +27,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private Dictionary<string, List<ModelBoneTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<ModelBoneTimeLineRow>>();
-        private Dictionary<string, ModelBonePlayData> _playDataMap = new Dictionary<string, ModelBonePlayData>();
+        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
+        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
 
         private ModelBoneTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -129,17 +108,23 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private void ApplyMotion(ModelBoneMotionData motion, Transform transform, float lerpFrame)
+        private void ApplyMotion(MotionData motion, Transform transform, float lerpFrame)
         {
             if (transform == null)
             {
                 return;
             }
 
-            float easingTime = CalcEasingValue(lerpFrame, motion.easing);
-            transform.localPosition = Vector3.Lerp(motion.myTm.stPos, motion.myTm.edPos, easingTime);
-            transform.localRotation = Quaternion.Euler(Vector3.Lerp(motion.myTm.stRot, motion.myTm.edRot, easingTime));
-            transform.localScale = Vector3.Lerp(motion.myTm.stSca, motion.myTm.edSca, easingTime);
+            var start = motion.start;
+            var end = motion.end;
+
+            var stTrans = start.transform;
+            var edTrans = end.transform;
+
+            float easingTime = CalcEasingValue(lerpFrame, stTrans.easing);
+            transform.localPosition = Vector3.Lerp(stTrans.position, edTrans.position, easingTime);
+            transform.localRotation = Quaternion.Euler(Vector3.Lerp(stTrans.eulerAngles, edTrans.eulerAngles, easingTime));
+            transform.localScale = Vector3.Lerp(stTrans.scale, edTrans.scale, easingTime);
         }
 
         public override void OnModelAdded(StudioModelStat model)
@@ -224,13 +209,21 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private void BuildPlayData(bool forOutput)
         {
-            PluginUtils.LogDebug("BuildPlayData");
-            _playDataMap.Clear();
+            foreach (var playData in _playDataMap.Values)
+            {
+                playData.ResetIndex();
+                playData.motions.Clear();
+            }
 
             foreach (var pair in _timelineRowsMap)
             {
                 var name = pair.Key;
                 var rows = pair.Value;
+
+                if (rows.Count == 0)
+                {
+                    continue;
+                }
 
                 var bone = modelManager.GetBone(name);
                 if (bone == null)
@@ -238,60 +231,30 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     continue;
                 }
 
-                ModelBonePlayData playData;
+                MotionPlayData playData;
                 if (!_playDataMap.TryGetValue(name, out playData))
                 {
-                    playData = new ModelBonePlayData
-                    {
-                        motions = new List<ModelBoneMotionData>(rows.Count),
-                    };
+                    playData = new MotionPlayData(rows.Count);
                     _playDataMap[name] = playData;
                 }
-
-                playData.ResetIndex();
-                playData.motions.Clear();
 
                 for (var i = 0; i < rows.Count - 1; i++)
                 {
                     var start = rows[i];
                     var end = rows[i + 1];
-
-                    var stFrame = start.frame;
-                    var edFrame = end.frame;
-
-                    var motion = new ModelBoneMotionData
-                    {
-                        name = name,
-                        stFrame = stFrame,
-                        edFrame = edFrame,
-                        myTm = new MyTransform
-                        {
-                            stPos = start.position,
-                            stRot = start.rotation,
-                            stSca = start.scale,
-                            edPos = end.position,
-                            edRot = end.rotation,
-                            edSca = end.scale,
-                        },
-                        easing = end.easing,
-                    };
-
-                    playData.motions.Add(motion);
+                    playData.motions.Add(new MotionData(start, end));
                 }
-            }
 
-            foreach (var pair in _playDataMap)
-            {
-                var name = pair.Key;
-                var playData = pair.Value;
                 playData.Setup(timeline.singleFrameType);
-                //PluginUtils.LogDebug("PlayData: name={0}, count={1}", name, playData.motions.Count);
             }
         }
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            _timelineRowsMap.Clear();
+            foreach (var rows in _timelineRowsMap.Values)
+            {
+                rows.Clear();
+            }
 
             foreach (var keyFrame in keyFrames)
             {
@@ -315,26 +278,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     continue;
                 }
 
-                List<ModelBoneTimeLineRow> rows;
+                List<BoneData> rows;
                 if (!_timelineRowsMap.TryGetValue(name, out rows))
                 {
-                    rows = new List<ModelBoneTimeLineRow>();
+                    rows = new List<BoneData>();
                     _timelineRowsMap[name] = rows;
                 }
 
-                var trans = bone.transform;
-
-                var row = new ModelBoneTimeLineRow
-                {
-                    frame = frame.frameNo,
-                    name = bone.name,
-                    position = trans.position,
-                    rotation = trans.eulerAngles,
-                    scale = trans.scale,
-                    easing = trans.easing
-                };
-
-                rows.Add(row);
+                rows.Add(bone);
             }
         }
 

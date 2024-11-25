@@ -778,8 +778,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void BuildPlayData(bool forOutput)
         {
-            PluginUtils.LogDebug("BuildPlayData");
-            _ikPlayDataMap.Clear();
+            foreach (var playData in _motionPlayDataMap.Values)
+            {
+                playData.ResetIndex();
+                playData.motions.Clear();
+            }
+
+            foreach (var playData in _ikPlayDataMap.Values)
+            {
+                playData.ResetIndex();
+                playData.motions.Clear();
+            }
+
+            _groundingPlayData.ResetIndex();
+            _groundingPlayData.motions.Clear();
+
+            foreach (var playData in _fingerBlendPlayDataMap.Values)
+            {
+                playData.ResetIndex();
+                playData.motions.Clear();
+            }
 
             foreach (var pair in _motionTimelineRowsMap)
             {
@@ -793,9 +811,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _motionPlayDataMap[name] = playData;
                 }
 
-                playData.ResetIndex();
-                playData.motions.Clear();
-
                 for (var i = 0; i < rows.Count - 1; i++)
                 {
                     var start = rows[i];
@@ -803,11 +818,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     playData.motions.Add(new MotionData(start, end));
                 }
-            }
 
-            foreach (var pair in _motionPlayDataMap)
-            {
-                var playData = pair.Value;
                 playData.Setup(timeline.singleFrameType);
             }
 
@@ -823,20 +834,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _ikPlayDataMap[name] = playData;
                 }
 
-                playData.ResetIndex();
-                playData.motions.Clear();
-
                 for (var i = 0; i < rows.Count - 1; i++)
                 {
                     var start = rows[i];
                     var end = rows[i + 1];
                     playData.motions.Add(new MotionData(start, end));
                 }
-            }
 
-            foreach (var pair in _ikPlayDataMap)
-            {
-                var playData = pair.Value;
                 playData.Setup(timeline.singleFrameType);
             }
 
@@ -844,18 +848,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var rows = _groundingTimelineRows;
                 var playData = _groundingPlayData;
 
-                playData.ResetIndex();
-                playData.motions.Clear();
-
                 for (var i = 0; i < rows.Count - 1; i++)
                 {
                     var start = rows[i];
                     var end = rows[i + 1];
                     playData.motions.Add(new MotionData(start, end));
                 }
-            }
 
-            _groundingPlayData.Setup(SingleFrameType.None);
+                _groundingPlayData.Setup(SingleFrameType.None);
+            }
 
             foreach (var pair in _fingerBlendTimelineRowsMap)
             {
@@ -871,9 +872,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     };
                     _fingerBlendPlayDataMap[name] = playData;
                 }
-
-                playData.ResetIndex();
-                playData.motions.Clear();
 
                 for (var i = 0; i < rows.Count - 1; i++)
                 {
@@ -1232,11 +1230,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 PluginUtils.LogException(e);
                 PluginUtils.ShowDialog("モーションの出力に失敗しました");
             }
-        }
-
-        public override float CalcEasingValue(float t, int easing)
-        {
-            return t;
         }
 
         private GUIComboBox<TransformEditType> _transComboBox = new GUIComboBox<TransformEditType>

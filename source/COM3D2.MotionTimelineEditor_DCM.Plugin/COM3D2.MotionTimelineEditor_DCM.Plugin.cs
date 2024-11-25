@@ -1,4 +1,5 @@
 using System;
+using COM3D2.DanceCameraMotion.Plugin;
 using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 using UnityInjector;
@@ -40,54 +41,25 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private void Initialize()
         {
+            TimelineLayerBase.EasingFunction = CalcEasingValue;
+
             timelineManager.RegisterLayer(
                 typeof(MorphTimelineLayer), MorphTimelineLayer.Create
-            );
-            timelineManager.RegisterLayer(
-                typeof(MoveTimelineLayer), MoveTimelineLayer.Create
-            );
-            timelineManager.RegisterLayer(
-                typeof(EyesTimelineLayer), EyesTimelineLayer.Create
-            );
-            timelineManager.RegisterLayer(
-                typeof(ShapeKeyTimelineLayer), ShapeKeyTimelineLayer.Create
-            );
-            timelineManager.RegisterLayer(
-                typeof(VoiceTimelineLayer), VoiceTimelineLayer.Create
             );
             timelineManager.RegisterLayer(
                 typeof(UndressTimelineLayer), UndressTimelineLayer.Create
             );
             timelineManager.RegisterLayer(
-                typeof(CameraTimelineLayer), CameraTimelineLayer.Create
-            );
-            timelineManager.RegisterLayer(
-                typeof(ModelTimelineLayer), ModelTimelineLayer.Create
-            );
-            timelineManager.RegisterLayer(
-                typeof(ModelBoneTimelineLayer), ModelBoneTimelineLayer.Create
-            );
-            timelineManager.RegisterLayer(
-                typeof(ModelShapeKeyTimelineLayer), ModelShapeKeyTimelineLayer.Create
-            );
-            timelineManager.RegisterLayer(
-                typeof(BGTimelineLayer), BGTimelineLayer.Create
-            );
-            timelineManager.RegisterLayer(
-                typeof(BGColorTimelineLayer), BGColorTimelineLayer.Create
-            );
-            timelineManager.RegisterLayer(
-                typeof(LightTimelineLayer), LightTimelineLayer.Create
-            );
-            timelineManager.RegisterLayer(
                 typeof(SeTimelineLayer), SeTimelineLayer.Create
-            );
-            timelineManager.RegisterLayer(
-                typeof(PostEffectTimelineLayer), PostEffectTimelineLayer.Create
             );
             timelineManager.RegisterLayer(
                 typeof(TextTimelineLayer), TextTimelineLayer.Create
             );
+        }
+
+        public static float CalcEasingValue(float t, int easing)
+        {
+            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
     }
 }

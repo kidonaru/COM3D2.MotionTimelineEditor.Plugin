@@ -65,48 +65,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BGColorTimelineLayer.cs" />
-    <Compile Include="BGTimelineLayer.cs" />
-    <Compile Include="CameraTimelineLayer.cs" />
     <Compile Include="COM3D2.MotionTimelineEditor_DCM.Plugin.cs" />
     <Compile Include="DCMUtils.cs" />
-    <Compile Include="EyesTimelineLayer.cs" />
-    <Compile Include="LightTimelineLayer.cs" />
-    <Compile Include="LightTimelineLayerBase.cs" />
-    <Compile Include="ModelBoneMenuItem.cs" />
-    <Compile Include="ModelBoneTimelineLayer.cs" />
-    <Compile Include="ModelShapeKeyTimelineLayer.cs" />
-    <Compile Include="ModelTimelineLayer.cs" />
-    <Compile Include="ModelTimelineLayerBase.cs" />
     <Compile Include="MorphTimelineLayer.cs" />
     <Compile Include="MorphUtils.cs" />
-    <Compile Include="MoveTimelineLayer.cs" />
     <Compile Include="PluginInfo.cs" />
-    <Compile Include="PostEffectTimelineLayer.cs" />
-    <Compile Include="PostEffectUtils.cs" />
     <Compile Include="SeTimelineLayer.cs" />
-    <Compile Include="ShapeKeyTimelineLayer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TextTimelineLayer.cs" />
-    <Compile Include="TransformDataBG.cs" />
-    <Compile Include="TransformDataBGColor.cs" />
-    <Compile Include="TransformDataCamera.cs" />
-    <Compile Include="TransformDataDepthOfField.cs" />
-    <Compile Include="TransformDataEyes.cs" />
-    <Compile Include="TransformDataLight.cs" />
-    <Compile Include="TransformDataLookAtTarget.cs" />
-    <Compile Include="TransformDataModel.cs" />
-    <Compile Include="TransformDataModelBone.cs" />
     <Compile Include="TransformDataMorph.cs" />
-    <Compile Include="TransformDataMove.cs" />
-    <Compile Include="TransformDataParaffin.cs" />
     <Compile Include="TransformDataSe.cs" />
-    <Compile Include="TransformDataShapeKey.cs" />
     <Compile Include="TransformDataText.cs" />
     <Compile Include="TransformDataUndress.cs" />
-    <Compile Include="TransformDataVoice.cs" />
     <Compile Include="UndressTimelineLayer.cs" />
-    <Compile Include="VoiceTimelineLayer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -4,31 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using COM3D2.DanceCameraMotion.Plugin;
-using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using ModelPlayData = PlayDataBase<ModelMotionData>;
-
-    public class ModelTimeLineRow
-    {
-        public int frame;
-        public string name;
-        public Vector3 position;
-        public Vector3 rotation;
-        public Vector3 scale;
-        public int easing;
-    }
-
-    public class ModelMotionData : MotionDataBase
-    {
-        public string name;
-        public MyTransform myTm;
-        public int easing;
-    }
-
     [TimelineLayerDesc("モデル", 21)]
     public class ModelTimelineLayer : ModelTimelineLayerBase
     {
@@ -48,9 +27,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private Dictionary<string, List<ModelTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<ModelTimeLineRow>>();
-        private Dictionary<string, ModelPlayData> _playDataMap = new Dictionary<string, ModelPlayData>();
-        private List<ModelMotionData> _outputMotions = new List<ModelMotionData>(128);
+        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
+        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
+        private List<MotionData> _outputMotions = new List<MotionData>(128);
 
         private ModelTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -119,17 +98,23 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private void ApplyMotion(ModelMotionData motion, Transform transform, float lerpTime)
+        private void ApplyMotion(MotionData motion, Transform transform, float lerpTime)
         {
             if (transform == null)
             {
                 return;
             }
 
-            float easingTime = CalcEasingValue(lerpTime, motion.easing);
-            transform.localPosition = Vector3.Lerp(motion.myTm.stPos, motion.myTm.edPos, easingTime);
-            transform.localRotation = Quaternion.Euler(Vector3.Lerp(motion.myTm.stRot, motion.myTm.edRot, easingTime));
-            transform.localScale = Vector3.Lerp(motion.myTm.stSca, motion.myTm.edSca, easingTime);
+            var start = motion.start;
+            var end = motion.end;
+
+            var stTrans = start.transform;
+            var edTrans = end.transform;
+
+            float easingTime = CalcEasingValue(lerpTime, stTrans.easing);
+            transform.localPosition = Vector3.Lerp(stTrans.position, edTrans.position, easingTime);
+            transform.localRotation = Quaternion.Euler(Vector3.Lerp(stTrans.eulerAngles, edTrans.eulerAngles, easingTime));
+            transform.localScale = Vector3.Lerp(stTrans.scale, edTrans.scale, easingTime);
         }
 
         public override void OnModelAdded(StudioModelStat model)
@@ -212,38 +197,34 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     continue;
                 }
 
-                List<ModelTimeLineRow> rows;
+                List<BoneData> rows;
                 if (!_timelineRowsMap.TryGetValue(name, out rows))
                 {
-                    rows = new List<ModelTimeLineRow>();
+                    rows = new List<BoneData>();
                     _timelineRowsMap[name] = rows;
                 }
 
-                var trans = bone.transform;
-
-                var row = new ModelTimeLineRow
-                {
-                    frame = frame.frameNo,
-                    name = bone.name,
-                    position = trans.position,
-                    rotation = trans.eulerAngles,
-                    scale = trans.scale,
-                    easing = trans.easing
-                };
-
-                rows.Add(row);
+                rows.Add(bone);
             }
         }
 
         private void BuildPlayData(bool forOutput)
         {
-            PluginUtils.LogDebug("BuildPlayData");
-            _playDataMap.Clear();
+            foreach (var playData in _playDataMap.Values)
+            {
+                playData.ResetIndex();
+                playData.motions.Clear();
+            }
 
             foreach (var pair in _timelineRowsMap)
             {
                 var name = pair.Key;
                 var rows = pair.Value;
+
+                if (rows.Count == 0)
+                {
+                    continue;
+                }
 
                 var model = modelManager.GetModel(name);
                 if (model == null || model.transform == null)
@@ -251,60 +232,30 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     continue;
                 }
 
-                ModelPlayData playData;
+                MotionPlayData playData;
                 if (!_playDataMap.TryGetValue(name, out playData))
                 {
-                    playData = new ModelPlayData
-                    {
-                        motions = new List<ModelMotionData>(rows.Count),
-                    };
+                    playData = new MotionPlayData(rows.Count);
                     _playDataMap[name] = playData;
                 }
-
-                playData.ResetIndex();
-                playData.motions.Clear();
 
                 for (var i = 0; i < rows.Count - 1; i++)
                 {
                     var start = rows[i];
                     var end = rows[i + 1];
-
-                    var stFrame = start.frame;
-                    var edFrame = end.frame;
-
-                    var motion = new ModelMotionData
-                    {
-                        name = name,
-                        stFrame = stFrame,
-                        edFrame = edFrame,
-                        myTm = new MyTransform
-                        {
-                            stPos = start.position,
-                            stRot = start.rotation,
-                            stSca = start.scale,
-                            edPos = end.position,
-                            edRot = end.rotation,
-                            edSca = end.scale,
-                        },
-                        easing = end.easing,
-                    };
-
-                    playData.motions.Add(motion);
+                    playData.motions.Add(new MotionData(start, end));
                 }
-            }
 
-            foreach (var pair in _playDataMap)
-            {
-                var name = pair.Key;
-                var playData = pair.Value;
                 playData.Setup(timeline.singleFrameType);
-                //PluginUtils.LogDebug("PlayData: name={0}, count={1}", name, playData.motions.Count);
             }
         }
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            _timelineRowsMap.Clear();
+            foreach (var rows in _timelineRowsMap.Values)
+            {
+                rows.Clear();
+            }
 
             foreach (var keyFrame in keyFrames)
             {
@@ -319,7 +270,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         }
 
         public void SaveModelMotion(
-            List<ModelMotionData> motions,
+            List<MotionData> motions,
             string filePath)
         {
             var offsetTime = timeline.startOffsetTime;
@@ -331,7 +282,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                             "bezier1,bezier2,bezierType,slotName" +
                             "\r\n");
 
-            Action<ModelMotionData, bool> appendMotion = (motion, isFirst) =>
+            Action<MotionData, bool> appendMotion = (motion, isFirst) =>
             {
                 var model = modelManager.GetModel(motion.name);
                 if (model == null || model.transform == null)
@@ -353,29 +304,35 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     edTime += offsetTime;
                 }
 
+                var start = motion.start;
+                var end = motion.end;
+
+                var stTrans = start.transform;
+                var edTrans = end.transform;
+
                 builder.Append(model.info.fileNameOrId + ",");
                 builder.Append(model.group + ",");
                 builder.Append(stTime.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stPos.x.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stPos.y.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stPos.z.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stRot.x.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stRot.y.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stRot.z.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stSca.x.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stSca.y.ToString("0.000") + ",");
-                builder.Append(motion.myTm.stSca.z.ToString("0.000") + ",");
+                builder.Append(stTrans.position.x.ToString("0.000") + ",");
+                builder.Append(stTrans.position.y.ToString("0.000") + ",");
+                builder.Append(stTrans.position.z.ToString("0.000") + ",");
+                builder.Append(stTrans.eulerAngles.x.ToString("0.000") + ",");
+                builder.Append(stTrans.eulerAngles.y.ToString("0.000") + ",");
+                builder.Append(stTrans.eulerAngles.z.ToString("0.000") + ",");
+                builder.Append(stTrans.scale.x.ToString("0.000") + ",");
+                builder.Append(stTrans.scale.y.ToString("0.000") + ",");
+                builder.Append(stTrans.scale.z.ToString("0.000") + ",");
                 builder.Append(edTime.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edPos.x.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edPos.y.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edPos.z.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edRot.x.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edRot.y.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edRot.z.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edSca.x.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edSca.y.ToString("0.000") + ",");
-                builder.Append(motion.myTm.edSca.z.ToString("0.000") + ",");
-                builder.Append(motion.easing + ",");
+                builder.Append(edTrans.position.x.ToString("0.000") + ",");
+                builder.Append(edTrans.position.y.ToString("0.000") + ",");
+                builder.Append(edTrans.position.z.ToString("0.000") + ",");
+                builder.Append(edTrans.eulerAngles.x.ToString("0.000") + ",");
+                builder.Append(edTrans.eulerAngles.y.ToString("0.000") + ",");
+                builder.Append(edTrans.eulerAngles.z.ToString("0.000") + ",");
+                builder.Append(edTrans.scale.x.ToString("0.000") + ",");
+                builder.Append(edTrans.scale.y.ToString("0.000") + ",");
+                builder.Append(edTrans.scale.z.ToString("0.000") + ",");
+                builder.Append(stTrans.easing + ",");
                 builder.Append(0 + ","); // maidSlotNo
                 builder.Append("" + ","); // option
                 builder.Append((int) model.info.type + ",");

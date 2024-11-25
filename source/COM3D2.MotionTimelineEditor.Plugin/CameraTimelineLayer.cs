@@ -4,15 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using MyHelper = DanceCameraMotion.Plugin.MyHelper;
-    using TimelineMotionEasing = DanceCameraMotion.Plugin.TimelineMotionEasing;
-    using EasingType = DanceCameraMotion.Plugin.EasingType;
-
     [TimelineLayerDesc("カメラ", 20)]
     public class CameraTimelineLayer : TimelineLayerBase
     {
@@ -175,7 +170,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 viewAngle = 35;
             }
 
-            var uoCamera = MyHelper.GetUOCamera();
+            var uoCamera = GetUOCamera();
             uoCamera.SetTargetPos(position);
             uoCamera.SetDistance(distance);
             uoCamera.SetAroundAngle(new Vector2(rotation.y, rotation.x));
@@ -190,18 +185,23 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             //PluginUtils.LogDebug("ApplyMotion: position={0}, rotation={1}, distance={2}, viewAngle={3}", position, rotation, distance, viewAngle);
         }
 
+        public static UltimateOrbitCamera GetUOCamera()
+        {
+            return Camera.main.GetComponent<UltimateOrbitCamera>();
+        }
+
         public override void UpdateFrame(FrameData frame)
         {
-            var uOCamera = MyHelper.GetUOCamera();
-            var target = uOCamera.target;
-            var angle = uOCamera.GetAroundAngle();
+            var uoCamera = GetUOCamera();
+            var target = uoCamera.target;
+            var angle = uoCamera.GetAroundAngle();
             var rotZ = Camera.main.GetRotationZ();
 
             var trans = CreateTransformData(CameraBoneName);
             trans.position = target.position;
             trans.eulerAngles = new Vector3(angle.y, angle.x, rotZ);
             trans.easing = GetEasing(frame.frameNo, CameraBoneName);
-            trans.scale = new Vector3(uOCamera.distance, Camera.main.fieldOfView, 0);
+            trans.scale = new Vector3(uoCamera.distance, Camera.main.fieldOfView, 0);
 
             var bone = frame.CreateBone(trans);
             frame.UpdateBone(bone);
@@ -265,6 +265,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private void BuildPlayData(bool forOutput)
         {
+            _playData.ResetIndex();
             _playData.motions.Clear();
 
             for (var i = 0; i < _timelineRows.Count - 1; i++)
@@ -433,11 +434,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override float CalcEasingValue(float t, int easing)
-        {
-            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
-        }
-
         private GUIComboBox<MaidCache> _maidComboBox = new GUIComboBox<MaidCache>
         {
             getName = (maidCache, _) => maidCache == null ? "未選択" : maidCache.fullName,
@@ -461,7 +457,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public override void DrawWindow(GUIView view)
         {
-            var uoCamera = MyHelper.GetUOCamera();
+            var uoCamera = GetUOCamera();
             var target = uoCamera.target;
             var position = target.position;
             var aroundAngle = uoCamera.GetAroundAngle();

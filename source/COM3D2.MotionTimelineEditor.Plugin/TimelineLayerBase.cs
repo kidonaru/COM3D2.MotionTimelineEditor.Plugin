@@ -11,6 +11,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public static readonly long TimelineAnmId = 26925014;
 
+        public static Func<float, int, float> EasingFunction { get; set; }
+
         public abstract string className { get; }
 
         public int slotNo { get; protected set; }
@@ -525,7 +527,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public abstract void OutputAnm();
         protected abstract byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo);
         public abstract void OutputDCM(XElement songElement);
-        public abstract float CalcEasingValue(float t, int easing);
+
+        public float CalcEasingValue(float t, int easing)
+        {
+            if (EasingFunction != null)
+            {
+                return EasingFunction(t, easing);
+            }
+
+            return t;
+        }
 
         public virtual void ResetDraw(GUIView view)
         {

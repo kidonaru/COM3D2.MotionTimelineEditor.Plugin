@@ -47,6 +47,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public BoneData start;
         public BoneData end;
 
+        public string name
+        {
+            get
+            {
+                return start.name;
+            }
+        }
+
         public MotionData(BoneData start, BoneData end)
         {
             this.start = start;

@@ -493,6 +493,42 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timelineManager.RegisterLayer(
                     typeof(StageLightTimelineLayer), StageLightTimelineLayer.Create
                 );
+                timelineManager.RegisterLayer(
+                    typeof(CameraTimelineLayer), CameraTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
+                    typeof(LightTimelineLayer), LightTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
+                    typeof(EyesTimelineLayer), EyesTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
+                    typeof(ShapeKeyTimelineLayer), ShapeKeyTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
+                    typeof(ModelTimelineLayer), ModelTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
+                    typeof(ModelBoneTimelineLayer), ModelBoneTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
+                    typeof(ModelShapeKeyTimelineLayer), ModelShapeKeyTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
+                    typeof(PostEffectTimelineLayer), PostEffectTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
+                    typeof(BGTimelineLayer), BGTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
+                    typeof(BGColorTimelineLayer), BGColorTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
+                    typeof(MoveTimelineLayer), MoveTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
+                    typeof(VoiceTimelineLayer), VoiceTimelineLayer.Create
+                );
 
                 windowManager.Init();
                 boneMenuManager.Init();

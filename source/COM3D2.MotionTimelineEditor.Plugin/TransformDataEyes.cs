@@ -1,16 +1,14 @@
 using System.Collections.Generic;
-using COM3D2.MotionTimelineEditor.Plugin;
-using UnityEngine;
 
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class TransformDataShapeKey : TransformDataBase
+    public class TransformDataEyes : TransformDataBase
     {
         public override int valueCount
         {
             get
             {
-                return 2;
+                return 3;
             }
         }
 
@@ -30,18 +28,27 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public TransformDataShapeKey()
+        public TransformDataEyes()
         {
         }
 
         private readonly static Dictionary<string, CustomValueInfo> CustomValueInfoMap = new Dictionary<string, CustomValueInfo>
         {
             {
-                "weight",
+                "horizon",
                 new CustomValueInfo
                 {
                     index = 1,
-                    name = "値",
+                    name = "水平",
+                    defaultValue = 0f,
+                }
+            },
+            {
+                "vertical",
+                new CustomValueInfo
+                {
+                    index = 2,
+                    name = "垂直",
                     defaultValue = 0f,
                 }
             },

@@ -4,30 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using COM3D2.DanceCameraMotion.Plugin;
-using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using BGPlayData = PlayDataBase<BGMotionData>;
-
-    public class BGTimeLineRow
-    {
-        public int frame;
-        public string name;
-        public int group;
-        public Vector3 position;
-        public Vector3 rotation;
-        public Vector3 scale;
-    }
-
-    public class BGMotionData : MotionDataBase
-    {
-        public string name;
-        public MyTransform myTm;
-    }
-
     [TimelineLayerDesc("背景", 31)]
     public partial class BGTimelineLayer : TimelineLayerBase
     {
@@ -48,9 +28,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private Dictionary<string, List<BGTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<BGTimeLineRow>>();
-        private Dictionary<string, BGPlayData> _playDataMap = new Dictionary<string, BGPlayData>();
-        private List<BGTimeLineRow> _outputRows = new List<BGTimeLineRow>(128);
+        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
+        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
+        private List<BoneData> _outputRows = new List<BoneData>(128);
 
         private static BgMgr bgMgr
         {
@@ -159,7 +139,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private void ApplyMotion(BGMotionData motion)
+        private void ApplyMotion(MotionData motion)
         {
             if (motion == null)
             {
@@ -178,11 +158,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                 studioHack.SetBackgroundVisible(timeline.isBackgroundVisible);
 
+                var start = motion.start;
+                var stTrans = start.transform;
+
                 if (bgObject != null)
                 {
-                    bgObject.transform.localPosition = motion.myTm.stPos;
-                    bgObject.transform.localEulerAngles = motion.myTm.stRot;
-                    bgObject.transform.localScale = motion.myTm.stSca;
+                    bgObject.transform.localPosition = stTrans.position;
+                    bgObject.transform.localEulerAngles =stTrans.eulerAngles;
+                    bgObject.transform.localScale = stTrans.scale;
                 }
             }
             catch (Exception e)
@@ -232,12 +215,17 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            _timelineRowsMap.Clear();
+            foreach (var rows in _timelineRowsMap.Values)
+            {
+                rows.Clear();
+            }
 
             foreach (var keyFrame in keyFrames)
             {
                 AppendTimeLineRow(keyFrame);
             }
+
+            AppendTimeLineRow(_dummyLastFrame);
 
             BuildPlayData(forOutput);
             return null;
@@ -253,84 +241,55 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     continue;
                 }
 
-                List<BGTimeLineRow> rows;
+                List<BoneData> rows;
                 if (!_timelineRowsMap.TryGetValue(name, out rows))
                 {
-                    rows = new List<BGTimeLineRow>();
+                    rows = new List<BoneData>();
                     _timelineRowsMap[name] = rows;
                 }
 
-                var trans = bone.transform;
-
-                var row = new BGTimeLineRow
-                {
-                    frame = frame.frameNo,
-                    name = bone.name,
-                    position = trans.position,
-                    rotation = trans.eulerAngles,
-                    scale = trans.scale,
-                };
-
-                rows.Add(row);
+                rows.Add(bone);
             }
         }
 
         private void BuildPlayData(bool forOutput)
         {
-            PluginUtils.LogDebug("BuildPlayData");
-            _playDataMap.Clear();
+            foreach (var playData in _playDataMap.Values)
+            {
+                playData.ResetIndex();
+                playData.motions.Clear();
+            }
 
             foreach (var pair in _timelineRowsMap)
             {
                 var name = pair.Key;
                 var rows = pair.Value;
 
-                BGPlayData playData;
+                if (rows.Count == 0)
+                {
+                    continue;
+                }
+
+                MotionPlayData playData;
                 if (!_playDataMap.TryGetValue(name, out playData))
                 {
-                    playData = new BGPlayData
-                    {
-                        motions = new List<BGMotionData>(rows.Count),
-                    };
+                    playData = new MotionPlayData(rows.Count);
                     _playDataMap[name] = playData;
                 }
 
-                playData.ResetIndex();
-                playData.motions.Clear();
-
-                for (var i = 0; i < rows.Count; i++)
+                for (var i = 0; i < rows.Count - 1; i++)
                 {
                     var start = rows[i];
-                    var stFrame = start.frame;
-
-                    var motion = new BGMotionData
-                    {
-                        name = name,
-                        stFrame = stFrame,
-                        edFrame = stFrame,
-                        myTm = new MyTransform
-                        {
-                            stPos = start.position,
-                            stRot = start.rotation,
-                            stSca = start.scale,
-                        },
-                    };
-
-                    playData.motions.Add(motion);
+                    var end = rows[i + 1];
+                    playData.motions.Add(new MotionData(start, end));
                 }
-            }
 
-            foreach (var pair in _playDataMap)
-            {
-                var name = pair.Key;
-                var playData = pair.Value;
                 playData.Setup(SingleFrameType.None);
-                //PluginUtils.LogDebug("PlayData: name={0}, count={1}", name, playData.motions.Count);
             }
         }
 
         public void SaveBGTimeLine(
-            List<BGTimeLineRow> rows,
+            List<BoneData> rows,
             string filePath)
         {
             var offsetTime = timeline.startOffsetTime;
@@ -338,9 +297,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var builder = new StringBuilder();
             builder.Append("bgName,group,time,posX,posY,posZ,rotX,rotY,rotZ,scale\r\n");
 
-            Action<BGTimeLineRow, bool> appendRow = (row, isFirst) =>
+            Action<BoneData, bool> appendRow = (row, isFirst) =>
             {
-                var time = row.frame * timeline.frameDuration;
+                var time = row.frameNo * timeline.frameDuration;
 
                 if (isFirst)
                 {
@@ -351,16 +310,18 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     time += offsetTime;
                 }
 
+                var transform = row.transform;
+
                 builder.Append(row.name + ",");
-                builder.Append(row.group + ",");
+                builder.Append(0 + ","); // group
                 builder.Append(time.ToString("0.000") + ",");
-                builder.Append(row.position.x.ToString("0.000") + ",");
-                builder.Append(row.position.y.ToString("0.000") + ",");
-                builder.Append(row.position.z.ToString("0.000") + ",");
-                builder.Append(row.rotation.x.ToString("0.000") + ",");
-                builder.Append(row.rotation.y.ToString("0.000") + ",");
-                builder.Append(row.rotation.z.ToString("0.000") + ",");
-                builder.Append(row.scale.x.ToString("0.000"));
+                builder.Append(transform.position.x.ToString("0.000") + ",");
+                builder.Append(transform.position.y.ToString("0.000") + ",");
+                builder.Append(transform.position.z.ToString("0.000") + ",");
+                builder.Append(transform.eulerAngles.x.ToString("0.000") + ",");
+                builder.Append(transform.eulerAngles.y.ToString("0.000") + ",");
+                builder.Append(transform.eulerAngles.z.ToString("0.000") + ",");
+                builder.Append(transform.scale.x.ToString("0.000"));
                 builder.Append("\r\n");
             };
 
@@ -405,11 +366,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 PluginUtils.LogException(e);
                 PluginUtils.ShowDialog("背景チェンジの出力に失敗しました");
             }
-        }
-
-        public override float CalcEasingValue(float t, int easing)
-        {
-            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
         }
 
         private GUIComboBox<PhotoBGData> _bgComboBox = new GUIComboBox<PhotoBGData>

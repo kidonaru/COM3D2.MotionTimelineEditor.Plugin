@@ -517,9 +517,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void BuildPlayData(bool forOutput)
         {
-            PluginUtils.LogDebug("BuildPlayData");
-
             foreach (var playData in _lightPlayDataMap.Values)
+            {
+                playData.ResetIndex();
+                playData.motions.Clear();
+            }
+
+            foreach (var playData in _controllerPlayDataMap.Values)
             {
                 playData.ResetIndex();
                 playData.motions.Clear();
@@ -529,6 +533,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var name = pair.Key;
                 var rows = pair.Value;
+
+                if (rows.Count == 0)
+                {
+                    continue;
+                }
 
                 MotionPlayData playData;
                 if (!_lightPlayDataMap.TryGetValue(name, out playData))
@@ -547,16 +556,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 playData.Setup(timeline.singleFrameType);
             }
 
-            foreach (var playData in _controllerPlayDataMap.Values)
-            {
-                playData.ResetIndex();
-                playData.motions.Clear();
-            }
-
             foreach (var pair in _controllerTimelineRowsMap)
             {
                 var name = pair.Key;
                 var rows = pair.Value;
+
+                if (rows.Count == 0)
+                {
+                    continue;
+                }
 
                 MotionPlayData playData;
                 if (!_controllerPlayDataMap.TryGetValue(name, out playData))
@@ -578,8 +586,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            _lightTimelineRowsMap.Clear();
-            _controllerTimelineRowsMap.Clear();
+            foreach (var rows in _lightTimelineRowsMap.Values)
+            {
+                rows.Clear();
+            }
+            foreach (var rows in _controllerTimelineRowsMap.Values)
+            {
+                rows.Clear();
+            }
 
             foreach (var keyFrame in keyFrames)
             {
@@ -1220,11 +1234,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.SetEnabled(!view.IsComboBoxFocused());
             view.EndScrollView();
-        }
-
-        public override float CalcEasingValue(float t, int easing)
-        {
-            return t;
         }
 
         public override ITransformData CreateTransformData(string name)

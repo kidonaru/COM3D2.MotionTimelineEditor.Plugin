@@ -1,15 +1,13 @@
 
-using COM3D2.MotionTimelineEditor.Plugin;
-
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class TransformDataMove : TransformDataBase
+    public class TransformDataBG : TransformDataBase
     {
         public override int valueCount
         {
             get
             {
-                return 7;
+                return 9;
             }
         }
 
@@ -29,7 +27,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override bool hasEasing
+        public override bool hasScale
         {
             get
             {
@@ -53,15 +51,15 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override ValueData easingValue
+        public override ValueData[] scaleValues
         {
             get
             {
-                return values[6];
+                return new ValueData[] { values[6], values[7], values[8] };
             }
         }
 
-        public TransformDataMove()
+        public TransformDataBG()
         {
         }
     }

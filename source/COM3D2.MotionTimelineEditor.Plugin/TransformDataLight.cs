@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using COM3D2.MotionTimelineEditor.Plugin;
-using UnityEngine;
 
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataLight : TransformDataBase
     {
