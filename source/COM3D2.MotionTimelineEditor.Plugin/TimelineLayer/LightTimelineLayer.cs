@@ -8,30 +8,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using LightPlayData = PlayDataBase<LightMotionData>;
-
-    public class LightTimeLineRow
-    {
-        public int frame;
-        public string name;
-        public Vector3 position;
-        public Vector3 rotation;
-        public Color color;
-        public float range;
-        public float intensity;
-        public float spotAngle;
-        public float shadowStrength;
-        public float shadowBias;
-        public int maidSlotNo;
-        public int easing;
-    }
-
-    public class LightMotionData : MotionDataBase
-    {
-        public LightTimeLineRow start;
-        public LightTimeLineRow end;
-    }
-
     [TimelineLayerDesc("ライト", 41)]
     public class LightTimelineLayer : LightTimelineLayerBase
     {
@@ -51,9 +27,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Dictionary<string, List<LightTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<LightTimeLineRow>>();
-        private Dictionary<string, LightPlayData> _playDataMap = new Dictionary<string, LightPlayData>();
-        private List<LightMotionData> _outputMotions = new List<LightMotionData>(128);
+        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
+        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
+        private List<MotionData> _outputMotions = new List<MotionData>(128);
 
         private LightTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -122,7 +98,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyMotion(LightMotionData motion, StudioLightStat stat, float lerpTime)
+        private void ApplyMotion(MotionData motion, StudioLightStat stat, float lerpTime)
         {
             var light = stat.light;
             var followLight = stat.followLight;
@@ -134,11 +110,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var start = motion.start;
             var end = motion.end;
-            float easingTime = CalcEasingValue(lerpTime, start.easing);
 
-            followLight.maidSlotNo = start.maidSlotNo;
+            var stTrans = start.transform;
+            var edTrans = end.transform;
 
-            var position = Vector3.Lerp(start.position, end.position, easingTime);
+            float easingTime = CalcEasingValue(lerpTime, stTrans.easing);
+
+            followLight.maidSlotNo = stTrans["maidSlotNo"].intValue;
+
+            var position = Vector3.Lerp(stTrans.position, edTrans.position, easingTime);
             if (followLight.isFollow)
             {
                 followLight.offset = position;
@@ -148,22 +128,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 transform.localPosition = position;
             }
 
-            transform.localEulerAngles = Vector3.Lerp(start.rotation, end.rotation, easingTime);
+            transform.localEulerAngles = Vector3.Lerp(stTrans.eulerAngles, edTrans.eulerAngles, easingTime);
 
             if (timeline.isLightColorEasing)
             {
-                light.color = Color.Lerp(start.color, end.color, easingTime);
+                light.color = Color.Lerp(stTrans.color, edTrans.color, easingTime);
             }
             else
             {
-                light.color = start.color;
+                light.color = stTrans.color;
             }
 
-            light.range = start.range;
-            light.intensity = start.intensity;
-            light.spotAngle = start.spotAngle;
-            light.shadowStrength = start.shadowStrength;
-            light.shadowBias = start.shadowBias;
+            light.range = stTrans["range"].value;
+            light.intensity = stTrans["intensity"].value;
+            light.spotAngle = stTrans["spotAngle"].value;
+            light.shadowStrength = stTrans["shadowStrength"].value;
+            light.shadowBias = stTrans["shadowBias"].value;
 
             lightManager.ApplyLight(stat);
         }
@@ -274,32 +254,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     continue;
                 }
 
-                List<LightTimeLineRow> rows;
+                List<BoneData> rows;
                 if (!_timelineRowsMap.TryGetValue(name, out rows))
                 {
-                    rows = new List<LightTimeLineRow>();
+                    rows = new List<BoneData>();
                     _timelineRowsMap[name] = rows;
                 }
 
-                var trans = bone.transform;
-
-                var row = new LightTimeLineRow
-                {
-                    frame = frame.frameNo,
-                    name = bone.name,
-                    position = trans.position,
-                    rotation = trans.eulerAngles,
-                    color = trans.color,
-                    range = trans["range"].value,
-                    intensity = trans["intensity"].value,
-                    spotAngle = trans["spotAngle"].value,
-                    shadowStrength = trans["shadowStrength"].value,
-                    shadowBias = trans["shadowBias"].value,
-                    maidSlotNo = trans["maidSlotNo"].intValue,
-                    easing = trans.easing,
-                };
-
-                rows.Add(row);
+                rows.Add(bone);
             }
         }
 
@@ -327,13 +289,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     continue;
                 }
 
-                LightPlayData playData;
+                MotionPlayData playData;
                 if (!_playDataMap.TryGetValue(name, out playData))
                 {
-                    playData = new LightPlayData
-                    {
-                        motions = new List<LightMotionData>(rows.Count),
-                    };
+                    playData = new MotionPlayData(rows.Count);
                     _playDataMap[name] = playData;
                 }
 
@@ -341,19 +300,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var start = rows[i];
                     var end = rows[i + 1];
-
-                    var stFrame = start.frame;
-                    var edFrame = end.frame;
-
-                    var motion = new LightMotionData
-                    {
-                        stFrame = stFrame,
-                        edFrame = edFrame,
-                        start = start,
-                        end = end,
-                    };
-
-                    playData.motions.Add(motion);
+                    playData.motions.Add(new MotionData(start, end));
                 }
 
                 playData.Setup(timeline.singleFrameType);
@@ -380,7 +327,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public void SaveLightMotion(
-            List<LightMotionData> motions,
+            List<MotionData> motions,
             string filePath)
         {
             var offsetTime = timeline.startOffsetTime;
@@ -391,10 +338,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             "option,range,intensity,spotAngle,maidSlotNo,shadowStrength,shadowBias" +
                             "\r\n");
 
-            Action<LightMotionData, bool> appendMotion = (motion, isFirst) =>
+            Action<MotionData, bool> appendMotion = (motion, isFirst) =>
             {
                 var start = motion.start;
                 var end = motion.end;
+
+                var stTrans = start.transform;
+                var edTrans = end.transform;
 
                 var light = lightManager.GetLight(start.name);
                 if (light == null || light.light == null)
@@ -419,32 +369,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 builder.Append(light.type + ",");
                 builder.Append(light.index + ",");
                 builder.Append(stTime.ToString("0.000") + ",");
-                builder.Append(start.position.x.ToString("0.000") + ",");
-                builder.Append(start.position.y.ToString("0.000") + ",");
-                builder.Append(start.position.z.ToString("0.000") + ",");
-                builder.Append(start.rotation.x.ToString("0.000") + ",");
-                builder.Append(start.rotation.y.ToString("0.000") + ",");
-                builder.Append(start.rotation.z.ToString("0.000") + ",");
-                builder.Append(start.color.r.ToString("0.000") + ",");
-                builder.Append(start.color.g.ToString("0.000") + ",");
-                builder.Append(start.color.b.ToString("0.000") + ",");
+                builder.Append(stTrans.position.x.ToString("0.000") + ",");
+                builder.Append(stTrans.position.y.ToString("0.000") + ",");
+                builder.Append(stTrans.position.z.ToString("0.000") + ",");
+                builder.Append(stTrans.eulerAngles.x.ToString("0.000") + ",");
+                builder.Append(stTrans.eulerAngles.y.ToString("0.000") + ",");
+                builder.Append(stTrans.eulerAngles.z.ToString("0.000") + ",");
+                builder.Append(stTrans.color.r.ToString("0.000") + ",");
+                builder.Append(stTrans.color.g.ToString("0.000") + ",");
+                builder.Append(stTrans.color.b.ToString("0.000") + ",");
                 builder.Append(edTime.ToString("0.000") + ",");
-                builder.Append(end.position.x.ToString("0.000") + ",");
-                builder.Append(end.position.y.ToString("0.000") + ",");
-                builder.Append(end.position.z.ToString("0.000") + ",");
-                builder.Append(end.rotation.x.ToString("0.000") + ",");
-                builder.Append(end.rotation.y.ToString("0.000") + ",");
-                builder.Append(end.rotation.z.ToString("0.000") + ",");
-                builder.Append(end.color.r.ToString("0.000") + ",");
-                builder.Append(end.color.g.ToString("0.000") + ",");
-                builder.Append(end.color.b.ToString("0.000") + ",");
+                builder.Append(edTrans.position.x.ToString("0.000") + ",");
+                builder.Append(edTrans.position.y.ToString("0.000") + ",");
+                builder.Append(edTrans.position.z.ToString("0.000") + ",");
+                builder.Append(edTrans.eulerAngles.x.ToString("0.000") + ",");
+                builder.Append(edTrans.eulerAngles.y.ToString("0.000") + ",");
+                builder.Append(edTrans.eulerAngles.z.ToString("0.000") + ",");
+                builder.Append(edTrans.color.r.ToString("0.000") + ",");
+                builder.Append(edTrans.color.g.ToString("0.000") + ",");
+                builder.Append(edTrans.color.b.ToString("0.000") + ",");
                 builder.Append("" + ","); // option
-                builder.Append(start.range.ToString("0.000") + ","); // range
-                builder.Append(start.intensity.ToString("0.000") + ","); // intensity
-                builder.Append(start.spotAngle.ToString("0.000") + ","); // spotAngle
-                builder.Append(start.maidSlotNo + ","); // maidSlotNo
-                builder.Append(start.shadowStrength.ToString("0.000") + ","); // shadowStrength
-                builder.Append(start.shadowBias.ToString("0.000")); // shadowBias
+                builder.Append(stTrans["range"].value.ToString("0.000") + ","); // range
+                builder.Append(stTrans["intensity"].value.ToString("0.000") + ","); // intensity
+                builder.Append(stTrans["spotAngle"].value.ToString("0.000") + ","); // spotAngle
+                builder.Append(stTrans["maidSlotNo"].value + ","); // maidSlotNo
+                builder.Append(stTrans["shadowStrength"].value.ToString("0.000") + ","); // shadowStrength
+                builder.Append(stTrans["shadowBias"].value.ToString("0.000")); // shadowBias
                 builder.Append("\r\n");
             };
 
