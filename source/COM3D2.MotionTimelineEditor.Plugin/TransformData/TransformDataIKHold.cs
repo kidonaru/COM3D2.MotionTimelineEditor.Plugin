@@ -82,5 +82,45 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             return CustomValueInfoMap;
         }
+
+        public ValueData isHoldValue
+        {
+            get
+            {
+                return this["isHold"];
+            }
+        }
+
+        public ValueData isAnimeValue
+        {
+            get
+            {
+                return this["isAnime"];
+            }
+        }
+
+        public bool isHold
+        {
+            get
+            {
+                return isHoldValue.boolValue;
+            }
+            set
+            {
+                isHoldValue.boolValue = value;
+            }
+        }
+
+        public bool isAnime
+        {
+            get
+            {
+                return isAnimeValue.boolValue;
+            }
+            set
+            {
+                isAnimeValue.boolValue = value;
+            }
+        }
     }
 }

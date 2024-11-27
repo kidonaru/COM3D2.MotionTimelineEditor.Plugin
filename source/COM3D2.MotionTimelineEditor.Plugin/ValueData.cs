@@ -37,6 +37,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             outTangent.FromTangentData(value.outTangent);
         }
 
+        public ValueData Clone()
+        {
+            ValueData value = new ValueData();
+            value.FromValue(this);
+            return value;
+        }
+
         public bool Equals(ValueData other)
         {
             return value == other.value;

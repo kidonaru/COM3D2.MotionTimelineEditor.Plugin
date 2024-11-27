@@ -49,5 +49,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             return CustomValueInfoMap;
         }
+
+        public ValueData weightValue
+        {
+            get
+            {
+                return this["weight"];
+            }
+        }
+
+        public float weight
+        {
+            get
+            {
+                return weightValue.value;
+            }
+            set
+            {
+                weightValue.value = value;
+            }
+        }
+
+        public string slotName;
+        public int maidSlotNo;
     }
 }

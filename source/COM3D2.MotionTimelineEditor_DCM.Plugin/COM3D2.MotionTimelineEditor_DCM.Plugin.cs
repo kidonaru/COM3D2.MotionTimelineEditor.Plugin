@@ -47,9 +47,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 typeof(MorphTimelineLayer), MorphTimelineLayer.Create
             );
             timelineManager.RegisterLayer(
-                typeof(UndressTimelineLayer), UndressTimelineLayer.Create
-            );
-            timelineManager.RegisterLayer(
                 typeof(SeTimelineLayer), SeTimelineLayer.Create
             );
             timelineManager.RegisterLayer(

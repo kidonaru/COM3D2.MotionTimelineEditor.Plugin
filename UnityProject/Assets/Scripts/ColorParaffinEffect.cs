@@ -40,6 +40,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			useOverlay = data.useOverlay;
 			useSubstruct = data.useSubstruct;
 		}
+
+		public static ParaffinData Lerp(
+            ParaffinData a,
+            ParaffinData b,
+            float t)
+        {
+			return new ParaffinData
+			{
+				enabled = a.enabled,
+				color1 = Color.Lerp(a.color1, b.color1, t),
+				color2 = Color.Lerp(a.color2, b.color2, t),
+				centerPosition = Vector2.Lerp(a.centerPosition, b.centerPosition, t),
+				radiusFar = Mathf.Lerp(a.radiusFar, b.radiusFar, t),
+				radiusNear = Mathf.Lerp(a.radiusNear, b.radiusNear, t),
+				radiusScale = Vector2.Lerp(a.radiusScale, b.radiusScale, t),
+				useNormal = Mathf.Lerp(a.useNormal, b.useNormal, t),
+				useAdd = Mathf.Lerp(a.useAdd, b.useAdd, t),
+				useMultiply = Mathf.Lerp(a.useMultiply, b.useMultiply, t),
+				useOverlay = Mathf.Lerp(a.useOverlay, b.useOverlay, t),
+				useSubstruct = Mathf.Lerp(a.useSubstruct, b.useSubstruct, t),
+			};
+		}
 	}
 
 	[ExecuteInEditMode]

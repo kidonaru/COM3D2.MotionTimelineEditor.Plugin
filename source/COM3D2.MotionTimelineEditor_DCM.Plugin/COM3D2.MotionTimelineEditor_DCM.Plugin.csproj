@@ -76,8 +76,6 @@
     <Compile Include="TransformDataMorph.cs" />
     <Compile Include="TransformDataSe.cs" />
     <Compile Include="TransformDataText.cs" />
-    <Compile Include="TransformDataUndress.cs" />
-    <Compile Include="UndressTimelineLayer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

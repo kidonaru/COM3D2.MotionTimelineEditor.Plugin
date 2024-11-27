@@ -35,5 +35,25 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             return CustomValueInfoMap;
         }
+
+        public ValueData morphValueValue
+        {
+            get
+            {
+                return this["morphValue"];
+            }
+        }
+
+        public float morphValue
+        {
+            get
+            {
+                return morphValueValue.value;
+            }
+            set
+            {
+                morphValueValue.value = value;
+            }
+        }
     }
 }

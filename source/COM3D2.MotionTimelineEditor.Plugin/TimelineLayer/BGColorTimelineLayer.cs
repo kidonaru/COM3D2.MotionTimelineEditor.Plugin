@@ -8,19 +8,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using BGColorPlayData = PlayDataBase<BGColorMotionData>;
-
-    public class BGColorTimeLineRow
-    {
-        public int frame;
-        public Color color;
-    }
-
-    public class BGColorMotionData : MotionDataBase
-    {
-        public Color color;
-    }
-
     [TimelineLayerDesc("背景色", 32)]
     public partial class BGColorTimelineLayer : TimelineLayerBase
     {
@@ -44,8 +31,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private List<BGColorTimeLineRow> _timelineRows = new List<BGColorTimeLineRow>();
-        private BGColorPlayData _playData = new BGColorPlayData();
+        private List<BoneData> _timelineRows = new List<BoneData>();
+        private MotionPlayData _playData = new MotionPlayData(32);
 
         private static Camera camera
         {
@@ -98,27 +85,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var playingFrameNoFloat = this.playingFrameNoFloat;
 
             var indexUpdated = _playData.Update(playingFrameNoFloat);
-
-            var current = _playData.current;
-            if (current != null && indexUpdated)
+            if (indexUpdated)
             {
-                ApplyMotion(current);
+                ApplyMotion(_playData.current);
             }
         }
 
-        private void ApplyMotion(BGColorMotionData motion)
+        private void ApplyMotion(MotionData motion)
         {
             if (motion == null)
             {
                 return;
             }
 
-            //PluginUtils.LogDebug("ApplyMotion: stFrame={0}, color={1}",
-            //    motion.stFrame, motion.color);
-
             try
             {
-                camera.backgroundColor = motion.color;
+                var start = motion.start;
+                camera.backgroundColor = start.color;
             }
             catch (Exception e)
             {
@@ -166,56 +149,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 AppendTimelineRow(keyFrame);
             }
 
+            AppendTimelineRow(_dummyLastFrame);
+
             BuildPlayData(forOutput);
             return null;
         }
 
         private void AppendTimelineRow(FrameData frame)
         {
+            var isLastFrame = frame.frameNo == maxFrameNo;
             var bone = frame.GetBone(BoneName);
-            if (bone == null)
-            {
-                return;
-            }
-
-            var trans = bone.transform;
-
-            var row = new BGColorTimeLineRow
-            {
-                frame = frame.frameNo,
-                color = trans.color,
-            };
-
-            _timelineRows.Add(row);
+            _timelineRows.AppendBone(bone, isLastFrame);
         }
 
         private void BuildPlayData(bool forOutput)
         {
-            _playData.ResetIndex();
-            _playData.motions.Clear();
-
-            for (var i = 0; i < _timelineRows.Count; i++)
-            {
-                var start = _timelineRows[i];
-                var stFrame = start.frame;
-
-                var motion = new BGColorMotionData
-                {
-                    stFrame = stFrame,
-                    edFrame = stFrame,
-                    color = start.color,
-                };
-
-                _playData.motions.Add(motion);
-            }
-
-            _playData.Setup(SingleFrameType.None);
-
-            //PluginUtils.LogDebug("PlayData: name={0}, count={1}", BoneName, _playData.motions.Count);
+            BuildPlayDataFromBones(
+                _timelineRows,
+                _playData,
+                SingleFrameType.None);
         }
 
         public void SaveBGTimeLine(
-            List<BGColorTimeLineRow> rows,
+            List<BoneData> rows,
             string filePath)
         {
             var offsetTime = timeline.startOffsetTime;
@@ -223,9 +179,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var builder = new StringBuilder();
             builder.Append("bgName,colorR,colorG,colorB\r\n");
 
-            Action<BGColorTimeLineRow, bool> appendRow = (row, isFirst) =>
+            Action<BoneData, bool> appendRow = (row, isFirst) =>
             {
-                var time = row.frame * timeline.frameDuration;
+                var time = row.frameNo * timeline.frameDuration;
 
                 if (isFirst)
                 {
@@ -236,10 +192,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     time += offsetTime;
                 }
 
+                var transform = row.transform;
+
                 builder.Append(time.ToString("0.000") + ",");
-                builder.Append(row.color.IntR() + ",");
-                builder.Append(row.color.IntG() + ",");
-                builder.Append(row.color.IntB());
+                builder.Append(transform.color.IntR() + ",");
+                builder.Append(transform.color.IntG() + ",");
+                builder.Append(transform.color.IntB());
                 builder.Append("\r\n");
             };
 

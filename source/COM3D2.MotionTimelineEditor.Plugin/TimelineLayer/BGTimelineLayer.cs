@@ -30,7 +30,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
         private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
-        private List<BoneData> _outputRows = new List<BoneData>(128);
+        private List<BoneData> _outputRows = new List<BoneData>(32);
 
         private static BgMgr bgMgr
         {
@@ -125,16 +125,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var playingFrameNoFloat = this.playingFrameNoFloat;
 
-            foreach (var bgName in _playDataMap.Keys)
+            foreach (var playData in _playDataMap.Values)
             {
-                var playData = _playDataMap[bgName];
-
                 var indexUpdated = playData.Update(playingFrameNoFloat);
-
-                var current = playData.current;
-                if (current != null && indexUpdated)
+                if (indexUpdated)
                 {
-                    ApplyMotion(current);
+                    ApplyMotion(playData.current);
                 }
             }
         }
@@ -159,13 +155,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 studioHack.SetBackgroundVisible(timeline.isBackgroundVisible);
 
                 var start = motion.start;
-                var stTrans = start.transform;
 
                 if (bgObject != null)
                 {
-                    bgObject.transform.localPosition = stTrans.position;
-                    bgObject.transform.localEulerAngles =stTrans.eulerAngles;
-                    bgObject.transform.localScale = stTrans.scale;
+                    bgObject.transform.localPosition = start.position;
+                    bgObject.transform.localEulerAngles = start.eulerAngles;
+                    bgObject.transform.localScale = start.scale;
                 }
             }
             catch (Exception e)
@@ -215,77 +210,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            foreach (var rows in _timelineRowsMap.Values)
-            {
-                rows.Clear();
-            }
+            _timelineRowsMap.ClearBones();
 
             foreach (var keyFrame in keyFrames)
             {
-                AppendTimeLineRow(keyFrame);
+                AppendTimelineRow(keyFrame);
             }
 
-            AppendTimeLineRow(_dummyLastFrame);
+            AppendTimelineRow(_dummyLastFrame);
 
             BuildPlayData(forOutput);
             return null;
         }
 
-        private void AppendTimeLineRow(FrameData frame)
+        private void AppendTimelineRow(FrameData frame)
         {
+            var isLastFrame = frame.frameNo == maxFrameNo;
             foreach (var name in allBoneNames)
             {
                 var bone = frame.GetBone(name);
-                if (bone == null)
-                {
-                    continue;
-                }
-
-                List<BoneData> rows;
-                if (!_timelineRowsMap.TryGetValue(name, out rows))
-                {
-                    rows = new List<BoneData>();
-                    _timelineRowsMap[name] = rows;
-                }
-
-                rows.Add(bone);
+                _timelineRowsMap.AppendBone(bone, isLastFrame);
             }
         }
 
         private void BuildPlayData(bool forOutput)
         {
-            foreach (var playData in _playDataMap.Values)
-            {
-                playData.ResetIndex();
-                playData.motions.Clear();
-            }
-
-            foreach (var pair in _timelineRowsMap)
-            {
-                var name = pair.Key;
-                var rows = pair.Value;
-
-                if (rows.Count == 0)
-                {
-                    continue;
-                }
-
-                MotionPlayData playData;
-                if (!_playDataMap.TryGetValue(name, out playData))
-                {
-                    playData = new MotionPlayData(rows.Count);
-                    _playDataMap[name] = playData;
-                }
-
-                for (var i = 0; i < rows.Count - 1; i++)
-                {
-                    var start = rows[i];
-                    var end = rows[i + 1];
-                    playData.motions.Add(new MotionData(start, end));
-                }
-
-                playData.Setup(SingleFrameType.None);
-            }
+            BuildPlayDataFromBonesMap(
+                _timelineRowsMap,
+                _playDataMap,
+                SingleFrameType.None);
         }
 
         public void SaveBGTimeLine(

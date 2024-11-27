@@ -1376,6 +1376,63 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return maidElement;
         }
 
+        protected void BuildPlayDataFromBonesMap(
+            Dictionary<string, List<BoneData>> bonesMap,
+            Dictionary<string, MotionPlayData> playDataMap,
+            SingleFrameType singleFrameType)
+        {
+            playDataMap.ClearPlayData();
+
+            foreach (var pair in bonesMap)
+            {
+                var name = pair.Key;
+                var rows = pair.Value;
+
+                if (rows.Count == 0)
+                {
+                    continue;
+                }
+
+                MotionPlayData playData;
+                if (!playDataMap.TryGetValue(name, out playData))
+                {
+                    playData = new MotionPlayData(rows.Count);
+                    playDataMap[name] = playData;
+                }
+
+                for (var i = 0; i < rows.Count - 1; i++)
+                {
+                    var start = rows[i];
+                    var end = rows[i + 1];
+                    playData.motions.Add(new MotionData(start, end));
+                }
+
+                playData.Setup(singleFrameType);
+            }
+        }
+
+        protected void BuildPlayDataFromBones(
+            List<BoneData> rows,
+            MotionPlayData playData,
+            SingleFrameType singleFrameType)
+        {
+            playData.Clear();
+
+            if (rows.Count == 0)
+            {
+                return;
+            }
+
+            for (var i = 0; i < rows.Count - 1; i++)
+            {
+                var start = rows[i];
+                var end = rows[i + 1];
+                playData.motions.Add(new MotionData(start, end));
+            }
+
+            playData.Setup(singleFrameType);
+        }
+
         public enum TransformEditType
         {
             全て,

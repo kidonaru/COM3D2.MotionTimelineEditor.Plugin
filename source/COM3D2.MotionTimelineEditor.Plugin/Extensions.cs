@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using RootMotion.FinalIK;
 using UnityEngine;
+using System.Linq;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -191,6 +192,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return (T) attributes[0];
             }
             return default(T);
+        }
+
+        public static Vector2 ToVector2(this ValueData[] values)
+        {
+            if (values.Length != 2)
+            {
+                PluginUtils.LogError("ToVector2: 不正なValueData配列です length={0}", values.Length);
+                return Vector2.zero;
+            }
+
+            return new Vector2(values[0].value, values[1].value);
+        }
+
+        public static void FromVector2(this ValueData[] values, Vector2 vector)
+        {
+            if (values.Length != 2)
+            {
+                PluginUtils.LogError("FromVector2: 不正なValueData配列です length={0}", values.Length);
+            }
+            else
+            {
+                values[0].value = vector.x;
+                values[1].value = vector.y;
+            }
         }
 
         public static Vector3 ToVector3(this ValueData[] values)
@@ -665,6 +690,75 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Vector3 eulerAngles = camera.transform.eulerAngles;
             eulerAngles.z = z;
             camera.transform.eulerAngles = eulerAngles;
+        }
+
+        public static void ClearBones(
+            this Dictionary<string, List<BoneData>> bonesMap)
+        {
+            foreach (var bones in bonesMap.Values)
+            {
+                bones.Clear();
+            }
+        }
+
+        public static void ClearPlayData(
+            this Dictionary<string, MotionPlayData> playDataMap)
+        {
+            foreach (var data in playDataMap.Values)
+            {
+                data.Clear();
+            }
+        }
+
+        public static void AppendBone(
+            this Dictionary<string, List<BoneData>> bonesMap,
+            BoneData bone,
+            bool isLastFrame)
+        {
+            if (bone == null)
+            {
+                return;
+            }
+
+            var boneName = bone.name;
+
+            List<BoneData> rows;
+            if (!bonesMap.TryGetValue(boneName, out rows))
+            {
+                rows = new List<BoneData>(16);
+                bonesMap[boneName] = rows;
+            }
+
+            // 最後のフレームは2重に追加しない
+            if (isLastFrame &&
+                rows.Count > 0 &&
+                rows[rows.Count - 1].frameNo == bone.frameNo)
+            {
+                return;
+            }
+
+            rows.Add(bone);
+        }
+
+        public static void AppendBone(
+            this List<BoneData> rows,
+            BoneData bone,
+            bool isLastFrame)
+        {
+            if (bone == null)
+            {
+                return;
+            }
+
+            // 最後のフレームは2重に追加しない
+            if (isLastFrame &&
+                rows.Count > 0 &&
+                rows[rows.Count - 1].frameNo == bone.frameNo)
+            {
+                return;
+            }
+
+            rows.Add(bone);
         }
     }
 

@@ -110,19 +110,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override Vector3 initialEulerAngles
+        public override Quaternion initialRotation
         {
             get
             {
-                return new Vector3(90f, 0f, 0f);
+                return Quaternion.Euler(90f, 0f, 0f);
             }
         }
 
-        public override Vector3 initialSubEulerAngles
+        public override Quaternion initialSubRotation
         {
             get
             {
-                return new Vector3(90f, 0f, 0f);
+                return Quaternion.Euler(90f, 0f, 0f);
             }
         }
 
@@ -225,6 +225,224 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override Dictionary<string, CustomValueInfo> GetCustomValueInfoMap()
         {
             return CustomValueInfoMap;
+        }
+
+        public ValueData spotAngleValue
+        {
+            get
+            {
+                return this["spotAngle"];
+            }
+        }
+
+        public ValueData spotRangeValue
+        {
+            get
+            {
+                return this["spotRange"];
+            }
+        }
+
+        public ValueData rangeMultiplierValue
+        {
+            get
+            {
+                return this["rangeMultiplier"];
+            }
+        }
+
+        public ValueData falloffExpValue
+        {
+            get
+            {
+                return this["falloffExp"];
+            }
+        }
+
+        public ValueData noiseStrengthValue
+        {
+            get
+            {
+                return this["noiseStrength"];
+            }
+        }
+
+        public ValueData noiseScaleValue
+        {
+            get
+            {
+                return this["noiseScale"];
+            }
+        }
+
+        public ValueData coreRadiusValue
+        {
+            get
+            {
+                return this["coreRadius"];
+            }
+        }
+
+        public ValueData offsetRangeValue
+        {
+            get
+            {
+                return this["offsetRange"];
+            }
+        }
+
+        public ValueData segmentAngleValue
+        {
+            get
+            {
+                return this["segmentAngle"];
+            }
+        }
+
+        public ValueData segmentRangeValue
+        {
+            get
+            {
+                return this["segmentRange"];
+            }
+        }
+
+        public float spotAngle
+        {
+            get
+            {
+                return spotAngleValue.value;
+            }
+            set
+            {
+                spotAngleValue.value = value;
+            }
+        }
+
+        public float spotRange
+        {
+            get
+            {
+                return spotRangeValue.value;
+            }
+            set
+            {
+                spotRangeValue.value = value;
+            }
+        }
+
+        public float rangeMultiplier
+        {
+            get
+            {
+                return rangeMultiplierValue.value;
+            }
+            set
+            {
+                rangeMultiplierValue.value = value;
+            }
+        }
+
+        public float falloffExp
+        {
+            get
+            {
+                return falloffExpValue.value;
+            }
+            set
+            {
+                falloffExpValue.value = value;
+            }
+        }
+
+        public float noiseStrength
+        {
+            get
+            {
+                return noiseStrengthValue.value;
+            }
+            set
+            {
+                noiseStrengthValue.value = value;
+            }
+        }
+
+        public float noiseScale
+        {
+            get
+            {
+                return noiseScaleValue.value;
+            }
+            set
+            {
+                noiseScaleValue.value = value;
+            }
+        }
+
+        public float coreRadius
+        {
+            get
+            {
+                return coreRadiusValue.value;
+            }
+            set
+            {
+                coreRadiusValue.value = value;
+            }
+        }
+
+        public float offsetRange
+        {
+            get
+            {
+                return offsetRangeValue.value;
+            }
+            set
+            {
+                offsetRangeValue.value = value;
+            }
+        }
+
+        public float segmentAngle
+        {
+            get
+            {
+                return segmentAngleValue.value;
+            }
+            set
+            {
+                segmentAngleValue.value = value;
+            }
+        }
+
+        public int segmentRange
+        {
+            get
+            {
+                return segmentRangeValue.intValue;
+            }
+            set
+            {
+                segmentRangeValue.intValue = value;
+            }
+        }
+
+        public void FromStageLight(StageLight light)
+        {
+            position = light.transform.localPosition;
+            rotation = light.transform.localRotation;
+            color = light.color;
+            visible = light.visible;
+            spotAngle = light.spotAngle;
+            spotRange = light.spotRange;
+            rangeMultiplier = light.rangeMultiplier;
+            falloffExp = light.falloffExp;
+            noiseStrength = light.noiseStrength;
+            noiseScale = light.noiseScale;
+            coreRadius = light.coreRadius;
+            offsetRange = light.offsetRange;
+            segmentAngle = light.segmentAngle;
+            segmentRange = light.segmentRange;
         }
     }
 }

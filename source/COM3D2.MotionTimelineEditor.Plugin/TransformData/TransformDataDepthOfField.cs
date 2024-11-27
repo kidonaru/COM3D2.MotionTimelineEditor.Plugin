@@ -96,5 +96,130 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             return CustomValueInfoMap;
         }
+
+        public ValueData focalLengthValue
+        {
+            get
+            {
+                return this["focalLength"];
+            }
+        }
+
+        public ValueData focalSizeValue
+        {
+            get
+            {
+                return this["focalSize"];
+            }
+        }
+
+        public ValueData apertureValue
+        {
+            get
+            {
+                return this["aperture"];
+            }
+        }
+
+        public ValueData maxBlurSizeValue
+        {
+            get
+            {
+                return this["maxBlurSize"];
+            }
+        }
+
+        public ValueData maidSlotNoValue
+        {
+            get
+            {
+                return this["maidSlotNo"];
+            }
+        }
+
+        public float focalLength
+        {
+            get
+            {
+                return focalLengthValue.value;
+            }
+            set
+            {
+                focalLengthValue.value = value;
+            }
+        }
+
+        public float focalSize
+        {
+            get
+            {
+                return focalSizeValue.value;
+            }
+            set
+            {
+                focalSizeValue.value = value;
+            }
+        }
+
+        public float aperture
+        {
+            get
+            {
+                return apertureValue.value;
+            }
+            set
+            {
+                apertureValue.value = value;
+            }
+        }
+
+        public float maxBlurSize
+        {
+            get
+            {
+                return maxBlurSizeValue.value;
+            }
+            set
+            {
+                maxBlurSizeValue.value = value;
+            }
+        }
+
+        public int maidSlotNo
+        {
+            get
+            {
+                return maidSlotNoValue.intValue;
+            }
+            set
+            {
+                maidSlotNoValue.intValue = value;
+            }
+        }
+
+        public DepthOfFieldData depthOfField
+        {
+            get
+            {
+                return new DepthOfFieldData
+                {
+                    enabled = visible,
+                    focalLength = focalLength,
+                    focalSize = focalSize,
+                    aperture = aperture,
+                    maxBlurSize = maxBlurSize,
+                    maidSlotNo = maidSlotNo,
+                };
+            }
+            set
+            {
+                visible = value.enabled;
+                focalLength = value.focalLength;
+                focalSize = value.focalSize;
+                aperture = value.aperture;
+                maxBlurSize = value.maxBlurSize;
+                maidSlotNo = value.maidSlotNo;
+            }
+        }
     }
 }

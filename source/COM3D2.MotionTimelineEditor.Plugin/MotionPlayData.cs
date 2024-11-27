@@ -21,6 +21,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             current = null;
         }
 
+        public void Clear()
+        {
+            ResetIndex();
+            motions.Clear();
+        }
+
         public bool Update(float playingFrame)
         {
             if (motions.Count == 0)

@@ -44,8 +44,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class MotionData : MotionDataBase
     {
-        public BoneData start;
-        public BoneData end;
+        public ITransformData start;
+        public ITransformData end;
 
         public string name
         {
@@ -55,12 +55,39 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public int frameNo
+        {
+            get
+            {
+                return stFrame;
+            }
+        }
+
         public MotionData(BoneData start, BoneData end)
+        {
+            this.start = start.transform;
+            this.end = end.transform;
+            this.stFrame = start.frameNo;
+            this.edFrame = end.frameNo;
+        }
+
+        public MotionData(
+            ITransformData start,
+            ITransformData end,
+            int stFrame,
+            int edFrame)
         {
             this.start = start;
             this.end = end;
-            stFrame = start.frameNo;
-            edFrame = end.frameNo;
+            this.stFrame = stFrame;
+            this.edFrame = edFrame;
+        }
+
+        public MotionData Clone()
+        {
+            var newStart = start.Clone();
+            var newEnd = end.Clone();
+            return new MotionData(newStart, newEnd, stFrame, edFrame);
         }
     }
 }

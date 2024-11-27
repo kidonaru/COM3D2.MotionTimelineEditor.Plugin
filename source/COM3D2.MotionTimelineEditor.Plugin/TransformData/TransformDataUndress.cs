@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using COM3D2.MotionTimelineEditor.Plugin;
 
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataUndress : TransformDataBase
     {
@@ -34,5 +33,35 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             return CustomValueInfoMap;
         }
+
+        public ValueData isVisibleValue
+        {
+            get
+            {
+                return this["isVisible"];
+            }
+        }
+
+        public bool isVisible
+        {
+            get
+            {
+                return isVisibleValue.boolValue;
+            }
+            set
+            {
+                isVisibleValue.boolValue = value;
+            }
+        }
+
+        public DressSlotID slotId
+        {
+            get
+            {
+                return DressUtils.GetDressSlotId(name);
+            }
+        }
+
+        public int maidSlotNo;
     }
 }

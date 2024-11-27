@@ -86,30 +86,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var playingFrameNoFloat = this.playingFrameNoFloat;
 
-            foreach (var boneName in _playDataMap.Keys)
+            foreach (var playData in _playDataMap.Values)
             {
-                var playData = _playDataMap[boneName];
-
-                var bone = modelManager.GetBone(boneName);
-                if (bone == null)
-                {
-                    continue;
-                }
-
                 playData.Update(playingFrameNoFloat);
 
                 var current = playData.current;
                 if (current != null)
                 {
-                    ApplyMotion(current, bone.transform, playData.lerpFrame);
+                    ApplyMotion(current, playData.lerpFrame);
                 }
 
                 //PluginUtils.LogDebug("ApplyPlayData: boneName={0} lerpFrame={1}, listIndex={2}", boneName, playData.lerpFrame, playData.listIndex);
             }
         }
 
-        private void ApplyMotion(MotionData motion, Transform transform, float lerpFrame)
+        private void ApplyMotion(MotionData motion, float lerpFrame)
         {
+            var bone = modelManager.GetBone(motion.name);
+            if (bone == null)
+            {
+                return;
+            }
+
+            var transform = bone.transform;
             if (transform == null)
             {
                 return;
@@ -118,13 +117,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start;
             var end = motion.end;
 
-            var stTrans = start.transform;
-            var edTrans = end.transform;
-
-            float easingTime = CalcEasingValue(lerpFrame, stTrans.easing);
-            transform.localPosition = Vector3.Lerp(stTrans.position, edTrans.position, easingTime);
-            transform.localRotation = Quaternion.Euler(Vector3.Lerp(stTrans.eulerAngles, edTrans.eulerAngles, easingTime));
-            transform.localScale = Vector3.Lerp(stTrans.scale, edTrans.scale, easingTime);
+            float easingTime = CalcEasingValue(lerpFrame, start.easing);
+            transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
+            transform.localRotation = Quaternion.Euler(Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime));
+            transform.localScale = Vector3.Lerp(start.scale, end.scale, easingTime);
         }
 
         public override void OnModelAdded(StudioModelStat model)
@@ -209,52 +205,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void BuildPlayData(bool forOutput)
         {
-            foreach (var playData in _playDataMap.Values)
-            {
-                playData.ResetIndex();
-                playData.motions.Clear();
-            }
-
-            foreach (var pair in _timelineRowsMap)
-            {
-                var name = pair.Key;
-                var rows = pair.Value;
-
-                if (rows.Count == 0)
-                {
-                    continue;
-                }
-
-                var bone = modelManager.GetBone(name);
-                if (bone == null)
-                {
-                    continue;
-                }
-
-                MotionPlayData playData;
-                if (!_playDataMap.TryGetValue(name, out playData))
-                {
-                    playData = new MotionPlayData(rows.Count);
-                    _playDataMap[name] = playData;
-                }
-
-                for (var i = 0; i < rows.Count - 1; i++)
-                {
-                    var start = rows[i];
-                    var end = rows[i + 1];
-                    playData.motions.Add(new MotionData(start, end));
-                }
-
-                playData.Setup(timeline.singleFrameType);
-            }
+            BuildPlayDataFromBonesMap(
+                _timelineRowsMap,
+                _playDataMap,
+                timeline.singleFrameType);
         }
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            foreach (var rows in _timelineRowsMap.Values)
-            {
-                rows.Clear();
-            }
+            _timelineRowsMap.ClearBones();
 
             foreach (var keyFrame in keyFrames)
             {
@@ -270,22 +229,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void AppendTimelineRow(FrameData frame)
         {
+            var isLastFrame = frame.frameNo == maxFrameNo;
             foreach (var name in allBoneNames)
             {
                 var bone = frame.GetBone(name);
-                if (bone == null)
-                {
-                    continue;
-                }
-
-                List<BoneData> rows;
-                if (!_timelineRowsMap.TryGetValue(name, out rows))
-                {
-                    rows = new List<BoneData>();
-                    _timelineRowsMap[name] = rows;
-                }
-
-                rows.Add(bone);
+                _timelineRowsMap.AppendBone(bone, isLastFrame);
             }
         }
 

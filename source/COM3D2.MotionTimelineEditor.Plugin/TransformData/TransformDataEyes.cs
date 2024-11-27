@@ -58,5 +58,45 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             return CustomValueInfoMap;
         }
+
+        public ValueData horizonValue
+        {
+            get
+            {
+                return this["horizon"];
+            }
+        }
+
+        public ValueData verticalValue
+        {
+            get
+            {
+                return this["vertical"];
+            }
+        }
+
+        public float horizon
+        {
+            get
+            {
+                return horizonValue.value;
+            }
+            set
+            {
+                horizonValue.value = value;
+            }
+        }
+
+        public float vertical
+        {
+            get
+            {
+                return verticalValue.value;
+            }
+            set
+            {
+                verticalValue.value = value;
+            }
+        }
     }
 }

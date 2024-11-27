@@ -4,28 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using COM3D2.DanceCameraMotion.Plugin;
-using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
-namespace COM3D2.MotionTimelineEditor_DCM.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using UndressPlayData = PlayDataBase<UndressMotionData>;
-
-    public class UndressTimeLineRow
-    {
-        public int frame;
-        public DressSlotID slotId;
-        public int maidSlotNo;
-        public bool isVisible;
-    }
-
-    public class UndressMotionData : MotionDataBase
-    {
-        public DressSlotID slotId;
-        public bool isVisible;
-    }
-
     [TimelineLayerDesc("メイド脱衣", 15)]
     public class UndressTimelineLayer : TimelineLayerBase
     {
@@ -53,7 +35,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public Dictionary<string, List<UndressTimeLineRow>> timelineRowsMap
+        public Dictionary<string, List<BoneData>> timelineRowsMap
         {
             get
             {
@@ -61,9 +43,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private Dictionary<string, List<UndressTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<UndressTimeLineRow>>();
-        private Dictionary<string, UndressPlayData> _playDataMap = new Dictionary<string, UndressPlayData>();
-        private List<UndressTimeLineRow> _dcmOutputRows = new List<UndressTimeLineRow>(128);
+        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
+        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
 
         private UndressTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -136,27 +117,31 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             var playingFrameNoFloat = this.playingFrameNoFloat;
 
-            foreach (var slotName in _playDataMap.Keys)
+            foreach (var playData in _playDataMap.Values)
             {
-                var playData = _playDataMap[slotName];
-
                 var updated = playData.Update(playingFrameNoFloat);
                 if (updated)
                 {
-                    var current = playData.current;
-                    ApplyMotion(current);
+                    ApplyMotion(playData.current);
                 }
             }
 
             //PluginUtils.LogDebug("ApplyCamera: lerpFrame={0}, listIndex={1}", playData.lerpFrame, playData.listIndex);
         }
 
-        private void ApplyMotion(UndressMotionData motion)
+        private void ApplyMotion(MotionData motion)
         {
+            if (motion == null)
+            {
+                return;
+            }
+
             var maidCache = this.maidCache;
             if (maidCache == null) return;
 
-            maidCache.SetSlotVisible(motion.slotId, motion.isVisible);
+            var start = motion.start as TransformDataUndress;
+
+            maidCache.SetSlotVisible(start.slotId, start.isVisible);
         }
 
         public override void UpdateFrame(FrameData frame)
@@ -167,8 +152,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             foreach (var slotName in allBoneNames)
             {
                 var slotId = DressUtils.GetDressSlotId(slotName);
-                var trans = CreateTransformData(slotName);
-                trans["isVisible"].boolValue = maidCache.IsSlotVisible(slotId);
+                var trans = CreateTransformData(slotName) as TransformDataUndress;
+                trans.isVisible = maidCache.IsSlotVisible(slotId);
 
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
@@ -199,113 +184,39 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            foreach (var rows in _timelineRowsMap.Values)
-            {
-                rows.Clear();
-            }
+            _timelineRowsMap.ClearBones();
 
             foreach (var keyFrame in keyFrames)
             {
-                AppendTimeLineRow(keyFrame);
+                AppendTimelineRow(keyFrame);
             }
 
-            AppendTimeLineRow(_dummyLastFrame);
+            AppendTimelineRow(_dummyLastFrame);
 
             BuildPlayData();
             return null;
         }
 
-        private void AppendTimeLineRow(FrameData frame)
+        private void AppendTimelineRow(FrameData frame)
         {
             var isLastFrame = frame.frameNo == maxFrameNo;
             foreach (var slotName in firstFrame.boneNames)
             {
-                List<UndressTimeLineRow> rows;
-                if (!_timelineRowsMap.TryGetValue(slotName, out rows))
-                {
-                    rows = new List<UndressTimeLineRow>(16);
-                    _timelineRowsMap[slotName] = rows;
-                }
-
                 var bone = frame.GetBone(slotName);
-                if (bone == null)
-                {
-                    continue;
-                }
-
-                // 最後のフレームは2重に追加しない
-                if (isLastFrame && rows.Count > 0 && rows.Last().frame == frame.frameNo)
-                {
-                    continue;
-                }
-
-                var slotId = DressUtils.GetDressSlotId(slotName);
-
-                var row = new UndressTimeLineRow
-                {
-                    frame = frame.frameNo,
-                    slotId = slotId,
-                    maidSlotNo = slotNo,
-                    isVisible = bone.transform["isVisible"].boolValue,
-                };
-
-                rows.Add(row);
+                _timelineRowsMap.AppendBone(bone, isLastFrame);
             }
         }
 
         private void BuildPlayData()
         {
-            foreach (var playData in _playDataMap.Values)
-            {
-                playData.ResetIndex();
-                playData.motions.Clear();
-            }
-
-            foreach (var pair in _timelineRowsMap)
-            {
-                var name = pair.Key;
-                var rows = pair.Value;
-
-                if (rows.Count == 0)
-                {
-                    continue;
-                }
-
-                UndressPlayData playData;
-                if (!_playDataMap.TryGetValue(name, out playData))
-                {
-                    playData = new UndressPlayData
-                    {
-                        motions = new List<UndressMotionData>(rows.Count)
-                    };
-                    _playDataMap[name] = playData;
-                }
-
-                foreach (var row in rows)
-                {
-                    var motion = new UndressMotionData
-                    {
-                        stFrame = row.frame,
-                        edFrame = row.frame,
-                        slotId = row.slotId,
-                        isVisible = row.isVisible,
-                    };
-                    playData.motions.Add(motion);
-
-                    if (playData.motions.Count >= 2)
-                    {
-                        int prevIndex = playData.motions.Count() - 2;
-                        var prevMotion = playData.motions[prevIndex];
-                        prevMotion.edFrame = row.frame;
-                    }
-                }
-
-                playData.Setup(SingleFrameType.None);
-            }
+            BuildPlayDataFromBonesMap(
+                _timelineRowsMap,
+                _playDataMap,
+                SingleFrameType.None);
         }
 
         public void SaveUndressTimeLine(
-            List<UndressTimeLineRow> rows,
+            List<BoneData> rows,
             string filePath)
         {
             var offsetTime = timeline.startOffsetTime;
@@ -313,23 +224,25 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var builder = new StringBuilder();
             builder.Append("label,maidSlotNo,time,mask\r\n");
 
-            Action<UndressTimeLineRow, bool> appendRow = (row, isFirst) =>
+            Action<BoneData, bool> appendRow = (row, isFirst) =>
             {
-                var time = row.frame * timeline.frameDuration;
+                var time = row.frameNo * timeline.frameDuration;
 
                 if (!isFirst)
                 {
                     time += offsetTime;
                 }
 
-                bool mask = row.isVisible;
-                if (!DressUtils.IsShiftSlotId(row.slotId))
+                var trans = row.transform as TransformDataUndress;
+
+                bool mask = trans.isVisible;
+                if (!DressUtils.IsShiftSlotId(trans.slotId))
                 {
                     mask = !mask;
                 }
 
-                builder.Append(row.slotId.ToString() + ",");
-                builder.Append(row.maidSlotNo + ",");
+                builder.Append(trans.slotId.ToString() + ",");
+                builder.Append(trans.maidSlotNo + ",");
                 builder.Append(time.ToString("0.000") + ",");
                 builder.Append(mask ? "1" : "0");
                 builder.Append("\r\n");
@@ -356,19 +269,24 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             try
             {
-                _dcmOutputRows.Clear();
+                var outputRows = new List<BoneData>(64);
 
                 foreach (var layer in timelineManager.FindLayers<UndressTimelineLayer>(className))
                 {
                     foreach (var rows in layer.timelineRowsMap.Values)
                     {
-                        _dcmOutputRows.AddRange(rows);
+                        foreach (var row in rows)
+                        {
+                            var trans = row.transform as TransformDataUndress;
+                            trans.maidSlotNo = layer.slotNo;
+                            outputRows.Add(row);
+                        }
                     }
                 }
 
                 var outputFileName = "undress.csv";
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveUndressTimeLine(_dcmOutputRows, outputPath);
+                SaveUndressTimeLine(outputRows, outputPath);
 
                 songElement.Add(new XElement("changeUndress", outputFileName));
             }

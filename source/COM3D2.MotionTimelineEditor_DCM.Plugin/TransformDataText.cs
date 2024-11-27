@@ -1,6 +1,7 @@
 
 using System.Collections.Generic;
 using COM3D2.MotionTimelineEditor.Plugin;
+using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
@@ -194,6 +195,130 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public override Dictionary<string, StrValueInfo> GetStrValueInfoMap()
         {
             return StrValueInfoMap;
+        }
+
+        public ValueData indexValue
+        {
+            get
+            {
+                return this["index"];
+            }
+        }
+
+        public ValueData fontSizeValue
+        {
+            get
+            {
+                return this["fontSize"];
+            }
+        }
+
+        public ValueData lineSpacingValue
+        {
+            get
+            {
+                return this["lineSpacing"];
+            }
+        }
+
+        public ValueData alignmentValue
+        {
+            get
+            {
+                return this["alignment"];
+            }
+        }
+
+        public ValueData[] sizeDeltaValues
+        {
+            get
+            {
+                return new ValueData[] { this["sizeDeltaX"], this["sizeDeltaY"] };
+            }
+        }
+
+        public int index
+        {
+            get
+            {
+                return indexValue.intValue;
+            }
+            set
+            {
+                indexValue.intValue = value;
+            }
+        }
+
+        public string text
+        {
+            get
+            {
+                return GetStrValue("text");
+            }
+            set
+            {
+                SetStrValue("text", value);
+            }
+        }
+
+        public string font
+        {
+            get
+            {
+                return GetStrValue("font");
+            }
+            set
+            {
+                SetStrValue("font", value);
+            }
+        }
+
+        public int fontSize
+        {
+            get
+            {
+                return fontSizeValue.intValue;
+            }
+            set
+            {
+                fontSizeValue.intValue = value;
+            }
+        }
+
+        public int lineSpacing
+        {
+            get
+            {
+                return lineSpacingValue.intValue;
+            }
+            set
+            {
+                lineSpacingValue.intValue = value;
+            }
+        }
+
+        public TextAnchor alignment
+        {
+            get
+            {
+                return (TextAnchor) alignmentValue.intValue;
+            }
+            set
+            {
+                alignmentValue.intValue = (int) value;
+            }
+        }
+
+        public Vector2 sizeDelta
+        {
+            get
+            {
+                return sizeDeltaValues.ToVector2();
+            }
+            set
+            {
+                sizeDeltaValues.FromVector2(value);
+            }
         }
     }
 }

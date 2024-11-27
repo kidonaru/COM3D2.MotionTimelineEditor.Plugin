@@ -48,7 +48,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         private List<BoneData> _timelineRows = new List<BoneData>();
-        private MotionPlayData _playData = new MotionPlayData(64);
+        private MotionPlayData _playData = new MotionPlayData(32);
 
         private CameraTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -104,16 +104,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             _playData.Update(playingFrameNoFloat);
 
-            if (_playData.current == null)
+            if (_playData.current != null)
             {
-                PluginUtils.LogError("ApplyCamera: カメラデータの取得に失敗しました");
-                return;
+                ApplyMotion(_playData.current);
             }
 
             //PluginUtils.LogDebug("ApplyCamera: lerpFrame={0}, listIndex={1}, playingFrameNo={2}",
             //    _playData.lerpFrame, _playData.listIndex, playingFrameNoFloat);
-
-            ApplyMotion(_playData.current);
         }
 
         private void ApplyMotion(MotionData motion)
@@ -124,9 +121,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start;
             var end = motion.end;
 
-            var stTrans = start.transform;
-            var edTrans = end.transform;
-
             if (timeline.isTangentCamera)
             {
                 var t0 = motion.stFrame * timeline.frameDuration;
@@ -135,22 +129,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 position = PluginUtils.HermiteVector3(
                     t0,
                     t1,
-                    stTrans.positionValues,
-                    edTrans.positionValues,
+                    start.positionValues,
+                    end.positionValues,
                     _playData.lerpFrame);
 
                 rotation = PluginUtils.HermiteVector3(
                     t0,
                     t1,
-                    stTrans.eulerAnglesValues,
-                    edTrans.eulerAnglesValues,
+                    start.eulerAnglesValues,
+                    end.eulerAnglesValues,
                     _playData.lerpFrame);
 
                 var tempScale = PluginUtils.HermiteVector3(
                     t0,
                     t1,
-                    stTrans.scaleValues,
-                    edTrans.scaleValues,
+                    start.scaleValues,
+                    end.scaleValues,
                     _playData.lerpFrame);
 
                 distance = tempScale.x;
@@ -158,11 +152,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             else
             {
-                float easing = CalcEasingValue(_playData.lerpFrame, stTrans.easing);
-                position = Vector3.Lerp(stTrans.position, edTrans.position, easing);
-                rotation = Vector3.Lerp(stTrans.eulerAngles, edTrans.eulerAngles, easing);
-                distance = Mathf.Lerp(stTrans.scale.x, edTrans.scale.x, easing);
-                viewAngle = Mathf.Lerp(stTrans.scale.y, edTrans.scale.y, easing);
+                float easing = CalcEasingValue(_playData.lerpFrame, start.easing);
+                position = Vector3.Lerp(start.position, end.position, easing);
+                rotation = Vector3.Lerp(start.eulerAngles, end.eulerAngles, easing);
+                distance = Mathf.Lerp(start.scale.x, end.scale.x, easing);
+                viewAngle = Mathf.Lerp(start.scale.y, end.scale.y, easing);
             }
 
             if (config.isFixedFoV && !isCurrent && studioHack.isPoseEditing)
@@ -265,17 +259,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void BuildPlayData(bool forOutput)
         {
-            _playData.ResetIndex();
-            _playData.motions.Clear();
-
-            for (var i = 0; i < _timelineRows.Count - 1; i++)
-            {
-                var start = _timelineRows[i];
-                var end = _timelineRows[i + 1];
-                _playData.motions.Add(new MotionData(start, end));
-            }
-
-            _playData.Setup(timeline.singleFrameType);
+            BuildPlayDataFromBones(
+                _timelineRows,
+                _playData,
+                timeline.singleFrameType);
         }
 
         public void SaveCameraTimeLine(
@@ -360,29 +347,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var start = motion.start;
                 var end = motion.end;
 
-                var stTrans = start.transform;
-                var edTrans = end.transform;
+                var stDistance = start.scale.x;
+                var edDistance = end.scale.x;
+                var stViewAngle = start.scale.y;
+                var edViewAngle = end.scale.y;
 
-                var stDistance = stTrans.scale.x;
-                var edDistance = edTrans.scale.x;
-                var stViewAngle = stTrans.scale.y;
-                var edViewAngle = edTrans.scale.y;
-
-                builder.Append(stTrans.easing + ",");
+                builder.Append(start.easing + ",");
                 builder.Append(stTime.ToString("0.000") + ",");
-                builder.Append(stTrans.position.x.ToString("0.000") + ",");
-                builder.Append(stTrans.position.y.ToString("0.000") + ",");
-                builder.Append(stTrans.position.z.ToString("0.000") + ",");
-                builder.Append(stTrans.eulerAngles.x.ToString("0.000") + ",");
-                builder.Append(stTrans.eulerAngles.y.ToString("0.000") + ",");
-                builder.Append(stTrans.eulerAngles.z.ToString("0.000") + ",");
+                builder.Append(start.position.x.ToString("0.000") + ",");
+                builder.Append(start.position.y.ToString("0.000") + ",");
+                builder.Append(start.position.z.ToString("0.000") + ",");
+                builder.Append(start.eulerAngles.x.ToString("0.000") + ",");
+                builder.Append(start.eulerAngles.y.ToString("0.000") + ",");
+                builder.Append(start.eulerAngles.z.ToString("0.000") + ",");
                 builder.Append(edTime.ToString("0.000") + ",");
-                builder.Append(edTrans.position.x.ToString("0.000") + ",");
-                builder.Append(edTrans.position.y.ToString("0.000") + ",");
-                builder.Append(edTrans.position.z.ToString("0.000") + ",");
-                builder.Append(edTrans.eulerAngles.x.ToString("0.000") + ",");
-                builder.Append(edTrans.eulerAngles.y.ToString("0.000") + ",");
-                builder.Append(edTrans.eulerAngles.z.ToString("0.000") + ",");
+                builder.Append(end.position.x.ToString("0.000") + ",");
+                builder.Append(end.position.y.ToString("0.000") + ",");
+                builder.Append(end.position.z.ToString("0.000") + ",");
+                builder.Append(end.eulerAngles.x.ToString("0.000") + ",");
+                builder.Append(end.eulerAngles.y.ToString("0.000") + ",");
+                builder.Append(end.eulerAngles.z.ToString("0.000") + ",");
                 builder.Append(stDistance.ToString("0.000") + ",");
                 builder.Append(edDistance.ToString("0.000") + ",");
                 builder.Append(stViewAngle.ToString("0.000") + ",");

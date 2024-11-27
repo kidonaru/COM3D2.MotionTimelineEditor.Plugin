@@ -116,5 +116,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         TangentData[] GetOutTangentDataList(TangentValueType valueType);
 
         void Reset();
+
+        ITransformData Clone();
     }
 }

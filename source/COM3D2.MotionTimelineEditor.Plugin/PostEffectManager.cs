@@ -11,6 +11,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float aperture;
         public float maxBlurSize;
         public int maidSlotNo;
+
+        public static DepthOfFieldData Lerp(
+            DepthOfFieldData a,
+            DepthOfFieldData b,
+            float t)
+        {
+            return new DepthOfFieldData
+            {
+                enabled = a.enabled,
+                focalLength = Mathf.Lerp(a.focalLength, b.focalLength, t),
+                focalSize = Mathf.Lerp(a.focalSize, b.focalSize, t),
+                aperture = Mathf.Lerp(a.aperture, b.aperture, t),
+                maxBlurSize = Mathf.Lerp(a.maxBlurSize, b.maxBlurSize, t),
+                maidSlotNo = a.maidSlotNo,
+            };
+        }
     }
 
     public class PostEffectManager

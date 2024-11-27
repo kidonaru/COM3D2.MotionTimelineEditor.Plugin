@@ -136,5 +136,125 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             return CustomValueInfoMap;
         }
+
+        public ValueData rangeValue
+        {
+            get
+            {
+                return this["range"];
+            }
+        }
+
+        public ValueData intensityValue
+        {
+            get
+            {
+                return this["intensity"];
+            }
+        }
+
+        public ValueData spotAngleValue
+        {
+            get
+            {
+                return this["spotAngle"];
+            }
+        }
+
+        public ValueData shadowStrengthValue
+        {
+            get
+            {
+                return this["shadowStrength"];
+            }
+        }
+
+        public ValueData shadowBiasValue
+        {
+            get
+            {
+                return this["shadowBias"];
+            }
+        }
+
+        public ValueData maidSlotNoValue
+        {
+            get
+            {
+                return this["maidSlotNo"];
+            }
+        }
+
+        public float range
+        {
+            get
+            {
+                return rangeValue.value;
+            }
+            set
+            {
+                rangeValue.value = value;
+            }
+        }
+
+        public float intensity
+        {
+            get
+            {
+                return intensityValue.value;
+            }
+            set
+            {
+                intensityValue.value = value;
+            }
+        }
+
+        public float spotAngle
+        {
+            get
+            {
+                return spotAngleValue.value;
+            }
+            set
+            {
+                spotAngleValue.value = value;
+            }
+        }
+
+        public float shadowStrength
+        {
+            get
+            {
+                return shadowStrengthValue.value;
+            }
+            set
+            {
+                shadowStrengthValue.value = value;
+            }
+        }
+
+        public float shadowBias
+        {
+            get
+            {
+                return shadowBiasValue.value;
+            }
+            set
+            {
+                shadowBiasValue.value = value;
+            }
+        }
+
+        public int maidSlotNo
+        {
+            get
+            {
+                return maidSlotNoValue.intValue;
+            }
+            set
+            {
+                maidSlotNoValue.intValue = value;
+            }
+        }
     }
 }

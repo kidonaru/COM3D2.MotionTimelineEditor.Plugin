@@ -59,5 +59,65 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             return CustomValueInfoMap;
         }
+
+        public ValueData targetTypeValue
+        {
+            get
+            {
+                return this["targetType"];
+            }
+        }
+
+        public ValueData targetIndexValue
+        {
+            get
+            {
+                return this["targetIndex"];
+            }
+        }
+
+        public ValueData maidPointTypeValue
+        {
+            get
+            {
+                return this["maidPointType"];
+            }
+        }
+
+        public LookAtTargetType targetType
+        {
+            get
+            {
+                return (LookAtTargetType) targetTypeValue.intValue;
+            }
+            set
+            {
+                targetTypeValue.intValue = (int) value;
+            }
+        }
+
+        public int targetIndex
+        {
+            get
+            {
+                return targetIndexValue.intValue;
+            }
+            set
+            {
+                targetIndexValue.intValue = value;
+            }
+        }
+
+        public MaidPointType maidPointType
+        {
+            get
+            {
+                return (MaidPointType) maidPointTypeValue.intValue;
+            }
+            set
+            {
+                maidPointTypeValue.intValue = (int) value;
+            }
+        }
     }
 }

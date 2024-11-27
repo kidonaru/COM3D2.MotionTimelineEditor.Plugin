@@ -529,6 +529,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timelineManager.RegisterLayer(
                     typeof(VoiceTimelineLayer), VoiceTimelineLayer.Create
                 );
+                timelineManager.RegisterLayer(
+                    typeof(UndressTimelineLayer), UndressTimelineLayer.Create
+                );
 
                 windowManager.Init();
                 boneMenuManager.Init();

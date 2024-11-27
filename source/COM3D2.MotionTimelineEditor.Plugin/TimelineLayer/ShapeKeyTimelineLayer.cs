@@ -8,42 +8,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using ShapeKeyPlayData = PlayDataBase<ShapeKeyMotionData>;
-
-    public class ShapeKeyTimeLineRow
-    {
-        public int frame;
-        public string name;
-        public float weight;
-        public int easing;
-    }
-
-    public class ShapeKeyMotionData : MotionDataBase
-    {
-        public string tag;
-        public string slotName;
-        public int maidSlotNo;
-        public float stWeight;
-        public float edWeight;
-        public int easing;
-
-        public ShapeKeyMotionData Clone()
-        {
-            return new ShapeKeyMotionData
-            {
-                stFrame = stFrame,
-                edFrame = edFrame,
-
-                tag = tag,
-                slotName = slotName,
-                maidSlotNo = maidSlotNo,
-                stWeight = stWeight,
-                edWeight = edWeight,
-                easing = easing,
-            };
-        }
-    }
-
     [TimelineLayerDesc("メイドシェイプ", 13)]
     public partial class ShapeKeyTimelineLayer : TimelineLayerBase
     {
@@ -78,9 +42,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Dictionary<string, List<ShapeKeyTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<ShapeKeyTimeLineRow>>();
-        private Dictionary<string, ShapeKeyPlayData> _playDataMap = new Dictionary<string, ShapeKeyPlayData>();
-        private List<ShapeKeyMotionData> _dcmOutputMotions = new List<ShapeKeyMotionData>(128);
+        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
+        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
 
         private ShapeKeyTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -133,10 +96,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var playingFrameNoFloat = this.playingFrameNoFloat;
 
-            foreach (var shapeKey in _playDataMap.Keys)
+            foreach (var playData in _playDataMap.Values)
             {
-                var playData = _playDataMap[shapeKey];
-
                 playData.Update(playingFrameNoFloat);
 
                 var current = playData.current;
@@ -151,14 +112,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             maidCache.FixBlendValues(_playDataMap.Keys);
         }
 
-        private void ApplyMotion(ShapeKeyMotionData motion, float lerpTime)
+        private void ApplyMotion(MotionData motion, float lerpTime)
         {
-            if (maidCache != null)
+            if (maidCache == null)
             {
-                float easingTime = CalcEasingValue(lerpTime, motion.easing);
-                var weight = Mathf.Lerp(motion.stWeight, motion.edWeight, easingTime);
-                maidCache.SetBlendShapeValue(motion.tag, weight);
+                return;
             }
+
+            var start = motion.start as TransformDataShapeKey;
+            var end = motion.end as TransformDataShapeKey;
+
+            float easingTime = CalcEasingValue(lerpTime, start.easing);
+            var weight = Mathf.Lerp(start.weight, end.weight, easingTime);
+            maidCache.SetBlendShapeValue(motion.name, weight);
         }
 
         public override void OnShapeKeyAdded(string shapeKey)
@@ -183,9 +149,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             foreach (var boneName in allBoneNames)
             {
-                var trans = CreateTransformData(boneName);
+                var trans = CreateTransformData(boneName) as TransformDataShapeKey;
                 trans.easing = GetEasing(frame.frameNo, boneName);
-                trans["weight"].value = maidCache.GetBlendShapeValue(boneName);
+                trans.weight = maidCache.GetBlendShapeValue(boneName);
 
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
@@ -216,64 +182,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void BuildPlayData(bool forOutput)
         {
-            foreach (var playData in _playDataMap.Values)
-            {
-                playData.ResetIndex();
-                playData.motions.Clear();
-            }
-
-            foreach (var pair in _timelineRowsMap)
-            {
-                var name = pair.Key;
-                var rows = pair.Value;
-
-                if (rows.Count == 0)
-                {
-                    continue;
-                }
-
-                ShapeKeyPlayData playData;
-                if (!_playDataMap.TryGetValue(name, out playData))
-                {
-                    playData = new ShapeKeyPlayData
-                    {
-                        motions = new List<ShapeKeyMotionData>(rows.Count),
-                    };
-                    _playDataMap[name] = playData;
-                }
-
-                for (var i = 0; i < rows.Count - 1; i++)
-                {
-                    var start = rows[i];
-                    var end = rows[i + 1];
-
-                    var stFrame = start.frame;
-                    var edFrame = end.frame;
-
-                    var motion = new ShapeKeyMotionData
-                    {
-                        tag = name,
-                        stFrame = stFrame,
-                        edFrame = edFrame,
-
-                        stWeight = start.weight,
-                        edWeight = end.weight,
-                        easing = end.easing,
-                    };
-
-                    playData.motions.Add(motion);
-                }
-
-                playData.Setup(timeline.singleFrameType);
-            }
+            BuildPlayDataFromBonesMap(
+                _timelineRowsMap,
+                _playDataMap,
+                timeline.singleFrameType);
         }
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            foreach (var rows in _timelineRowsMap.Values)
-            {
-                rows.Clear();
-            }
+            _timelineRowsMap.ClearBones();
 
             foreach (var keyFrame in keyFrames)
             {
@@ -289,37 +206,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void AppendTimelineRow(FrameData frame)
         {
+            var isLastFrame = frame.frameNo == maxFrameNo;
             foreach (var name in allBoneNames)
             {
                 var bone = frame.GetBone(name);
-                if (bone == null)
-                {
-                    continue;
-                }
-
-                List<ShapeKeyTimeLineRow> rows;
-                if (!_timelineRowsMap.TryGetValue(name, out rows))
-                {
-                    rows = new List<ShapeKeyTimeLineRow>();
-                    _timelineRowsMap[name] = rows;
-                }
-
-                var trans = bone.transform;
-
-                var row = new ShapeKeyTimeLineRow
-                {
-                    frame = frame.frameNo,
-                    name = bone.name,
-                    weight = trans["weight"].value,
-                    easing = trans.easing
-                };
-
-                rows.Add(row);
+                _timelineRowsMap.AppendBone(bone, isLastFrame);
             }
         }
 
         public void SaveMotions(
-            List<ShapeKeyMotionData> motions,
+            List<MotionData> motions,
             string filePath)
         {
             var offsetTime = timeline.startOffsetTime;
@@ -328,7 +224,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             builder.Append("stTime,edTime,maidSlotNo,tag,slot,minSize,maxSize,outInterval,inInterval,outKeepTime,inKeepTime,outEasing,inEasing,isOneWay,isReverse" +
                             "\r\n");
 
-            Action<ShapeKeyMotionData, bool> appendMotion = (motion, isFirst) =>
+            Action<MotionData, bool> appendMotion = (motion, isFirst) =>
             {
                 var stTime = motion.stFrame * timeline.frameDuration;
                 var edTime = motion.edFrame * timeline.frameDuration;
@@ -337,9 +233,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 stTime += offsetTime;
                 edTime += offsetTime;
 
+                var start = motion.start as TransformDataShapeKey;
+                var end = motion.end as TransformDataShapeKey;
+
                 var isReverse = false;
-                var minSize = (int) (motion.stWeight * 100);
-                var maxSize = (int) (motion.edWeight * 100);
+                var minSize = (int) (start.weight * 100);
+                var maxSize = (int) (end.weight * 100);
 
                 if (minSize > maxSize)
                 {
@@ -351,17 +250,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 builder.Append(stTime.ToString("0.000") + ",");
                 builder.Append(edTime.ToString("0.000") + ",");
-                builder.Append(motion.maidSlotNo.ToString() + ",");
-                builder.Append(motion.tag + ",");
-                builder.Append(motion.slotName + ",");
+                builder.Append(start.maidSlotNo.ToString() + ",");
+                builder.Append(start.name + ",");
+                builder.Append(start.slotName + ",");
                 builder.Append(minSize.ToString() + ",");
                 builder.Append(maxSize.ToString() + ",");
                 builder.Append(dt.ToString("0.000") + ","); // outInterval
                 builder.Append(dt.ToString("0.000") + ","); // inInterval
                 builder.Append("0.000"+ ","); // outKeepTime
                 builder.Append("0.000"+ ","); // inKeepTime
-                builder.Append(motion.easing + ",");
-                builder.Append(motion.easing + ",");
+                builder.Append(start.easing + ",");
+                builder.Append(start.easing + ",");
                 builder.Append("1" + ","); // isOneWay
                 builder.Append(isReverse ? "1" : "0");
                 builder.Append("\r\n");
@@ -378,9 +277,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public List<ShapeKeyMotionData> BuildDcmMotions()
+        public List<MotionData> BuildDcmMotions()
         {
-            _dcmOutputMotions.Clear();
+            var outputMotions = new List<MotionData>(64);
 
             foreach (var pair in _playDataMap)
             {
@@ -398,14 +297,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     foreach (var entity in blendShape.entities)
                     {
                         var newMotion = motion.Clone();
-                        newMotion.slotName = entity.morph.bodyskin.Category;
-                        newMotion.maidSlotNo = slotNo;
-                        _dcmOutputMotions.Add(newMotion);
+                        var start = newMotion.start as TransformDataShapeKey;
+                        start.slotName = entity.morph.bodyskin.Category;
+                        start.maidSlotNo = slotNo;
+                        outputMotions.Add(newMotion);
                     }
                 }
             }
 
-            return _dcmOutputMotions;
+            return outputMotions;
         }
 
         public override void OutputDCM(XElement songElement)
@@ -417,7 +317,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             try
             {
-                var motions = new List<ShapeKeyMotionData>();
+                var motions = new List<MotionData>();
                 foreach (var layer in timelineManager.FindLayers<ShapeKeyTimelineLayer>(className))
                 {
                     motions.AddRange(layer.BuildDcmMotions());

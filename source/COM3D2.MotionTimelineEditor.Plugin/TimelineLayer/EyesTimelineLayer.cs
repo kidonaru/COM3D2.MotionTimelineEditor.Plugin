@@ -8,8 +8,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using EyesPlayData = PlayDataBase<EyesMotionData>;
-
     public enum MotionEyesType
     {
         EyesPosL,
@@ -18,31 +16,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         EyesScaR,
         EyesRot,
         LookAtTarget,
-    }
-
-    public class EyesTimeLineRow
-    {
-        public int frame;
-        public string name;
-        public float horizon;
-        public float vertical;
-        public int easing;
-        public LookAtTargetType targetType;
-        public int targetIndex;
-        public MaidPointType maidPointType;
-    }
-
-    public class EyesMotionData : MotionDataBase
-    {
-        public string name;
-        public float startHorizon;
-        public float startVertical;
-        public float endHorizon;
-        public float endVertical;
-        public int easing;
-        public LookAtTargetType targetType;
-        public int targetIndex;
-        public MaidPointType maidPointType;
     }
 
     [TimelineLayerDesc("メイド瞳", 12)]
@@ -113,9 +86,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Dictionary<string, List<EyesTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<EyesTimeLineRow>>();
-        private Dictionary<string, EyesPlayData> _playDataMap = new Dictionary<string, EyesPlayData>();
-        private List<EyesMotionData> _dcmOutputMotions = new List<EyesMotionData>(128);
+        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
+        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
 
         private EyesTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -179,10 +151,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var playingFrameNoFloat = this.playingFrameNoFloat;
 
-            foreach (var pair in _playDataMap)
+            foreach (var playData in _playDataMap.Values)
             {
-                var playData = pair.Value;
-
                 playData.Update(playingFrameNoFloat);
 
                 var current = playData.current;
@@ -195,21 +165,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             //PluginUtils.LogDebug("ApplyPlayData: lerpFrame={0}, listIndex={1}", playData.lerpFrame, playData.listIndex);
         }
 
-        private void ApplyMotion(EyesMotionData motion, float lerpFrame)
+        private void ApplyMotion(MotionData motion, float lerpFrame)
         {
             if (motion.name == "LookAtTarget")
             {
-                var targetType = motion.targetType;
-                var targetIndex = motion.targetIndex;
-                var maidPointType = motion.maidPointType;
+                var start = motion.start as TransformDataLookAtTarget;
+
+                var targetType = start.targetType;
+                var targetIndex = start.targetIndex;
+                var maidPointType = start.maidPointType;
 
                 ApplyLookAtTarget(targetType, targetIndex, maidPointType);
             }
             else
             {
-                float easingValue = CalcEasingValue(lerpFrame, motion.easing);
-                float horizon = Mathf.Lerp(motion.startHorizon, motion.endHorizon, easingValue);
-                float vertical = Mathf.Lerp(motion.startVertical, motion.endVertical, easingValue);
+                var start = motion.start as TransformDataEyes;
+                var end = motion.end as TransformDataEyes;
+
+                float easingValue = CalcEasingValue(lerpFrame, start.easing);
+                float horizon = Mathf.Lerp(start.horizon, end.horizon, easingValue);
+                float vertical = Mathf.Lerp(start.vertical, end.vertical, easingValue);
 
                 var eyesType = EyesTypeMap[motion.name];
                 ApplyEyes(eyesType, horizon, vertical);
@@ -221,7 +196,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             float horizon,
             float vertical)
         {
-            
             switch (eyesType)
             {
                 case MotionEyesType.EyesPosL:
@@ -341,38 +315,42 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             foreach (var eyesName in allBoneNames)
             {
                 var eyesType = EyesTypeMap[eyesName];
-                ITransformData trans = CreateTransformData(eyesName);
 
                 if (eyesType == MotionEyesType.LookAtTarget)
                 {
+                    var trans = CreateTransformData(eyesName) as TransformDataLookAtTarget;
                     var targetType = maidCache.lookAtTargetType;
-                    trans["targetType"].value = (int) targetType;
-                    trans["targetIndex"].value = 0;
-                    trans["maidPointType"].value = 0;
+                    trans.targetType = targetType;
+                    trans.targetIndex = 0;
+                    trans.maidPointType = 0;
 
                     switch (targetType)
                     {
                         case LookAtTargetType.Camera:
                             break;
                         case LookAtTargetType.Maid:
-                            trans["targetIndex"].value = maidCache.lookAtTargetIndex;
-                            trans["maidPointType"].value = (int) maidCache.lookAtMaidPointType;
+                            trans.targetIndex = maidCache.lookAtTargetIndex;
+                            trans.maidPointType = maidCache.lookAtMaidPointType;
                             break;
                         case LookAtTargetType.Model:
-                            trans["targetIndex"].value = maidCache.lookAtTargetIndex;
+                            trans.targetIndex = maidCache.lookAtTargetIndex;
                             break;
                     }
+
+                    var bone = frame.CreateBone(trans);
+                    frame.UpdateBone(bone);
                 }
                 else
                 {
+                    var trans = CreateTransformData(eyesName) as TransformDataEyes;
                     var eyesValue = GetEyesValue(eyesType);
-                    trans["horizon"].value = eyesValue.x;
-                    trans["vertical"].value = eyesValue.y;
+                    trans.horizon = eyesValue.x;
+                    trans.vertical = eyesValue.y;
                     trans.easing = GetEasing(frame.frameNo, eyesName);
-                }
 
-                var bone = frame.CreateBone(trans);
-                frame.UpdateBone(bone);
+                    var bone = frame.CreateBone(trans);
+                    frame.UpdateBone(bone);
+                }
             }
         }
 
@@ -400,10 +378,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            foreach (var rows in _timelineRowsMap.Values)
-            {
-                rows.Clear();
-            }
+            _timelineRowsMap.ClearBones();
 
             foreach (var keyFrame in keyFrames)
             {
@@ -419,121 +394,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private void AppendTimelineRow(FrameData frame)
         {
             var isLastFrame = frame.frameNo == maxFrameNo;
-            foreach (var name in firstFrame.boneNames)
+            foreach (var name in allBoneNames)
             {
-                List<EyesTimeLineRow> rows;
-                if (!_timelineRowsMap.TryGetValue(name, out rows))
-                {
-                    rows = new List<EyesTimeLineRow>(16);
-                    _timelineRowsMap[name] = rows;
-                }
-
                 var bone = frame.GetBone(name);
-                if (bone == null)
-                {
-                    continue;
-                }
-
-                // 最後のフレームは2重に追加しない
-                if (isLastFrame && rows.Count > 0 && rows.Last().frame == frame.frameNo)
-                {
-                    continue;
-                }
-
-                if (name == "LookAtTarget")
-                {
-                    var targetType = (LookAtTargetType) (int) bone.transform["targetType"].value;
-                    var targetIndex = (int) bone.transform["targetIndex"].value;
-                    var maidPointType = (MaidPointType) (int) bone.transform["maidPointType"].value;
-
-                    var row = new EyesTimeLineRow
-                    {
-                        frame = frame.frameNo,
-                        name = name,
-                        targetType = targetType,
-                        targetIndex = targetIndex,
-                        maidPointType = maidPointType,
-                    };
-                    rows.Add(row);
-                }
-                else
-                {
-                    var row = new EyesTimeLineRow
-                    {
-                        frame = frame.frameNo,
-                        name = name,
-                        horizon = bone.transform["horizon"].value,
-                        vertical = bone.transform["vertical"].value,
-                        easing = bone.transform.easing,
-                    };
-                    rows.Add(row);
-                }
+                _timelineRowsMap.AppendBone(bone, isLastFrame);
             }
         }
         
         private void BuildPlayData()
         {
-            foreach (var playData in _playDataMap.Values)
-            {
-                playData.ResetIndex();
-                playData.motions.Clear();
-            }
-
-            foreach (var pair in _timelineRowsMap)
-            {
-                var name = pair.Key;
-                var rows = pair.Value;
-
-                if (rows.Count == 0)
-                {
-                    continue;
-                }
-
-                EyesPlayData playData;
-                if (!_playDataMap.TryGetValue(name, out playData))
-                {
-                    playData = new EyesPlayData
-                    {
-                        motions = new List<EyesMotionData>(rows.Count)
-                    };
-                    _playDataMap[name] = playData;
-                }
-
-                foreach (var row in rows)
-                {
-                    var motion = new EyesMotionData
-                    {
-                        stFrame = row.frame,
-                        edFrame = row.frame,
-
-                        name = row.name,
-                        startHorizon = row.horizon,
-                        endHorizon = row.horizon,
-                        startVertical = row.vertical,
-                        endVertical = row.vertical,
-                        easing = row.easing,
-                        targetType = row.targetType,
-                        targetIndex = row.targetIndex,
-                        maidPointType = row.maidPointType,
-                    };
-                    playData.motions.Add(motion);
-
-                    if (playData.motions.Count >= 2)
-                    {
-                        int prevIndex = playData.motions.Count() - 2;
-                        var prevMotion = playData.motions[prevIndex];
-                        prevMotion.edFrame = row.frame;
-                        prevMotion.endHorizon = row.horizon;
-                        prevMotion.endVertical = row.vertical;
-                    }
-                }
-
-                playData.Setup(SingleFrameType.None);
-            }
+            BuildPlayDataFromBonesMap(
+                _timelineRowsMap,
+                _playDataMap,
+                SingleFrameType.None);
         }
 
         public void SaveMotions(
-            List<EyesMotionData> motions,
+            List<MotionData> motions,
             string filePath)
         {
             var offsetTime = timeline.startOffsetTime;
@@ -542,7 +419,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             builder.Append("type,startTime,startHorizon,startVertical,endTime,endHorizon,endVertical,easing" +
                             "\r\n");
 
-            Action<EyesMotionData, bool> appendMotion = (motion, isFirst) =>
+            Action<MotionData, bool> appendMotion = (motion, isFirst) =>
             {
                 var type = EyesTypeMap[motion.name];
 
@@ -565,14 +442,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     edTime += offsetTime;
                 }
 
+                var start = motion.start as TransformDataEyes;
+                var end = motion.end as TransformDataEyes;
+
                 builder.Append((int) type + ",");
                 builder.Append(stTime.ToString("0.000") + ",");
-                builder.Append(motion.startHorizon.ToString("0.000") + ",");
-                builder.Append(motion.startVertical.ToString("0.000") + ",");
+                builder.Append(start.horizon.ToString("0.000") + ",");
+                builder.Append(start.vertical.ToString("0.000") + ",");
                 builder.Append(edTime.ToString("0.000") + ",");
-                builder.Append(motion.endHorizon.ToString("0.000") + ",");
-                builder.Append(motion.endVertical.ToString("0.000") + ",");
-                builder.Append(motion.easing);
+                builder.Append(end.horizon.ToString("0.000") + ",");
+                builder.Append(end.vertical.ToString("0.000") + ",");
+                builder.Append(start.easing);
                 builder.Append("\r\n");
             };
 
@@ -596,16 +476,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             try
             {
-                _dcmOutputMotions.Clear();
+                var outputMotions = new List<MotionData>(64);
 
                 foreach (var playData in _playDataMap.Values)
                 {
-                    _dcmOutputMotions.AddRange(playData.motions);
+                    outputMotions.AddRange(playData.motions);
                 }
 
                 var outputFileName = string.Format("eyes_{0}.csv", slotNo);
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveMotions(_dcmOutputMotions, outputPath);
+                SaveMotions(outputMotions, outputPath);
 
                 var maidElement = GetMeidElement(songElement);
                 maidElement.Add(new XElement("eyes", outputFileName));

@@ -10,31 +10,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
-    using TextPlayData = PlayDataBase<TextMotionData>;
-
-    public class TextTimeLineRow
-    {
-        public int frame;
-        public int index;
-        public string text;
-        public string font;
-        public int fontSize;
-        public Vector3 position;
-        public Vector3 rotation;
-        public Vector3 scale;
-        public Color color;
-        public int easing;
-        public int lineSpacing;
-		public TextAnchor alignment;
-		public Vector2 sizeDelta;
-    }
-
-    public class TextMotionData : MotionDataBase
-    {
-        public TextTimeLineRow start;
-        public TextTimeLineRow end;
-    }
-
     [TimelineLayerDesc("テキスト", 45)]
     public partial class TextTimelineLayer : TimelineLayerBase
     {
@@ -67,8 +42,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private Dictionary<string, List<TextTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<TextTimeLineRow>>();
-        private Dictionary<string, TextPlayData> _playDataMap = new Dictionary<string, TextPlayData>();
+        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
+        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
 
         private TextManager _textManager = null;
 
@@ -162,58 +137,79 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             foreach (var playData in _playDataMap.Values)
             {
                 var indexUpdated = playData.Update(playingFrameNoFloat);
-
                 var current = playData.current;
+
+                if (indexUpdated)
+                {
+                    ApplyNewMotion(current, playData.lerpFrame);
+                }
                 if (current != null)
                 {
-                    ApplyMotion(current, playData.lerpFrame, indexUpdated);
+                    ApplyMotion(current, playData.lerpFrame);
                 }
             }
         }
 
-        private void ApplyMotion(TextMotionData motion, float t, bool indexUpdated)
+        private void ApplyNewMotion(MotionData motion, float t)
 		{
-            if (!IsValidIndex(motion.start.index))
+            if (motion == null)
             {
                 return;
             }
 
-            var start = motion.start;
-            var end = motion.end;
+            var start = motion.start as TransformDataText;
+
+            if (!IsValidIndex(start.index))
+            {
+                return;
+            }
+
 			var freeTextSet = GetFreeTextSet(start.index);
 
-            if (indexUpdated)
-            {
-                var text = freeTextSet.text;
-                RectTransform rect = freeTextSet.rect;
+            var text = freeTextSet.text;
+            var rect = freeTextSet.rect;
 
-                bool flag = false;
-                if (text.text != start.text)
-                {
-                    text.text = start.text;
-                    flag = true;
-                }
-                if (!string.IsNullOrEmpty(start.text) && (flag || (text.font != null && text.font.name != start.font)))
-                {
-                    text.font = textManager.GetFont(start.font);
-                }
-                text.fontSize = start.fontSize;
-                rect.localPosition = start.position;
-                rect.eulerAngles = start.rotation;
-                rect.localScale = start.scale;
-                text.color = start.color;
-                text.lineSpacing = (float) start.lineSpacing;
-                text.alignment = start.alignment;
-                rect.sizeDelta = start.sizeDelta;
+            bool flag = false;
+            if (text.text != start.text)
+            {
+                text.text = start.text;
+                flag = true;
             }
+            if (!string.IsNullOrEmpty(start.text) && (flag || (text.font != null && text.font.name != start.font)))
+            {
+                text.font = textManager.GetFont(start.font);
+            }
+            text.fontSize = start.fontSize;
+            rect.localPosition = start.position;
+            rect.eulerAngles = start.eulerAngles;
+            rect.localScale = start.scale;
+            text.color = start.color;
+            text.lineSpacing = (float) start.lineSpacing;
+            text.alignment = start.alignment;
+            rect.sizeDelta = start.sizeDelta;
+
+			UpdateFreeTextSet(start.index, freeTextSet);
+		}
+
+        private void ApplyMotion(MotionData motion, float t)
+		{
+            var start = motion.start as TransformDataText;
+            var end = motion.end as TransformDataText;
+
+            if (!IsValidIndex(start.index))
+            {
+                return;
+            }
+
+			var freeTextSet = GetFreeTextSet(start.index);
 
 			if (start.position != end.position)
             {
                 freeTextSet.rect.localPosition = Vector3.Lerp(start.position, end.position, t);
             }
-			if (start.rotation != end.rotation)
+			if (start.eulerAngles != end.eulerAngles)
             {
-                freeTextSet.rect.eulerAngles = Vector3.Lerp(start.rotation, end.rotation, t);
+                freeTextSet.rect.eulerAngles = Vector3.Lerp(start.eulerAngles, end.eulerAngles, t);
             }
 			if (start.scale != end.scale)
             {
@@ -299,20 +295,19 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var text = freeTextSet.text;
                 var rect = freeTextSet.rect;
 
-                var trans = CreateTransformData(boneName);
-                trans.SetStrValue("text", text.text);
-                trans.SetStrValue("font", text.font != null ? text.font.name : "");
+                var trans = CreateTransformData(boneName) as TransformDataText;
+                trans.text = text.text;
+                trans.font = text.font != null ? text.font.name : "";
                 trans.position = rect.localPosition;
                 trans.eulerAngles = rect.localEulerAngles;
                 trans.scale = rect.localScale;
                 trans.color = text.color;
                 trans.easing = GetEasing(frame.frameNo, boneName);
-                trans["index"].value = index;
-                trans["fontSize"].value = text.fontSize;
-                trans["lineSpacing"].value = text.lineSpacing;
-                trans["alignment"].value = (int) text.alignment;
-                trans["sizeDeltaX"].value = rect.sizeDelta.x;
-                trans["sizeDeltaY"].value = rect.sizeDelta.y;
+                trans.index = index;
+                trans.fontSize = text.fontSize;
+                trans.lineSpacing = (int) text.lineSpacing;
+                trans.alignment = text.alignment;
+                trans.sizeDelta = rect.sizeDelta;
 
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
@@ -343,112 +338,36 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            foreach (var rows in _timelineRowsMap.Values)
-            {
-                rows.Clear();
-            }
+            _timelineRowsMap.ClearBones();
 
             foreach (var keyFrame in keyFrames)
             {
-                AppendTimeLineRow(keyFrame);
+                AppendTimelineRow(keyFrame);
             }
 
-            AppendTimeLineRow(_dummyLastFrame);
+            AppendTimelineRow(_dummyLastFrame);
 
             BuildPlayData(forOutput);
 
             return null;
         }
 
-        private void AppendTimeLineRow(FrameData frame)
+        private void AppendTimelineRow(FrameData frame)
         {
+            var isLastFrame = frame.frameNo == maxFrameNo;
             foreach (var name in allBoneNames)
             {
                 var bone = frame.GetBone(name);
-                if (bone == null)
-                {
-                    continue;
-                }
-
-                List<TextTimeLineRow> rows;
-                if (!_timelineRowsMap.TryGetValue(name, out rows))
-                {
-                    rows = new List<TextTimeLineRow>();
-                    _timelineRowsMap[name] = rows;
-                }
-
-                var trans = bone.transform;
-
-                var row = new TextTimeLineRow
-                {
-                    frame = frame.frameNo,
-                    index = trans["index"].intValue,
-                    text = trans.GetStrValue("text"),
-                    font = trans.GetStrValue("font"),
-                    fontSize = trans["fontSize"].intValue,
-                    position = trans.position,
-                    rotation = trans.eulerAngles,
-                    scale = trans.scale,
-                    color = trans.color,
-                    easing = trans.easing,
-                    lineSpacing = trans["lineSpacing"].intValue,
-                    alignment = (TextAnchor) trans["alignment"].intValue,
-                    sizeDelta = new Vector2(trans["sizeDeltaX"].value, trans["sizeDeltaY"].value),
-                };
-
-                rows.Add(row);
+                _timelineRowsMap.AppendBone(bone, isLastFrame);
             }
         }
 
         private void BuildPlayData(bool forOutput)
         {
-            foreach (var playData in _playDataMap.Values)
-            {
-                playData.ResetIndex();
-                playData.motions.Clear();
-            }
-
-            foreach (var pair in _timelineRowsMap)
-            {
-                var name = pair.Key;
-                var rows = pair.Value;
-
-                if (rows.Count == 0)
-                {
-                    continue;
-                }
-
-                TextPlayData playData;
-                if (!_playDataMap.TryGetValue(name, out playData))
-                {
-                    playData = new TextPlayData
-                    {
-                        motions = new List<TextMotionData>(rows.Count),
-                    };
-                    _playDataMap[name] = playData;
-                }
-
-                for (var i = 0; i < rows.Count - 1; i++)
-                {
-                    var start = rows[i];
-                    var end = rows[i + 1];
-
-                    var stFrame = start.frame;
-                    var edFrame = end.frame;
-
-                    var motion = new TextMotionData
-                    {
-                        stFrame = stFrame,
-                        edFrame = edFrame,
-                        start = start,
-                        end = end,
-                    };
-
-                    playData.motions.Add(motion);
-                }
-
-                playData.Setup(timeline.singleFrameType);
-            }
+            BuildPlayDataFromBonesMap(
+                _timelineRowsMap,
+                _playDataMap,
+                timeline.singleFrameType);
         }
 
         public void SavePlayData(string filePath)
@@ -458,7 +377,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var builder = new StringBuilder();
             builder.Append("index,text,font,fontSize,stTime,stPosX,stPosY,stRotZ,stScaX,stScaY,stColR,stColG,stColB,stColA,edTime,edPosX,edPosY,edRotZ,edScaX,edScaY,edColR,edColG,edColB,edColA,easing,lineSpacing,alignment,sizeDeltaX,sizeDeltaY\r\n");
 
-            Action<TextMotionData> appendMotion = motion =>
+            Action<MotionData> appendMotion = motion =>
             {
                 var stTime = motion.stFrame * timeline.frameDuration;
                 var edTime = motion.edFrame * timeline.frameDuration;
@@ -466,8 +385,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 stTime += offsetTime;
                 edTime += offsetTime;
 
-                var start = motion.start;
-                var end = motion.end;
+                var start = motion.start as TransformDataText;
+                var end = motion.end as TransformDataText;
                 var stColor = (Color32) start.color;
                 var edColor = (Color32) end.color;
 

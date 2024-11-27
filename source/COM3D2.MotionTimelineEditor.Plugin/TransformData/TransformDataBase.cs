@@ -1372,6 +1372,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public ITransformData Clone()
+        {
+            var clone = (TransformDataBase) MemberwiseClone();
+
+            clone._values = new ValueData[values.Length];
+            for (int i = 0; i < values.Length; i++)
+            {
+                clone._values[i] = values[i].Clone();
+            }
+
+            clone._strValues = new string[strValues.Length];
+            for (int i = 0; i < strValues.Length; i++)
+            {
+                clone._strValues[i] = strValues[i];
+            }
+
+            return clone;
+        }
+
         public override bool Equals(object obj)
         {
             var other = obj as TransformDataBase;

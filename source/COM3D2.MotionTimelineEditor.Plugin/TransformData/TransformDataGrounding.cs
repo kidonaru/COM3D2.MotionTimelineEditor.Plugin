@@ -87,5 +87,145 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             return CustomValueInfoMap;
         }
+
+        public ValueData isGroundingFootLValue
+        {
+            get
+            {
+                return this["isGroundingFootL"];
+            }
+        }
+
+        public ValueData floorHeightValue
+        {
+            get
+            {
+                return this["floorHeight"];
+            }
+        }
+
+        public ValueData footBaseOffsetValue
+        {
+            get
+            {
+                return this["footBaseOffset"];
+            }
+        }
+
+        public ValueData footStretchHeightValue
+        {
+            get
+            {
+                return this["footStretchHeight"];
+            }
+        }
+
+        public ValueData footStretchAngleValue
+        {
+            get
+            {
+                return this["footStretchAngle"];
+            }
+        }
+
+        public ValueData footGroundAngleValue
+        {
+            get
+            {
+                return this["footGroundAngle"];
+            }
+        }
+
+        public ValueData isGroundingFootRValue
+        {
+            get
+            {
+                return this["isGroundingFootR"];
+            }
+        }
+
+        public bool isGroundingFootL
+        {
+            get
+            {
+                return isGroundingFootLValue.boolValue;
+            }
+            set
+            {
+                isGroundingFootLValue.boolValue = value;
+            }
+        }
+
+        public float floorHeight
+        {
+            get
+            {
+                return floorHeightValue.value;
+            }
+            set
+            {
+                floorHeightValue.value = value;
+            }
+        }
+
+        public float footBaseOffset
+        {
+            get
+            {
+                return footBaseOffsetValue.value;
+            }
+            set
+            {
+                footBaseOffsetValue.value = value;
+            }
+        }
+
+        public float footStretchHeight
+        {
+            get
+            {
+                return footStretchHeightValue.value;
+            }
+            set
+            {
+                footStretchHeightValue.value = value;
+            }
+        }
+
+        public float footStretchAngle
+        {
+            get
+            {
+                return footStretchAngleValue.value;
+            }
+            set
+            {
+                footStretchAngleValue.value = value;
+            }
+        }
+
+        public float footGroundAngle
+        {
+            get
+            {
+                return footGroundAngleValue.value;
+            }
+            set
+            {
+                footGroundAngleValue.value = value;
+            }
+        }
+
+        public bool isGroundingFootR
+        {
+            get
+            {
+                return isGroundingFootRValue.boolValue;
+            }
+            set
+            {
+                isGroundingFootRValue.boolValue = value;
+            }
+        }
     }
 }

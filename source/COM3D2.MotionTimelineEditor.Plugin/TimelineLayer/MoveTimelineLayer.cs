@@ -40,7 +40,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         private List<BoneData> _timelineRows = new List<BoneData>();
-        private MotionPlayData _playData = new MotionPlayData(64);
+        private MotionPlayData _playData = new MotionPlayData(32);
 
         private MoveTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -107,12 +107,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start;
             var end = motion.end;
 
-            var stTrans = start.transform;
-            var edTrans = end.transform;
-
-            float easingTime = CalcEasingValue(lerpTime, stTrans.easing);
-            transform.localPosition = Vector3.Lerp(stTrans.position, edTrans.position, easingTime);
-            transform.localRotation = Quaternion.Euler(Vector3.Lerp(stTrans.eulerAngles, edTrans.eulerAngles, easingTime));
+            float easingTime = CalcEasingValue(lerpTime, start.easing);
+            transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
+            transform.localRotation = Quaternion.Euler(Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime));
         }
 
         public override void OnEndPoseEdit()
@@ -166,17 +163,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             foreach (var keyFrame in keyFrames)
             {
-                AppendTimeLineRow(keyFrame);
+                AppendTimelineRow(keyFrame);
             }
 
-            AppendTimeLineRow(_dummyLastFrame);
+            AppendTimelineRow(_dummyLastFrame);
 
             BuildPlayData(forOutput);
 
             return null;
         }
 
-        private void AppendTimeLineRow(FrameData frame)
+        private void AppendTimelineRow(FrameData frame)
         {
             var bone = frame.GetBone(MoveBoneName);
             if (bone == null)
@@ -189,24 +186,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void BuildPlayData(bool forOutput)
         {
-            var maid = this.maid;
-            if (maid == null)
-            {
-                return;
-            }
-
-            _playData.ResetIndex();
-            _playData.motions.Clear();
-
-            for (var i = 0; i < _timelineRows.Count - 1; i++)
-            {
-                var start = _timelineRows[i];
-                var end = _timelineRows[i + 1];
-
-                _playData.motions.Add(new MotionData(start, end));
-            }
-
-            _playData.Setup(timeline.singleFrameType);
+            BuildPlayDataFromBones(
+                _timelineRows,
+                _playData,
+                timeline.singleFrameType);
         }
 
         public void SaveMotions(
@@ -240,27 +223,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var start = motion.start;
                 var end = motion.end;
 
-                var stTrans = start.transform;
-                var edTrans = end.transform;
-
                 builder.Append(stTime.ToString("0.000") + ",");
-                builder.Append(stTrans.position.x.ToString("0.000") + ",");
-                builder.Append(stTrans.position.y.ToString("0.000") + ",");
-                builder.Append(stTrans.position.z.ToString("0.000") + ",");
-                builder.Append(stTrans.eulerAngles.x.ToString("0.000") + ",");
-                builder.Append(stTrans.eulerAngles.y.ToString("0.000") + ",");
-                builder.Append(stTrans.eulerAngles.z.ToString("0.000") + ",");
+                builder.Append(start.position.x.ToString("0.000") + ",");
+                builder.Append(start.position.y.ToString("0.000") + ",");
+                builder.Append(start.position.z.ToString("0.000") + ",");
+                builder.Append(start.eulerAngles.x.ToString("0.000") + ",");
+                builder.Append(start.eulerAngles.y.ToString("0.000") + ",");
+                builder.Append(start.eulerAngles.z.ToString("0.000") + ",");
                 builder.Append(edTime.ToString("0.000") + ",");
-                builder.Append(edTrans.position.x.ToString("0.000") + ",");
-                builder.Append(edTrans.position.y.ToString("0.000") + ",");
-                builder.Append(edTrans.position.z.ToString("0.000") + ",");
-                builder.Append(edTrans.eulerAngles.x.ToString("0.000") + ",");
-                builder.Append(edTrans.eulerAngles.y.ToString("0.000") + ",");
-                builder.Append(edTrans.eulerAngles.z.ToString("0.000") + ",");
+                builder.Append(end.position.x.ToString("0.000") + ",");
+                builder.Append(end.position.y.ToString("0.000") + ",");
+                builder.Append(end.position.z.ToString("0.000") + ",");
+                builder.Append(end.eulerAngles.x.ToString("0.000") + ",");
+                builder.Append(end.eulerAngles.y.ToString("0.000") + ",");
+                builder.Append(end.eulerAngles.z.ToString("0.000") + ",");
                 builder.Append(0 + ","); // bezier1
                 builder.Append(0 + ","); // bezier2
                 builder.Append(0 + ","); // bezierType
-                builder.Append(stTrans.easing);
+                builder.Append(start.easing);
                 builder.Append("\r\n");
             };
 

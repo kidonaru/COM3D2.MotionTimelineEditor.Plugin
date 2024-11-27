@@ -69,5 +69,57 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             return StrValueInfoMap;
         }
+
+        public ValueData intervalValue
+        {
+            get
+            {
+                return this["interval"];
+            }
+        }
+
+        public ValueData isLoopValue
+        {
+            get
+            {
+                return this["isLoop"];
+            }
+        }
+
+        public string fileName
+        {
+            get
+            {
+                return GetStrValue("fileName");
+            }
+            set
+            {
+                SetStrValue("fileName", value);
+            }
+        }
+
+        public float interval
+        {
+            get
+            {
+                return intervalValue.value;
+            }
+            set
+            {
+                intervalValue.value = value;
+            }
+        }
+
+        public bool isLoop
+        {
+            get
+            {
+                return isLoopValue.boolValue;
+            }
+            set
+            {
+                isLoopValue.boolValue = value;
+            }
+        }
     }
 }

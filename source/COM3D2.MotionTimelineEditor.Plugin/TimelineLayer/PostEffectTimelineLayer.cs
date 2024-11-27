@@ -5,25 +5,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using PostEffectPlayData = PlayDataBase<PostEffectMotionData>;
-
-    public class PostEffectTimeLineRow
-    {
-        public int frame;
-        public string name;
-        public PostEffectType type;
-        public int index;
-        public int easing;
-        public DepthOfFieldData depthOfField;
-        public ParaffinData paraffin;
-    }
-
-    public class PostEffectMotionData : MotionDataBase
-    {
-        public PostEffectTimeLineRow start;
-        public PostEffectTimeLineRow end;
-    }
-
     [TimelineLayerDesc("ポストエフェクト", 44)]
     public class PostEffectTimelineLayer : TimelineLayerBase
     {
@@ -58,8 +39,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Dictionary<string, List<PostEffectTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<PostEffectTimeLineRow>>();
-        private Dictionary<string, PostEffectPlayData> _playDataMap = new Dictionary<string, PostEffectPlayData>();
+        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
+        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
 
         private static PostEffectManager postEffectManager
         {
@@ -150,10 +131,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var playingFrameNoFloat = this.playingFrameNoFloat;
 
-            foreach (var postEffectName in _playDataMap.Keys)
+            foreach (var playData in _playDataMap.Values)
             {
-                var playData = _playDataMap[postEffectName];
-
                 playData.Update(playingFrameNoFloat);
 
                 var current = playData.current;
@@ -166,9 +145,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyMotion(PostEffectMotionData motion, float lerpTime)
+        private void ApplyMotion(MotionData motion, float lerpTime)
         {
-            switch (motion.start.type)
+            var effectType = PostEffectUtils.ToEffectType(motion.name);
+            switch (effectType)
             {
                 case PostEffectType.DepthOfField:
                     ApplyDepthOfField(motion, lerpTime);
@@ -179,52 +159,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyDepthOfField(PostEffectMotionData motion, float lerpTime)
+        private void ApplyDepthOfField(MotionData motion, float lerpTime)
         {
-            var depthOfField = postEffectManager.GetDepthOfFieldData();
-
-            var start = motion.start;
-            var end = motion.end;
+            var start = motion.start as TransformDataDepthOfField;
+            var end = motion.end as TransformDataDepthOfField;
 
             var stData = start.depthOfField;
             var edData = end.depthOfField;
 
             float easingTime = CalcEasingValue(lerpTime, start.easing);
-            depthOfField.enabled = stData.enabled;
-            depthOfField.focalLength = Mathf.Lerp(stData.focalLength, edData.focalLength, easingTime);
-            depthOfField.focalSize = Mathf.Lerp(stData.focalSize, edData.focalSize, easingTime);
-            depthOfField.aperture = Mathf.Lerp(stData.aperture, edData.aperture, easingTime);
-            depthOfField.maxBlurSize = Mathf.Lerp(stData.maxBlurSize, edData.maxBlurSize, easingTime);
-            depthOfField.maidSlotNo = stData.maidSlotNo;
+            var depthOfField = DepthOfFieldData.Lerp(stData, edData, easingTime);
 
             postEffectManager.ApplyDepthOfField(depthOfField);
         }
 
-        private void ApplyParaffin(PostEffectMotionData motion, float lerpTime)
+        private void ApplyParaffin(MotionData motion, float lerpTime)
         {
-            var index = motion.start.index;
-            var paraffin = postEffectManager.GetParaffinData(index);
-
-            var start = motion.start;
-            var end = motion.end;
+            var start = motion.start as TransformDataParaffin;
+            var end = motion.end as TransformDataParaffin;
 
             var stData = start.paraffin;
             var edData = end.paraffin;
 
             float easingTime = CalcEasingValue(lerpTime, start.easing);
-            paraffin.enabled = stData.enabled;
-            paraffin.color1 = Color.Lerp(stData.color1, edData.color1, easingTime);
-            paraffin.color2 = Color.Lerp(stData.color2, edData.color2, easingTime);
-            paraffin.centerPosition = Vector2.Lerp(stData.centerPosition, edData.centerPosition, easingTime);
-            paraffin.radiusFar = Mathf.Lerp(stData.radiusFar, edData.radiusFar, easingTime);
-            paraffin.radiusNear = Mathf.Lerp(stData.radiusNear, edData.radiusNear, easingTime);
-            paraffin.radiusScale = Vector2.Lerp(stData.radiusScale, edData.radiusScale, easingTime);
-            paraffin.useNormal = Mathf.Lerp(stData.useNormal, edData.useNormal, easingTime);
-            paraffin.useAdd = Mathf.Lerp(stData.useAdd, edData.useAdd, easingTime);
-            paraffin.useMultiply = Mathf.Lerp(stData.useMultiply, edData.useMultiply, easingTime);
-            paraffin.useOverlay = Mathf.Lerp(stData.useOverlay, edData.useOverlay, easingTime);
-            paraffin.useSubstruct = Mathf.Lerp(stData.useSubstruct, edData.useSubstruct, easingTime);
+            var paraffin = ParaffinData.Lerp(stData, edData, easingTime);
 
+            var index = start.index;
             postEffectManager.ApplyParaffin(index, paraffin);
         }
 
@@ -233,7 +193,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             foreach (var effectName in allBoneNames)
             {
                 var effectType = PostEffectUtils.ToEffectType(effectName);
-                var trans = CreateTransformData(effectName);
                 var index = PluginUtils.ExtractGroup(effectName);
 
                 switch (effectType)
@@ -241,39 +200,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     case PostEffectType.DepthOfField:
                     {
                         var depthOfField = postEffectManager.GetDepthOfFieldData();
-                        trans.visible = depthOfField.enabled;
-                        trans["focalLength"].value = depthOfField.focalLength;
-                        trans["focalSize"].value = depthOfField.focalSize;
-                        trans["aperture"].value = depthOfField.aperture;
-                        trans["maxBlurSize"].value = depthOfField.maxBlurSize;
-                        trans["maidSlotNo"].intValue = depthOfField.maidSlotNo;
+                        var trans = CreateTransformData(effectName) as TransformDataDepthOfField;
+                        trans.depthOfField = depthOfField;
+                        trans.easing = GetEasing(frame.frameNo, effectName);
+
+                        var bone = frame.CreateBone(trans);
+                        frame.UpdateBone(bone);
                         break;
                     }
                     case PostEffectType.Paraffin:
                     {
                         var paraffin = postEffectManager.GetParaffinData(index);
-                        trans.visible = paraffin.enabled;
-                        trans.color = paraffin.color1;
-                        trans.subColor = paraffin.color2;
-                        trans["centerPositionX"].value = paraffin.centerPosition.x;
-                        trans["centerPositionY"].value = paraffin.centerPosition.y;
-                        trans["radiusFar"].value = paraffin.radiusFar;
-                        trans["radiusNear"].value = paraffin.radiusNear;
-                        trans["radiusScaleX"].value = paraffin.radiusScale.x;
-                        trans["radiusScaleY"].value = paraffin.radiusScale.y;
-                        trans["useNormal"].value = paraffin.useNormal;
-                        trans["useAdd"].value = paraffin.useAdd;
-                        trans["useMultiply"].value = paraffin.useMultiply;
-                        trans["useOverlay"].value = paraffin.useOverlay;
-                        trans["useSubstruct"].value = paraffin.useSubstruct;
+                        var trans = CreateTransformData(effectName) as TransformDataParaffin;
+                        trans.paraffin = paraffin;
+                        trans.easing = GetEasing(frame.frameNo, effectName);
+
+                        var bone = frame.CreateBone(trans);
+                        frame.UpdateBone(bone);
                         break;
                     }
                 }
-
-                trans.easing = GetEasing(frame.frameNo, effectName);
-
-                var bone = frame.CreateBone(trans);
-                frame.UpdateBone(bone);
             }
         }
 
@@ -299,136 +245,54 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // do nothing
         }
 
-        private void AddTimelineRow(FrameData frame)
+        private void AppendTimelineRow(FrameData frame)
         {
+            var isLastFrame = frame.frameNo == maxFrameNo;
             foreach (var name in allBoneNames)
             {
                 var bone = frame.GetBone(name);
-                if (bone == null)
-                {
-                    continue;
-                }
-
-                List<PostEffectTimeLineRow> rows;
-                if (!_timelineRowsMap.TryGetValue(name, out rows))
-                {
-                    rows = new List<PostEffectTimeLineRow>();
-                    _timelineRowsMap[name] = rows;
-                }
-
-                var trans = bone.transform;
-                var effectType = PostEffectUtils.ToEffectType(name);
-                var index = PluginUtils.ExtractGroup(name);
-
-                var row = new PostEffectTimeLineRow
-                {
-                    frame = frame.frameNo,
-                    name = bone.name,
-                    type = effectType,
-                    index = index,
-                    easing = trans.easing,
-                };
-
-                switch (effectType)
-                {
-                    case PostEffectType.DepthOfField:
-                        row.depthOfField = new DepthOfFieldData
-                        {
-                            enabled = trans.visible,
-                            focalLength = trans["focalLength"].value,
-                            focalSize = trans["focalSize"].value,
-                            aperture = trans["aperture"].value,
-                            maxBlurSize = trans["maxBlurSize"].value,
-                            maidSlotNo = trans["maidSlotNo"].intValue,
-                        };
-                        break;
-                    case PostEffectType.Paraffin:
-                        row.paraffin = new ParaffinData
-                        {
-                            enabled = trans.visible,
-                            color1 = trans.color,
-                            color2 = trans.subColor,
-                            centerPosition = new Vector2(trans["centerPositionX"].value, trans["centerPositionY"].value),
-                            radiusFar = trans["radiusFar"].value,
-                            radiusNear = trans["radiusNear"].value,
-                            radiusScale = new Vector2(trans["radiusScaleX"].value, trans["radiusScaleY"].value),
-                            useNormal = trans["useNormal"].value,
-                            useAdd = trans["useAdd"].value,
-                            useMultiply = trans["useMultiply"].value,
-                            useOverlay = trans["useOverlay"].value,
-                            useSubstruct = trans["useSubstruct"].value,
-                        };
-                        break;
-                }
-
-                rows.Add(row);
+                _timelineRowsMap.AppendBone(bone, isLastFrame);
             }
         }
 
         private void BuildPlayData(bool forOutput)
         {
-            foreach (var playData in _playDataMap.Values)
-            {
-                playData.ResetIndex();
-                playData.motions.Clear();
-            }
-
-            foreach (var pair in _timelineRowsMap)
-            {
-                var name = pair.Key;
-                var rows = pair.Value;
-
-                if (rows.Count == 0)
-                {
-                    continue;
-                }
-
-                PostEffectPlayData playData;
-                if (!_playDataMap.TryGetValue(name, out playData))
-                {
-                    playData = new PostEffectPlayData
-                    {
-                        motions = new List<PostEffectMotionData>(rows.Count),
-                    };
-                    _playDataMap[name] = playData;
-                }
-
-                for (var i = 0; i < rows.Count - 1; i++)
-                {
-                    var start = rows[i];
-                    var end = rows[i + 1];
-
-                    var stFrame = start.frame;
-                    var edFrame = end.frame;
-
-                    var motion = new PostEffectMotionData
-                    {
-                        stFrame = stFrame,
-                        edFrame = edFrame,
-                        start = start,
-                        end = end,
-                    };
-
-                    playData.motions.Add(motion);
-                }
-
-                playData.Setup(timeline.singleFrameType);
-            }
+            BuildPlayDataFromBonesMap(
+                _timelineRowsMap,
+                _playDataMap,
+                timeline.singleFrameType);
         }
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            foreach (var rows in _timelineRowsMap.Values)
-            {
-                rows.Clear();
-            }
+            _timelineRowsMap.ClearBones();
 
             foreach (var keyFrame in keyFrames)
             {
-                AddTimelineRow(keyFrame);
+                AppendTimelineRow(keyFrame);
             }
 
-            AddTimelineRow(_dummyLastFrame);
+            AppendTimelineRow(_dummyLastFrame);
+
+            foreach (var pair in _timelineRowsMap)
+            {
+                var name = pair.Key;
+                var bones = pair.Value;
+
+                var effectType = PostEffectUtils.ToEffectType(name);
+                var index = PluginUtils.ExtractGroup(name);
+
+                switch (effectType)
+                {
+                    case PostEffectType.Paraffin:
+                        foreach (var bone in bones)
+                        {
+                            var trans = bone.transform as TransformDataParaffin;
+                            trans.index = index;
+                        }
+                        break;
+                }
+            }
 
             BuildPlayData(forOutput);
 

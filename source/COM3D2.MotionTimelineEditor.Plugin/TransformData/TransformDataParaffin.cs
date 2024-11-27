@@ -193,5 +193,224 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             return CustomValueInfoMap;
         }
+
+        public ValueData[] centerPositionValues
+        {
+            get
+            {
+                return new ValueData[] { this["centerPositionX"], this["centerPositionY"] };
+            }
+        }
+
+        public ValueData radiusFarValue
+        {
+            get
+            {
+                return this["radiusFar"];
+            }
+        }
+
+        public ValueData radiusNearValue
+        {
+            get
+            {
+                return this["radiusNear"];
+            }
+        }
+
+        public ValueData[] radiusScaleValues
+        {
+            get
+            {
+                return new ValueData[] { this["radiusScaleX"], this["radiusScaleY"] };
+            }
+        }
+
+        public ValueData useNormalValue
+        {
+            get
+            {
+                return this["useNormal"];
+            }
+        }
+
+        public ValueData useAddValue
+        {
+            get
+            {
+                return this["useAdd"];
+            }
+        }
+
+        public ValueData useMultiplyValue
+        {
+            get
+            {
+                return this["useMultiply"];
+            }
+        }
+
+        public ValueData useOverlayValue
+        {
+            get
+            {
+                return this["useOverlay"];
+            }
+        }
+
+        public ValueData useSubstructValue
+        {
+            get
+            {
+                return this["useSubstruct"];
+            }
+        }
+
+        public Vector2 centerPosition
+        {
+            get
+            {
+                return centerPositionValues.ToVector2();
+            }
+            set
+            {
+                centerPositionValues.FromVector2(value);
+            }
+        }
+
+        public float radiusFar
+        {
+            get
+            {
+                return radiusFarValue.value;
+            }
+            set
+            {
+                radiusFarValue.value = value;
+            }
+        }
+
+        public float radiusNear
+        {
+            get
+            {
+                return radiusNearValue.value;
+            }
+            set
+            {
+                radiusNearValue.value = value;
+            }
+        }
+
+        public Vector2 radiusScale
+        {
+            get
+            {
+                return radiusScaleValues.ToVector2();
+            }
+            set
+            {
+                radiusScaleValues.FromVector2(value);
+            }
+        }
+
+        public float useNormal
+        {
+            get
+            {
+                return useNormalValue.value;
+            }
+            set
+            {
+                useNormalValue.value = value;
+            }
+        }
+
+        public float useAdd
+        {
+            get
+            {
+                return useAddValue.value;
+            }
+            set
+            {
+                useAddValue.value = value;
+            }
+        }   
+
+        public float useMultiply
+        {
+            get
+            {
+                return useMultiplyValue.value;
+            }
+            set
+            {
+                useMultiplyValue.value = value;
+            }
+        }
+
+        public float useOverlay
+        {
+            get
+            {
+                return useOverlayValue.value;
+            }
+            set
+            {
+                useOverlayValue.value = value;
+            }
+        }
+
+        public float useSubstruct
+        {
+            get
+            {
+                return useSubstructValue.value;
+            }
+            set
+            {
+                useSubstructValue.value = value;
+            }
+        }
+
+        public ParaffinData paraffin
+        {
+            get
+            {
+                return new ParaffinData
+                {
+                    enabled = visible,
+                    color1 = color,
+                    color2 = subColor,
+                    centerPosition = centerPosition,
+                    radiusFar = radiusFar,
+                    radiusNear = radiusNear,
+                    radiusScale = radiusScale,
+                    useNormal = useNormal,
+                    useAdd = useAdd,
+                    useMultiply = useMultiply,
+                    useOverlay = useOverlay,
+                    useSubstruct = useSubstruct,
+                };
+            }
+            set
+            {
+                visible = value.enabled;
+                color = value.color1;
+                subColor = value.color2;
+                centerPosition = value.centerPosition;
+                radiusFar = value.radiusFar;
+                radiusNear = value.radiusNear;
+                radiusScale = value.radiusScale;
+                useNormal = value.useNormal;
+                useAdd = value.useAdd;
+                useMultiply = value.useMultiply;
+                useOverlay = value.useOverlay;
+                useSubstruct = value.useSubstruct;
+            }
+        }
+
+        public int index;
     }
 }

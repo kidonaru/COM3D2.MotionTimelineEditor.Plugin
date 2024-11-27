@@ -333,5 +333,333 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             return CustomValueInfoMap;
         }
+
+        public ValueData spotAngleValue
+        {
+            get
+            {
+                return this["spotAngle"];
+            }
+        }
+
+        public ValueData spotRangeValue
+        {
+            get
+            {
+                return this["spotRange"];
+            }
+        }
+
+        public ValueData rangeMultiplierValue
+        {
+            get
+            {
+                return this["rangeMultiplier"];
+            }
+        }
+
+        public ValueData falloffExpValue
+        {
+            get
+            {
+                return this["falloffExp"];
+            }
+        }
+
+        public ValueData noiseStrengthValue
+        {
+            get
+            {
+                return this["noiseStrength"];
+            }
+        }
+
+        public ValueData noiseScaleValue
+        {
+            get
+            {
+                return this["noiseScale"];
+            }
+        }
+
+        public ValueData coreRadiusValue
+        {
+            get
+            {
+                return this["coreRadius"];
+            }
+        }
+
+        public ValueData offsetRangeValue
+        {
+            get
+            {
+                return this["offsetRange"];
+            }
+        }
+
+        public ValueData segmentAngleValue
+        {
+            get
+            {
+                return this["segmentAngle"];
+            }
+        }
+
+        public ValueData segmentRangeValue
+        {
+            get
+            {
+                return this["segmentRange"];
+            }
+        }
+
+        public ValueData autoPositionValue
+        {
+            get
+            {
+                return this["autoPosition"];
+            }
+        }
+
+        public ValueData autoRotationValue
+        {
+            get
+            {
+                return this["autoRotation"];
+            }
+        }
+
+        public ValueData autoColorValue
+        {
+            get
+            {
+                return this["autoColor"];
+            }
+        }
+
+        public ValueData autoLightInfoValue
+        {
+            get
+            {
+                return this["autoLightInfo"];
+            }
+        }
+
+        public ValueData autoVisibleValue
+        {
+            get
+            {
+                return this["autoVisible"];
+            }
+        }
+
+        public float spotAngle
+        {
+            get
+            {
+                return spotAngleValue.value;
+            }
+            set
+            {
+                spotAngleValue.value = value;
+            }
+        }
+
+        public float spotRange
+        {
+            get
+            {
+                return spotRangeValue.value;
+            }
+            set
+            {
+                spotRangeValue.value = value;
+            }
+        }
+
+        public float rangeMultiplier
+        {
+            get
+            {
+                return rangeMultiplierValue.value;
+            }
+            set
+            {
+                rangeMultiplierValue.value = value;
+            }
+        }
+
+        public float falloffExp
+        {
+            get
+            {
+                return falloffExpValue.value;
+            }
+            set
+            {
+                falloffExpValue.value = value;
+            }
+        }
+
+        public float noiseStrength
+        {
+            get
+            {
+                return noiseStrengthValue.value;
+            }
+            set
+            {
+                noiseStrengthValue.value = value;
+            }
+        }
+
+        public float noiseScale
+        {
+            get
+            {
+                return noiseScaleValue.value;
+            }
+            set
+            {
+                noiseScaleValue.value = value;
+            }
+        }
+
+        public float coreRadius
+        {
+            get
+            {
+                return coreRadiusValue.value;
+            }
+            set
+            {
+                coreRadiusValue.value = value;
+            }
+        }
+
+        public float offsetRange
+        {
+            get
+            {
+                return offsetRangeValue.value;
+            }
+            set
+            {
+                offsetRangeValue.value = value;
+            }
+        }
+
+        public float segmentAngle
+        {
+            get
+            {
+                return segmentAngleValue.value;
+            }
+            set
+            {
+                segmentAngleValue.value = value;
+            }
+        }
+
+        public int segmentRange
+        {
+            get
+            {
+                return segmentRangeValue.intValue;
+            }
+            set
+            {
+                segmentRangeValue.intValue = value;
+            }
+        }
+
+        public bool autoPosition
+        {
+            get
+            {
+                return autoPositionValue.boolValue;
+            }
+            set
+            {
+                autoPositionValue.boolValue = value;
+            }
+        }
+
+        public bool autoRotation
+        {
+            get
+            {
+                return autoRotationValue.boolValue;
+            }
+            set
+            {
+                autoRotationValue.boolValue = value;
+            }
+        }
+
+        public bool autoColor
+        {
+            get
+            {
+                return autoColorValue.boolValue;
+            }
+            set
+            {
+                autoColorValue.boolValue = value;
+            }
+        }
+
+        public bool autoLightInfo
+        {
+            get
+            {
+                return autoLightInfoValue.boolValue;
+            }
+            set
+            {
+                autoLightInfoValue.boolValue = value;
+            }
+        }
+
+        public bool autoVisible
+        {
+            get
+            {
+                return autoVisibleValue.boolValue;
+            }
+            set
+            {
+                autoVisibleValue.boolValue = value;
+            }
+        }
+
+        public void FromStageLightController(StageLightController controller)
+        {
+            var lightInfo = controller.lightInfo;
+
+            position = controller.positionMin;
+            subPosition = controller.positionMax;
+            eulerAngles = controller.rotationMin;
+            subEulerAngles = controller.rotationMax;
+            color = controller.colorMin;
+            subColor = controller.colorMax;
+            visible = controller.visible;
+            spotAngle = lightInfo.spotAngle;
+            spotRange = lightInfo.spotRange;
+            rangeMultiplier = lightInfo.rangeMultiplier;
+            falloffExp = lightInfo.falloffExp;
+            noiseStrength = lightInfo.noiseStrength;
+            noiseScale = lightInfo.noiseScale;
+            coreRadius = lightInfo.coreRadius;
+            offsetRange = lightInfo.offsetRange;
+            segmentAngle = lightInfo.segmentAngle;
+            segmentRange = lightInfo.segmentRange;
+            autoPosition = controller.autoPosition;
+            autoRotation = controller.autoRotation;
+            autoColor = controller.autoColor;
+            autoLightInfo = controller.autoLightInfo;
+            autoVisible = controller.autoVisible;
+        }
     }
 }

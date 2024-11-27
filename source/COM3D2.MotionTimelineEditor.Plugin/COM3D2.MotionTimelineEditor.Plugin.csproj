@@ -160,6 +160,7 @@
     <Compile Include="TimelineLayer\ShapeKeyTimelineLayer.cs" />
     <Compile Include="TimelineLayer\StageLightTimelineLayer.cs" />
     <Compile Include="TimelineLayer\TimelineLayerBase.cs" />
+    <Compile Include="TimelineLayer\UndressTimelineLayer.cs" />
     <Compile Include="TimelineLayer\VoiceTimelineLayer.cs" />
     <Compile Include="TimelineLoadManager.cs" />
     <Compile Include="TimelineLoadUI.cs" />
@@ -190,6 +191,7 @@
     <Compile Include="TransformData\TransformDataShapeKey.cs" />
     <Compile Include="TransformData\TransformDataStageLight.cs" />
     <Compile Include="TransformData\TransformDataStageLightController.cs" />
+    <Compile Include="TransformData\TransformDataUndress.cs" />
     <Compile Include="TransformData\TransformDataVoice.cs" />
     <Compile Include="TransformXml.cs" />
     <Compile Include="ValueData.cs" />

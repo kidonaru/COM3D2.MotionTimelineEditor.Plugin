@@ -114,7 +114,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var updated = _playData.Update(playingFrameNoFloat);
-
             if (updated)
             {
                 ApplyMotion(_playData.current);
@@ -123,6 +122,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void ApplyMotion(VoiceMotionData motion)
         {
+            if (motion == null)
+            {
+                return;
+            }
+
             maidCache.oneShotVoiceName = motion.voiceName;
             maidCache.oneShotVoiceStartTime = motion.startTime;
             maidCache.oneShotVoiceLength = motion.length;
@@ -187,17 +191,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             foreach (var keyFrame in keyFrames)
             {
-                AppendTimeLineRow(keyFrame);
+                AppendTimelineRow(keyFrame);
             }
 
-            AppendTimeLineRow(_dummyLastFrame);
+            AppendTimelineRow(_dummyLastFrame);
 
             BuildPlayData(forOutput);
 
             return null;
         }
 
-        private void AppendTimeLineRow(FrameData frame)
+        private void AppendTimelineRow(FrameData frame)
         {
             var bone = frame.GetBone(VoiceBoneName);
             if (bone == null)
@@ -229,8 +233,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            _playData.ResetIndex();
-            _playData.motions.Clear();
+            _playData.Clear();
 
             for (var i = 0; i < _timelineRows.Count - 1; i++)
             {

@@ -10,21 +10,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
-    using MorphPlayData = PlayDataBase<MorphMotionData>;
-
-    public class MorphTimeLineRow
-    {
-        public int frame;
-        public string name;
-        public float morphValue;
-    }
-
-    public class MorphMotionData : MotionDataBase
-    {
-        public float startValue;
-        public float endValue;
-    }
-
     [TimelineLayerDesc("メイド表情", 10)]
     public class MorphTimelineLayer : TimelineLayerBase
     {
@@ -55,9 +40,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         private MaidFaceManager _faceManager = new MaidFaceManager();
         private Dictionary<string, float> _applyMorphMap = new Dictionary<string, float>();
 
-        private Dictionary<string, List<MorphTimeLineRow>> _timelineRowsMap = new Dictionary<string, List<MorphTimeLineRow>>();
-        private Dictionary<string, MorphPlayData> _playDataMap = new Dictionary<string, MorphPlayData>();
-        private List<MorphTimeLineRow> _dcmOutputRows = new List<MorphTimeLineRow>(128);
+        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
+        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
         private bool _isForceUpdate = false;
 
         private MorphTimelineLayer(int slotNo) : base(slotNo)
@@ -137,18 +121,20 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             _applyMorphMap.Clear();
 
-            foreach (var morphName in _playDataMap.Keys)
+            foreach (var playData in _playDataMap.Values)
             {
-                var playData = _playDataMap[morphName];
-
                 playData.Update(playingFrameNoFloat);
 
                 var current = playData.current;
                 if (current != null)
                 {
+                    var start = current.start as TransformDataMorph;
+                    var end = current.end as TransformDataMorph;
+                    var morphName = current.name;
+
                     _applyMorphMap[morphName] = this.Lerp(
-                        current.startValue,
-                        current.endValue,
+                        start.morphValue,
+                        end.morphValue,
                         playData.lerpFrame,
                         morphName);
                 }
@@ -252,111 +238,39 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            foreach (var rows in _timelineRowsMap.Values)
-            {
-                rows.Clear();
-            }
+            _timelineRowsMap.ClearBones();
 
             foreach (var keyFrame in keyFrames)
             {
-                AppendTimeLineRow(keyFrame);
+                AppendTimelineRow(keyFrame);
             }
 
-            AppendTimeLineRow(_dummyLastFrame);
+            AppendTimelineRow(_dummyLastFrame);
 
             BuildPlayData();
             return null;
         }
 
-        private void AppendTimeLineRow(FrameData frame)
+        private void AppendTimelineRow(FrameData frame)
         {
             var isLastFrame = frame.frameNo == maxFrameNo;
             foreach (var name in firstFrame.boneNames)
             {
-                List<MorphTimeLineRow> rows;
-                if (!_timelineRowsMap.TryGetValue(name, out rows))
-                {
-                    rows = new List<MorphTimeLineRow>(16);
-                    _timelineRowsMap[name] = rows;
-                }
-
                 var bone = frame.GetBone(name);
-                if (bone == null)
-                {
-                    continue;
-                }
-
-                // 最後のフレームは2重に追加しない
-                if (isLastFrame && rows.Count > 0 && rows.Last().frame == frame.frameNo)
-                {
-                    continue;
-                }
-
-                var row = new MorphTimeLineRow
-                {
-                    frame = frame.frameNo,
-                    name = name,
-                    morphValue = bone.transform["morphValue"].value
-                };
-
-                rows.Add(row);
+                _timelineRowsMap.AppendBone(bone, isLastFrame);
             }
         }
 
         private void BuildPlayData()
         {
-            foreach (var playData in _playDataMap.Values)
-            {
-                playData.ResetIndex();
-                playData.motions.Clear();
-            }
-
-            foreach (var pair in _timelineRowsMap)
-            {
-                var name = pair.Key;
-                var rows = pair.Value;
-
-                if (rows.Count == 0)
-                {
-                    continue;
-                }
-
-                MorphPlayData playData;
-                if (!_playDataMap.TryGetValue(name, out playData))
-                {
-                    playData = new MorphPlayData
-                    {
-                        motions = new List<MorphMotionData>(rows.Count)
-                    };
-                    _playDataMap[name] = playData;
-                }
-
-                foreach (var row in rows)
-                {
-                    var motion = new MorphMotionData
-                    {
-                        stFrame = row.frame,
-                        edFrame = row.frame,
-                        startValue = row.morphValue,
-                        endValue = row.morphValue
-                    };
-                    playData.motions.Add(motion);
-
-                    if (playData.motions.Count >= 2)
-                    {
-                        int prevIndex = playData.motions.Count() - 2;
-                        var prevMotion = playData.motions[prevIndex];
-                        prevMotion.edFrame = row.frame;
-                        prevMotion.endValue = row.morphValue;
-                    }
-                }
-
-                playData.Setup(SingleFrameType.None);
-            }
+            BuildPlayDataFromBonesMap(
+                _timelineRowsMap,
+                _playDataMap,
+                SingleFrameType.None);
         }
 
         public void SaveMorphTimeLine(
-            List<MorphTimeLineRow> rows,
+            List<BoneData> rows,
             string filePath)
         {
             var offsetTime = timeline.startOffsetTime;
@@ -366,31 +280,27 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var builder = new StringBuilder();
             builder.Append("frame,morphName,morphValue\r\n");
 
-            Action<MorphTimeLineRow, bool> appendRow = (row, isFirst) =>
+            Action<BoneData, bool> appendRow = (row, isFirst) =>
             {
-                int frame = (int) Mathf.Round(row.frame * frameFactor);
+                int frame = (int) Mathf.Round(row.frameNo * frameFactor);
                 if (!isFirst)
                 {
                     frame += offsetFrame;
                 }
 
+                var trans = row.transform as TransformDataMorph;
+
                 builder.Append(frame + ",");
                 builder.Append(row.name + ",");
-                builder.Append(row.morphValue.ToString("0.000"));
+                builder.Append(trans.morphValue.ToString("0.000"));
                 builder.Append("\r\n");
             };
 
-            if (offsetFrame > 0)
+            if (offsetFrame > 0 && rows.Count > 0)
             {
                 foreach (var name in firstFrame.boneNames)
                 {
-                    var row = new MorphTimeLineRow
-                    {
-                        frame = 0,
-                        name = name,
-                        morphValue = 0f
-                    };
-                    appendRow(row, true);
+                    appendRow(rows[0], true);
                 }
             }
 
@@ -409,16 +319,16 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             try
             {
-                _dcmOutputRows.Clear();
+                var outputRows = new List<BoneData>(64);
 
                 foreach (var rows in _timelineRowsMap.Values)
                 {
-                    _dcmOutputRows.AddRange(rows);
+                    outputRows.AddRange(rows);
                 }
 
                 var outputFileName = string.Format("morph_{0}.csv", slotNo);
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveMorphTimeLine(_dcmOutputRows, outputPath);
+                SaveMorphTimeLine(outputRows, outputPath);
 
                 var maidElement = GetMeidElement(songElement);
                 maidElement.Add(new XElement("morph", outputFileName));

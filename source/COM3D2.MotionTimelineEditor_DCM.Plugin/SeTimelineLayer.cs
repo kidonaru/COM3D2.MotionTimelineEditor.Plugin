@@ -10,23 +10,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
-    using SePlayData = PlayDataBase<SoundMotionData>;
-
-    public class SeTimeLineRow
-    {
-        public int frame;
-        public string fileName;
-        public float interval;
-        public bool isLoop;
-    }
-
-    public class SoundMotionData : MotionDataBase
-    {
-        public string fileName;
-        public float interval;
-        public bool isLoop;
-    }
-
     [TimelineLayerDesc("効果音", 43)]
     public partial class SeTimelineLayer : TimelineLayerBase
     {
@@ -52,8 +35,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private static SoundManager soundManager = new SoundManager(false);
 
-        private List<SeTimeLineRow> _timelineRows = new List<SeTimeLineRow>();
-        private SePlayData _playData = new SePlayData();
+        private List<BoneData> _timelineRows = new List<BoneData>();
+        private MotionPlayData _playData = new MotionPlayData(32);
 
         private SeTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -100,17 +83,20 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var playingFrameNoFloat = this.playingFrameNoFloat;
 
             var updated = _playData.Update(playingFrameNoFloat);
-
             if (updated)
             {
-                var current = _playData.current;
-                ApplyMotion(current);
+                ApplyMotion(_playData.current);
             }
         }
 
-        private void ApplyMotion(SoundMotionData motion)
+        private void ApplyMotion(MotionData motion)
         {
-            PlaySe(motion.fileName, motion.interval, motion.isLoop);
+            var start = motion.start as TransformDataSe;
+
+            var fileName = start.fileName;
+            var interval = start.interval;
+            var isLoop = start.isLoop;
+            PlaySe(fileName, interval, isLoop);
         }
 
         private string _currentSeName = "";
@@ -156,10 +142,10 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public override void UpdateFrame(FrameData frame)
         {
-            var trans = CreateTransformData(SeBoneName);
-            trans.SetStrValue("fileName", _currentSeName);
-            trans["interval"].value = _currentInterval;
-            trans["isLoop"].boolValue = _currentIsLoop;
+            var trans = CreateTransformData(SeBoneName) as TransformDataSe;
+            trans.fileName = _currentSeName;
+            trans.interval = _currentInterval;
+            trans.isLoop = _currentIsLoop;
 
             var bone = frame.CreateBone(trans);
             frame.UpdateBone(bone);
@@ -193,67 +179,33 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             foreach (var keyFrame in keyFrames)
             {
-                AppendTimeLineRow(keyFrame);
+                AppendTimelineRow(keyFrame);
             }
 
-            AppendTimeLineRow(_dummyLastFrame);
+            AppendTimelineRow(_dummyLastFrame);
 
             BuildPlayData(forOutput);
 
             return null;
         }
 
-        private void AppendTimeLineRow(FrameData frame)
+        private void AppendTimelineRow(FrameData frame)
         {
+            var isLastFrame = frame.frameNo == maxFrameNo;
             var bone = frame.GetBone(SeBoneName);
-            if (bone == null)
-            {
-                return;
-            }
-
-            var trans = bone.transform;
-
-            var row = new SeTimeLineRow
-            {
-                frame = frame.frameNo,
-                fileName = trans.GetStrValue("fileName"),
-                interval = trans["interval"].value,
-                isLoop = trans["isLoop"].boolValue,
-            };
-
-            _timelineRows.Add(row);
+            _timelineRows.AppendBone(bone, isLastFrame);
         }
 
         private void BuildPlayData(bool forOutput)
         {
-            _playData.ResetIndex();
-            _playData.motions.Clear();
-
-            for (var i = 0; i < _timelineRows.Count - 1; i++)
-            {
-                var start = _timelineRows[i];
-                var end = _timelineRows[i + 1];
-
-                var stFrame = start.frame;
-                var edFrame = end.frame;
-
-                var motion = new SoundMotionData
-                {
-                    stFrame = stFrame,
-                    edFrame = edFrame,
-                    fileName = start.fileName,
-                    interval = start.interval,
-                    isLoop = start.isLoop,
-                };
-
-                _playData.motions.Add(motion);
-            }
-
-            _playData.Setup(SingleFrameType.None);
+            BuildPlayDataFromBones(
+                _timelineRows,
+                _playData,
+                SingleFrameType.None);
         }
 
         public void SaveMotions(
-            List<SoundMotionData> motions,
+            List<MotionData> motions,
             string filePath)
         {
             var offsetTime = timeline.startOffsetTime;
@@ -262,7 +214,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             builder.Append("fileName,sTime,eTime,interval,isLoop" +
                             "\r\n");
 
-            Action<SoundMotionData> appendMotion = motion =>
+            Action<MotionData> appendMotion = motion =>
             {
                 var stTime = motion.stFrame * timeline.frameDuration;
                 var edTime = motion.edFrame * timeline.frameDuration;
@@ -270,13 +222,15 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 stTime += offsetTime;
                 edTime += offsetTime;
 
-                var interval = motion.interval == 0f ? timeline.maxFrameNo * timeline.frameDuration : motion.interval;
+                var start = motion.start as TransformDataSe;
 
-                builder.Append(motion.fileName + ",");
+                var interval = start.interval == 0f ? timeline.maxFrameNo * timeline.frameDuration : start.interval;
+
+                builder.Append(start.fileName + ",");
                 builder.Append(stTime.ToString("0.000") + ",");
                 builder.Append(edTime.ToString("0.000") + ",");
                 builder.Append(interval.ToString("0.000") + ",");
-                builder.Append(motion.isLoop ? "1" : "0");
+                builder.Append(start.isLoop ? "1" : "0");
                 builder.Append("\r\n");
             };
 

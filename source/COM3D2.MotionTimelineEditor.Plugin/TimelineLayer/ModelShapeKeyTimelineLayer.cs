@@ -86,22 +86,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var playingFrameNoFloat = this.playingFrameNoFloat;
 
-            foreach (var shapeName in _playDataMap.Keys)
+            foreach (var playData in _playDataMap.Values)
             {
-                var playData = _playDataMap[shapeName];
-
-                var blendShape = modelManager.GetBlendShape(shapeName);
-                if (blendShape == null)
-                {
-                    continue;
-                }
-
                 playData.Update(playingFrameNoFloat);
 
                 var current = playData.current;
                 if (current != null)
                 {
-                    ApplyMotion(current, blendShape, playData.lerpFrame);
+                    ApplyMotion(current, playData.lerpFrame);
                 }
 
                 //PluginUtils.LogDebug("ApplyPlayData: boneName={0} lerpFrame={1}, listIndex={2}", boneName, playData.lerpFrame, playData.listIndex);
@@ -114,16 +106,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyMotion(MotionData motion, ModelBlendShape blendShape, float lerpTime)
+        private void ApplyMotion(MotionData motion, float lerpTime)
         {
-            var start = motion.start;
-            var end = motion.end;
+            var blendShape = modelManager.GetBlendShape(motion.name);
+            if (blendShape == null)
+            {
+                return;
+            }
 
-            var stTrans = start.transform;
-            var edTrans = end.transform;
+            var start = motion.start as TransformDataShapeKey;
+            var end = motion.end as TransformDataShapeKey;
 
-            float easingTime = CalcEasingValue(lerpTime, stTrans.easing);
-            var weight = Mathf.Lerp(stTrans["weight"].value, edTrans["weight"].value, easingTime);
+            float easingTime = CalcEasingValue(lerpTime, start.easing);
+            var weight = Mathf.Lerp(start.weight, end.weight, easingTime);
             blendShape.weight = weight;
         }
 
@@ -174,9 +169,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var boneName = blendShape.name;
 
-                var trans = CreateTransformData(boneName);
+                var trans = CreateTransformData(boneName) as TransformDataShapeKey;
                 trans.easing = GetEasing(frame.frameNo, boneName);
-                trans["weight"].value = blendShape.weight;
+                trans.weight = blendShape.weight;
 
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
@@ -207,52 +202,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void BuildPlayData(bool forOutput)
         {
-            foreach (var playData in _playDataMap.Values)
-            {
-                playData.ResetIndex();
-                playData.motions.Clear();
-            }
-
-            foreach (var pair in _timelineRowsMap)
-            {
-                var name = pair.Key;
-                var rows = pair.Value;
-
-                if (rows.Count == 0)
-                {
-                    continue;
-                }
-
-                var blendShape = modelManager.GetBlendShape(name);
-                if (blendShape == null)
-                {
-                    continue;
-                }
-
-                MotionPlayData playData;
-                if (!_playDataMap.TryGetValue(name, out playData))
-                {
-                    playData = new MotionPlayData(rows.Count);
-                    _playDataMap[name] = playData;
-                }
-
-                for (var i = 0; i < rows.Count - 1; i++)
-                {
-                    var start = rows[i];
-                    var end = rows[i + 1];
-                    playData.motions.Add(new MotionData(start, end));
-                }
-
-                playData.Setup(timeline.singleFrameType);
-            }
+            BuildPlayDataFromBonesMap(
+                _timelineRowsMap,
+                _playDataMap,
+                timeline.singleFrameType);
         }
 
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
-            foreach (var rows in _timelineRowsMap.Values)
-            {
-                rows.Clear();
-            }
+            _timelineRowsMap.ClearBones();
 
             foreach (var keyFrame in keyFrames)
             {
@@ -268,22 +226,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void AppendTimelineRow(FrameData frame)
         {
+            var isLastFrame = frame.frameNo == maxFrameNo;
             foreach (var name in allBoneNames)
             {
                 var bone = frame.GetBone(name);
-                if (bone == null)
-                {
-                    continue;
-                }
-
-                List<BoneData> rows;
-                if (!_timelineRowsMap.TryGetValue(name, out rows))
-                {
-                    rows = new List<BoneData>();
-                    _timelineRowsMap[name] = rows;
-                }
-
-                rows.Add(bone);
+                _timelineRowsMap.AppendBone(bone, isLastFrame);
             }
         }
 
