@@ -115,7 +115,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void ApplyMotion(MotionData motion)
         {
-            Vector3 position, rotation;
+            Vector3 position, eulerAngles;
             float distance, viewAngle;
 
             var start = motion.start;
@@ -133,7 +133,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     end.positionValues,
                     _playData.lerpFrame);
 
-                rotation = PluginUtils.HermiteVector3(
+                eulerAngles = PluginUtils.HermiteVector3(
                     t0,
                     t1,
                     start.eulerAnglesValues,
@@ -154,7 +154,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 float easing = CalcEasingValue(_playData.lerpFrame, start.easing);
                 position = Vector3.Lerp(start.position, end.position, easing);
-                rotation = Vector3.Lerp(start.eulerAngles, end.eulerAngles, easing);
+                eulerAngles = Vector3.Lerp(start.eulerAngles, end.eulerAngles, easing);
                 distance = Mathf.Lerp(start.scale.x, end.scale.x, easing);
                 viewAngle = Mathf.Lerp(start.scale.y, end.scale.y, easing);
             }
@@ -167,8 +167,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var uoCamera = GetUOCamera();
             uoCamera.SetTargetPos(position);
             uoCamera.SetDistance(distance);
-            uoCamera.SetAroundAngle(new Vector2(rotation.y, rotation.x));
-            Camera.main.SetRotationZ(rotation.z);
+            uoCamera.SetAroundAngle(new Vector2(eulerAngles.y, eulerAngles.x));
+            Camera.main.SetRotationZ(eulerAngles.z);
             Camera.main.fieldOfView = viewAngle;
 
             if (subCamera != null)

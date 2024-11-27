@@ -647,7 +647,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var anmData = GetAnmBinary(true);
                 if (anmData == null)
                 {
-                    PluginUtils.ShowDialog(errorMessage);
+                    PluginUtils.LogError("モーションの出力に失敗しました");
                     return;
                 }
                 var anmPath = this.anmPath;
@@ -925,7 +925,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var anmData = GetAnmBinary(true);
                     if (anmData == null)
                     {
-                        PluginUtils.ShowDialog(errorMessage);
+                        PluginUtils.LogError("モーションの出力に失敗しました");
                         return;
                     }
 

@@ -397,7 +397,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 builder.Append(stTime.ToString("0.000") + ",");
                 builder.Append(start.position.x.ToString("0.000") + ",");
                 builder.Append(start.position.y.ToString("0.000") + ",");
-                builder.Append(start.rotation.z.ToString("0.000") + ",");
+                builder.Append(start.eulerAngles.z.ToString("0.000") + ",");
                 builder.Append(start.scale.x.ToString("0.000") + ",");
                 builder.Append(start.scale.y.ToString("0.000") + ",");
                 builder.Append(stColor.r + ",");
@@ -407,7 +407,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 builder.Append(edTime.ToString("0.000") + ",");
                 builder.Append(end.position.x.ToString("0.000") + ",");
                 builder.Append(end.position.y.ToString("0.000") + ",");
-                builder.Append(end.rotation.z.ToString("0.000") + ",");
+                builder.Append(end.eulerAngles.z.ToString("0.000") + ",");
                 builder.Append(end.scale.x.ToString("0.000") + ",");
                 builder.Append(end.scale.y.ToString("0.000") + ",");
                 builder.Append(edColor.r + ",");

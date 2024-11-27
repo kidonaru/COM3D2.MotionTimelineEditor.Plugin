@@ -298,9 +298,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             if (offsetFrame > 0 && rows.Count > 0)
             {
-                foreach (var name in firstFrame.boneNames)
+                foreach (var row in rows)
                 {
-                    appendRow(rows[0], true);
+                    if (row.frameNo == 0)
+                    {
+                        appendRow(row, true);
+                    }
                 }
             }
 
