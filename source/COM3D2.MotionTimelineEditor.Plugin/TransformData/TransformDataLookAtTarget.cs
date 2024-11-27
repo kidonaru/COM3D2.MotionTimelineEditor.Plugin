@@ -4,6 +4,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataLookAtTarget : TransformDataBase
     {
+        public override TransformType type
+        {
+            get
+            {
+                return TransformType.LookAtTarget;
+            }
+        }
+
         public override int valueCount
         {
             get

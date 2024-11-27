@@ -2,9 +2,16 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-
     public class TransformDataRoot : TransformDataBase
     {
+        public override TransformType type
+        {
+            get
+            {
+                return TransformType.Root;
+            }
+        }
+
         public override int valueCount
         {
             get

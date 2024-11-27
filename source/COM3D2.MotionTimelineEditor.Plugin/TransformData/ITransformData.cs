@@ -3,6 +3,38 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+    public enum TransformType
+    {
+        None = 0,
+        BG = 1,
+        BGColor = 2,
+        Camera = 3,
+        DepthOfField = 4,
+        ExtendBone = 5,
+        Eyes = 6,
+        FingerBlend = 7,
+        Grounding = 8,
+        IKHold = 9,
+        Light = 10,
+        LookAtTarget = 11,
+        Model = 12,
+        ModelBone = 13,
+        Move = 14,
+        Paraffin = 15,
+        Root = 16,
+        Rotation = 17,
+        ShapeKey = 18,
+        StageLight = 19,
+        StageLightController = 20,
+        Undress = 21,
+        Voice = 22,
+
+        // DCM
+        Morph = 1001,
+        Se = 1002,
+        Text = 1003,
+    }
+
     public class CustomValueInfo
     {
         public int index;
@@ -20,6 +52,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public interface ITransformData
     {
         string name { get; }
+        TransformType type { get; }
         int valueCount { get; }
         ValueData[] values { get; }
         int strValueCount { get; }

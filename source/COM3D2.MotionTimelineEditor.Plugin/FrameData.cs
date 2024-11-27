@@ -37,6 +37,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private static TimelineManager timelineManager
+        {
+            get
+            {
+                return TimelineManager.instance;
+            }
+        }
+
         public FrameData(ITimelineLayer parentLayer)
         {
             this.parentLayer = parentLayer;
@@ -80,12 +88,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return bones.Any(HasBone);
         }
 
-        public BoneData GetOrCreateBone(string name)
+        public BoneData GetOrCreateBone(TransformType transformType, string name)
         {
             BoneData bone;
             if (!_boneMap.TryGetValue(name, out bone))
             {
-                var trans = parentLayer.CreateTransformData(name);
+                var trans = timelineManager.CreateTransform(transformType, name);
                 bone = CreateBone(trans);
                 _boneMap[name] = bone;
             }
@@ -119,7 +127,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var targetBone = GetOrCreateBone(bone.name);
+            var targetBone = GetOrCreateBone(bone.transform.type, bone.name);
             targetBone.transform.FromTransformData(bone.transform);
         }
 
@@ -354,7 +362,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     PluginUtils.LogDebug("Flip Bone：" + boneType + " " + eulerAngles + " -> " + newEulerAngles);
 
-                    var newTransform = parentLayer.CreateTransformData(BoneUtils.GetBoneName(boneType));
+                    var newTransform = timelineManager.CreateTransform(transform.type, BoneUtils.GetBoneName(boneType));
                     newTransform.eulerAngles = newEulerAngles;
 
                     if (boneType == IKManager.BoneType.Root)
@@ -379,7 +387,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             foreach (var bone in sourceFrame.bones)
             {
-                var newBone = GetOrCreateBone(bone.transform.name);
+                var newBone = GetOrCreateBone(bone.transform.type, bone.transform.name);
                 newBone.transform.FromTransformData(bone.transform);
                 SetBone(newBone);
             }

@@ -3,6 +3,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataBG : TransformDataBase
     {
+        public override TransformType type
+        {
+            get
+            {
+                return TransformType.BG;
+            }
+        }
+
         public override int valueCount
         {
             get

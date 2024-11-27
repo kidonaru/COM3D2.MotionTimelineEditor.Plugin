@@ -7,6 +7,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("Name")]
         public string name;
 
+        [XmlElement("Type")]
+        public TransformType type;
+
         [XmlElement("Value")]
         public float[] values = new float[0];
 

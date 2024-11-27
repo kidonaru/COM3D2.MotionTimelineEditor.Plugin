@@ -152,7 +152,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             foreach (var slotName in allBoneNames)
             {
                 var slotId = DressUtils.GetDressSlotId(slotName);
-                var trans = CreateTransformData(slotName) as TransformDataUndress;
+                var trans = CreateTransformData<TransformDataUndress>(slotName);
                 trans.isVisible = maidCache.IsSlotVisible(slotId);
 
                 var bone = frame.CreateBone(trans);
@@ -377,11 +377,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             });
         }
 
-        public override ITransformData CreateTransformData(string name)
+        public override TransformType GetTransformType(string name)
         {
-            var transform = new TransformDataUndress();
-            transform.Initialize(name);
-            return transform;
+            return TransformType.Undress;
         }
     }
 }

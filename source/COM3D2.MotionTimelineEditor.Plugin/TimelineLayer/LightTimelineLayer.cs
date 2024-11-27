@@ -180,7 +180,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     continue;
                 }
 
-                var newBone = keyFrame.GetOrCreateBone(newLightName);
+                var newBone = keyFrame.GetOrCreateBone(sourceBone.transform.type, newLightName);
                 newBone.transform.FromTransformData(sourceBone.transform);
             }
         }
@@ -205,7 +205,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     position = followLight.offset;
                 }
 
-                var trans = CreateTransformData(lightName) as TransformDataLight;
+                var trans = CreateTransformData<TransformDataLight>(lightName);
                 trans.position = position;
                 trans.eulerAngles = transform.localEulerAngles;
                 trans.color = light.color;
@@ -662,11 +662,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.EndScrollView();
         }
 
-        public override ITransformData CreateTransformData(string name)
+        public override TransformType GetTransformType(string name)
         {
-            var transform = new TransformDataLight();
-            transform.Initialize(name);
-            return transform;
+            return TransformType.Light;
         }
     }
 }

@@ -55,4 +55,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return (bool)validateMethod.Invoke(null, null);
         }
     }
+
+    public class TransformInfo
+    {
+        public readonly TransformType type;
+        public readonly Func<string, ITransformData> createTransform;
+
+        public TransformInfo(
+            TransformType type,
+            Func<string, ITransformData> createTransform)
+        {
+            this.type = type;
+            this.createTransform = createTransform;
+        }
+    }
 }

@@ -4,6 +4,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataUndress : TransformDataBase
     {
+        public override TransformType type
+        {
+            get
+            {
+                return TransformType.Undress;
+            }
+        }
+
         public override int valueCount
         {
             get

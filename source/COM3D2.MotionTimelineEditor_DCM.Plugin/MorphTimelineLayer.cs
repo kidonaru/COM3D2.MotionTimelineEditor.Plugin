@@ -10,6 +10,8 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
+    using TransformType = MotionTimelineEditor.Plugin.TransformType;
+
     [TimelineLayerDesc("メイド表情", 10)]
     public class MorphTimelineLayer : TimelineLayerBase
     {
@@ -206,7 +208,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 var morphValue = GetMorphValue(name);
 
-                var trans = CreateTransformData(name);
+                var trans = CreateTransformData<TransformDataMorph>(name);
                 trans.values[0].value = morphValue;
 
                 var bone = frame.CreateBone(trans);
@@ -443,11 +445,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             });
         }
 
-        public override ITransformData CreateTransformData(string name)
+        public override TransformType GetTransformType(string name)
         {
-            var transform = new TransformDataMorph();
-            transform.Initialize(name);
-            return transform;
+            return TransformType.Morph;
         }
     }
 }

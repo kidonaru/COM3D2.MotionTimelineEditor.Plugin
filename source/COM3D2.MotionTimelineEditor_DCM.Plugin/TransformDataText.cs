@@ -7,6 +7,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
     public class TransformDataText : TransformDataBase
     {
+        public override TransformType type
+        {
+            get
+            {
+                return TransformType.Text;
+            }
+        }
+
         public override int valueCount
         {
             get

@@ -4,6 +4,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataDepthOfField : TransformDataBase
     {
+        public override TransformType type
+        {
+            get
+            {
+                return TransformType.DepthOfField;
+            }
+        }
+
         public override int valueCount
         {
             get

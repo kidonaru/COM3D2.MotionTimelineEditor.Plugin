@@ -318,7 +318,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (eyesType == MotionEyesType.LookAtTarget)
                 {
-                    var trans = CreateTransformData(eyesName) as TransformDataLookAtTarget;
+                    var trans = CreateTransformData<TransformDataLookAtTarget>(eyesName);
                     var targetType = maidCache.lookAtTargetType;
                     trans.targetType = targetType;
                     trans.targetIndex = 0;
@@ -342,7 +342,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
                 else
                 {
-                    var trans = CreateTransformData(eyesName) as TransformDataEyes;
+                    var trans = CreateTransformData<TransformDataEyes>(eyesName);
                     var eyesValue = GetEyesValue(eyesType);
                     trans.horizon = eyesValue.x;
                     trans.vertical = eyesValue.y;
@@ -853,19 +853,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override ITransformData CreateTransformData(string name)
+        public override TransformType GetTransformType(string name)
         {
             if (name == "LookAtTarget")
             {
-                var transform = new TransformDataLookAtTarget();
-                transform.Initialize(name);
-                return transform;
+                return TransformType.LookAtTarget;
             }
             else
             {
-                var transform = new TransformDataEyes();
-                transform.Initialize(name);
-                return transform;
+                return TransformType.Eyes;
             }
         }
     }

@@ -149,7 +149,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             foreach (var boneName in allBoneNames)
             {
-                var trans = CreateTransformData(boneName) as TransformDataShapeKey;
+                var trans = CreateTransformData<TransformDataShapeKey>(boneName);
                 trans.easing = GetEasing(frame.frameNo, boneName);
                 trans.weight = maidCache.GetBlendShapeValue(boneName);
 
@@ -484,11 +484,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.EndScrollView();
         }
 
-        public override ITransformData CreateTransformData(string name)
+        public override TransformType GetTransformType(string name)
         {
-            var transform = new TransformDataShapeKey();
-            transform.Initialize(name);
-            return transform;
+            return TransformType.ShapeKey;
         }
     }
 }

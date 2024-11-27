@@ -488,25 +488,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 studioHackManager.Register(new StudioHack());
 
                 timelineManager.RegisterLayer(
-                    typeof(MotionTimelineLayer), MotionTimelineLayer.Create
+                    typeof(BGColorTimelineLayer), BGColorTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
-                    typeof(StageLightTimelineLayer), StageLightTimelineLayer.Create
+                    typeof(BGTimelineLayer), BGTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
                     typeof(CameraTimelineLayer), CameraTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
-                    typeof(LightTimelineLayer), LightTimelineLayer.Create
-                );
-                timelineManager.RegisterLayer(
                     typeof(EyesTimelineLayer), EyesTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
-                    typeof(ShapeKeyTimelineLayer), ShapeKeyTimelineLayer.Create
-                );
-                timelineManager.RegisterLayer(
-                    typeof(ModelTimelineLayer), ModelTimelineLayer.Create
+                    typeof(LightTimelineLayer), LightTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
                     typeof(ModelBoneTimelineLayer), ModelBoneTimelineLayer.Create
@@ -515,22 +509,95 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     typeof(ModelShapeKeyTimelineLayer), ModelShapeKeyTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
-                    typeof(PostEffectTimelineLayer), PostEffectTimelineLayer.Create
+                    typeof(ModelTimelineLayer), ModelTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
-                    typeof(BGTimelineLayer), BGTimelineLayer.Create
-                );
-                timelineManager.RegisterLayer(
-                    typeof(BGColorTimelineLayer), BGColorTimelineLayer.Create
+                    typeof(MotionTimelineLayer), MotionTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
                     typeof(MoveTimelineLayer), MoveTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
-                    typeof(VoiceTimelineLayer), VoiceTimelineLayer.Create
+                    typeof(PostEffectTimelineLayer), PostEffectTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
+                    typeof(ShapeKeyTimelineLayer), ShapeKeyTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
+                    typeof(StageLightTimelineLayer), StageLightTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
                     typeof(UndressTimelineLayer), UndressTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
+                    typeof(VoiceTimelineLayer), VoiceTimelineLayer.Create
+                );
+
+                timelineManager.RegisterTransform(
+                    TransformType.BG, TimelineManager.CreateTransform<TransformDataBG>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.BGColor, TimelineManager.CreateTransform<TransformDataBGColor>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.Camera, TimelineManager.CreateTransform<TransformDataCamera>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.DepthOfField, TimelineManager.CreateTransform<TransformDataDepthOfField>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.ExtendBone, TimelineManager.CreateTransform<TransformDataExtendBone>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.Eyes, TimelineManager.CreateTransform<TransformDataEyes>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.FingerBlend, TimelineManager.CreateTransform<TransformDataFingerBlend>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.Grounding, TimelineManager.CreateTransform<TransformDataGrounding>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.IKHold, TimelineManager.CreateTransform<TransformDataIKHold>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.Light, TimelineManager.CreateTransform<TransformDataLight>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.LookAtTarget, TimelineManager.CreateTransform<TransformDataLookAtTarget>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.Model, TimelineManager.CreateTransform<TransformDataModel>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.ModelBone, TimelineManager.CreateTransform<TransformDataModelBone>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.Move, TimelineManager.CreateTransform<TransformDataMove>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.Paraffin, TimelineManager.CreateTransform<TransformDataParaffin>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.Root, TimelineManager.CreateTransform<TransformDataRoot>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.Rotation, TimelineManager.CreateTransform<TransformDataRotation>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.ShapeKey, TimelineManager.CreateTransform<TransformDataShapeKey>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.StageLight, TimelineManager.CreateTransform<TransformDataStageLight>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.StageLightController, TimelineManager.CreateTransform<TransformDataStageLightController>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.Undress, TimelineManager.CreateTransform<TransformDataUndress>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.Voice, TimelineManager.CreateTransform<TransformDataVoice>
                 );
 
                 windowManager.Init();

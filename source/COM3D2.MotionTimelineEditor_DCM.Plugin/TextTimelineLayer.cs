@@ -10,6 +10,8 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
+    using TransformType = MotionTimelineEditor.Plugin.TransformType;
+
     [TimelineLayerDesc("テキスト", 45)]
     public partial class TextTimelineLayer : TimelineLayerBase
     {
@@ -295,7 +297,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var text = freeTextSet.text;
                 var rect = freeTextSet.rect;
 
-                var trans = CreateTransformData(boneName) as TransformDataText;
+                var trans = CreateTransformData<TransformDataText>(boneName);
                 trans.text = text.text;
                 trans.font = text.font != null ? text.font.name : "";
                 trans.position = rect.localPosition;
@@ -654,11 +656,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             view.EndScrollView();
         }
 
-        public override ITransformData CreateTransformData(string name)
+        public override TransformType GetTransformType(string name)
         {
-            var transform = new TransformDataText();
-            transform.Initialize(name);
-            return transform;
+            return TransformType.Text;
         }
     }
 }

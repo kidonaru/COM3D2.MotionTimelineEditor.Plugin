@@ -5,6 +5,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataFingerBlend : TransformDataBase
     {
+        public override TransformType type
+        {
+            get
+            {
+                return TransformType.FingerBlend;
+            }
+        }
+
         public override int valueCount
         {
             get

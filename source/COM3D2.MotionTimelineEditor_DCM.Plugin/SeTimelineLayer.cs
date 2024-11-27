@@ -10,6 +10,8 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
+    using TransformType = MotionTimelineEditor.Plugin.TransformType;
+
     [TimelineLayerDesc("効果音", 43)]
     public partial class SeTimelineLayer : TimelineLayerBase
     {
@@ -142,7 +144,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public override void UpdateFrame(FrameData frame)
         {
-            var trans = CreateTransformData(SeBoneName) as TransformDataSe;
+            var trans = CreateTransformData<TransformDataSe>(SeBoneName);
             trans.fileName = _currentSeName;
             trans.interval = _currentInterval;
             trans.isLoop = _currentIsLoop;
@@ -331,11 +333,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override ITransformData CreateTransformData(string name)
+        public override TransformType GetTransformType(string name)
         {
-            var transform = new TransformDataSe();
-            transform.Initialize(name);
-            return transform;
+            return TransformType.Se;
         }
     }
 }

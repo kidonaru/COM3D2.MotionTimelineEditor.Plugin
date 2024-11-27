@@ -191,7 +191,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var angle = uoCamera.GetAroundAngle();
             var rotZ = Camera.main.GetRotationZ();
 
-            var trans = CreateTransformData(CameraBoneName);
+            var trans = CreateTransformData<TransformDataCamera>(CameraBoneName);
             trans.position = target.position;
             trans.eulerAngles = new Vector3(angle.y, angle.x, rotZ);
             trans.easing = GetEasing(frame.frameNo, CameraBoneName);
@@ -650,11 +650,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override ITransformData CreateTransformData(string name)
+        public override TransformType GetTransformType(string name)
         {
-            var transform = new TransformDataCamera();
-            transform.Initialize(name);
-            return transform;
+            return TransformType.Camera;
         }
     }
 }

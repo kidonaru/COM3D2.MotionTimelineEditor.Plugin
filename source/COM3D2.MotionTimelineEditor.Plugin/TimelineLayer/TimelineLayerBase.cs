@@ -848,18 +848,36 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyAnm(TimelineAnmId, anmData);
         }
 
-        public abstract ITransformData CreateTransformData(string name);
+        public abstract TransformType GetTransformType(string name);
+
+        public T CreateTransformData<T>(string name)
+            where T : class, ITransformData, new()
+        {
+            return TimelineManager.CreateTransform<T>(name);
+        }
 
         public ITransformData CreateTransformData(ITransformData transform)
         {
-            var newTransform = CreateTransformData(transform.name);
+            var type = transform.type;
+            if (type == TransformType.None)
+            {
+                type = GetTransformType(transform.name);
+            }
+
+            var newTransform = timelineManager.CreateTransform(type, transform.name);
             newTransform.FromTransformData(transform);
             return newTransform;
         }
 
         public ITransformData CreateTransformData(TransformXml xml)
         {
-            var newTransform = CreateTransformData(xml.name);
+            var type = xml.type;
+            if (type == TransformType.None)
+            {
+                type = GetTransformType(xml.name);
+            }
+
+            var newTransform = timelineManager.CreateTransform(type, xml.name);
             newTransform.FromXml(xml);
             return newTransform;
         }

@@ -467,7 +467,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     continue;
                 }
 
-                var trans = CreateTransformData(name);
+                ITransformData trans;
+                if (name == "Bip01")
+                {
+                    trans = CreateTransformData<TransformDataRoot>(name);
+                }
+                else
+                {
+                    trans = CreateTransformData<TransformDataRotation>(name);
+                }
+
                 if (trans.hasPosition)
                 {
                     trans.position = transform.localPosition;
@@ -494,7 +503,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     continue;
                 }
 
-                var trans = CreateTransformData(name);
+                var trans = CreateTransformData<TransformDataExtendBone>(name);
                 if (trans.hasPosition)
                 {
                     trans.position = transform.localPosition;
@@ -520,7 +529,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     continue;
                 }
 
-                var trans = CreateTransformData(name) as TransformDataIKHold;
+                var trans = CreateTransformData<TransformDataIKHold>(name);
                 trans.position = ikHoldEntity.position;
                 trans.isHold = ikHoldEntity.isHold;
                 trans.isAnime = ikHoldEntity.isAnime;
@@ -532,7 +541,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var name = GroundingBoneName;
 
-                var trans = CreateTransformData(name) as TransformDataGrounding;
+                var trans = CreateTransformData<TransformDataGrounding>(name);
                 trans.isGroundingFootL = maidCache.isGroundingFootL;
                 trans.isGroundingFootR = maidCache.isGroundingFootR;
                 trans.floorHeight = maidCache.floorHeight;
@@ -558,7 +567,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         continue;
                     }
 
-                    var trans = CreateTransformData(name) as TransformDataFingerBlend;
+                    var trans = CreateTransformData<TransformDataFingerBlend>(name);
                     trans.UpdateFromArmFinger(fingerBlend);
 
                     var bone = frame.CreateBone(trans);
@@ -572,7 +581,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         continue;
                     }
 
-                    var trans = CreateTransformData(name) as TransformDataFingerBlend;
+                    var trans = CreateTransformData<TransformDataFingerBlend>(name);
                     trans.UpdateFromLegFinger(fingerBlend);
 
                     var bone = frame.CreateBone(trans);
@@ -1496,37 +1505,48 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.EndScrollView();
         }
 
-        public override ITransformData CreateTransformData(string name)
-        {
-            ITransformData transform;
+        private static Dictionary<string, TransformType> _transformTypeCache = new Dictionary<string, TransformType>();
 
+        public override TransformType GetTransformType(string name)
+        {
+            TransformType type;
+            if (_transformTypeCache.TryGetValue(name, out type))
+            {
+                return type;
+            }
+
+            type = GetTransformTypeInternal(name);
+            _transformTypeCache[name] = type;
+            return type;
+        }
+
+        private TransformType GetTransformTypeInternal(string name)
+        {
             var holdtype = MaidCache.GetIKHoldType(name);
             if (holdtype != IKHoldType.Max)
             {
-                transform = new TransformDataIKHold();
+                return TransformType.IKHold;
             }
             else if (name == GroundingBoneName)
             {
-                transform = new TransformDataGrounding();
+                return TransformType.Grounding;
             }
             else if (name == "Bip01")
             {
-                transform = new TransformDataRoot();
+                return TransformType.Root;
             }
             else if (BoneUtils.IsDefaultBoneName(name))
             {
-                transform = new TransformDataRotation();
+                return TransformType.Rotation;
             }
             else if (IsFingerBlendBone(name))
             {
-                transform = new TransformDataFingerBlend();
+                return TransformType.FingerBlend;
             }
             else
             {
-                transform = new TransformDataExtendBone();
+                return TransformType.ExtendBone;
             }
-            transform.Initialize(name);
-            return transform;
         }
     }
 }

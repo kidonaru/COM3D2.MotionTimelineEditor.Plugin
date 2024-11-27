@@ -200,7 +200,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     case PostEffectType.DepthOfField:
                     {
                         var depthOfField = postEffectManager.GetDepthOfFieldData();
-                        var trans = CreateTransformData(effectName) as TransformDataDepthOfField;
+                        var trans = CreateTransformData<TransformDataDepthOfField>(effectName);
                         trans.depthOfField = depthOfField;
                         trans.easing = GetEasing(frame.frameNo, effectName);
 
@@ -211,7 +211,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     case PostEffectType.Paraffin:
                     {
                         var paraffin = postEffectManager.GetParaffinData(index);
-                        var trans = CreateTransformData(effectName) as TransformDataParaffin;
+                        var trans = CreateTransformData<TransformDataParaffin>(effectName);
                         trans.paraffin = paraffin;
                         trans.easing = GetEasing(frame.frameNo, effectName);
 
@@ -774,24 +774,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.EndScrollView();
         }
 
-        public override ITransformData CreateTransformData(string name)
-        {
-            ITransformData transform = null;
+        private static Dictionary<string, TransformType> _transformTypeCache = new Dictionary<string, TransformType>();
 
+        public override TransformType GetTransformType(string name)
+        {
+            TransformType type;
+            if (_transformTypeCache.TryGetValue(name, out type))
+            {
+                return type;
+            }
+
+            type = GetTransformTypeInternal(name);
+            _transformTypeCache[name] = type;
+            return type;
+        }
+
+        private TransformType GetTransformTypeInternal(string name)
+        {
             var effectType = PostEffectUtils.ToEffectType(name);
             switch (effectType)
             {
                 case PostEffectType.DepthOfField:
-                    transform = new TransformDataDepthOfField();
-                    transform.Initialize(name);
-                    break;
+                    return TransformType.DepthOfField;
                 case PostEffectType.Paraffin:
-                    transform = new TransformDataParaffin();
-                    transform.Initialize(name);
-                    break;
+                    return TransformType.Paraffin;
             }
 
-            return transform;
+            return TransformType.None;
         }
     }
 }

@@ -4,6 +4,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataGrounding : TransformDataBase
     {
+        public override TransformType type
+        {
+            get
+            {
+                return TransformType.Grounding;
+            }
+        }
+
         public override int valueCount
         {
             get

@@ -381,7 +381,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var lightName = light.name;
 
-                var trans = CreateTransformData(lightName) as TransformDataStageLight;
+                var trans = CreateTransformData<TransformDataStageLight>(lightName);
                 trans.FromStageLight(light);
 
                 var bone = frame.CreateBone(trans);
@@ -397,7 +397,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var controllerName = controller.name;
 
-                var trans = CreateTransformData(controllerName) as TransformDataStageLightController;
+                var trans = CreateTransformData<TransformDataStageLightController>(controllerName);
                 trans.FromStageLightController(controller);
 
                 var bone = frame.CreateBone(trans);
@@ -1102,21 +1102,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.EndScrollView();
         }
 
-        public override ITransformData CreateTransformData(string name)
+        public override TransformType GetTransformType(string name)
         {
-            ITransformData transform;
-
             if (name.StartsWith("StageLightController", StringComparison.Ordinal))
             {
-                transform = new TransformDataStageLightController();
+                return TransformType.StageLightController;
             }
             else
             {
-                transform = new TransformDataStageLight();
+                return TransformType.StageLight;
             }
-
-            transform.Initialize(name);
-            return transform;
         }
     }
 }

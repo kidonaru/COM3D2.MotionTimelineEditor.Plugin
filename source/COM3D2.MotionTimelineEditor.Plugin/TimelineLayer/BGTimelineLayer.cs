@@ -174,7 +174,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var bgName = bgMgr.GetBGName();
 
-            var trans = CreateTransformData(bgName);
+            var trans = CreateTransformData<TransformDataBG>(bgName);
             if (bgObject != null)
             {
                 trans.position = bgObject.transform.localPosition;
@@ -366,11 +366,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 initialScale);
         }
 
-        public override ITransformData CreateTransformData(string name)
+        public override TransformType GetTransformType(string name)
         {
-            var transform = new TransformDataBG();
-            transform.Initialize(name);
-            return transform;
+            return TransformType.BG;
         }
 
         public override void UpdateBones(int frameNo, IEnumerable<BoneData> bones)

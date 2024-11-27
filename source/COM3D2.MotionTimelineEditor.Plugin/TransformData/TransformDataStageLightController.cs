@@ -5,6 +5,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataStageLightController : TransformDataBase
     {
+        public override TransformType type
+        {
+            get
+            {
+                return TransformType.StageLightController;
+            }
+        }
+
         public override int valueCount
         {
             get

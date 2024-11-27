@@ -151,7 +151,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var trans = CreateTransformData(VoiceBoneName);
+            var trans = CreateTransformData<TransformDataVoice>(VoiceBoneName);
             trans.SetStrValue("voiceName", maidCache.oneShotVoiceName);
             trans["startTime"].value = maidCache.oneShotVoiceStartTime;
             trans["length"].value = maidCache.oneShotVoiceLength;
@@ -453,11 +453,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return GameUty.FileSystem.GetFileListAtExtension(extention).Concat(GameUty.FileSystemOld.GetFileListAtExtension(extention)).ToArray();
         }
 
-        public override ITransformData CreateTransformData(string name)
+        public override TransformType GetTransformType(string name)
         {
-            var transform = new TransformDataVoice();
-            transform.Initialize(name);
-            return transform;
+            return TransformType.Voice;
         }
     }
 }

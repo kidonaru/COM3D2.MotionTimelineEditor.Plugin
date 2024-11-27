@@ -4,6 +4,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataLight : TransformDataBase
     {
+        public override TransformType type
+        {
+            get
+            {
+                return TransformType.Light;
+            }
+        }
+
         public override int valueCount
         {
             get

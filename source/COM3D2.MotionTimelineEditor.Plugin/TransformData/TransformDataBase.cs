@@ -7,6 +7,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public abstract class TransformDataBase : ITransformData
     {
         public string name { get; protected set; }
+        public abstract TransformType type { get; }
 
         public virtual int valueCount
         {
@@ -1074,6 +1075,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var xml = new TransformXml
             {
                 name = name,
+                type = type,
                 values = _valuesForXml,
                 inTangents = _normalizedInTangents,
                 outTangents = _normalizedOutTangents,

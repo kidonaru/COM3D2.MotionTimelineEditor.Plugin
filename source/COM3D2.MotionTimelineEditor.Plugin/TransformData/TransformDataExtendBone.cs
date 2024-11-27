@@ -4,6 +4,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataExtendBone : TransformDataBase
     {
+        public override TransformType type
+        {
+            get
+            {
+                return TransformType.ExtendBone;
+            }
+        }
+
         public override int valueCount
         {
             get

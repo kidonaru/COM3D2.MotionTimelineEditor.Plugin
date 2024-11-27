@@ -127,7 +127,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var trans = CreateTransformData(MoveBoneName);
+            var trans = CreateTransformData<TransformDataMove>(MoveBoneName);
             trans.position = maid.transform.localPosition;
             trans.eulerAngles = maid.transform.localEulerAngles;
 
@@ -304,11 +304,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 initialScale);
         }
 
-        public override ITransformData CreateTransformData(string name)
+        public override TransformType GetTransformType(string name)
         {
-            var transform = new TransformDataMove();
-            transform.Initialize(name);
-            return transform;
+            return TransformType.Move;
         }
     }
 }

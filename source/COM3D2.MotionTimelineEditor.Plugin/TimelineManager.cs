@@ -1655,6 +1655,45 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return layers;
         }
 
+        private Dictionary<TransformType, TransformInfo> transformInfoMap
+            = new Dictionary<TransformType, TransformInfo>();
+
+        public TransformInfo GetTransformInfo(TransformType type)
+        {
+            TransformInfo info;
+            if (transformInfoMap.TryGetValue(type, out info))
+            {
+                return info;
+            }
+            return null;
+        }
+
+        public void RegisterTransform(TransformType type, Func<string, ITransformData> createTransform)
+        {
+            var info = new TransformInfo(type, createTransform);
+            transformInfoMap[type] = info;
+        }
+
+        public ITransformData CreateTransform(TransformType type, string name)
+        {
+            var info = GetTransformInfo(type);
+            if (info == null)
+            {
+                PluginUtils.LogError("未登録のトランスフォーム type:{0} name:{1}", type, name);
+                return null;
+            }
+
+            return info.createTransform(name);
+        }
+
+        public static T CreateTransform<T>(string name)
+            where T : class, ITransformData, new()
+        {
+            var trans = new T();
+            trans.Initialize(name);
+            return trans;
+        }
+
         public void CopyModel(StudioModelStat model)
         {
             if (model == null || timeline == null)

@@ -90,8 +90,6 @@
     <Compile Include="GUIView.cs" />
     <Compile Include="IKHoldEntity.cs" />
     <Compile Include="IKHoldUI.cs" />
-    <Compile Include="ITimelineLayer.cs" />
-    <Compile Include="ITransformData.cs" />
     <Compile Include="KeyBind.cs" />
     <Compile Include="KeyFrameUI.cs" />
     <Compile Include="LetterBoxView.cs" />
@@ -148,6 +146,7 @@
     <Compile Include="TimelineLayer\BGTimelineLayer.cs" />
     <Compile Include="TimelineLayer\CameraTimelineLayer.cs" />
     <Compile Include="TimelineLayer\EyesTimelineLayer.cs" />
+    <Compile Include="TimelineLayer\ITimelineLayer.cs" />
     <Compile Include="TimelineLayer\LightTimelineLayer.cs" />
     <Compile Include="TimelineLayer\LightTimelineLayerBase.cs" />
     <Compile Include="TimelineLayer\ModelBoneTimelineLayer.cs" />
@@ -170,6 +169,7 @@
     <Compile Include="TimelineXml.cs" />
     <Compile Include="TrackData.cs" />
     <Compile Include="TransformCache.cs" />
+    <Compile Include="TransformData\ITransformData.cs" />
     <Compile Include="TransformData\TransformDataBase.cs" />
     <Compile Include="TransformData\TransformDataBG.cs" />
     <Compile Include="TransformData\TransformDataBGColor.cs" />

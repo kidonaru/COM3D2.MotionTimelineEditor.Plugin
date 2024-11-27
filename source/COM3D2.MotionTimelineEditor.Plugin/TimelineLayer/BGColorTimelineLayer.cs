@@ -111,7 +111,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void UpdateFrame(FrameData frame)
         {
-            var trans = CreateTransformData(BoneName);
+            var trans = CreateTransformData<TransformDataBGColor>(BoneName);
             trans.color = camera.backgroundColor;
 
             var bone = frame.CreateBone(trans);
@@ -261,11 +261,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override ITransformData CreateTransformData(string name)
+        public override TransformType GetTransformType(string name)
         {
-            var transform = new TransformDataBGColor();
-            transform.Initialize(name);
-            return transform;
+            return TransformType.BGColor;
         }
     }
 }
