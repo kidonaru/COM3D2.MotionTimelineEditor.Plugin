@@ -575,7 +575,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected abstract void ApplyMotion(MotionData motion, float t, bool indexUpdated);
 
-        protected virtual void BuildPlayData(bool forOutput)
+        protected virtual void BuildPlayData()
         {
             _playDataMap.ClearPlayData();
 
@@ -622,14 +622,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         protected virtual void AppendTimelineRow(FrameData frame)
         {
             var isLastFrame = frame.frameNo == maxFrameNo;
-            foreach (var name in allBoneNames)
+            foreach (var bone in frame.bones)
             {
-                var bone = frame.GetBone(name);
                 _timelineBonesMap.AppendBone(bone, isLastFrame);
             }
         }
 
-        protected virtual byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
+        protected virtual void BuildTimelineBonesMap()
         {
             _timelineBonesMap.ClearBones();
 
@@ -639,9 +638,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             AppendTimelineRow(_dummyLastFrame);
+        }
 
-            BuildPlayData(forOutput);
-
+        protected virtual byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
+        {
             return null;
         }
 
@@ -907,7 +907,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (sourceBone != null)
                 {
-                   _dummyLastFrame.UpdateBone(sourceBone);
+                    _dummyLastFrame.UpdateBone(sourceBone);
                 }
             }
 
@@ -920,13 +920,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var stopwatch = new StopwatchDebug();
 
             FixRotation(startFrameNo, endFrameNo);
-            stopwatch.ProcessEnd("FixRotation");
+            stopwatch.ProcessEnd("  FixRotation");
 
             UpdateTangent(startFrameNo, endFrameNo);
-            stopwatch.ProcessEnd("UpdateTangent");
+            stopwatch.ProcessEnd("  UpdateTangent");
 
             UpdateDummyLastFrame();
-            stopwatch.ProcessEnd("UpdateDummyLastFrame");
+            stopwatch.ProcessEnd("  UpdateDummyLastFrame");
+
+            BuildTimelineBonesMap();
+            stopwatch.ProcessEnd("  BuildTimelineBonesMap");
+
+            BuildPlayData();
+            stopwatch.ProcessEnd("  BuildPlayData");
         }
 
         public byte[] GetAnmBinary(bool forOutput)
@@ -935,6 +941,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return null;
             }
+
+            PluginUtils.LogDebug(className);
 
             var startFrameNo = 0;
             var endFrameNo = timeline.maxFrameNo;
@@ -945,7 +953,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 startFrameNo = GetStartFrameNo(activeTrack.startFrameNo);
                 endFrameNo = GetEndFrameNo(activeTrack.endFrameNo);
 
-                PluginUtils.LogDebug("GetAnmBinary: slotNo={0} startFrameNo={1}, endFrameNo={2} ",
+                PluginUtils.LogDebug("  slotNo={0} startFrameNo={1}, endFrameNo={2} ",
                     slotNo, startFrameNo, endFrameNo);
             }
 
@@ -953,14 +961,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var stopwatch = new StopwatchDebug();
             var anmData = GetAnmBinaryInternal(forOutput, startFrameNo, endFrameNo);
-            stopwatch.ProcessEnd("GetAnmBinary");
+            stopwatch.ProcessEnd("  GetAnmBinary");
 
             return anmData;
         }
 
         public void CreateAndApplyAnm()
         {
-            PluginUtils.LogDebug("CreateAndApplyAnm");
             var anmData = GetAnmBinary(false);
             ApplyAnm(TimelineAnmId, anmData);
         }

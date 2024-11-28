@@ -739,27 +739,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             rows.Add(bone);
         }
-
-        public static void AppendBone(
-            this List<BoneData> rows,
-            BoneData bone,
-            bool isLastFrame)
-        {
-            if (bone == null)
-            {
-                return;
-            }
-
-            // 最後のフレームは2重に追加しない
-            if (isLastFrame &&
-                rows.Count > 0 &&
-                rows[rows.Count - 1].frameNo == bone.frameNo)
-            {
-                return;
-            }
-
-            rows.Add(bone);
-        }
     }
 
 }

@@ -625,6 +625,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        List<float> _timesCache = new List<float>(128);
+        List<ValueData[]> _valuesListCache = new List<ValueData[]>(128);
+
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
             if (maidCache == null)
@@ -635,15 +638,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var startSecond = timeline.GetFrameTimeSeconds(startFrameNo);
             var endSecond = timeline.GetFrameTimeSeconds(endFrameNo);
 
-            var times = new List<float>(_keyFrames.Count);
-            var valuesList = new List<ValueData[]>(_keyFrames.Count);
-
             int _startFrameNo = startFrameNo;
             int _endFrameNo = endFrameNo;
-            Action<BinaryWriter, BoneData> write_bone_data = delegate (
+            Action<BinaryWriter, List<BoneData>> write_bones = delegate (
                 BinaryWriter w,
-                BoneData firstBone)
+                List<BoneData> bones)
             {
+                if (bones.Count == 0)
+                {
+                    return;
+                }
+
+                var firstBone = bones[0];
                 var name = firstBone.name;
                 var path = maidCache.GetBonePath(name);
                 if (string.IsNullOrEmpty(path))
@@ -655,86 +661,78 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 w.Write((byte)1);
                 w.Write(path);
 
-                times.Clear();
-                valuesList.Clear();
+                _timesCache.Clear();
+                _valuesListCache.Clear();
 
-                bool hasLastKey = false;
-                foreach (var frame in _keyFrames)
+                BoneData prevBone = null;
+
+                foreach (var bone in bones)
                 {
-                    if (frame.frameNo < _startFrameNo || frame.frameNo > _endFrameNo)
+                    if (bone.frameNo < _startFrameNo)
                     {
+                        prevBone = bone;
                         continue;
                     }
 
-                    var bone = frame.GetBone(name);
-                    if (bone == null && frame.frameNo == _startFrameNo)
+                    // 開始フレームにキーフレームがない場合は前のキーフレームを使う
+                    if (_timesCache.Count == 0 && bone.frameNo != _startFrameNo && prevBone != null)
                     {
-                        bone = GetPrevBone(frame.frameNo, name, false);
+                        _timesCache.Add(0f);
+                        _valuesListCache.Add(prevBone.transform.values);
                     }
 
-                    if (bone == null && frame.frameNo == _endFrameNo)
+                    if (bone.frameNo > _endFrameNo)
                     {
-                        bone = GetNextBone(frame.frameNo, name, false);
+                        // 終了フレームにキーフレームがない場合は後のキーフレームを使う
+                        if (prevBone != null && prevBone.frameNo != _endFrameNo)
+                        {
+                            _timesCache.Add(endSecond - startSecond);
+                            _valuesListCache.Add(bone.transform.values);
+                        }
+                        break;
                     }
 
-                    if (bone != null)
-                    {
-                        times.Add(timeline.GetFrameTimeSeconds(frame.frameNo) - startSecond);
-                        valuesList.Add(bone.transform.values);
-                        hasLastKey = frame.frameNo == _endFrameNo;
-                    }
-                }
-
-                if (!hasLastKey)
-                {
-                    var bone = _dummyLastFrame.GetBone(name);
-                    if (bone != null)
-                    {
-                        times.Add(endSecond - startSecond);
-                        valuesList.Add(bone.transform.values);
-                    }
+                    _timesCache.Add(timeline.GetFrameTimeSeconds(bone.frameNo) - startSecond);
+                    _valuesListCache.Add(bone.transform.values);
+                    prevBone = bone;
                 }
 
                 for (int i = 0; i < firstBone.transform.valueCount; i++)
                 {
                     w.Write((byte)(100 + i));
-                    w.Write(times.Count);
-                    for (int j = 0; j < times.Count; j++)
+                    w.Write(_timesCache.Count);
+                    for (int j = 0; j < _timesCache.Count; j++)
                     {
-                        w.Write(times[j]);
-                        w.Write(valuesList[j][i].value);
-                        w.Write(valuesList[j][i].inTangent.value);
-                        w.Write(valuesList[j][i].outTangent.value);
+                        w.Write(_timesCache[j]);
+                        w.Write(_valuesListCache[j][i].value);
+                        w.Write(_valuesListCache[j][i].inTangent.value);
+                        w.Write(_valuesListCache[j][i].outTangent.value);
                     }
                 }
             };
+
             MemoryStream memoryStream = new MemoryStream();
             BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
             binaryWriter.Write("CM3D2_ANIM");
             binaryWriter.Write(1001);
-            foreach (var name in allBoneNames)
+
+            foreach (var bones in _timelineBonesMap.Values)
             {
-                if (MaidCache.ikHoldTypeMap.ContainsKey(name))
-                {
-                    continue;
-                }
-                if (name == GroundingBoneName)
-                {
-                    continue;
-                }
-                if (IsFingerBlendBone(name))
+                if (bones.Count == 0)
                 {
                     continue;
                 }
 
-                var bone = firstFrame.GetBone(name);
-                if (bone == null)
+                switch (bones[0].transform.type)
                 {
-                    PluginUtils.Log("0フレーム目にキーフレームがないのでスキップしました boneName={0}", name);
-                    continue;
+                    case TransformType.Root:
+                    case TransformType.Rotation:
+                    case TransformType.ExtendBone:
+                        write_bones(binaryWriter, bones);
+                        break;
                 }
-                write_bone_data(binaryWriter, bone);
             }
+
             binaryWriter.Write((byte)0);
             binaryWriter.Write((byte)(useMuneKeyL ? 1u : 0u));
             binaryWriter.Write((byte)(useMuneKeyR ? 1u : 0u));
@@ -748,8 +746,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 maidCache.anmStartFrameNo = startFrameNo;
                 maidCache.anmEndFrameNo = endFrameNo;
             }
-
-            base.GetAnmBinaryInternal(forOutput, startFrameNo, endFrameNo);
 
             return result;
         }

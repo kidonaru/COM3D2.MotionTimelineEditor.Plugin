@@ -104,7 +104,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             frame.SetBone(bone);
         }
 
-        public void SaveBones(
+        public void OutputBones(
             List<BoneData> rows,
             string filePath)
         {
@@ -157,7 +157,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var outputFileName = "bg_color.csv";
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveBones(_timelineBonesMap[BoneName], outputPath);
+                OutputBones(_timelineBonesMap[BoneName], outputPath);
 
                 songElement.Add(new XElement("changeBgColor", outputFileName));
             }
