@@ -124,5 +124,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var suffix = PluginUtils.GetGroupSuffix(index);
             return ToJpName(PostEffectType.Paraffin) + suffix;
         }
+
+        private static Dictionary<string, int> _indexCache = new Dictionary<string, int>(16);
+
+        public static int GetEffectIndex(string name)
+        {
+            int index;
+            if (_indexCache.TryGetValue(name, out index))
+            {
+                return index;
+            }
+
+            index = PluginUtils.ExtractGroup(name);
+            _indexCache[name] = index;
+            return index;
+        }
+
+        private static Dictionary<string, PostEffectType> _effectTypeCache = new Dictionary<string, PostEffectType>(16);
+
+        public static PostEffectType GetEffectType(string name)
+        {
+            PostEffectType type;
+            if (_effectTypeCache.TryGetValue(name, out type))
+            {
+                return type;
+            }
+
+            type = PostEffectUtils.ToEffectType(name);
+            _effectTypeCache[name] = type;
+            return type;
+        }
     }
 }

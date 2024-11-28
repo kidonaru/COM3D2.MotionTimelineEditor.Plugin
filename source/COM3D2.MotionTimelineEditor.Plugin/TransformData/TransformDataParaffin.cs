@@ -105,6 +105,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
         }
 
+        public override void Initialize(string name)
+        {
+            base.Initialize(name);
+            index = PostEffectUtils.GetEffectIndex(name);
+        }
+
         private readonly static Dictionary<string, CustomValueInfo> CustomValueInfoMap = new Dictionary<string, CustomValueInfo>
         {
             {

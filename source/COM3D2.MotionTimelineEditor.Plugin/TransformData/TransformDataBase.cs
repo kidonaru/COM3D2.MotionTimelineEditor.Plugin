@@ -306,25 +306,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public bool isHidden
+        public virtual bool isHidden
         {
             get
             {
-                if (isHead)
-                {
-                    return !timeline.useHeadKey;
-                }
-
-                if (isBustL)
-                {
-                    return !timeline.useMuneKeyL;
-                }
-
-                if (isBustR)
-                {
-                    return !timeline.useMuneKeyR;
-                }
-
                 return false;
             }
         }
@@ -562,10 +547,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public bool isBustL { get; protected set; }
-        public bool isBustR { get; protected set; }
-        public bool isHead { get; protected set; }
-
         public static readonly string[] PositionNames = new string[] { "X", "Y", "Z" };
         public static readonly string[] RotationNames = new string[] { "RX", "RY", "RZ", "RW" };
         public static readonly string[] ScaleNames = new string[] { "SX", "SY", "SZ" };
@@ -618,12 +599,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void Initialize(string name)
+        public virtual void Initialize(string name)
         {
             this.name = name;
-            isBustL = name == "Mune_L";
-            isBustR = name == "Mune_R";
-            isHead = name == "Bip01 Head";
 
             var length = valueCount;
             if (_values.Length != length)

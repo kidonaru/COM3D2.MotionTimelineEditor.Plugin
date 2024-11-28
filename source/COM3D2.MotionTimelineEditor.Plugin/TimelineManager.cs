@@ -882,9 +882,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
             currentLayer.CleanFrames();
+            currentLayer.ApplyCurrentFrame(true);
             selectedBones.Clear();
-
-            ApplyCurrentFrame(true);
 
             RequestHistory("キーフレーム削除");
         }
@@ -945,8 +944,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             currentLayer.CleanFrames();
-
-            ApplyCurrentFrame(true);
+            currentLayer.ApplyCurrentFrame(true);
 
             RequestHistory("キーフレーム移動");
         }
@@ -1369,7 +1367,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
-                ApplyCurrentFrame(true);
+                currentLayer.ApplyCurrentFrame(true);
             }
             catch (Exception e)
             {
@@ -1561,7 +1559,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 SetPlayingFrameNoAll(0);
             }
 
-            CreateAndApplyAnmAll();
+            ApplyCurrentFrame(false);
             studioHack.isMotionPlaying = true;
 
             if (onPlay != null)

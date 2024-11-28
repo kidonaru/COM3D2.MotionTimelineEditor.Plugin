@@ -36,6 +36,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public override bool isHidden
+        {
+            get
+            {
+                if (isHead)
+                {
+                    return !timeline.useHeadKey;
+                }
+
+                if (isBustL)
+                {
+                    return !timeline.useMuneKeyL;
+                }
+
+                if (isBustR)
+                {
+                    return !timeline.useMuneKeyR;
+                }
+
+                return false;
+            }
+        }
+
         public override ValueData[] rotationValues
         {
             get
@@ -83,5 +106,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public TransformDataRotation()
         {
         }
+
+        public override void Initialize(string name)
+        {
+            base.Initialize(name);
+
+            isBustL = name == "Mune_L";
+            isBustR = name == "Mune_R";
+            isHead = name == "Bip01 Head";
+        }
+
+        public bool isBustL { get; protected set; }
+        public bool isBustR { get; protected set; }
+        public bool isHead { get; protected set; }
     }
 }

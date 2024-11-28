@@ -175,16 +175,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             foreach (var effectName in allBoneNames)
             {
-                var effectType = GetEffectType(effectName);
-                var index = GetEffectIndex(effectName);
+                var effectType = PostEffectUtils.GetEffectType(effectName);
 
                 switch (effectType)
                 {
                     case PostEffectType.DepthOfField:
                     {
-                        var depthOfField = postEffectManager.GetDepthOfFieldData();
                         var trans = CreateTransformData<TransformDataDepthOfField>(effectName);
-                        trans.depthOfField = depthOfField;
+                        trans.depthOfField = postEffectManager.GetDepthOfFieldData();
                         trans.easing = GetEasing(frame.frameNo, effectName);
 
                         var bone = frame.CreateBone(trans);
@@ -193,9 +191,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                     case PostEffectType.Paraffin:
                     {
-                        var paraffin = postEffectManager.GetParaffinData(index);
                         var trans = CreateTransformData<TransformDataParaffin>(effectName);
-                        trans.paraffin = paraffin;
+                        trans.paraffin = postEffectManager.GetParaffinData(trans.index);
                         trans.easing = GetEasing(frame.frameNo, effectName);
 
                         var bone = frame.CreateBone(trans);
@@ -204,63 +201,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
             }
-        }
-
-        protected override void BuildPlayData()
-        {
-            foreach (var pair in _timelineBonesMap)
-            {
-                var name = pair.Key;
-                var bones = pair.Value;
-
-                if (bones.Count == 0)
-                {
-                    continue;
-                }
-
-                switch (bones[0].transform.type)
-                {
-                    case TransformType.Paraffin:
-                        foreach (var bone in bones)
-                        {
-                            var trans = bone.transform as TransformDataParaffin;
-                            trans.index = GetEffectIndex(name);
-                        }
-                        break;
-                }
-            }
-
-            base.BuildPlayData();
-        }
-
-        private static Dictionary<string, int> _indexCache = new Dictionary<string, int>(16);
-
-        private int GetEffectIndex(string name)
-        {
-            int index;
-            if (_indexCache.TryGetValue(name, out index))
-            {
-                return index;
-            }
-
-            index = PluginUtils.ExtractGroup(name);
-            _indexCache[name] = index;
-            return index;
-        }
-
-        private static Dictionary<string, PostEffectType> _effectTypeCache = new Dictionary<string, PostEffectType>(16);
-
-        private PostEffectType GetEffectType(string name)
-        {
-            PostEffectType type;
-            if (_effectTypeCache.TryGetValue(name, out type))
-            {
-                return type;
-            }
-
-            type = PostEffectUtils.ToEffectType(name);
-            _effectTypeCache[name] = type;
-            return type;
         }
 
         private GUIComboBox<MaidCache> _maidComboBox = new GUIComboBox<MaidCache>
@@ -735,7 +675,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override TransformType GetTransformType(string name)
         {
-            var effectType = GetEffectType(name);
+            var effectType = PostEffectUtils.GetEffectType(name);
             switch (effectType)
             {
                 case PostEffectType.DepthOfField:
