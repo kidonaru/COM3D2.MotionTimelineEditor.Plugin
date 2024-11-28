@@ -929,7 +929,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (config.isAutoScroll &&
                 currentLayer.isAnmSyncing &&
                 studioHack.isMotionPlaying &&
-                !Input.GetMouseButton(0))
+                !(view.IsMouseOverRect(viewWidth, viewHeight) && Input.GetMouseButton(0)))
             {
                 timelineView.scrollPosition.x = Mathf.Clamp(
                     timelineManager.currentFrameNo * config.frameWidth - viewWidth / 2,

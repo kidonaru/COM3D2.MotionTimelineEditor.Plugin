@@ -971,6 +971,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public bool IsMouseOverRect(float width, float height)
+        {
+            var drawRect = GetDrawRect(width, height);
+            return drawRect.Contains(Event.current.mousePosition);
+        }
+
         public void SetFocusComboBox(GUIComboBoxBase comboBox)
         {
             PluginUtils.LogDebug("SetFocusComboBox comboBox={0}", comboBox);
