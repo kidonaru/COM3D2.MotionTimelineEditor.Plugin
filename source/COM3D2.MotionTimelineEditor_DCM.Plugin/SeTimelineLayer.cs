@@ -37,9 +37,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private static SoundManager soundManager = new SoundManager(false);
 
-        private List<BoneData> _timelineRows = new List<BoneData>();
-        private MotionPlayData _playData = new MotionPlayData(32);
-
         private SeTimelineLayer(int slotNo) : base(slotNo)
         {
         }
@@ -80,18 +77,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             UpdateSe();
         }
 
-        private void ApplyPlayData()
-        {
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            var updated = _playData.Update(playingFrameNoFloat);
-            if (updated)
-            {
-                ApplyMotion(_playData.current);
-            }
-        }
-
-        private void ApplyMotion(MotionData motion)
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
             var start = motion.start as TransformDataSe;
 
@@ -153,60 +139,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             frame.UpdateBone(bone);
         }
 
-        public override void ApplyAnm(long id, byte[] anmData)
-        {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRows.Clear();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AppendTimelineRow(keyFrame);
-            }
-
-            AppendTimelineRow(_dummyLastFrame);
-
-            BuildPlayData(forOutput);
-
-            return null;
-        }
-
-        private void AppendTimelineRow(FrameData frame)
-        {
-            var isLastFrame = frame.frameNo == maxFrameNo;
-            var bone = frame.GetBone(SeBoneName);
-            _timelineRows.AppendBone(bone, isLastFrame);
-        }
-
-        private void BuildPlayData(bool forOutput)
-        {
-            BuildPlayDataFromBones(
-                _timelineRows,
-                _playData,
-                SingleFrameType.None);
-        }
-
-        public void SaveMotions(
+        public void OutputMotions(
             List<MotionData> motions,
             string filePath)
         {
@@ -251,18 +184,18 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             try
             {
-                var motions = _playData.motions;
+                var motions = _playDataMap[SeBoneName].motions;
 
                 var outputFileName = "se.csv";
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveMotions(motions, outputPath);
+                OutputMotions(motions, outputPath);
 
                 songElement.Add(new XElement("changeSe", outputFileName));
             }
             catch (Exception e)
             {
                 PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("効果音の出力に失敗しました");
+                PluginUtils.LogError("効果音の出力に失敗しました");
             }
         }
 
@@ -331,6 +264,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 soundManager.StopSe();
                 PlaySe(_currentSeName, _currentInterval, _currentIsLoop);
             }
+        }
+
+        public override SingleFrameType GetSingleFrameType(TransformType transformType)
+        {
+            return SingleFrameType.None;
         }
 
         public override TransformType GetTransformType(string name)

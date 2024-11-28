@@ -42,8 +42,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         private MaidFaceManager _faceManager = new MaidFaceManager();
         private Dictionary<string, float> _applyMorphMap = new Dictionary<string, float>();
 
-        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
-        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
         private bool _isForceUpdate = false;
 
         private MorphTimelineLayer(int slotNo) : base(slotNo)
@@ -111,7 +109,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private void ApplyPlayData()
+        protected override void ApplyPlayData()
         {
             var maid = this.maid;
             if (maid == null || maid.body0 == null || !maid.body0.isLoadedBody)
@@ -119,33 +117,27 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
             _applyMorphMap.Clear();
 
-            foreach (var playData in _playDataMap.Values)
-            {
-                playData.Update(playingFrameNoFloat);
-
-                var current = playData.current;
-                if (current != null)
-                {
-                    var start = current.start as TransformDataMorph;
-                    var end = current.end as TransformDataMorph;
-                    var morphName = current.name;
-
-                    _applyMorphMap[morphName] = this.Lerp(
-                        start.morphValue,
-                        end.morphValue,
-                        playData.lerpFrame,
-                        morphName);
-                }
-            }
+            base.ApplyPlayData();
 
             _faceManager.SetMabatakiOff(maid);
             _faceManager.SetMorphValue(maid, _applyMorphMap);
 
             //PluginUtils.LogDebug("ApplyCamera: lerpFrame={0}, listIndex={1}", playData.lerpFrame, playData.listIndex);
+        }
+
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
+        {
+            var start = motion.start as TransformDataMorph;
+            var end = motion.end as TransformDataMorph;
+            var morphName = motion.name;
+
+            _applyMorphMap[morphName] = this.Lerp(
+                start.morphValue,
+                end.morphValue,
+                t,
+                morphName);
         }
 
         private float Lerp(float startValue, float endValue, float lerpFrame, string morphName)
@@ -216,62 +208,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override void ApplyAnm(long id, byte[] anmData)
-        {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRowsMap.ClearBones();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AppendTimelineRow(keyFrame);
-            }
-
-            AppendTimelineRow(_dummyLastFrame);
-
-            BuildPlayData();
-            return null;
-        }
-
-        private void AppendTimelineRow(FrameData frame)
-        {
-            var isLastFrame = frame.frameNo == maxFrameNo;
-            foreach (var name in firstFrame.boneNames)
-            {
-                var bone = frame.GetBone(name);
-                _timelineRowsMap.AppendBone(bone, isLastFrame);
-            }
-        }
-
-        private void BuildPlayData()
-        {
-            BuildPlayDataFromBonesMap(
-                _timelineRowsMap,
-                _playDataMap,
-                SingleFrameType.None);
-        }
-
-        public void SaveMorphTimeLine(
+        public void OutputBones(
             List<BoneData> rows,
             string filePath)
         {
@@ -324,16 +261,16 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             try
             {
-                var outputRows = new List<BoneData>(64);
+                var output = new List<BoneData>(64);
 
-                foreach (var rows in _timelineRowsMap.Values)
+                foreach (var rows in _timelineBonesMap.Values)
                 {
-                    outputRows.AddRange(rows);
+                    output.AddRange(rows);
                 }
 
                 var outputFileName = string.Format("morph_{0}.csv", slotNo);
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveMorphTimeLine(outputRows, outputPath);
+                OutputBones(output, outputPath);
 
                 var maidElement = GetMeidElement(songElement);
                 maidElement.Add(new XElement("morph", outputFileName));
@@ -341,7 +278,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             catch (Exception e)
             {
                 PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("表情モーションの出力に失敗しました");
+                PluginUtils.LogError("表情モーションの出力に失敗しました");
             }
         }
 
@@ -443,6 +380,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 SetMorphValue(morphName, newValue ? 1f : 0f);
             });
+        }
+
+        public override SingleFrameType GetSingleFrameType(TransformType transformType)
+        {
+            return SingleFrameType.None;
         }
 
         public override TransformType GetTransformType(string name)

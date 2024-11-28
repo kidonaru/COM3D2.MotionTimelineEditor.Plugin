@@ -47,9 +47,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private List<BoneData> _timelineRows = new List<BoneData>();
-        private MotionPlayData _playData = new MotionPlayData(32);
-
         private CameraTimelineLayer(int slotNo) : base(slotNo)
         {
         }
@@ -93,27 +90,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             base.LateUpdate();
         }
 
-        private void ApplyPlayData()
+        protected override void ApplyPlayData()
         {
             if (!isCurrent && !config.isCameraSync)
             {
                 return;
             }
 
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            _playData.Update(playingFrameNoFloat);
-
-            if (_playData.current != null)
-            {
-                ApplyMotion(_playData.current);
-            }
-
-            //PluginUtils.LogDebug("ApplyCamera: lerpFrame={0}, listIndex={1}, playingFrameNo={2}",
-            //    _playData.lerpFrame, _playData.listIndex, playingFrameNoFloat);
+            base.ApplyPlayData();
         }
 
-        private void ApplyMotion(MotionData motion)
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
             Vector3 position, eulerAngles;
             float distance, viewAngle;
@@ -131,28 +118,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     t1,
                     start.positionValues,
                     end.positionValues,
-                    _playData.lerpFrame);
+                    t);
 
                 eulerAngles = PluginUtils.HermiteVector3(
                     t0,
                     t1,
                     start.eulerAnglesValues,
                     end.eulerAnglesValues,
-                    _playData.lerpFrame);
+                    t);
 
                 var tempScale = PluginUtils.HermiteVector3(
                     t0,
                     t1,
                     start.scaleValues,
                     end.scaleValues,
-                    _playData.lerpFrame);
+                    t);
 
                 distance = tempScale.x;
                 viewAngle = tempScale.y;
             }
             else
             {
-                float easing = CalcEasingValue(_playData.lerpFrame, start.easing);
+                float easing = CalcEasingValue(t, start.easing);
                 position = Vector3.Lerp(start.position, end.position, easing);
                 eulerAngles = Vector3.Lerp(start.eulerAngles, end.eulerAngles, easing);
                 distance = Mathf.Lerp(start.scale.x, end.scale.x, easing);
@@ -203,71 +190,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             //PluginUtils.LogDebug("UpdateFromCurrentPose: position={0}, rotation={1}", _cameraManager.CurrentPosition,_cameraManager.CurrentRotation);
         }
 
-        public override void ApplyAnm(long id, byte[] anmData)
-        {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        protected override byte[] GetAnmBinaryInternal(
-            bool forOutput,
-            int startFrameNo,
-            int endFrameNo)
-        {
-            _timelineRows.Clear();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AddTimeLineRow(keyFrame);
-            }
-
-            if (_timelineRows.Count > 0 && _timelineRows.Last().frameNo != timeline.maxFrameNo)
-            {
-                AddTimeLineRow(_dummyLastFrame);
-            }
-
-            BuildPlayData(forOutput);
-            return null;
-        }
-
-        private void AddTimeLineRow(FrameData frame)
-        {
-            var bone = frame.GetBone(CameraBoneName);
-            if (bone == null)
-            {
-                return;
-            }
-
-            _timelineRows.Add(bone);
-        }
-
-        private void BuildPlayData(bool forOutput)
-        {
-            BuildPlayDataFromBones(
-                _timelineRows,
-                _playData,
-                timeline.singleFrameType);
-        }
-
-        public void SaveCameraTimeLine(
-            List<BoneData> rows,
-            string filePath)
+        public void OutputBones(List<BoneData> rows, string filePath)
         {
             var offsetTime = timeline.startOffsetTime;
             var offsetFrame = (int) Mathf.Round(offsetTime * timeline.frameRate);
@@ -316,9 +239,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void SaveCameraMotion(
-            List<MotionData> motions,
-            string filePath)
+        public void OutputMotions(List<MotionData> motions, string filePath)
         {
             var offsetTime = timeline.startOffsetTime;
 
@@ -397,7 +318,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var outputFileName = "camera_timeline.csv";
                     var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                    SaveCameraTimeLine(_timelineRows, outputPath);
+                    OutputBones(_timelineBonesMap[CameraBoneName], outputPath);
 
                     //songElement.Add(new XElement("customMotion", outputFileName));
                     songElement.Add(new XComment(string.Format("<customMotion>{0}</customMotion>", outputFileName)));
@@ -406,7 +327,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var outputFileName = "camera_motion.csv";
                     var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                    SaveCameraMotion(_playData.motions, outputPath);
+                    OutputMotions(_playDataMap[CameraBoneName].motions, outputPath);
 
                     songElement.Add(new XElement("motion", outputFileName));
                 }
@@ -414,7 +335,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             catch (Exception e)
             {
                 PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("カメラモーションの出力に失敗しました");
+                PluginUtils.LogError("カメラモーションの出力に失敗しました");
             }
         }
 

@@ -27,10 +27,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
-        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
-        private List<MotionData> _outputMotions = new List<MotionData>(128);
-
         private LightTimelineLayer(int slotNo) : base(slotNo)
         {
         }
@@ -72,25 +68,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyPlayData()
-        {
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            foreach (var playData in _playDataMap.Values)
-            {
-                playData.Update(playingFrameNoFloat);
-
-                var current = playData.current;
-                if (current != null)
-                {
-                    ApplyMotion(current, playData.lerpFrame);
-                }
-
-                //PluginUtils.LogDebug("ApplyPlayData: lightName={0} lerpTime={1}, listIndex={2}", lightName, playData.lerpTime, playData.listIndex);
-            }
-        }
-
-        private void ApplyMotion(MotionData motion, float lerpTime)
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
             var stat = lightManager.GetLight(motion.name);
             if (stat == null)
@@ -114,7 +92,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start as TransformDataLight;
             var end = motion.end as TransformDataLight;
 
-            float easingTime = CalcEasingValue(lerpTime, start.easing);
+            float easingTime = CalcEasingValue(t, start.easing);
 
             followLight.maidSlotNo = start.maidSlotNo;
 
@@ -222,63 +200,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void ApplyAnm(long id, byte[] anmData)
-        {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        private void AppendTimelineRow(FrameData frame)
-        {
-            var isLastFrame = frame.frameNo == maxFrameNo;
-            foreach (var name in allBoneNames)
-            {
-                var bone = frame.GetBone(name);
-                _timelineRowsMap.AppendBone(bone, isLastFrame);
-            }
-        }
-
-        private void BuildPlayData(bool forOutput)
-        {
-            BuildPlayDataFromBonesMap(
-                _timelineRowsMap,
-                _playDataMap,
-                timeline.singleFrameType);
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRowsMap.ClearBones();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AppendTimelineRow(keyFrame);
-            }
-
-            AppendTimelineRow(_dummyLastFrame);
-
-            BuildPlayData(forOutput);
-
-            return null;
-        }
-
-        public void SaveLightMotion(
+        public void OutputMotions(
             List<MotionData> motions,
             string filePath)
         {
@@ -367,23 +289,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             try
             {
-                _outputMotions.Clear();
+                var motions = new List<MotionData>(128);
 
                 foreach (var playData in _playDataMap.Values)
                 {
-                    _outputMotions.AddRange(playData.motions);
+                    motions.AddRange(playData.motions);
                 }
 
                 var outputFileName = "light.csv";
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveLightMotion(_outputMotions, outputPath);
+                OutputMotions(motions, outputPath);
 
                 songElement.Add(new XElement("changeLight", outputFileName));
             }
             catch (Exception e)
             {
                 PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("ライトチェンジの出力に失敗しました");
+                PluginUtils.LogError("ライトチェンジの出力に失敗しました");
             }
         }
 

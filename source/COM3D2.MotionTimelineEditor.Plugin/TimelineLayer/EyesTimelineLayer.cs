@@ -86,9 +86,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
-        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
-
         private EyesTimelineLayer(int slotNo) : base(slotNo)
         {
         }
@@ -141,33 +138,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyPlayData()
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
-            var maid = this.maid;
-            if (maid == null || maid.body0 == null || !maid.body0.isLoadedBody)
-            {
-                return;
-            }
-
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            foreach (var playData in _playDataMap.Values)
-            {
-                playData.Update(playingFrameNoFloat);
-
-                var current = playData.current;
-                if (current != null)
-                {
-                    ApplyMotion(current, playData.lerpFrame);
-                }
-            }
-
-            //PluginUtils.LogDebug("ApplyPlayData: lerpFrame={0}, listIndex={1}", playData.lerpFrame, playData.listIndex);
-        }
-
-        private void ApplyMotion(MotionData motion, float lerpFrame)
-        {
-            if (motion.name == "LookAtTarget")
+            if (motion.start.type == TransformType.LookAtTarget)
             {
                 var start = motion.start as TransformDataLookAtTarget;
 
@@ -182,7 +155,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var start = motion.start as TransformDataEyes;
                 var end = motion.end as TransformDataEyes;
 
-                float easingValue = CalcEasingValue(lerpFrame, start.easing);
+                float easingValue = CalcEasingValue(t, start.easing);
                 float horizon = Mathf.Lerp(start.horizon, end.horizon, easingValue);
                 float vertical = Mathf.Lerp(start.vertical, end.vertical, easingValue);
 
@@ -354,62 +327,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void ApplyAnm(long id, byte[] anmData)
-        {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRowsMap.ClearBones();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AppendTimelineRow(keyFrame);
-            }
-
-            AppendTimelineRow(_dummyLastFrame);
-
-            BuildPlayData();
-            return null;
-        }
-
-        private void AppendTimelineRow(FrameData frame)
-        {
-            var isLastFrame = frame.frameNo == maxFrameNo;
-            foreach (var name in allBoneNames)
-            {
-                var bone = frame.GetBone(name);
-                _timelineRowsMap.AppendBone(bone, isLastFrame);
-            }
-        }
-        
-        private void BuildPlayData()
-        {
-            BuildPlayDataFromBonesMap(
-                _timelineRowsMap,
-                _playDataMap,
-                SingleFrameType.None);
-        }
-
-        public void SaveMotions(
+        public void OutputMotions(
             List<MotionData> motions,
             string filePath)
         {
@@ -476,16 +394,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             try
             {
-                var outputMotions = new List<MotionData>(64);
+                var motions = new List<MotionData>(64);
 
                 foreach (var playData in _playDataMap.Values)
                 {
-                    outputMotions.AddRange(playData.motions);
+                    motions.AddRange(playData.motions);
                 }
 
                 var outputFileName = string.Format("eyes_{0}.csv", slotNo);
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveMotions(outputMotions, outputPath);
+                OutputMotions(motions, outputPath);
 
                 var maidElement = GetMeidElement(songElement);
                 maidElement.Add(new XElement("eyes", outputFileName));
@@ -493,7 +411,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             catch (Exception e)
             {
                 PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("瞳モーションの出力に失敗しました");
+                PluginUtils.LogError("瞳モーションの出力に失敗しました");
             }
         }
 
@@ -851,6 +769,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.currentPos = getImagePosition(eyesType);
                 view.DrawTexture(_eyesTex);
             }
+        }
+
+        public override SingleFrameType GetSingleFrameType(TransformType transformType)
+        {
+            return SingleFrameType.None;
         }
 
         public override TransformType GetTransformType(string name)

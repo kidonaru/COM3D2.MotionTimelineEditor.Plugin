@@ -8,29 +8,6 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using VoicePlayData = PlayDataBase<VoiceMotionData>;
-
-    public class VoiceTimeLineRow
-    {
-        public int frame;
-        public string voiceName;
-        public float startTime;
-        public float length;
-        public float fadeTime;
-        public float pitch;
-        public string loopVoiceName;
-    }
-
-    public class VoiceMotionData : MotionDataBase
-    {
-        public string voiceName;
-        public float startTime;
-        public float length;
-        public float fadeTime;
-        public float pitch;
-        public string loopVoiceName;
-    }
-
     [TimelineLayerDesc("メイドボイス", 14)]
     public partial class VoiceTimelineLayer : TimelineLayerBase
     {
@@ -61,9 +38,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return _allBoneNames;
             }
         }
-
-        private List<VoiceTimeLineRow> _timelineRows = new List<VoiceTimeLineRow>();
-        private VoicePlayData _playData = new VoicePlayData();
 
         private VoiceTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -103,36 +77,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyPlayData()
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
-            var playingFrameNoFloat = this.playingFrameNoFloat;
+            var start = motion.start as TransformDataVoice;
 
-            var maid = this.maid;
-            if (maid == null)
-            {
-                return;
-            }
-
-            var updated = _playData.Update(playingFrameNoFloat);
-            if (updated)
-            {
-                ApplyMotion(_playData.current);
-            }
-        }
-
-        private void ApplyMotion(VoiceMotionData motion)
-        {
-            if (motion == null)
-            {
-                return;
-            }
-
-            maidCache.oneShotVoiceName = motion.voiceName;
-            maidCache.oneShotVoiceStartTime = motion.startTime;
-            maidCache.oneShotVoiceLength = motion.length;
-            maidCache.voiceFadeTime = motion.fadeTime;
-            maidCache.voicePitch = motion.pitch;
-            maidCache.loopVoiceName = motion.loopVoiceName;
+            maidCache.oneShotVoiceName = start.voiceName;
+            maidCache.oneShotVoiceStartTime = start.startTime;
+            maidCache.oneShotVoiceLength = start.length;
+            maidCache.voiceFadeTime = start.fadeTime;
+            maidCache.voicePitch = start.pitch;
+            maidCache.loopVoiceName = start.loopVoiceName;
             maidCache.PlayOneShotVoice();
         }
 
@@ -152,122 +106,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var trans = CreateTransformData<TransformDataVoice>(VoiceBoneName);
-            trans.SetStrValue("voiceName", maidCache.oneShotVoiceName);
-            trans["startTime"].value = maidCache.oneShotVoiceStartTime;
-            trans["length"].value = maidCache.oneShotVoiceLength;
-            trans["fadeTime"].value = maidCache.voiceFadeTime;
-            trans["pitch"].value = maidCache.voicePitch;
-            trans.SetStrValue("loopVoiceName", maidCache.loopVoiceName);
+            trans.voiceName = maidCache.oneShotVoiceName;
+            trans.startTime = maidCache.oneShotVoiceStartTime;
+            trans.length = maidCache.oneShotVoiceLength;
+            trans.fadeTime = maidCache.voiceFadeTime;
+            trans.pitch = maidCache.voicePitch;
+            trans.loopVoiceName = maidCache.loopVoiceName;
 
             var bone = frame.CreateBone(trans);
             frame.UpdateBone(bone);
         }
 
-        public override void ApplyAnm(long id, byte[] anmData)
+        public List<MotionData> GetVoiceMotionData()
         {
-            ApplyPlayData();
+            return _playDataMap[VoiceBoneName].motions;
         }
 
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRows.Clear();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AppendTimelineRow(keyFrame);
-            }
-
-            AppendTimelineRow(_dummyLastFrame);
-
-            BuildPlayData(forOutput);
-
-            return null;
-        }
-
-        private void AppendTimelineRow(FrameData frame)
-        {
-            var bone = frame.GetBone(VoiceBoneName);
-            if (bone == null)
-            {
-                return;
-            }
-
-            var trans = bone.transform;
-
-            var row = new VoiceTimeLineRow
-            {
-                frame = frame.frameNo,
-                voiceName = trans.GetStrValue("voiceName"),
-                startTime = trans["startTime"].value,
-                length = trans["length"].value,
-                fadeTime = trans["fadeTime"].value,
-                pitch = trans["pitch"].value,
-                loopVoiceName = trans.GetStrValue("loopVoiceName"),
-            };
-
-            _timelineRows.Add(row);
-        }
-
-        private void BuildPlayData(bool forOutput)
-        {
-            var maid = this.maid;
-            if (maid == null)
-            {
-                return;
-            }
-
-            _playData.Clear();
-
-            for (var i = 0; i < _timelineRows.Count - 1; i++)
-            {
-                var start = _timelineRows[i];
-                var end = _timelineRows[i + 1];
-
-                var stFrame = start.frame;
-                var edFrame = end.frame;
-
-                var motion = new VoiceMotionData
-                {
-                    stFrame = stFrame,
-                    edFrame = edFrame,
-                    voiceName = start.voiceName,
-                    startTime = start.startTime,
-                    length = start.length,
-                    fadeTime = start.fadeTime,
-                    pitch = start.pitch,
-                    loopVoiceName = start.loopVoiceName,
-                };
-
-                _playData.motions.Add(motion);
-            }
-
-            _playData.Setup(SingleFrameType.None);
-        }
-
-        public List<VoiceMotionData> GetVoiceMotionData()
-        {
-            return _playData.motions;
-        }
-
-        public void SaveMotions(
-            List<VoiceMotionData> motions,
+        public void OutputMotions(
+            List<MotionData> motions,
             string filePath)
         {
             var offsetTime = timeline.startOffsetTime;
@@ -276,7 +132,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             builder.Append("sTime,eTime,oneTimeVoiceName,loopVoiceName,maidSlotNo" +
                             "\r\n");
 
-            Action<VoiceMotionData> appendMotion = motion =>
+            Action<MotionData> appendMotion = motion =>
             {
                 var stTime = motion.stFrame * timeline.frameDuration;
                 var edTime = motion.edFrame * timeline.frameDuration;
@@ -284,10 +140,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 stTime += offsetTime;
                 edTime += offsetTime;
 
+                var start = motion.start as TransformDataVoice;
+
                 builder.Append(stTime.ToString("0.000") + ",");
                 builder.Append(edTime.ToString("0.000") + ",");
-                builder.Append(motion.voiceName + ",");
-                builder.Append(motion.loopVoiceName + ",");
+                builder.Append(start.voiceName + ",");
+                builder.Append(start.loopVoiceName + ",");
                 builder.Append(slotNo.ToString());
                 builder.Append("\r\n");
             };
@@ -312,7 +170,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             try
             {
-                var motions = new List<VoiceMotionData>();
+                var motions = new List<MotionData>(64);
                 foreach (var layer in timelineManager.FindLayers<VoiceTimelineLayer>(className))
                 {
                     motions.AddRange(layer.GetVoiceMotionData());
@@ -320,14 +178,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var outputFileName = "maid_voice.csv";
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveMotions(motions, outputPath);
+                OutputMotions(motions, outputPath);
 
                 songElement.Add(new XElement("changeMaidVoice", outputFileName));
             }
             catch (Exception e)
             {
                 PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("メイドボイスの出力に失敗しました");
+                PluginUtils.LogError("メイドボイスの出力に失敗しました");
             }
         }
 
@@ -451,6 +309,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static string[] GetFileListAtExtension(string extention)
         {
             return GameUty.FileSystem.GetFileListAtExtension(extention).Concat(GameUty.FileSystemOld.GetFileListAtExtension(extention)).ToArray();
+        }
+
+        public override SingleFrameType GetSingleFrameType(TransformType transformType)
+        {
+            return SingleFrameType.None;
         }
 
         public override TransformType GetTransformType(string name)

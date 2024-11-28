@@ -28,10 +28,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
-        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
-        private List<BoneData> _outputRows = new List<BoneData>(32);
-
         private static BgMgr bgMgr
         {
             get
@@ -121,23 +117,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             base.LateUpdate();
         }
 
-        private void ApplyPlayData()
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            foreach (var playData in _playDataMap.Values)
-            {
-                var indexUpdated = playData.Update(playingFrameNoFloat);
-                if (indexUpdated)
-                {
-                    ApplyMotion(playData.current);
-                }
-            }
-        }
-
-        private void ApplyMotion(MotionData motion)
-        {
-            if (motion == null)
+            if (!indexUpdated)
             {
                 return;
             }
@@ -186,62 +168,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             frame.SetBone(bone);
         }
 
-        public override void ApplyAnm(long id, byte[] anmData)
-        {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRowsMap.ClearBones();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AppendTimelineRow(keyFrame);
-            }
-
-            AppendTimelineRow(_dummyLastFrame);
-
-            BuildPlayData(forOutput);
-            return null;
-        }
-
-        private void AppendTimelineRow(FrameData frame)
-        {
-            var isLastFrame = frame.frameNo == maxFrameNo;
-            foreach (var name in allBoneNames)
-            {
-                var bone = frame.GetBone(name);
-                _timelineRowsMap.AppendBone(bone, isLastFrame);
-            }
-        }
-
-        private void BuildPlayData(bool forOutput)
-        {
-            BuildPlayDataFromBonesMap(
-                _timelineRowsMap,
-                _playDataMap,
-                SingleFrameType.None);
-        }
-
-        public void SaveBGTimeLine(
+        public void OutputBones(
             List<BoneData> rows,
             string filePath)
         {
@@ -298,16 +225,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             try
             {
-                _outputRows.Clear();
+                var outputRows = new List<BoneData>(64);
 
-                foreach (var rows in _timelineRowsMap.Values)
+                foreach (var rows in _timelineBonesMap.Values)
                 {
-                    _outputRows.AddRange(rows);
+                    outputRows.AddRange(rows);
                 }
 
                 var outputFileName = "bg.csv";
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveBGTimeLine(_outputRows, outputPath);
+                OutputBones(outputRows, outputPath);
 
                 if (timeline.isBackgroundVisible)
                 {
@@ -317,7 +244,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             catch (Exception e)
             {
                 PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("背景チェンジの出力に失敗しました");
+                PluginUtils.LogError("背景チェンジの出力に失敗しました");
             }
         }
 
@@ -364,6 +291,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 initialPosition,
                 initialEulerAngles,
                 initialScale);
+        }
+
+        public override SingleFrameType GetSingleFrameType(TransformType transformType)
+        {
+            return SingleFrameType.None;
         }
 
         public override TransformType GetTransformType(string name)

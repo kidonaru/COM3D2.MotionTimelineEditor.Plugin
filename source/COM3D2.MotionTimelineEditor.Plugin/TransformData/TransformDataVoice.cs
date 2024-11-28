@@ -102,5 +102,109 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             return StrValueInfoMap;
         }
+
+        public ValueData startTimeValue
+        {
+            get
+            {
+                return this["startTime"];
+            }
+        }
+
+        public ValueData lengthValue
+        {
+            get
+            {
+                return this["length"];
+            }
+        }
+
+        public ValueData fadeTimeValue
+        {
+            get
+            {
+                return this["fadeTime"];
+            }
+        }
+
+        public ValueData pitchValue
+        {
+            get
+            {
+                return this["pitch"];
+            }
+        }
+
+        public string voiceName
+        {
+            get
+            {
+                return GetStrValue("voiceName");
+            }
+            set
+            {
+                SetStrValue("voiceName", value);
+            }
+        }
+
+        public string loopVoiceName
+        {
+            get
+            {
+                return GetStrValue("loopVoiceName");
+            }
+            set
+            {
+                SetStrValue("loopVoiceName", value);
+            }
+        }
+
+        public float startTime
+        {
+            get
+            {
+                return startTimeValue.value;
+            }
+            set
+            {
+                startTimeValue.value = value;
+            }
+        }
+
+        public float length
+        {
+            get
+            {
+                return lengthValue.value;
+            }
+            set
+            {
+                lengthValue.value = value;
+            }
+        }
+
+        public float fadeTime
+        {
+            get
+            {
+                return fadeTimeValue.value;
+            }
+            set
+            {
+                fadeTimeValue.value = value;
+            }
+        }
+
+        public float pitch
+        {
+            get
+            {
+                return pitchValue.value;
+            }
+            set
+            {
+                pitchValue.value = value;
+            }
+        }
     }
 }

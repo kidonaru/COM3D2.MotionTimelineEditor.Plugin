@@ -27,9 +27,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
-        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
-
         private ModelBoneTimelineLayer(int slotNo) : base(slotNo)
         {
         }
@@ -82,25 +79,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyPlayData()
-        {
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            foreach (var playData in _playDataMap.Values)
-            {
-                playData.Update(playingFrameNoFloat);
-
-                var current = playData.current;
-                if (current != null)
-                {
-                    ApplyMotion(current, playData.lerpFrame);
-                }
-
-                //PluginUtils.LogDebug("ApplyPlayData: boneName={0} lerpFrame={1}, listIndex={2}", boneName, playData.lerpFrame, playData.listIndex);
-            }
-        }
-
-        private void ApplyMotion(MotionData motion, float lerpFrame)
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
             var bone = modelManager.GetBone(motion.name);
             if (bone == null)
@@ -117,7 +96,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start;
             var end = motion.end;
 
-            float easingTime = CalcEasingValue(lerpFrame, start.easing);
+            float easingTime = CalcEasingValue(t, start.easing);
             transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
             transform.localRotation = Quaternion.Euler(Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime));
             transform.localScale = Vector3.Lerp(start.scale, end.scale, easingTime);
@@ -179,67 +158,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
             }
-        }
-
-        public override void ApplyAnm(long id, byte[] anmData)
-        {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        private void BuildPlayData(bool forOutput)
-        {
-            BuildPlayDataFromBonesMap(
-                _timelineRowsMap,
-                _playDataMap,
-                timeline.singleFrameType);
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRowsMap.ClearBones();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AppendTimelineRow(keyFrame);
-            }
-
-            AppendTimelineRow(_dummyLastFrame);
-
-            BuildPlayData(forOutput);
-
-            return null;
-        }
-
-        private void AppendTimelineRow(FrameData frame)
-        {
-            var isLastFrame = frame.frameNo == maxFrameNo;
-            foreach (var name in allBoneNames)
-            {
-                var bone = frame.GetBone(name);
-                _timelineRowsMap.AppendBone(bone, isLastFrame);
-            }
-        }
-
-        public override void OutputDCM(XElement songElement)
-        {
-            PluginUtils.LogWarning("モデルボーンはDCMに対応していません");
         }
 
         private GUIComboBox<StudioModelStat> _modelComboBox = new GUIComboBox<StudioModelStat>

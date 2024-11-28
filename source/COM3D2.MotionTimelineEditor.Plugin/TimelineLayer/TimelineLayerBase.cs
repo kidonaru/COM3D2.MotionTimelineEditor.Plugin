@@ -254,6 +254,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         // ループ補正用の最終フレーム
         protected FrameData _dummyLastFrame = null;
 
+        public Dictionary<string, List<BoneData>> timelineRowsMap
+        {
+            get
+            {
+                return _timelineBonesMap;
+            }
+        }
+        protected Dictionary<string, List<BoneData>> _timelineBonesMap = new Dictionary<string, List<BoneData>>(32);
+
+        protected Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>(32);
+
         protected static TimelineManager timelineManager
         {
             get
@@ -522,11 +533,117 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public abstract void UpdateFrame(FrameData frame);
-        public abstract void ApplyAnm(long id, byte[] anmData);
-        public abstract void ApplyCurrentFrame(bool motionUpdate);
-        public abstract void OutputAnm();
-        protected abstract byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo);
-        public abstract void OutputDCM(XElement songElement);
+
+        public virtual void ApplyAnm(long id, byte[] anmData)
+        {
+            ApplyPlayData();
+        }
+
+        public virtual void ApplyCurrentFrame(bool motionUpdate)
+        {
+            if (anmId != TimelineAnmId || motionUpdate)
+            {
+                CreateAndApplyAnm();
+            }
+            else
+            {
+                ApplyPlayData();
+            }
+        }
+
+        protected virtual void ApplyPlayData()
+        {
+            var maid = this.maid;
+            if (maid == null || maid.body0 == null || !maid.body0.isLoadedBody)
+            {
+                return;
+            }
+
+            var playingFrameNoFloat = this.playingFrameNoFloat;
+
+            foreach (var playData in _playDataMap.Values)
+            {
+                var indexUpdated = playData.Update(playingFrameNoFloat);
+
+                var current = playData.current;
+                if (current != null)
+                {
+                    ApplyMotion(current, playData.lerpFrame, indexUpdated);
+                }
+            }
+        }
+
+        protected abstract void ApplyMotion(MotionData motion, float t, bool indexUpdated);
+
+        protected virtual void BuildPlayData(bool forOutput)
+        {
+            _playDataMap.ClearPlayData();
+
+            foreach (var pair in _timelineBonesMap)
+            {
+                var name = pair.Key;
+                var rows = pair.Value;
+
+                if (rows.Count == 0)
+                {
+                    continue;
+                }
+
+                MotionPlayData playData;
+                if (!_playDataMap.TryGetValue(name, out playData))
+                {
+                    playData = new MotionPlayData(rows.Count);
+                    _playDataMap[name] = playData;
+                }
+
+                for (var i = 0; i < rows.Count - 1; i++)
+                {
+                    var start = rows[i];
+                    var end = rows[i + 1];
+                    playData.motions.Add(new MotionData(start, end));
+                }
+
+                var bone = rows[0];
+                var singleFrameType = GetSingleFrameType(bone.transform.type);
+                playData.Setup(singleFrameType);
+            }
+        }
+
+        public virtual void OutputAnm()
+        {
+            // do nothing
+        }
+
+        public virtual void OutputDCM(XElement songElement)
+        {
+            PluginUtils.LogWarning("{0}はDCMに対応していません", className);
+        }
+
+        protected virtual void AppendTimelineRow(FrameData frame)
+        {
+            var isLastFrame = frame.frameNo == maxFrameNo;
+            foreach (var name in allBoneNames)
+            {
+                var bone = frame.GetBone(name);
+                _timelineBonesMap.AppendBone(bone, isLastFrame);
+            }
+        }
+
+        protected virtual byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
+        {
+            _timelineBonesMap.ClearBones();
+
+            foreach (var keyFrame in keyFrames)
+            {
+                AppendTimelineRow(keyFrame);
+            }
+
+            AppendTimelineRow(_dummyLastFrame);
+
+            BuildPlayData(forOutput);
+
+            return null;
+        }
 
         public float CalcEasingValue(float t, int easing)
         {
@@ -846,6 +963,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             PluginUtils.LogDebug("CreateAndApplyAnm");
             var anmData = GetAnmBinary(false);
             ApplyAnm(TimelineAnmId, anmData);
+        }
+
+        public virtual SingleFrameType GetSingleFrameType(TransformType transformType)
+        {
+            return timeline.singleFrameType;
         }
 
         public abstract TransformType GetTransformType(string name);
@@ -1392,63 +1514,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             return maidElement;
-        }
-
-        protected void BuildPlayDataFromBonesMap(
-            Dictionary<string, List<BoneData>> bonesMap,
-            Dictionary<string, MotionPlayData> playDataMap,
-            SingleFrameType singleFrameType)
-        {
-            playDataMap.ClearPlayData();
-
-            foreach (var pair in bonesMap)
-            {
-                var name = pair.Key;
-                var rows = pair.Value;
-
-                if (rows.Count == 0)
-                {
-                    continue;
-                }
-
-                MotionPlayData playData;
-                if (!playDataMap.TryGetValue(name, out playData))
-                {
-                    playData = new MotionPlayData(rows.Count);
-                    playDataMap[name] = playData;
-                }
-
-                for (var i = 0; i < rows.Count - 1; i++)
-                {
-                    var start = rows[i];
-                    var end = rows[i + 1];
-                    playData.motions.Add(new MotionData(start, end));
-                }
-
-                playData.Setup(singleFrameType);
-            }
-        }
-
-        protected void BuildPlayDataFromBones(
-            List<BoneData> rows,
-            MotionPlayData playData,
-            SingleFrameType singleFrameType)
-        {
-            playData.Clear();
-
-            if (rows.Count == 0)
-            {
-                return;
-            }
-
-            for (var i = 0; i < rows.Count - 1; i++)
-            {
-                var start = rows[i];
-                var end = rows[i + 1];
-                playData.motions.Add(new MotionData(start, end));
-            }
-
-            playData.Setup(singleFrameType);
         }
 
         public enum TransformEditType

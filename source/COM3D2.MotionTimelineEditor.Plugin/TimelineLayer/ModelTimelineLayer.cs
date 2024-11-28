@@ -27,10 +27,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
-        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
-        private List<MotionData> _outputMotions = new List<MotionData>(128);
-
         private ModelTimelineLayer(int slotNo) : base(slotNo)
         {
         }
@@ -72,25 +68,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyPlayData()
-        {
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            foreach (var playData in _playDataMap.Values)
-            {
-                playData.Update(playingFrameNoFloat);
-
-                var current = playData.current;
-                if (current != null)
-                {
-                    ApplyMotion(current, playData.lerpFrame);
-                }
-
-                //PluginUtils.LogDebug("ApplyPlayData: modelName={0} lerpTime={1}, listIndex={2}", modelName, playData.lerpTime, playData.listIndex);
-            }
-        }
-
-        private void ApplyMotion(MotionData motion, float lerpTime)
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
             var model = modelManager.GetModel(motion.name);
             if (model == null)
@@ -107,7 +85,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start;
             var end = motion.end;
 
-            float easingTime = CalcEasingValue(lerpTime, start.easing);
+            float easingTime = CalcEasingValue(t, start.easing);
             transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
             transform.localRotation = Quaternion.Euler(Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime));
             transform.localScale = Vector3.Lerp(start.scale, end.scale, easingTime);
@@ -161,63 +139,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void ApplyAnm(long id, byte[] anmData)
-        {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        private void AppendTimelineRow(FrameData frame)
-        {
-            var isLastFrame = frame.frameNo == maxFrameNo;
-            foreach (var name in allBoneNames)
-            {
-                var bone = frame.GetBone(name);
-                _timelineRowsMap.AppendBone(bone, isLastFrame);
-            }
-        }
-
-        private void BuildPlayData(bool forOutput)
-        {
-            BuildPlayDataFromBonesMap(
-                _timelineRowsMap,
-                _playDataMap,
-                timeline.singleFrameType);
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRowsMap.ClearBones();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AppendTimelineRow(keyFrame);
-            }
-
-            AppendTimelineRow(_dummyLastFrame);
-
-            BuildPlayData(forOutput);
-
-            return null;
-        }
-
-        public void SaveModelMotion(
+        public void OutputMotions(
             List<MotionData> motions,
             string filePath)
         {
@@ -308,23 +230,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             try
             {
-                _outputMotions.Clear();
+                var motions = new List<MotionData>(64);
 
                 foreach (var playData in _playDataMap.Values)
                 {
-                    _outputMotions.AddRange(playData.motions);
+                    motions.AddRange(playData.motions);
                 }
 
                 var outputFileName = "model.csv";
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveModelMotion(_outputMotions, outputPath);
+                OutputMotions(motions, outputPath);
 
                 songElement.Add(new XElement("changeModel", outputFileName));
             }
             catch (Exception e)
             {
                 PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("モデルチェンジの出力に失敗しました");
+                PluginUtils.LogError("モデルチェンジの出力に失敗しました");
             }
         }
 

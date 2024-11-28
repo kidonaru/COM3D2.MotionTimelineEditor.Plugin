@@ -35,17 +35,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public Dictionary<string, List<BoneData>> timelineRowsMap
-        {
-            get
-            {
-                return _timelineRowsMap;
-            }
-        }
-
-        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
-        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
-
         private UndressTimelineLayer(int slotNo) : base(slotNo)
         {
         }
@@ -107,38 +96,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyPlayData()
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
-            var maid = this.maid;
-            if (maid == null || maid.body0 == null || !maid.body0.isLoadedBody)
-            {
-                return;
-            }
-
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            foreach (var playData in _playDataMap.Values)
-            {
-                var updated = playData.Update(playingFrameNoFloat);
-                if (updated)
-                {
-                    ApplyMotion(playData.current);
-                }
-            }
-
-            //PluginUtils.LogDebug("ApplyCamera: lerpFrame={0}, listIndex={1}", playData.lerpFrame, playData.listIndex);
-        }
-
-        private void ApplyMotion(MotionData motion)
-        {
-            if (motion == null)
-            {
-                return;
-            }
-
-            var maidCache = this.maidCache;
-            if (maidCache == null) return;
-
             var start = motion.start as TransformDataUndress;
 
             maidCache.SetSlotVisible(start.slotId, start.isVisible);
@@ -160,62 +119,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void ApplyAnm(long id, byte[] anmData)
-        {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRowsMap.ClearBones();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AppendTimelineRow(keyFrame);
-            }
-
-            AppendTimelineRow(_dummyLastFrame);
-
-            BuildPlayData();
-            return null;
-        }
-
-        private void AppendTimelineRow(FrameData frame)
-        {
-            var isLastFrame = frame.frameNo == maxFrameNo;
-            foreach (var slotName in firstFrame.boneNames)
-            {
-                var bone = frame.GetBone(slotName);
-                _timelineRowsMap.AppendBone(bone, isLastFrame);
-            }
-        }
-
-        private void BuildPlayData()
-        {
-            BuildPlayDataFromBonesMap(
-                _timelineRowsMap,
-                _playDataMap,
-                SingleFrameType.None);
-        }
-
-        public void SaveUndressTimeLine(
+        public void OutputBones(
             List<BoneData> rows,
             string filePath)
         {
@@ -286,14 +190,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var outputFileName = "undress.csv";
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveUndressTimeLine(outputRows, outputPath);
+                OutputBones(outputRows, outputPath);
 
                 songElement.Add(new XElement("changeUndress", outputFileName));
             }
             catch (Exception e)
             {
                 PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("脱衣モーションの出力に失敗しました");
+                PluginUtils.LogError("脱衣モーションの出力に失敗しました");
             }
         }
 
@@ -375,6 +279,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 maidCache.SetSlotVisible(slotId, newIsVisible);
             });
+        }
+
+        public override SingleFrameType GetSingleFrameType(TransformType transformType)
+        {
+            return SingleFrameType.None;
         }
 
         public override TransformType GetTransformType(string name)

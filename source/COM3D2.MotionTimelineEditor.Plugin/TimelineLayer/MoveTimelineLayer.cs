@@ -39,9 +39,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private List<BoneData> _timelineRows = new List<BoneData>();
-        private MotionPlayData _playData = new MotionPlayData(32);
-
         private MoveTimelineLayer(int slotNo) : base(slotNo)
         {
         }
@@ -80,34 +77,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyPlayData()
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
-            var playingFrameNoFloat = this.playingFrameNoFloat;
+            var transform = maid.transform;
 
-            var maid = this.maid;
-            if (maid == null)
-            {
-                return;
-            }
-
-            _playData.Update(playingFrameNoFloat);
-
-            var current = _playData.current;
-            if (current != null)
-            {
-                ApplyMotion(current, maid.transform, _playData.lerpFrame);
-            }
-
-            //PluginUtils.LogDebug("ApplyPlayData: name={0} lerpFrame={1}, listIndex={2}",
-            //    maid.name, _playData.lerpFrame, _playData.listIndex);
-        }
-
-        private void ApplyMotion(MotionData motion, Transform transform, float lerpTime)
-        {
             var start = motion.start;
             var end = motion.end;
 
-            float easingTime = CalcEasingValue(lerpTime, start.easing);
+            float easingTime = CalcEasingValue(t, start.easing);
             transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
             transform.localRotation = Quaternion.Euler(Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime));
         }
@@ -135,64 +112,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             frame.UpdateBone(bone);
         }
 
-        public override void ApplyAnm(long id, byte[] anmData)
-        {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRows.Clear();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AppendTimelineRow(keyFrame);
-            }
-
-            AppendTimelineRow(_dummyLastFrame);
-
-            BuildPlayData(forOutput);
-
-            return null;
-        }
-
-        private void AppendTimelineRow(FrameData frame)
-        {
-            var bone = frame.GetBone(MoveBoneName);
-            if (bone == null)
-            {
-                return;
-            }
-
-            _timelineRows.Add(bone);
-        }
-
-        private void BuildPlayData(bool forOutput)
-        {
-            BuildPlayDataFromBones(
-                _timelineRows,
-                _playData,
-                timeline.singleFrameType);
-        }
-
-        public void SaveMotions(
+        public void OutputMotions(
             List<MotionData> motions,
             string filePath)
         {
@@ -266,7 +186,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var outputFileName = string.Format("move_{0}.csv", slotNo);
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveMotions(_playData.motions, outputPath);
+                OutputMotions(_playDataMap[MoveBoneName].motions, outputPath);
 
                 var maidElement = GetMeidElement(songElement);
                 maidElement.Add(new XElement("move", outputFileName));
@@ -274,7 +194,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             catch (Exception e)
             {
                 PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("メイド移動の出力に失敗しました");
+                PluginUtils.LogError("メイド移動の出力に失敗しました");
             }
         }
 

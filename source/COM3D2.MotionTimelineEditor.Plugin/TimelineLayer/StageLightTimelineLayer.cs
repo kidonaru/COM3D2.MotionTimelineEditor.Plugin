@@ -32,12 +32,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Dictionary<string, List<BoneData>> _lightTimelineRowsMap = new Dictionary<string, List<BoneData>>();
-        private Dictionary<string, MotionPlayData> _lightPlayDataMap = new Dictionary<string, MotionPlayData>();
-
-        private Dictionary<string, List<BoneData>> _controllerTimelineRowsMap = new Dictionary<string, List<BoneData>>();
-        private Dictionary<string, MotionPlayData> _controllerPlayDataMap = new Dictionary<string, MotionPlayData>();
-
         private StageLightTimelineLayer(int slotNo) : base(slotNo)
         {
         }
@@ -122,34 +116,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyPlayData()
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            foreach (var playData in _lightPlayDataMap.Values)
+            switch (motion.start.type)
             {
-                playData.Update(playingFrameNoFloat);
-
-                var current = playData.current;
-                if (current != null)
-                {
-                    ApplyLightMotion(current, playData.lerpFrame);
-                }
-
-                //PluginUtils.LogDebug("ApplyPlayData: lightName={0} lerpTime={1}, listIndex={2}", lightName, playData.lerpTime, playData.listIndex);
-            }
-
-            foreach (var playData in _controllerPlayDataMap.Values)
-            {
-                playData.Update(playingFrameNoFloat);
-
-                var current = playData.current;
-                if (current != null)
-                {
-                    ApplyControllerMotion(current, playData.lerpFrame);
-                }
-
-                //PluginUtils.LogDebug("ApplyPlayData: lightName={0} lerpTime={1}, listIndex={2}", lightName, playData.lerpTime, playData.listIndex);
+                case TransformType.StageLight:
+                    ApplyLightMotion(motion, t);
+                    break;
+                case TransformType.StageLightController:
+                    ApplyControllerMotion(motion, t);
+                    break;
             }
         }
 
@@ -403,79 +379,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
             }
-        }
-
-        public override void ApplyAnm(long id, byte[] anmData)
-        {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        private void AppendTimelineRow(FrameData frame)
-        {
-            var isLastFrame = frame.frameNo == maxFrameNo;
-            foreach (var name in stageLightManager.lightNames)
-            {
-                var bone = frame.GetBone(name);
-                _lightTimelineRowsMap.AppendBone(bone, isLastFrame);
-            }
-
-            foreach (var name in stageLightManager.controllerNames)
-            {
-                var bone = frame.GetBone(name);
-                _controllerTimelineRowsMap.AppendBone(bone, isLastFrame);
-            }
-        }
-
-        private void BuildPlayData(bool forOutput)
-        {
-            BuildPlayDataFromBonesMap(
-                _lightTimelineRowsMap,
-                _lightPlayDataMap,
-                timeline.singleFrameType);
-
-            BuildPlayDataFromBonesMap(
-                _controllerTimelineRowsMap,
-                _controllerPlayDataMap,
-                timeline.singleFrameType);
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _lightTimelineRowsMap.ClearBones();
-            _controllerTimelineRowsMap.ClearBones();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AppendTimelineRow(keyFrame);
-            }
-
-            AppendTimelineRow(_dummyLastFrame);
-
-            BuildPlayData(forOutput);
-
-            return null;
-        }
-
-        public override void OutputDCM(XElement songElement)
-        {
-            // do nothing
         }
 
         private GUIComboBox<StageLightController> _controllerComboBox = new GUIComboBox<StageLightController>

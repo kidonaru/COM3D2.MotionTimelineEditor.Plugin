@@ -42,9 +42,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
-        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
-
         private ShapeKeyTimelineLayer(int slotNo) : base(slotNo)
         {
         }
@@ -87,42 +84,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyPlayData()
+        protected override void ApplyPlayData()
         {
             if (maidCache == null)
             {
                 return;
             }
 
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            foreach (var playData in _playDataMap.Values)
-            {
-                playData.Update(playingFrameNoFloat);
-
-                var current = playData.current;
-                if (current != null)
-                {
-                    ApplyMotion(current, playData.lerpFrame);
-                }
-
-                //PluginUtils.LogDebug("ApplyPlayData: boneName={0} lerpFrame={1}, listIndex={2}", boneName, playData.lerpFrame, playData.listIndex);
-            }
+            base.ApplyPlayData();
 
             maidCache.FixBlendValues(_playDataMap.Keys);
         }
 
-        private void ApplyMotion(MotionData motion, float lerpTime)
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
-            if (maidCache == null)
-            {
-                return;
-            }
-
             var start = motion.start as TransformDataShapeKey;
             var end = motion.end as TransformDataShapeKey;
 
-            float easingTime = CalcEasingValue(lerpTime, start.easing);
+            float easingTime = CalcEasingValue(t, start.easing);
             var weight = Mathf.Lerp(start.weight, end.weight, easingTime);
             maidCache.SetBlendShapeValue(motion.name, weight);
         }
@@ -158,63 +137,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void ApplyAnm(long id, byte[] anmData)
-        {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        private void BuildPlayData(bool forOutput)
-        {
-            BuildPlayDataFromBonesMap(
-                _timelineRowsMap,
-                _playDataMap,
-                timeline.singleFrameType);
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRowsMap.ClearBones();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AppendTimelineRow(keyFrame);
-            }
-
-            AppendTimelineRow(_dummyLastFrame);
-
-            BuildPlayData(forOutput);
-
-            return null;
-        }
-
-        private void AppendTimelineRow(FrameData frame)
-        {
-            var isLastFrame = frame.frameNo == maxFrameNo;
-            foreach (var name in allBoneNames)
-            {
-                var bone = frame.GetBone(name);
-                _timelineRowsMap.AppendBone(bone, isLastFrame);
-            }
-        }
-
-        public void SaveMotions(
+        public void OutputMotions(
             List<MotionData> motions,
             string filePath)
         {
@@ -325,14 +248,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var outputFileName = string.Format("shape_key.csv", slotNo);
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveMotions(motions, outputPath);
+                OutputMotions(motions, outputPath);
 
                 songElement.Add(new XElement("changeShapeKey", outputFileName));
             }
             catch (Exception e)
             {
                 PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("メイドシェイプキーの出力に失敗しました");
+                PluginUtils.LogError("メイドシェイプキーの出力に失敗しました");
             }
         }
 

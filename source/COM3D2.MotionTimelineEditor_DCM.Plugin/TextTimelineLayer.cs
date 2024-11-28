@@ -44,9 +44,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
-        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
-
         private TextManager _textManager = null;
 
         private TextManager textManager
@@ -132,33 +129,20 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             ReleaseTextManager();
         }
 
-        private void ApplyPlayData()
-        {
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            foreach (var playData in _playDataMap.Values)
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
+		{
+            if (indexUpdated)
             {
-                var indexUpdated = playData.Update(playingFrameNoFloat);
-                var current = playData.current;
-
-                if (indexUpdated)
-                {
-                    ApplyNewMotion(current, playData.lerpFrame);
-                }
-                if (current != null)
-                {
-                    ApplyMotion(current, playData.lerpFrame);
-                }
+                ApplyNewMotion(motion, t);
+            }
+            else
+            {
+                ApplyUpdateMotion(motion, t);
             }
         }
 
         private void ApplyNewMotion(MotionData motion, float t)
 		{
-            if (motion == null)
-            {
-                return;
-            }
-
             var start = motion.start as TransformDataText;
 
             if (!IsValidIndex(start.index))
@@ -193,7 +177,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 			UpdateFreeTextSet(start.index, freeTextSet);
 		}
 
-        private void ApplyMotion(MotionData motion, float t)
+        private void ApplyUpdateMotion(MotionData motion, float t)
 		{
             var start = motion.start as TransformDataText;
             var end = motion.end as TransformDataText;
@@ -316,63 +300,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override void ApplyAnm(long id, byte[] anmData)
-        {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRowsMap.ClearBones();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AppendTimelineRow(keyFrame);
-            }
-
-            AppendTimelineRow(_dummyLastFrame);
-
-            BuildPlayData(forOutput);
-
-            return null;
-        }
-
-        private void AppendTimelineRow(FrameData frame)
-        {
-            var isLastFrame = frame.frameNo == maxFrameNo;
-            foreach (var name in allBoneNames)
-            {
-                var bone = frame.GetBone(name);
-                _timelineRowsMap.AppendBone(bone, isLastFrame);
-            }
-        }
-
-        private void BuildPlayData(bool forOutput)
-        {
-            BuildPlayDataFromBonesMap(
-                _timelineRowsMap,
-                _playDataMap,
-                timeline.singleFrameType);
-        }
-
-        public void SavePlayData(string filePath)
+        public void OutputPlayData(string filePath)
         {
             var offsetTime = timeline.startOffsetTime;
 
@@ -444,14 +372,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 var outputFileName = "text.csv";
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SavePlayData(outputPath);
+                OutputPlayData(outputPath);
 
                 songElement.Add(new XElement("changeText", outputFileName));
             }
             catch (Exception e)
             {
                 PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("テキストチェンジの出力に失敗しました");
+                PluginUtils.LogError("テキストチェンジの出力に失敗しました");
             }
         }
 

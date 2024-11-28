@@ -39,9 +39,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Dictionary<string, List<BoneData>> _timelineRowsMap = new Dictionary<string, List<BoneData>>();
-        private Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>();
-
         private static PostEffectManager postEffectManager
         {
             get
@@ -120,7 +117,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyPlayData()
+        protected override void ApplyPlayData()
         {
             if (!isCurrent && !config.isPostEffectSync)
             {
@@ -129,37 +126,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            foreach (var playData in _playDataMap.Values)
-            {
-                playData.Update(playingFrameNoFloat);
-
-                var current = playData.current;
-                if (current != null)
-                {
-                    ApplyMotion(current, playData.lerpFrame);
-                }
-
-                //PluginUtils.LogDebug("ApplyPlayData: postEffectName={0} lerpTime={1}, listIndex={2}", postEffectName, playData.lerpTime, playData.listIndex);
-            }
+            base.ApplyPlayData();
         }
 
-        private void ApplyMotion(MotionData motion, float lerpTime)
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
-            var effectType = PostEffectUtils.ToEffectType(motion.name);
-            switch (effectType)
+            switch (motion.start.type)
             {
-                case PostEffectType.DepthOfField:
-                    ApplyDepthOfField(motion, lerpTime);
+                case TransformType.DepthOfField:
+                    ApplyDepthOfField(motion, t);
                     break;
-                case PostEffectType.Paraffin:
-                    ApplyParaffin(motion, lerpTime);
+                case TransformType.Paraffin:
+                    ApplyParaffin(motion, t);
                     break;
             }
         }
 
-        private void ApplyDepthOfField(MotionData motion, float lerpTime)
+        private void ApplyDepthOfField(MotionData motion, float t)
         {
             var start = motion.start as TransformDataDepthOfField;
             var end = motion.end as TransformDataDepthOfField;
@@ -167,13 +150,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var stData = start.depthOfField;
             var edData = end.depthOfField;
 
-            float easingTime = CalcEasingValue(lerpTime, start.easing);
+            float easingTime = CalcEasingValue(t, start.easing);
             var depthOfField = DepthOfFieldData.Lerp(stData, edData, easingTime);
 
             postEffectManager.ApplyDepthOfField(depthOfField);
         }
 
-        private void ApplyParaffin(MotionData motion, float lerpTime)
+        private void ApplyParaffin(MotionData motion, float t)
         {
             var start = motion.start as TransformDataParaffin;
             var end = motion.end as TransformDataParaffin;
@@ -181,7 +164,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var stData = start.paraffin;
             var edData = end.paraffin;
 
-            float easingTime = CalcEasingValue(lerpTime, start.easing);
+            float easingTime = CalcEasingValue(t, start.easing);
             var paraffin = ParaffinData.Lerp(stData, edData, easingTime);
 
             var index = start.index;
@@ -223,58 +206,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void ApplyAnm(long id, byte[] anmData)
+        protected override void BuildPlayData(bool forOutput)
         {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        private void AppendTimelineRow(FrameData frame)
-        {
-            var isLastFrame = frame.frameNo == maxFrameNo;
-            foreach (var name in allBoneNames)
-            {
-                var bone = frame.GetBone(name);
-                _timelineRowsMap.AppendBone(bone, isLastFrame);
-            }
-        }
-
-        private void BuildPlayData(bool forOutput)
-        {
-            BuildPlayDataFromBonesMap(
-                _timelineRowsMap,
-                _playDataMap,
-                timeline.singleFrameType);
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRowsMap.ClearBones();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AppendTimelineRow(keyFrame);
-            }
-
-            AppendTimelineRow(_dummyLastFrame);
-
-            foreach (var pair in _timelineRowsMap)
+            foreach (var pair in _timelineBonesMap)
             {
                 var name = pair.Key;
                 var bones = pair.Value;
@@ -294,14 +228,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            BuildPlayData(forOutput);
-
-            return null;
-        }
-
-        public override void OutputDCM(XElement songElement)
-        {
-            // do nothing
+            base.BuildPlayData(forOutput);
         }
 
         private GUIComboBox<MaidCache> _maidComboBox = new GUIComboBox<MaidCache>

@@ -31,9 +31,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private List<BoneData> _timelineRows = new List<BoneData>();
-        private MotionPlayData _playData = new MotionPlayData(32);
-
         private static Camera camera
         {
             get
@@ -80,20 +77,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             base.LateUpdate();
         }
 
-        private void ApplyPlayData()
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            var indexUpdated = _playData.Update(playingFrameNoFloat);
-            if (indexUpdated)
-            {
-                ApplyMotion(_playData.current);
-            }
-        }
-
-        private void ApplyMotion(MotionData motion)
-        {
-            if (motion == null)
+            if (!indexUpdated)
             {
                 return;
             }
@@ -118,59 +104,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             frame.SetBone(bone);
         }
 
-        public override void ApplyAnm(long id, byte[] anmData)
-        {
-            ApplyPlayData();
-        }
-
-        public override void ApplyCurrentFrame(bool motionUpdate)
-        {
-            if (anmId != TimelineAnmId || motionUpdate)
-            {
-                CreateAndApplyAnm();
-            }
-            else
-            {
-                ApplyPlayData();
-            }
-        }
-
-        public override void OutputAnm()
-        {
-            // do nothing
-        }
-
-        protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
-        {
-            _timelineRows.Clear();
-
-            foreach (var keyFrame in keyFrames)
-            {
-                AppendTimelineRow(keyFrame);
-            }
-
-            AppendTimelineRow(_dummyLastFrame);
-
-            BuildPlayData(forOutput);
-            return null;
-        }
-
-        private void AppendTimelineRow(FrameData frame)
-        {
-            var isLastFrame = frame.frameNo == maxFrameNo;
-            var bone = frame.GetBone(BoneName);
-            _timelineRows.AppendBone(bone, isLastFrame);
-        }
-
-        private void BuildPlayData(bool forOutput)
-        {
-            BuildPlayDataFromBones(
-                _timelineRows,
-                _playData,
-                SingleFrameType.None);
-        }
-
-        public void SaveBGTimeLine(
+        public void SaveBones(
             List<BoneData> rows,
             string filePath)
         {
@@ -223,14 +157,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var outputFileName = "bg_color.csv";
                 var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                SaveBGTimeLine(_timelineRows, outputPath);
+                SaveBones(_timelineBonesMap[BoneName], outputPath);
 
                 songElement.Add(new XElement("changeBgColor", outputFileName));
             }
             catch (Exception e)
             {
                 PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("背景色チェンジの出力に失敗しました");
+                PluginUtils.LogError("背景色チェンジの出力に失敗しました");
             }
         }
 
@@ -259,6 +193,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 camera.backgroundColor = color;
             }
+        }
+
+        public override SingleFrameType GetSingleFrameType(TransformType transformType)
+        {
+            return SingleFrameType.None;
         }
 
         public override TransformType GetTransformType(string name)

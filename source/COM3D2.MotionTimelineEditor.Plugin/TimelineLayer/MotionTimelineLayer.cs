@@ -60,15 +60,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private Dictionary<string, List<BoneData>> _motionTimelineRowsMap = new Dictionary<string, List<BoneData>>();
-        private Dictionary<string, MotionPlayData> _motionPlayDataMap = new Dictionary<string, MotionPlayData>(); 
-        private Dictionary<string, List<BoneData>> _ikTimelineRowsMap = new Dictionary<string, List<BoneData>>();
-        private Dictionary<string, MotionPlayData> _ikPlayDataMap = new Dictionary<string, MotionPlayData>();
-        private List<BoneData> _groundingTimelineRows = new List<BoneData>();
-        private MotionPlayData _groundingPlayData = new MotionPlayData(32);
-        private Dictionary<string, List<BoneData>> _fingerBlendTimelineRowsMap = new Dictionary<string, List<BoneData>>();
-        private Dictionary<string, MotionPlayData> _fingerBlendPlayDataMap = new Dictionary<string, MotionPlayData>();
-
         private List<string> _extendSlotNames = new List<string>();
 
         private MotionTimelineLayer(int slotNo) : base(slotNo)
@@ -237,57 +228,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyPlayData()
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
-            foreach (var playData in _motionPlayDataMap.Values)
+            switch (motion.start.type)
             {
-                playData.Update(playingFrameNoFloat);
-
-                var current = playData.current;
-                if (current != null)
-                {
-                    ApplyMotion(current, playData.lerpFrame);
-                }
-            }
-
-            foreach (var playData in _ikPlayDataMap.Values)
-            {
-                playData.Update(playingFrameNoFloat);
-
-                var current = playData.current;
-                if (current != null)
-                {
-                    ApplyIKHoldMotion(current, playData.lerpFrame);
-                }
-            }
-
-            {
-                var playData = _groundingPlayData;
-
-                playData.Update(playingFrameNoFloat);
-
-                var current = playData.current;
-                if (current != null)
-                {
-                    ApplyGroundingMotion(current);
-                }
-            }
-
-            foreach (var playData in _fingerBlendPlayDataMap.Values)
-            {
-                playData.Update(playingFrameNoFloat);
-
-                var current = playData.current;
-                if (current != null)
-                {
-                    ApplyFingerBlendMotion(current);
-                }
+                case TransformType.ExtendBone:
+                    ApplyExtendBoneMotion(motion, t);
+                    break;
+                case TransformType.IKHold:
+                    ApplyIKHoldMotion(motion, t);
+                    break;
+                case TransformType.Grounding:
+                    ApplyGroundingMotion(motion);
+                    break;
+                case TransformType.FingerBlend:
+                    ApplyFingerBlendMotion(motion);
+                    break;
             }
         }
 
-        private void ApplyMotion(MotionData motion, float lerpFrame)
+        private void ApplyExtendBoneMotion(MotionData motion, float t)
         {
             if (maidCache == null)
             {
@@ -312,17 +272,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 t1,
                 start.positionValues,
                 end.positionValues,
-                lerpFrame);
+                t);
 
             bone.localScale = PluginUtils.HermiteVector3(
                 t0,
                 t1,
                 start.scaleValues,
                 end.scaleValues,
-                lerpFrame);
+                t);
         }
 
-        private void ApplyIKHoldMotion(MotionData motion, float lerpFrame)
+        private void ApplyIKHoldMotion(MotionData motion, float t)
         {
             if (maidCache == null)
             {
@@ -356,7 +316,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 t1,
                 start.positionValues,
                 end.positionValues,
-                lerpFrame);
+                t);
         }
 
         private void ApplyGroundingMotion(MotionData motion)
@@ -504,18 +464,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 var trans = CreateTransformData<TransformDataExtendBone>(name);
-                if (trans.hasPosition)
-                {
-                    trans.position = transform.localPosition;
-                }
-                if (trans.hasRotation)
-                {
-                    trans.rotation = transform.localRotation;
-                }
-                if (trans.hasScale)
-                {
-                    trans.scale = transform.localScale;
-                }
+                trans.position = transform.localPosition;
+                trans.rotation = transform.localRotation;
+                trans.scale = transform.localScale;
 
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
@@ -674,29 +625,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void BuildPlayData(bool forOutput)
-        {
-            BuildPlayDataFromBonesMap(
-                _motionTimelineRowsMap,
-                _motionPlayDataMap,
-                timeline.singleFrameType);
-
-            BuildPlayDataFromBonesMap(
-                _ikTimelineRowsMap,
-                _ikPlayDataMap,
-                timeline.singleFrameType);
-
-            BuildPlayDataFromBones(
-                _groundingTimelineRows,
-                _groundingPlayData,
-                SingleFrameType.None);
-
-            BuildPlayDataFromBonesMap(
-                _fingerBlendTimelineRowsMap,
-                _fingerBlendPlayDataMap,
-                SingleFrameType.None);
-        }
-
         protected override byte[] GetAnmBinaryInternal(bool forOutput, int startFrameNo, int endFrameNo)
         {
             if (maidCache == null)
@@ -821,60 +749,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 maidCache.anmEndFrameNo = endFrameNo;
             }
 
-            {
-                _motionTimelineRowsMap.ClearBones();
-                _ikTimelineRowsMap.ClearBones();
-                _groundingTimelineRows.Clear();
-                _fingerBlendTimelineRowsMap.ClearBones();
-
-                foreach (var keyFrame in keyFrames)
-                {
-                    AppendTimelineRow(keyFrame);
-                }
-
-                AppendTimelineRow(_dummyLastFrame);
-
-                BuildPlayData(forOutput);
-            }
+            base.GetAnmBinaryInternal(forOutput, startFrameNo, endFrameNo);
 
             return result;
         }
 
-        private void AppendTimelineRow(FrameData frame)
-        {
-            var isLastFrame = frame.frameNo == maxFrameNo;
-            foreach (var bone in frame.bones)
-            {
-                var name = bone.name;
-
-                var extendBoneEntity = maidCache.extendBoneCache.GetEntity(name);
-                if (extendBoneEntity == null)
-                {
-                    continue;
-                }
-
-                _motionTimelineRowsMap.AppendBone(bone, isLastFrame);
-            }
-
-            foreach (var name in MaidCache.ikHoldTypeMap.Keys)
-            {
-                var bone = frame.GetBone(name);
-                _ikTimelineRowsMap.AppendBone(bone, isLastFrame);
-            }
-
-            {
-                var bone = frame.GetBone(GroundingBoneName);
-                _groundingTimelineRows.AppendBone(bone, isLastFrame);
-            }
-
-            foreach (var name in FingerBlendBoneNames)
-            {
-                var bone = frame.GetBone(name);
-                _fingerBlendTimelineRowsMap.AppendBone(bone, isLastFrame);
-            }
-        }
-
-        public void SavePoseTimeLine(
+        public void OutputPoseCsv(
             List<PoseTimeLineRow> rows,
             string filePath)
         {
@@ -966,7 +846,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     var outputFileName = string.Format("pose_{0}.csv", slotNo);
                     var outputPath = timeline.GetDcmSongFilePath(outputFileName);
-                    SavePoseTimeLine(outputRows, outputPath);
+                    OutputPoseCsv(outputRows, outputPath);
 
                     var maidElement = GetMeidElement(songElement);
                     maidElement.Add(new XElement("pose", outputFileName));
@@ -975,7 +855,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             catch (Exception e)
             {
                 PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("モーションの出力に失敗しました");
+                PluginUtils.LogError("モーションの出力に失敗しました");
             }
         }
 
@@ -1503,6 +1383,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.SetEnabled(!view.IsComboBoxFocused());
             view.EndScrollView();
+        }
+
+        public override SingleFrameType GetSingleFrameType(TransformType transformType)
+        {
+            switch (transformType)
+            {
+                case TransformType.Grounding:
+                case TransformType.FingerBlend:
+                    return SingleFrameType.None;
+            }
+
+            return base.GetSingleFrameType(transformType);
         }
 
         private static Dictionary<string, TransformType> _transformTypeCache = new Dictionary<string, TransformType>();
