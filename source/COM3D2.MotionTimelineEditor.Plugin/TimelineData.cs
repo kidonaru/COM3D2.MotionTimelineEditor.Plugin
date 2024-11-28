@@ -811,6 +811,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public TimelineXml ToXml()
         {
+            var stopwatch = new StopwatchDebug();
+
             var xml = new TimelineXml();
             xml.version = version;
 
@@ -913,6 +915,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.videoFrontmostPosition = videoFrontmostPosition;
             xml.videoFrontmostScale = videoFrontmostScale;
             xml.videoFrontmostAlpha = videoFrontmostAlpha;
+
+            stopwatch.ProcessEnd("TimelineData.ToXml");
 
             return xml;
         }

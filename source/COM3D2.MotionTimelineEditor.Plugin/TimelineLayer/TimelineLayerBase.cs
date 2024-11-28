@@ -772,120 +772,121 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             timelineManager.RequestHistory("キーフレーム削除");
         }
 
-        protected void FixRotationFrame(FrameData frame)
-        {
-            foreach (var bone in frame.bones)
-            {
-                if (bone.transform.hasRotation)
-                {
-                    var prevBone = GetPrevBone(frame.frameNo, bone.name);
-                    if (prevBone != null)
-                    {
-                        bone.transform.FixRotation(prevBone.transform);
-                    }
-                }
-                if (bone.transform.hasEulerAngles)
-                {
-                    var prevBone = GetPrevBone(frame.frameNo, bone.name);
-                    if (prevBone != null)
-                    {
-                        bone.transform.FixEulerAngles(prevBone.transform);
-                    }
-                }
-            }
-        }
-
         protected void FixRotation(int startFrameNo, int endFrameNo)
         {
-            foreach (var frame in _keyFrames)
+            foreach (var bones in _timelineBonesMap.Values)
             {
-                if (frame.frameNo <= startFrameNo || frame.frameNo > endFrameNo)
+                if (bones.Count <= 1)
                 {
                     continue;
                 }
 
-                FixRotationFrame(frame);
-            }
-        }
-
-        protected void UpdateTangentFrame(FrameData frame)
-        {
-            var currentTime = timeline.GetFrameTimeSeconds(frame.frameNo);
-            foreach (var bone in frame.bones)
-            {
-                if (!bone.transform.hasTangent)
+                foreach (var bone in bones)
                 {
-                    continue;
-                }
-
-                int prevFrameNo;
-                var prevBone = GetPrevBone(frame.frameNo, bone.name, out prevFrameNo);
-
-                int nextFrameNo;
-                var nextBone = GetNextBone(frame.frameNo, bone.name, out nextFrameNo);
-
-                // 前後に存在しない場合は自身を使用
-                if (prevBone == null)
-                {
-                    prevBone = bone;
-                    prevFrameNo = frame.frameNo - 1;
-                }
-                if (nextBone == null)
-                {
-                    nextBone = bone;
-                    nextFrameNo = frame.frameNo + 1;
-                }
-
-                // 1フレーム補間が有効な場合は自身を使用
-                if (bone.transform.singleFrameType == SingleFrameType.Delay ||
-                    bone.transform.singleFrameType == SingleFrameType.Advance)
-                {
-                    if (frame.frameNo - prevFrameNo == 1)
+                    if (bone.frameNo <= startFrameNo || bone.frameNo > endFrameNo)
                     {
-                        prevBone = bone;
+                        continue;
                     }
-                    if (nextFrameNo - frame.frameNo == 1)
+
+                    if (bone.transform.hasRotation)
                     {
-                        nextBone = bone;
+                        var prevBone = GetPrevBone2(bone.frameNo, bones);
+                        if (prevBone != null)
+                        {
+                            bone.transform.FixRotation(prevBone.transform);
+                        }
+                    }
+                    if (bone.transform.hasEulerAngles)
+                    {
+                        var prevBone = GetPrevBone2(bone.frameNo, bones);
+                        if (prevBone != null)
+                        {
+                            bone.transform.FixEulerAngles(prevBone.transform);
+                        }
                     }
                 }
-
-                var prevTrans = prevBone.transform;
-                var nextTrans = nextBone.transform;
-
-                // 別ループのキーフレームは回転補正を行う
-                if (prevFrameNo != prevBone.frameNo)
-                {
-                    prevTrans = CreateTransformData(prevTrans);
-                    prevTrans.FixRotation(bone.transform);
-                }
-                if (nextFrameNo != nextBone.frameNo)
-                {
-                    nextTrans = CreateTransformData(nextTrans);
-                    nextTrans.FixRotation(bone.transform);
-                }
-
-                var prevTime = timeline.GetFrameTimeSeconds(prevFrameNo);
-                var nextTime = timeline.GetFrameTimeSeconds(nextFrameNo);
-
-                bone.transform.UpdateTangent(
-                    prevTrans,
-                    nextTrans,
-                    prevTime,
-                    currentTime,
-                    nextTime);
             }
         }
 
         protected void UpdateTangent(int startFrameNo, int endFrameNo)
         {
-            foreach (var frame in _keyFrames)
+            foreach (var bones in _timelineBonesMap.Values)
             {
-                if (frame.frameNo < startFrameNo || frame.frameNo > endFrameNo)
+                if (bones.Count <= 1)
                 {
                     continue;
                 }
-                UpdateTangentFrame(frame);
+
+                foreach (var bone in bones)
+                {
+                    if (bone.frameNo < startFrameNo || bone.frameNo > endFrameNo)
+                    {
+                        continue;
+                    }
+
+                    if (!bone.transform.hasTangent)
+                    {
+                        continue;
+                    }
+
+                    int prevFrameNo;
+                    var prevBone = GetPrevBone2(bone.frameNo, bones, out prevFrameNo);
+
+                    int nextFrameNo;
+                    var nextBone = GetNextBone2(bone.frameNo, bones, out nextFrameNo);
+
+                    // 前後に存在しない場合は自身を使用
+                    if (prevBone == null)
+                    {
+                        prevBone = bone;
+                        prevFrameNo = bone.frameNo - 1;
+                    }
+                    if (nextBone == null)
+                    {
+                        nextBone = bone;
+                        nextFrameNo = bone.frameNo + 1;
+                    }
+
+                    // 1フレーム補間が有効な場合は自身を使用
+                    if (bone.transform.singleFrameType == SingleFrameType.Delay ||
+                        bone.transform.singleFrameType == SingleFrameType.Advance)
+                    {
+                        if (bone.frameNo - prevFrameNo == 1)
+                        {
+                            prevBone = bone;
+                        }
+                        if (nextFrameNo - bone.frameNo == 1)
+                        {
+                            nextBone = bone;
+                        }
+                    }
+
+                    var prevTrans = prevBone.transform;
+                    var nextTrans = nextBone.transform;
+
+                    // 別ループのキーフレームは回転補正を行う
+                    if (prevFrameNo != prevBone.frameNo)
+                    {
+                        prevTrans = CreateTransformData(prevTrans);
+                        prevTrans.FixRotation(bone.transform);
+                    }
+                    if (nextFrameNo != nextBone.frameNo)
+                    {
+                        nextTrans = CreateTransformData(nextTrans);
+                        nextTrans.FixRotation(bone.transform);
+                    }
+
+                    var prevTime = timeline.GetFrameTimeSeconds(prevFrameNo);
+                    var currentTime = timeline.GetFrameTimeSeconds(bone.frameNo);
+                    var nextTime = timeline.GetFrameTimeSeconds(nextFrameNo);
+
+                    bone.transform.UpdateTangent(
+                        prevTrans,
+                        nextTrans,
+                        prevTime,
+                        currentTime,
+                        nextTime);
+                }
             }
         }
 
@@ -910,26 +911,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _dummyLastFrame.UpdateBone(sourceBone);
                 }
             }
-
-            FixRotationFrame(_dummyLastFrame);
-            UpdateTangentFrame(_dummyLastFrame);
         }
 
         protected void PrepareAnmBinary(int startFrameNo, int endFrameNo)
         {
             var stopwatch = new StopwatchDebug();
 
-            FixRotation(startFrameNo, endFrameNo);
-            stopwatch.ProcessEnd("  FixRotation");
-
-            UpdateTangent(startFrameNo, endFrameNo);
-            stopwatch.ProcessEnd("  UpdateTangent");
-
             UpdateDummyLastFrame();
             stopwatch.ProcessEnd("  UpdateDummyLastFrame");
 
             BuildTimelineBonesMap();
             stopwatch.ProcessEnd("  BuildTimelineBonesMap");
+
+            FixRotation(startFrameNo, endFrameNo);
+            stopwatch.ProcessEnd("  FixRotation");
+
+            UpdateTangent(startFrameNo, endFrameNo);
+            stopwatch.ProcessEnd("  UpdateTangent");
 
             BuildPlayData();
             stopwatch.ProcessEnd("  BuildPlayData");
@@ -1260,6 +1258,105 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             int nextFrameNo;
             return GetNextBone(frameNo, name, out nextFrameNo);
+        }
+
+        protected BoneData GetPrevBone2(
+            int frameNo,
+            List<BoneData> bones,
+            out int prevFrameNo,
+            bool loopSearch)
+        {
+            BoneData prevBone = null;
+            prevFrameNo = -1;
+
+            foreach (var bone in bones)
+            {
+                if (bone.frameNo >= frameNo)
+                {
+                    break;
+                }
+
+                prevBone = bone;
+                prevFrameNo = bone.frameNo;
+            }
+
+            if (prevBone == null && loopSearch)
+            {
+                if (isLoopAnm)
+                {
+                    frameNo = (frameNo == 0) ? maxFrameNo : maxFrameNo + 1; // 0Fの場合は最終フレームを除外
+                    prevBone = GetPrevBone2(frameNo, bones, out prevFrameNo, false);
+                    prevFrameNo -= maxFrameNo;
+                }
+                else
+                {
+                    prevBone = GetNextBone2(-1, bones, out prevFrameNo, false);
+                    prevFrameNo = -1;
+                }
+            }
+
+            return prevBone;
+        }
+
+        public BoneData GetPrevBone2(int frameNo, List<BoneData> bones, out int prevFrameNo)
+        {
+            return GetPrevBone2(frameNo, bones, out prevFrameNo, true);
+        }
+
+        public BoneData GetPrevBone2(int frameNo, List<BoneData> bones)
+        {
+            int prevFrameNo;
+            return GetPrevBone2(frameNo, bones, out prevFrameNo);
+        }
+
+        public BoneData GetNextBone2(
+            int frameNo,
+            List<BoneData> bones,
+            out int nextFrameNo,
+            bool loopSearch)
+        {
+            BoneData nextBone = null;
+            nextFrameNo = -1;
+
+            foreach (var bone in bones)
+            {
+                if (bone.frameNo <= frameNo)
+                {
+                    continue;
+                }
+
+                nextBone = bone;
+                nextFrameNo = bone.frameNo;
+                break;
+            }
+
+            if (nextBone == null && loopSearch)
+            {
+                if (isLoopAnm)
+                {
+                    frameNo = (frameNo == maxFrameNo) ? 0 : -1; // 最終フレームの場合は0Fを除外
+                    nextBone = GetNextBone2(frameNo, bones, out nextFrameNo, false);
+                    nextFrameNo += maxFrameNo;
+                }
+                else
+                {
+                    nextBone = GetPrevBone2(maxFrameNo + 1, bones, out nextFrameNo, false);
+                    nextFrameNo = maxFrameNo + 1;
+                }
+            }
+
+            return nextBone;
+        }
+
+        public BoneData GetNextBone2(int frameNo, List<BoneData> bones, out int nextFrameNo)
+        {
+            return GetNextBone2(frameNo, bones, out nextFrameNo, true);
+        }
+
+        public BoneData GetNextBone2(int frameNo, List<BoneData> bones)
+        {
+            int nextFrameNo;
+            return GetNextBone2(frameNo, bones, out nextFrameNo);
         }
 
         public void AddFirstBones(List<string> boneNames)
