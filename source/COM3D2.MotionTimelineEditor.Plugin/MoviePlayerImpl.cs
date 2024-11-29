@@ -21,6 +21,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private bool _metaUpdated = false;
         private Material _gridMaterial = null;
 
+        public enum SeekState
+        {
+            None,
+            Seeking,
+            Adjusting,
+        }
+
+        public SeekState _seekState = SeekState.None;
+
         public bool isDisplayOnGUI
         {
             get
@@ -90,6 +99,42 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     return LayerMask.NameToLayer("NGUI");
                 }
                 return LayerMask.NameToLayer("Default");
+            }
+        }
+
+        public IMediaControl mediaControl
+        {
+            get
+            {
+                return _mediaPlayer != null ? _mediaPlayer.Control : null;
+            }
+        }
+
+        public float targetSeekTimeMs
+        {
+            get
+            {
+                return (currentTime + timeline.startOffsetTime + timeline.videoStartTime) * 1000f;
+            }
+        }
+
+        public float playingTimeMs
+        {
+            get
+            {
+                if (mediaControl != null)
+                {
+                    return mediaControl.GetCurrentTimeMs();
+                }
+                return 0f;
+            }
+        }
+
+        public bool isSeeking
+        {
+            get
+            {
+                return _seekState != SeekState.None;
             }
         }
 
@@ -203,6 +248,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             _mediaPlayer.m_Loop = true;
             _isStarted = false;
+            _seekState = SeekState.None;
 
             UpdateVolume();
             UpdateTransform();
@@ -211,7 +257,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Update()
         {
-            if (_mediaPlayer == null || _mediaPlayer.Control == null)
+            if (mediaControl == null)
             {
                 return;
             }
@@ -220,6 +266,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 UpdateTransform();
                 _metaUpdated = false;
+            }
+
+            if (_seekState == SeekState.Adjusting)
+            {
+                var overTime = playingTimeMs - targetSeekTimeMs;
+                //PluginUtils.LogDebug("MoviePlayerImpl: overTime={0}", overTime);
+                if (overTime < 10f)
+                {
+                    _seekState = SeekState.None;
+                    UpdateSpeed();
+                }
             }
 
             if (currentTime < _prevTime)
@@ -330,19 +387,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void UpdateVolume()
         {
-            if (_mediaPlayer != null && _mediaPlayer.Control != null)
+            if (mediaControl != null)
             {
-                _mediaPlayer.Control.SetVolume(timeline.videoVolume);
+                mediaControl.SetVolume(timeline.videoVolume);
                 _mediaPlayer.m_Muted = timeline.videoVolume == 0f;
             }
         }
 
         public void UpdateSpeed()
         {
-            if (_mediaPlayer != null && _mediaPlayer.Control != null)
+            if (mediaControl != null)
             {
-                var playbackRate = _isAnmPlaying ? timelineManager.anmSpeed : 0f;
-                _mediaPlayer.Control.SetPlaybackRate(playbackRate);
+                var playbackRate = (_isAnmPlaying && !isSeeking) ? timelineManager.anmSpeed : 0f;
+                mediaControl.SetPlaybackRate(playbackRate);
             }
         }
 
@@ -353,17 +410,36 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            if (_mediaPlayer != null && _mediaPlayer.Control != null)
+            if (mediaControl != null)
             {
-                var seekTimeMs = (currentTime + timeline.startOffsetTime + timeline.videoStartTime) * 1000f;
-                var playingTimeMs = _mediaPlayer.Control.GetCurrentTimeMs();
-                if (Mathf.Abs(seekTimeMs - playingTimeMs) > 1)
+                var seekTimeMs = this.targetSeekTimeMs;
+                var playingTimeMs = this.playingTimeMs;
+                if (Mathf.Abs(seekTimeMs - playingTimeMs) > 10f)
                 {
-                    _mediaPlayer.Control.Seek(seekTimeMs);
+                    if (currentLayer.isAnmPlaying)
+                    {
+                        var halfPrebufferTimeMs = config.videoPrebufferTime * 500f;
+                        mediaControl.SeekWithTolerance(
+                            seekTimeMs + halfPrebufferTimeMs,
+                            halfPrebufferTimeMs,
+                            halfPrebufferTimeMs);
+                    }
+                    else
+                    {
+                        mediaControl.Seek(seekTimeMs);
+                    }
+                    _seekState = SeekState.Seeking;
+                    UpdateSpeed();
                 }
 
                 _prevTime = currentTime;
             }
+        }
+
+        private IEnumerator UpdateSeekTimeAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            UpdateSeekTime();
         }
 
         private Color videoColor
@@ -571,8 +647,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (et == MediaPlayerEvent.EventType.Started)
             {
                 _isStarted = true;
-                UpdateSeekTime();
-                StartCoroutine(UpdateColorAfterDelay(1f));
+                StartCoroutine(UpdateSeekTimeAfterDelay(0.5f));
+                StartCoroutine(UpdateColorAfterDelay(0.5f));
+                return;
+            }
+
+            if (et == MediaPlayerEvent.EventType.FinishedSeeking)
+            {
+                _seekState = SeekState.Adjusting;
+                UpdateSpeed();
+                return;
             }
 
             if (et == MediaPlayerEvent.EventType.MetaDataReady)
@@ -581,6 +665,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _duration = _mediaPlayer.Info.GetDurationMs() / 1000f;
                 _frameRate = _mediaPlayer.Info.GetVideoFrameRate();
                 _metaUpdated = true;
+                return;
             }
         }
 

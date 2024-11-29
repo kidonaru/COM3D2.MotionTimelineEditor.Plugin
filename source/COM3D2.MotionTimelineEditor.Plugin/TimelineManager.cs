@@ -34,6 +34,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private bool isPrevPoseEditing;
 
         public static event UnityAction onPlay;
+        public static event UnityAction onStop;
         public static event UnityAction onRefresh;
         public static event UnityAction onEditPoseUpdated;
         public static event UnityAction onAnmSpeedChanged;
@@ -1571,6 +1572,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void Stop()
         {
             studioHack.isMotionPlaying = false;
+
+            if (onStop != null)
+            {
+                onStop();
+            }
         }
 
         private string requestedHistoryDesc = "";

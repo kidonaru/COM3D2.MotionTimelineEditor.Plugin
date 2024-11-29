@@ -105,6 +105,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Init()
         {
+            TimelineManager.onStop += UpdateSeekTime;
             TimelineManager.onRefresh += ReloadMovie;
             TimelineManager.onAnmSpeedChanged += UpdateSpeed;
             TimelineManager.onSeekCurrentFrame += UpdateSeekTime;

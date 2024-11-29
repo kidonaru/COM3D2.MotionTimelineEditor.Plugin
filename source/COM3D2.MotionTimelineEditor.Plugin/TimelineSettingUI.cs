@@ -442,6 +442,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawSliderValue(new GUIView.SliderOption
             {
+                label = "動画先読み秒数",
+                labelWidth = 100,
+                min = 0f,
+                max = 1f,
+                step = 0,
+                defaultValue = 0.5f,
+                value = config.videoPrebufferTime,
+                onChanged = value =>
+                {
+                    config.videoPrebufferTime = value;
+                    config.dirty = true;
+                },
+            });
+
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
                 label = "ボイス最大秒数",
                 labelWidth = 100,
                 min = 1f,
