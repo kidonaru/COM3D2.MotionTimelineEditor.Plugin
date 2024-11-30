@@ -149,13 +149,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static MaidManager maidManager => MaidManager.instance;
 
-        private static Maid maid
-        {
-            get
-            {
-                return maidManager.maid;
-            }
-        }
+        private static Maid maid => maidManager.maid;
 
         private static WindowManager windowManager => WindowManager.instance;
 

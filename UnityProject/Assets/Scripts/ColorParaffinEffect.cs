@@ -98,7 +98,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		public static readonly int MAX_PARAFFIN_COUNT = 4;
 
 		[System.Serializable]
-		private struct ParaffinBuffer
+		public struct ParaffinBuffer
 		{
 			public Color color1;
 			public Color color2;

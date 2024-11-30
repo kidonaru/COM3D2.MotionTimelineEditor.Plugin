@@ -62,6 +62,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BGMManager.cs" />
+    <Compile Include="BGModelManager.cs" />
+    <Compile Include="BGModelStat.cs" />
     <Compile Include="BinaryExtensions.cs" />
     <Compile Include="BinaryLoader.cs" />
     <Compile Include="BlendShapeCacheData.cs" />
@@ -148,6 +150,8 @@
     <Compile Include="TimelineLayerUI.cs" />
     <Compile Include="TimelineLayerXml.cs" />
     <Compile Include="TimelineLayer\BGColorTimelineLayer.cs" />
+    <Compile Include="TimelineLayer\BGModelTimelineLayer.cs" />
+    <Compile Include="TimelineLayer\BGModelTimelineLayerBase.cs" />
     <Compile Include="TimelineLayer\BGTimelineLayer.cs" />
     <Compile Include="TimelineLayer\CameraTimelineLayer.cs" />
     <Compile Include="TimelineLayer\EyesTimelineLayer.cs" />
@@ -178,6 +182,7 @@
     <Compile Include="TransformData\TransformDataBase.cs" />
     <Compile Include="TransformData\TransformDataBG.cs" />
     <Compile Include="TransformData\TransformDataBGColor.cs" />
+    <Compile Include="TransformData\TransformDataBGModel.cs" />
     <Compile Include="TransformData\TransformDataCamera.cs" />
     <Compile Include="TransformData\TransformDataDepthOfField.cs" />
     <Compile Include="TransformData\TransformDataExtendBone.cs" />

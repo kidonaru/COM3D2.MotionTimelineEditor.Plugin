@@ -8,6 +8,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         None = 0,
         BG,
         BGColor,
+        BGModel,
         Camera,
         DepthOfField,
         ExtendBone,

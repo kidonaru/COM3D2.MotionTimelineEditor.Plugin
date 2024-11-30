@@ -20,13 +20,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static TimelineLoadManager timelineLoadManager
-        {
-            get
-            {
-                return TimelineLoadManager.instance;
-            }
-        }
+        private static TimelineLoadManager timelineLoadManager => TimelineLoadManager.instance;
 
         public TimelineLoadUI(SubWindow subWindow) : base(subWindow)
         {

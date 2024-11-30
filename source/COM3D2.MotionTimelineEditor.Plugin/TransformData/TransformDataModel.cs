@@ -10,11 +10,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override int valueCount => 10;
 
         public override bool hasPosition => true;
-
         public override bool hasEulerAngles =>  true;
-
         public override bool hasScale => true;
-
         public override bool hasEasing => true;
 
         public override ValueData[] positionValues
@@ -48,4 +45,5 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
     }
+
 }

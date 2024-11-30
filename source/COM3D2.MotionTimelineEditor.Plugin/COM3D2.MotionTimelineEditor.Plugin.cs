@@ -54,29 +54,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static MaidManager maidManager => MaidManager.instance;
 
-        private static Maid maid
-        {
-            get
-            {
-                return maidManager.maid;
-            }
-        }
+        private static Maid maid => maidManager.maid;
 
         private static TimelineManager timelineManager => TimelineManager.instance;
 
-        private static TimelineLoadManager timelineLoadManager
-        {
-            get
-            {
-                return TimelineLoadManager.instance;
-            }
-        }
+        private static TimelineLoadManager timelineLoadManager => TimelineLoadManager.instance;
 
-        protected static StudioModelManager modelManager => StudioModelManager.instance;
+        private static StudioModelManager modelManager => StudioModelManager.instance;
 
-        protected static StudioLightManager lightManager => StudioLightManager.instance;
+        private static BGModelManager bgModelManager => BGModelManager.instance;
 
-        protected static StageLightManager stageLightManager => StageLightManager.instance;
+        private static StudioLightManager lightManager => StudioLightManager.instance;
+
+        private static StageLightManager stageLightManager => StageLightManager.instance;
 
         private static TimelineHistoryManager historyManager => TimelineHistoryManager.instance;
 
@@ -86,13 +76,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static MovieManager movieManager => MovieManager.instance;
 
-        private static StudioHackManager studioHackManager
-        {
-            get
-            {
-                return StudioHackManager.instance;
-            }
-        }
+        private static StudioHackManager studioHackManager => StudioHackManager.instance;
 
         private static StudioHackBase studioHack => StudioHackManager.studioHack;
 
@@ -100,13 +84,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static WindowManager windowManager => WindowManager.instance;
 
-        private static ConfigManager configManager
-        {
-            get
-            {
-                return ConfigManager.instance;
-            }
-        }
+        private static ConfigManager configManager => ConfigManager.instance;
 
         private static CameraManager cameraManager =>  CameraManager.instance;
 
@@ -114,19 +92,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static ITimelineLayer currentLayer => timelineManager.currentLayer;
 
-        private static MainWindow mainWindow
-        {
-            get
-            {
-                return windowManager.mainWindow;
-            }
-        }
+        private static MainWindow mainWindow => windowManager.mainWindow;
 
         private static GridViewManager gridViewManager => GridViewManager.instance;
 
         private static PostEffectManager postEffectManager => PostEffectManager.instance;
 
-        protected static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
+        private static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
 
         public MotionTimelineEditor()
         {
@@ -321,6 +293,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     maidManager.LateUpdate();
                     modelManager.LateUpdate(false);
+                    bgModelManager.LateUpdate();
                     lightManager.LateUpdate(false);
                     timelineManager.LateUpdate();
                 }
@@ -383,6 +356,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     typeof(BGColorTimelineLayer), BGColorTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
+                    typeof(BGModelTimelineLayer), BGModelTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
                     typeof(BGTimelineLayer), BGTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
@@ -430,6 +406,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 );
                 timelineManager.RegisterTransform(
                     TransformType.BGColor, TimelineManager.CreateTransform<TransformDataBGColor>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.BGModel, TimelineManager.CreateTransform<TransformDataBGModel>
                 );
                 timelineManager.RegisterTransform(
                     TransformType.Camera, TimelineManager.CreateTransform<TransformDataCamera>
@@ -587,6 +566,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             DumpAllCameraInfo();
             DumpLayerInfo();
+            DumpBGObject();
 
             studioHackManager.Update();
             modelHackManager.Update();
@@ -600,6 +580,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             maidManager.OnPluginEnable();
             modelManager.OnPluginEnable();
+            bgModelManager.OnPluginEnable();
             lightManager.OnPluginEnable();
             stageLightManager.OnPluginEnable();
             movieManager.OnPluginEnable();
@@ -618,6 +599,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             maidManager.OnPluginDisable();
             modelManager.OnPluginDisable();
+            bgModelManager.OnPluginDisable();
             lightManager.OnPluginDisable();
             stageLightManager.OnPluginDisable();
             movieManager.OnPluginDisable();
@@ -729,6 +711,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 PluginUtils.LogDebug("  高解像度: " + dof.highResolution);
                 PluginUtils.LogDebug("  サンプル数: " + dof.blurSampleCount);
                 PluginUtils.LogDebug("  近距離: " + dof.nearBlur);
+            }
+        }
+
+        [Conditional("DEBUG")]
+        private void DumpBGObject()
+        {
+            PluginUtils.LogDebug("背景階層構造:");
+            BgMgr bgMgr = GameMain.Instance.BgMgr;
+            GameObject bgObject = bgMgr.BgObject;
+
+            if (bgObject != null)
+            {
+                DumpGameObject(bgObject, 0);
+            }
+        }
+
+        private void DumpGameObject(GameObject obj, int depth)
+        {
+            string indent = new string(' ', depth * 2);
+            PluginUtils.LogDebug($"{indent}└─ {obj.name}");
+            
+            foreach (Transform child in obj.transform)
+            {
+                DumpGameObject(child.gameObject, depth + 1);
             }
         }
     }

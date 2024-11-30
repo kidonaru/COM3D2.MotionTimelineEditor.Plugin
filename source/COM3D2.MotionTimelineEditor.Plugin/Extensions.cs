@@ -739,6 +739,31 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             rows.Add(bone);
         }
+
+        public static TValue GetOrCreate<TKey, TValue>(this Dictionary<TKey, TValue> self, TKey key)
+            where TValue : new()
+        {
+            TValue value;
+            if (!self.TryGetValue(key, out value))
+            {
+                value = new TValue();
+                self[key] = value;
+            }
+
+            return value;
+        }
+
+        public static TValue GetOrNull<TKey, TValue>(this Dictionary<TKey, TValue> self, TKey key)
+            where TValue : class
+        {
+            TValue value;
+            if (!self.TryGetValue(key, out value))
+            {
+                return null;
+            }
+
+            return value;
+        }
     }
 
 }

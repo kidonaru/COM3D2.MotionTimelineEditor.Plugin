@@ -104,6 +104,52 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
     }
 
+    public class TimelineBGModelData
+    {
+        public string sourceName;
+        public int group;
+
+        public string name
+        {
+            get
+            {
+                var groupSuffix = PluginUtils.GetGroupSuffix(group);
+                return sourceName + groupSuffix;
+            }
+        }
+
+        public TimelineBGModelData()
+        {
+        }
+
+        public TimelineBGModelData(BGModelStat model)
+        {
+            FromModel(model);
+        }
+
+        public void FromModel(BGModelStat model)
+        {
+            sourceName = model.sourceName;
+            group = model.group;
+        }
+
+        public void FromXml(TimelineBGModelXml xml)
+        {
+            sourceName = xml.sourceName;
+            group = xml.group;
+        }
+
+        public TimelineBGModelXml ToXml()
+        {
+            var xml = new TimelineBGModelXml
+            {
+                sourceName = sourceName,
+                group = group,
+            };
+            return xml;
+        }
+    }
+
     public class TimelineData
     {
         public static readonly int CurrentVersion = 15;
@@ -118,6 +164,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public List<TimelineModelData> models = new List<TimelineModelData>();
 
         public List<TimelineLightData> lights = new List<TimelineLightData>();
+
+        public List<TimelineBGModelData> bgModels = new List<TimelineBGModelData>();
 
         // maidSlotNo -> shapeKeys
         public Dictionary<int, HashSet<string>> maidShapeKeysMap = new Dictionary<int, HashSet<string>>();
@@ -333,13 +381,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float videoFrontmostScale = 0.38f;
         public float videoFrontmostAlpha = 1f;
 
-        public int maxFrameCount
-        {
-            get
-            {
-                return maxFrameNo + 1;
-            }
-        }
+        public int maxFrameCount => maxFrameNo + 1;
 
         private static TimelineManager timelineManager => TimelineManager.instance;
 
@@ -361,37 +403,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public ITimelineLayer defaultLayer { get; private set; }
 
-        public string timelinePath
-        {
-            get
-            {
-                return PluginUtils.GetTimelinePath(anmName, directoryName);
-            }
-        }
-
-        public string thumPath
-        {
-            get
-            {
-                return PluginUtils.ConvertThumPath(timelinePath);
-            }
-        }
-
-        public string dcmSongName
-        {
-            get
-            {
-                return "【MTE】" + anmName;
-            }
-        }
-
-        public string dcmSongListPath
-        {
-            get
-            {
-                return PluginUtils.GetDcmSongListFilePath(dcmSongName);
-            }
-        }
+        public string timelinePath => PluginUtils.GetTimelinePath(anmName, directoryName);
+        public string thumPath => PluginUtils.ConvertThumPath(timelinePath);
+        public string dcmSongName => "【MTE】" + anmName;
+        public string dcmSongListPath => PluginUtils.GetDcmSongListFilePath(dcmSongName);
 
         public float aspectRatio
         {
@@ -716,6 +731,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 lights.Add(light);
             }
 
+            bgModels = new List<TimelineBGModelData>(xml.bgModels.Count);
+            foreach (var bgModelXml in xml.bgModels)
+            {
+                var bgModel = new TimelineBGModelData();
+                bgModel.FromXml(bgModelXml);
+                bgModels.Add(bgModel);
+            }
+
             maidShapeKeysMap.Clear();
             foreach (var shapeKeyml in xml.maidShapeKeys)
             {
@@ -824,6 +847,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var lightXml = light.ToXml();
                 xml.lights.Add(lightXml);
+            }
+
+            xml.bgModels = new List<TimelineBGModelXml>(bgModels.Count);
+            foreach (var bgModel in bgModels)
+            {
+                var bgModelXml = bgModel.ToXml();
+                xml.bgModels.Add(bgModelXml);
             }
 
             xml.maidShapeKeys = new List<TimelineMaidShapeKeyXml>();

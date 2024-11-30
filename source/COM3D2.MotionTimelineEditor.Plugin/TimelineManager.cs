@@ -134,6 +134,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private static MaidManager maidManager => MaidManager.instance;
 
         private static StudioModelManager modelManager => StudioModelManager.instance;
+        private static BGModelManager bgModelManager => BGModelManager.instance;
 
         private static StudioLightManager lightManager => StudioLightManager.instance;
 
@@ -143,13 +144,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static IPartsEditHack partsEditHack => PartsEditHackManager.instance.partsEditHack;
 
-        private static Maid maid
-        {
-            get
-            {
-                return maidManager.maid;
-            }
-        }
+        private static Maid maid => maidManager.maid;
 
         private static MaidCache maidCache => maidManager.maidCache;
 
@@ -169,6 +164,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             StudioModelManager.onModelAdded += OnModelAdded;
             StudioModelManager.onModelRemoved += OnModelRemoved;
             StudioModelManager.onModelUpdated += OnModelUpdated;
+            BGModelManager.onModelAdded += OnBGModelAdded;
+            BGModelManager.onModelRemoved += OnBGModelRemoved;
             StudioLightManager.onLightAdded += OnLightAdded;
             StudioLightManager.onLightRemoved += OnLightRemoved;
             StudioLightManager.onLightUpdated += OnLightUpdated;
@@ -408,6 +405,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             maidManager.ChangeMaid(currentLayer.maid);
             modelManager.SetupModels(timeline.models);
+            bgModelManager.SetupModels(timeline.bgModels);
             lightManager.SetupLights(timeline.lights);
             stageLightManager.SetupLights(timeline.stageLightCountList);
 
@@ -469,6 +467,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             currentLayer.OnActive();
 
             modelManager.SetupModels(timeline.models);
+            bgModelManager.SetupModels(timeline.bgModels);
             lightManager.SetupLights(timeline.lights);
             stageLightManager.SetupLights(timeline.stageLightCountList);
 
@@ -1654,6 +1653,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 timeline.OnPluginEnable();
                 modelManager.SetupModels(timeline.models);
+                bgModelManager.SetupModels(timeline.bgModels);
                 lightManager.SetupLights(timeline.lights);
                 stageLightManager.SetupLights(timeline.stageLightCountList);
             }
@@ -1797,6 +1797,52 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (IsValidData())
             {
                 UpdateTimelineModels();
+            }
+        }
+
+        private void UpdateTimelineBGModels()
+        {
+            if (timeline == null)
+            {
+                return;
+            }
+
+            var models = bgModelManager.models;
+            var timelineModels = timeline.bgModels;
+
+            if (models.Count != timelineModels.Count)
+            {
+                timelineModels.Clear();
+                foreach (var model in models)
+                {
+                    var timelineModel = new TimelineBGModelData(model);
+                    timelineModels.Add(timelineModel);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < models.Count; i++)
+                {
+                    var model = models[i];
+                    var timelineModel = timelineModels[i];
+                    timelineModel.FromModel(model);
+                }
+            }
+        }
+
+        private void OnBGModelAdded(BGModelStat model)
+        {
+            if (IsValidData())
+            {
+                UpdateTimelineBGModels();
+            }
+        }
+
+        private void OnBGModelRemoved(BGModelStat model)
+        {
+            if (IsValidData())
+            {
+                UpdateTimelineBGModels();
             }
         }
 

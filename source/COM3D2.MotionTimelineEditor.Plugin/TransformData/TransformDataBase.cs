@@ -174,14 +174,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                if (_baseValues == null)
+                if (_baseValues != null)
                 {
-                    var length = 0;
-                    if (hasPosition) length += 3;
-                    if (hasRotation) length += 4;
-                    if (hasScale) length += 3;
-                    _baseValues = new ValueData[length];
+                    return _baseValues;
                 }
+
+                var length = 0;
+                if (hasPosition) length += 3;
+                if (hasRotation) length += 4;
+                if (hasEulerAngles) length += 3;
+                if (hasScale) length += 3;
+                _baseValues = new ValueData[length];
 
                 int index = 0;
                 if (hasPosition)
@@ -198,6 +201,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _baseValues[index++] = rotationValues[1];
                     _baseValues[index++] = rotationValues[2];
                     _baseValues[index++] = rotationValues[3];
+                }
+                if (hasEulerAngles)
+                {
+                    var eulerAnglesValues = this.eulerAnglesValues;
+                    _baseValues[index++] = eulerAnglesValues[0];
+                    _baseValues[index++] = eulerAnglesValues[1];
+                    _baseValues[index++] = eulerAnglesValues[2];
                 }
                 if (hasScale)
                 {

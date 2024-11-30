@@ -47,6 +47,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public List<string> extendBoneNames;
     }
 
+    public class TimelineBGModelXml
+    {
+        [XmlElement("SourceName")]
+        public string sourceName;
+        [XmlElement("Group")]
+        public int group;
+    }
+
     [XmlRoot("TimelineData")]
     public class TimelineXml
     {
@@ -70,6 +78,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlArray("Lights")]
         [XmlArrayItem("Light")]
         public List<TimelineLightXml> lights = new List<TimelineLightXml>();
+
+        [XmlArray("BGModels")]
+        [XmlArrayItem("BGModel")]
+        public List<TimelineBGModelXml> bgModels = new List<TimelineBGModelXml>();
 
         [XmlArray("MaidShapeKeys")]
         [XmlArrayItem("MaidShapeKey")]

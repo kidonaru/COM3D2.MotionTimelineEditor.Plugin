@@ -14,31 +14,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static Func<float, int, float> EasingFunction { get; set; }
 
         public abstract string className { get; }
-
         public int slotNo { get; protected set; }
-
         public virtual bool hasSlotNo => false;
-
         public virtual bool isCameraLayer => false;
-
         public virtual bool isPostEffectLayer => false;
 
         protected List<FrameData> _keyFrames = new List<FrameData>();
-        public List<FrameData> keyFrames
-        {
-            get
-            {
-                return _keyFrames.Cast<FrameData>().ToList();
-            }
-        }
+        public List<FrameData> keyFrames => _keyFrames.ToList();
 
-        public MaidCache maidCache
-        {
-            get
-            {
-                return maidManager.GetMaidCache(slotNo);
-            }
-        }
+        public MaidCache maidCache => maidManager.GetMaidCache(slotNo);
 
         public Maid maid
         {
@@ -79,13 +63,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public float playingTime
-        {
-            get
-            {
-                return playingFrameNoFloat * timeline.frameDuration;
-            }
-        }
+        public float playingTime => playingFrameNoFloat * timeline.frameDuration;
 
         public bool isMotionPlaying
         {
@@ -167,25 +145,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public virtual bool isDragging
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool isDragging => false;
 
         public abstract List<string> allBoneNames { get; }
 
         public string errorMessage { get; protected set; }
 
-        public bool isCurrent
-        {
-            get
-            {
-                return timelineManager.currentLayer == this;
-            }
-        }
+        public bool isCurrent => timelineManager.currentLayer == this;
 
         public int maxExistFrameNo
         {
@@ -199,13 +165,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public FrameData firstFrame
-        {
-            get
-            {
-                return _keyFrames.Count > 0 ? _keyFrames[0] : null;
-            }
-        }
+        public FrameData firstFrame => _keyFrames.Count > 0 ? _keyFrames[0] : null;
 
         public string anmFileName
         {
@@ -216,13 +176,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public string anmPath
-        {
-            get
-            {
-                return studioHack.outputAnmPath + "\\" + anmFileName;
-            }
-        }
+        public string anmPath => studioHack.outputAnmPath + "\\" + anmFileName;
 
         public List<IBoneMenuItem> _allMenuItems = new List<IBoneMenuItem>();
         public List<IBoneMenuItem> allMenuItems => _allMenuItems;
@@ -230,13 +184,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         // ループ補正用の最終フレーム
         protected FrameData _dummyLastFrame = null;
 
-        public Dictionary<string, List<BoneData>> timelineRowsMap
-        {
-            get
-            {
-                return _timelineBonesMap;
-            }
-        }
+        public Dictionary<string, List<BoneData>> timelineRowsMap => _timelineBonesMap;
         protected Dictionary<string, List<BoneData>> _timelineBonesMap = new Dictionary<string, List<BoneData>>(32);
 
         protected Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>(32);
@@ -260,19 +208,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         protected static bool isLoopAnm => timeline.isLoopAnm;
 
         protected static MaidManager maidManager => MaidManager.instance;
-
         protected static StudioModelManager modelManager => StudioModelManager.instance;
-
+        protected static BGModelManager bgModelManager => BGModelManager.instance;
         protected static ModelHackManager modelHackManager => ModelHackManager.instance;
-
         protected static StudioLightManager lightManager => StudioLightManager.instance;
-
         protected static StageLightManager stageLightManager => StageLightManager.instance;
-
         protected static StudioHackBase studioHack => StudioHackManager.studioHack;
-
         protected static PhotoBGManager photoBGManager => PhotoBGManager.instance;
-
         protected static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
 
         protected TimelineLayerBase(int slotNo)
