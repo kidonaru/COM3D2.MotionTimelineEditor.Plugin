@@ -637,6 +637,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 AppendTimelineRow(keyFrame);
             }
 
+            UpdateDummyLastFrame();
+
             AppendTimelineRow(_dummyLastFrame);
         }
 
@@ -894,16 +896,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             _dummyLastFrame.frameNo = maxFrameNo;
 
-            foreach (var name in allBoneNames)
+            foreach (var bones in _timelineBonesMap.Values)
             {
+                if (bones.Count == 0)
+                {
+                    continue;
+                }
+
                 BoneData sourceBone;
                 if (isLoopAnm)
                 {
-                    sourceBone = GetNextBone(-1, name);
+                    sourceBone = GetNextBone2(-1, bones);
                 }
                 else
                 {
-                    sourceBone = GetPrevBone(maxFrameNo, name);
+                    sourceBone = GetPrevBone2(maxFrameNo, bones);
                 }
 
                 if (sourceBone != null)
@@ -911,26 +918,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _dummyLastFrame.UpdateBone(sourceBone);
                 }
             }
-        }
-
-        protected void PrepareAnmBinary(int startFrameNo, int endFrameNo)
-        {
-            var stopwatch = new StopwatchDebug();
-
-            UpdateDummyLastFrame();
-            stopwatch.ProcessEnd("  UpdateDummyLastFrame");
-
-            BuildTimelineBonesMap();
-            stopwatch.ProcessEnd("  BuildTimelineBonesMap");
-
-            FixRotation(startFrameNo, endFrameNo);
-            stopwatch.ProcessEnd("  FixRotation");
-
-            UpdateTangent(startFrameNo, endFrameNo);
-            stopwatch.ProcessEnd("  UpdateTangent");
-
-            BuildPlayData();
-            stopwatch.ProcessEnd("  BuildPlayData");
         }
 
         public byte[] GetAnmBinary(bool forOutput)
@@ -942,6 +929,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             PluginUtils.LogDebug(className);
 
+            var stopwatch = new StopwatchDebug();
+
+            BuildTimelineBonesMap();
+            stopwatch.ProcessEnd("  BuildTimelineBonesMap");
+
             var startFrameNo = 0;
             var endFrameNo = timeline.maxFrameNo;
             var activeTrack = timeline.activeTrack;
@@ -951,13 +943,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 startFrameNo = GetStartFrameNo(activeTrack.startFrameNo);
                 endFrameNo = GetEndFrameNo(activeTrack.endFrameNo);
 
-                PluginUtils.LogDebug("  slotNo={0} startFrameNo={1}, endFrameNo={2} ",
-                    slotNo, startFrameNo, endFrameNo);
+                if (config.outputElapsedTime)
+                {
+                    PluginUtils.Log("  slotNo={0} startFrameNo={1}, endFrameNo={2} ",
+                            slotNo, startFrameNo, endFrameNo);
+                }
             }
 
-            PrepareAnmBinary(startFrameNo, endFrameNo);
+            FixRotation(startFrameNo, endFrameNo);
+            stopwatch.ProcessEnd("  FixRotation");
 
-            var stopwatch = new StopwatchDebug();
+            UpdateTangent(startFrameNo, endFrameNo);
+            stopwatch.ProcessEnd("  UpdateTangent");
+
+            BuildPlayData();
+            stopwatch.ProcessEnd("  BuildPlayData");
+
             var anmData = GetAnmBinaryInternal(forOutput, startFrameNo, endFrameNo);
             stopwatch.ProcessEnd("  GetAnmBinary");
 
@@ -1129,40 +1130,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             out int prevFrameNo,
             bool loopSearch)
         {
-            BoneData prevBone = null;
-            prevFrameNo = -1;
-
-            foreach (var frame in _keyFrames)
+            List<BoneData> bones;
+            if (!_timelineBonesMap.TryGetValue(name, out bones))
             {
-                if (frame.frameNo >= frameNo)
-                {
-                    break;
-                }
-
-                var bone = frame.GetBone(name);
-                if (bone != null)
-                {
-                    prevBone = bone;
-                    prevFrameNo = frame.frameNo;
-                }
+                prevFrameNo = -1;
+                return null;
             }
 
-            if (prevBone == null && loopSearch)
-            {
-                if (isLoopAnm)
-                {
-                    frameNo = (frameNo == 0) ? maxFrameNo : maxFrameNo + 1; // 0Fの場合は最終フレームを除外
-                    prevBone = GetPrevBone(frameNo, name, out prevFrameNo, false);
-                    prevFrameNo -= maxFrameNo;
-                }
-                else
-                {
-                    prevBone = GetNextBone(-1, name, out prevFrameNo, false);
-                    prevFrameNo = -1;
-                }
-            }
-
-            return prevBone;
+            return GetPrevBone2(frameNo, bones, out prevFrameNo, loopSearch);
         }
 
         public BoneData GetPrevBone(int frameNo, string name, out int prevFrameNo)
@@ -1207,40 +1182,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             out int nextFrameNo,
             bool loopSearch)
         {
-            BoneData nextBone = null;
-            nextFrameNo = -1;
-            foreach (var frame in _keyFrames)
+            List<BoneData> bones;
+            if (!_timelineBonesMap.TryGetValue(name, out bones))
             {
-                if (frame.frameNo <= frameNo)
-                {
-                    continue;
-                }
-
-                var bone = frame.GetBone(name);
-                if (bone != null)
-                {
-                    nextBone = bone;
-                    nextFrameNo = frame.frameNo;
-                    break;
-                }
+                nextFrameNo = -1;
+                return null;
             }
 
-            if (nextBone == null && loopSearch)
-            {
-                if (isLoopAnm)
-                {
-                    frameNo = (frameNo == maxFrameNo) ? 0 : -1; // 最終フレームの場合は0Fを除外
-                    nextBone = GetNextBone(frameNo, name, out nextFrameNo, false);
-                    nextFrameNo += maxFrameNo;
-                }
-                else
-                {
-                    nextBone = GetPrevBone(maxFrameNo + 1, name, out nextFrameNo, false);
-                    nextFrameNo = maxFrameNo + 1;
-                }
-            }
-
-            return nextBone;
+            return GetNextBone2(frameNo, bones, out nextFrameNo, loopSearch);
         }
 
         public BoneData GetNextBone(int frameNo, string name, out int nextFrameNo)
@@ -1301,6 +1250,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public BoneData GetPrevBone2(int frameNo, List<BoneData> bones, out int prevFrameNo)
         {
             return GetPrevBone2(frameNo, bones, out prevFrameNo, true);
+        }
+
+        public BoneData GetPrevBone2(int frameNo, List<BoneData> bones, bool loopSearch)
+        {
+            int prevFrameNo;
+            return GetPrevBone2(frameNo, bones, out prevFrameNo, loopSearch);
         }
 
         public BoneData GetPrevBone2(int frameNo, List<BoneData> bones)
@@ -1450,10 +1405,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var startFrameNo = frameNo;
 
-            foreach (var firstBone in firstFrame.bones)
+            foreach (var bones in _timelineBonesMap.Values)
             {
-                var name = firstBone.name;
-                var bone = GetPrevBone(frameNo + 1, name, false);
+                if (bones.Count == 0)
+                {
+                    continue;
+                }
+
+                var bone = GetPrevBone2(frameNo + 1, bones, false);
                 if (bone != null)
                 {
                     startFrameNo = Math.Min(startFrameNo, bone.frameNo);
@@ -1477,11 +1436,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var endFrameNo = frameNo;
 
-            foreach (var firstBone in firstFrame.bones)
+            foreach (var bones in _timelineBonesMap.Values)
             {
-                var name = firstBone.name;
+                if (bones.Count == 0)
+                {
+                    continue;
+                }
+
                 int nextFrameNo;
-                var bone = GetNextBone(frameNo - 1, name, out nextFrameNo);
+                var bone = GetNextBone2(frameNo - 1, bones, out nextFrameNo);
                 if (bone != null)
                 {
                     endFrameNo = Math.Max(endFrameNo, nextFrameNo);

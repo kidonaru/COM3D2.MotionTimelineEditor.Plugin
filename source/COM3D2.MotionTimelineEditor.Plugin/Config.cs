@@ -37,6 +37,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool dofVisualizeFocus = false;
         public bool paraffinDebug = false;
         public float videoPrebufferTime = 0.5f;
+        public bool outputElapsedTime = false;
 
         // 表示設定
         public int frameWidth = 11;

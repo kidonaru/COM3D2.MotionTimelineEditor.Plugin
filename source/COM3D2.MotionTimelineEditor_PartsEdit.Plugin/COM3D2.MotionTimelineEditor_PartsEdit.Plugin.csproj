@@ -7,8 +7,8 @@
     <ProjectGuid>{22C15C7B-5EE4-4A1C-A004-A884A5398F42}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>COM3D2.MotionTimelineEditor_SceneCapture.Plugin</RootNamespace>
-    <AssemblyName>COM3D2.MotionTimelineEditor_SceneCapture.Plugin</AssemblyName>
+    <RootNamespace>COM3D2.MotionTimelineEditor_PartsEdit.Plugin</RootNamespace>
+    <AssemblyName>COM3D2.MotionTimelineEditor_PartsEdit.Plugin</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>

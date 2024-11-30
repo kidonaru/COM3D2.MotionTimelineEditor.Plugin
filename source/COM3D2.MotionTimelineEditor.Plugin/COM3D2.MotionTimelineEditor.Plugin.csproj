@@ -31,6 +31,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\..\UnityProject\Assets\Bundles\mte_bundle">
+      <LogicalName>mte_bundle</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="Accessibility" />
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\COM3D2x64_Data\Managed\Assembly-CSharp.dll</HintPath>
@@ -116,9 +121,9 @@
     <Compile Include="PostEffectManager.cs" />
     <Compile Include="PostEffectUtils.cs" />
     <Compile Include="ScriptLoader.cs" />
-    <Compile Include="../../UnityProject/Assets/Scripts/StageLight.cs" />
-    <Compile Include="../../UnityProject/Assets/Scripts/StageLightController.cs" />
-    <Compile Include="../../UnityProject/Assets/Scripts/ColorParaffinEffect.cs" />
+    <Compile Include="..\..\UnityProject/Assets/Scripts/StageLight.cs" />
+    <Compile Include="..\..\UnityProject/Assets/Scripts/StageLightController.cs" />
+    <Compile Include="..\..\UnityProject/Assets/Scripts/ColorParaffinEffect.cs" />
     <Compile Include="StageLightManager.cs" />
     <Compile Include="StopwatchDebug.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

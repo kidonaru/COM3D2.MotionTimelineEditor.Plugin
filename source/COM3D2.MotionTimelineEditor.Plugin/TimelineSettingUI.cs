@@ -542,6 +542,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 },
             });
 
+            view.DrawToggle("処理時間出力", config.outputElapsedTime, 120, 20, newValue =>
+            {
+                config.outputElapsedTime = newValue;
+                config.dirty = true;
+            });
+
             if (view.DrawButton("初期化", 100, 20))
             {
                 PluginUtils.ShowConfirmDialog("共通設定を初期化しますか？", () =>

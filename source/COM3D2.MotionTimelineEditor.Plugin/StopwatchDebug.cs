@@ -7,28 +7,50 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         private readonly Stopwatch stopwatch;
 
+        private static Config config
+        {
+            get
+            {
+                return ConfigManager.config;
+            }
+        }
+
+        private bool isEnabled
+        {
+            get
+            {
+                return config.outputElapsedTime;
+            }
+        }
+
         public StopwatchDebug()
         {
-#if DEBUG
-            stopwatch = new Stopwatch();
-            stopwatch.Start();
-#endif
+            if (isEnabled)
+            {
+                stopwatch = new Stopwatch();
+                stopwatch.Start();
+            }
         }
 
-        [Conditional("DEBUG")]
         public void ProcessStart()
         {
-            stopwatch.Stop();
+            if (isEnabled)
+            {
+                stopwatch.Reset();
+                stopwatch.Start();
+            }
         }
 
-        [Conditional("DEBUG")]
         public void ProcessEnd(string processName)
         {
-            TimeSpan elapsed = stopwatch.Elapsed;
-            PluginUtils.LogDebug(processName + "：" + (int) elapsed.TotalMilliseconds + "ms");
+            if (isEnabled)
+            {
+                TimeSpan elapsed = stopwatch.Elapsed;
+                PluginUtils.Log(string.Format("{0}: {1:F3}ms", processName, elapsed.TotalMilliseconds));
 
-            stopwatch.Reset();
-            stopwatch.Start();
+                stopwatch.Reset();
+                stopwatch.Start();
+            }
         }
     }
 }

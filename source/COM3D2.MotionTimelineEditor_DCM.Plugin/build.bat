@@ -4,38 +4,34 @@ setlocal enabledelayedexpansion
 cd /d %~dp0
 
 set PLUGIN_NAME=COM3D2.MotionTimelineEditor_DCM.Plugin
-set CSC_PATH="C:\Windows\Microsoft.NET\Framework\v3.5\csc"
-set LIB_PATHS="/lib:..\..\..\..\COM3D2x64_Data\Managed" "/lib:..\..\.." "/lib:..\..\..\lib" "/lib:..\..\..\UnityInjector"
-set REFERENCES="/r:UnityEngine.dll" "/r:UnityEngine.UI.dll" "/r:UnityInjector.dll" "/r:Assembly-CSharp.dll" "/r:Assembly-CSharp-firstpass.dll" "/r:COM3D2.MotionTimelineEditor.Plugin.dll" "/r:COM3D2.DanceCameraMotion.Plugin.dll"
 set SOURCE_DIR=%~dp0
-set MAIN_FILE=%SOURCE_DIR%%PLUGIN_NAME%.cs
 
-set DEBUG_OPTION=
-IF "%~1"=="debug" (
-    set DEBUG_OPTION="/debug+"
-    set DEBUG_OPTION=!DEBUG_OPTION! /define:DEBUG
-)
+set CONFIG=Release
+if "%~1"=="debug" set CONFIG=Debug
 
-set SOURCES="%MAIN_FILE%"
+set MSBUILD_PATH="C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe"
+set OUTPUT_DIR=%SOURCE_DIR%\bin\%CONFIG%
 
-for /R %SOURCE_DIR% %%f in (*.cs) do (
-    echo Add: %%f
-    set "SOURCE_FILE=%%f"
-    if not "%%f"=="%MAIN_FILE%" set SOURCES=!SOURCES! "!SOURCE_FILE:%SOURCE_DIR%=.\!"
-)
-
-echo %CSC_PATH% /t:library %LIB_PATHS% %REFERENCES% %DEBUG_OPTION% %SOURCES%
-%CSC_PATH% /t:library %LIB_PATHS% %REFERENCES% %DEBUG_OPTION% %SOURCES%
+%MSBUILD_PATH% %PLUGIN_NAME%.csproj /t:Clean /p:Configuration=%CONFIG%
 if %ERRORLEVEL% neq 0 (
-    echo Failed build
+    echo クリーンビルドに失敗しました
     exit /b 1
 )
 
-copy *.dll ..\..\..\UnityInjector
+%MSBUILD_PATH% %PLUGIN_NAME%.csproj /p:Configuration=%CONFIG%
 if %ERRORLEVEL% neq 0 (
-    echo Failed to copy dlls
+    echo ビルドに失敗しました
     exit /b 1
 )
 
-move *.dll ..\..\UnityInjector
-del *.pdb
+copy %OUTPUT_DIR%\%PLUGIN_NAME%.dll ..\..\..\UnityInjector
+if %ERRORLEVEL% neq 0 (
+    echo dllのコピーに失敗しました
+    exit /b 1
+)
+
+copy %OUTPUT_DIR%\%PLUGIN_NAME%.dll ..\..\UnityInjector
+if %ERRORLEVEL% neq 0 (
+    echo dllのコピーに失敗しました
+    exit /b 1
+)
