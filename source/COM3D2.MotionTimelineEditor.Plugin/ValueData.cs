@@ -8,26 +8,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public int intValue
         {
-            get
-            {
-                return (int)value;
-            }
-            set
-            {
-                this.value = value;
-            }
+            get => (int)value;
+            set => this.value = value;
         }
 
         public bool boolValue
         {
-            get
-            {
-                return value != 0f;
-            }
-            set
-            {
-                this.value = value == true ? 1f : 0f;
-            }
+            get => value != 0f;
+            set => this.value = value == true ? 1f : 0f;
         }
 
         public void FromValue(ValueData value)

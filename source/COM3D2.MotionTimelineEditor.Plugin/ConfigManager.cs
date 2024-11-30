@@ -22,13 +22,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static WindowManager windowManager
-        {
-            get
-            {
-                return WindowManager.instance;
-            }
-        }
+        public static WindowManager windowManager => WindowManager.instance;
 
         private ConfigManager()
         {

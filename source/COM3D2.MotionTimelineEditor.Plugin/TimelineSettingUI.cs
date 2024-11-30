@@ -9,13 +9,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TimelineSettingUI : SubWindowUIBase
     {
-        public override string title
-        {
-            get
-            {
-                return "タイムライン 設定";
-            }
-        }
+        public override string title => "タイムライン 設定";
 
         private enum TabType
         {

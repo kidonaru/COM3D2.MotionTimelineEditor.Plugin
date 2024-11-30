@@ -4,21 +4,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataGrounding : TransformDataBase
     {
-        public override TransformType type
-        {
-            get
-            {
-                return TransformType.Grounding;
-            }
-        }
+        public override TransformType type => TransformType.Grounding;
 
-        public override int valueCount
-        {
-            get
-            {
-                return 7;
-            }
-        }
+        public override int valueCount => 7;
 
         public TransformDataGrounding()
         {
@@ -96,144 +84,60 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData isGroundingFootLValue
-        {
-            get
-            {
-                return this["isGroundingFootL"];
-            }
-        }
+        public ValueData isGroundingFootLValue => this["isGroundingFootL"];
 
-        public ValueData floorHeightValue
-        {
-            get
-            {
-                return this["floorHeight"];
-            }
-        }
+        public ValueData floorHeightValue => this["floorHeight"];
 
-        public ValueData footBaseOffsetValue
-        {
-            get
-            {
-                return this["footBaseOffset"];
-            }
-        }
+        public ValueData footBaseOffsetValue => this["footBaseOffset"];
 
-        public ValueData footStretchHeightValue
-        {
-            get
-            {
-                return this["footStretchHeight"];
-            }
-        }
+        public ValueData footStretchHeightValue => this["footStretchHeight"];
 
-        public ValueData footStretchAngleValue
-        {
-            get
-            {
-                return this["footStretchAngle"];
-            }
-        }
+        public ValueData footStretchAngleValue => this["footStretchAngle"];
 
-        public ValueData footGroundAngleValue
-        {
-            get
-            {
-                return this["footGroundAngle"];
-            }
-        }
+        public ValueData footGroundAngleValue => this["footGroundAngle"];
 
-        public ValueData isGroundingFootRValue
-        {
-            get
-            {
-                return this["isGroundingFootR"];
-            }
-        }
+        public ValueData isGroundingFootRValue => this["isGroundingFootR"];
 
         public bool isGroundingFootL
         {
-            get
-            {
-                return isGroundingFootLValue.boolValue;
-            }
-            set
-            {
-                isGroundingFootLValue.boolValue = value;
-            }
+            get => isGroundingFootLValue.boolValue;
+            set => isGroundingFootLValue.boolValue = value;
         }
 
         public float floorHeight
         {
-            get
-            {
-                return floorHeightValue.value;
-            }
-            set
-            {
-                floorHeightValue.value = value;
-            }
+            get => floorHeightValue.value;
+            set => floorHeightValue.value = value;
         }
 
         public float footBaseOffset
         {
-            get
-            {
-                return footBaseOffsetValue.value;
-            }
-            set
-            {
-                footBaseOffsetValue.value = value;
-            }
+            get => footBaseOffsetValue.value;
+            set => footBaseOffsetValue.value = value;
         }
 
         public float footStretchHeight
         {
-            get
-            {
-                return footStretchHeightValue.value;
-            }
-            set
-            {
-                footStretchHeightValue.value = value;
-            }
+            get => footStretchHeightValue.value;
+            set => footStretchHeightValue.value = value;
         }
 
         public float footStretchAngle
         {
-            get
-            {
-                return footStretchAngleValue.value;
-            }
-            set
-            {
-                footStretchAngleValue.value = value;
-            }
+            get => footStretchAngleValue.value;
+            set => footStretchAngleValue.value = value;
         }
 
         public float footGroundAngle
         {
-            get
-            {
-                return footGroundAngleValue.value;
-            }
-            set
-            {
-                footGroundAngleValue.value = value;
-            }
+            get => footGroundAngleValue.value;
+            set => footGroundAngleValue.value = value;
         }
 
         public bool isGroundingFootR
         {
-            get
-            {
-                return isGroundingFootRValue.boolValue;
-            }
-            set
-            {
-                isGroundingFootRValue.boolValue = value;
-            }
+            get => isGroundingFootRValue.boolValue;
+            set => isGroundingFootRValue.boolValue = value;
         }
     }
 }

@@ -4,85 +4,34 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataLight : TransformDataBase
     {
-        public override TransformType type
-        {
-            get
-            {
-                return TransformType.Light;
-            }
-        }
+        public override TransformType type => TransformType.Light;
 
-        public override int valueCount
-        {
-            get
-            {
-                return 16;
-            }
-        }
+        public override int valueCount => 16;
 
-        public override bool hasPosition
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasPosition => true;
 
-        public override bool hasEulerAngles
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasEulerAngles =>  true;
 
-        public override bool hasColor
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasColor =>  true;
 
-        public override bool hasEasing
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasEasing => true;
 
         public override ValueData[] positionValues
         {
-            get
-            {
-                return new ValueData[] { values[0], values[1], values[2] };
-            }
+            get => new ValueData[] { values[0], values[1], values[2] };
         }
 
         public override ValueData[] eulerAnglesValues
         {
-            get
-            {
-                return new ValueData[] { values[3], values[4], values[5] };
-            }
+            get => new ValueData[] { values[3], values[4], values[5] };
         }
 
         public override ValueData[] colorValues
         {
-            get
-            {
-                return new ValueData[] { values[6], values[7], values[8] };
-            }
+            get => new ValueData[] { values[6], values[7], values[8] };
         }
 
-        public override ValueData easingValue
-        {
-            get
-            {
-                return values[9];
-            }
-        }
+        public override ValueData easingValue => values[9];
 
         public TransformDataLight()
         {
@@ -145,124 +94,52 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData rangeValue
-        {
-            get
-            {
-                return this["range"];
-            }
-        }
+        public ValueData rangeValue => this["range"];
 
-        public ValueData intensityValue
-        {
-            get
-            {
-                return this["intensity"];
-            }
-        }
+        public ValueData intensityValue => this["intensity"];
 
-        public ValueData spotAngleValue
-        {
-            get
-            {
-                return this["spotAngle"];
-            }
-        }
+        public ValueData spotAngleValue => this["spotAngle"];
 
-        public ValueData shadowStrengthValue
-        {
-            get
-            {
-                return this["shadowStrength"];
-            }
-        }
+        public ValueData shadowStrengthValue => this["shadowStrength"];
 
-        public ValueData shadowBiasValue
-        {
-            get
-            {
-                return this["shadowBias"];
-            }
-        }
+        public ValueData shadowBiasValue => this["shadowBias"];
 
-        public ValueData maidSlotNoValue
-        {
-            get
-            {
-                return this["maidSlotNo"];
-            }
-        }
+        public ValueData maidSlotNoValue => this["maidSlotNo"];
 
         public float range
         {
-            get
-            {
-                return rangeValue.value;
-            }
-            set
-            {
-                rangeValue.value = value;
-            }
+            get => rangeValue.value;
+            set => rangeValue.value = value;
         }
 
         public float intensity
         {
-            get
-            {
-                return intensityValue.value;
-            }
-            set
-            {
-                intensityValue.value = value;
-            }
+            get => intensityValue.value;
+            set => intensityValue.value = value;
         }
 
         public float spotAngle
         {
-            get
-            {
-                return spotAngleValue.value;
-            }
-            set
-            {
-                spotAngleValue.value = value;
-            }
+            get => spotAngleValue.value;
+            set => spotAngleValue.value = value;
         }
 
         public float shadowStrength
         {
-            get
-            {
-                return shadowStrengthValue.value;
-            }
-            set
-            {
-                shadowStrengthValue.value = value;
-            }
+            get => shadowStrengthValue.value;
+            set => shadowStrengthValue.value = value;
         }
 
         public float shadowBias
         {
-            get
-            {
-                return shadowBiasValue.value;
-            }
-            set
-            {
-                shadowBiasValue.value = value;
-            }
+            get => shadowBiasValue.value;
+            set => shadowBiasValue.value = value;
         }
 
         public int maidSlotNo
         {
-            get
-            {
-                return maidSlotNoValue.intValue;
-            }
-            set
-            {
-                maidSlotNoValue.intValue = value;
-            }
+            get => maidSlotNoValue.intValue;
+            set => maidSlotNoValue.intValue = value;
         }
     }
 }

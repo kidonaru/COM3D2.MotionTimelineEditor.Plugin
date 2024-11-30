@@ -372,29 +372,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        private static TimelineManager timelineManager => TimelineManager.instance;
 
-        private static TimelineData timeline
-        {
-            get
-            {
-                return timelineManager.timeline;
-            }
-        }
+        private static TimelineData timeline => timelineManager.timeline;
 
-        private static StudioHackBase studioHack
-        {
-            get
-            {
-                return StudioHackManager.studioHack;
-            }
-        }
+        private static StudioHackBase studioHack => StudioHackManager.studioHack;
 
         private static PartsEditHackManager partsEditHackManager
         {
@@ -404,21 +386,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static MaidManager maidManager
-        {
-            get
-            {
-                return MaidManager.instance;
-            }
-        }
+        private static MaidManager maidManager => MaidManager.instance;
 
-        private static StudioModelManager modelManager
-        {
-            get
-            {
-                return StudioModelManager.instance;
-            }
-        }
+        private static StudioModelManager modelManager => StudioModelManager.instance;
 
         public MaidCache(int slotNo)
         {

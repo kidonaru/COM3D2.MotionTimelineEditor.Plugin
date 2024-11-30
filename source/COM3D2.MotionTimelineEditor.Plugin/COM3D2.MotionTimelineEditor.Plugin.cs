@@ -52,13 +52,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static MotionTimelineEditor instance { get; private set; }
 
-        private static MaidManager maidManager
-        {
-            get
-            {
-                return MaidManager.instance;
-            }
-        }
+        private static MaidManager maidManager => MaidManager.instance;
 
         private static Maid maid
         {
@@ -68,13 +62,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        private static TimelineManager timelineManager => TimelineManager.instance;
 
         private static TimelineLoadManager timelineLoadManager
         {
@@ -84,61 +72,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        protected static StudioModelManager modelManager
-        {
-            get
-            {
-                return StudioModelManager.instance;
-            }
-        }
+        protected static StudioModelManager modelManager => StudioModelManager.instance;
 
-        protected static StudioLightManager lightManager
-        {
-            get
-            {
-                return StudioLightManager.instance;
-            }
-        }
+        protected static StudioLightManager lightManager => StudioLightManager.instance;
 
-        protected static StageLightManager stageLightManager
-        {
-            get
-            {
-                return StageLightManager.instance;
-            }
-        }
+        protected static StageLightManager stageLightManager => StageLightManager.instance;
 
-        private static TimelineHistoryManager historyManager
-        {
-            get
-            {
-                return TimelineHistoryManager.instance;
-            }
-        }
+        private static TimelineHistoryManager historyManager => TimelineHistoryManager.instance;
 
-        private static BoneMenuManager boneMenuManager
-        {
-            get
-            {
-                return BoneMenuManager.Instance;
-            }
-        }
+        private static BoneMenuManager boneMenuManager => BoneMenuManager.Instance;
 
-        private static BGMManager bgmManager
-        {
-            get
-            {
-                return BGMManager.instance;
-            }
-        }
+        private static BGMManager bgmManager => BGMManager.instance;
 
-        private static MovieManager movieManager
-        {
-            get
-            {
-                return MovieManager.instance;
-            }
-        }
+        private static MovieManager movieManager => MovieManager.instance;
 
         private static StudioHackManager studioHackManager
         {
@@ -148,29 +94,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static StudioHackBase studioHack
-        {
-            get
-            {
-                return StudioHackManager.studioHack;
-            }
-        }
+        private static StudioHackBase studioHack => StudioHackManager.studioHack;
 
-        private static ModelHackManager modelHackManager
-        {
-            get
-            {
-                return ModelHackManager.instance;
-            }
-        }
+        private static ModelHackManager modelHackManager => ModelHackManager.instance;
 
-        private static WindowManager windowManager
-        {
-            get
-            {
-                return WindowManager.instance;
-            }
-        }
+        private static WindowManager windowManager => WindowManager.instance;
 
         private static ConfigManager configManager
         {
@@ -180,29 +108,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static CameraManager cameraManager
-        {
-            get
-            {
-                return CameraManager.instance;
-            }
-        }
+        private static CameraManager cameraManager =>  CameraManager.instance;
 
-        private static Config config
-        {
-            get
-            {
-                return ConfigManager.config;
-            }
-        }
+        private static Config config => ConfigManager.config;
 
-        private static ITimelineLayer currentLayer
-        {
-            get
-            {
-                return timelineManager.currentLayer;
-            }
-        }
+        private static ITimelineLayer currentLayer => timelineManager.currentLayer;
 
         private static MainWindow mainWindow
         {
@@ -212,29 +122,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static GridViewManager gridViewManager
-        {
-            get
-            {
-                return GridViewManager.instance;
-            }
-        }
+        private static GridViewManager gridViewManager => GridViewManager.instance;
 
-        private static PostEffectManager postEffectManager
-        {
-            get
-            {
-                return PostEffectManager.instance;
-            }
-        }
+        private static PostEffectManager postEffectManager => PostEffectManager.instance;
 
-        protected static TimelineBundleManager bundleManager
-        {
-            get
-            {
-                return TimelineBundleManager.instance;
-            }
-        }
+        protected static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
 
         public MotionTimelineEditor()
         {

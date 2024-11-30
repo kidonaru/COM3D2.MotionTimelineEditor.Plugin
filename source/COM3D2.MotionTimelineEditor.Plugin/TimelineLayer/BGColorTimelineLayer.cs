@@ -11,32 +11,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("背景色", 32)]
     public partial class BGColorTimelineLayer : TimelineLayerBase
     {
-        public override string className
-        {
-            get
-            {
-                return typeof(BGColorTimelineLayer).Name;
-            }
-        }
+        public override string className => typeof(BGColorTimelineLayer).Name;
 
         public static string BoneName = "BGColor";
         public static string BoneDisplayName = "背景色";
 
         private List<string> _allBoneNames = new List<string> { BoneName };
-        public override List<string> allBoneNames
-        {
-            get
-            {
-                return _allBoneNames;
-            }
-        }
+        public override List<string> allBoneNames => _allBoneNames;
 
         private static Camera camera
         {
-            get
-            {
-                return GameMain.Instance.MainCamera.camera;
-            }
+            get => GameMain.Instance.MainCamera.camera;
         }
 
         private BGColorTimelineLayer(int slotNo) : base(slotNo)

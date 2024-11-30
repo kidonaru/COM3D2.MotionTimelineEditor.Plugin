@@ -17,29 +17,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public int slotNo { get; protected set; }
 
-        public virtual bool hasSlotNo
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool hasSlotNo => false;
 
-        public virtual bool isCameraLayer
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool isCameraLayer => false;
 
-        public virtual bool isPostEffectLayer
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool isPostEffectLayer => false;
 
         protected List<FrameData> _keyFrames = new List<FrameData>();
         public List<FrameData> keyFrames
@@ -243,13 +225,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public List<IBoneMenuItem> _allMenuItems = new List<IBoneMenuItem>();
-        public List<IBoneMenuItem> allMenuItems
-        {
-            get
-            {
-                return _allMenuItems;
-            }
-        }
+        public List<IBoneMenuItem> allMenuItems => _allMenuItems;
 
         // ループ補正用の最終フレーム
         protected FrameData _dummyLastFrame = null;
@@ -265,141 +241,39 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>(32);
 
-        protected static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        protected static TimelineManager timelineManager => TimelineManager.instance;
 
-        protected static TimelineData timeline
-        {
-            get
-            {
-                return timelineManager.timeline;
-            }
-        }
+        protected static TimelineData timeline => timelineManager.timeline;
 
-        protected static ITimelineLayer currentLayer
-        {
-            get
-            {
-                return timelineManager.currentLayer;
-            }
-        }
+        protected static ITimelineLayer currentLayer => timelineManager.currentLayer;
 
-        protected static ITimelineLayer defaultLayer
-        {
-            get
-            {
-                return timeline.defaultLayer;
-            }
-        }
+        protected static ITimelineLayer defaultLayer => timeline.defaultLayer;
 
-        protected static Config config
-        {
-            get
-            {
-                return ConfigManager.config;
-            }
-        }
+        protected static Config config => ConfigManager.config;
 
-        protected static int maxFrameNo
-        {
-            get
-            {
-                return timeline.maxFrameNo;
-            }
-        }
+        protected static int maxFrameNo => timeline.maxFrameNo;
 
-        protected static bool useMuneKeyL
-        {
-            get
-            {
-                return timeline.useMuneKeyL;
-            }
-        }
+        protected static bool useMuneKeyL => timeline.useMuneKeyL;
 
-        protected static bool useMuneKeyR
-        {
-            get
-            {
-                return timeline.useMuneKeyR;
-            }
-        }
+        protected static bool useMuneKeyR => timeline.useMuneKeyR;
 
-        protected static bool isLoopAnm
-        {
-            get
-            {
-                return timeline.isLoopAnm;
-            }
-        }
+        protected static bool isLoopAnm => timeline.isLoopAnm;
 
-        protected static MaidManager maidManager
-        {
-            get
-            {
-                return MaidManager.instance;
-            }
-        }
+        protected static MaidManager maidManager => MaidManager.instance;
 
-        protected static StudioModelManager modelManager
-        {
-            get
-            {
-                return StudioModelManager.instance;
-            }
-        }
+        protected static StudioModelManager modelManager => StudioModelManager.instance;
 
-        protected static ModelHackManager modelHackManager
-        {
-            get
-            {
-                return ModelHackManager.instance;
-            }
-        }
+        protected static ModelHackManager modelHackManager => ModelHackManager.instance;
 
-        protected static StudioLightManager lightManager
-        {
-            get
-            {
-                return StudioLightManager.instance;
-            }
-        }
+        protected static StudioLightManager lightManager => StudioLightManager.instance;
 
-        protected static StageLightManager stageLightManager
-        {
-            get
-            {
-                return StageLightManager.instance;
-            }
-        }
+        protected static StageLightManager stageLightManager => StageLightManager.instance;
 
-        protected static StudioHackBase studioHack
-        {
-            get
-            {
-                return StudioHackManager.studioHack;
-            }
-        }
+        protected static StudioHackBase studioHack => StudioHackManager.studioHack;
 
-        protected static PhotoBGManager photoBGManager
-        {
-            get
-            {
-                return PhotoBGManager.instance;
-            }
-        }
+        protected static PhotoBGManager photoBGManager => PhotoBGManager.instance;
 
-        protected static TimelineBundleManager bundleManager
-        {
-            get
-            {
-                return TimelineBundleManager.instance;
-            }
-        }
+        protected static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
 
         protected TimelineLayerBase(int slotNo)
         {

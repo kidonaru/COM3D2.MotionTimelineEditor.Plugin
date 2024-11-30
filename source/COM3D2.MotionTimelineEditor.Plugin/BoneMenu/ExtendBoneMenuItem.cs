@@ -4,10 +4,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public override bool isSelectedMenu
         {
-            get
-            {
-                return base.isSelectedMenu;
-            }
+            get => base.isSelectedMenu;
             set
             {
                 base.isSelectedMenu = value;

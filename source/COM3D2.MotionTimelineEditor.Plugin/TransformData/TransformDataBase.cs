@@ -9,86 +9,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string name { get; protected set; }
         public abstract TransformType type { get; }
 
-        public virtual int valueCount
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public virtual int valueCount => 0;
 
         private ValueData[] _values = new ValueData[0];
-        public ValueData[] values
-        {
-            get
-            {
-                return _values;
-            }
-        }
+        public ValueData[] values => _values;
 
-        public virtual int strValueCount
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public virtual int strValueCount => 0;
 
         private string[] _strValues = new string[0];
-        public string[] strValues
-        {
-            get
-            {
-                return _strValues;
-            }
-        }
+        public string[] strValues => _strValues;
 
         public Vector3 position
         {
-            get
-            {
-                return positionValues.ToVector3();
-            }
-            set
-            {
-                positionValues.FromVector3(value);
-            }
+            get => positionValues.ToVector3();
+            set => positionValues.FromVector3(value);
         }
 
         public Vector3 subPosition
         {
-            get
-            {
-                return subPositionValues.ToVector3();
-            }
-            set
-            {
-                subPositionValues.FromVector3(value);
-            }
+            get => subPositionValues.ToVector3();
+            set => subPositionValues.FromVector3(value);
         }
 
         public Quaternion rotation
         {
-            get
-            {
-                return rotationValues.ToQuaternion();
-            }
-            set
-            {
-                rotationValues.FromQuaternion(value);
-            }
+            get => rotationValues.ToQuaternion();
+            set => rotationValues.FromQuaternion(value);
         }
 
         public Quaternion subRotation
         {
-            get
-            {
-                return subRotationValues.ToQuaternion();
-            }
-            set
-            {
-                subRotationValues.FromQuaternion(value);
-            }
+            get => subRotationValues.ToQuaternion();
+            set => subRotationValues.FromQuaternion(value);
         }
 
         public Vector3 eulerAngles
@@ -147,266 +99,74 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public Vector3 normalizedEulerAngles
         {
-            get
-            {
-                return GetNormalizedEulerAngles(eulerAngles);
-            }
+            get => GetNormalizedEulerAngles(eulerAngles);
         }
 
         public Vector3 normalizedSubEulerAngles
         {
-            get
-            {
-                return GetNormalizedEulerAngles(subEulerAngles);
-            }
+            get => GetNormalizedEulerAngles(subEulerAngles);
         }
 
         public Vector3 scale
         {
-            get
-            {
-                return scaleValues.ToVector3();
-            }
-            set
-            {
-                scaleValues.FromVector3(value);
-            }
+            get => scaleValues.ToVector3();
+            set => scaleValues.FromVector3(value);
         }
 
         public Color color
         {
-            get
-            {
-                return colorValues.ToColor();
-            }
-            set
-            {
-                colorValues.FromColor(value);
-            }
+            get => colorValues.ToColor();
+            set => colorValues.FromColor(value);
         }
 
         public Color subColor
         {
-            get
-            {
-                return subColorValues.ToColor();
-            }
-            set
-            {
-                subColorValues.FromColor(value);
-            }
+            get => subColorValues.ToColor();
+            set => subColorValues.FromColor(value);
         }
 
         public bool visible
         {
-            get
-            {
-                return visibleValue.boolValue;
-            }
-            set
-            {
-                visibleValue.boolValue = value;
-            }
+            get => visibleValue.boolValue;
+            set => visibleValue.boolValue = value;
         }
 
         public int easing
         {
-            get
-            {
-                return easingValue.intValue;
-            }
-            set
-            {
-                easingValue.intValue = value;
-            }
+            get => easingValue.intValue;
+            set => easingValue.intValue = value;
         }
 
-        public virtual bool hasPosition
-        {
-            get
-            {
-                return false;
-            }
-        }
-        public virtual bool hasSubPosition
-        {
-            get
-            {
-                return false;
-            }
-        }
-        public virtual bool hasRotation
-        {
-            get
-            {
-                return false;
-            }
-        }
-        public virtual bool hasSubRotation
-        {
-            get
-            {
-                return false;
-            }
-        }
-        public virtual bool hasEulerAngles
-        {
-            get
-            {
-                return false;
-            }
-        }
-        public virtual bool hasSubEulerAngles
-        {
-            get
-            {
-                return false;
-            }
-        }
-        public virtual bool hasScale
-        {
-            get
-            {
-                return false;
-            }
-        }
-        public virtual bool hasColor
-        {
-            get
-            {
-                return false;
-            }
-        }
-        public virtual bool hasSubColor
-        {
-            get
-            {
-                return false;
-            }
-        }
-        public virtual bool hasVisible
-        {
-            get
-            {
-                return false;
-            }
-        }
-        public virtual bool hasEasing
-        {
-            get
-            {
-                return false;
-            }
-        }
-        public virtual bool hasTangent
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool hasPosition => false;
+        public virtual bool hasSubPosition => false;
+        public virtual bool hasRotation => false;
+        public virtual bool hasSubRotation => false;
+        public virtual bool hasEulerAngles => false;
+        public virtual bool hasSubEulerAngles => false;
+        public virtual bool hasScale => false;
+        public virtual bool hasColor => false;
+        public virtual bool hasSubColor => false;
+        public virtual bool hasVisible => false;
+        public virtual bool hasEasing => false;
+        public virtual bool hasTangent => false;
 
-        public virtual bool isHidden
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool isHidden => false;
 
-        public virtual bool isGlobal
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool isGlobal => false;
 
-        public virtual ValueData[] positionValues
-        {
-            get
-            {
-                return new ValueData[0];
-            }
-        }
-        public virtual ValueData[] subPositionValues
-        {
-            get
-            {
-                return new ValueData[0];
-            }
-        }
-        public virtual ValueData[] rotationValues
-        {
-            get
-            {
-                return new ValueData[0];
-            }
-        }
-        public virtual ValueData[] subRotationValues
-        {
-            get
-            {
-                return new ValueData[0];
-            }
-        }
-        public virtual ValueData[] eulerAnglesValues
-        {
-            get
-            {
-                return new ValueData[0];
-            }
-        }
-        public virtual ValueData[] subEulerAnglesValues
-        {
-            get
-            {
-                return new ValueData[0];
-            }
-        }
-        public virtual ValueData[] scaleValues
-        {
-            get
-            {
-                return new ValueData[0];
-            }
-        }
-        public virtual ValueData[] colorValues
-        {
-            get
-            {
-                return new ValueData[0];
-            }
-        }
-        public virtual ValueData[] subColorValues
-        {
-            get
-            {
-                return new ValueData[0];
-            }
-        }
-        public virtual ValueData visibleValue
-        {
-            get
-            {
-                return new ValueData();
-            }
-        }
-        public virtual ValueData easingValue
-        {
-            get
-            {
-                return new ValueData();
-            }
-        }
+        public virtual ValueData[] positionValues => new ValueData[0];
+        public virtual ValueData[] subPositionValues => new ValueData[0];
+        public virtual ValueData[] rotationValues => new ValueData[0];
+        public virtual ValueData[] subRotationValues => new ValueData[0];
+        public virtual ValueData[] eulerAnglesValues => new ValueData[0];
+        public virtual ValueData[] subEulerAnglesValues => new ValueData[0];
+        public virtual ValueData[] scaleValues => new ValueData[0];
+        public virtual ValueData[] colorValues => new ValueData[0];
+        public virtual ValueData[] subColorValues => new ValueData[0];
+        public virtual ValueData visibleValue => new ValueData();
+        public virtual ValueData easingValue => new ValueData();
 
-        public virtual ValueData[] tangentValues
-        {
-            get
-            {
-                return new ValueData[0];
-            }
-        }
+        public virtual ValueData[] tangentValues => new ValueData[0];
 
         private ValueData[] _baseValues = null;
 
@@ -451,153 +211,48 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public virtual Vector3 initialPosition
-        {
-            get
-            {
-                return Vector3.zero;
-            }
-        }
+        public virtual Vector3 initialPosition => Vector3.zero;
 
-        public virtual Vector3 initialSubPosition
-        {
-            get
-            {
-                return Vector3.zero;
-            }
-        }
+        public virtual Vector3 initialSubPosition => Vector3.zero;
 
-        public virtual Quaternion initialRotation
-        {
-            get
-            {
-                return Quaternion.identity;
-            }
-        }
+        public virtual Quaternion initialRotation => Quaternion.identity;
 
-        public virtual Quaternion initialSubRotation
-        {
-            get
-            {
-                return Quaternion.identity;
-            }
-        }
+        public virtual Quaternion initialSubRotation => Quaternion.identity;
 
-        public virtual Vector3 initialEulerAngles
-        {
-            get
-            {
-                return Vector3.zero;
-            }
-        }
+        public virtual Vector3 initialEulerAngles => Vector3.zero;
 
-        public virtual Vector3 initialSubEulerAngles
-        {
-            get
-            {
-                return Vector3.zero;
-            }
-        }
+        public virtual Vector3 initialSubEulerAngles => Vector3.zero;
 
-        public virtual Vector3 initialScale
-        {
-            get
-            {
-                return Vector3.one;
-            }
-        }
+        public virtual Vector3 initialScale => Vector3.one;
 
-        public virtual Color initialColor
-        {
-            get
-            {
-                return Color.white;
-            }
-        }
+        public virtual Color initialColor => Color.white;
 
-        public virtual Color initialSubColor
-        {
-            get
-            {
-                return Color.white;
-            }
-        }
+        public virtual Color initialSubColor => Color.white;
 
-        public virtual bool initialVisible
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public virtual bool initialVisible => true;
 
-        public virtual SingleFrameType singleFrameType
-        {
-            get
-            {
-                return timeline.singleFrameType;
-            }
-        }
+        public virtual SingleFrameType singleFrameType => timeline.singleFrameType;
 
         public ValueData this[string name]
         {
-            get
-            {
-                return GetCustomValue(name);
-            }
+            get => GetCustomValue(name);
         }
 
         public static readonly string[] PositionNames = new string[] { "X", "Y", "Z" };
         public static readonly string[] RotationNames = new string[] { "RX", "RY", "RZ", "RW" };
         public static readonly string[] ScaleNames = new string[] { "SX", "SY", "SZ" };
 
-        protected static Config config
-        {
-            get
-            {
-                return ConfigManager.config;
-            }
-        }
+        protected static Config config => ConfigManager.config;
 
-        protected static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        protected static TimelineManager timelineManager => TimelineManager.instance;
 
-        protected static TimelineData timeline
-        {
-            get
-            {
-                return timelineManager.timeline;
-            }
-        }
+        protected static TimelineData timeline => timelineManager.timeline;
 
-        protected static MaidManager maidManager
-        {
-            get
-            {
-                return MaidManager.instance;
-            }
-        }
+        protected static MaidManager maidManager => MaidManager.instance;
 
-        protected static MaidCache maidCache
-        {
-            get
-            {
-                return maidManager.maidCache;
-            }
-        }
+        protected static MaidCache maidCache => maidManager.maidCache;
 
-        protected static StudioModelManager modelManager
-        {
-            get
-            {
-                return StudioModelManager.instance;
-            }
-        }
+        protected static StudioModelManager modelManager => StudioModelManager.instance;
 
         public virtual void Initialize(string name)
         {

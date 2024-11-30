@@ -24,117 +24,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        protected static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        protected static TimelineManager timelineManager => TimelineManager.instance;
 
-        protected static TimelineData timeline
-        {
-            get
-            {
-                return timelineManager.timeline;
-            }
-        }
+        protected static TimelineData timeline => timelineManager.timeline;
 
-        protected static MaidManager maidManager
-        {
-            get
-            {
-                return MaidManager.instance;
-            }
-        }
+        protected static MaidManager maidManager => MaidManager.instance;
 
-        protected static StudioModelManager modelManager
-        {
-            get
-            {
-                return StudioModelManager.instance;
-            }
-        }
+        protected static StudioModelManager modelManager => StudioModelManager.instance;
 
-        protected static StudioHackBase studioHack
-        {
-            get
-            {
-                return StudioHackManager.studioHack;
-            }
-        }
+        protected static StudioHackBase studioHack => StudioHackManager.studioHack;
         
-        protected static ModelHackManager modelHackManager
-        {
-            get
-            {
-                return ModelHackManager.instance;
-            }
-        }
+        protected static ModelHackManager modelHackManager => ModelHackManager.instance;
 
-        protected static WindowManager windowManager
-        {
-            get
-            {
-                return WindowManager.instance;
-            }
-        }
+        protected static WindowManager windowManager => WindowManager.instance;
 
-        protected static MovieManager movieManager
-        {
-            get
-            {
-                return MovieManager.instance;
-            }
-        }
+        protected static MovieManager movieManager => MovieManager.instance;
 
-        protected static BGMManager bgmManager
-        {
-            get
-            {
-                return BGMManager.instance;
-            }
-        }
+        protected static BGMManager bgmManager => BGMManager.instance;
 
-        protected static GridViewManager gridViewManager
-        {
-            get
-            {
-                return GridViewManager.instance;
-            }
-        }
+        protected static GridViewManager gridViewManager => GridViewManager.instance;
 
-        protected static CameraManager cameraManager
-        {
-            get
-            {
-                return CameraManager.instance;
-            }
-        }
+        protected static CameraManager cameraManager =>  CameraManager.instance;
 
-        protected static TimelineBundleManager bundleManager
-        {
-            get
-            {
-                return TimelineBundleManager.instance;
-            }
-        }
+        protected static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
 
-        protected static ITimelineLayer currentLayer
-        {
-            get
-            {
-                return timelineManager.currentLayer;
-            }
-        }
+        protected static ITimelineLayer currentLayer => timelineManager.currentLayer;
 
-        protected static Config config
-        {
-            get
-            {
-                return ConfigManager.config;
-            }
-        }
+        protected static Config config => ConfigManager.config;
 
         protected Rect windowRect
         {

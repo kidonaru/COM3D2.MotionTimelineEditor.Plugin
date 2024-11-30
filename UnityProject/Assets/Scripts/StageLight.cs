@@ -267,13 +267,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private MeshRenderer _meshRenderer;
 
 #if COM3D2
-        private static TimelineBundleManager bundleManager
-        {
-            get
-            {
-                return TimelineBundleManager.instance;
-            }
-        }
+        private static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
 #endif
 
         void OnEnable()

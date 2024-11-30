@@ -16,13 +16,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
     ]
     public class MotionTimelineEditor_DCM : PluginBase
     {
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        private static TimelineManager timelineManager => TimelineManager.instance;
 
         public void Awake()
         {

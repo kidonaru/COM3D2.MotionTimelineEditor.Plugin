@@ -23,29 +23,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static Config config
-        {
-            get
-            {
-                return ConfigManager.config;
-            }
-        }
+        private static Config config => ConfigManager.config;
 
-        private static Maid maid
-        {
-            get
-            {
-                return MaidManager.instance.maid;
-            }
-        }
+        private static Maid maid => MaidManager.instance.maid;
 
-        private static StudioHackBase studioHack
-        {
-            get
-            {
-                return StudioHackManager.studioHack;
-            }
-        }
+        private static StudioHackBase studioHack => StudioHackManager.studioHack;
 
         private WindowManager()
         {

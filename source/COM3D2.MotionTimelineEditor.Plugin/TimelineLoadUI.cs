@@ -6,13 +6,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TimelineLoadUI : SubWindowUIBase
     {
-        public override string title
-        {
-            get
-            {
-                return "タイムライン ロード";
-            }
-        }
+        public override string title => "タイムライン ロード";
 
         private TimelineLoadItem selectedItem
         {

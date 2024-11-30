@@ -4,37 +4,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataShapeKey : TransformDataBase
     {
-        public override TransformType type
-        {
-            get
-            {
-                return TransformType.ShapeKey;
-            }
-        }
+        public override TransformType type => TransformType.ShapeKey;
 
-        public override int valueCount
-        {
-            get
-            {
-                return 2;
-            }
-        }
+        public override int valueCount => 2;
 
-        public override bool hasEasing
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasEasing => true;
 
-        public override ValueData easingValue
-        {
-            get
-            {
-                return values[0];
-            }
-        }
+        public override ValueData easingValue => values[0];
 
         public TransformDataShapeKey()
         {
@@ -58,24 +34,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData weightValue
-        {
-            get
-            {
-                return this["weight"];
-            }
-        }
+        public ValueData weightValue => this["weight"];
 
         public float weight
         {
-            get
-            {
-                return weightValue.value;
-            }
-            set
-            {
-                weightValue.value = value;
-            }
+            get => weightValue.value;
+            set => weightValue.value = value;
         }
 
         public string slotName;

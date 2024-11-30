@@ -33,22 +33,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public string format
-        {
-            get
-            {
-                return fieldType == FloatFieldType.Int ? "F0" : "F2";
-            }
-        }
+        public string format => fieldType == FloatFieldType.Int ? "F0" : "F2";
 
         private float _value = float.NaN;
-        public float value
-        {
-            get
-            {
-                return _value;
-            }
-        }
+        public float value => _value;
 
         public void UpdateValue(float value, bool updateText)
         {
@@ -83,40 +71,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool useHSV = false;
 
         private Color _color = Color.white;
-        public Color color
-        {
-            get
-            {
-                return _color;
-            }
-        }
+        public Color color => _color;
 
         private Vector4 _hsv = Vector4.zero;
-        public Vector4 hsv
-        {
-            get
-            {
-                return _hsv;
-            }
-        }
+        public Vector4 hsv => _hsv;
 
         private Color _defaultColor = Color.white;
-        public Color defaultColor
-        {
-            get
-            {
-                return _color;
-            }
-        }
+        public Color defaultColor => _defaultColor;
 
         private Vector4 _defaultHSV = Color.white.ToHSVA();
-        public Vector4 defaultHSV
-        {
-            get
-            {
-                return _defaultHSV;
-            }
-        }
+        public Vector4 defaultHSV => _defaultHSV;
 
         public void UpdateColor(Color color, bool updateText)
         {

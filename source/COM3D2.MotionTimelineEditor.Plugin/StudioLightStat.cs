@@ -11,13 +11,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int maidSlotNo = -1;
         public Vector3 offset = Vector3.zero;
 
-        protected static MaidManager maidManager
-        {
-            get
-            {
-                return MaidManager.instance;
-            }
-        }
+        protected static MaidManager maidManager => MaidManager.instance;
 
         public MaidCache maidCache
         {
@@ -39,13 +33,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static StudioHackBase studioHack
-        {
-            get
-            {
-                return StudioHackManager.studioHack;
-            }
-        }
+        private static StudioHackBase studioHack => StudioHackManager.studioHack;
 
         public bool isFollow
         {

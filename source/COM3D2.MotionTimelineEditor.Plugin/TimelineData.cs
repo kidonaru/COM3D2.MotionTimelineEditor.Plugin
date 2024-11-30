@@ -341,29 +341,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        private static TimelineManager timelineManager => TimelineManager.instance;
 
-        private static MaidManager maidManager
-        {
-            get
-            {
-                return MaidManager.instance;
-            }
-        }
+        private static MaidManager maidManager => MaidManager.instance;
 
-        private static StudioHackBase studioHack
-        {
-            get
-            {
-                return StudioHackManager.studioHack;
-            }
-        }
+        private static StudioHackBase studioHack => StudioHackManager.studioHack;
 
         public TrackData activeTrack
         {

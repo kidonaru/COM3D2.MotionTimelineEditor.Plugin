@@ -18,10 +18,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private GUIView _parent = null;
         public GUIView parent
         {
-            get
-            {
-                return _parent;
-            }
+            get => _parent;
             set
             {
                 _parent = value;
@@ -205,21 +202,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static Texture2D texDummy = new Texture2D(1, 1);
         public static Texture2D texWhite = CreateColorTexture(Color.white);
 
-        private static Config config
-        {
-            get
-            {
-                return ConfigManager.config;
-            }
-        }
+        private static Config config => ConfigManager.config;
 
-        private static TimelineBundleManager bundleManager
-        {
-            get
-            {
-                return TimelineBundleManager.instance;
-            }
-        }
+        private static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
 
         public enum LayoutDirection
         {

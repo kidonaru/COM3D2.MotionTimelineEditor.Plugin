@@ -11,41 +11,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("カメラ", 20)]
     public class CameraTimelineLayer : TimelineLayerBase
     {
-        public override string className
-        {
-            get
-            {
-                return typeof(CameraTimelineLayer).Name;
-            }
-        }
+        public override string className => typeof(CameraTimelineLayer).Name;
 
-        public override bool isCameraLayer
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool isCameraLayer => true;
 
-        private static Camera subCamera
-        {
-            get
-            {
-                return studioHack.subCamera;
-            }
-        }
+        private static Camera subCamera => studioHack.subCamera;
 
         public static string CameraBoneName = "camera";
         public static string CameraDisplayName = "カメラ";
 
         private List<string> _allBoneNames = new List<string> { CameraBoneName };
-        public override List<string> allBoneNames
-        {
-            get
-            {
-                return _allBoneNames;
-            }
-        }
+        public override List<string> allBoneNames => _allBoneNames;
 
         private CameraTimelineLayer(int slotNo) : base(slotNo)
         {

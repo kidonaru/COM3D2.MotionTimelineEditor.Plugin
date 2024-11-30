@@ -13,37 +13,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public Dictionary<string, BoneData>.ValueCollection bones
         {
-            get
-            {
-                return _boneMap.Values;
-            }
+            get => _boneMap.Values;
         }
 
         public Dictionary<string, BoneData>.KeyCollection boneNames
         {
-            get
-            {
-                return _boneMap.Keys;
-            }
+            get => _boneMap.Keys;
         }
 
         private Dictionary<string, BoneData> _boneMap = null;
 
         public bool isFullBone
         {
-            get
-            {
-                return _boneMap.Count == parentLayer.allBoneNames.Count;
-            }
+            get => _boneMap.Count == parentLayer.allBoneNames.Count;
         }
 
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        private static TimelineManager timelineManager => TimelineManager.instance;
 
         public FrameData(ITimelineLayer parentLayer)
         {

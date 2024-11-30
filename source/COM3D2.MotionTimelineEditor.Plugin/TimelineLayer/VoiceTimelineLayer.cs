@@ -11,33 +11,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("メイドボイス", 14)]
     public partial class VoiceTimelineLayer : TimelineLayerBase
     {
-        public override string className
-        {
-            get
-            {
-                return typeof(VoiceTimelineLayer).Name;
-            }
-        }
+        public override string className => typeof(VoiceTimelineLayer).Name;
 
-        public override bool hasSlotNo
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasSlotNo => true;
 
         public static string VoiceBoneName = "Voice";
         public static string VoiceDisplayName = "ボイス";
 
         private List<string> _allBoneNames = new List<string> { VoiceBoneName };
-        public override List<string> allBoneNames
-        {
-            get
-            {
-                return _allBoneNames;
-            }
-        }
+        public override List<string> allBoneNames => _allBoneNames;
 
         private VoiceTimelineLayer(int slotNo) : base(slotNo)
         {

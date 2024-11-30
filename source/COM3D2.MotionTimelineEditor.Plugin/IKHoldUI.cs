@@ -7,21 +7,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class IKHoldUI : SubWindowUIBase
     {
-        public override string title
-        {
-            get
-            {
-                return "IK固定";
-            }
-        }
+        public override string title => "IK固定";
 
-        private static MaidCache maidCache
-        {
-            get
-            {
-                return maidManager.maidCache;
-            }
-        }
+        private static MaidCache maidCache => maidManager.maidCache;
 
         public IKHoldUI(SubWindow subWindow) : base(subWindow)
         {

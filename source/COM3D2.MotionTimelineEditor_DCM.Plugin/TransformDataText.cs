@@ -31,45 +31,15 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override bool hasPosition
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasPosition => true;
 
-        public override bool hasEulerAngles
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasEulerAngles =>  true;
 
-        public override bool hasScale
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasScale => true;
 
-        public override bool hasColor
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasColor =>  true;
 
-        public override bool hasEasing
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasEasing => true;
 
         public override ValueData[] positionValues
         {

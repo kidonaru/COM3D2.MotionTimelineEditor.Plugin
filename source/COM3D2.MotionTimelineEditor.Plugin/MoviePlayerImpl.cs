@@ -138,53 +138,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        private static TimelineManager timelineManager => TimelineManager.instance;
 
-        private static TimelineData timeline
-        {
-            get
-            {
-                return timelineManager.timeline;
-            }
-        }
+        private static TimelineData timeline => timelineManager.timeline;
 
-        private static ITimelineLayer currentLayer
-        {
-            get
-            {
-                return timelineManager.currentLayer;
-            }
-        }
+        private static ITimelineLayer currentLayer => timelineManager.currentLayer;
 
-        private static StudioHackBase studioHack
-        {
-            get
-            {
-                return StudioHackManager.studioHack;
-            }
-        }
+        private static StudioHackBase studioHack => StudioHackManager.studioHack;
 
-        private static Config config
-        {
-            get
-            {
-                return ConfigManager.config;
-            }
-        }
+        private static Config config => ConfigManager.config;
 
-        private static CameraManager cameraManager
-        {
-            get
-            {
-                return CameraManager.instance;
-            }
-        }
+        private static CameraManager cameraManager =>  CameraManager.instance;
 
         public void Awake()
         {

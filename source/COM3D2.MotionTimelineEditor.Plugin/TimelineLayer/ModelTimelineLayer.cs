@@ -11,21 +11,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("モデル", 21)]
     public class ModelTimelineLayer : ModelTimelineLayerBase
     {
-        public override string className
-        {
-            get
-            {
-                return typeof(ModelTimelineLayer).Name;
-            }
-        }
+        public override string className => typeof(ModelTimelineLayer).Name;
 
-        public override List<string> allBoneNames
-        {
-            get
-            {
-                return modelManager.modelNames;
-            }
-        }
+        public override List<string> allBoneNames => modelManager.modelNames;
 
         private ModelTimelineLayer(int slotNo) : base(slotNo)
         {

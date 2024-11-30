@@ -8,21 +8,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("ポストエフェクト", 44)]
     public class PostEffectTimelineLayer : TimelineLayerBase
     {
-        public override string className
-        {
-            get
-            {
-                return typeof(PostEffectTimelineLayer).Name;
-            }
-        }
+        public override string className => typeof(PostEffectTimelineLayer).Name;
 
-        public override bool isPostEffectLayer
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool isPostEffectLayer => true;
 
         private List<string> _allBoneNames = null;
         public override List<string> allBoneNames
@@ -39,13 +27,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static PostEffectManager postEffectManager
-        {
-            get
-            {
-                return PostEffectManager.instance;
-            }
-        }
+        private static PostEffectManager postEffectManager => PostEffectManager.instance;
 
         private PostEffectTimelineLayer(int slotNo) : base(slotNo)
         {

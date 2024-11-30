@@ -26,10 +26,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static PartsEditHackManager partsEditHackManager
         {
-            get
-            {
-                return PartsEditHackManager.instance;
-            }
+            get => PartsEditHackManager.instance;
         }
 
         public ExtendBoneCache()

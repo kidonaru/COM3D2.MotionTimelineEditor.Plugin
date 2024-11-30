@@ -5,93 +5,36 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataStageLight : TransformDataBase
     {
-        public override TransformType type
-        {
-            get
-            {
-                return TransformType.StageLight;
-            }
-        }
+        public override TransformType type => TransformType.StageLight;
 
-        public override int valueCount
-        {
-            get
-            {
-                return 22;
-            }
-        }
+        public override int valueCount => 22;
 
-        public override bool hasPosition
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasPosition => true;
 
-        public override bool hasRotation
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasRotation => true;
 
-        public override bool hasColor
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasColor =>  true;
 
-        public override bool hasVisible
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasVisible => true;
 
-        public override bool hasTangent
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasTangent => true;
 
         public override ValueData[] positionValues
         {
-            get
-            {
-                return new ValueData[] { values[0], values[1], values[2] };
-            }
+            get => new ValueData[] { values[0], values[1], values[2] };
         }
 
         public override ValueData[] rotationValues
         {
-            get
-            {
-                return new ValueData[] { values[3], values[4], values[5], values[6] };
-            }
+            get => new ValueData[] { values[3], values[4], values[5], values[6] };
         }
 
         public override ValueData[] colorValues
         {
-            get
-            {
-                return new ValueData[] { values[7], values[8], values[9], values[10] };
-            }
+            get => new ValueData[] { values[7], values[8], values[9], values[10] };
         }
 
-        public override ValueData visibleValue
-        {
-            get
-            {
-                return values[11];
-            }
-        }
+        public override ValueData visibleValue => values[11];
 
         private List<ValueData> _tangentValues = null;
         public override ValueData[] tangentValues
@@ -112,34 +55,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override Vector3 initialPosition
         {
-            get
-            {
-                return new Vector3(0f, 10f, 0f);
-            }
+            get => new Vector3(0f, 10f, 0f);
         }
 
         public override Quaternion initialRotation
         {
-            get
-            {
-                return Quaternion.Euler(90f, 0f, 0f);
-            }
+            get => Quaternion.Euler(90f, 0f, 0f);
         }
 
         public override Quaternion initialSubRotation
         {
-            get
-            {
-                return Quaternion.Euler(90f, 0f, 0f);
-            }
+            get => Quaternion.Euler(90f, 0f, 0f);
         }
 
         public override Color initialColor
         {
-            get
-            {
-                return new Color(1f, 1f, 1f, 0.3f);
-            }
+            get => new Color(1f, 1f, 1f, 0.3f);
         }
 
         public TransformDataStageLight()
@@ -235,204 +166,84 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData spotAngleValue
-        {
-            get
-            {
-                return this["spotAngle"];
-            }
-        }
+        public ValueData spotAngleValue => this["spotAngle"];
 
-        public ValueData spotRangeValue
-        {
-            get
-            {
-                return this["spotRange"];
-            }
-        }
+        public ValueData spotRangeValue => this["spotRange"];
 
-        public ValueData rangeMultiplierValue
-        {
-            get
-            {
-                return this["rangeMultiplier"];
-            }
-        }
+        public ValueData rangeMultiplierValue => this["rangeMultiplier"];
 
-        public ValueData falloffExpValue
-        {
-            get
-            {
-                return this["falloffExp"];
-            }
-        }
+        public ValueData falloffExpValue => this["falloffExp"];
 
-        public ValueData noiseStrengthValue
-        {
-            get
-            {
-                return this["noiseStrength"];
-            }
-        }
+        public ValueData noiseStrengthValue => this["noiseStrength"];
 
-        public ValueData noiseScaleValue
-        {
-            get
-            {
-                return this["noiseScale"];
-            }
-        }
+        public ValueData noiseScaleValue => this["noiseScale"];
 
-        public ValueData coreRadiusValue
-        {
-            get
-            {
-                return this["coreRadius"];
-            }
-        }
+        public ValueData coreRadiusValue => this["coreRadius"];
 
-        public ValueData offsetRangeValue
-        {
-            get
-            {
-                return this["offsetRange"];
-            }
-        }
+        public ValueData offsetRangeValue => this["offsetRange"];
 
-        public ValueData segmentAngleValue
-        {
-            get
-            {
-                return this["segmentAngle"];
-            }
-        }
+        public ValueData segmentAngleValue => this["segmentAngle"];
 
-        public ValueData segmentRangeValue
-        {
-            get
-            {
-                return this["segmentRange"];
-            }
-        }
+        public ValueData segmentRangeValue => this["segmentRange"];
 
         public float spotAngle
         {
-            get
-            {
-                return spotAngleValue.value;
-            }
-            set
-            {
-                spotAngleValue.value = value;
-            }
+            get => spotAngleValue.value;
+            set => spotAngleValue.value = value;
         }
 
         public float spotRange
         {
-            get
-            {
-                return spotRangeValue.value;
-            }
-            set
-            {
-                spotRangeValue.value = value;
-            }
+            get => spotRangeValue.value;
+            set => spotRangeValue.value = value;
         }
 
         public float rangeMultiplier
         {
-            get
-            {
-                return rangeMultiplierValue.value;
-            }
-            set
-            {
-                rangeMultiplierValue.value = value;
-            }
+            get => rangeMultiplierValue.value;
+            set => rangeMultiplierValue.value = value;
         }
 
         public float falloffExp
         {
-            get
-            {
-                return falloffExpValue.value;
-            }
-            set
-            {
-                falloffExpValue.value = value;
-            }
+            get => falloffExpValue.value;
+            set => falloffExpValue.value = value;
         }
 
         public float noiseStrength
         {
-            get
-            {
-                return noiseStrengthValue.value;
-            }
-            set
-            {
-                noiseStrengthValue.value = value;
-            }
+            get => noiseStrengthValue.value;
+            set => noiseStrengthValue.value = value;
         }
 
         public float noiseScale
         {
-            get
-            {
-                return noiseScaleValue.value;
-            }
-            set
-            {
-                noiseScaleValue.value = value;
-            }
+            get => noiseScaleValue.value;
+            set => noiseScaleValue.value = value;
         }
 
         public float coreRadius
         {
-            get
-            {
-                return coreRadiusValue.value;
-            }
-            set
-            {
-                coreRadiusValue.value = value;
-            }
+            get => coreRadiusValue.value;
+            set => coreRadiusValue.value = value;
         }
 
         public float offsetRange
         {
-            get
-            {
-                return offsetRangeValue.value;
-            }
-            set
-            {
-                offsetRangeValue.value = value;
-            }
+            get => offsetRangeValue.value;
+            set => offsetRangeValue.value = value;
         }
 
         public float segmentAngle
         {
-            get
-            {
-                return segmentAngleValue.value;
-            }
-            set
-            {
-                segmentAngleValue.value = value;
-            }
+            get => segmentAngleValue.value;
+            set => segmentAngleValue.value = value;
         }
 
         public int segmentRange
         {
-            get
-            {
-                return segmentRangeValue.intValue;
-            }
-            set
-            {
-                segmentRangeValue.intValue = value;
-            }
+            get => segmentRangeValue.intValue;
+            set => segmentRangeValue.intValue = value;
         }
 
         public void FromStageLight(StageLight light)

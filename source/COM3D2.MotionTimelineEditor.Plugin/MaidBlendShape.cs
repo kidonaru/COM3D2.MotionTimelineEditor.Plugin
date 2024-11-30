@@ -12,14 +12,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             public float weight
             {
-                get
-                {
-                    return morph.GetBlendValues(shapeKeyIndex);
-                }
-                set
-                {
-                    morph.SetBlendValues(shapeKeyIndex, value);
-                }
+                get => morph.GetBlendValues(shapeKeyIndex);
+                set => morph.SetBlendValues(shapeKeyIndex, value);
             }
         }
 

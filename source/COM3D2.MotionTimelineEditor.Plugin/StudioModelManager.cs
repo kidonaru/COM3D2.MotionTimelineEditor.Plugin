@@ -62,21 +62,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static ModelHackManager modelHackManager
-        {
-            get
-            {
-                return ModelHackManager.instance;
-            }
-        }
+        private static ModelHackManager modelHackManager => ModelHackManager.instance;
 
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        private static TimelineManager timelineManager => TimelineManager.instance;
 
         private Dictionary<string, OfficialObjectInfo> _officialObjectLabelMap = null;
         private Dictionary<string, OfficialObjectInfo> _bgObjectFileNameMap = null;

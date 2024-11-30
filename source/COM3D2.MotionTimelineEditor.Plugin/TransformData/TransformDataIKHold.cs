@@ -4,61 +4,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataIKHold : TransformDataBase
     {
-        public override TransformType type
-        {
-            get
-            {
-                return TransformType.IKHold;
-            }
-        }
+        public override TransformType type => TransformType.IKHold;
 
-        public override int valueCount
-        {
-            get
-            {
-                return 5;
-            }
-        }
+        public override int valueCount => 5;
 
-        public override bool hasPosition
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasPosition => true;
 
-        public override bool hasTangent
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasTangent => true;
 
         public override ValueData[] positionValues
         {
-            get
-            {
-                return new ValueData[] { values[0], values[1], values[2] };
-            }
+            get => new ValueData[] { values[0], values[1], values[2] };
         }
 
-        public override ValueData[] tangentValues
-        {
-            get
-            {
-                return positionValues;
-            }
-        }
+        public override ValueData[] tangentValues => positionValues;
 
-        public override bool isGlobal
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool isGlobal => true;
 
         public TransformDataIKHold()
         {
@@ -91,44 +52,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData isHoldValue
-        {
-            get
-            {
-                return this["isHold"];
-            }
-        }
+        public ValueData isHoldValue => this["isHold"];
 
-        public ValueData isAnimeValue
-        {
-            get
-            {
-                return this["isAnime"];
-            }
-        }
+        public ValueData isAnimeValue => this["isAnime"];
 
         public bool isHold
         {
-            get
-            {
-                return isHoldValue.boolValue;
-            }
-            set
-            {
-                isHoldValue.boolValue = value;
-            }
+            get => isHoldValue.boolValue;
+            set => isHoldValue.boolValue = value;
         }
 
         public bool isAnime
         {
-            get
-            {
-                return isAnimeValue.boolValue;
-            }
-            set
-            {
-                isAnimeValue.boolValue = value;
-            }
+            get => isAnimeValue.boolValue;
+            set => isAnimeValue.boolValue = value;
         }
     }
 }

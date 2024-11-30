@@ -143,29 +143,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static Config config
-        {
-            get
-            {
-                return ConfigManager.config;
-            }
-        }
+        public static Config config => ConfigManager.config;
 
-        private static StudioHackBase studioHack
-        {
-            get
-            {
-                return StudioHackManager.studioHack;
-            }
-        }
+        private static StudioHackBase studioHack => StudioHackManager.studioHack;
 
-        private static MaidManager maidManager
-        {
-            get
-            {
-                return MaidManager.instance;
-            }
-        }
+        private static MaidManager maidManager => MaidManager.instance;
 
         private static Maid maid
         {
@@ -175,13 +157,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static WindowManager windowManager
-        {
-            get
-            {
-                return WindowManager.instance;
-            }
-        }
+        private static WindowManager windowManager => WindowManager.instance;
 
         public SubWindow(int windowIndex)
         {

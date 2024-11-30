@@ -23,13 +23,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override bool hasSlotNo
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasSlotNo => true;
 
         public override List<string> allBoneNames
         {

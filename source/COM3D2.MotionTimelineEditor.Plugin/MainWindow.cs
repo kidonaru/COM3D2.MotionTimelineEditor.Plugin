@@ -26,53 +26,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public readonly static int HEADER_HEIGHT = 200;
         public readonly static int EASY_EDIT_WINDOW_HEIGHT = 260;
 
-        private static StudioHackBase studioHack
-        {
-            get
-            {
-                return StudioHackManager.studioHack;
-            }
-        }
+        private static StudioHackBase studioHack => StudioHackManager.studioHack;
 
-        private static MaidManager maidManager
-        {
-            get
-            {
-                return MaidManager.instance;
-            }
-        }
+        private static MaidManager maidManager => MaidManager.instance;
 
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        private static TimelineManager timelineManager => TimelineManager.instance;
 
-        private static TimelineData timeline
-        {
-            get
-            {
-                return timelineManager.timeline;
-            }
-        }
+        private static TimelineData timeline => timelineManager.timeline;
 
-        private static ITimelineLayer currentLayer
-        {
-            get
-            {
-                return timelineManager.currentLayer;
-            }
-        }
+        private static ITimelineLayer currentLayer => timelineManager.currentLayer;
 
-        private static Config config
-        {
-            get
-            {
-                return ConfigManager.config;
-            }
-        }
+        private static Config config => ConfigManager.config;
 
         private static string anmName
         {
@@ -96,13 +60,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static WindowManager windowManager
-        {
-            get
-            {
-                return WindowManager.instance;
-            }
-        }
+        public static WindowManager windowManager => WindowManager.instance;
 
         private static SubWindow subWindow
         {
@@ -112,13 +70,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static BoneMenuManager boneMenuManager
-        {
-            get
-            {
-                return BoneMenuManager.Instance;
-            }
-        }
+        private static BoneMenuManager boneMenuManager => BoneMenuManager.Instance;
 
         private static int timelineViewHeight
         {

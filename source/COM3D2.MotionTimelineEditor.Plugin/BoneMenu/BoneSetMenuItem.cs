@@ -10,10 +10,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool isSelectedMenu
         {
-            get
-            {
-                return children.All(item => item.isSelectedMenu);
-            }
+            get => children.All(item => item.isSelectedMenu);
             set
             {
                 foreach (var menuItem in children)
@@ -26,23 +23,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private bool _isVisibleMenu = true;
         public bool isVisibleMenu
         {
-            get
-            {
-                return _isVisibleMenu;
-            }
-            set
-            {
-                _isVisibleMenu = value;
-            }
+            get => _isVisibleMenu;
+            set => _isVisibleMenu = value;
         }
 
         private bool _isOpenMenu = true;
         public bool isOpenMenu
         {
-            get
-            {
-                return _isOpenMenu;
-            }
+            get => _isOpenMenu;
             set
             {
                 if (isOpenMenu == value)
@@ -55,49 +43,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public bool isSetMenu
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public bool isSetMenu => true;
 
         public IBoneMenuItem parent { get; set; }
 
         public List<IBoneMenuItem> children { get; private set; }
 
-        private static BoneMenuManager boneMenuManager
-        {
-            get
-            {
-                return BoneMenuManager.Instance;
-            }
-        }
+        private static BoneMenuManager boneMenuManager => BoneMenuManager.Instance;
 
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        private static TimelineManager timelineManager => TimelineManager.instance;
 
-        protected static ITimelineLayer currentLayer
-        {
-            get
-            {
-                return timelineManager.currentLayer;
-            }
-        }
+        protected static ITimelineLayer currentLayer => timelineManager.currentLayer;
 
-        private static Config config
-        {
-            get
-            {
-                return ConfigManager.config;
-            }
-        }
+        private static Config config => ConfigManager.config;
 
         public BoneSetMenuItem(string name, string displayName)
         {

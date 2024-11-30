@@ -9,37 +9,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public ITransformData transform { get; private set; }
 
-        public string name
-        {
-            get
-            {
-                return transform.name;
-            }
-        }
+        public string name => transform.name;
 
         public IKManager.BoneType boneType
         {
-            get
-            {
-                return BoneUtils.GetBoneTypeByName(transform.name);
-            }
+            get => BoneUtils.GetBoneTypeByName(transform.name);
         }
 
         public int frameNo
         {
-            get
-            {
-                return parentFrame != null ? parentFrame.frameNo : -1;
-            }
+            get => parentFrame != null ? parentFrame.frameNo : -1;
         }
 
-        public ITimelineLayer parentLayer
-        {
-            get
-            {
-                return parentFrame.parentLayer;
-            }
-        }
+        public ITimelineLayer parentLayer => parentFrame.parentLayer;
 
         public BoneData(FrameData parentFrame)
         {

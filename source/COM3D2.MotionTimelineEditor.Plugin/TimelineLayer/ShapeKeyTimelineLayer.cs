@@ -11,21 +11,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("メイドシェイプ", 13)]
     public partial class ShapeKeyTimelineLayer : TimelineLayerBase
     {
-        public override string className
-        {
-            get
-            {
-                return typeof(ShapeKeyTimelineLayer).Name;
-            }
-        }
+        public override string className => typeof(ShapeKeyTimelineLayer).Name;
 
-        public override bool hasSlotNo
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasSlotNo => true;
 
         private List<string> _allBoneNames = null;
         public override List<string> allBoneNames

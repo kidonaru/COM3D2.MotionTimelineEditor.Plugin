@@ -20,14 +20,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlArrayItem("Value")]
         public float[] inTangents
         {
-            get
-            {
-                return _inTangents;
-            }
-            set
-            {
-                _inTangents = value;
-            }
+            get => _inTangents;
+            set => _inTangents = value;
         }
 
         [XmlIgnore]
@@ -37,14 +31,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlArrayItem("Value")]
         public float[] outTangents
         {
-            get
-            {
-                return _outTangents;
-            }
-            set
-            {
-                _outTangents = value;
-            }
+            get => _outTangents;
+            set => _outTangents = value;
         }
 
         [XmlElement("InSmoothBit")]
@@ -60,14 +48,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlArrayItem("Value")]
         public string[] strValues
         {
-            get
-            {
-                return _strValues;
-            }
-            set
-            {
-                _strValues = value;
-            }
+            get => _strValues;
+            set => _strValues = value;
         }
 
         public TransformXml()

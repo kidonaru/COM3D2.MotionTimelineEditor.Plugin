@@ -5,29 +5,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataVoice : TransformDataBase
     {
-        public override TransformType type
-        {
-            get
-            {
-                return TransformType.Voice;
-            }
-        }
+        public override TransformType type => TransformType.Voice;
 
-        public override int valueCount
-        {
-            get
-            {
-                return 4;
-            }
-        }
+        public override int valueCount => 4;
 
-        public override int strValueCount
-        {
-            get
-            {
-                return 2;
-            }
-        }
+        public override int strValueCount => 2;
 
         public TransformDataVoice()
         {
@@ -103,108 +85,48 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return StrValueInfoMap;
         }
 
-        public ValueData startTimeValue
-        {
-            get
-            {
-                return this["startTime"];
-            }
-        }
+        public ValueData startTimeValue => this["startTime"];
 
-        public ValueData lengthValue
-        {
-            get
-            {
-                return this["length"];
-            }
-        }
+        public ValueData lengthValue => this["length"];
 
-        public ValueData fadeTimeValue
-        {
-            get
-            {
-                return this["fadeTime"];
-            }
-        }
+        public ValueData fadeTimeValue => this["fadeTime"];
 
-        public ValueData pitchValue
-        {
-            get
-            {
-                return this["pitch"];
-            }
-        }
+        public ValueData pitchValue => this["pitch"];
 
         public string voiceName
         {
-            get
-            {
-                return GetStrValue("voiceName");
-            }
-            set
-            {
-                SetStrValue("voiceName", value);
-            }
+            get => GetStrValue("voiceName");
+            set => SetStrValue("voiceName", value);
         }
 
         public string loopVoiceName
         {
-            get
-            {
-                return GetStrValue("loopVoiceName");
-            }
-            set
-            {
-                SetStrValue("loopVoiceName", value);
-            }
+            get => GetStrValue("loopVoiceName");
+            set => SetStrValue("loopVoiceName", value);
         }
 
         public float startTime
         {
-            get
-            {
-                return startTimeValue.value;
-            }
-            set
-            {
-                startTimeValue.value = value;
-            }
+            get => startTimeValue.value;
+            set => startTimeValue.value = value;
         }
 
         public float length
         {
-            get
-            {
-                return lengthValue.value;
-            }
-            set
-            {
-                lengthValue.value = value;
-            }
+            get => lengthValue.value;
+            set => lengthValue.value = value;
         }
 
         public float fadeTime
         {
-            get
-            {
-                return fadeTimeValue.value;
-            }
-            set
-            {
-                fadeTimeValue.value = value;
-            }
+            get => fadeTimeValue.value;
+            set => fadeTimeValue.value = value;
         }
 
         public float pitch
         {
-            get
-            {
-                return pitchValue.value;
-            }
-            set
-            {
-                pitchValue.value = value;
-            }
+            get => pitchValue.value;
+            set => pitchValue.value = value;
         }
     }
 }

@@ -4,37 +4,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataRotation : TransformDataBase
     {
-        public override TransformType type
-        {
-            get
-            {
-                return TransformType.Rotation;
-            }
-        }
+        public override TransformType type => TransformType.Rotation;
 
-        public override int valueCount
-        {
-            get
-            {
-                return 4;
-            }
-        }
+        public override int valueCount => 4;
 
-        public override bool hasRotation
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasRotation => true;
 
-        public override bool hasTangent
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasTangent => true;
 
         public override bool isHidden
         {
@@ -61,26 +37,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override ValueData[] rotationValues
         {
-            get
-            {
-                return new ValueData[] { values[0], values[1], values[2], values[3] };
-            }
+            get => new ValueData[] { values[0], values[1], values[2], values[3] };
         }
 
-        public override ValueData[] tangentValues
-        {
-            get
-            {
-                return values;
-            }
-        }
+        public override ValueData[] tangentValues => values;
 
         public override Quaternion initialRotation
         {
-            get
-            {
-                return Quaternion.Euler(initialEulerAngles);
-            }
+            get => Quaternion.Euler(initialEulerAngles);
         }
 
         public override Vector3 initialEulerAngles
@@ -95,13 +59,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override SingleFrameType singleFrameType
-        {
-            get
-            {
-                return SingleFrameType.None;
-            }
-        }
+        public override SingleFrameType singleFrameType => SingleFrameType.None;
 
         public TransformDataRotation()
         {

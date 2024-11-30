@@ -11,95 +11,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool isVisibleMenu
         {
-            get
-            {
-                return parent == null || parent.isOpenMenu;
-            }
+            get => parent == null || parent.isOpenMenu;
             set {}
         }
 
         public bool isOpenMenu
         {
-            get
-            {
-                return false;
-            }
+            get => false;
             set {}
         }
 
         public bool isSetMenu
         {
-            get
-            {
-                return false;
-            }
+            get => false;
         }
 
         public IBoneMenuItem parent { get; set; }
 
-        public List<IBoneMenuItem> children
-        {
-            get
-            {
-                return null;
-            }
-        }
+        public List<IBoneMenuItem> children => null;
 
-        protected static StudioHackBase studioHack
-        {
-            get
-            {
-                return StudioHackManager.studioHack;
-            }
-        }
+        protected static StudioHackBase studioHack => StudioHackManager.studioHack;
 
-        protected static BoneMenuManager boneMenuManager
-        {
-            get
-            {
-                return BoneMenuManager.Instance;
-            }
-        }
+        protected static BoneMenuManager boneMenuManager => BoneMenuManager.Instance;
 
-        protected static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        protected static TimelineManager timelineManager => TimelineManager.instance;
 
-        protected static ITimelineLayer currentLayer
-        {
-            get
-            {
-                return timelineManager.currentLayer;
-            }
-        }
+        protected static ITimelineLayer currentLayer => timelineManager.currentLayer;
 
-        protected static StudioModelManager modelManager
-        {
-            get
-            {
-                return StudioModelManager.instance;
-            }
-        }
+        protected static StudioModelManager modelManager => StudioModelManager.instance;
 
-        protected static IPartsEditHack partsEditHack
-        {
-            get
-            {
-                return PartsEditHackManager.instance.partsEditHack;
-            }
-        }
+        protected static IPartsEditHack partsEditHack => PartsEditHackManager.instance.partsEditHack;
 
-        protected static MaidCache maidCache
-        {
-            get
-            {
-                return MaidManager.instance.maidCache;
-            }
-        }
+        protected static MaidCache maidCache => MaidManager.instance.maidCache;
 
         public BoneMenuItem(string name, string displayName)
         {

@@ -5,45 +5,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataBGColor : TransformDataBase
     {
-        public override TransformType type
-        {
-            get
-            {
-                return TransformType.BGColor;
-            }
-        }
+        public override TransformType type => TransformType.BGColor;
 
-        public override int valueCount
-        {
-            get
-            {
-                return 3;
-            }
-        }
+        public override int valueCount => 3;
 
-        public override bool hasColor
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasColor =>  true;
 
         public override ValueData[] colorValues
         {
-            get
-            {
-                return new ValueData[] { values[0], values[1], values[2] };
-            }
+            get => new ValueData[] { values[0], values[1], values[2] };
         }
 
-        public override Color initialColor
-        {
-            get
-            {
-                return Color.black;
-            }
-        }
+        public override Color initialColor => Color.black;
 
         public TransformDataBGColor()
         {

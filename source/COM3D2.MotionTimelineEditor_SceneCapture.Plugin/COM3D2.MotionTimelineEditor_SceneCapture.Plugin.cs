@@ -13,13 +13,7 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
     ]
     public class MotionTimelineEditor_SceneCapture : PluginBase
     {
-        private static ModelHackManager modelHackManager
-        {
-            get
-            {
-                return ModelHackManager.instance;
-            }
-        }
+        private static ModelHackManager modelHackManager => ModelHackManager.instance;
 
         public void Awake()
         {

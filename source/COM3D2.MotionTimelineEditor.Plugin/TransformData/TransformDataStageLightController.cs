@@ -5,141 +5,57 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataStageLightController : TransformDataBase
     {
-        public override TransformType type
-        {
-            get
-            {
-                return TransformType.StageLightController;
-            }
-        }
+        public override TransformType type => TransformType.StageLightController;
 
-        public override int valueCount
-        {
-            get
-            {
-                return 36;
-            }
-        }
+        public override int valueCount => 36;
 
-        public override bool hasPosition
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasPosition => true;
 
-        public override bool hasSubPosition
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasSubPosition => true;
 
-        public override bool hasEulerAngles
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasEulerAngles =>  true;
 
-        public override bool hasSubEulerAngles
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasSubEulerAngles => true;
 
-        public override bool hasColor
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasColor =>  true;
 
-        public override bool hasSubColor
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasSubColor => true;
 
-        public override bool hasVisible
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasVisible => true;
 
-        public override bool hasTangent
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasTangent => true;
 
         public override ValueData[] positionValues
         {
-            get
-            {
-                return new ValueData[] { values[0], values[1], values[2] };
-            }
+            get => new ValueData[] { values[0], values[1], values[2] };
         }
 
         public override ValueData[] subPositionValues
         {
-            get
-            {
-                return new ValueData[] { values[3], values[4], values[5] };
-            }
+            get => new ValueData[] { values[3], values[4], values[5] };
         }
 
         public override ValueData[] eulerAnglesValues
         {
-            get
-            {
-                return new ValueData[] { values[6], values[7], values[8] };
-            }
+            get => new ValueData[] { values[6], values[7], values[8] };
         }
 
         public override ValueData[] subEulerAnglesValues
         {
-            get
-            {
-                return new ValueData[] { values[9], values[10], values[11] };
-            }
+            get => new ValueData[] { values[9], values[10], values[11] };
         }
 
         public override ValueData[] colorValues
         {
-            get
-            {
-                return new ValueData[] { values[12], values[13], values[14], values[15] };
-            }
+            get => new ValueData[] { values[12], values[13], values[14], values[15] };
         }
 
         public override ValueData[] subColorValues
         {
-            get
-            {
-                return new ValueData[] { values[16], values[17], values[18], values[19] };
-            }
+            get => new ValueData[] { values[16], values[17], values[18], values[19] };
         }
 
-        public override ValueData visibleValue
-        {
-            get
-            {
-                return values[20];
-            }
-        }
+        public override ValueData visibleValue => values[20];
 
         private List<ValueData> _tangentValues = null;
         public override ValueData[] tangentValues
@@ -161,53 +77,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override Vector3 initialPosition
-        {
-            get
-            {
-                return new Vector3(-5f, 10f, 0f);
-            }
-        }
+        public override Vector3 initialPosition => new Vector3(-5f, 10f, 0f);
 
-        public override Vector3 initialSubPosition
-        {
-            get
-            {
-                return new Vector3(5f, 10f, 0f);
-            }
-        }
+        public override Vector3 initialSubPosition => new Vector3(5f, 10f, 0f);
 
-        public override Vector3 initialEulerAngles
-        {
-            get
-            {
-                return new Vector3(90f, 0f, 0f);
-            }
-        }
+        public override Vector3 initialEulerAngles => new Vector3(90f, 0f, 0f);
 
-        public override Vector3 initialSubEulerAngles
-        {
-            get
-            {
-                return new Vector3(90f, 0f, 0f);
-            }
-        }
+        public override Vector3 initialSubEulerAngles => new Vector3(90f, 0f, 0f);
 
-        public override Color initialColor
-        {
-            get
-            {
-                return new Color(1f, 1f, 1f, 0.3f);
-            }
-        }
+        public override Color initialColor => new Color(1f, 1f, 1f, 0.3f);
 
-        public override Color initialSubColor
-        {
-            get
-            {
-                return new Color(1f, 1f, 1f, 0.3f);
-            }
-        }
+        public override Color initialSubColor => new Color(1f, 1f, 1f, 0.3f);
 
         public TransformDataStageLightController()
         {
@@ -342,304 +222,124 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData spotAngleValue
-        {
-            get
-            {
-                return this["spotAngle"];
-            }
-        }
+        public ValueData spotAngleValue => this["spotAngle"];
 
-        public ValueData spotRangeValue
-        {
-            get
-            {
-                return this["spotRange"];
-            }
-        }
+        public ValueData spotRangeValue => this["spotRange"];
 
-        public ValueData rangeMultiplierValue
-        {
-            get
-            {
-                return this["rangeMultiplier"];
-            }
-        }
+        public ValueData rangeMultiplierValue => this["rangeMultiplier"];
 
-        public ValueData falloffExpValue
-        {
-            get
-            {
-                return this["falloffExp"];
-            }
-        }
+        public ValueData falloffExpValue => this["falloffExp"];
 
-        public ValueData noiseStrengthValue
-        {
-            get
-            {
-                return this["noiseStrength"];
-            }
-        }
+        public ValueData noiseStrengthValue => this["noiseStrength"];
 
-        public ValueData noiseScaleValue
-        {
-            get
-            {
-                return this["noiseScale"];
-            }
-        }
+        public ValueData noiseScaleValue => this["noiseScale"];
 
-        public ValueData coreRadiusValue
-        {
-            get
-            {
-                return this["coreRadius"];
-            }
-        }
+        public ValueData coreRadiusValue => this["coreRadius"];
 
-        public ValueData offsetRangeValue
-        {
-            get
-            {
-                return this["offsetRange"];
-            }
-        }
+        public ValueData offsetRangeValue => this["offsetRange"];
 
-        public ValueData segmentAngleValue
-        {
-            get
-            {
-                return this["segmentAngle"];
-            }
-        }
+        public ValueData segmentAngleValue => this["segmentAngle"];
 
-        public ValueData segmentRangeValue
-        {
-            get
-            {
-                return this["segmentRange"];
-            }
-        }
+        public ValueData segmentRangeValue => this["segmentRange"];
 
-        public ValueData autoPositionValue
-        {
-            get
-            {
-                return this["autoPosition"];
-            }
-        }
+        public ValueData autoPositionValue => this["autoPosition"];
 
-        public ValueData autoRotationValue
-        {
-            get
-            {
-                return this["autoRotation"];
-            }
-        }
+        public ValueData autoRotationValue => this["autoRotation"];
 
-        public ValueData autoColorValue
-        {
-            get
-            {
-                return this["autoColor"];
-            }
-        }
+        public ValueData autoColorValue => this["autoColor"];
 
-        public ValueData autoLightInfoValue
-        {
-            get
-            {
-                return this["autoLightInfo"];
-            }
-        }
+        public ValueData autoLightInfoValue => this["autoLightInfo"];
 
-        public ValueData autoVisibleValue
-        {
-            get
-            {
-                return this["autoVisible"];
-            }
-        }
+        public ValueData autoVisibleValue => this["autoVisible"];
 
         public float spotAngle
         {
-            get
-            {
-                return spotAngleValue.value;
-            }
-            set
-            {
-                spotAngleValue.value = value;
-            }
+            get => spotAngleValue.value;
+            set => spotAngleValue.value = value;
         }
 
         public float spotRange
         {
-            get
-            {
-                return spotRangeValue.value;
-            }
-            set
-            {
-                spotRangeValue.value = value;
-            }
+            get => spotRangeValue.value;
+            set => spotRangeValue.value = value;
         }
 
         public float rangeMultiplier
         {
-            get
-            {
-                return rangeMultiplierValue.value;
-            }
-            set
-            {
-                rangeMultiplierValue.value = value;
-            }
+            get => rangeMultiplierValue.value;
+            set => rangeMultiplierValue.value = value;
         }
 
         public float falloffExp
         {
-            get
-            {
-                return falloffExpValue.value;
-            }
-            set
-            {
-                falloffExpValue.value = value;
-            }
+            get => falloffExpValue.value;
+            set => falloffExpValue.value = value;
         }
 
         public float noiseStrength
         {
-            get
-            {
-                return noiseStrengthValue.value;
-            }
-            set
-            {
-                noiseStrengthValue.value = value;
-            }
+            get => noiseStrengthValue.value;
+            set => noiseStrengthValue.value = value;
         }
 
         public float noiseScale
         {
-            get
-            {
-                return noiseScaleValue.value;
-            }
-            set
-            {
-                noiseScaleValue.value = value;
-            }
+            get => noiseScaleValue.value;
+            set => noiseScaleValue.value = value;
         }
 
         public float coreRadius
         {
-            get
-            {
-                return coreRadiusValue.value;
-            }
-            set
-            {
-                coreRadiusValue.value = value;
-            }
+            get => coreRadiusValue.value;
+            set => coreRadiusValue.value = value;
         }
 
         public float offsetRange
         {
-            get
-            {
-                return offsetRangeValue.value;
-            }
-            set
-            {
-                offsetRangeValue.value = value;
-            }
+            get => offsetRangeValue.value;
+            set => offsetRangeValue.value = value;
         }
 
         public float segmentAngle
         {
-            get
-            {
-                return segmentAngleValue.value;
-            }
-            set
-            {
-                segmentAngleValue.value = value;
-            }
+            get => segmentAngleValue.value;
+            set => segmentAngleValue.value = value;
         }
 
         public int segmentRange
         {
-            get
-            {
-                return segmentRangeValue.intValue;
-            }
-            set
-            {
-                segmentRangeValue.intValue = value;
-            }
+            get => segmentRangeValue.intValue;
+            set => segmentRangeValue.intValue = value;
         }
 
         public bool autoPosition
         {
-            get
-            {
-                return autoPositionValue.boolValue;
-            }
-            set
-            {
-                autoPositionValue.boolValue = value;
-            }
+            get => autoPositionValue.boolValue;
+            set => autoPositionValue.boolValue = value;
         }
 
         public bool autoRotation
         {
-            get
-            {
-                return autoRotationValue.boolValue;
-            }
-            set
-            {
-                autoRotationValue.boolValue = value;
-            }
+            get => autoRotationValue.boolValue;
+            set => autoRotationValue.boolValue = value;
         }
 
         public bool autoColor
         {
-            get
-            {
-                return autoColorValue.boolValue;
-            }
-            set
-            {
-                autoColorValue.boolValue = value;
-            }
+            get => autoColorValue.boolValue;
+            set => autoColorValue.boolValue = value;
         }
 
         public bool autoLightInfo
         {
-            get
-            {
-                return autoLightInfoValue.boolValue;
-            }
-            set
-            {
-                autoLightInfoValue.boolValue = value;
-            }
+            get => autoLightInfoValue.boolValue;
+            set => autoLightInfoValue.boolValue = value;
         }
 
         public bool autoVisible
         {
-            get
-            {
-                return autoVisibleValue.boolValue;
-            }
-            set
-            {
-                autoVisibleValue.boolValue = value;
-            }
+            get => autoVisibleValue.boolValue;
+            set => autoVisibleValue.boolValue = value;
         }
 
         public void FromStageLightController(StageLightController controller)

@@ -4,53 +4,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataDepthOfField : TransformDataBase
     {
-        public override TransformType type
-        {
-            get
-            {
-                return TransformType.DepthOfField;
-            }
-        }
+        public override TransformType type => TransformType.DepthOfField;
 
-        public override int valueCount
-        {
-            get
-            {
-                return 7;
-            }
-        }
+        public override int valueCount => 7;
 
-        public override bool hasVisible
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasVisible => true;
 
-        public override bool hasEasing
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasEasing => true;
 
-        public override ValueData visibleValue
-        {
-            get
-            {
-                return values[1];
-            }
-        }
+        public override ValueData visibleValue => values[1];
 
-        public override ValueData easingValue
-        {
-            get
-            {
-                return values[0];
-            }
-        }
+        public override ValueData easingValue => values[0];
 
         public TransformDataDepthOfField()
         {
@@ -105,120 +69,57 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData focalLengthValue
-        {
-            get
-            {
-                return this["focalLength"];
-            }
-        }
+        public ValueData focalLengthValue => this["focalLength"];
 
-        public ValueData focalSizeValue
-        {
-            get
-            {
-                return this["focalSize"];
-            }
-        }
+        public ValueData focalSizeValue => this["focalSize"];
 
-        public ValueData apertureValue
-        {
-            get
-            {
-                return this["aperture"];
-            }
-        }
+        public ValueData apertureValue => this["aperture"];
 
-        public ValueData maxBlurSizeValue
-        {
-            get
-            {
-                return this["maxBlurSize"];
-            }
-        }
+        public ValueData maxBlurSizeValue => this["maxBlurSize"];
 
-        public ValueData maidSlotNoValue
-        {
-            get
-            {
-                return this["maidSlotNo"];
-            }
-        }
+        public ValueData maidSlotNoValue => this["maidSlotNo"];
 
         public float focalLength
         {
-            get
-            {
-                return focalLengthValue.value;
-            }
-            set
-            {
-                focalLengthValue.value = value;
-            }
+            get => focalLengthValue.value;
+            set => focalLengthValue.value = value;
         }
 
         public float focalSize
         {
-            get
-            {
-                return focalSizeValue.value;
-            }
-            set
-            {
-                focalSizeValue.value = value;
-            }
+            get => focalSizeValue.value;
+            set => focalSizeValue.value = value;
         }
 
         public float aperture
         {
-            get
-            {
-                return apertureValue.value;
-            }
-            set
-            {
-                apertureValue.value = value;
-            }
+            get => apertureValue.value;
+            set => apertureValue.value = value;
         }
 
         public float maxBlurSize
         {
-            get
-            {
-                return maxBlurSizeValue.value;
-            }
-            set
-            {
-                maxBlurSizeValue.value = value;
-            }
+            get => maxBlurSizeValue.value;
+            set => maxBlurSizeValue.value = value;
         }
 
         public int maidSlotNo
         {
-            get
-            {
-                return maidSlotNoValue.intValue;
-            }
-            set
-            {
-                maidSlotNoValue.intValue = value;
-            }
+            get => maidSlotNoValue.intValue;
+            set => maidSlotNoValue.intValue = value;
         }
 
         public DepthOfFieldData depthOfField
         {
-            get
+            get => new DepthOfFieldData
             {
-                return new DepthOfFieldData
-                {
-                    enabled = visible,
-                    focalLength = focalLength,
-                    focalSize = focalSize,
-                    aperture = aperture,
-                    maxBlurSize = maxBlurSize,
-                    maidSlotNo = maidSlotNo,
-                };
-            }
+                enabled = visible,
+                focalLength = focalLength,
+                focalSize = focalSize,
+                aperture = aperture,
+                maxBlurSize = maxBlurSize,
+                maidSlotNo = maidSlotNo,
+            };
             set
             {
                 visible = value.enabled;

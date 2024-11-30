@@ -6,29 +6,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
     public class TransformDataSe : TransformDataBase
     {
-        public override TransformType type
-        {
-            get
-            {
-                return TransformType.Se;
-            }
-        }
+        public override TransformType type => TransformType.Se;
 
-        public override int valueCount
-        {
-            get
-            {
-                return 2;
-            }
-        }
+        public override int valueCount => 2;
 
-        public override int strValueCount
-        {
-            get
-            {
-                return 1;
-            }
-        }
+        public override int strValueCount => 1;
 
         public TransformDataSe()
         {
@@ -78,56 +60,26 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return StrValueInfoMap;
         }
 
-        public ValueData intervalValue
-        {
-            get
-            {
-                return this["interval"];
-            }
-        }
+        public ValueData intervalValue => this["interval"];
 
-        public ValueData isLoopValue
-        {
-            get
-            {
-                return this["isLoop"];
-            }
-        }
+        public ValueData isLoopValue => this["isLoop"];
 
         public string fileName
         {
-            get
-            {
-                return GetStrValue("fileName");
-            }
-            set
-            {
-                SetStrValue("fileName", value);
-            }
+            get => GetStrValue("fileName");
+            set => SetStrValue("fileName", value);
         }
 
         public float interval
         {
-            get
-            {
-                return intervalValue.value;
-            }
-            set
-            {
-                intervalValue.value = value;
-            }
+            get => intervalValue.value;
+            set => intervalValue.value = value;
         }
 
         public bool isLoop
         {
-            get
-            {
-                return isLoopValue.boolValue;
-            }
-            set
-            {
-                isLoopValue.boolValue = value;
-            }
+            get => isLoopValue.boolValue;
+            set => isLoopValue.boolValue = value;
         }
     }
 }

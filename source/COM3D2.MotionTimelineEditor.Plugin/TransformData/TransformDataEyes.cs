@@ -4,37 +4,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataEyes : TransformDataBase
     {
-        public override TransformType type
-        {
-            get
-            {
-                return TransformType.Eyes;
-            }
-        }
+        public override TransformType type => TransformType.Eyes;
 
-        public override int valueCount
-        {
-            get
-            {
-                return 3;
-            }
-        }
+        public override int valueCount => 3;
 
-        public override bool hasEasing
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasEasing => true;
 
-        public override ValueData easingValue
-        {
-            get
-            {
-                return values[0];
-            }
-        }
+        public override ValueData easingValue => values[0];
 
         public TransformDataEyes()
         {
@@ -67,44 +43,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData horizonValue
-        {
-            get
-            {
-                return this["horizon"];
-            }
-        }
+        public ValueData horizonValue => this["horizon"];
 
-        public ValueData verticalValue
-        {
-            get
-            {
-                return this["vertical"];
-            }
-        }
+        public ValueData verticalValue => this["vertical"];
 
         public float horizon
         {
-            get
-            {
-                return horizonValue.value;
-            }
-            set
-            {
-                horizonValue.value = value;
-            }
+            get => horizonValue.value;
+            set => horizonValue.value = value;
         }
 
         public float vertical
         {
-            get
-            {
-                return verticalValue.value;
-            }
-            set
-            {
-                verticalValue.value = value;
-            }
+            get => verticalValue.value;
+            set => verticalValue.value = value;
         }
     }
 }

@@ -11,21 +11,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("モデルシェイプ", 23)]
     public partial class ModelShapeKeyTimelineLayer : ModelTimelineLayerBase
     {
-        public override string className
-        {
-            get
-            {
-                return typeof(ModelShapeKeyTimelineLayer).Name;
-            }
-        }
+        public override string className => typeof(ModelShapeKeyTimelineLayer).Name;
 
-        public override List<string> allBoneNames
-        {
-            get
-            {
-                return modelManager.blendShapeNames;
-            }
-        }
+        public override List<string> allBoneNames => modelManager.blendShapeNames;
 
         private ModelShapeKeyTimelineLayer(int slotNo) : base(slotNo)
         {

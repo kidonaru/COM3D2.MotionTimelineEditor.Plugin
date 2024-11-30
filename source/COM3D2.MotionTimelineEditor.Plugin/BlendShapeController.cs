@@ -10,20 +10,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string shapeKeyName { get; private set; }
         public float weight { get; set; }
 
-        public StudioModelStat model
-        {
-            get
-            {
-                return controller.model;
-            }
-        }
+        public StudioModelStat model => controller.model;
 
         public string name
         {
-            get
-            {
-                return string.Format("{0}/{1}", model.name, shapeKeyName);
-            }
+            get => string.Format("{0}/{1}", model.name, shapeKeyName);
         }
 
         public ModelBlendShape(

@@ -5,101 +5,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataParaffin : TransformDataBase
     {
-        public override TransformType type
-        {
-            get
-            {
-                return TransformType.Paraffin;
-            }
-        }
+        public override TransformType type => TransformType.Paraffin;
 
-        public override int valueCount
-        {
-            get
-            {
-                return 21;
-            }
-        }
+        public override int valueCount => 21;
 
-        public override bool hasColor
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasColor =>  true;
 
-        public override bool hasSubColor
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasSubColor => true;
 
-        public override bool hasVisible
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasVisible => true;
 
-        public override bool hasEasing
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasEasing => true;
 
         public override ValueData[] colorValues
         {
-            get
-            {
-                return new ValueData[] { values[0], values[1], values[2], values[3] };
-            }
+            get => new ValueData[] { values[0], values[1], values[2], values[3] };
         }
 
         public override ValueData[] subColorValues
         {
-            get
-            {
-                return new ValueData[] { values[4], values[5], values[6], values[7] };
-            }
+            get => new ValueData[] { values[4], values[5], values[6], values[7] };
         }
 
-        public override ValueData visibleValue
-        {
-            get
-            {
-                return values[8];
-            }
-        }
+        public override ValueData visibleValue => values[8];
 
-        public override ValueData easingValue
-        {
-            get
-            {
-                return values[9];
-            }
-        }
+        public override ValueData easingValue => values[9];
 
-        public override Color initialColor
-        {
-            get
-            {
-                return new Color(1f, 1f, 1f, 1f);
-            }
-        }
+        public override Color initialColor => new Color(1f, 1f, 1f, 1f);
 
-        public override Color initialSubColor
-        {
-            get
-            {
-                return new Color(1f, 1f, 1f, 0f);
-            }
-        }
+        public override Color initialSubColor => new Color(1f, 1f, 1f, 0f);
 
         public TransformDataParaffin()
         {
@@ -210,204 +144,99 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public ValueData[] centerPositionValues
         {
-            get
-            {
-                return new ValueData[] { this["centerPositionX"], this["centerPositionY"] };
-            }
+            get => new ValueData[] { this["centerPositionX"], this["centerPositionY"] };
         }
 
-        public ValueData radiusFarValue
-        {
-            get
-            {
-                return this["radiusFar"];
-            }
-        }
+        public ValueData radiusFarValue => this["radiusFar"];
 
-        public ValueData radiusNearValue
-        {
-            get
-            {
-                return this["radiusNear"];
-            }
-        }
+        public ValueData radiusNearValue => this["radiusNear"];
 
         public ValueData[] radiusScaleValues
         {
-            get
-            {
-                return new ValueData[] { this["radiusScaleX"], this["radiusScaleY"] };
-            }
+            get => new ValueData[] { this["radiusScaleX"], this["radiusScaleY"] };
         }
 
-        public ValueData useNormalValue
-        {
-            get
-            {
-                return this["useNormal"];
-            }
-        }
+        public ValueData useNormalValue => this["useNormal"];
 
-        public ValueData useAddValue
-        {
-            get
-            {
-                return this["useAdd"];
-            }
-        }
+        public ValueData useAddValue => this["useAdd"];
 
-        public ValueData useMultiplyValue
-        {
-            get
-            {
-                return this["useMultiply"];
-            }
-        }
+        public ValueData useMultiplyValue => this["useMultiply"];
 
-        public ValueData useOverlayValue
-        {
-            get
-            {
-                return this["useOverlay"];
-            }
-        }
+        public ValueData useOverlayValue => this["useOverlay"];
 
-        public ValueData useSubstructValue
-        {
-            get
-            {
-                return this["useSubstruct"];
-            }
-        }
+        public ValueData useSubstructValue => this["useSubstruct"];
 
         public Vector2 centerPosition
         {
-            get
-            {
-                return centerPositionValues.ToVector2();
-            }
-            set
-            {
-                centerPositionValues.FromVector2(value);
-            }
+            get => centerPositionValues.ToVector2();
+            set => centerPositionValues.FromVector2(value);
         }
 
         public float radiusFar
         {
-            get
-            {
-                return radiusFarValue.value;
-            }
-            set
-            {
-                radiusFarValue.value = value;
-            }
+            get => radiusFarValue.value;
+            set => radiusFarValue.value = value;
         }
 
         public float radiusNear
         {
-            get
-            {
-                return radiusNearValue.value;
-            }
-            set
-            {
-                radiusNearValue.value = value;
-            }
+            get => radiusNearValue.value;
+            set => radiusNearValue.value = value;
         }
 
         public Vector2 radiusScale
         {
-            get
-            {
-                return radiusScaleValues.ToVector2();
-            }
-            set
-            {
-                radiusScaleValues.FromVector2(value);
-            }
+            get => radiusScaleValues.ToVector2();
+            set => radiusScaleValues.FromVector2(value);
         }
 
         public float useNormal
         {
-            get
-            {
-                return useNormalValue.value;
-            }
-            set
-            {
-                useNormalValue.value = value;
-            }
+            get => useNormalValue.value;
+            set => useNormalValue.value = value;
         }
 
         public float useAdd
         {
-            get
-            {
-                return useAddValue.value;
-            }
-            set
-            {
-                useAddValue.value = value;
-            }
+            get => useAddValue.value;
+            set => useAddValue.value = value;
         }   
 
         public float useMultiply
         {
-            get
-            {
-                return useMultiplyValue.value;
-            }
-            set
-            {
-                useMultiplyValue.value = value;
-            }
+            get => useMultiplyValue.value;
+            set => useMultiplyValue.value = value;
         }
 
         public float useOverlay
         {
-            get
-            {
-                return useOverlayValue.value;
-            }
-            set
-            {
-                useOverlayValue.value = value;
-            }
+            get => useOverlayValue.value;
+            set => useOverlayValue.value = value;
         }
 
         public float useSubstruct
         {
-            get
-            {
-                return useSubstructValue.value;
-            }
-            set
-            {
-                useSubstructValue.value = value;
-            }
+            get => useSubstructValue.value;
+            set => useSubstructValue.value = value;
         }
 
         public ParaffinData paraffin
         {
-            get
+            get => new ParaffinData
             {
-                return new ParaffinData
-                {
-                    enabled = visible,
-                    color1 = color,
-                    color2 = subColor,
-                    centerPosition = centerPosition,
-                    radiusFar = radiusFar,
-                    radiusNear = radiusNear,
-                    radiusScale = radiusScale,
-                    useNormal = useNormal,
-                    useAdd = useAdd,
-                    useMultiply = useMultiply,
-                    useOverlay = useOverlay,
-                    useSubstruct = useSubstruct,
-                };
-            }
+                enabled = visible,
+                color1 = color,
+                color2 = subColor,
+                centerPosition = centerPosition,
+                radiusFar = radiusFar,
+                radiusNear = radiusNear,
+                radiusScale = radiusScale,
+                useNormal = useNormal,
+                useAdd = useAdd,
+                useMultiply = useMultiply,
+                useOverlay = useOverlay,
+                useSubstruct = useSubstruct,
+            };
             set
             {
                 visible = value.enabled;

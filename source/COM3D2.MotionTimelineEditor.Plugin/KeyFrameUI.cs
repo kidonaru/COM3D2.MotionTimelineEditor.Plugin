@@ -7,13 +7,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class KeyFrameUI : SubWindowUIBase
     {
-        public override string title
-        {
-            get
-            {
-                return "キーフレーム 詳細";
-            }
-        }
+        public override string title => "キーフレーム 詳細";
 
         private Texture2D tangentTex = null;
         private TangentValueType tangentValueType = TangentValueType.すべて;

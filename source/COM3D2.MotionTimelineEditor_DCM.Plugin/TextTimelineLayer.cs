@@ -15,13 +15,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
     [TimelineLayerDesc("テキスト", 45)]
     public partial class TextTimelineLayer : TimelineLayerBase
     {
-        public override string className
-        {
-            get
-            {
-                return typeof(TextTimelineLayer).Name;
-            }
-        }
+        public override string className => typeof(TextTimelineLayer).Name;
 
         public static string TextBoneName = "Text";
         public static string TextDisplayName = "テキスト";

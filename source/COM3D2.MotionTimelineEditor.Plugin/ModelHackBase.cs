@@ -36,13 +36,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        protected static MaidManager maidManager
-        {
-            get
-            {
-                return MaidManager.instance;
-            }
-        }
+        protected static MaidManager maidManager => MaidManager.instance;
 
         protected static CacheBoneDataArray cacheBoneData
         {
@@ -68,13 +62,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        protected static StudioModelManager modelManager
-        {
-            get
-            {
-                return StudioModelManager.instance;
-            }
-        }
+        protected static StudioModelManager modelManager => StudioModelManager.instance;
 
         protected ModelHackBase()
         {

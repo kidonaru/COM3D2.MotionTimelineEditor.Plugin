@@ -4,21 +4,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataUndress : TransformDataBase
     {
-        public override TransformType type
-        {
-            get
-            {
-                return TransformType.Undress;
-            }
-        }
+        public override TransformType type => TransformType.Undress;
 
-        public override int valueCount
-        {
-            get
-            {
-                return 1;
-            }
-        }
+        public override int valueCount => 1;
 
         public TransformDataUndress()
         {
@@ -42,32 +30,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData isVisibleValue
-        {
-            get
-            {
-                return this["isVisible"];
-            }
-        }
+        public ValueData isVisibleValue => this["isVisible"];
 
         public bool isVisible
         {
-            get
-            {
-                return isVisibleValue.boolValue;
-            }
-            set
-            {
-                isVisibleValue.boolValue = value;
-            }
+            get => isVisibleValue.boolValue;
+            set => isVisibleValue.boolValue = value;
         }
 
         public DressSlotID slotId
         {
-            get
-            {
-                return DressUtils.GetDressSlotId(name);
-            }
+            get => DressUtils.GetDressSlotId(name);
         }
 
         public int maidSlotNo;

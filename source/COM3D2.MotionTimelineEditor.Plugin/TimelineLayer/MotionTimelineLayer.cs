@@ -24,21 +24,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("メイドアニメ", 0)]
     public class MotionTimelineLayer : TimelineLayerBase
     {
-        public override string className
-        {
-            get
-            {
-                return typeof(MotionTimelineLayer).Name;
-            }
-        }
+        public override string className => typeof(MotionTimelineLayer).Name;
 
-        public override bool hasSlotNo
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasSlotNo => true;
 
         public static string GroundingBoneName = "Grounding";
         public static string GroundingDisplayName = "接地";

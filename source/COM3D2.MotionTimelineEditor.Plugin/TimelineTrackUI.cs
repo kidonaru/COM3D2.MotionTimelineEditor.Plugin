@@ -5,13 +5,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TimelineTrackUI : SubWindowUIBase
     {
-        public override string title
-        {
-            get
-            {
-                return "トラック設定";
-            }
-        }
+        public override string title => "トラック設定";
 
         public TimelineTrackUI(SubWindow subWindow) : base(subWindow)
         {

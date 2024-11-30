@@ -129,61 +129,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static StudioHackBase studioHack
-        {
-            get
-            {
-                return StudioHackManager.studioHack;
-            }
-        }
+        private static StudioHackBase studioHack => StudioHackManager.studioHack;
 
-        private static MaidManager maidManager
-        {
-            get
-            {
-                return MaidManager.instance;
-            }
-        }
+        private static MaidManager maidManager => MaidManager.instance;
 
-        private static StudioModelManager modelManager
-        {
-            get
-            {
-                return StudioModelManager.instance;
-            }
-        }
+        private static StudioModelManager modelManager => StudioModelManager.instance;
 
-        private static StudioLightManager lightManager
-        {
-            get
-            {
-                return StudioLightManager.instance;
-            }
-        }
+        private static StudioLightManager lightManager => StudioLightManager.instance;
 
-        private static StageLightManager stageLightManager
-        {
-            get
-            {
-                return StageLightManager.instance;
-            }
-        }
+        private static StageLightManager stageLightManager => StageLightManager.instance;
 
-        private static ModelHackManager modelHackManager
-        {
-            get
-            {
-                return ModelHackManager.instance;
-            }
-        }
+        private static ModelHackManager modelHackManager => ModelHackManager.instance;
 
-        private static IPartsEditHack partsEditHack
-        {
-            get
-            {
-                return PartsEditHackManager.instance.partsEditHack;
-            }
-        }
+        private static IPartsEditHack partsEditHack => PartsEditHackManager.instance.partsEditHack;
 
         private static Maid maid
         {
@@ -193,45 +151,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static MaidCache maidCache
-        {
-            get
-            {
-                return maidManager.maidCache;
-            }
-        }
+        private static MaidCache maidCache => maidManager.maidCache;
 
-        private static Config config
-        {
-            get
-            {
-                return ConfigManager.config;
-            }
-        }
+        private static Config config => ConfigManager.config;
 
-        private static BoneMenuManager boneMenuManager
-        {
-            get
-            {
-                return BoneMenuManager.Instance;
-            }
-        }
+        private static BoneMenuManager boneMenuManager => BoneMenuManager.Instance;
 
-        private static TimelineHistoryManager historyManager
-        {
-            get
-            {
-                return TimelineHistoryManager.instance;
-            }
-        }
+        private static TimelineHistoryManager historyManager => TimelineHistoryManager.instance;
 
-        protected static TimelineBundleManager bundleManager
-        {
-            get
-            {
-                return TimelineBundleManager.instance;
-            }
-        }
+        protected static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
 
         private TimelineManager()
         {

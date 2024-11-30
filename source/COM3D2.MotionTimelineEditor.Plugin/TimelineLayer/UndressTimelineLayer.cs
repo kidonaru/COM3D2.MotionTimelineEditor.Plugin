@@ -11,29 +11,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("メイド脱衣", 15)]
     public class UndressTimelineLayer : TimelineLayerBase
     {
-        public override string className
-        {
-            get
-            {
-                return typeof(UndressTimelineLayer).Name;
-            }
-        }
+        public override string className => typeof(UndressTimelineLayer).Name;
 
-        public override bool hasSlotNo
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasSlotNo => true;
 
-        public override List<string> allBoneNames
-        {
-            get
-            {
-                return DressUtils.DressSlotNames;
-            }
-        }
+        public override List<string> allBoneNames => DressUtils.DressSlotNames;
 
         private UndressTimelineLayer(int slotNo) : base(slotNo)
         {

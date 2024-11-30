@@ -11,33 +11,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("メイド移動", 11)]
     public partial class MoveTimelineLayer : TimelineLayerBase
     {
-        public override string className
-        {
-            get
-            {
-                return typeof(MoveTimelineLayer).Name;
-            }
-        }
+        public override string className => typeof(MoveTimelineLayer).Name;
 
-        public override bool hasSlotNo
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasSlotNo => true;
 
         public static string MoveBoneName = "move";
         public static string MoveDisplayName = "移動";
 
         private List<string> _allBoneNames = new List<string> { MoveBoneName };
-        public override List<string> allBoneNames
-        {
-            get
-            {
-                return _allBoneNames;
-            }
-        }
+        public override List<string> allBoneNames => _allBoneNames;
 
         private MoveTimelineLayer(int slotNo) : base(slotNo)
         {

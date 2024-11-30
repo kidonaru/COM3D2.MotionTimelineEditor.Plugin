@@ -11,21 +11,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("ライト", 41)]
     public class LightTimelineLayer : LightTimelineLayerBase
     {
-        public override string className
-        {
-            get
-            {
-                return typeof(LightTimelineLayer).Name;
-            }
-        }
+        public override string className => typeof(LightTimelineLayer).Name;
 
-        public override List<string> allBoneNames
-        {
-            get
-            {
-                return lightManager.lightNames;
-            }
-        }
+        public override List<string> allBoneNames => lightManager.lightNames;
 
         private LightTimelineLayer(int slotNo) : base(slotNo)
         {

@@ -23,37 +23,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        private static TimelineManager timelineManager => TimelineManager.instance;
 
-        private static TimelineData timeline
-        {
-            get
-            {
-                return timelineManager.timeline;
-            }
-        }
+        private static TimelineData timeline => timelineManager.timeline;
 
-        private static ITimelineLayer defaultLayer
-        {
-            get
-            {
-                return timeline.defaultLayer;
-            }
-        }
+        private static ITimelineLayer defaultLayer => timeline.defaultLayer;
 
-        private static SoundMgr soundMgr
-        {
-            get
-            {
-                return GameMain.Instance.SoundMgr;
-            }
-        }
+        private static SoundMgr soundMgr => GameMain.Instance.SoundMgr;
 
         private AudioSourceMgr _audioMgr;
         private AudioClip _audioClip;
@@ -62,10 +38,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public int volumeDance
         {
-            get
-            {
-                return soundMgr.GetVolumeDance();
-            }
+            get => soundMgr.GetVolumeDance();
             set
             {
                 soundMgr.SetVolumeDance(value);

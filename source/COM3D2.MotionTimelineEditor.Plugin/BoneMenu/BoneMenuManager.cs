@@ -19,37 +19,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static Config config
-        {
-            get
-            {
-                return ConfigManager.config;
-            }
-        }
+        private static Config config => ConfigManager.config;
 
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        private static TimelineManager timelineManager => TimelineManager.instance;
 
-        private static ITimelineLayer currentLayer
-        {
-            get
-            {
-                return timelineManager.currentLayer;
-            }
-        }
+        private static ITimelineLayer currentLayer => timelineManager.currentLayer;
 
-        private List<IBoneMenuItem> allMenuItems
-        {
-            get
-            {
-                return currentLayer.allMenuItems;
-            }
-        }
+        private List<IBoneMenuItem> allMenuItems => currentLayer.allMenuItems;
 
         private BoneMenuManager()
         {

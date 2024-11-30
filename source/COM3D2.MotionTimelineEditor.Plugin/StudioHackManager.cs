@@ -27,13 +27,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static Config config
-        {
-            get
-            {
-                return ConfigManager.config;
-            }
-        }
+        private static Config config => ConfigManager.config;
 
         private StudioHackManager()
         {

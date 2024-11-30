@@ -5,90 +5,39 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class EasyMenuItem : IBoneMenuItem
     {
-        public string name
-        {
-            get
-            {
-                return "KeyFrame";
-            }
-        }
+        public string name => "KeyFrame";
 
-        public string displayName
-        {
-            get
-            {
-                return "キーフレーム";
-            }
-        }
+        public string displayName => "キーフレーム";
 
         public bool isSelectedMenu
         {
-            get
-            {
-                return false;
-            }
+            get => false;
             set {}
         }
 
         public bool isVisibleMenu
         {
-            get
-            {
-                return true;
-            }
+            get => true;
             set {}
         }
 
         public bool isOpenMenu
         {
-            get
-            {
-                return false;
-            }
+            get => false;
             set {}
         }
 
-        public bool isSetMenu
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool isSetMenu => false;
 
         public IBoneMenuItem parent { get; set; }
 
-        public List<IBoneMenuItem> children
-        {
-            get
-            {
-                return null;
-            }
-        }
+        public List<IBoneMenuItem> children => null;
 
-        private static BoneMenuManager boneItemManager
-        {
-            get
-            {
-                return BoneMenuManager.Instance;
-            }
-        }
+        private static BoneMenuManager boneItemManager => BoneMenuManager.Instance;
 
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        private static TimelineManager timelineManager => TimelineManager.instance;
 
-        protected static ITimelineLayer currentLayer
-        {
-            get
-            {
-                return timelineManager.currentLayer;
-            }
-        }
+        protected static ITimelineLayer currentLayer => timelineManager.currentLayer;
 
         public void SelectMenu(bool isMultiSelect)
         {

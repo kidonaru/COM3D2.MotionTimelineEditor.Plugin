@@ -13,10 +13,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public Vector3 eulerAngles
         {
-            get
-            {
-                return _eulerAngles;
-            }
+            get => _eulerAngles;
             set
             {
                 _eulerAngles = value;

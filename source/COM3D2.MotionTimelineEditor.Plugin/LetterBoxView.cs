@@ -10,13 +10,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private float _currentAspect = -1f;
         private float _targetAspect = -1f;
 
-        private static CameraManager cameraManager
-        {
-            get
-            {
-                return CameraManager.instance;
-            }
-        }
+        private static CameraManager cameraManager =>  CameraManager.instance;
 
         private static Camera frontCamera
         {
@@ -26,21 +20,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static TimelineManager timelineManager
-        {
-            get
-            {
-                return TimelineManager.instance;
-            }
-        }
+        private static TimelineManager timelineManager => TimelineManager.instance;
 
-        private static TimelineData timeline
-        {
-            get
-            {
-                return timelineManager.timeline;
-            }
-        }
+        private static TimelineData timeline => timelineManager.timeline;
 
         public void Awake()
         {

@@ -6,21 +6,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
     public class TransformDataMorph : TransformDataBase
     {
-        public override TransformType type
-        {
-            get
-            {
-                return TransformType.Morph;
-            }
-        }
+        public override TransformType type => TransformType.Morph;
 
-        public override int valueCount
-        {
-            get
-            {
-                return 1;
-            }
-        }
+        public override int valueCount => 1;
 
         public TransformDataMorph()
         {
@@ -44,24 +32,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData morphValueValue
-        {
-            get
-            {
-                return this["morphValue"];
-            }
-        }
+        public ValueData morphValueValue => this["morphValue"];
 
         public float morphValue
         {
-            get
-            {
-                return morphValueValue.value;
-            }
-            set
-            {
-                morphValueValue.value = value;
-            }
+            get => morphValueValue.value;
+            set => morphValueValue.value = value;
         }
     }
 }

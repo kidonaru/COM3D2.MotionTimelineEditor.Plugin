@@ -11,38 +11,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("背景", 31)]
     public partial class BGTimelineLayer : TimelineLayerBase
     {
-        public override string className
-        {
-            get
-            {
-                return typeof(BGTimelineLayer).Name;
-            }
-        }
+        public override string className => typeof(BGTimelineLayer).Name;
 
         private List<string> _allBoneNames = new List<string>();
-        public override List<string> allBoneNames
-        {
-            get
-            {
-                return _allBoneNames;
-            }
-        }
+        public override List<string> allBoneNames => _allBoneNames;
 
-        private static BgMgr bgMgr
-        {
-            get
-            {
-                return GameMain.Instance.BgMgr;
-            }
-        }
+        private static BgMgr bgMgr => GameMain.Instance.BgMgr;
 
-        private static GameObject bgObject
-        {
-            get
-            {
-                return bgMgr.current_bg_object;
-            }
-        }
+        private static GameObject bgObject => bgMgr.current_bg_object;
 
         private BGTimelineLayer(int slotNo) : base(slotNo)
         {

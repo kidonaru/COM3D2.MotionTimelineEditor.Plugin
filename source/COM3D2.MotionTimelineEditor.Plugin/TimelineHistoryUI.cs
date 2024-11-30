@@ -4,21 +4,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TimelineHistoryUI : SubWindowUIBase
     {
-        public override string title
-        {
-            get
-            {
-                return "操作履歴";
-            }
-        }
+        public override string title => "操作履歴";
 
-        private static TimelineHistoryManager historyManager
-        {
-            get
-            {
-                return TimelineHistoryManager.instance;
-            }
-        }
+        private static TimelineHistoryManager historyManager => TimelineHistoryManager.instance;
 
         public TimelineHistoryUI(SubWindow subWindow) : base(subWindow)
         {

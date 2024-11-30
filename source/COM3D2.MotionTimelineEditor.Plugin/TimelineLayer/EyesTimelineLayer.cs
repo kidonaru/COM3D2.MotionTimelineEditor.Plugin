@@ -21,21 +21,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("メイド瞳", 12)]
     public class EyesTimelineLayer : TimelineLayerBase
     {
-        public override string className
-        {
-            get
-            {
-                return typeof(EyesTimelineLayer).Name;
-            }
-        }
+        public override string className => typeof(EyesTimelineLayer).Name;
 
-        public override bool hasSlotNo
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasSlotNo => true;
 
         public static readonly Dictionary<string, MotionEyesType> EyesTypeMap = new Dictionary<string, MotionEyesType>
         {
@@ -70,21 +58,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override List<string> allBoneNames
-        {
-            get
-            {
-                return saveEyesNames;
-            }
-        }
+        public override List<string> allBoneNames => saveEyesNames;
 
-        public override bool isDragging
-        {
-            get
-            {
-                return _isEyesDragging;
-            }
-        }
+        public override bool isDragging => _isEyesDragging;
 
         private EyesTimelineLayer(int slotNo) : base(slotNo)
         {

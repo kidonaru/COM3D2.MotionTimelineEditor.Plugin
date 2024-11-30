@@ -126,13 +126,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             "足首(左)",
         };
 
-        private static MaidManager maidManager
-        {
-            get
-            {
-                return MaidManager.instance;
-            }
-        }
+        private static MaidManager maidManager => MaidManager.instance;
 
         private static TimelineData timeline
         {
@@ -142,13 +136,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static StudioHackBase studioHack
-        {
-            get
-            {
-                return StudioHackManager.studioHack;
-            }
-        }
+        private static StudioHackBase studioHack => StudioHackManager.studioHack;
 
         public IKHoldEntity(IKHoldType holdType, MaidCache maidCache)
         {
