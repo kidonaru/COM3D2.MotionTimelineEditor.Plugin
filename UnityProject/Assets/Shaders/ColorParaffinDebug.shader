@@ -9,6 +9,8 @@ Shader "MTE/ColorParaffinDebug"
     {
         Tags { "RenderType"="Transparent" "Queue"="Transparent" }
         Blend Off
+        ZWrite Off
+        Cull Off
 
         Pass
         {
@@ -43,6 +45,8 @@ Shader "MTE/ColorParaffinDebug"
                 float useMultiply;
                 float useOverlay;
                 float useSubstruct;
+                float depthMin;
+                float depthMax;
                 float padding0;
             };
 

@@ -106,9 +106,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public virtual void SetModelVisible(StudioModelStat model, bool visible)
         {
-            if (model.transform != null)
+            var go = model.transform != null ? model.transform.gameObject : null;
+            if (go != null && go.activeSelf != visible)
             {
-                 model.transform.gameObject.SetActive(visible);
+                go.SetActive(visible);
             }
         }
     }

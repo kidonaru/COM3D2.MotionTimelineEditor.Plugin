@@ -98,11 +98,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override void Update()
         {
             base.Update();
-        }
-
-        public override void LateUpdate()
-        {
-            base.LateUpdate();
 
             if (!studioHack.isPoseEditing)
             {
@@ -110,20 +105,70 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public override void LateUpdate()
+        {
+            base.LateUpdate();
+        }
+
         protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
             switch (motion.start.type)
             {
                 case TransformType.StageLight:
-                    ApplyLightMotion(motion, t);
+                    if (indexUpdated)
+                    {
+                        ApplyLightMotionInit(motion, t);
+                    }
+                    ApplyLightMotionUpdate(motion, t);
                     break;
                 case TransformType.StageLightController:
-                    ApplyControllerMotion(motion, t);
+                    if (indexUpdated)
+                    {
+                        ApplyControllerMotionInit(motion, t);
+                    }
+                    ApplyControllerMotionUpdate(motion, t);
                     break;
             }
         }
 
-        private void ApplyLightMotion(MotionData motion, float lerpTime)
+        private void ApplyLightMotionInit(MotionData motion, float t)
+        {
+            var light = stageLightManager.GetLight(motion.name);
+            if (light == null)
+            {
+                return;
+            }
+
+            var transform = light.transform;
+            var controller = light.controller;
+            if (transform == null || controller == null)
+            {
+                return;
+            }
+
+            var start = motion.start as TransformDataStageLight;
+
+            light.visible = start.visible;
+
+            transform.localPosition = start.position;
+            transform.localRotation = start.rotation;
+
+            light.color = start.color;
+
+            light.spotAngle = start.spotAngle;
+            light.spotRange = start.spotRange;
+
+            light.rangeMultiplier = start.rangeMultiplier;
+            light.falloffExp = start.falloffExp;
+            light.noiseStrength = start.noiseStrength;
+            light.noiseScale = start.noiseScale;
+            light.coreRadius = start.coreRadius;
+            light.offsetRange = start.offsetRange;
+            light.segmentAngle = start.segmentAngle;
+            light.segmentRange = start.segmentRange;
+        }
+
+        private void ApplyLightMotionUpdate(MotionData motion, float t)
         {
             var light = stageLightManager.GetLight(motion.name);
             if (light == null)
@@ -156,7 +201,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     t1,
                     start.positionValues,
                     end.positionValues,
-                    lerpTime
+                    t
                 ).ToVector3();
             }
 
@@ -167,19 +212,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     t1,
                     start.rotationValues,
                     end.rotationValues,
-                    lerpTime
+                    t
                 ).ToQuaternion();
             }
 
             if (!controller.autoColor)
             {
-                light.color = PluginUtils.HermiteValues(
-                    t0,
-                    t1,
-                    start.colorValues,
-                    end.colorValues,
-                    lerpTime
-                ).ToColor();
+                light.color = Color.Lerp(start.color, end.color, t);
             }
 
             if (!controller.autoLightInfo)
@@ -189,27 +228,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     t1,
                     start.spotAngleValue,
                     end.spotAngleValue,
-                    lerpTime);
+                    t);
 
                 light.spotRange = PluginUtils.HermiteValue(
                     t0,
                     t1,
                     start.spotRangeValue,
                     end.spotRangeValue,
-                    lerpTime);
-
-                light.rangeMultiplier = start.rangeMultiplier;
-                light.falloffExp = start.falloffExp;
-                light.noiseStrength = start.noiseStrength;
-                light.noiseScale = start.noiseScale;
-                light.coreRadius = start.coreRadius;
-                light.offsetRange = start.offsetRange;
-                light.segmentAngle = start.segmentAngle;
-                light.segmentRange = start.segmentRange;
+                    t);
             }
         }
 
-        private void ApplyControllerMotion(MotionData motion, float lerpTime)
+        private void ApplyControllerMotionInit(MotionData motion, float t)
         {
             var controller = stageLightManager.GetController(motion.name);
             if (controller == null)
@@ -218,76 +248,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var start = motion.start as TransformDataStageLightController;
-            var end = motion.end as TransformDataStageLightController;
-
-            var t0 = motion.stFrame * timeline.frameDuration;
-            var t1 = motion.edFrame * timeline.frameDuration;
 
             controller.visible = start.visible;
 
-            controller.positionMin = PluginUtils.HermiteValues(
-                t0,
-                t1,
-                start.positionValues,
-                end.positionValues,
-                lerpTime
-            ).ToVector3();
-
-            controller.positionMax = PluginUtils.HermiteValues(
-                t0,
-                t1,
-                start.subPositionValues,
-                end.subPositionValues,
-                lerpTime
-            ).ToVector3();
-
-            controller.rotationMin = PluginUtils.HermiteValues(
-                t0,
-                t1,
-                start.eulerAnglesValues,
-                end.eulerAnglesValues,
-                lerpTime
-            ).ToVector3();
-
-            controller.rotationMax = PluginUtils.HermiteValues(
-                t0,
-                t1,
-                start.subEulerAnglesValues,
-                end.subEulerAnglesValues,
-                lerpTime
-            ).ToVector3();
-
-            controller.colorMin = PluginUtils.HermiteValues(
-                t0,
-                t1,
-                start.colorValues,
-                end.colorValues,
-                lerpTime
-            ).ToColor();
-
-            controller.colorMax = PluginUtils.HermiteValues(
-                t0,
-                t1,
-                start.subColorValues,
-                end.subColorValues,
-                lerpTime
-            ).ToColor();
+            controller.positionMin = start.position;
+            controller.positionMax = start.subPosition;
+            controller.rotationMin = start.eulerAngles;
+            controller.rotationMax = start.subEulerAngles;
+            controller.colorMin = start.color;
+            controller.colorMax = start.subColor;
 
             var lightInfo = controller.lightInfo;
 
-            lightInfo.spotAngle = PluginUtils.HermiteValue(
-                t0,
-                t1,
-                start.spotAngleValue,
-                end.spotAngleValue,
-                lerpTime);
-
-            lightInfo.spotRange = PluginUtils.HermiteValue(
-                t0,
-                t1,
-                start.spotRangeValue,
-                end.spotRangeValue,
-                lerpTime);
+            lightInfo.spotAngle = start.spotAngle;
+            lightInfo.spotRange = start.spotRange;
 
             lightInfo.rangeMultiplier = start.rangeMultiplier;
             lightInfo.falloffExp = start.falloffExp;
@@ -303,6 +277,84 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             controller.autoColor = start.autoColor;
             controller.autoLightInfo = start.autoLightInfo;
             controller.autoVisible = start.autoVisible;
+        }
+
+        private void ApplyControllerMotionUpdate(MotionData motion, float t)
+        {
+            var controller = stageLightManager.GetController(motion.name);
+            if (controller == null)
+            {
+                return;
+            }
+
+            var start = motion.start as TransformDataStageLightController;
+            var end = motion.end as TransformDataStageLightController;
+
+            var t0 = motion.stFrame * timeline.frameDuration;
+            var t1 = motion.edFrame * timeline.frameDuration;
+
+            if (controller.autoPosition)
+            {
+                controller.positionMin = PluginUtils.HermiteValues(
+                    t0,
+                    t1,
+                    start.positionValues,
+                    end.positionValues,
+                    t
+                ).ToVector3();
+
+                controller.positionMax = PluginUtils.HermiteValues(
+                    t0,
+                    t1,
+                    start.subPositionValues,
+                    end.subPositionValues,
+                    t
+                ).ToVector3();
+            }
+
+            if (controller.autoRotation)
+            {
+                controller.rotationMin = PluginUtils.HermiteValues(
+                    t0,
+                    t1,
+                    start.eulerAnglesValues,
+                    end.eulerAnglesValues,
+                    t
+                ).ToVector3();
+
+                controller.rotationMax = PluginUtils.HermiteValues(
+                    t0,
+                    t1,
+                    start.subEulerAnglesValues,
+                    end.subEulerAnglesValues,
+                    t
+                ).ToVector3();
+            }
+
+            if (controller.autoColor)
+            {
+                controller.colorMin = Color.Lerp(start.color, end.color, t);
+                controller.colorMax = Color.Lerp(start.subColor, end.subColor, t);
+            }
+
+            var lightInfo = controller.lightInfo;
+
+            if (controller.autoLightInfo)
+            {
+                lightInfo.spotAngle = PluginUtils.HermiteValue(
+                    t0,
+                    t1,
+                    start.spotAngleValue,
+                    end.spotAngleValue,
+                    t);
+
+                lightInfo.spotRange = PluginUtils.HermiteValue(
+                    t0,
+                    t1,
+                    start.spotRangeValue,
+                    end.spotRangeValue,
+                    t);
+            }
         }
 
         public void OnLightSetup()

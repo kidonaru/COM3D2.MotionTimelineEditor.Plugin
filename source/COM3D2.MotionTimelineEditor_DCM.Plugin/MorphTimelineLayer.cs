@@ -127,11 +127,19 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var end = motion.end as TransformDataMorph;
             var morphName = motion.name;
 
-            _applyMorphMap[morphName] = this.Lerp(
-                start.morphValue,
-                end.morphValue,
-                t,
-                morphName);
+            if (indexUpdated)
+            {
+                _applyMorphMap[morphName] = start.morphValue;
+            }
+
+            if (start.morphValue != end.morphValue)
+            {
+                _applyMorphMap[morphName] = this.Lerp(
+                    start.morphValue,
+                    end.morphValue,
+                    t,
+                    morphName);
+            }
         }
 
         private float Lerp(float startValue, float endValue, float lerpFrame, string morphName)

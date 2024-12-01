@@ -7,7 +7,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public override TransformType type => TransformType.Paraffin;
 
-        public override int valueCount => 21;
+        public override int valueCount => 23;
 
         public override bool hasColor =>  true;
 
@@ -135,6 +135,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     defaultValue = 0f,
                 }
             },
+            {
+                "depthMin", new CustomValueInfo
+                {
+                    index = 21,
+                    name = "最小深度",
+                    defaultValue = 0f,
+                }
+            },
+            {
+                "depthMax", new CustomValueInfo
+                {
+                    index = 22,
+                    name = "最大深度",
+                    defaultValue = 0f,
+                }
+            },
         };
 
         public override Dictionary<string, CustomValueInfo> GetCustomValueInfoMap()
@@ -165,6 +181,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public ValueData useOverlayValue => this["useOverlay"];
 
         public ValueData useSubstructValue => this["useSubstruct"];
+
+        public ValueData depthMinValue => this["depthMin"];
+
+        public ValueData depthMaxValue => this["depthMax"];
 
         public Vector2 centerPosition
         {
@@ -220,6 +240,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => useSubstructValue.value = value;
         }
 
+        public float depthMin
+        {
+            get => depthMinValue.value;
+            set => depthMinValue.value = value;
+        }
+
+        public float depthMax
+        {
+            get => depthMaxValue.value;
+            set => depthMaxValue.value = value;
+        }
+
         public ParaffinData paraffin
         {
             get => new ParaffinData
@@ -231,6 +263,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 radiusFar = radiusFar,
                 radiusNear = radiusNear,
                 radiusScale = radiusScale,
+                depthMin = depthMin,
+                depthMax = depthMax,
                 useNormal = useNormal,
                 useAdd = useAdd,
                 useMultiply = useMultiply,
@@ -246,6 +280,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 radiusFar = value.radiusFar;
                 radiusNear = value.radiusNear;
                 radiusScale = value.radiusScale;
+                depthMin = value.depthMin;
+                depthMax = value.depthMax;
                 useNormal = value.useNormal;
                 useAdd = value.useAdd;
                 useMultiply = value.useMultiply;

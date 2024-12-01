@@ -127,15 +127,13 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 		{
             if (indexUpdated)
             {
-                ApplyNewMotion(motion, t);
+                ApplyMotionInit(motion, t);
             }
-            else
-            {
-                ApplyUpdateMotion(motion, t);
-            }
+
+            ApplyMotionUpdate(motion, t);
         }
 
-        private void ApplyNewMotion(MotionData motion, float t)
+        private void ApplyMotionInit(MotionData motion, float t)
 		{
             var start = motion.start as TransformDataText;
 
@@ -171,7 +169,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 			UpdateFreeTextSet(start.index, freeTextSet);
 		}
 
-        private void ApplyUpdateMotion(MotionData motion, float t)
+        private void ApplyMotionUpdate(MotionData motion, float t)
 		{
             var start = motion.start as TransformDataText;
             var end = motion.end as TransformDataText;

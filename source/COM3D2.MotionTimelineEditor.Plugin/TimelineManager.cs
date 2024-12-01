@@ -1433,7 +1433,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             isPrevPoseEditing = false;
 
             currentLayerIndex = layers.IndexOf(layer);
-            Refresh();
+            //Refresh();
 
             layer.OnActive();
         }

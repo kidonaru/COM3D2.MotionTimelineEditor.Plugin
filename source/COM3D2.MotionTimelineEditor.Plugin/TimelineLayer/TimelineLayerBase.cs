@@ -1414,6 +1414,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             SX,
             SY,
             SZ,
+            なし,
         }
 
         public enum TransformDrawType
@@ -1454,6 +1455,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 case TransformEditType.SZ:
                     if (drawType != TransformDrawType.拡縮) return false;
                     break;
+                case TransformEditType.なし:
+                    return false;
             }
 
             {

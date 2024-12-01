@@ -17,6 +17,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		[Range(0f, 1f)]
 		public float radiusNear = 0f;
 		public Vector2 radiusScale = new Vector2(1f, 1f);
+		public float depthMin;
+		public float depthMax;
 
 		[Header("Blend Mode")]
 		public float useNormal = 0f;
@@ -34,6 +36,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			radiusFar = data.radiusFar;
 			radiusNear = data.radiusNear;
 			radiusScale = data.radiusScale;
+			depthMin = data.depthMin;
+			depthMax = data.depthMax;
 			useNormal = data.useNormal;
 			useAdd = data.useAdd;
 			useMultiply = data.useMultiply;
@@ -55,6 +59,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 				radiusFar = Mathf.Lerp(a.radiusFar, b.radiusFar, t),
 				radiusNear = Mathf.Lerp(a.radiusNear, b.radiusNear, t),
 				radiusScale = Vector2.Lerp(a.radiusScale, b.radiusScale, t),
+				depthMin = Mathf.Lerp(a.depthMin, b.depthMin, t),
+				depthMax = Mathf.Lerp(a.depthMax, b.depthMax, t),
 				useNormal = Mathf.Lerp(a.useNormal, b.useNormal, t),
 				useAdd = Mathf.Lerp(a.useAdd, b.useAdd, t),
 				useMultiply = Mathf.Lerp(a.useMultiply, b.useMultiply, t),
@@ -76,24 +82,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         [Header("Debug")]
         [SerializeField]
-        private bool _isDebug = false;
-        public bool isDebug
-        {
-            get
-            {
-                return _isDebug;
-            }
-            set
-            {
-                if (_isDebug == value)
-                {
-                    return;
-                }
-                _isDebug = value;
-
-                InitMaterial();
-            }
-        }
+        public bool isDebug = false;
 
 		public static readonly int MAX_PARAFFIN_COUNT = 4;
 
@@ -111,13 +100,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			public float useMultiply;
 			public float useOverlay;
 			public float useSubstruct;
+			public float depthMin;
+			public float depthMax;
 			public float padding0;
 		}
 
-		private Material material = null;
-		private ParaffinBuffer[] paraffinBuffers = new ParaffinBuffer[MAX_PARAFFIN_COUNT];
-		private int enabledCount = 0;
-		private ComputeBuffer computeBuffer = null;
+		private Material _material = null;
+		private Material _materialDepth = null;
+		private Material _materialDebug = null;
+		private ParaffinBuffer[] _paraffinBuffers = new ParaffinBuffer[MAX_PARAFFIN_COUNT];
+		private int _enabledCount = 0;
+		private bool _enableDepth = false;
+		private ComputeBuffer _computeBuffer = null;
+		private Camera _camera = null;
+
+		private Material activeMaterial
+		{
+			get
+			{
+				if (isDebug)
+				{
+					return _materialDebug;
+				}
+				if (_enableDepth)
+				{
+					return _materialDepth;
+				}
+				return _material;
+			}
+		}
 
 #if COM3D2
 		private static TimelineBundleManager bundleManager
@@ -131,39 +142,59 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
 		void OnEnable()
 		{
-			computeBuffer = new ComputeBuffer(MAX_PARAFFIN_COUNT, sizeof(float) * 24);
-            InitMaterial();
+			_computeBuffer = new ComputeBuffer(MAX_PARAFFIN_COUNT, sizeof(float) * 24);
+			_camera = GetComponent<Camera>();
+			_camera.depthTextureMode |= DepthTextureMode.Depth;
+			InitMaterial();
 		}
 
 		void OnDisable()
 		{
-			if (computeBuffer != null)
+			if (_computeBuffer != null)
 			{
-				computeBuffer.Release();
-				computeBuffer = null;
+				_computeBuffer.Release();
+				_computeBuffer = null;
 			}
 			DeleteMaterial();
+		}
+
+		private Material LoadMaterial(string materialName)
+		{
+#if COM3D2
+			var material = bundleManager.LoadMaterial(materialName);
+#else
+			var material = new Material(Shader.Find("MTE/" + materialName));
+#endif
+			material.hideFlags = HideFlags.HideAndDontSave;
+			return material;
 		}
 
         private void InitMaterial()
         {
             DeleteMaterial();
-            var materialName = isDebug ? "ColorParaffinDebug" : "ColorParaffin";
-#if COM3D2
-			material = bundleManager.LoadMaterial(materialName);
-#else
-			material = new Material(Shader.Find("MTE/" + materialName));
-#endif
-			material.hideFlags = HideFlags.HideAndDontSave;
-        }
+
+			_material = LoadMaterial("ColorParaffin");
+			_materialDepth = LoadMaterial("ColorParaffinDepth");
+			_materialDebug = LoadMaterial("ColorParaffinDebug");
+		}
 
         private void DeleteMaterial()
         {
-            if (material != null)
+            if (_material != null)
             {
-                DestroyImmediate(material);
-                material = null;
+                DestroyImmediate(_material);
+                _material = null;
             }
+			if (_materialDepth != null)
+			{
+				DestroyImmediate(_materialDepth);
+				_materialDepth = null;
+			}
+			if (_materialDebug != null)
+			{
+				DestroyImmediate(_materialDebug);
+				_materialDebug = null;
+			}
         }
 
 		void OnValidate()
@@ -175,15 +206,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		{
 			BuildParaffinBuffers();
 
-			if (enabledCount == 0)
+			if (_enabledCount == 0)
 			{
 				Graphics.Blit(source, destination);
 				return;
 			}
 
-			computeBuffer.SetData(paraffinBuffers);
-			material.SetBuffer("_ParaffinBuffer", computeBuffer);
-			material.SetInt("_ParaffinCount", enabledCount);
+			_computeBuffer.SetData(_paraffinBuffers);
+
+			var material = activeMaterial;
+			material.SetBuffer("_ParaffinBuffer", _computeBuffer);
+			material.SetInt("_ParaffinCount", _enabledCount);
 
 			Graphics.Blit(source, destination, material);
 		}
@@ -240,10 +273,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
 		private void BuildParaffinBuffers()
 		{
-			enabledCount = 0;
+			_enabledCount = 0;
+			_enableDepth = false;
 			for (int i = 0; i < paraffinDataList.Count; i++)
 			{
-				if (enabledCount >= MAX_PARAFFIN_COUNT)
+				if (_enabledCount >= MAX_PARAFFIN_COUNT)
 				{
 					Debug.LogError("Too many paraffin effects. Max count is " + MAX_PARAFFIN_COUNT);
 					break;
@@ -255,8 +289,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 					continue;
 				}
 
-				paraffinBuffers[enabledCount] = ConvertToBuffer(data);
-				++enabledCount;
+				if (data.depthMin != 0f || data.depthMax != 0f)
+				{
+					_enableDepth = true;
+				}
+
+				_paraffinBuffers[_enabledCount] = ConvertToBuffer(data);
+				++_enabledCount;
 			}
 		}
 
@@ -299,6 +338,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			buffer.radiusFar = data.radiusFar;
 			buffer.radiusNear = data.radiusNear;
 			buffer.radiusScale = aspectScale;
+			buffer.depthMin = data.depthMin == 0f ? _camera.nearClipPlane : data.depthMin;
+			buffer.depthMax = data.depthMax == 0f ? _camera.farClipPlane : data.depthMax;
 			buffer.useNormal = data.useNormal;
 			buffer.useAdd = data.useAdd;
 			buffer.useMultiply = data.useMultiply;

@@ -1,4 +1,4 @@
-Shader "MTE/ColorParaffin"
+Shader "MTE/ColorParaffinDepth"
 {
     Properties
     {
@@ -30,6 +30,7 @@ Shader "MTE/ColorParaffin"
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
+                float4 screenPos : TEXCOORD1;
             };
 
             struct ParaffinBuffer
@@ -51,6 +52,7 @@ Shader "MTE/ColorParaffin"
             };
 
             sampler2D _MainTex;
+            sampler2D _CameraDepthTexture;
             StructuredBuffer<ParaffinBuffer> _ParaffinBuffer;
             int _ParaffinCount;
 
@@ -59,6 +61,7 @@ Shader "MTE/ColorParaffin"
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
+                o.screenPos = ComputeScreenPos(o.vertex);
                 return o;
             }
 
@@ -102,19 +105,28 @@ Shader "MTE/ColorParaffin"
                 return blendDiff * gradientColor.a;
             }
 
+            float4 CalculateDepthFactor(ParaffinBuffer data, float depth)
+            {
+                float depthFactor = step(data.depthMin, depth);
+                depthFactor *= 1.0 - step(data.depthMax, depth);
+                return depthFactor;
+            }
+
             fixed4 frag (v2f i) : SV_Target
             {
                 float4 col = tex2D(_MainTex, i.uv);
                 float4 blend = float4(0, 0, 0, 0);
+                float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.screenPos));
 
                 [loop]
                 for(int idx = 0; idx < _ParaffinCount; idx++)
                 {
-                    blend += CalculateBlend(col, _ParaffinBuffer[idx], i.uv);
+                    blend += CalculateBlend(col, _ParaffinBuffer[idx], i.uv) * CalculateDepthFactor(_ParaffinBuffer[idx], depth);
                 }
 
                 float4 result = col + blend;
                 result.a = col.a;
+
                 return result;
             }
             ENDCG

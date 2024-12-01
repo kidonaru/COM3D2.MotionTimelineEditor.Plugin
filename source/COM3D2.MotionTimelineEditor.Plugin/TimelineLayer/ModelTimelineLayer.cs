@@ -59,24 +59,52 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
             var model = modelManager.GetModel(motion.name);
-            if (model == null)
+            if (model == null || model.transform == null)
             {
                 return;
             }
 
+            if (indexUpdated)
+            {
+                ApplyMotionInit(motion, t, model);
+            }
+
+            ApplyMotionUpdate(motion, t, model);
+        }
+
+        private void ApplyMotionInit(MotionData motion, float t, StudioModelStat model)
+        {
             var transform = model.transform;
-            if (transform == null)
-            {
-                return;
-            }
+            var start = motion.start;
 
+            transform.localPosition = start.position;
+            transform.localRotation = Quaternion.Euler(start.eulerAngles);
+            transform.localScale = start.scale;
+            modelManager.SetModelVisible(model, start.visible);
+        }
+
+        private void ApplyMotionUpdate(MotionData motion, float t, StudioModelStat model)
+        {
+            var transform = model.transform;
             var start = motion.start;
             var end = motion.end;
 
             float easingTime = CalcEasingValue(t, start.easing);
-            transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
-            transform.localRotation = Quaternion.Euler(Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime));
-            transform.localScale = Vector3.Lerp(start.scale, end.scale, easingTime);
+
+            if (start.position != end.position)
+            {
+                transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
+            }
+
+            if (start.eulerAngles != end.eulerAngles)
+            {
+                transform.localRotation = Quaternion.Euler(Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime));
+            }
+
+            if (start.scale != end.scale)
+            {
+                transform.localScale = Vector3.Lerp(start.scale, end.scale, easingTime);
+            }
         }
 
         public override void OnModelAdded(StudioModelStat model)
@@ -121,6 +149,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 trans.eulerAngles = model.transform.localEulerAngles;
                 trans.scale = model.transform.localScale;
                 trans.easing = GetEasing(frame.frameNo, modelName);
+                trans.visible = model.visible;
 
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
@@ -299,7 +328,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     continue;
                 }
 
-                view.DrawLabel(model.displayName, 200, 20);
+                view.DrawToggle(model.displayName, model.visible, 200, 20, (visible) =>
+                {
+                    modelManager.SetModelVisible(model, visible);
+                });
 
                 var initialPosition = Vector3.zero;
                 var initialEulerAngles = Vector3.zero;

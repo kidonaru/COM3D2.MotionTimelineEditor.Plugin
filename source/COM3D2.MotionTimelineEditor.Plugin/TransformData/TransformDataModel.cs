@@ -7,11 +7,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public override TransformType type => TransformType.Model;
 
-        public override int valueCount => 10;
+        public override int valueCount => 11;
 
         public override bool hasPosition => true;
         public override bool hasEulerAngles =>  true;
         public override bool hasScale => true;
+        public override bool hasVisible => true;
         public override bool hasEasing => true;
 
         public override ValueData[] positionValues
@@ -28,6 +29,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get => new ValueData[] { values[6], values[7], values[8] };
         }
+
+        public override ValueData visibleValue => values[10];
 
         public override ValueData easingValue => values[9];
 

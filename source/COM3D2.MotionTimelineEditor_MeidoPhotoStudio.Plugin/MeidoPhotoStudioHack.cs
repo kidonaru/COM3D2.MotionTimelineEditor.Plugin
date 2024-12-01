@@ -432,7 +432,10 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                 return;
             }
 
-            prop.Visible = visible;
+            if (prop.Visible != visible)
+            {
+                prop.Visible = visible;
+            }
         }
 
         public override bool CanCreateLight()

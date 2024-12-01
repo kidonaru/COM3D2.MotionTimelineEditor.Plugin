@@ -260,14 +260,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 config.timelineLineColor2,
                 config.frameNoInterval);
 
-            if (texKeyFrame != null)
+            if (texKeyFrame == null)
             {
-                UnityEngine.Object.Destroy(texKeyFrame);
-                texKeyFrame = null;
+                texKeyFrame = TextureUtils.CreateDiamondTexture(
+                    config.frameWidth,
+                    Color.white);
             }
-            texKeyFrame = TextureUtils.CreateDiamondTexture(
-                config.frameWidth,
-                Color.white);
         }
 
         public void FixScrollPosition()

@@ -42,6 +42,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set
             {
                 soundMgr.SetVolumeDance(value);
+                soundMgr.Apply();
                 UpdateVolume();
             }
         }

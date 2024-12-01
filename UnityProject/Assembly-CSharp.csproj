@@ -54,6 +54,7 @@
      <None Include="Assets\Shaders\StageLight.shader" />
      <None Include="Assets\Shaders\ColorParaffinDebug.shader" />
      <None Include="Assets\Shaders\ColorParaffin.shader" />
+     <None Include="Assets\Shaders\ColorParaffinDepth.shader" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Hub/Editor/5.6.4f1/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

@@ -66,9 +66,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start;
             var end = motion.end;
 
+            if (indexUpdated)
+            {
+                transform.localPosition = start.position;
+                transform.localRotation = Quaternion.Euler(start.eulerAngles);
+            }
+
             float easingTime = CalcEasingValue(t, start.easing);
-            transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
-            transform.localRotation = Quaternion.Euler(Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime));
+
+            if (start.position != end.position)
+            {
+                transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
+            }
+
+            if (start.eulerAngles != end.eulerAngles)
+            {
+                transform.localRotation = Quaternion.Euler(Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime));
+            }
         }
 
         public override void OnEndPoseEdit()

@@ -566,6 +566,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
             }*/
+
+            if (version < 16)
+            {
+                // ModelTimelineLayerにvisibleを追加
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "ModelTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+
+                                var values = new List<float>(transform.values);
+                                if (values.Count == 10)
+                                {
+                                    PluginUtils.LogDebug("Add visible to ModelTimelineLayer name={0}", transform.name);
+                                    values.Add(1f);
+                                }
+                                transform.values = values.ToArray();
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 }

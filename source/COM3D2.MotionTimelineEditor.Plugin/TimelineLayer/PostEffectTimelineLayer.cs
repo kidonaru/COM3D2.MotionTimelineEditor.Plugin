@@ -558,6 +558,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 onChanged = newValue => paraffin.radiusScale.y = newValue,
             });
 
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "最小深度",
+                labelWidth = 30,
+                min = 0f,
+                max = Camera.main.farClipPlane,
+                step = 0.1f,
+                defaultValue = 0f,
+                value = paraffin.depthMin,
+                onChanged = newValue => paraffin.depthMin = newValue,
+            });
+
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "最大深度",
+                labelWidth = 30,
+                min = 0f,
+                max = Camera.main.farClipPlane,
+                step = 0.1f,
+                defaultValue = 0f,
+                value = paraffin.depthMax,
+                onChanged = newValue => paraffin.depthMax = newValue,
+            });
+
             view.DrawLabel("ブレンドモード", 100, 20);
 
             updateTransform |= view.DrawSliderValue(new GUIView.SliderOption

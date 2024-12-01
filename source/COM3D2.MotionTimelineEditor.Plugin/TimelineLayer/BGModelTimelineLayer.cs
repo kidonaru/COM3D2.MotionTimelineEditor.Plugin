@@ -74,25 +74,52 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
             var model = bgModelManager.GetModel(motion.name);
-            if (model == null)
+            if (model == null || model.transform == null)
             {
                 return;
             }
 
+            if (indexUpdated)
+            {
+                ApplyMotionInit(motion, t, model);
+            }
+
+            ApplyMotionUpdate(motion, t, model);
+        }
+
+        protected void ApplyMotionInit(MotionData motion, float t, BGModelStat model)
+        {
             var transform = model.transform;
-            if (transform == null)
-            {
-                return;
-            }
+            var start = motion.start;
 
+            transform.localPosition = start.position;
+            transform.localRotation = start.rotation;
+            transform.localScale = start.scale;
+            model.visible = start.visible;
+        }
+
+        protected void ApplyMotionUpdate(MotionData motion, float t, BGModelStat model)
+        {
+            var transform = model.transform;
             var start = motion.start;
             var end = motion.end;
 
             float easingTime = CalcEasingValue(t, start.easing);
-            transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
-            transform.localRotation = Quaternion.Lerp(start.rotation, end.rotation, easingTime);
-            transform.localScale = Vector3.Lerp(start.scale, end.scale, easingTime);
-            model.visible = start.visible;
+
+            if (start.position != end.position)
+            {
+                transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
+            }
+
+            if (start.rotation != end.rotation)
+            {
+                transform.localRotation = Quaternion.Lerp(start.rotation, end.rotation, easingTime);
+            }
+
+            if (start.scale != end.scale)
+            {
+                transform.localScale = Vector3.Lerp(start.scale, end.scale, easingTime);
+            }
         }
 
         public void OnBGModelSetup()
@@ -137,6 +164,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private GUIComboBox<TransformEditType> _transComboBox = new GUIComboBox<TransformEditType>
+        {
+            items = Enum.GetValues(typeof(TransformEditType)).Cast<TransformEditType>().ToList(),
+            getName = (type, index) => type.ToString(),
+        };
+
         private GUIComboBox<BGModelStat> _modelComboBox = new GUIComboBox<BGModelStat>
         {
             getName = (model, index) => model.displayName,
@@ -166,7 +199,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawComboBox();
         }
-        
+
         public void DrawModelEdit(GUIView view)
         {
             var models = bgModelManager.models;
@@ -178,21 +211,31 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.SetEnabled(!view.IsComboBoxFocused());
 
-            _modelComboBox.items = models;
-            _modelComboBox.DrawButton("操作対象", view);
+            _transComboBox.DrawButton("操作種類", view);
 
             view.DrawHorizontalLine(Color.gray);
 
             view.AddSpace(5);
 
-            var model = _modelComboBox.currentItem;
-            if (model == null || model.transform == null)
-            {
-                view.DrawLabel("モデルが選択されていません", 200, 20);
-                return;
-            }
+            view.BeginScrollView();
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+
+            foreach (var model in models)
+            {
+                DrawModel(view, model);
+            }
+
+            view.SetEnabled(!view.IsComboBoxFocused());
+            view.EndScrollView();
+        }
+
+        private void DrawModel(GUIView view, BGModelStat model)
+        {
+            if (model == null || model.transform == null)
+            {
+                return;
+            }
 
             view.DrawToggle(model.displayName, model.visible, 200, 20, newValue =>
             {
@@ -200,11 +243,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             });
 
             var info = model.info;
+            var editType = _transComboBox.currentItem;
 
             DrawTransform(
                 view,
                 model.transform,
-                TransformEditType.全て,
+                editType,
                 DrawMaskAll,
                 model.name,
                 info.initialPosition,
