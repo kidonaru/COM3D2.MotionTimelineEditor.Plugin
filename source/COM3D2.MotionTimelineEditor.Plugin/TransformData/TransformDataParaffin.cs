@@ -7,7 +7,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public override TransformType type => TransformType.Paraffin;
 
-        public override int valueCount => 23;
+        public override int valueCount => 24;
 
         public override bool hasColor =>  true;
 
@@ -151,6 +151,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     defaultValue = 0f,
                 }
             },
+            {
+                "depthFade", new CustomValueInfo
+                {
+                    index = 23,
+                    name = "深度幅",
+                    defaultValue = 0f,
+                }
+            }
         };
 
         public override Dictionary<string, CustomValueInfo> GetCustomValueInfoMap()
@@ -162,29 +170,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get => new ValueData[] { this["centerPositionX"], this["centerPositionY"] };
         }
-
         public ValueData radiusFarValue => this["radiusFar"];
-
         public ValueData radiusNearValue => this["radiusNear"];
-
         public ValueData[] radiusScaleValues
         {
             get => new ValueData[] { this["radiusScaleX"], this["radiusScaleY"] };
         }
-
         public ValueData useNormalValue => this["useNormal"];
-
         public ValueData useAddValue => this["useAdd"];
-
         public ValueData useMultiplyValue => this["useMultiply"];
-
         public ValueData useOverlayValue => this["useOverlay"];
-
         public ValueData useSubstructValue => this["useSubstruct"];
-
         public ValueData depthMinValue => this["depthMin"];
-
         public ValueData depthMaxValue => this["depthMax"];
+        public ValueData depthFadeValue => this["depthFade"];
 
         public Vector2 centerPosition
         {
@@ -252,6 +251,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => depthMaxValue.value = value;
         }
 
+        public float depthFade
+        {
+            get => depthFadeValue.value;
+            set => depthFadeValue.value = value;
+        }
+
         public ParaffinData paraffin
         {
             get => new ParaffinData
@@ -265,6 +270,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 radiusScale = radiusScale,
                 depthMin = depthMin,
                 depthMax = depthMax,
+                depthFade = depthFade,
                 useNormal = useNormal,
                 useAdd = useAdd,
                 useMultiply = useMultiply,
@@ -282,6 +288,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 radiusScale = value.radiusScale;
                 depthMin = value.depthMin;
                 depthMax = value.depthMax;
+                depthFade = value.depthFade;
                 useNormal = value.useNormal;
                 useAdd = value.useAdd;
                 useMultiply = value.useMultiply;

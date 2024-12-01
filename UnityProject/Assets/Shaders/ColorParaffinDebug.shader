@@ -47,7 +47,7 @@ Shader "MTE/ColorParaffinDebug"
                 float useSubstruct;
                 float depthMin;
                 float depthMax;
-                float padding0;
+                float depthFade;
             };
 
             sampler2D _MainTex;
@@ -81,7 +81,10 @@ Shader "MTE/ColorParaffinDebug"
             float4 CalculateDebugBlend(ParaffinBuffer data, float2 uv)
             {
                 float4 blend = CalculateGradientColor(data, uv);
-                blend.rgb *= blend.a;
+
+                float useFactor = data.useNormal + data.useAdd + data.useMultiply + data.useMultiply + data.useOverlay + data.useSubstruct;
+
+                blend.rgb *= blend.a * useFactor;
                 return blend;
             }
 

@@ -488,7 +488,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         labelWidth = 30,
                         min = 0f,
                         max = 5f,
-                        step = 0.1f,
+                        step = 0.01f,
                         defaultValue = 3f,
                         value = light.intensity,
                         onChanged = newValue => light.intensity = newValue,

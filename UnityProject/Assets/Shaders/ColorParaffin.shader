@@ -47,7 +47,7 @@ Shader "MTE/ColorParaffin"
                 float useSubstruct;
                 float depthMin;
                 float depthMax;
-                float padding0;
+                float depthFade;
             };
 
             sampler2D _MainTex;

@@ -78,11 +78,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override void Update()
         {
             base.Update();
-        }
-
-        public override void LateUpdate()
-        {
-            base.LateUpdate();
 
             var boneCount = 1 + timeline.paraffinCount;
             if (allBoneNames.Count != boneCount)
@@ -97,6 +92,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 ApplyPlayData();
             }
+        }
+
+        public override void LateUpdate()
+        {
+            base.LateUpdate();
         }
 
         protected override void ApplyPlayData()
@@ -129,11 +129,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start as TransformDataDepthOfField;
             var end = motion.end as TransformDataDepthOfField;
 
-            var stData = start.depthOfField;
-            var edData = end.depthOfField;
-
             float easingTime = CalcEasingValue(t, start.easing);
-            var depthOfField = DepthOfFieldData.Lerp(stData, edData, easingTime);
+            var depthOfField = DepthOfFieldData.Lerp(start.depthOfField, end.depthOfField, easingTime);
 
             postEffectManager.ApplyDepthOfField(depthOfField);
         }
@@ -143,11 +140,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start as TransformDataParaffin;
             var end = motion.end as TransformDataParaffin;
 
-            var stData = start.paraffin;
-            var edData = end.paraffin;
-
             float easingTime = CalcEasingValue(t, start.easing);
-            var paraffin = ParaffinData.Lerp(stData, edData, easingTime);
+            var paraffin = ParaffinData.Lerp(start.paraffin, end.paraffin, easingTime);
 
             var index = start.index;
             postEffectManager.ApplyParaffin(index, paraffin);
@@ -580,6 +574,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 defaultValue = 0f,
                 value = paraffin.depthMax,
                 onChanged = newValue => paraffin.depthMax = newValue,
+            });
+
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "深度幅",
+                labelWidth = 30,
+                min = 0f,
+                max = Camera.main.farClipPlane,
+                step = 0.1f,
+                defaultValue = 0f,
+                value = paraffin.depthFade,
+                onChanged = newValue => paraffin.depthFade = newValue,
             });
 
             view.DrawLabel("ブレンドモード", 100, 20);

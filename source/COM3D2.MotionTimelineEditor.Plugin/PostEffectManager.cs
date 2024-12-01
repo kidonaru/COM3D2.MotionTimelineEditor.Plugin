@@ -114,6 +114,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void OnPluginDisable()
         {
             ResetCache();
+            DisableDepthOfField();
+            DisableParaffin();
         }
 
         public void OnPluginEnable()

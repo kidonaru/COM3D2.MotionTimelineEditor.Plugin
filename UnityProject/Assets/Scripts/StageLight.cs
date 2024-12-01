@@ -524,16 +524,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (_meshRenderer != null && _meshRenderer.sharedMaterial != null)
             {
                 var material = _meshRenderer.sharedMaterial;
-                material.SetFloat("_SpotRange", CalculateEffectiveRange());
-                material.SetFloat("_SpotAngle", spotAngle);
-                material.SetColor("_Color", color);
-                material.SetColor("_SubColor", color);
-                material.SetFloat("_FalloffExp", falloffExp);
-                material.SetFloat("_NoiseStrength", noiseStrength);
-                material.SetFloat("_NoiseScaleInv", 1f / noiseScale);
-                material.SetFloat("_CoreRadius", coreRadius);
-                material.SetFloat("_TanHalfAngle", Mathf.Tan(spotAngle * 0.5f * Mathf.Deg2Rad));
+                material.SetFloat(Uniforms._SpotRange, CalculateEffectiveRange());
+                material.SetFloat(Uniforms._SpotAngle, spotAngle);
+                material.SetColor(Uniforms._Color, color);
+                material.SetColor(Uniforms._SubColor, color);
+                material.SetFloat(Uniforms._FalloffExp, falloffExp);
+                material.SetFloat(Uniforms._NoiseStrength, noiseStrength);
+                material.SetFloat(Uniforms._NoiseScaleInv, 1f / noiseScale);
+                material.SetFloat(Uniforms._CoreRadius, coreRadius);
+                material.SetFloat(Uniforms._TanHalfAngle, Mathf.Tan(spotAngle * 0.5f * Mathf.Deg2Rad));
             }
+        }
+
+        private static class Uniforms
+        {
+            internal static readonly int _SpotRange = Shader.PropertyToID("_SpotRange");
+            internal static readonly int _SpotAngle = Shader.PropertyToID("_SpotAngle");
+            internal static readonly int _Color = Shader.PropertyToID("_Color");
+            internal static readonly int _SubColor = Shader.PropertyToID("_SubColor");
+            internal static readonly int _FalloffExp = Shader.PropertyToID("_FalloffExp");
+            internal static readonly int _NoiseStrength = Shader.PropertyToID("_NoiseStrength");
+            internal static readonly int _NoiseScaleInv = Shader.PropertyToID("_NoiseScaleInv");
+            internal static readonly int _CoreRadius = Shader.PropertyToID("_CoreRadius");
+            internal static readonly int _TanHalfAngle = Shader.PropertyToID("_TanHalfAngle");
         }
 
         private void UpdateName()

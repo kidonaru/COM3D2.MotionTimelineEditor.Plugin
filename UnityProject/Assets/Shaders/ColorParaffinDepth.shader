@@ -48,7 +48,7 @@ Shader "MTE/ColorParaffinDepth"
                 float useSubstruct;
                 float depthMin;
                 float depthMax;
-                float padding0;
+                float depthFade;
             };
 
             sampler2D _MainTex;
@@ -107,9 +107,9 @@ Shader "MTE/ColorParaffinDepth"
 
             float4 CalculateDepthFactor(ParaffinBuffer data, float depth)
             {
-                float depthFactor = step(data.depthMin, depth);
-                depthFactor *= 1.0 - step(data.depthMax, depth);
-                return depthFactor;
+                float minFactor = smoothstep(data.depthMin - data.depthFade, data.depthMin, depth);
+                float maxFactor = 1.0 - smoothstep(data.depthMax, data.depthMax + data.depthFade, depth);
+                return minFactor * maxFactor;
             }
 
             fixed4 frag (v2f i) : SV_Target

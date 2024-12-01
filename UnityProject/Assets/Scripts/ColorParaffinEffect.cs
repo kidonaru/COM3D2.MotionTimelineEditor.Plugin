@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.PostProcessing;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -17,8 +18,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		[Range(0f, 1f)]
 		public float radiusNear = 0f;
 		public Vector2 radiusScale = new Vector2(1f, 1f);
-		public float depthMin;
-		public float depthMax;
+		public float depthMin = 0f;
+		public float depthMax = 0f;
+		public float depthFade = 0f;
 
 		[Header("Blend Mode")]
 		public float useNormal = 0f;
@@ -38,6 +40,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			radiusScale = data.radiusScale;
 			depthMin = data.depthMin;
 			depthMax = data.depthMax;
+			depthFade = data.depthFade;
 			useNormal = data.useNormal;
 			useAdd = data.useAdd;
 			useMultiply = data.useMultiply;
@@ -61,6 +64,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 				radiusScale = Vector2.Lerp(a.radiusScale, b.radiusScale, t),
 				depthMin = Mathf.Lerp(a.depthMin, b.depthMin, t),
 				depthMax = Mathf.Lerp(a.depthMax, b.depthMax, t),
+				depthFade = Mathf.Lerp(a.depthFade, b.depthFade, t),
 				useNormal = Mathf.Lerp(a.useNormal, b.useNormal, t),
 				useAdd = Mathf.Lerp(a.useAdd, b.useAdd, t),
 				useMultiply = Mathf.Lerp(a.useMultiply, b.useMultiply, t),
@@ -102,7 +106,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			public float useSubstruct;
 			public float depthMin;
 			public float depthMax;
-			public float padding0;
+			public float depthFade;
 		}
 
 		private Material _material = null;
@@ -197,15 +201,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			}
         }
 
-		void OnValidate()
+		public void LateUpdate()
 		{
-            InitMaterial();
+			BuildParaffinBuffers();
 		}
 
 		private void OnRenderImage(RenderTexture source, RenderTexture destination)
 		{
-			BuildParaffinBuffers();
-
 			if (_enabledCount == 0)
 			{
 				Graphics.Blit(source, destination);
@@ -215,10 +217,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			_computeBuffer.SetData(_paraffinBuffers);
 
 			var material = activeMaterial;
-			material.SetBuffer("_ParaffinBuffer", _computeBuffer);
-			material.SetInt("_ParaffinCount", _enabledCount);
+			material.SetBuffer(Uniforms._ParaffinBuffer, _computeBuffer);
+			material.SetInt(Uniforms._ParaffinCount, _enabledCount);
 
 			Graphics.Blit(source, destination, material);
+		}
+
+		private static class Uniforms
+		{
+			internal static readonly int _ParaffinBuffer = Shader.PropertyToID("_ParaffinBuffer");
+			internal static readonly int _ParaffinCount = Shader.PropertyToID("_ParaffinCount");
 		}
 
 		public ParaffinData GetParaffinData(int index)
@@ -340,6 +348,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			buffer.radiusScale = aspectScale;
 			buffer.depthMin = data.depthMin == 0f ? _camera.nearClipPlane : data.depthMin;
 			buffer.depthMax = data.depthMax == 0f ? _camera.farClipPlane : data.depthMax;
+			buffer.depthFade = data.depthFade;
 			buffer.useNormal = data.useNormal;
 			buffer.useAdd = data.useAdd;
 			buffer.useMultiply = data.useMultiply;
