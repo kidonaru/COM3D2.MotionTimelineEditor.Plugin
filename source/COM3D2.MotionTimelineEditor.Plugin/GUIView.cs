@@ -1484,7 +1484,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             fieldCache.UpdateColor(color, true);
             fieldCache.UpdateDefaultColor(resetColor);
 
-            if (fieldCache.useHSV)
+            if (config.useHSVColor)
             {
                 var newHSV = fieldCache.hsv;
                 var defaultHSV = fieldCache.defaultHSV;
@@ -1618,7 +1618,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (DrawTextureButton(bundleManager.changeIcon, 20, 20))
                 {
-                    fieldCache.useHSV = !fieldCache.useHSV;
+                    config.useHSVColor = !config.useHSVColor;
+                    config.dirty = true;
                 }
             }
             EndLayout();

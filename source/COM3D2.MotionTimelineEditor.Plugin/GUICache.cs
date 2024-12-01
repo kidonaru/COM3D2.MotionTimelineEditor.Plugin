@@ -68,7 +68,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string label = null;
         public string text = "";
         public bool hasAlpha = false;
-        public bool useHSV = false;
 
         private Color _color = Color.white;
         public Color color => _color;

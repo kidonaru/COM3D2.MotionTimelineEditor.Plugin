@@ -1428,14 +1428,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             UnselectAll();
 
-            studioHack.isPoseEditing = false;
-            OnEndPoseEdit();
-            isPrevPoseEditing = false;
+            bool isPoseEditing = studioHack.isPoseEditing;
+            if (isPoseEditing)
+            {
+                OnEndPoseEdit();
+            }
 
             currentLayerIndex = layers.IndexOf(layer);
             //Refresh();
 
             layer.OnActive();
+
+            if (isPoseEditing)
+            {
+                OnStartPoseEdit();
+            }
         }
         
         public void SetPlayingFrameNoAll(int frameNo)
