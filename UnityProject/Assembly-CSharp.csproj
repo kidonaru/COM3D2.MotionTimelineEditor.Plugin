@@ -91,9 +91,13 @@
      <Compile Include="Assets\PostProcessing\Runtime\Utils\MaterialFactory.cs" />
      <Compile Include="Assets\PostProcessing\Runtime\Utils\RenderTextureFactory.cs" />
      <Compile Include="Assets\PostProcessing\Utilities\CustomMotionTexture\ExampleWheelController.cs" />
-     <Compile Include="Assets\Scripts\ColorParaffinEffect.cs" />
      <Compile Include="Assets\Scripts\CreateAssetBundles.cs" />
      <Compile Include="Assets\Scripts\NoiseTextureGenerator.cs" />
+     <Compile Include="Assets\Scripts\PostEffect\ColorParaffinEffectModel.cs" />
+     <Compile Include="Assets\Scripts\PostEffect\ColorParaffinEffectSettings.cs" />
+     <Compile Include="Assets\Scripts\PostEffect\PostEffectContext.cs" />
+     <Compile Include="Assets\Scripts\PostEffect\PostEffectController.cs" />
+     <Compile Include="Assets\Scripts\PostEffect\PostEffectModelBase.cs" />
      <Compile Include="Assets\Scripts\StageLight.cs" />
      <Compile Include="Assets\Scripts\StageLightController.cs" />
      <None Include="Assets\PostProcessing\Resources\Shaders\DepthOfField.shader" />
@@ -136,11 +140,9 @@
      <None Include="Assets\PostProcessing\Editor Resources\Monitors\VectorscopeRender.shader" />
      <None Include="Assets\PostProcessing\Resources\Shaders\EyeAdaptation.shader" />
      <None Include="Assets\PostProcessing\Resources\Shaders\ColorGrading.cginc" />
-     <None Include="Assets\Shaders\ColorParaffinDebug.shader" />
-     <None Include="Assets\Shaders\ColorParaffin.shader" />
      <None Include="Assets\PostProcessing\Resources\Shaders\AmbientOcclusion.cginc" />
      <None Include="Assets\PostProcessing\Editor Resources\Monitors\WaveformCompute.compute" />
-     <None Include="Assets\Shaders\ColorParaffinDepth.shader" />
+     <None Include="Assets\Shaders\PostEffect.shader" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Hub/Editor/5.6.4f1/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

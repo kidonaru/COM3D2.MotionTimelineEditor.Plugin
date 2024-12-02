@@ -1,4 +1,4 @@
-Shader "MTE/ColorParaffin"
+Shader "MTE/PostEffect"
 {
     Properties
     {
@@ -18,6 +18,10 @@ Shader "MTE/ColorParaffin"
             #pragma vertex vert
             #pragma fragment frag
             #pragma target 4.5
+            #pragma multi_compile __ PARAFFIN
+            #pragma multi_compile __ PARAFFIN_DEBUG
+            #pragma multi_compile __ PARAFFIN_DEPTH
+            #pragma multi_compile __ PARAFFIN_OVERLAY
             #include "UnityCG.cginc"
 
             struct appdata
@@ -30,6 +34,9 @@ Shader "MTE/ColorParaffin"
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
+                #if PARAFFIN_DEPTH
+                float4 screenPos : TEXCOORD1;
+                #endif
             };
 
             struct ParaffinBuffer
@@ -51,6 +58,8 @@ Shader "MTE/ColorParaffin"
             };
 
             sampler2D _MainTex;
+            sampler2D _CameraDepthTexture;
+
             StructuredBuffer<ParaffinBuffer> _ParaffinBuffer;
             int _ParaffinCount;
 
@@ -59,6 +68,9 @@ Shader "MTE/ColorParaffin"
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
+                #if PARAFFIN_DEPTH
+                o.screenPos = ComputeScreenPos(o.vertex);
+                #endif
                 return o;
             }
 
@@ -96,26 +108,68 @@ Shader "MTE/ColorParaffin"
                 blendDiff += (gradientColor - col) * data.useNormal;
                 blendDiff += (col + gradientColor - col) * data.useAdd;
                 blendDiff += (col * gradientColor - col) * data.useMultiply;
+                #if PARAFFIN_OVERLAY
                 blendDiff += (BlendOverlay(col, gradientColor) - col) * data.useOverlay;
+                #endif
                 blendDiff += (col - gradientColor - col) * data.useSubstruct;
 
                 return blendDiff * gradientColor.a;
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            float4 CalculateDepthFactor(ParaffinBuffer data, float depth)
             {
-                float4 col = tex2D(_MainTex, i.uv);
-                float4 blend = float4(0, 0, 0, 0);
+                float minFactor = smoothstep(data.depthMin - data.depthFade, data.depthMin, depth);
+                float maxFactor = 1.0 - smoothstep(data.depthMax, data.depthMax + data.depthFade, depth);
+                return minFactor * maxFactor;
+            }
+
+            float4 CalculateDebugBlend(ParaffinBuffer data, float2 uv)
+            {
+                float4 blend = CalculateGradientColor(data, uv);
+
+                float useFactor = data.useNormal + data.useAdd + data.useMultiply + data.useMultiply + data.useOverlay + data.useSubstruct;
+
+                blend.rgb *= blend.a * useFactor;
+                return blend;
+            }
+
+            float4 CalculateParaffin(v2f i, float4 src)
+            {
+                float4 dst = src;
+
+                #if PARAFFIN_DEBUG
+                dst = float4(0, 0, 0, 0);
+                #endif
+
+                #if PARAFFIN_DEPTH
+                float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.screenPos));
+                #endif
 
                 [loop]
                 for(int idx = 0; idx < _ParaffinCount; idx++)
                 {
-                    blend += CalculateBlend(col, _ParaffinBuffer[idx], i.uv);
+                    #if PARAFFIN_DEBUG
+                    dst += CalculateDebugBlend(_ParaffinBuffer[idx], i.uv);
+                    #elif PARAFFIN_DEPTH
+                    dst += CalculateBlend(src, _ParaffinBuffer[idx], i.uv) * CalculateDepthFactor(_ParaffinBuffer[idx], depth);
+                    #else
+                    dst += CalculateBlend(src, _ParaffinBuffer[idx], i.uv);
+                    #endif
                 }
 
-                float4 result = col + blend;
-                result.a = col.a;
-                return result;
+                dst.a = src.a;
+                return dst;
+            }
+
+            fixed4 frag (v2f i) : SV_Target
+            {
+                float4 col = tex2D(_MainTex, i.uv);
+
+                #if PARAFFIN
+                col = CalculateParaffin(i, col);
+                #endif
+
+                return col;
             }
             ENDCG
         }

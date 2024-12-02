@@ -49,7 +49,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             while (postEffectManager.GetParaffinCount() < timeline.paraffinCount)
             {
-                postEffectManager.AddParaffinData(new ParaffinData());
+                postEffectManager.AddParaffinData();
             }
             while (postEffectManager.GetParaffinCount() > timeline.paraffinCount)
             {

@@ -123,9 +123,13 @@
     <Compile Include="PostEffectManager.cs" />
     <Compile Include="PostEffectUtils.cs" />
     <Compile Include="ScriptLoader.cs" />
-    <Compile Include="..\..\UnityProject/Assets/Scripts/StageLight.cs" />
-    <Compile Include="..\..\UnityProject/Assets/Scripts/StageLightController.cs" />
-    <Compile Include="..\..\UnityProject/Assets/Scripts/ColorParaffinEffect.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\StageLight.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\StageLightController.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\ColorParaffinEffectModel.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\ColorParaffinEffectSettings.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\PostEffectContext.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\PostEffectController.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\PostEffectModelBase.cs" />
     <Compile Include="StageLightManager.cs" />
     <Compile Include="StopwatchDebug.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -61,24 +61,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public int depthOfFieldMaidSlotId = -1;
 
-        private ColorParaffinEffect _paraffin = null;
-        public ColorParaffinEffect paraffin
+        private PostEffectController _controller = null;
+        public PostEffectController controller
         {
             get
             {
-                if (_paraffin == null)
+                if (_controller == null)
                 {
-                    _paraffin = mainCamera.GetComponent<ColorParaffinEffect>();
-                    if (_paraffin == null)
-                    {
-                        _paraffin = mainCamera.gameObject.AddComponent<ColorParaffinEffect>();
-                        _paraffin.enabled = false;
-                    }
+                    _controller = mainCamera.GetOrAddComponent<PostEffectController>();
                 }
-
-                return _paraffin;
+                return _controller;
             }
         }
+
+        public ColorParaffinEffectSettings paraffin => controller.context.paraffinSettings;
 
         private static MaidManager maidManager => MaidManager.instance;
 
@@ -108,14 +104,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Init()
         {
-            TimelineManager.onRefresh += ResetCache;
         }
 
         public void OnPluginDisable()
         {
-            ResetCache();
             DisableDepthOfField();
             DisableParaffin();
+            ResetCache();
+            ReleaseController();
         }
 
         public void OnPluginEnable()
@@ -125,7 +121,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private void ResetCache()
         {
             _depthOfField = null;
-            _paraffin = null;
+        }
+
+        private void ReleaseController()
+        {
+            if (_controller != null)
+            {
+                Object.Destroy(_controller);
+                _controller = null;
+            }
         }
 
         public DepthOfFieldData GetDepthOfFieldData()
@@ -176,9 +180,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return paraffin.GetParaffinCount();
         }
         
-        public void AddParaffinData(ParaffinData data)
+        public void AddParaffinData()
         {
-            paraffin.AddParaffinData(data);
+            paraffin.AddParaffinData(new ParaffinData());
         }
 
         public void RemoveParaffinData()
