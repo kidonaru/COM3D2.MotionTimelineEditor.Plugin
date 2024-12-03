@@ -358,8 +358,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float letterBoxAlpha = 1f;
         public int textCount = 1;
         public bool fingerBlendEnabled = true;
-        public bool useParaffinExtra = false;
+        public bool usePostEffectExtra = false;
         public int paraffinCount = 1;
+        public int distanceFogCount = 1;
 
         // 動画
         public bool videoEnabled = true;
@@ -780,8 +781,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             letterBoxAlpha = xml.letterBoxAlpha;
             textCount = xml.textCount;
             fingerBlendEnabled = xml.fingerBlendEnabled;
-            useParaffinExtra = xml.useParaffinExtra;
+            usePostEffectExtra = xml.usePostEffectExtra;
             paraffinCount = xml.paraffinCount;
+            distanceFogCount = xml.distanceFogCount;
             videoEnabled = xml.videoEnabled;
             videoDisplayType = xml.videoDisplayType;
             videoPath = xml.videoPath;
@@ -907,8 +909,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.letterBoxAlpha = letterBoxAlpha;
             xml.textCount = textCount;
             xml.fingerBlendEnabled = fingerBlendEnabled;
-            xml.useParaffinExtra = useParaffinExtra;
+            xml.usePostEffectExtra = usePostEffectExtra;
             xml.paraffinCount = paraffinCount;
+            xml.distanceFogCount = distanceFogCount;
             xml.videoEnabled = videoEnabled;
             xml.videoDisplayType = videoDisplayType;
             xml.videoPath = videoPath;

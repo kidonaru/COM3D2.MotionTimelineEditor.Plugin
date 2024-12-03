@@ -93,14 +93,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (updateText)
             {
-                if (hasAlpha)
-                {
-                    text = color.ToHexRGBA();
-                }
-                else
-                {
-                    text = color.ToHexRGB();
-                }
+                UpdateText();
             }
         }
 
@@ -116,7 +109,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (updateText)
             {
-                text = _color.ToHexRGB();
+                UpdateText();
             }
         }
 
@@ -140,7 +133,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             _color = _defaultColor;
             _hsv = _defaultHSV;
-            text = _color.ToHexRGB();
+            UpdateText();
+        }
+
+        public void UpdateText()
+        {
+            if (hasAlpha)
+            {
+                text = _color.ToHexRGBA();
+            }
+            else
+            {
+                text = _color.ToHexRGB();
+            }
         }
 
         public ColorFieldCache()

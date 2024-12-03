@@ -417,6 +417,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     TransformType.DepthOfField, TimelineManager.CreateTransform<TransformDataDepthOfField>
                 );
                 timelineManager.RegisterTransform(
+                    TransformType.DistanceFog, TimelineManager.CreateTransform<TransformDataDistanceFog>
+                );
+                timelineManager.RegisterTransform(
                     TransformType.ExtendBone, TimelineManager.CreateTransform<TransformDataExtendBone>
                 );
                 timelineManager.RegisterTransform(

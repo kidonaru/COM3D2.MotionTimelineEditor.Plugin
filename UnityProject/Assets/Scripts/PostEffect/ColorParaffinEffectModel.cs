@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -39,6 +40,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			}
 		}
 
+		public override CameraEvent cameraEvent
+		{
+			get
+			{
+				return CameraEvent.BeforeImageEffects;
+			}
+		}
+
 		public ColorParaffinEffectSettings settings
 		{
 			get
@@ -56,7 +65,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			}
 		}
 
-		public override void OnPreCull()
+		public override void OnPreRender()
 		{
 			if (_computeBuffer == null)
 			{
@@ -140,7 +149,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return centeredUV + new Vector2(0.5f, 0.5f);
         }
 
-		private ParaffinBuffer ConvertToBuffer(ParaffinData data)
+		private ParaffinBuffer ConvertToBuffer(ColorParaffinData data)
 		{
 			var buffer = new ParaffinBuffer();
 

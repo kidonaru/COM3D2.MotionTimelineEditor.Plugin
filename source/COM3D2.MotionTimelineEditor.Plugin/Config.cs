@@ -36,6 +36,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool dofNearBlur = false;
         public bool dofVisualizeFocus = false;
         public bool paraffinDebug = false;
+        public bool distanceFogDebug = false;
         public float videoPrebufferTime = 0.5f;
         public bool outputElapsedTime = false;
         public bool useHSVColor = false;

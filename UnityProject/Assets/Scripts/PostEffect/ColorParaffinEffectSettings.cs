@@ -1,10 +1,9 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-	[System.Serializable]
-	public class ParaffinData
+    [System.Serializable]
+	public class ColorParaffinData : IPostEffectData
 	{
 		public bool enabled = false;
 		public Color color1 = new Color(0.68f, 0.34f, 0f, 1f);
@@ -27,31 +26,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		public float useOverlay = 0f;
 		public float useSubstruct = 0f;
 
-		public void CopyFrom(ParaffinData data)
+		public void CopyFrom(IPostEffectData data)
 		{
-			enabled = data.enabled;
-			color1 = data.color1;
-			color2 = data.color2;
-			centerPosition = data.centerPosition;
-			radiusFar = data.radiusFar;
-			radiusNear = data.radiusNear;
-			radiusScale = data.radiusScale;
-			depthMin = data.depthMin;
-			depthMax = data.depthMax;
-			depthFade = data.depthFade;
-			useNormal = data.useNormal;
-			useAdd = data.useAdd;
-			useMultiply = data.useMultiply;
-			useOverlay = data.useOverlay;
-			useSubstruct = data.useSubstruct;
+			var paraffinData = data as ColorParaffinData;
+			enabled = paraffinData.enabled;
+			color1 = paraffinData.color1;
+			color2 = paraffinData.color2;
+			centerPosition = paraffinData.centerPosition;
+			radiusFar = paraffinData.radiusFar;
+			radiusNear = paraffinData.radiusNear;
+			radiusScale = paraffinData.radiusScale;
+			depthMin = paraffinData.depthMin;
+			depthMax = paraffinData.depthMax;
+			depthFade = paraffinData.depthFade;
+			useNormal = paraffinData.useNormal;
+			useAdd = paraffinData.useAdd;
+			useMultiply = paraffinData.useMultiply;
+			useOverlay = paraffinData.useOverlay;
+			useSubstruct = paraffinData.useSubstruct;
 		}
 
-		public static ParaffinData Lerp(
-            ParaffinData a,
-            ParaffinData b,
+		public static ColorParaffinData Lerp(
+            ColorParaffinData a,
+            ColorParaffinData b,
             float t)
         {
-			return new ParaffinData
+			return new ColorParaffinData
 			{
 				enabled = a.enabled,
 				color1 = Color.Lerp(a.color1, b.color1, t),
@@ -73,60 +73,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 	}
 
     [System.Serializable]
-	public class ColorParaffinEffectSettings
+	public class ColorParaffinEffectSettings : PostEffectSettingsBase<ColorParaffinData>
 	{
-		public bool enabled = false;
-		public List<ParaffinData> dataList = new List<ParaffinData>();
 		public bool isDebug = false;
-
-		public ParaffinData GetParaffinData(int index)
-		{
-			if (index < 0 || index >= dataList.Count)
-			{
-				return null;
-			}
-			return dataList[index];
-		}
-
-		public void SetParaffinData(int index, ParaffinData data)
-		{
-			if (index < 0 || index >= dataList.Count)
-			{
-				return;
-			}
-			dataList[index].CopyFrom(data);
-		}
-
-		public void AddParaffinData(ParaffinData data)
-		{
-			dataList.Add(data);
-		}
-
-		public void RemoveParaffinData(int index)
-		{
-			if (index < 0 || index >= dataList.Count)
-			{
-				return;
-			}
-			dataList.RemoveAt(index);
-		}
-
-		public void RemoveLastParaffinData()
-		{
-			if (dataList.Count > 0)
-			{
-				dataList.RemoveAt(dataList.Count - 1);
-			}
-		}
-
-		public int GetParaffinCount()
-		{
-			return dataList.Count;
-		}
-
-		public void ClearParaffinData()
-		{
-			dataList.Clear();
-		}
 	}
 }

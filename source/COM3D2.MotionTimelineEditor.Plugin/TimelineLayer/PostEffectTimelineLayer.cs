@@ -22,6 +22,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _allBoneNames = new List<string>(1 + timeline.paraffinCount);
                     _allBoneNames.Add("DepthOfField");
                     _allBoneNames.AddRange(paraffinNames);
+                    _allBoneNames.AddRange(distanceFogNames);
                 }
                 return _allBoneNames;
             }
@@ -42,6 +43,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Init();
             InitParrifinEffect();
+            InitDistanceFogEffect();
             AddFirstBones(allBoneNames);
         }
 
@@ -54,6 +56,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             while (postEffectManager.GetParaffinCount() > timeline.paraffinCount)
             {
                 postEffectManager.RemoveParaffinData();
+            }
+        }
+
+        private void InitDistanceFogEffect()
+        {
+            while (postEffectManager.GetDistanceFogCount() < timeline.distanceFogCount)
+            {
+                postEffectManager.AddDistanceFogData();
+            }
+            while (postEffectManager.GetDistanceFogCount() > timeline.distanceFogCount)
+            {
+                postEffectManager.RemoveDistanceFogData();
             }
         }
 
@@ -79,11 +93,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Update();
 
-            var boneCount = 1 + timeline.paraffinCount;
+            var boneCount = 1 + timeline.paraffinCount + timeline.distanceFogCount;
             if (allBoneNames.Count != boneCount)
             {
                 _allBoneNames = null;
                 InitParrifinEffect();
+                InitDistanceFogEffect();
                 InitMenuItems();
                 AddFirstBones(allBoneNames);
             }
@@ -103,8 +118,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!isCurrent && !config.isPostEffectSync)
             {
-                postEffectManager.DisableDepthOfField();
-                postEffectManager.DisableParaffin();
+                postEffectManager.DisableAllEffects();
                 return;
             }
 
@@ -120,6 +134,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     break;
                 case TransformType.Paraffin:
                     ApplyParaffin(motion, t);
+                    break;
+                case TransformType.DistanceFog:
+                    ApplyDistanceFog(motion, t);
                     break;
             }
         }
@@ -141,10 +158,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var end = motion.end as TransformDataParaffin;
 
             float easingTime = CalcEasingValue(t, start.easing);
-            var paraffin = ParaffinData.Lerp(start.paraffin, end.paraffin, easingTime);
+            var paraffin = ColorParaffinData.Lerp(start.paraffin, end.paraffin, easingTime);
 
             var index = start.index;
             postEffectManager.ApplyParaffin(index, paraffin);
+        }
+
+        private void ApplyDistanceFog(MotionData motion, float t)
+        {
+            var start = motion.start as TransformDataDistanceFog;
+            var end = motion.end as TransformDataDistanceFog;
+
+            float easingTime = CalcEasingValue(t, start.easing);
+            var distanceFog = DistanceFogData.Lerp(start.distanceFog, end.distanceFog, easingTime);
+
+            var index = start.index;
+            postEffectManager.ApplyDistanceFog(index, distanceFog);
         }
 
         public override void UpdateFrame(FrameData frame)
@@ -175,6 +204,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         frame.UpdateBone(bone);
                         break;
                     }
+                    case PostEffectType.DistanceFog:
+                    {
+                        var trans = CreateTransformData<TransformDataDistanceFog>(effectName);
+                        trans.distanceFog = postEffectManager.GetDistanceFogData(trans.index);
+                        trans.easing = GetEasing(frame.frameNo, effectName);
+
+                        var bone = frame.CreateBone(trans);
+                        frame.UpdateBone(bone);
+                        break;
+                    }
                 }
             }
         }
@@ -196,6 +235,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             getName = (name, index) => name,
         };
 
+        private GUIComboBox<string> _distanceFogNameComboBox = new GUIComboBox<string>
+        {
+            getName = (name, index) => name,
+        };
+
+        private GUIComboBox<string> _copyToDistanceFogComboBox = new GUIComboBox<string>
+        {
+            getName = (name, index) => name,
+        };
+
         private ColorFieldCache _color1FieldValue = new ColorFieldCache("Color1", true);
         private ColorFieldCache _color2FieldValue = new ColorFieldCache("Color2", true);
 
@@ -203,6 +252,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             被写界深度,
             パラフィン,
+            距離フォグ,
         }
 
         private TabType _tabType = TabType.被写界深度;
@@ -218,6 +268,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     break;
                 case TabType.パラフィン:
                     DrawParaffin(view);
+                    break;
+                case TabType.距離フォグ:
+                    DrawDistanceFog(view);
                     break;
             }
 
@@ -411,7 +464,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     timeline.paraffinCount++;
                 }
 
-                timeline.paraffinCount = Mathf.Clamp(timeline.paraffinCount, 0, 4);
+                timeline.paraffinCount = Mathf.Clamp(timeline.paraffinCount, 0, 8);
 
                 view.margin = GUIView.defaultMargin;
             }
@@ -449,7 +502,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 paraffin.enabled = newValue;
             });
 
-            if (timeline.useParaffinExtra)
+            if (timeline.usePostEffectExtra)
             {
                 updateTransform |= view.DrawColor(
                     _color1FieldValue,
@@ -473,11 +526,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     Color.white,
                     newValue =>
                     {
+                        var alpha2 = paraffin.color2.a;
                         paraffin.color1 = newValue;
                         paraffin.color2 = newValue;
-                        paraffin.color2.a = 0f;
+                        paraffin.color2.a = alpha2;
                     }
                 );
+
+                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+                {
+                    label = "A2",
+                    labelWidth = 30,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 0f,
+                    value = paraffin.color2.a,
+                    onChanged = newValue => paraffin.color2.a = newValue,
+                });
             }
 
             updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
@@ -557,7 +623,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 label = "最小深度",
                 labelWidth = 30,
                 min = 0f,
-                max = Camera.main.farClipPlane,
+                max = paraffin.depthMax,
                 step = 0.1f,
                 defaultValue = 0f,
                 value = paraffin.depthMin,
@@ -568,8 +634,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 label = "最大深度",
                 labelWidth = 30,
-                min = 0f,
-                max = Camera.main.farClipPlane,
+                min = paraffin.depthMin,
+                max = 100f,
                 step = 0.1f,
                 defaultValue = 0f,
                 value = paraffin.depthMax,
@@ -670,7 +736,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawLabel("共通設定", 100, 20);
 
-            updateTransform = view.DrawToggle("デバッグ表示", config.paraffinDebug, 150, 20, newValue =>
+            updateTransform |= view.DrawToggle("デバッグ表示", config.paraffinDebug, 150, 20, newValue =>
             {
                 config.paraffinDebug = newValue;
                 config.dirty = true;
@@ -679,6 +745,224 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (updateTransform)
             {
                 postEffectManager.ApplyParaffin(index, paraffin);
+            }
+
+            view.SetEnabled(!view.IsComboBoxFocused());
+            view.EndScrollView();
+        }
+
+        private List<string> _distanceFogNames = new List<string>();
+        private List<string> distanceFogNames
+        {
+            get
+            {
+                var distanceFogCount = timeline.distanceFogCount;
+                if (_distanceFogNames.Count != distanceFogCount)
+                {
+                    _distanceFogNames.Clear();
+                    for (var i = 0; i < distanceFogCount; i++)
+                    {
+                        _distanceFogNames.Add(PostEffectUtils.GetDistanceFogName(i));
+                    }
+                }
+
+                return _distanceFogNames;
+            }
+        }
+
+        private List<string> _distanceFogJpNames = new List<string>();
+        private List<string> distanceFogJpNames
+        {
+            get
+            {
+                var distanceFogCount = timeline.distanceFogCount;
+                if (_distanceFogJpNames.Count != distanceFogCount)
+                {
+                    _distanceFogJpNames.Clear();
+                    for (var i = 0; i < distanceFogCount; i++)
+                    {
+                        _distanceFogJpNames.Add(PostEffectUtils.GetDistanceFogJpName(i));
+                    }
+                }
+
+                return _distanceFogJpNames;
+            }
+        }
+
+        public void DrawDistanceFog(GUIView view)
+        {
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+
+            view.BeginHorizontal();
+            {
+                view.margin = 0;
+
+                view.DrawLabel("エフェクト数", view.labelWidth, 20);
+
+                view.DrawIntField(new GUIView.IntFieldOption
+                {
+                    value = timeline.distanceFogCount,
+                    width = view.viewRect.width - (view.labelWidth + 40 + view.padding.x * 2),
+                    height = 20,
+                    onChanged = x => timeline.distanceFogCount = x,
+                });
+
+                if (view.DrawButton("-", 20, 20))
+                {
+                    timeline.distanceFogCount--;
+                }
+                if (view.DrawButton("+", 20, 20))
+                {
+                    timeline.distanceFogCount++;
+                }
+
+                timeline.distanceFogCount = Mathf.Clamp(timeline.distanceFogCount, 0, 4);
+
+                view.margin = GUIView.defaultMargin;
+            }
+            view.EndLayout();
+
+            if (timeline.distanceFogCount == 0)
+            {
+                view.DrawLabel("エフェクトを追加してください", 200, 20);
+                return;
+            }
+
+            _distanceFogNameComboBox.items = distanceFogJpNames;
+            _distanceFogNameComboBox.DrawButton("対象", view);
+
+            var index = _distanceFogNameComboBox.currentIndex;
+
+            var distanceFog = postEffectManager.GetDistanceFogData(index);
+            if (distanceFog == null)
+            {
+                view.DrawLabel("エフェクトを選択してください", 200, 20);
+                return;
+            }
+
+            view.SetEnabled(!view.IsComboBoxFocused());
+            view.DrawHorizontalLine(Color.gray);
+            view.AddSpace(5);
+            view.BeginScrollView();
+
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+
+            var updateTransform = false;
+
+            updateTransform = view.DrawToggle("有効化", distanceFog.enabled, 80, 20, newValue =>
+            {
+                distanceFog.enabled = newValue;
+            });
+
+            if (timeline.usePostEffectExtra)
+            {
+                updateTransform |= view.DrawColor(
+                    _color1FieldValue,
+                    distanceFog.color1,
+                    Color.white,
+                    newValue => distanceFog.color1 = newValue
+                );
+
+                updateTransform |= view.DrawColor(
+                    _color2FieldValue,
+                    distanceFog.color2,
+                    new Color(1f, 1f, 1f, 0f),
+                    newValue => distanceFog.color2 = newValue
+                );
+            }
+            else
+            {
+                updateTransform |= view.DrawColor(
+                    _color2FieldValue,
+                    distanceFog.color2,
+                    Color.white,
+                    newValue =>
+                    {
+                        var alpha1 = distanceFog.color1.a;
+                        distanceFog.color1 = newValue;
+                        distanceFog.color2 = newValue;
+                        distanceFog.color1.a = alpha1;
+                    }
+                );
+
+                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+                {
+                    label = "A1",
+                    labelWidth = 30,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 0f,
+                    value = distanceFog.color1.a,
+                    onChanged = newValue => distanceFog.color1.a = newValue,
+                });
+            }
+
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "開始深度",
+                labelWidth = 30,
+                min = 0f,
+                max = distanceFog.fogEnd,
+                step = 0.1f,
+                defaultValue = 0f,
+                value = distanceFog.fogStart,
+                onChanged = newValue => distanceFog.fogStart = newValue,
+            });
+
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "終了深度",
+                labelWidth = 30,
+                min = distanceFog.fogStart,
+                max = 100f,
+                step = 0.1f,
+                defaultValue = 50f,
+                value = distanceFog.fogEnd,
+                onChanged = newValue => distanceFog.fogEnd = newValue,
+            });
+
+            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "指数",
+                labelWidth = 30,
+                min = 0f,
+                max = 10f,
+                step = 0.01f,
+                defaultValue = 1f,
+                value = distanceFog.fogExp,
+                onChanged = newValue => distanceFog.fogExp = newValue,
+            });
+
+            view.DrawHorizontalLine(Color.gray);
+
+            _copyToDistanceFogComboBox.items = _distanceFogJpNames;
+            _copyToDistanceFogComboBox.DrawButton("コピー先", view);
+
+            if (view.DrawButton("コピー", 60, 20))
+            {
+                var copyToIndex = _copyToDistanceFogComboBox.currentIndex;
+                if (copyToIndex != -1 && copyToIndex != index)
+                {
+                    postEffectManager.ApplyDistanceFog(copyToIndex, distanceFog);
+                }
+            }
+
+            view.SetEnabled(!view.IsComboBoxFocused());
+
+            view.DrawHorizontalLine(Color.gray);
+
+            view.DrawLabel("共通設定", 100, 20);
+
+            updateTransform |= view.DrawToggle("デバッグ表示", config.distanceFogDebug, 150, 20, newValue =>
+            {
+                config.distanceFogDebug = newValue;
+                config.dirty = true;
+            });
+
+            if (updateTransform)
+            {
+                postEffectManager.ApplyDistanceFog(index, distanceFog);
             }
 
             view.SetEnabled(!view.IsComboBoxFocused());
@@ -694,6 +978,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     return TransformType.DepthOfField;
                 case PostEffectType.Paraffin:
                     return TransformType.Paraffin;
+                case PostEffectType.DistanceFog:
+                    return TransformType.DistanceFog;
             }
 
             return TransformType.None;

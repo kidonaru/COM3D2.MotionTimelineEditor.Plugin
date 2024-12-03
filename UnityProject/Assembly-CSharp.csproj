@@ -95,9 +95,12 @@
      <Compile Include="Assets\Scripts\NoiseTextureGenerator.cs" />
      <Compile Include="Assets\Scripts\PostEffect\ColorParaffinEffectModel.cs" />
      <Compile Include="Assets\Scripts\PostEffect\ColorParaffinEffectSettings.cs" />
+     <Compile Include="Assets\Scripts\PostEffect\DistanceFogEffectModel.cs" />
+     <Compile Include="Assets\Scripts\PostEffect\DistanceFogEffectSettings.cs" />
      <Compile Include="Assets\Scripts\PostEffect\PostEffectContext.cs" />
      <Compile Include="Assets\Scripts\PostEffect\PostEffectController.cs" />
      <Compile Include="Assets\Scripts\PostEffect\PostEffectModelBase.cs" />
+     <Compile Include="Assets\Scripts\PostEffect\PostEffectSettingsBase.cs" />
      <Compile Include="Assets\Scripts\StageLight.cs" />
      <Compile Include="Assets\Scripts\StageLightController.cs" />
      <None Include="Assets\PostProcessing\Resources\Shaders\DepthOfField.shader" />

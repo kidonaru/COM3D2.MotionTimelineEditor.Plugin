@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -16,14 +17,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
 		public abstract bool active { get; }
 
+		public abstract CameraEvent cameraEvent { get; }
+
 		public void Init(PostEffectContext context)
 		{
 			this.context = context;
 		}
 
-		public abstract void OnPreCull();
-
 		public abstract void Dispose();
+
+		public abstract void OnPreRender();
 
 		public abstract void Prepare(Material material);
 

@@ -127,9 +127,12 @@
     <Compile Include="..\..\UnityProject\Assets\Scripts\StageLightController.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\ColorParaffinEffectModel.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\ColorParaffinEffectSettings.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\DistanceFogEffectModel.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\DistanceFogEffectSettings.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\PostEffectContext.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\PostEffectController.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\PostEffectModelBase.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\PostEffectSettingsBase.cs" />
     <Compile Include="StageLightManager.cs" />
     <Compile Include="StopwatchDebug.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -189,6 +192,7 @@
     <Compile Include="TransformData\TransformDataBGModel.cs" />
     <Compile Include="TransformData\TransformDataCamera.cs" />
     <Compile Include="TransformData\TransformDataDepthOfField.cs" />
+    <Compile Include="TransformData\TransformDataDistanceFog.cs" />
     <Compile Include="TransformData\TransformDataExtendBone.cs" />
     <Compile Include="TransformData\TransformDataEyes.cs" />
     <Compile Include="TransformData\TransformDataFingerBlend.cs" />

@@ -76,6 +76,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public ColorParaffinEffectSettings paraffin => controller.context.paraffinSettings;
 
+        public DistanceFogEffectSettings distanceFog => controller.context.fogSettings;
+
         private static MaidManager maidManager => MaidManager.instance;
 
         private static StudioHackBase studioHack => StudioHackManager.studioHack;
@@ -108,8 +110,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void OnPluginDisable()
         {
-            DisableDepthOfField();
-            DisableParaffin();
+            DisableAllEffects();
             ResetCache();
             ReleaseController();
         }
@@ -132,6 +133,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public void DisableAllEffects()
+        {
+            depthOfField.enabled = false;
+            paraffin.enabled = false;
+            distanceFog.enabled = false;
+        }
+
         public DepthOfFieldData GetDepthOfFieldData()
         {
             DepthOfFieldData data = new DepthOfFieldData();
@@ -142,11 +150,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             data.maxBlurSize = depthOfField.maxBlurSize;
             data.maidSlotNo = depthOfFieldMaidSlotId;
             return data;
-        }
-
-        public void DisableDepthOfField()
-        {
-            depthOfField.enabled = false;
         }
 
         public void ApplyDepthOfField(DepthOfFieldData data)
@@ -177,37 +180,62 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public int GetParaffinCount()
         {
-            return paraffin.GetParaffinCount();
+            return paraffin.GetDataCount();
         }
         
         public void AddParaffinData()
         {
-            paraffin.AddParaffinData(new ParaffinData());
+            paraffin.AddData(new ColorParaffinData());
         }
 
         public void RemoveParaffinData()
         {
-            paraffin.RemoveLastParaffinData();
+            paraffin.RemoveDataLast();
         }
 
-        public ParaffinData GetParaffinData(int index)
+        public ColorParaffinData GetParaffinData(int index)
         {
-            return paraffin.GetParaffinData(index);
+            return paraffin.GetData(index);
         }
 
-        public void DisableParaffin()
-        {
-            paraffin.enabled = false;
-        }
-
-        public void ApplyParaffin(int index, ParaffinData data)
+        public void ApplyParaffin(int index, ColorParaffinData data)
         {
             if (data.enabled)
             {
                 paraffin.enabled = true;
             }
-            paraffin.SetParaffinData(index, data);
+            paraffin.SetData(index, data);
             paraffin.isDebug = config.paraffinDebug;
+        }
+
+        public int GetDistanceFogCount()
+        {
+            return distanceFog.GetDataCount();
+        }
+        
+        public void AddDistanceFogData()
+        {
+            distanceFog.AddData(new DistanceFogData());
+        }
+
+        public void RemoveDistanceFogData()
+        {
+            distanceFog.RemoveDataLast();
+        }
+
+        public DistanceFogData GetDistanceFogData(int index)
+        {
+            return distanceFog.GetData(index);
+        }
+
+        public void ApplyDistanceFog(int index, DistanceFogData data)
+        {
+            if (data.enabled)
+            {
+                distanceFog.enabled = true;
+            }
+            distanceFog.SetData(index, data);
+            distanceFog.isDebug = config.distanceFogDebug;
         }
     }
 }

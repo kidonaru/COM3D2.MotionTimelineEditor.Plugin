@@ -7,6 +7,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         DepthOfField,
         Paraffin,
+        DistanceFog,
     }
 
     public static class PostEffectUtils
@@ -23,6 +24,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             { PostEffectType.DepthOfField, "被写界深度" },
             { PostEffectType.Paraffin, "パラフィン" },
+            { PostEffectType.DistanceFog, "距離フォグ" },
         };
 
         public static string ToJpName(PostEffectType postEffectType)
@@ -123,6 +125,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var suffix = PluginUtils.GetGroupSuffix(index);
             return ToJpName(PostEffectType.Paraffin) + suffix;
+        }
+
+        public static bool IsValidDistanceFogIndex(int index)
+        {
+            if (index < 0 || index >= timeline.distanceFogCount)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static string GetDistanceFogName(int index)
+        {
+            if (!IsValidDistanceFogIndex(index))
+            {
+                return "";
+            }
+
+            var suffix = PluginUtils.GetGroupSuffix(index);
+            return ToEffectName(PostEffectType.DistanceFog) + suffix;
+        }
+
+        public static string GetDistanceFogJpName(int index)
+        {
+            if (!IsValidDistanceFogIndex(index))
+            {
+                return "";
+            }
+
+            var suffix = PluginUtils.GetGroupSuffix(index);
+            return ToJpName(PostEffectType.DistanceFog) + suffix;
         }
 
         private static Dictionary<string, int> _indexCache = new Dictionary<string, int>(16);

@@ -169,11 +169,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("FingerBlendEnabled")]
         public bool fingerBlendEnabled = true;
 
-        [XmlElement("UseParaffinExtra")]
-        public bool useParaffinExtra = false;
+        [XmlElement("UsePostEffectExtra")]
+        public bool usePostEffectExtra = false;
 
         [XmlElement("ParaffinCount")]
         public int paraffinCount = 1;
+
+        [XmlElement("DistanceFogCount")]
+        public int distanceFogCount = 1;
 
         [XmlElement("VideoEnabled")]
         public bool videoEnabled = true;

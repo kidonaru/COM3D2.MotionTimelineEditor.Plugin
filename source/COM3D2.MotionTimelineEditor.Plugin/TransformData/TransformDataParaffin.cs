@@ -257,9 +257,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => depthFadeValue.value = value;
         }
 
-        public ParaffinData paraffin
+        public ColorParaffinData paraffin
         {
-            get => new ParaffinData
+            get => new ColorParaffinData
             {
                 enabled = visible,
                 color1 = color,

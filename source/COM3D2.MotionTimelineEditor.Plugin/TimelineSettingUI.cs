@@ -207,9 +207,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timeline.isLightColorEasing = newValue;
             });
 
-            view.DrawToggle("拡張パラフィンを有効化", timeline.useParaffinExtra, 200, 20, newValue =>
+            view.DrawToggle("ポストエフェクト拡張を有効化", timeline.usePostEffectExtra, 200, 20, newValue =>
             {
-                timeline.useParaffinExtra = newValue;
+                timeline.usePostEffectExtra = newValue;
             });
 
             view.BeginHorizontal();
