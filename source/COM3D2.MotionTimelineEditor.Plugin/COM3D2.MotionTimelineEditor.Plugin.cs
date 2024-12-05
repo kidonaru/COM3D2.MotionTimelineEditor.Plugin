@@ -453,6 +453,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     TransformType.Paraffin, TimelineManager.CreateTransform<TransformDataParaffin>
                 );
                 timelineManager.RegisterTransform(
+                    TransformType.Rimlight, TimelineManager.CreateTransform<TransformDataRimlight>
+                );
+                timelineManager.RegisterTransform(
                     TransformType.Root, TimelineManager.CreateTransform<TransformDataRoot>
                 );
                 timelineManager.RegisterTransform(

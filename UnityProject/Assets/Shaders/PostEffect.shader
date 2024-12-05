@@ -18,12 +18,12 @@ Shader "MTE/PostEffect"
             #pragma vertex vert
             #pragma fragment frag
             #pragma target 4.5
+            #pragma multi_compile __ DEBUG_VIEW
+            #pragma multi_compile __ RIMLIGHT
+            #pragma multi_compile __ RIMLIGHT_EDGE
+            #pragma multi_compile __ RIMLIGHT_HEIGHT
             #pragma multi_compile __ DISTANCE_FOG
-            #pragma multi_compile __ DISTANCE_FOG_DEBUG
             #pragma multi_compile __ PARAFFIN
-            #pragma multi_compile __ PARAFFIN_DEBUG
-            #pragma multi_compile __ PARAFFIN_DEPTH
-            #pragma multi_compile __ PARAFFIN_OVERLAY
             #include "UnityCG.cginc"
 
             struct appdata
@@ -36,15 +36,42 @@ Shader "MTE/PostEffect"
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
-                #if PARAFFIN_DEPTH || DISTANCE_FOG
-                float4 screenPos : TEXCOORD1;
-                #endif
             };
 
             sampler2D _MainTex;
 
-            #if PARAFFIN_DEPTH || DISTANCE_FOG
             sampler2D _CameraDepthTexture;
+
+            #if RIMLIGHT
+            sampler2D _CameraDepthNormalsTexture;
+            #endif
+
+            #if RIMLIGHT
+            struct RimlightBuffer
+            {
+                float4 color1;
+                float4 color2;
+                float3 direction;
+                float lightArea;
+                float fadeRange;
+                float fadeExp;
+                float depthMin;
+                float depthMax;
+                float depthFade;
+                float useNormal;
+                float useAdd;
+                float useMultiply;
+                float useOverlay;
+                float useSubstruct;
+                float edgeDepth;
+                float2 edgeRange;
+                float heightMin;
+            };
+
+            float4x4 _CameraToWorldMatrix;
+
+            StructuredBuffer<RimlightBuffer> _RimlightBuffer;
+            int _RimlightCount;
             #endif
 
             #if DISTANCE_FOG
@@ -83,11 +110,151 @@ Shader "MTE/PostEffect"
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
-                #if PARAFFIN_DEPTH || DISTANCE_FOG
-                o.screenPos = ComputeScreenPos(o.vertex);
-                #endif
                 return o;
             }
+
+            float4 BlendOverlay(float4 base, float4 blend)
+            {
+                float4 result;
+                result.rgb = base.rgb < 0.5 ? 
+                    2.0 * base.rgb * blend.rgb :
+                    1.0 - 2.0 * (1.0 - base.rgb) * (1.0 - blend.rgb);
+                result.a = base.a;
+                return result;
+            }
+
+            float4 CalculateBlend(
+                float4 src,
+                float4 dst,
+                float4 useNormal,
+                float4 useAdd,
+                float4 useMultiply,
+                float4 useOverlay,
+                float4 useSubstruct)
+            {
+                float4 blend = float4(0, 0, 0, 0);
+                blend += (dst - src) * useNormal;
+                blend += (dst) * useAdd;
+                blend += (src * dst - src) * useMultiply;
+                blend += (BlendOverlay(src, dst) - src) * useOverlay;
+                blend += (-dst) * useSubstruct;
+                return blend * dst.a;
+            }
+
+            float4 CalculateBlendDebug(
+                float4 src,
+                float4 dst,
+                float4 useNormal,
+                float4 useAdd,
+                float4 useMultiply,
+                float4 useOverlay,
+                float4 useSubstruct)
+            {
+                float4 blend = dst;
+
+                float useFactor = useNormal + useAdd + useMultiply + useMultiply + useOverlay + useSubstruct;
+
+                blend.rgb *= blend.a * useFactor;
+                return blend;
+            }
+
+            float SampleDepth(float2 uv)
+            {
+                return LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, uv));
+            }
+
+            #if RIMLIGHT
+
+            #if RIMLIGHT_EDGE
+            float Rimlight_CalculateEdgeFactor(RimlightBuffer data, float2 uv)
+            {
+                float2 range = data.edgeRange;
+
+                float d0 = SampleDepth(uv + float2(0, 0));
+                float m0 = 0;
+                float rangeFactor = 0.5;
+
+                UNITY_UNROLL
+                for (int i = 1; i <= 2; i++)
+                {
+                    float d1 = SampleDepth(uv + float2(range.x, range.y) * i * rangeFactor);
+                    float d2 = SampleDepth(uv + float2(-range.x, -range.y) * i * rangeFactor);
+                    float d3 = SampleDepth(uv + float2(-range.x, range.y) * i * rangeFactor);
+                    float d4 = SampleDepth(uv + float2(range.x, -range.y) * i * rangeFactor);
+
+                    m0 = max(m0, max(max(d1, d2), max(d3, d4)));
+                }
+
+                return (m0 - d0 > data.edgeDepth) ? 1.0 : 0.0;
+            }
+            #endif
+
+            float Rimlight_CalculateDepthFactor(RimlightBuffer data, float depth)
+            {
+                float minFactor = smoothstep(data.depthMin - data.depthFade, data.depthMin, depth);
+                float maxFactor = 1.0 - smoothstep(data.depthMax, data.depthMax + data.depthFade, depth);
+                return minFactor * maxFactor;
+            }
+
+            #if RIMLIGHT_HEIGHT
+            float Rimlight_CalculateHeightFactor(RimlightBuffer data, float2 screenUV)
+            {
+                float depth = SampleDepth(screenUV);
+                float4 ndcPos = float4(screenUV * 2 - 1, 1, 1);
+                float4 viewPos = mul(unity_CameraInvProjection, ndcPos);
+                viewPos.xyz *= depth;
+                viewPos.w = 1.0;
+
+                float3 worldPos = mul(_CameraToWorldMatrix, viewPos).xyz;
+
+                return step(data.heightMin, worldPos.y);
+            }
+            #endif
+
+            float4 Rimlight_CalculateBlend(float4 src, RimlightBuffer data, float2 uv, float depth, float3 normal)
+            {
+                float rimFactor = 1.0 - dot(normal, data.direction);
+                float basicRim = smoothstep(data.lightArea - data.fadeRange, data.lightArea, rimFactor);
+                float rimIntensity = pow(basicRim, data.fadeExp);
+                float4 rimColor = lerp(data.color2, data.color1, rimIntensity);
+
+                #if DEBUG_VIEW
+                return CalculateBlendDebug(src, rimColor, data.useNormal, data.useAdd, data.useMultiply, data.useOverlay, data.useSubstruct);
+                #else
+                return CalculateBlend(src, rimColor, data.useNormal, data.useAdd, data.useMultiply, data.useOverlay, data.useSubstruct);
+                #endif
+            }
+
+            float4 Rimlight_frag(v2f i, float4 src)
+            {
+                float4 dst = src;
+                float3 normal;
+                float depth;
+                DecodeDepthNormal(tex2D(_CameraDepthNormalsTexture, i.uv), depth, normal);
+
+                [loop]
+                for(int idx = 0; idx < _RimlightCount; idx++)
+                {
+                    float4 blend = Rimlight_CalculateBlend(dst, _RimlightBuffer[idx], i.uv, depth, normal);
+
+                    blend *= Rimlight_CalculateDepthFactor(_RimlightBuffer[idx], depth);
+
+                    #if RIMLIGHT_EDGE
+                    blend *= Rimlight_CalculateEdgeFactor(_RimlightBuffer[idx], i.uv);
+                    #endif
+
+                    #if RIMLIGHT_HEIGHT
+                    blend *= Rimlight_CalculateHeightFactor(_RimlightBuffer[idx], i.uv);
+                    #endif
+
+                    dst += blend;
+                }
+
+                dst.a = src.a;
+
+                return dst;
+            }
+            #endif
 
             #if DISTANCE_FOG
             float4 DistanceFog_CalculateFog(float4 src, float depth)
@@ -106,11 +273,7 @@ Shader "MTE/PostEffect"
             float4 DistanceFog_frag(v2f i, float4 src)
             {
                 float4 dst = src;
-                float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.screenPos));
-
-                #if DISTANCE_FOG_DEBUG
-                dst = float4(0, 0, 0, 0);
-                #endif
+                float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv));
 
                 dst = DistanceFog_CalculateFog(dst, depth);
 
@@ -127,16 +290,6 @@ Shader "MTE/PostEffect"
                 return centeredUV + 0.5;
             }
 
-            float4 Paraffin_BlendOverlay(float4 base, float4 blend)
-            {
-                float4 result;
-                result.rgb = base.rgb < 0.5 ? 
-                    2.0 * base.rgb * blend.rgb :
-                    1.0 - 2.0 * (1.0 - base.rgb) * (1.0 - blend.rgb);
-                result.a = base.a;
-                return result;
-            }
-
             float4 Paraffin_CalculateGradientColor(ParaffinBuffer data, float2 uv)
             {
                 float2 adjustedUV = Paraffin_AdjustUV(uv, data.radiusScale);
@@ -149,57 +302,33 @@ Shader "MTE/PostEffect"
             {
                 float4 gradientColor = Paraffin_CalculateGradientColor(data, uv);
 
-                float4 blendDiff = float4(0, 0, 0, 0);
-                blendDiff += (gradientColor - col) * data.useNormal;
-                blendDiff += (col + gradientColor - col) * data.useAdd;
-                blendDiff += (col * gradientColor - col) * data.useMultiply;
-                #if PARAFFIN_OVERLAY
-                blendDiff += (Paraffin_BlendOverlay(col, gradientColor) - col) * data.useOverlay;
+                #if DEBUG_VIEW
+                return CalculateBlendDebug(col, gradientColor, data.useNormal, data.useAdd, data.useMultiply, data.useOverlay, data.useSubstruct);
+                #else
+                return CalculateBlend(col, gradientColor, data.useNormal, data.useAdd, data.useMultiply, data.useOverlay, data.useSubstruct);
                 #endif
-                blendDiff += (col - gradientColor - col) * data.useSubstruct;
-
-                return blendDiff * gradientColor.a;
             }
 
-            float4 Paraffin_CalculateDepthFactor(ParaffinBuffer data, float depth)
+            float Paraffin_CalculateDepthFactor(ParaffinBuffer data, float depth)
             {
                 float minFactor = smoothstep(data.depthMin - data.depthFade, data.depthMin, depth);
                 float maxFactor = 1.0 - smoothstep(data.depthMax, data.depthMax + data.depthFade, depth);
                 return minFactor * maxFactor;
             }
 
-            float4 Paraffin_CalculateDebugBlend(ParaffinBuffer data, float2 uv)
-            {
-                float4 blend = Paraffin_CalculateGradientColor(data, uv);
-
-                float useFactor = data.useNormal + data.useAdd + data.useMultiply + data.useMultiply + data.useOverlay + data.useSubstruct;
-
-                blend.rgb *= blend.a * useFactor;
-                return blend;
-            }
-
             float4 Paraffin_frag(v2f i, float4 src)
             {
                 float4 dst = src;
-
-                #if PARAFFIN_DEBUG
-                dst = float4(0, 0, 0, 0);
-                #endif
-
-                #if PARAFFIN_DEPTH
-                float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.screenPos));
-                #endif
+                float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv));
 
                 [loop]
                 for(int idx = 0; idx < _ParaffinCount; idx++)
                 {
-                    #if PARAFFIN_DEBUG
-                    dst += Paraffin_CalculateDebugBlend(_ParaffinBuffer[idx], i.uv);
-                    #elif PARAFFIN_DEPTH
-                    dst += Paraffin_CalculateBlend(src, _ParaffinBuffer[idx], i.uv) * Paraffin_CalculateDepthFactor(_ParaffinBuffer[idx], depth);
-                    #else
-                    dst += Paraffin_CalculateBlend(src, _ParaffinBuffer[idx], i.uv);
-                    #endif
+                    float4 blend = Paraffin_CalculateBlend(src, _ParaffinBuffer[idx], i.uv);
+
+                    blend *= Paraffin_CalculateDepthFactor(_ParaffinBuffer[idx], depth);
+
+                    dst += blend;
                 }
 
                 dst.a = src.a;
@@ -210,6 +339,14 @@ Shader "MTE/PostEffect"
             fixed4 frag (v2f i) : SV_Target
             {
                 float4 col = tex2D(_MainTex, i.uv);
+
+                #if DEBUG_VIEW
+                col = float4(0, 0, 0, 1);
+                #endif
+
+                #if RIMLIGHT
+                col = Rimlight_frag(i, col);
+                #endif
 
                 #if DISTANCE_FOG
                 col = DistanceFog_frag(i, col);

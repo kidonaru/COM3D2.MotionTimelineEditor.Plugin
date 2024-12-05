@@ -20,10 +20,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		public float depthFade = 0f;
 
 		[Header("Blend Mode")]
+		[Range(0f, 1f)]
 		public float useNormal = 0f;
+		[Range(0f, 1f)]
 		public float useAdd = 1f;
+		[Range(0f, 1f)]
 		public float useMultiply = 0f;
+		[Range(0f, 1f)]
 		public float useOverlay = 0f;
+		[Range(0f, 1f)]
 		public float useSubstruct = 0f;
 
 		public void CopyFrom(IPostEffectData data)
@@ -75,6 +80,5 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [System.Serializable]
 	public class ColorParaffinEffectSettings : PostEffectSettingsBase<ColorParaffinData>
 	{
-		public bool isDebug = false;
 	}
 }

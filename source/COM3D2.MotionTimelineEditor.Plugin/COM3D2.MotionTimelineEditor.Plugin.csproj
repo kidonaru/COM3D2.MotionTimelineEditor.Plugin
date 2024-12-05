@@ -133,6 +133,8 @@
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\PostEffectController.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\PostEffectModelBase.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\PostEffectSettingsBase.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\RimlightEffectModel.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\RimlightEffectSettings.cs" />
     <Compile Include="StageLightManager.cs" />
     <Compile Include="StopwatchDebug.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -172,6 +174,10 @@
     <Compile Include="TimelineLayer\MotionTimelineLayer.cs" />
     <Compile Include="TimelineLayer\MoveTimelineLayer.cs" />
     <Compile Include="TimelineLayer\PostEffectTimelineLayer.cs" />
+    <Compile Include="TimelineLayer\PostEffectTimelineLayer_DepthOfField.cs" />
+    <Compile Include="TimelineLayer\PostEffectTimelineLayer_DistanceFog.cs" />
+    <Compile Include="TimelineLayer\PostEffectTimelineLayer_Parrifin.cs" />
+    <Compile Include="TimelineLayer\PostEffectTimelineLayer_Rimlight.cs" />
     <Compile Include="TimelineLayer\ShapeKeyTimelineLayer.cs" />
     <Compile Include="TimelineLayer\StageLightTimelineLayer.cs" />
     <Compile Include="TimelineLayer\TimelineLayerBase.cs" />
@@ -204,6 +210,7 @@
     <Compile Include="TransformData\TransformDataModelBone.cs" />
     <Compile Include="TransformData\TransformDataMove.cs" />
     <Compile Include="TransformData\TransformDataParaffin.cs" />
+    <Compile Include="TransformData\TransformDataRimlight.cs" />
     <Compile Include="TransformData\TransformDataRoot.cs" />
     <Compile Include="TransformData\TransformDataRotation.cs" />
     <Compile Include="TransformData\TransformDataShapeKey.cs" />

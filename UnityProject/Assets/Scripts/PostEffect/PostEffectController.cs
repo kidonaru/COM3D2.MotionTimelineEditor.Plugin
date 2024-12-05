@@ -30,6 +30,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		{
 			_models.Add(new ColorParaffinEffectModel());
 			_models.Add(new DistanceFogEffectModel());
+			_models.Add(new RimlightEffectModel());
 		}
 
 		void OnEnable()
@@ -163,13 +164,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
 				if (activeModelCount > 0 && _materials.TryGetValue(cameraEvent, out material))
 				{
+					bool isDebugView = false;
+
 					foreach (var model in _models)
 					{
 						if (model.cameraEvent == cameraEvent)
 						{
 							model.Prepare(material);
+							isDebugView |= model.isDebugView;
 						}
 					}
+
+					PostEffectModelBase.SetKeyword(material, "DEBUG_VIEW", isDebugView);
 
 					buffer.GetTemporaryRT(Uniforms._TempRT, -1, -1, 24, FilterMode.Bilinear);
 					buffer.Blit(BuiltinRenderTextureType.CameraTarget, Uniforms._TempRT);

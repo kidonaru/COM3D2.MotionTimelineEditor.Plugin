@@ -361,6 +361,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool usePostEffectExtra = false;
         public int paraffinCount = 1;
         public int distanceFogCount = 1;
+        public int rimlightCount = 1;
 
         // 動画
         public bool videoEnabled = true;
@@ -784,6 +785,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             usePostEffectExtra = xml.usePostEffectExtra;
             paraffinCount = xml.paraffinCount;
             distanceFogCount = xml.distanceFogCount;
+            rimlightCount = xml.rimlightCount;
             videoEnabled = xml.videoEnabled;
             videoDisplayType = xml.videoDisplayType;
             videoPath = xml.videoPath;
@@ -912,6 +914,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.usePostEffectExtra = usePostEffectExtra;
             xml.paraffinCount = paraffinCount;
             xml.distanceFogCount = distanceFogCount;
+            xml.rimlightCount = rimlightCount;
             xml.videoEnabled = videoEnabled;
             xml.videoDisplayType = videoDisplayType;
             xml.videoPath = videoPath;

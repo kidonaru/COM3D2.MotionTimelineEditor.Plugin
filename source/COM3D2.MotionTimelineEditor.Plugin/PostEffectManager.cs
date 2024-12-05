@@ -75,8 +75,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public ColorParaffinEffectSettings paraffin => controller.context.paraffinSettings;
-
         public DistanceFogEffectSettings distanceFog => controller.context.fogSettings;
+        public RimlightEffectSettings rimlight => controller.context.rimlightSettings;
 
         private static MaidManager maidManager => MaidManager.instance;
 
@@ -138,6 +138,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             depthOfField.enabled = false;
             paraffin.enabled = false;
             distanceFog.enabled = false;
+            rimlight.enabled = false;
         }
 
         public DepthOfFieldData GetDepthOfFieldData()
@@ -205,7 +206,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 paraffin.enabled = true;
             }
             paraffin.SetData(index, data);
-            paraffin.isDebug = config.paraffinDebug;
+            paraffin.isDebugView = config.paraffinDebug;
         }
 
         public int GetDistanceFogCount()
@@ -235,7 +236,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 distanceFog.enabled = true;
             }
             distanceFog.SetData(index, data);
-            distanceFog.isDebug = config.distanceFogDebug;
+            distanceFog.isDebugView = config.distanceFogDebug;
+        }
+
+        public int GetRimlightCount()
+        {
+            return rimlight.GetDataCount();
+        }
+        
+        public void AddRimlightData()
+        {
+            rimlight.AddData(new RimlightData());
+        }
+
+        public void RemoveRimlightData()
+        {
+            rimlight.RemoveDataLast();
+        }
+
+        public RimlightData GetRimlightData(int index)
+        {
+            return rimlight.GetData(index);
+        }
+
+        public void ApplyRimlight(int index, RimlightData data)
+        {
+            if (data.enabled)
+            {
+                rimlight.enabled = true;
+            }
+            rimlight.SetData(index, data);
+            rimlight.isDebugView = config.rimlightDebug;
         }
     }
 }

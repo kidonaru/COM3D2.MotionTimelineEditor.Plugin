@@ -178,6 +178,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("DistanceFogCount")]
         public int distanceFogCount = 1;
 
+        [XmlElement("RimlightCount")]
+        public int rimlightCount = 1;
+
         [XmlElement("VideoEnabled")]
         public bool videoEnabled = true;
 

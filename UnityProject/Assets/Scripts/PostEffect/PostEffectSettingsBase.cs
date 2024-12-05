@@ -12,6 +12,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		where T : class, IPostEffectData
 	{
 		public bool enabled = false;
+		public bool isDebugView = false;
 		public List<T> dataList = new List<T>();
 
 		public T GetData(int index)

@@ -28,8 +28,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
 		private ParaffinBuffer[] _paraffinBuffers = new ParaffinBuffer[MAX_PARAFFIN_COUNT];
 		private int _enabledCount = 0;
-		private bool _enableDepth = false;
-		private bool _enableOverlay = false;
 		private ComputeBuffer _computeBuffer = null;
 
 		public override bool active
@@ -45,6 +43,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			get
 			{
 				return CameraEvent.BeforeImageEffects;
+			}
+		}
+
+		public override bool isDebugView
+		{
+			get
+			{
+				return settings.isDebugView;
 			}
 		}
 
@@ -91,9 +97,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			material.SetInt(Uniforms._ParaffinCount, _enabledCount);
 
 			material.EnableKeyword("PARAFFIN");
-			SetKeyword(material, "PARAFFIN_DEBUG", settings.isDebug);
-			SetKeyword(material, "PARAFFIN_DEPTH", _enableDepth);
-			SetKeyword(material, "PARAFFIN_OVERLAY", _enableOverlay);
 		}
 
 		private static class Uniforms
@@ -105,8 +108,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		private void BuildParaffinBuffers()
 		{
 			_enabledCount = 0;
-			_enableDepth = false;
-			_enableOverlay = false;
 
 			if (!settings.enabled)
 			{
@@ -125,15 +126,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 				if (!data.enabled)
 				{
 					continue;
-				}
-
-				if (data.depthMin != 0f || data.depthMax != 0f)
-				{
-					_enableDepth = true;
-				}
-				if (data.useOverlay > 0f)
-				{
-					_enableOverlay = true;
 				}
 
 				_paraffinBuffers[_enabledCount] = ConvertToBuffer(data);
@@ -174,14 +166,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 				aspectScale.y *= 10000f;
 			}
 
+			var depthMax = data.depthMax == 0f ? camera.farClipPlane : data.depthMax;
+
 			buffer.color1 = data.color1;
 			buffer.color2 = data.color2;
 			buffer.centerPosition = AdjustUV(aspectScale, data.centerPosition);
 			buffer.radiusFar = data.radiusFar;
 			buffer.radiusNear = data.radiusNear;
 			buffer.radiusScale = aspectScale;
-			buffer.depthMin = data.depthMin == 0f ? camera.nearClipPlane : data.depthMin;
-			buffer.depthMax = data.depthMax == 0f ? camera.farClipPlane : data.depthMax;
+			buffer.depthMin = data.depthMin;
+			buffer.depthMax = depthMax;
 			buffer.depthFade = data.depthFade;
 			buffer.useNormal = data.useNormal;
 			buffer.useAdd = data.useAdd;

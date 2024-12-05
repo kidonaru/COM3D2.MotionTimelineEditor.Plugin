@@ -1636,23 +1636,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public T DrawTabs<T>(T currentTab, float width, float height)
         {
+            var tabTypes = Enum.GetValues(typeof(T));
+            var savedMargin = margin;
+            margin = 0;
+
             BeginLayout(LayoutDirection.Horizontal);
             {
-                var savedMargin = margin;
-                margin = 0;
-                foreach (T tabType in Enum.GetValues(typeof(T)))
+                foreach (T tabType in tabTypes)
                 {
+                    if (currentPos.x + width > viewRect.width)
+                    {
+                        EndLayout();
+                        BeginLayout(LayoutDirection.Horizontal);
+                    }
+
                     var color = currentTab.Equals(tabType) ? Color.green : Color.white;
                     if (DrawButton(tabType.ToString(), width, height, true, color))
                     {
                         currentTab = tabType;
                     }
                 }
-                margin = savedMargin;
             }
             EndLayout();
 
             AddSpace(5);
+
+            margin = savedMargin;
 
             return currentTab;
         }

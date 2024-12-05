@@ -23,6 +23,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         ModelBone,
         Move,
         Paraffin,
+        Rimlight,
         Root,
         Rotation,
         ShapeKey,

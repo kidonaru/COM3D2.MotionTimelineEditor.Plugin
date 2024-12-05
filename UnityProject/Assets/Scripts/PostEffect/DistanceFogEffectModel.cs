@@ -34,6 +34,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			}
 		}
 
+		public override bool isDebugView
+		{
+			get
+			{
+				return settings.isDebugView;
+			}
+		}
+
 		public DistanceFogEffectSettings settings
 		{
 			get
@@ -68,7 +76,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			material.SetFloat(Uniforms._DistanceFogExp, _fogBuffer.fogExp);
 
 			material.EnableKeyword("DISTANCE_FOG");
-			SetKeyword(material, "DISTANCE_FOG_DEBUG", settings.isDebug);
 		}
 
 		private static class Uniforms

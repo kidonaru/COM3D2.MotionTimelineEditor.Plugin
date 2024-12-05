@@ -10,5 +10,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		public Camera camera;
 		public ColorParaffinEffectSettings paraffinSettings = new ColorParaffinEffectSettings();
 		public DistanceFogEffectSettings fogSettings = new DistanceFogEffectSettings();
+		public RimlightEffectSettings rimlightSettings = new RimlightEffectSettings();
 	}
 }

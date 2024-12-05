@@ -19,6 +19,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
 		public abstract CameraEvent cameraEvent { get; }
 
+		public abstract bool isDebugView { get; }
+
 		public void Init(PostEffectContext context)
 		{
 			this.context = context;
@@ -30,7 +32,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
 		public abstract void Prepare(Material material);
 
-		protected void SetKeyword(Material material, string keyword, bool enable)
+		public static void SetKeyword(Material material, string keyword, bool enable)
 		{
 			if (enable)
 			{

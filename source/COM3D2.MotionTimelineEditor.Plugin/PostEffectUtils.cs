@@ -8,6 +8,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         DepthOfField,
         Paraffin,
         DistanceFog,
+        Rimlight,
     }
 
     public static class PostEffectUtils
@@ -25,6 +26,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             { PostEffectType.DepthOfField, "被写界深度" },
             { PostEffectType.Paraffin, "パラフィン" },
             { PostEffectType.DistanceFog, "距離フォグ" },
+            { PostEffectType.Rimlight, "リムライト" },
         };
 
         public static string ToJpName(PostEffectType postEffectType)
@@ -95,70 +97,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static bool IsValidParaffinIndex(int index)
-        {
-            if (index < 0 || index >= timeline.paraffinCount)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public static string GetParaffinName(int index)
-        {
-            if (!IsValidParaffinIndex(index))
-            {
-                return "";
-            }
-
-            var suffix = PluginUtils.GetGroupSuffix(index);
-            return ToEffectName(PostEffectType.Paraffin) + suffix;
-        }
-
-        public static string GetParaffinJpName(int index)
-        {
-            if (!IsValidParaffinIndex(index))
-            {
-                return "";
-            }
-
-            var suffix = PluginUtils.GetGroupSuffix(index);
-            return ToJpName(PostEffectType.Paraffin) + suffix;
-        }
-
-        public static bool IsValidDistanceFogIndex(int index)
-        {
-            if (index < 0 || index >= timeline.distanceFogCount)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public static string GetDistanceFogName(int index)
-        {
-            if (!IsValidDistanceFogIndex(index))
-            {
-                return "";
-            }
-
-            var suffix = PluginUtils.GetGroupSuffix(index);
-            return ToEffectName(PostEffectType.DistanceFog) + suffix;
-        }
-
-        public static string GetDistanceFogJpName(int index)
-        {
-            if (!IsValidDistanceFogIndex(index))
-            {
-                return "";
-            }
-
-            var suffix = PluginUtils.GetGroupSuffix(index);
-            return ToJpName(PostEffectType.DistanceFog) + suffix;
-        }
-
         private static Dictionary<string, int> _indexCache = new Dictionary<string, int>(16);
 
         public static int GetEffectIndex(string name)
@@ -184,7 +122,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return type;
             }
 
-            type = PostEffectUtils.ToEffectType(name);
+            type = ToEffectType(name);
             _effectTypeCache[name] = type;
             return type;
         }

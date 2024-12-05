@@ -44,6 +44,5 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [System.Serializable]
 	public class DistanceFogEffectSettings : PostEffectSettingsBase<DistanceFogData>
 	{
-		public bool isDebug = false;
 	}
 }
