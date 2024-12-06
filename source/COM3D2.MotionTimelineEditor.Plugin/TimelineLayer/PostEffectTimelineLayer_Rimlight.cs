@@ -131,6 +131,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
+            var defaultTrans = TransformDataRimlight.defaultTrans;
+
             view.SetEnabled(!view.IsComboBoxFocused());
             view.DrawHorizontalLine(Color.gray);
             view.AddSpace(5);
@@ -150,14 +152,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 updateTransform |= view.DrawColor(
                     _color1FieldValue,
                     rimlight.color1,
-                    Color.white,
+                    defaultTrans.initialColor,
                     newValue => rimlight.color1 = newValue
                 );
 
                 updateTransform |= view.DrawColor(
                     _color2FieldValue,
                     rimlight.color2,
-                    new Color(1f, 1f, 1f, 0f),
+                    defaultTrans.initialSubColor,
                     newValue => rimlight.color2 = newValue
                 );
             }
@@ -166,7 +168,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 updateTransform |= view.DrawColor(
                     _color1FieldValue,
                     rimlight.color1,
-                    Color.white,
+                    defaultTrans.initialColor,
                     newValue =>
                     {
                         var alpha2 = rimlight.color2.a;
@@ -189,7 +191,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 });
             }
 
-            var initialEulerAngles = new Vector3(0f, 0f, 0f);
+            var initialEulerAngles = defaultTrans.initialEulerAngles;
             var transformCache = view.GetTransformCache(null);
             transformCache.eulerAngles = rimlight.rotation;
 
@@ -202,180 +204,82 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 rimlightName,
                 initialEulerAngles);
 
-            updateTransform |= view.DrawToggle("ワールド空間", rimlight.isWorldSpace, 120, 20, newValue =>
-            {
-                rimlight.isWorldSpace = newValue;
-            });
+            updateTransform |= view.DrawCustomValueBool(
+                defaultTrans.isWorldSpaceInfo,
+                rimlight.isWorldSpace,
+                newValue => rimlight.isWorldSpace = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "影響",
-                labelWidth = 30,
-                min = 0f,
-                max = 2f,
-                step = 0.01f,
-                defaultValue = 1f,
-                value = rimlight.lightArea,
-                onChanged = newValue => rimlight.lightArea = newValue,
-            });
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.lightAreaInfo,
+                rimlight.lightArea,
+                newValue => rimlight.lightArea = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "幅",
-                labelWidth = 30,
-                min = 0f,
-                max = 2f,
-                step = 0.01f,
-                defaultValue = 0.05f,
-                value = rimlight.fadeRange,
-                onChanged = newValue => rimlight.fadeRange = newValue,
-            });
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.fadeRangeInfo,
+                rimlight.fadeRange,
+                newValue => rimlight.fadeRange = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "指数",
-                labelWidth = 30,
-                min = 0f,
-                max = 10f,
-                step = 0.01f,
-                defaultValue = 1f,
-                value = rimlight.fadeExp,
-                onChanged = newValue => rimlight.fadeExp = newValue,
-            });
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.fadeExpInfo,
+                rimlight.fadeExp,
+                newValue => rimlight.fadeExp = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "最小深度",
-                labelWidth = 30,
-                min = 0f,
-                max = rimlight.depthMax,
-                step = 0.1f,
-                defaultValue = 0f,
-                value = rimlight.depthMin,
-                onChanged = newValue => rimlight.depthMin = newValue,
-            });
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.depthMinInfo,
+                rimlight.depthMin,
+                newValue => rimlight.depthMin = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "最大深度",
-                labelWidth = 30,
-                min = rimlight.depthMin,
-                max = 100f,
-                step = 0.1f,
-                defaultValue = 5f,
-                value = rimlight.depthMax,
-                onChanged = newValue => rimlight.depthMax = newValue,
-            });
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.depthMaxInfo,
+                rimlight.depthMax,
+                newValue => rimlight.depthMax = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "深度幅",
-                labelWidth = 30,
-                min = 0f,
-                max = 10f,
-                step = 0.01f,
-                defaultValue = 1f,
-                value = rimlight.depthFade,
-                onChanged = newValue => rimlight.depthFade = newValue,
-            });
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.depthFadeInfo,
+                rimlight.depthFade,
+                newValue => rimlight.depthFade = newValue);
+
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.edgeDepthInfo,
+                rimlight.edgeDepth,
+                newValue => rimlight.edgeDepth = newValue);
+
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.edgeRangeInfo,
+                rimlight.edgeRange,
+                newValue => rimlight.edgeRange = newValue);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.heightMinInfo,
+                rimlight.heightMin,
+                newValue => rimlight.heightMin = newValue);
 
             view.DrawLabel("ブレンドモード", 100, 20);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "通常",
-                labelWidth = 30,
-                min = 0f,
-                max = 2f,
-                step = 0.01f,
-                defaultValue = 0f,
-                value = rimlight.useNormal,
-                onChanged = newValue => rimlight.useNormal = newValue,
-            });
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.useNormalInfo,
+                rimlight.useNormal,
+                newValue => rimlight.useNormal = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "加算",
-                labelWidth = 30,
-                min = 0f,
-                max = 2f,
-                step = 0.01f,
-                defaultValue = 0f,
-                value = rimlight.useAdd,
-                onChanged = newValue => rimlight.useAdd = newValue,
-            });
-
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "乗算",
-                labelWidth = 30,
-                min = 0f,
-                max = 2f,
-                step = 0.01f,
-                defaultValue = 0f,
-                value = rimlight.useMultiply,
-                onChanged = newValue => rimlight.useMultiply = newValue,
-            });
-
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "Overlay",
-                labelWidth = 30,
-                min = 0f,
-                max = 2f,
-                step = 0.01f,
-                defaultValue = 0f,
-                value = rimlight.useOverlay,
-                onChanged = newValue => rimlight.useOverlay = newValue,
-            });
-
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "減算",
-                labelWidth = 30,
-                min = 0f,
-                max = 2f,
-                step = 0.01f,
-                defaultValue = 0f,
-                value = rimlight.useSubstruct,
-                onChanged = newValue => rimlight.useSubstruct = newValue,
-            });
-
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "E深度",
-                labelWidth = 30,
-                min = 0f,
-                max = 10f,
-                step = 0.01f,
-                defaultValue = 0.2f,
-                value = rimlight.edgeDepth,
-                onChanged = newValue => rimlight.edgeDepth = newValue,
-            });
-
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "E幅",
-                labelWidth = 30,
-                min = 0f,
-                max = 10f,
-                step = 0.01f,
-                defaultValue = 1f,
-                value = rimlight.edgeRange,
-                onChanged = newValue => rimlight.edgeRange = newValue,
-            });
-
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "最小高さ",
-                labelWidth = 30,
-                min = -config.positionRange,
-                max = config.positionRange,
-                step = 0.01f,
-                defaultValue = 0.01f,
-                value = rimlight.heightMin,
-                onChanged = newValue => rimlight.heightMin = newValue,
-            });
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.useAddInfo,
+                rimlight.useAdd,
+                newValue => rimlight.useAdd = newValue);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.useMultiplyInfo,
+                rimlight.useMultiply,
+                newValue => rimlight.useMultiply = newValue);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.useOverlayInfo,
+                rimlight.useOverlay,
+                newValue => rimlight.useOverlay = newValue);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.useSubstructInfo,
+                rimlight.useSubstruct,
+                newValue => rimlight.useSubstruct = newValue);
 
             view.DrawHorizontalLine(Color.gray);
 

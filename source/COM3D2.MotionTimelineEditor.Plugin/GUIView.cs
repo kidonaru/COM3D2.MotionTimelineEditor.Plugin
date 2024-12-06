@@ -1755,5 +1755,68 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return cache;
             }
         }
+
+        public bool DrawCustomValueFloat(
+            CustomValueInfo info,
+            float value,
+            Action<float> onChanged)
+        {
+            if (info.type == CustomValueType.FloatSlider)
+            {
+                return DrawSliderValue(new SliderOption
+                {
+                    label = info.name,
+                    labelWidth = 40,
+                    fieldType = FloatFieldType.Float,
+                    min = info.min,
+                    max = info.max,
+                    step = info.step,
+                    defaultValue = info.defaultValue,
+                    value = value,
+                    onChanged = onChanged,
+                });
+            }
+            else
+            {
+                return DrawFloatField(new FloatFieldOption
+                {
+                    label = info.name,
+                    labelWidth = 40,
+                    minValue = info.min,
+                    maxValue = info.max,
+                    value = value,
+                    width = 90,
+                    height = 20,
+                    onChanged = onChanged,
+                });
+            }
+        }
+
+        public bool DrawCustomValueInt(
+            CustomValueInfo info,
+            int value,
+            Action<int> onChanged)
+        {
+            return DrawSliderValue(new SliderOption
+            {
+                label = info.name,
+                labelWidth = 40,
+                fieldType = FloatFieldType.Int,
+                min = info.min,
+                max = info.max,
+                step = info.step,
+                defaultValue = info.defaultValue,
+                value = value,
+                onChanged = x => onChanged((int) x),
+            });
+        }
+
+        public bool DrawCustomValueBool(
+            CustomValueInfo info,
+            bool value,
+            Action<bool> onChanged)
+        {
+            return DrawToggle(info.name, value, -1, 20, onChanged);
+        }
     }
 }

@@ -214,7 +214,7 @@ Shader "MTE/PostEffect"
             float4 Rimlight_CalculateBlend(float4 src, RimlightBuffer data, float2 uv, float depth, float3 normal)
             {
                 float rimFactor = 1.0 - dot(normal, data.direction);
-                float basicRim = smoothstep(data.lightArea - data.fadeRange, data.lightArea, rimFactor);
+                float basicRim = smoothstep(data.lightArea - data.fadeRange, data.lightArea + data.fadeRange, rimFactor);
                 float rimIntensity = pow(basicRim, data.fadeExp);
                 float4 rimColor = lerp(data.color2, data.color1, rimIntensity);
 

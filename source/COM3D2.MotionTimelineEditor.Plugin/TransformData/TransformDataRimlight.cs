@@ -5,6 +5,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataRimlight : TransformDataBase
     {
+        public static TransformDataRimlight defaultTrans = new TransformDataRimlight();
+
         public override TransformType type => TransformType.Rimlight;
 
         public override int valueCount => 27;
@@ -50,6 +52,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 13,
                     name = "影響",
+                    min = 0f,
+                    max = 2f,
+                    step = 0.01f,
                     defaultValue = 1f,
                 }
             },
@@ -58,7 +63,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 14,
                     name = "幅",
-                    defaultValue = 0.05f,
+                    min = 0f,
+                    max = 2f,
+                    step = 0.01f,
+                    defaultValue = 0.4f,
                 }
             },
             {
@@ -66,6 +74,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 15,
                     name = "指数",
+                    min = 0f,
+                    max = 10f,
+                    step = 0.01f,
                     defaultValue = 1f,
                 }
             },
@@ -74,6 +85,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 16,
                     name = "最小深度",
+                    min = 0f,
+                    max = 100f,
+                    step = 0.1f,
                     defaultValue = 0f,
                 }
             },
@@ -82,6 +96,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 17,
                     name = "最大深度",
+                    min = 0f,
+                    max = 100f,
+                    step = 0.1f,
                     defaultValue = 5f,
                 }
             },
@@ -90,6 +107,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 18,
                     name = "深度幅",
+                    min = 0f,
+                    max = 10f,
+                    step = 0.01f,
                     defaultValue = 1f,
                 }
             },
@@ -98,6 +118,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 19,
                     name = "通常",
+                    min = 0f,
+                    max = 2f,
+                    step = 0.01f,
                     defaultValue = 0f,
                 }
             },
@@ -106,6 +129,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 20,
                     name = "加算",
+                    min = 0f,
+                    max = 2f,
+                    step = 0.01f,
                     defaultValue = 0f,
                 }
             },
@@ -114,6 +140,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 21,
                     name = "乗算",
+                    min = 0f,
+                    max = 2f,
+                    step = 0.01f,
                     defaultValue = 0f,
                 }
             },
@@ -121,7 +150,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "useOverlay", new CustomValueInfo
                 {
                     index = 22,
-                    name = "オーバーレイ",
+                    name = "Overlay",
+                    min = 0f,
+                    max = 2f,
+                    step = 0.01f,
                     defaultValue = 0f,
                 }
             },
@@ -130,6 +162,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 23,
                     name = "減算",
+                    min = 0f,
+                    max = 2f,
+                    step = 0.01f,
                     defaultValue = 0f,
                 }
             },
@@ -138,6 +173,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 23,
                     name = "ワールド空間",
+                    min = 0f,
+                    max = 1f,
+                    step = 1f,
                     defaultValue = 0f,
                 }
             },
@@ -145,23 +183,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "edgeDepth", new CustomValueInfo
                 {
                     index = 24,
-                    name = "エッジ深度",
-                    defaultValue = 0.2f,
+                    name = "Edge深度",
+                    min = 0f,
+                    max = 10f,
+                    step = 0.01f,
+                    defaultValue = 0f,
                 }
             },
             {
                 "edgeRange", new CustomValueInfo
                 {
                     index = 25,
-                    name = "エッジ幅",
-                    defaultValue = 1f,
-                }        
+                    name = "Edge幅",
+                    min = 0f,
+                    max = 10f,
+                    step = 0.01f,
+                    defaultValue = 0f,
+                }
             },
             {
                 "heightMin", new CustomValueInfo
                 {
                     index = 26,
                     name = "最小高さ",
+                    min = -10f,
+                    max = 10f,
+                    step = 0.01f,
                     defaultValue = 0.01f,
                 }
             }
@@ -187,6 +234,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public ValueData edgeDepthValue => this["edgeDepth"];
         public ValueData edgeRangeValue => this["edgeRange"];
         public ValueData heightMinValue => this["heightMin"];
+
+        public CustomValueInfo lightAreaInfo => GetCustomValueInfo("lightArea");
+        public CustomValueInfo fadeRangeInfo => GetCustomValueInfo("fadeRange");
+        public CustomValueInfo fadeExpInfo => GetCustomValueInfo("fadeExp");
+        public CustomValueInfo depthMinInfo => GetCustomValueInfo("depthMin");
+        public CustomValueInfo depthMaxInfo => GetCustomValueInfo("depthMax");
+        public CustomValueInfo depthFadeInfo => GetCustomValueInfo("depthFade");
+        public CustomValueInfo useNormalInfo => GetCustomValueInfo("useNormal");
+        public CustomValueInfo useAddInfo => GetCustomValueInfo("useAdd");
+        public CustomValueInfo useMultiplyInfo => GetCustomValueInfo("useMultiply");
+        public CustomValueInfo useOverlayInfo => GetCustomValueInfo("useOverlay");
+        public CustomValueInfo useSubstructInfo => GetCustomValueInfo("useSubstruct");
+        public CustomValueInfo isWorldSpaceInfo => GetCustomValueInfo("isWorldSpace");
+        public CustomValueInfo edgeDepthInfo => GetCustomValueInfo("edgeDepth");
+        public CustomValueInfo edgeRangeInfo => GetCustomValueInfo("edgeRange");
+        public CustomValueInfo heightMinInfo => GetCustomValueInfo("heightMin");
 
         public float lightArea
         {

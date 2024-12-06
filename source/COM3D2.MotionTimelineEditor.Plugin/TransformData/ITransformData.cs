@@ -38,11 +38,45 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Text,
     }
 
+    public enum CustomValueType
+    {
+        FloatValue,
+        FloatSlider,
+        IntValue,
+        BoolValue,
+    }
+
     public class CustomValueInfo
     {
         public int index;
         public string name;
+        public float min;
+        public float max;
+        public float step;
         public float defaultValue;
+
+        public CustomValueType type
+        {
+            get
+            {
+                if (min == 0f && max == 1f && step == 1f)
+                {
+                    return CustomValueType.BoolValue;
+                }
+                else if (step == 1f)
+                {
+                    return CustomValueType.IntValue;
+                }
+                else if (step > 0f)
+                {
+                    return CustomValueType.FloatSlider;
+                }
+                else
+                {
+                    return CustomValueType.FloatValue;
+                }
+            }
+        }
     }
 
     public class StrValueInfo

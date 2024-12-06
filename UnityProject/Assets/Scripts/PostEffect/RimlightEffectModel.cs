@@ -180,13 +180,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 				edgeRange = new Vector2(1f, 1f);
 			}
 
+			float fadeRange = data.fadeRange * 0.5f;
+
 			return new RimlightBuffer
 			{
 				color1 = data.color1,
 				color2 = data.color2,
 				direction = direction,
 				lightArea = data.lightArea,
-				fadeRange = data.fadeRange,
+				fadeRange = fadeRange,
 				fadeExp = data.fadeExp,
 				depthMin = depthMin,
 				depthMax = depthMax,
