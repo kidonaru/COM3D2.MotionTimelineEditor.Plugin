@@ -19,9 +19,9 @@ Shader "MTE/PostEffect"
             #pragma fragment frag
             #pragma target 4.5
             #pragma multi_compile __ DEBUG_VIEW
+            #pragma multi_compile __ EXTRA_BLEND
             #pragma multi_compile __ RIMLIGHT
             #pragma multi_compile __ RIMLIGHT_EDGE
-            #pragma multi_compile __ RIMLIGHT_HEIGHT
             #pragma multi_compile __ DISTANCE_FOG
             #pragma multi_compile __ PARAFFIN
             #include "UnityCG.cginc"
@@ -75,11 +75,21 @@ Shader "MTE/PostEffect"
             #endif
 
             #if DISTANCE_FOG
-            float4 _DistanceFogColor1;
-            float4 _DistanceFogColor2;
-            float _DistanceFogStart;
-            float _DistanceFogEnd;
-            float _DistanceFogExp;
+            struct DistanceFogBuffer
+            {
+                float4 color1;
+                float4 color2;
+                float fogStart;
+                float fogEnd;
+                float fogExp;
+                float useNormal;
+                float useAdd;
+                float useMultiply;
+                float useOverlay;
+                float useSubstruct;
+            };
+
+            StructuredBuffer<DistanceFogBuffer> _DistanceFogBuffer;
             #endif
 
             #if PARAFFIN
@@ -123,7 +133,7 @@ Shader "MTE/PostEffect"
                 return result;
             }
 
-            float4 CalculateBlend(
+            float4 CalculateBlendAdd(
                 float4 src,
                 float4 dst,
                 float4 useNormal,
@@ -133,11 +143,37 @@ Shader "MTE/PostEffect"
                 float4 useSubstruct)
             {
                 float4 blend = float4(0, 0, 0, 0);
+                #if EXTRA_BLEND
                 blend += (dst - src) * useNormal;
                 blend += (dst) * useAdd;
                 blend += (src * dst - src) * useMultiply;
                 blend += (BlendOverlay(src, dst) - src) * useOverlay;
                 blend += (-dst) * useSubstruct;
+                #else
+                blend += (dst) * useAdd;
+                #endif
+                return blend * dst.a;
+            }
+
+            float4 CalculateBlendNormal(
+                float4 src,
+                float4 dst,
+                float4 useNormal,
+                float4 useAdd,
+                float4 useMultiply,
+                float4 useOverlay,
+                float4 useSubstruct)
+            {
+                float4 blend = float4(0, 0, 0, 0);
+                #if EXTRA_BLEND
+                blend += (dst - src) * useNormal;
+                blend += (dst) * useAdd;
+                blend += (src * dst - src) * useMultiply;
+                blend += (BlendOverlay(src, dst) - src) * useOverlay;
+                blend += (-dst) * useSubstruct;
+                #else
+                blend += (dst - src) * useNormal;
+                #endif
                 return blend * dst.a;
             }
 
@@ -166,11 +202,11 @@ Shader "MTE/PostEffect"
             #if RIMLIGHT
 
             #if RIMLIGHT_EDGE
-            float Rimlight_CalculateEdgeFactor(RimlightBuffer data, float2 uv)
+            float Rimlight_CalculateEdgeFactor(RimlightBuffer data, float2 uv, float depth)
             {
                 float2 range = data.edgeRange;
 
-                float d0 = SampleDepth(uv + float2(0, 0));
+                float d0 = depth;
                 float m0 = 0;
                 float rangeFactor = 0.5;
 
@@ -196,10 +232,8 @@ Shader "MTE/PostEffect"
                 return minFactor * maxFactor;
             }
 
-            #if RIMLIGHT_HEIGHT
-            float Rimlight_CalculateHeightFactor(RimlightBuffer data, float2 screenUV)
+            float Rimlight_CalculateHeightFactor(RimlightBuffer data, float2 screenUV, float depth)
             {
-                float depth = SampleDepth(screenUV);
                 float4 ndcPos = float4(screenUV * 2 - 1, 1, 1);
                 float4 viewPos = mul(unity_CameraInvProjection, ndcPos);
                 viewPos.xyz *= depth;
@@ -209,9 +243,8 @@ Shader "MTE/PostEffect"
 
                 return step(data.heightMin, worldPos.y);
             }
-            #endif
 
-            float4 Rimlight_CalculateBlend(float4 src, RimlightBuffer data, float2 uv, float depth, float3 normal)
+            float4 Rimlight_CalculateBlend(float4 src, RimlightBuffer data, float2 uv, float3 normal)
             {
                 float rimFactor = 1.0 - dot(normal, data.direction);
                 float basicRim = smoothstep(data.lightArea - data.fadeRange, data.lightArea + data.fadeRange, rimFactor);
@@ -221,31 +254,28 @@ Shader "MTE/PostEffect"
                 #if DEBUG_VIEW
                 return CalculateBlendDebug(src, rimColor, data.useNormal, data.useAdd, data.useMultiply, data.useOverlay, data.useSubstruct);
                 #else
-                return CalculateBlend(src, rimColor, data.useNormal, data.useAdd, data.useMultiply, data.useOverlay, data.useSubstruct);
+                return CalculateBlendAdd(src, rimColor, data.useNormal, data.useAdd, data.useMultiply, data.useOverlay, data.useSubstruct);
                 #endif
             }
 
             float4 Rimlight_frag(v2f i, float4 src)
             {
                 float4 dst = src;
-                float3 normal;
-                float depth;
-                DecodeDepthNormal(tex2D(_CameraDepthNormalsTexture, i.uv), depth, normal);
+                float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv));
+                float3 normal = DecodeViewNormalStereo(tex2D(_CameraDepthNormalsTexture, i.uv));
 
                 [loop]
                 for(int idx = 0; idx < _RimlightCount; idx++)
                 {
-                    float4 blend = Rimlight_CalculateBlend(dst, _RimlightBuffer[idx], i.uv, depth, normal);
+                    float4 blend = Rimlight_CalculateBlend(dst, _RimlightBuffer[idx], i.uv, normal);
 
                     blend *= Rimlight_CalculateDepthFactor(_RimlightBuffer[idx], depth);
 
                     #if RIMLIGHT_EDGE
-                    blend *= Rimlight_CalculateEdgeFactor(_RimlightBuffer[idx], i.uv);
+                    blend *= Rimlight_CalculateEdgeFactor(_RimlightBuffer[idx], i.uv, depth);
                     #endif
-
-                    #if RIMLIGHT_HEIGHT
-                    blend *= Rimlight_CalculateHeightFactor(_RimlightBuffer[idx], i.uv);
-                    #endif
+\
+                    blend *= Rimlight_CalculateHeightFactor(_RimlightBuffer[idx], i.uv, depth);
 
                     dst += blend;
                 }
@@ -257,17 +287,19 @@ Shader "MTE/PostEffect"
             #endif
 
             #if DISTANCE_FOG
-            float4 DistanceFog_CalculateFog(float4 src, float depth)
+            float4 DistanceFog_CalculateFogBlend(float4 src, DistanceFogBuffer data, float depth)
             {
-                float range = _DistanceFogEnd - _DistanceFogStart;
-                float fogFactor = pow(saturate((depth - _DistanceFogStart) / range), _DistanceFogExp);
+                float range = data.fogEnd - data.fogStart;
+                float fogFactor = pow(saturate((depth - data.fogStart) / range), data.fogExp);
                 fogFactor = smoothstep(0, 1, fogFactor);
 
-                float4 fogColor = lerp(_DistanceFogColor1, _DistanceFogColor2, fogFactor);
+                float4 fogColor = lerp(data.color1, data.color2, fogFactor);
 
-                float4 dst = lerp(src, fogColor, fogColor.a);
-                dst.a = src.a;
-                return dst;
+                #if DEBUG_VIEW
+                return CalculateBlendDebug(src, fogColor, data.useNormal, data.useAdd, data.useMultiply, data.useOverlay, data.useSubstruct);
+                #else
+                return CalculateBlendNormal(src, fogColor, data.useNormal, data.useAdd, data.useMultiply, data.useOverlay, data.useSubstruct);
+                #endif
             }
 
             float4 DistanceFog_frag(v2f i, float4 src)
@@ -275,7 +307,8 @@ Shader "MTE/PostEffect"
                 float4 dst = src;
                 float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv));
 
-                dst = DistanceFog_CalculateFog(dst, depth);
+                dst += DistanceFog_CalculateFogBlend(dst, _DistanceFogBuffer[0], depth);
+                dst.a = src.a;
 
                 return dst;
             }
@@ -305,7 +338,7 @@ Shader "MTE/PostEffect"
                 #if DEBUG_VIEW
                 return CalculateBlendDebug(col, gradientColor, data.useNormal, data.useAdd, data.useMultiply, data.useOverlay, data.useSubstruct);
                 #else
-                return CalculateBlend(col, gradientColor, data.useNormal, data.useAdd, data.useMultiply, data.useOverlay, data.useSubstruct);
+                return CalculateBlendAdd(col, gradientColor, data.useNormal, data.useAdd, data.useMultiply, data.useOverlay, data.useSubstruct);
                 #endif
             }
 

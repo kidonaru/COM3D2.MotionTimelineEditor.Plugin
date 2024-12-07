@@ -358,7 +358,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float letterBoxAlpha = 1f;
         public int textCount = 1;
         public bool fingerBlendEnabled = true;
-        public bool usePostEffectExtra = false;
+        public bool usePostEffectExtraColor = false;
+        public bool usePostEffectExtraBlend = false;
         public int paraffinCount = 1;
         public int distanceFogCount = 1;
         public int rimlightCount = 1;
@@ -782,7 +783,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             letterBoxAlpha = xml.letterBoxAlpha;
             textCount = xml.textCount;
             fingerBlendEnabled = xml.fingerBlendEnabled;
-            usePostEffectExtra = xml.usePostEffectExtra;
+            usePostEffectExtraColor = xml.usePostEffectExtraColor;
+            usePostEffectExtraBlend = xml.usePostEffectExtraBlend;
             paraffinCount = xml.paraffinCount;
             distanceFogCount = xml.distanceFogCount;
             rimlightCount = xml.rimlightCount;
@@ -911,7 +913,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.letterBoxAlpha = letterBoxAlpha;
             xml.textCount = textCount;
             xml.fingerBlendEnabled = fingerBlendEnabled;
-            xml.usePostEffectExtra = usePostEffectExtra;
+            xml.usePostEffectExtraColor = usePostEffectExtraColor;
+            xml.usePostEffectExtraBlend = usePostEffectExtraBlend;
             xml.paraffinCount = paraffinCount;
             xml.distanceFogCount = distanceFogCount;
             xml.rimlightCount = rimlightCount;

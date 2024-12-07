@@ -138,25 +138,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
             var updateTransform = false;
+            var defaultTrans = TransformDataDistanceFog.defaultTrans;
 
             updateTransform = view.DrawToggle("有効化", distanceFog.enabled, 80, 20, newValue =>
             {
                 distanceFog.enabled = newValue;
             });
 
-            if (timeline.usePostEffectExtra)
+            if (timeline.usePostEffectExtraColor)
             {
                 updateTransform |= view.DrawColor(
                     _color1FieldValue,
                     distanceFog.color1,
-                    Color.white,
+                    defaultTrans.initialColor,
                     newValue => distanceFog.color1 = newValue
                 );
 
                 updateTransform |= view.DrawColor(
                     _color2FieldValue,
                     distanceFog.color2,
-                    new Color(1f, 1f, 1f, 0f),
+                    defaultTrans.initialSubColor,
                     newValue => distanceFog.color2 = newValue
                 );
             }
@@ -165,7 +166,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 updateTransform |= view.DrawColor(
                     _color2FieldValue,
                     distanceFog.color2,
-                    Color.white,
+                    defaultTrans.initialSubColor,
                     newValue =>
                     {
                         var alpha1 = distanceFog.color1.a;
@@ -188,41 +189,55 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 });
             }
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "開始深度",
-                labelWidth = 30,
-                min = 0f,
-                max = distanceFog.fogEnd,
-                step = 0.1f,
-                defaultValue = 0f,
-                value = distanceFog.fogStart,
-                onChanged = newValue => distanceFog.fogStart = newValue,
-            });
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.fogStartInfo,
+                distanceFog.fogStart,
+                newValue => distanceFog.fogStart = newValue);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.fogEndInfo,
+                distanceFog.fogEnd,
+                newValue => distanceFog.fogEnd = newValue);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.fogExpInfo,
+                distanceFog.fogExp,
+                newValue => distanceFog.fogExp = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            if (timeline.usePostEffectExtraBlend)
             {
-                label = "終了深度",
-                labelWidth = 30,
-                min = distanceFog.fogStart,
-                max = 100f,
-                step = 0.1f,
-                defaultValue = 50f,
-                value = distanceFog.fogEnd,
-                onChanged = newValue => distanceFog.fogEnd = newValue,
-            });
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useNormalInfo,
+                    distanceFog.useNormal,
+                    newValue => distanceFog.useNormal = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useAddInfo,
+                    distanceFog.useAdd,
+                    newValue => distanceFog.useAdd = newValue);
+
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useMultiplyInfo,
+                    distanceFog.useMultiply,
+                    newValue => distanceFog.useMultiply = newValue);
+
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useOverlayInfo,
+                    distanceFog.useOverlay,
+                    newValue => distanceFog.useOverlay = newValue);
+
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useSubstructInfo,
+                    distanceFog.useSubstruct,
+                    newValue => distanceFog.useSubstruct = newValue);
+            }
+            else
             {
-                label = "指数",
-                labelWidth = 30,
-                min = 0f,
-                max = 10f,
-                step = 0.01f,
-                defaultValue = 1f,
-                value = distanceFog.fogExp,
-                onChanged = newValue => distanceFog.fogExp = newValue,
-            });
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useNormalInfo,
+                    distanceFog.useNormal,
+                    newValue => distanceFog.useNormal = newValue);
+            }
 
             view.DrawHorizontalLine(Color.gray);
 

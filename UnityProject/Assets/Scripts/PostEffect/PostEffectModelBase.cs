@@ -21,6 +21,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
 		public abstract bool isDebugView { get; }
 
+		public abstract bool isExtraBlend { get; }
+
 		public void Init(PostEffectContext context)
 		{
 			this.context = context;

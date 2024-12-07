@@ -131,8 +131,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var defaultTrans = TransformDataRimlight.defaultTrans;
-
             view.SetEnabled(!view.IsComboBoxFocused());
             view.DrawHorizontalLine(Color.gray);
             view.AddSpace(5);
@@ -141,13 +139,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
             var updateTransform = false;
+            var defaultTrans = TransformDataRimlight.defaultTrans;
 
             updateTransform = view.DrawToggle("有効化", rimlight.enabled, 80, 20, newValue =>
             {
                 rimlight.enabled = newValue;
             });
 
-            if (timeline.usePostEffectExtra)
+            if (timeline.usePostEffectExtraColor)
             {
                 updateTransform |= view.DrawColor(
                     _color1FieldValue,
@@ -256,30 +255,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawLabel("ブレンドモード", 100, 20);
 
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.useNormalInfo,
-                rimlight.useNormal,
-                newValue => rimlight.useNormal = newValue);
+            if (timeline.usePostEffectExtraBlend)
+            {
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useNormalInfo,
+                    rimlight.useNormal,
+                    newValue => rimlight.useNormal = newValue);
 
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.useAddInfo,
-                rimlight.useAdd,
-                newValue => rimlight.useAdd = newValue);
-            
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.useMultiplyInfo,
-                rimlight.useMultiply,
-                newValue => rimlight.useMultiply = newValue);
-            
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.useOverlayInfo,
-                rimlight.useOverlay,
-                newValue => rimlight.useOverlay = newValue);
-            
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.useSubstructInfo,
-                rimlight.useSubstruct,
-                newValue => rimlight.useSubstruct = newValue);
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useAddInfo,
+                    rimlight.useAdd,
+                    newValue => rimlight.useAdd = newValue);
+
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useMultiplyInfo,
+                    rimlight.useMultiply,
+                    newValue => rimlight.useMultiply = newValue);
+
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useOverlayInfo,
+                    rimlight.useOverlay,
+                    newValue => rimlight.useOverlay = newValue);
+
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useSubstructInfo,
+                    rimlight.useSubstruct,
+                    newValue => rimlight.useSubstruct = newValue);
+            }
+            else
+            {
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useAddInfo,
+                    rimlight.useAdd,
+                    newValue => rimlight.useAdd = newValue);
+            }
 
             view.DrawHorizontalLine(Color.gray);
 

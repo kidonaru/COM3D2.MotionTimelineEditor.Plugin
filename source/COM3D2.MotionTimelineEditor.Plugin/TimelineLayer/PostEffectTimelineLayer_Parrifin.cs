@@ -138,25 +138,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
             var updateTransform = false;
+            var defaultTrans = TransformDataParaffin.defaultTrans;
 
             updateTransform = view.DrawToggle("有効化", paraffin.enabled, 80, 20, newValue =>
             {
                 paraffin.enabled = newValue;
             });
 
-            if (timeline.usePostEffectExtra)
+            if (timeline.usePostEffectExtraColor)
             {
                 updateTransform |= view.DrawColor(
                     _color1FieldValue,
                     paraffin.color1,
-                    Color.white,
+                    defaultTrans.initialColor,
                     newValue => paraffin.color1 = newValue
                 );
 
                 updateTransform |= view.DrawColor(
                     _color2FieldValue,
                     paraffin.color2,
-                    new Color(1f, 1f, 1f, 0f),
+                    defaultTrans.initialSubColor,
                     newValue => paraffin.color2 = newValue
                 );
             }
@@ -165,7 +166,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 updateTransform |= view.DrawColor(
                     _color1FieldValue,
                     paraffin.color1,
-                    Color.white,
+                    defaultTrans.initialColor,
                     newValue =>
                     {
                         var alpha2 = paraffin.color2.a;
@@ -188,175 +189,87 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 });
             }
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "X",
-                labelWidth = 30,
-                min = -1f,
-                max = 2f,
-                step = 0.01f,
-                defaultValue = 0.5f,
-                value = paraffin.centerPosition.x,
-                onChanged = newValue => paraffin.centerPosition.x = newValue,
-            });
-
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "Y",
-                labelWidth = 30,
-                min = -1f,
-                max = 2f,
-                step = 0.01f,
-                defaultValue = 0.5f,
-                value = paraffin.centerPosition.y,
-                onChanged = newValue => paraffin.centerPosition.y = newValue,
-            });
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.centerPositionXInfo,
+                paraffin.centerPosition.x,
+                newValue => paraffin.centerPosition.x = newValue);
             
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "外側半径",
-                labelWidth = 30,
-                min = 0f,
-                max = 1f,
-                step = 0.01f,
-                defaultValue = 1f,
-                value = paraffin.radiusFar,
-                onChanged = newValue => paraffin.radiusFar = newValue,
-            });
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.centerPositionYInfo,
+                paraffin.centerPosition.y,
+                newValue => paraffin.centerPosition.y = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "内側半径",
-                labelWidth = 30,
-                min = 0f,
-                max = 1f,
-                step = 0.01f,
-                defaultValue = 0f,
-                value = paraffin.radiusNear,
-                onChanged = newValue => paraffin.radiusNear = newValue,
-            });
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.radiusFarInfo,
+                paraffin.radiusFar,
+                newValue => paraffin.radiusFar = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "SX",
-                labelWidth = 30,
-                min = 0f,
-                max = 5f,
-                step = 0.01f,
-                defaultValue = 1f,
-                value = paraffin.radiusScale.x,
-                onChanged = newValue => paraffin.radiusScale.x = newValue,
-            });
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.radiusNearInfo,
+                paraffin.radiusNear,
+                newValue => paraffin.radiusNear = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "SY",
-                labelWidth = 30,
-                min = 0f,
-                max = 5f,
-                step = 0.01f,
-                defaultValue = 1f,
-                value = paraffin.radiusScale.y,
-                onChanged = newValue => paraffin.radiusScale.y = newValue,
-            });
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.radiusScaleXInfo,
+                paraffin.radiusScale.x,
+                newValue => paraffin.radiusScale.x = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "最小深度",
-                labelWidth = 30,
-                min = 0f,
-                max = paraffin.depthMax,
-                step = 0.1f,
-                defaultValue = 0f,
-                value = paraffin.depthMin,
-                onChanged = newValue => paraffin.depthMin = newValue,
-            });
-
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "最大深度",
-                labelWidth = 30,
-                min = paraffin.depthMin,
-                max = 100f,
-                step = 0.1f,
-                defaultValue = 0f,
-                value = paraffin.depthMax,
-                onChanged = newValue => paraffin.depthMax = newValue,
-            });
-
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "深度幅",
-                labelWidth = 30,
-                min = 0f,
-                max = 10f,
-                step = 0.01f,
-                defaultValue = 0f,
-                value = paraffin.depthFade,
-                onChanged = newValue => paraffin.depthFade = newValue,
-            });
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.radiusScaleYInfo,
+                paraffin.radiusScale.y,
+                newValue => paraffin.radiusScale.y = newValue);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.depthMinInfo,
+                paraffin.depthMin,
+                newValue => paraffin.depthMin = newValue);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.depthMaxInfo,
+                paraffin.depthMax,
+                newValue => paraffin.depthMax = newValue);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.depthFadeInfo,
+                paraffin.depthFade,
+                newValue => paraffin.depthFade = newValue);
 
             view.DrawLabel("ブレンドモード", 100, 20);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+            if (timeline.usePostEffectExtraBlend)
             {
-                label = "通常",
-                labelWidth = 30,
-                min = 0f,
-                max = 2f,
-                step = 0.01f,
-                defaultValue = 0f,
-                value = paraffin.useNormal,
-                onChanged = newValue => paraffin.useNormal = newValue,
-            });
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useNormalInfo,
+                    paraffin.useNormal,
+                    newValue => paraffin.useNormal = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "加算",
-                labelWidth = 30,
-                min = 0f,
-                max = 2f,
-                step = 0.01f,
-                defaultValue = 0f,
-                value = paraffin.useAdd,
-                onChanged = newValue => paraffin.useAdd = newValue,
-            });
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useAddInfo,
+                    paraffin.useAdd,
+                    newValue => paraffin.useAdd = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "乗算",
-                labelWidth = 30,
-                min = 0f,
-                max = 2f,
-                step = 0.01f,
-                defaultValue = 0f,
-                value = paraffin.useMultiply,
-                onChanged = newValue => paraffin.useMultiply = newValue,
-            });
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useMultiplyInfo,
+                    paraffin.useMultiply,
+                    newValue => paraffin.useMultiply = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-            {
-                label = "Overlay",
-                labelWidth = 30,
-                min = 0f,
-                max = 2f,
-                step = 0.01f,
-                defaultValue = 0f,
-                value = paraffin.useOverlay,
-                onChanged = newValue => paraffin.useOverlay = newValue,
-            });
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useOverlayInfo,
+                    paraffin.useOverlay,
+                    newValue => paraffin.useOverlay = newValue);
 
-            updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useSubstructInfo,
+                    paraffin.useSubstruct,
+                    newValue => paraffin.useSubstruct = newValue);
+            }
+            else
             {
-                label = "減算",
-                labelWidth = 30,
-                min = 0f,
-                max = 2f,
-                step = 0.01f,
-                defaultValue = 0f,
-                value = paraffin.useSubstruct,
-                onChanged = newValue => paraffin.useSubstruct = newValue,
-            });
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.useAddInfo,
+                    paraffin.useAdd,
+                    newValue => paraffin.useAdd = newValue);
+            }
 
             view.DrawHorizontalLine(Color.gray);
 

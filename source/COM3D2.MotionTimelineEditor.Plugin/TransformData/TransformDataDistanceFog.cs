@@ -5,9 +5,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataDistanceFog : TransformDataBase
     {
+        public static TransformDataDistanceFog defaultTrans = new TransformDataDistanceFog();
+
         public override TransformType type => TransformType.DistanceFog;
 
-        public override int valueCount => 13;
+        public override int valueCount => 18;
 
         public override bool hasColor =>  true;
 
@@ -31,9 +33,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override ValueData easingValue => values[9];
 
-        public override Color initialColor => new Color(1f, 1f, 1f, 1f);
+        public override Color initialColor => new Color(1f, 1f, 1f, 0f);
 
-        public override Color initialSubColor => new Color(1f, 1f, 1f, 0f);
+        public override Color initialSubColor => new Color(1f, 1f, 1f, 1f);
 
         public TransformDataDistanceFog()
         {
@@ -52,6 +54,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 10,
                     name = "開始深度",
+                    min = 0f,
+                    max = 1000f,
+                    step = 0.1f,
                     defaultValue = 0f,
                 }
             },
@@ -60,6 +65,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 11,
                     name = "終了深度",
+                    min = 0f,
+                    max = 1000f,
+                    step = 0.1f,
                     defaultValue = 50f,
                 }
             },
@@ -68,7 +76,65 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 12,
                     name = "指数",
+                    min = 0f,
+                    max = 10f,
+                    step = 0.01f,
                     defaultValue = 1f,
+                }
+            },
+            {
+                "useNormal", new CustomValueInfo
+                {
+                    index = 13,
+                    name = "通常",
+                    min = 0f,
+                    max = 2f,
+                    step = 0.01f,
+                    defaultValue = 1f,
+                }
+            },
+            {
+                "useAdd", new CustomValueInfo
+                {
+                    index = 14,
+                    name = "加算",
+                    min = 0f,
+                    max = 2f,
+                    step = 0.01f,
+                    defaultValue = 0f,
+                }
+            },
+            {
+                "useMultiply", new CustomValueInfo
+                {
+                    index = 15,
+                    name = "乗算",
+                    min = 0f,
+                    max = 2f,
+                    step = 0.01f,
+                    defaultValue = 0f,
+                }
+            },
+            {
+                "useOverlay", new CustomValueInfo
+                {
+                    index = 16,
+                    name = "Overlay",
+                    min = 0f,
+                    max = 2f,
+                    step = 0.01f,
+                    defaultValue = 0f,
+                }
+            },
+            {
+                "useSubstruct", new CustomValueInfo
+                {
+                    index = 17,
+                    name = "減算",
+                    min = 0f,
+                    max = 2f,
+                    step = 0.01f,
+                    defaultValue = 0f,
                 }
             },
         };
@@ -81,6 +147,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public ValueData fogStartValue => this["fogStart"];
         public ValueData fogEndValue => this["fogEnd"];
         public ValueData fogExpValue => this["fogExp"];
+        public ValueData useNormalValue => this["useNormal"];
+        public ValueData useAddValue => this["useAdd"];
+        public ValueData useMultiplyValue => this["useMultiply"];
+        public ValueData useOverlayValue => this["useOverlay"];
+        public ValueData useSubstructValue => this["useSubstruct"];
+
+        public CustomValueInfo fogStartInfo => GetCustomValueInfo("fogStart");
+        public CustomValueInfo fogEndInfo => GetCustomValueInfo("fogEnd");
+        public CustomValueInfo fogExpInfo => GetCustomValueInfo("fogExp");
+        public CustomValueInfo useNormalInfo => GetCustomValueInfo("useNormal");
+        public CustomValueInfo useAddInfo => GetCustomValueInfo("useAdd");
+        public CustomValueInfo useMultiplyInfo => GetCustomValueInfo("useMultiply");
+        public CustomValueInfo useOverlayInfo => GetCustomValueInfo("useOverlay");
+        public CustomValueInfo useSubstructInfo => GetCustomValueInfo("useSubstruct");
 
         public float fogStart
         {
@@ -100,6 +180,36 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => fogExpValue.value = value;
         }
 
+        public float useNormal
+        {
+            get => useNormalValue.value;
+            set => useNormalValue.value = value;
+        }
+
+        public float useAdd
+        {
+            get => useAddValue.value;
+            set => useAddValue.value = value;
+        }
+
+        public float useMultiply
+        {
+            get => useMultiplyValue.value;
+            set => useMultiplyValue.value = value;
+        }
+
+        public float useOverlay
+        {
+            get => useOverlayValue.value;
+            set => useOverlayValue.value = value;
+        }
+
+        public float useSubstruct
+        {
+            get => useSubstructValue.value;
+            set => useSubstructValue.value = value;
+        }
+
         public DistanceFogData distanceFog
         {
             get => new DistanceFogData
@@ -110,6 +220,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 fogStart = fogStart,
                 fogEnd = fogEnd,
                 fogExp = fogExp,
+                useNormal = useNormal,
+                useAdd = useAdd,
+                useMultiply = useMultiply,
+                useOverlay = useOverlay,
+                useSubstruct = useSubstruct,
             };
             set
             {
@@ -119,6 +234,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 fogStart = value.fogStart;
                 fogEnd = value.fogEnd;
                 fogExp = value.fogExp;
+                useNormal = value.useNormal;
+                useAdd = value.useAdd;
+                useMultiply = value.useMultiply;
+                useOverlay = value.useOverlay;
+                useSubstruct = value.useSubstruct;
             }
         }
 

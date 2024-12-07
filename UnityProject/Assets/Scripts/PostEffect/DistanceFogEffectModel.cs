@@ -5,6 +5,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class DistanceFogEffectModel : PostEffectModelBase
 	{
+		public static readonly int MAX_FOG_COUNT = 1;
+
 		[System.Serializable]
 		public struct DistanceFogBuffer
 		{
@@ -13,16 +15,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			public float fogStart;
 			public float fogEnd;
 			public float fogExp;
+			public float useNormal;
+			public float useAdd;
+			public float useMultiply;
+			public float useOverlay;
+			public float useSubstruct;
 		}
 
-		private DistanceFogBuffer _fogBuffer = new DistanceFogBuffer();
-		private bool _enabled = false;
+		private DistanceFogBuffer[] _fogBuffers = new DistanceFogBuffer[MAX_FOG_COUNT];
+		private int _enabledCount = 0;
+		private bool _enableExtraBlend = false;
+		private ComputeBuffer _computeBuffer = null;
 
 		public override bool active
 		{
 			get
 			{
-				return settings.enabled && _enabled;
+				return settings.enabled && _enabledCount > 0;
 			}
 		}
 
@@ -42,6 +51,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			}
 		}
 
+		public override bool isExtraBlend
+		{
+			get
+			{
+				return _enableExtraBlend;
+			}
+		}
+
 		public DistanceFogEffectSettings settings
 		{
 			get
@@ -52,10 +69,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
 		public override void Dispose()
 		{
+			if (_computeBuffer != null)
+			{
+				_computeBuffer.Release();
+				_computeBuffer = null;
+			}
 		}
 
 		public override void OnPreRender()
 		{
+			if (_computeBuffer == null)
+			{
+				_computeBuffer = new ComputeBuffer(MAX_FOG_COUNT, sizeof(float) * 16);
+			}
+
 			camera.depthTextureMode |= DepthTextureMode.Depth;
 
 			BuildDistanceFogBuffers();
@@ -69,27 +96,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 				return;
 			}
 
-			material.SetColor(Uniforms._DistanceFogColor1, _fogBuffer.color1);
-			material.SetColor(Uniforms._DistanceFogColor2, _fogBuffer.color2);
-			material.SetFloat(Uniforms._DistanceFogStart, _fogBuffer.fogStart);
-			material.SetFloat(Uniforms._DistanceFogEnd, _fogBuffer.fogEnd);
-			material.SetFloat(Uniforms._DistanceFogExp, _fogBuffer.fogExp);
+			_computeBuffer.SetData(_fogBuffers);
+
+			material.SetBuffer(Uniforms._DistanceFogBuffer, _computeBuffer);
 
 			material.EnableKeyword("DISTANCE_FOG");
 		}
 
 		private static class Uniforms
 		{
-			internal static readonly int _DistanceFogColor1 = Shader.PropertyToID("_DistanceFogColor1");
-			internal static readonly int _DistanceFogColor2 = Shader.PropertyToID("_DistanceFogColor2");
-			internal static readonly int _DistanceFogStart = Shader.PropertyToID("_DistanceFogStart");
-			internal static readonly int _DistanceFogEnd = Shader.PropertyToID("_DistanceFogEnd");
-			internal static readonly int _DistanceFogExp = Shader.PropertyToID("_DistanceFogExp");
+			internal static readonly int _DistanceFogBuffer = Shader.PropertyToID("_DistanceFogBuffer");
 		}
 
 		private void BuildDistanceFogBuffers()
 		{
-			_enabled = false;
+			_enabledCount = 0;
+			_enableExtraBlend = false;
 
 			if (!settings.enabled)
 			{
@@ -104,21 +126,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 					continue;
 				}
 
-				if (_enabled)
+				if (_enabledCount >= MAX_FOG_COUNT)
 				{
 					Debug.LogError("Too many fog effects.");
 					break;
 				}
 
-				_fogBuffer = ConvertToBuffer(data);
-				_enabled = true;
+				if (data.useAdd > 0f || data.useMultiply > 0f || data.useOverlay > 0f || data.useSubstruct > 0f)
+				{
+					_enableExtraBlend = true;
+				}
+
+				_fogBuffers[_enabledCount] = ConvertToBuffer(data);
+				++_enabledCount;
 			}
 		}
 
 		private DistanceFogBuffer ConvertToBuffer(DistanceFogData data)
 		{
-			var buffer = new DistanceFogBuffer();
-
 			var fogStart = data.fogStart;
 			var fogEnd = data.fogEnd;
 
@@ -128,13 +153,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 				fogEnd += 0.001f;
 			}
 
-			buffer.color1 = data.color1;
-			buffer.color2 = data.color2;
-			buffer.fogStart = fogStart;
-			buffer.fogEnd = fogEnd;
-			buffer.fogExp = data.fogExp;
-
-			return buffer;
+			return new DistanceFogBuffer
+			{
+				color1 = data.color1,
+				color2 = data.color2,
+				fogStart = fogStart,
+				fogEnd = fogEnd,
+				fogExp = data.fogExp,
+				useNormal = data.useNormal,
+				useAdd = data.useAdd,
+				useMultiply = data.useMultiply,
+				useOverlay = data.useOverlay,
+				useSubstruct = data.useSubstruct,
+			};
 		}
 	}
 }

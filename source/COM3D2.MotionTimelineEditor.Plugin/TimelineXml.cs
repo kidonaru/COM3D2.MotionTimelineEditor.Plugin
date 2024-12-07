@@ -170,7 +170,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool fingerBlendEnabled = true;
 
         [XmlElement("UsePostEffectExtra")]
-        public bool usePostEffectExtra = false;
+        public bool usePostEffectExtraColor = false;
+
+        [XmlElement("UsePostEffectBlend")]
+        public bool usePostEffectExtraBlend = false;
 
         [XmlElement("ParaffinCount")]
         public int paraffinCount = 1;

@@ -13,6 +13,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		public float fogEnd = 40f;
 		public float fogExp = 1f;
 
+		[Header("Blend Mode")]
+		[Range(0f, 1f)]
+		public float useNormal = 1f;
+		[Range(0f, 1f)]
+		public float useAdd = 0f;
+		[Range(0f, 1f)]
+		public float useMultiply = 0f;
+		[Range(0f, 1f)]
+		public float useOverlay = 0f;
+		[Range(0f, 1f)]
+		public float useSubstruct = 0f;
+
 		public void CopyFrom(IPostEffectData data)
 		{
 			var paraffinData = data as DistanceFogData;
@@ -22,6 +34,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			fogStart = paraffinData.fogStart;
 			fogEnd = paraffinData.fogEnd;
 			fogExp = paraffinData.fogExp;
+			useNormal = paraffinData.useNormal;
+			useAdd = paraffinData.useAdd;
+			useMultiply = paraffinData.useMultiply;
+			useOverlay = paraffinData.useOverlay;
+			useSubstruct = paraffinData.useSubstruct;
 		}
 
 		public static DistanceFogData Lerp(
@@ -37,6 +54,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 				fogStart = Mathf.Lerp(a.fogStart, b.fogStart, t),
 				fogEnd = Mathf.Lerp(a.fogEnd, b.fogEnd, t),
 				fogExp = Mathf.Lerp(a.fogExp, b.fogExp, t),
+				useNormal = Mathf.Lerp(a.useNormal, b.useNormal, t),
+				useAdd = Mathf.Lerp(a.useAdd, b.useAdd, t),
+				useMultiply = Mathf.Lerp(a.useMultiply, b.useMultiply, t),
+				useOverlay = Mathf.Lerp(a.useOverlay, b.useOverlay, t),
+				useSubstruct = Mathf.Lerp(a.useSubstruct, b.useSubstruct, t),
 			};
 		}
 	}

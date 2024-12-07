@@ -32,7 +32,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		private RimlightBuffer[] _rimlightBuffers = new RimlightBuffer[MAX_RIMLIGHT_COUNT];
 		private int _enabledCount = 0;
 		private bool _enableEdge = false;
-		private bool _enableHeight = false;
+		private bool _enableExtraBlend = false;
 		private ComputeBuffer _computeBuffer = null;
 
 		public override bool active
@@ -56,6 +56,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			get
 			{
 				return settings.isDebugView;
+			}
+		}
+
+		public override bool isExtraBlend
+		{
+			get
+			{
+				return _enableExtraBlend;
 			}
 		}
 
@@ -104,7 +112,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
 			material.EnableKeyword("RIMLIGHT");
 			SetKeyword(material, "RIMLIGHT_EDGE", _enableEdge);
-			SetKeyword(material, "RIMLIGHT_HEIGHT", _enableHeight);
 		}
 
 		private static class Uniforms
@@ -118,7 +125,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		{
 			_enabledCount = 0;
 			_enableEdge = false;
-			_enableHeight = false;
+			_enableExtraBlend = false;
 
 			if (!settings.enabled)
 			{
@@ -127,16 +134,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
 			for (int i = 0; i < settings.dataList.Count; i++)
 			{
-				if (_enabledCount >= MAX_RIMLIGHT_COUNT)
-				{
-					Debug.LogError("Too many rimlight effects. Max count is " + MAX_RIMLIGHT_COUNT);
-					break;
-				}
-
 				var data = settings.dataList[i];
 				if (!data.enabled)
 				{
 					continue;
+				}
+
+				if (_enabledCount >= MAX_RIMLIGHT_COUNT)
+				{
+					Debug.LogError("Too many rimlight effects. Max count is " + MAX_RIMLIGHT_COUNT);
+					break;
 				}
 
 				if (data.edgeDepth > 0.0f && data.edgeRange > 0.0f)
@@ -144,9 +151,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 					_enableEdge = true;
 				}
 
-				if (data.heightMin > 0.0f)
+				if (data.useNormal > 0f || data.useMultiply > 0f || data.useOverlay > 0f || data.useSubstruct > 0f)
 				{
-					_enableHeight = true;
+					_enableExtraBlend = true;
 				}
 
 				_rimlightBuffers[_enabledCount] = ConvertToBuffer(data);
@@ -156,11 +163,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
 		private RimlightBuffer ConvertToBuffer(RimlightData data)
 		{
-			float maxDistance = camera.farClipPlane;
-			float depthMin = Mathf.Clamp01(data.depthMin / maxDistance);
-			float depthMax = data.depthMax == 0f ? camera.farClipPlane : data.depthMax;
-			depthMax = Mathf.Clamp01(depthMax / maxDistance);
-			float depthFade = Mathf.Clamp01(data.depthFade / maxDistance);
+			float depthMin = data.depthMin;
+			float depthMax = data.depthMax == 0f ? camera.farClipPlane * 2f : data.depthMax;
+			float depthFade = data.depthFade;
 
 			var rotation = Quaternion.Euler(data.rotation);
     		Vector3 direction = rotation * Vector3.forward;

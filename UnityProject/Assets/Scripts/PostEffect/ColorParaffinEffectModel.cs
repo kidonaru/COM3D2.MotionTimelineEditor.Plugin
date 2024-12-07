@@ -28,6 +28,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
 		private ParaffinBuffer[] _paraffinBuffers = new ParaffinBuffer[MAX_PARAFFIN_COUNT];
 		private int _enabledCount = 0;
+		private bool _enableExtraBlend = false;
 		private ComputeBuffer _computeBuffer = null;
 
 		public override bool active
@@ -51,6 +52,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			get
 			{
 				return settings.isDebugView;
+			}
+		}
+
+		public override bool isExtraBlend
+		{
+			get
+			{
+				return _enableExtraBlend;
 			}
 		}
 
@@ -108,6 +117,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		private void BuildParaffinBuffers()
 		{
 			_enabledCount = 0;
+			_enableExtraBlend = false;
 
 			if (!settings.enabled)
 			{
@@ -126,6 +136,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 				if (!data.enabled)
 				{
 					continue;
+				}
+
+				if (data.useNormal > 0f || data.useMultiply > 0f || data.useOverlay > 0f || data.useSubstruct > 0f)
+				{
+					_enableExtraBlend = true;
 				}
 
 				_paraffinBuffers[_enabledCount] = ConvertToBuffer(data);
@@ -166,7 +181,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 				aspectScale.y *= 10000f;
 			}
 
-			var depthMax = data.depthMax == 0f ? camera.farClipPlane : data.depthMax;
+			var depthMin = data.depthMin;
+			var depthMax = data.depthMax == 0f ? camera.farClipPlane * 2f : data.depthMax;
+			var depthFade = data.depthFade;
 
 			buffer.color1 = data.color1;
 			buffer.color2 = data.color2;
@@ -174,9 +191,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 			buffer.radiusFar = data.radiusFar;
 			buffer.radiusNear = data.radiusNear;
 			buffer.radiusScale = aspectScale;
-			buffer.depthMin = data.depthMin;
+			buffer.depthMin = depthMin;
 			buffer.depthMax = depthMax;
-			buffer.depthFade = data.depthFade;
+			buffer.depthFade = depthFade;
 			buffer.useNormal = data.useNormal;
 			buffer.useAdd = data.useAdd;
 			buffer.useMultiply = data.useMultiply;

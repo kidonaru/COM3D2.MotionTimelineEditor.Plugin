@@ -207,9 +207,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timeline.isLightColorEasing = newValue;
             });
 
-            view.DrawToggle("ポストエフェクト拡張を有効化", timeline.usePostEffectExtra, 200, 20, newValue =>
+            view.DrawToggle("ポストエフェクトの色拡張", timeline.usePostEffectExtraColor, 200, 20, newValue =>
             {
-                timeline.usePostEffectExtra = newValue;
+                timeline.usePostEffectExtraColor = newValue;
+            });
+
+            view.DrawToggle("ポストエフェクトのブレンド拡張", timeline.usePostEffectExtraBlend, 200, 20, newValue =>
+            {
+                timeline.usePostEffectExtraBlend = newValue;
             });
 
             view.BeginHorizontal();

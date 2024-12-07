@@ -165,6 +165,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 				if (activeModelCount > 0 && _materials.TryGetValue(cameraEvent, out material))
 				{
 					bool isDebugView = false;
+					bool isExtraBlend = false;
 
 					foreach (var model in _models)
 					{
@@ -172,10 +173,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 						{
 							model.Prepare(material);
 							isDebugView |= model.isDebugView;
+							isExtraBlend |= model.isExtraBlend;
 						}
 					}
 
 					PostEffectModelBase.SetKeyword(material, "DEBUG_VIEW", isDebugView);
+					PostEffectModelBase.SetKeyword(material, "EXTRA_BLEND", isExtraBlend);
 
 					buffer.GetTemporaryRT(Uniforms._TempRT, -1, -1, 24, FilterMode.Bilinear);
 					buffer.Blit(BuiltinRenderTextureType.CameraTarget, Uniforms._TempRT);
