@@ -72,12 +72,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             maidCache.PlayOneShotVoice();
         }
 
-        public override void OnEndPoseEdit()
-        {
-            base.OnEndPoseEdit();
-            ApplyPlayData();
-        }
-
         public override void UpdateFrame(FrameData frame)
         {
             var maid = this.maid;

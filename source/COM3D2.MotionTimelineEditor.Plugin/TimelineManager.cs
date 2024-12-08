@@ -920,6 +920,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             ApplyCurrentFrame(false);
 
+            if (initialEditFrame != null)
+            {
+                OnEditPoseUpdated();
+            }
+
             if (onSeekCurrentFrame != null)
             {
                 onSeekCurrentFrame();

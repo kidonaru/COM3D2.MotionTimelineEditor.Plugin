@@ -110,12 +110,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override void OnEndPoseEdit()
-        {
-            base.OnEndPoseEdit();
-            ApplyPlayData();
-        }
-
         public override void UpdateFrame(FrameData frame)
         {
             var trans = CreateTransformData<TransformDataSe>(SeBoneName);
