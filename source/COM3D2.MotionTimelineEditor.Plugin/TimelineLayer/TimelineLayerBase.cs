@@ -389,6 +389,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected void ApplyPlayDataByType(TransformType transformType)
+        {
+            var playingFrameNoFloat = this.playingFrameNoFloat;
+
+            foreach (var playData in _playDataMap.Values)
+            {
+                if (playData.motions.Count == 0)
+                {
+                    continue;
+                }
+
+                var first = playData.motions[0];
+                if (first.start.type != transformType)
+                {
+                    continue;
+                }
+
+                var indexUpdated = playData.Update(playingFrameNoFloat);
+
+                var current = playData.current;
+                if (current != null)
+                {
+                    ApplyMotion(current, playData.lerpFrame, indexUpdated);
+                }
+            }
+        }
+
         protected abstract void ApplyMotion(MotionData motion, float t, bool indexUpdated);
 
         protected virtual void BuildPlayData()

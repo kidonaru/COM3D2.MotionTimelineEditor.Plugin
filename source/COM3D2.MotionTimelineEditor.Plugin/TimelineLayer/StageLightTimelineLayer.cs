@@ -110,6 +110,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             base.LateUpdate();
         }
 
+        protected override void ApplyPlayData()
+        {
+            var maid = this.maid;
+            if (maid == null || maid.body0 == null || !maid.body0.isLoadedBody)
+            {
+                return;
+            }
+
+            ApplyPlayDataByType(TransformType.StageLightController);
+            ApplyPlayDataByType(TransformType.StageLight);
+
+            foreach (var controller in stageLightManager.controllers)
+            {
+                controller.UpdateLights();
+            }
+        }
+
         protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
             switch (motion.start.type)
@@ -139,33 +156,49 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var transform = light.transform;
             var controller = light.controller;
-            if (transform == null || controller == null)
+            if (controller == null)
             {
                 return;
             }
 
             var start = motion.start as TransformDataStageLight;
 
-            light.visible = start.visible;
+            if (!controller.autoVisible)
+            {
+                light.visible = start.visible;
+            }
 
-            transform.localPosition = start.position;
-            transform.localRotation = start.rotation;
+            if (!controller.autoPosition)
+            {
+                light.position = start.position;
+            }
 
-            light.color = start.color;
+            if (!controller.autoRotation)
+            {
+                light.eulerAngles = start.eulerAngles;
+            }
 
-            light.spotAngle = start.spotAngle;
-            light.spotRange = start.spotRange;
+            if (!controller.autoColor)
+            {
+                light.color = start.color;
+            }
 
-            light.rangeMultiplier = start.rangeMultiplier;
-            light.falloffExp = start.falloffExp;
-            light.noiseStrength = start.noiseStrength;
-            light.noiseScale = start.noiseScale;
-            light.coreRadius = start.coreRadius;
-            light.offsetRange = start.offsetRange;
-            light.segmentAngle = start.segmentAngle;
-            light.segmentRange = start.segmentRange;
+            if (!controller.autoLightInfo)
+            {
+                light.spotAngle = start.spotAngle;
+                light.spotRange = start.spotRange;
+
+                light.rangeMultiplier = start.rangeMultiplier;
+                light.falloffExp = start.falloffExp;
+                light.noiseStrength = start.noiseStrength;
+                light.noiseScale = start.noiseScale;
+                light.coreRadius = start.coreRadius;
+                light.offsetRange = start.offsetRange;
+                light.segmentAngle = start.segmentAngle;
+                light.segmentRange = start.segmentRange;
+                light.zTest = start.zTest;
+            }
         }
 
         private void ApplyLightMotionUpdate(MotionData motion, float t)
@@ -176,9 +209,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var transform = light.transform;
             var controller = light.controller;
-            if (transform == null || controller == null)
+            if (controller == null)
             {
                 return;
             }
@@ -196,7 +228,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (!controller.autoPosition)
             {
-                transform.localPosition = PluginUtils.HermiteValues(
+                light.position = PluginUtils.HermiteValues(
                     t0,
                     t1,
                     start.positionValues,
@@ -207,13 +239,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (!controller.autoRotation)
             {
-                transform.localRotation = PluginUtils.HermiteValues(
+                light.eulerAngles = PluginUtils.HermiteValues(
                     t0,
                     t1,
-                    start.rotationValues,
-                    end.rotationValues,
+                    start.eulerAnglesValues,
+                    end.eulerAnglesValues,
                     t
-                ).ToQuaternion();
+                ).ToVector3();
             }
 
             if (!controller.autoColor)
@@ -271,6 +303,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             lightInfo.offsetRange = start.offsetRange;
             lightInfo.segmentAngle = start.segmentAngle;
             lightInfo.segmentRange = start.segmentRange;
+            lightInfo.zTest = start.zTest;
 
             controller.autoPosition = start.autoPosition;
             controller.autoRotation = start.autoRotation;
@@ -481,7 +514,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         
         public void DrawStageLightControllEdit(GUIView view)
         {
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused());
 
             view.BeginHorizontal();
             {
@@ -555,38 +588,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.DrawHorizontalLine(Color.gray);
             view.AddSpace(5);
 
-            view.SetEnabled(!view.IsComboBoxFocused());
             view.BeginScrollView();
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
-            view.DrawToggle("一括表示設定", controller.autoVisible, 200, 20, newValue =>
+            var updateTransform = false;
+            var defaultTrans = TransformDataStageLightController.defaultTrans;
+
+            updateTransform |= view.DrawToggle("一括表示設定", controller.autoVisible, 200, 20, newValue =>
             {
                 controller.autoVisible = newValue;
             });
 
             if (controller.autoVisible)
             {
-                view.DrawToggle("表示", controller.visible, 120, 20, newValue =>
+                updateTransform |= view.DrawToggle("表示", controller.visible, 120, 20, newValue =>
                 {
                     controller.visible = newValue;
                 });
             }
 
-            view.DrawToggle("一括位置設定", controller.autoPosition, 200, 20, newValue =>
+            updateTransform |= view.DrawToggle("一括位置設定", controller.autoPosition, 200, 20, newValue =>
             {
                 controller.autoPosition = newValue;
             });
 
             if (controller.autoPosition)
             {
-                var initialPosition = new Vector3(-15f, 10f, 0f);
+                var initialPosition = defaultTrans.initialPosition;
                 var transformCache = view.GetTransformCache(null);
                 transformCache.position = controller.positionMin;
 
                 view.DrawLabel("最小位置", 200, 20);
 
-                var updateTransform = DrawPosition(
+                updateTransform |= DrawPosition(
                     view,
                     transformCache,
                     TransformEditType.全て,
@@ -597,7 +632,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     controller.positionMin = transformCache.position;
                 }
 
-                initialPosition = new Vector3(15f, 10f, 0f);
+                initialPosition = defaultTrans.initialSubPosition;
                 transformCache = view.GetTransformCache(null);
                 transformCache.position = controller.positionMax;
 
@@ -615,20 +650,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            view.DrawToggle("一括回転設定", controller.autoRotation, 200, 20, newValue =>
+            updateTransform |= view.DrawToggle("一括回転設定", controller.autoRotation, 200, 20, newValue =>
             {
                 controller.autoRotation = newValue;
             });
 
             if (controller.autoRotation)
             {
-                var initialEulerAngles = new Vector3(90f, 0f, 0f);
+                var initialEulerAngles = defaultTrans.initialEulerAngles;
                 var transformCache = view.GetTransformCache(null);
                 transformCache.eulerAngles = controller.rotationMin;
 
                 view.DrawLabel("最小回転", 200, 20);
 
-                var updateTransform = DrawEulerAngles(
+                updateTransform |= DrawEulerAngles(
                     view,
                     transformCache,
                     TransformEditType.全て,
@@ -645,7 +680,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.DrawLabel("最大回転", 200, 20);
 
-                updateTransform = DrawEulerAngles(
+                updateTransform |= DrawEulerAngles(
                     view,
                     transformCache,
                     TransformEditType.全て,
@@ -658,7 +693,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            view.DrawToggle("一括色設定", controller.autoColor, 200, 20, newValue =>
+            updateTransform |= view.DrawToggle("一括色設定", controller.autoColor, 200, 20, newValue =>
             {
                 controller.autoColor = newValue;
             });
@@ -667,22 +702,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.DrawLabel("最小色", 200, 20);
 
-                view.DrawColor(
+                updateTransform |= view.DrawColor(
                     _color1FieldValue,
                     controller.colorMin,
-                    Color.white,
+                    defaultTrans.initialColor,
                     c => controller.colorMin = c);
 
                 view.DrawLabel("最大色", 200, 20);
 
-                view.DrawColor(
+                updateTransform |= view.DrawColor(
                     _color2FieldValue,
                     controller.colorMax,
-                    Color.white,
+                    defaultTrans.initialSubColor,
                     c => controller.colorMax = c);
             }
 
-            view.DrawToggle("一括ライト情報設定", controller.autoLightInfo, 200, 20, newValue =>
+            updateTransform |= view.DrawToggle("一括ライト情報設定", controller.autoLightInfo, 200, 20, newValue =>
             {
                 controller.autoLightInfo = newValue;
             });
@@ -690,128 +725,66 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (controller.autoLightInfo)
             {
                 var lightInfo = controller.lightInfo;
-                var updateTransform = false;
 
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "角度",
-                    labelWidth = 30,
-                    min = 1f,
-                    max = 179f,
-                    step = 0.1f,
-                    defaultValue = 10f,
-                    value = lightInfo.spotAngle,
-                    onChanged = newValue => lightInfo.spotAngle = newValue,
-                });
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.spotAngleInfo,
+                    lightInfo.spotAngle,
+                    x => lightInfo.spotAngle = x);
+                
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.spotRangeInfo,
+                    lightInfo.spotRange,
+                    x => lightInfo.spotRange = x);
+                
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.rangeMultiplierInfo,
+                    lightInfo.rangeMultiplier,
+                    x => lightInfo.rangeMultiplier = x);
 
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "範囲",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 100f,
-                    step = 0.1f,
-                    defaultValue = 10f,
-                    value = lightInfo.spotRange,
-                    onChanged = newValue => lightInfo.spotRange = newValue,
-                });
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.falloffExpInfo,
+                    lightInfo.falloffExp,
+                    x => lightInfo.falloffExp = x);
 
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "範囲補正",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 1f,
-                    step = 0.01f,
-                    defaultValue = 0.8f,
-                    value = lightInfo.rangeMultiplier,
-                    onChanged = newValue => lightInfo.rangeMultiplier = newValue,
-                });
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.noiseStrengthInfo,
+                    lightInfo.noiseStrength,
+                    x => lightInfo.noiseStrength = x);
 
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "減衰指数",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 1f,
-                    step = 0.01f,
-                    defaultValue = 0.5f,
-                    value = lightInfo.falloffExp,
-                    onChanged = newValue => lightInfo.falloffExp = newValue,
-                });
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.noiseScaleInfo,
+                    lightInfo.noiseScale,
+                    x => lightInfo.noiseScale = x);
+                
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.coreRadiusInfo,
+                    lightInfo.coreRadius,
+                    x => lightInfo.coreRadius = x);
+                
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.offsetRangeInfo,
+                    lightInfo.offsetRange,
+                    x => lightInfo.offsetRange = x);
+                
+                updateTransform |= view.DrawCustomValueInt(
+                    defaultTrans.segmentAngleInfo,
+                    lightInfo.segmentAngle,
+                    x => lightInfo.segmentAngle = x);
+                
+                updateTransform |= view.DrawCustomValueInt(
+                    defaultTrans.segmentRangeInfo,
+                    lightInfo.segmentRange,
+                    x => lightInfo.segmentRange = x);
 
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "ﾉｲｽﾞ強度",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 1f,
-                    step = 0.01f,
-                    defaultValue = 0.1f,
-                    value = lightInfo.noiseStrength,
-                    onChanged = newValue => lightInfo.noiseStrength = newValue,
-                });
+                updateTransform |= view.DrawCustomValueBool(
+                    defaultTrans.zTestInfo,
+                    lightInfo.zTest,
+                    x => lightInfo.zTest = x);
+            }
 
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "ﾉｲｽﾞｻｲｽﾞ",
-                    labelWidth = 30,
-                    min = 1f,
-                    max = 100f,
-                    step = 0.1f,
-                    defaultValue = 10f,
-                    value = lightInfo.noiseScale,
-                    onChanged = newValue => lightInfo.noiseScale = newValue,
-                });
-
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "中心半径",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 1f,
-                    step = 0.01f,
-                    defaultValue = 0.8f,
-                    value = lightInfo.coreRadius,
-                    onChanged = newValue => lightInfo.coreRadius = newValue,
-                });
-
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "ｵﾌｾｯﾄ範囲",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 10f,
-                    step = 0.1f,
-                    defaultValue = 0.5f,
-                    value = lightInfo.offsetRange,
-                    onChanged = newValue => lightInfo.offsetRange = newValue,
-                });
-
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "分割角度",
-                    labelWidth = 30,
-                    min = 0.1f,
-                    max = 10f,
-                    step = 0.1f,
-                    defaultValue = 1f,
-                    value = lightInfo.segmentAngle,
-                    onChanged = newValue => lightInfo.segmentAngle = newValue,
-                });
-
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "分割範囲",
-                    labelWidth = 30,
-                    fieldType = FloatFieldType.Int,
-                    min = 1,
-                    max = 64,
-                    step = 1,
-                    defaultValue = 10,
-                    value = lightInfo.segmentRange,
-                    onChanged = newValue => lightInfo.segmentRange = (int) newValue,
-                });
+            if (updateTransform)
+            {
+                controller.UpdateLights();
             }
 
             view.SetEnabled(!view.IsComboBoxFocused());
@@ -875,11 +848,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 });
             }
 
-            var transform = light.transform;
-            var transformCache = view.GetTransformCache(transform);
-            var position = transform.localPosition;
-            var initialPosition = StageLight.DefaultPosition;
-            var initialEulerAngles = StageLight.DefaultEulerAngles;
+            var transformCache = view.GetTransformCache();
+            var defaultTrans = TransformDataStageLight.defaultTrans;
+            transformCache.position = light.position;
+            transformCache.eulerAngles = light.eulerAngles;
+            var initialPosition = defaultTrans.initialPosition;
+            var initialEulerAngles = defaultTrans.initialEulerAngles;
             var initialScale = Vector3.one;
             var updateTransform = false;
             var editType = TransformEditType.全て;
@@ -894,6 +868,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 updateTransform |= DrawEulerAngles(view, transformCache, editType, light.name, initialEulerAngles);
             }
 
+            if (updateTransform)
+            {
+                light.position = transformCache.position;
+                light.eulerAngles = transformCache.eulerAngles;
+            }
+
             if (!controller.autoColor)
             {
                 updateTransform |= view.DrawColor(
@@ -905,126 +885,60 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (!controller.autoLightInfo)
             {
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "角度",
-                    labelWidth = 30,
-                    min = 1f,
-                    max = 179f,
-                    step = 0.1f,
-                    defaultValue = 10f,
-                    value = light.spotAngle,
-                    onChanged = newValue => light.spotAngle = newValue,
-                });
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.spotAngleInfo,
+                    light.spotAngle,
+                    x => light.spotAngle = x);
+                
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.spotRangeInfo,
+                    light.spotRange,
+                    x => light.spotRange = x);
+                
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.rangeMultiplierInfo,
+                    light.rangeMultiplier,
+                    x => light.rangeMultiplier = x);
 
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "範囲",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 100f,
-                    step = 0.1f,
-                    defaultValue = 10f,
-                    value = light.spotRange,
-                    onChanged = newValue => light.spotRange = newValue,
-                });
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.falloffExpInfo,
+                    light.falloffExp,
+                    x => light.falloffExp = x);
 
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "範囲補正",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 1f,
-                    step = 0.01f,
-                    defaultValue = 0.8f,
-                    value = light.rangeMultiplier,
-                    onChanged = newValue => light.rangeMultiplier = newValue,
-                });
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.noiseStrengthInfo,
+                    light.noiseStrength,
+                    x => light.noiseStrength = x);
 
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "減衰指数",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 1f,
-                    step = 0.01f,
-                    defaultValue = 0.5f,
-                    value = light.falloffExp,
-                    onChanged = newValue => light.falloffExp = newValue,
-                });
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.noiseScaleInfo,
+                    light.noiseScale,
+                    x => light.noiseScale = x);
+                
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.coreRadiusInfo,
+                    light.coreRadius,
+                    x => light.coreRadius = x);
+                
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.offsetRangeInfo,
+                    light.offsetRange,
+                    x => light.offsetRange = x);
+                
+                updateTransform |= view.DrawCustomValueInt(
+                    defaultTrans.segmentAngleInfo,
+                    light.segmentAngle,
+                    x => light.segmentAngle = x);
+                
+                updateTransform |= view.DrawCustomValueInt(
+                    defaultTrans.segmentRangeInfo,
+                    light.segmentRange,
+                    x => light.segmentRange = x);
 
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "ﾉｲｽﾞ強度",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 1f,
-                    step = 0.01f,
-                    defaultValue = 0.1f,
-                    value = light.noiseStrength,
-                    onChanged = newValue => light.noiseStrength = newValue,
-                });
-
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "ﾉｲｽﾞｻｲｽﾞ",
-                    labelWidth = 30,
-                    min = 1f,
-                    max = 100f,
-                    step = 0.1f,
-                    defaultValue = 10f,
-                    value = light.noiseScale,
-                    onChanged = newValue => light.noiseScale = newValue,
-                });
-
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "中心半径",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 1f,
-                    step = 0.01f,
-                    defaultValue = 0.8f,
-                    value = light.coreRadius,
-                    onChanged = newValue => light.coreRadius = newValue,
-                });
-
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "ｵﾌｾｯﾄ範囲",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 10f,
-                    step = 0.1f,
-                    defaultValue = 0.5f,
-                    value = light.offsetRange,
-                    onChanged = newValue => light.offsetRange = newValue,
-                });
-
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "分割角度",
-                    labelWidth = 30,
-                    min = 0.1f,
-                    max = 10f,
-                    step = 0.1f,
-                    defaultValue = 1f,
-                    value = light.segmentAngle,
-                    onChanged = newValue => light.segmentAngle = newValue,
-                });
-
-                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
-                {
-                    label = "分割範囲",
-                    labelWidth = 30,
-                    fieldType = FloatFieldType.Int,
-                    min = 1,
-                    max = 64,
-                    step = 1,
-                    defaultValue = 10,
-                    value = light.segmentRange,
-                    onChanged = newValue => light.segmentRange = (int) newValue,
-                });
+                updateTransform |= view.DrawCustomValueBool(
+                    defaultTrans.zTestInfo,
+                    light.zTest,
+                    x => light.zTest = x);
             }
 
             view.DrawHorizontalLine(Color.gray);

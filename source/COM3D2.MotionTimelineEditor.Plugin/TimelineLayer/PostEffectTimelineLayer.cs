@@ -42,10 +42,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void Init()
         {
-            base.Init();
             InitParrifinEffect();
             InitDistanceFogEffect();
             InitRimlightEffect();
+
+            base.Init();
+
             AddFirstBones(allBoneNames);
         }
 

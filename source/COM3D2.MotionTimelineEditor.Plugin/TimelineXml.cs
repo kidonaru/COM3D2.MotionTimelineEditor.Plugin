@@ -540,7 +540,34 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            /*if (version < 16)
+            if (version < 16)
+            {
+                // ModelTimelineLayerにvisibleを追加
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "ModelTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+
+                                var values = new List<float>(transform.values);
+                                if (values.Count == 10)
+                                {
+                                    PluginUtils.LogDebug("Add visible to ModelTimelineLayer name={0}", transform.name);
+                                    values.Add(1f);
+                                }
+                                transform.values = values.ToArray();
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (version < 17)
             {
                 // StageLightTimelineLayerのrotationをeulerAnglesに変更
                 foreach (var layer in layers)
@@ -566,7 +593,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                     values[3] = eulerAngles.x;
                                     values[4] = eulerAngles.y;
                                     values[5] = eulerAngles.z;
-                                    values[6] = 0f; // easing
+                                    values[6] = 0f; // not used
                                 }
                                 transform.values = values.ToArray();
                             }
@@ -574,28 +601,79 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         break;
                     }
                 }
-            }*/
+            }
 
-            if (version < 16)
+            if (version < 18)
             {
-                // ModelTimelineLayerにvisibleを追加
+                // StageLightTimelineLayerのにzTest追加
                 foreach (var layer in layers)
                 {
-                    if (layer.className == "ModelTimelineLayer")
+                    if (layer.className == "StageLightTimelineLayer")
                     {
                         foreach (var keyFrame in layer.keyFrames)
                         {
                             foreach (var bone in keyFrame.bones)
                             {
                                 var transform = bone.transform;
-
-                                var values = new List<float>(transform.values);
-                                if (values.Count == 10)
+                                if (transform.name.StartsWith("StageLightController", StringComparison.Ordinal))
                                 {
-                                    PluginUtils.LogDebug("Add visible to ModelTimelineLayer name={0}", transform.name);
-                                    values.Add(1f);
+                                    var values = new List<float>(transform.values);
+                                    if (values.Count == 36)
+                                    {
+                                        PluginUtils.LogDebug("Add zTest to StageLightTimelineLayer name={0}", transform.name);
+                                        values.Add(1f);
+                                    }
+                                    transform.values = values.ToArray();
                                 }
-                                transform.values = values.ToArray();
+                                else
+                                {
+                                    var values = new List<float>(transform.values);
+                                    if (values.Count == 22)
+                                    {
+                                        PluginUtils.LogDebug("Add zTest to StageLightTimelineLayer name={0}", transform.name);
+                                        values.Add(1f);
+                                    }
+                                    transform.values = values.ToArray();
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (version < 19)
+            {
+                // StageLightTimelineLayerのsegmentAngle上書き
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "StageLightTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+                                if (transform.type == TransformType.StageLight)
+                                {
+                                    var values = new List<float>(transform.values);
+                                    if (values.Count > 20)
+                                    {
+                                        PluginUtils.LogDebug("Overwrite segmentAngle in StageLightTimelineLayer name={0}", transform.name);
+                                        values[20] = 10f;
+                                    }
+                                    transform.values = values.ToArray();
+                                }
+                                else
+                                {
+                                    var values = new List<float>(transform.values);
+                                    if (values.Count > 29)
+                                    {
+                                        PluginUtils.LogDebug("Overwrite segmentAngle in StageLightTimelineLayer name={0}", transform.name);
+                                        values[29] = 10f;
+                                    }
+                                    transform.values = values.ToArray();
+                                }
                             }
                         }
                         break;

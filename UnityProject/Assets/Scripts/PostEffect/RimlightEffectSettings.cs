@@ -11,7 +11,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
 		public Vector3 rotation = new Vector3(10f, -40f, 0f);
 		public float lightArea = 1f;
-		public float fadeRange = 0.4f;
+		public float fadeRange = 0.2f;
 		public float fadeExp = 1f;
 		public float depthMin = 0f;
 		public float depthMax = 5f;

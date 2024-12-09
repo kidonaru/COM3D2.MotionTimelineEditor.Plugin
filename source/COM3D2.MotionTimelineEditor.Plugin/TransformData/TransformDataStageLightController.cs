@@ -5,9 +5,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataStageLightController : TransformDataBase
     {
+        public static TransformDataStageLightController defaultTrans = new TransformDataStageLightController();
+
         public override TransformType type => TransformType.StageLightController;
 
-        public override int valueCount => 36;
+        public override int valueCount => 37;
 
         public override bool hasPosition => true;
 
@@ -100,6 +102,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 21,
                     name = "角度",
+                    min = 1f,
+                    max = 179f,
+                    step = 0.1f,
                     defaultValue = 10f,
                 }
             },
@@ -108,6 +113,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 22,
                     name = "範囲",
+                    min = 0f,
+                    max = 100f,
+                    step = 0.1f,
                     defaultValue = 10f,
                 }
             },
@@ -116,6 +124,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 23,
                     name = "範囲補正",
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
                     defaultValue = 0.8f,
                 }
             },
@@ -124,6 +135,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 24,
                     name = "減衰指数",
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
                     defaultValue = 0.5f,
                 }
             },
@@ -132,6 +146,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 25,
                     name = "ﾉｲｽﾞ強度",
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
                     defaultValue = 0.1f,
                 }
             },
@@ -140,6 +157,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 26,
                     name = "ﾉｲｽﾞｻｲｽﾞ",
+                    min = 1f,
+                    max = 100f,
+                    step = 0.1f,
                     defaultValue = 10f,
                 }
             },
@@ -148,7 +168,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 27,
                     name = "中心半径",
-                    defaultValue = 0.8f,
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 0.2f,
                 }
             },
             {
@@ -156,6 +179,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 28,
                     name = "ｵﾌｾｯﾄ範囲",
+                    min = 0f,
+                    max = 10f,
+                    step = 0.1f,
                     defaultValue = 0.5f,
                 }
             },
@@ -164,7 +190,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 29,
                     name = "分割角度",
-                    defaultValue = 1f,
+                    min = 1,
+                    max = 64,
+                    step = 1,
+                    defaultValue = 10,
                 }
             },
             {
@@ -172,6 +201,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 30,
                     name = "分割範囲",
+                    min = 1,
+                    max = 64,
+                    step = 1,
                     defaultValue = 10,
                 }
             },
@@ -180,6 +212,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 31,
                     name = "一括位置",
+                    min = 0,
+                    max = 1,
+                    step = 1,
                     defaultValue = 0f,
                 }
             },
@@ -188,6 +223,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 32,
                     name = "一括回転",
+                    min = 0,
+                    max = 1,
+                    step = 1,
                     defaultValue = 0f,
                 }
             },
@@ -196,6 +234,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 33,
                     name = "一括色",
+                    min = 0,
+                    max = 1,
+                    step = 1,
                     defaultValue = 0f,
                 }
             },
@@ -204,6 +245,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 34,
                     name = "一括情報",
+                    min = 0,
+                    max = 1,
+                    step = 1,
                     defaultValue = 0f,
                 }
             },
@@ -212,7 +256,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 35,
                     name = "一括表示",
+                    min = 0,
+                    max = 1,
+                    step = 1,
                     defaultValue = 0f,
+                }
+            },
+            {
+                "zTest", new CustomValueInfo
+                {
+                    index = 36,
+                    name = "Zテスト",
+                    min = 0,
+                    max = 1,
+                    step = 1,
+                    defaultValue = 1,
                 }
             },
         };
@@ -223,34 +281,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public ValueData spotAngleValue => this["spotAngle"];
-
         public ValueData spotRangeValue => this["spotRange"];
-
         public ValueData rangeMultiplierValue => this["rangeMultiplier"];
-
         public ValueData falloffExpValue => this["falloffExp"];
-
         public ValueData noiseStrengthValue => this["noiseStrength"];
-
         public ValueData noiseScaleValue => this["noiseScale"];
-
         public ValueData coreRadiusValue => this["coreRadius"];
-
         public ValueData offsetRangeValue => this["offsetRange"];
-
         public ValueData segmentAngleValue => this["segmentAngle"];
-
         public ValueData segmentRangeValue => this["segmentRange"];
-
         public ValueData autoPositionValue => this["autoPosition"];
-
         public ValueData autoRotationValue => this["autoRotation"];
-
         public ValueData autoColorValue => this["autoColor"];
-
         public ValueData autoLightInfoValue => this["autoLightInfo"];
-
         public ValueData autoVisibleValue => this["autoVisible"];
+        public ValueData zTestValue => this["zTest"];
+
+        public CustomValueInfo spotAngleInfo => CustomValueInfoMap["spotAngle"];
+        public CustomValueInfo spotRangeInfo => CustomValueInfoMap["spotRange"];
+        public CustomValueInfo rangeMultiplierInfo => CustomValueInfoMap["rangeMultiplier"];
+        public CustomValueInfo falloffExpInfo => CustomValueInfoMap["falloffExp"];
+        public CustomValueInfo noiseStrengthInfo => CustomValueInfoMap["noiseStrength"];
+        public CustomValueInfo noiseScaleInfo => CustomValueInfoMap["noiseScale"];
+        public CustomValueInfo coreRadiusInfo => CustomValueInfoMap["coreRadius"];
+        public CustomValueInfo offsetRangeInfo => CustomValueInfoMap["offsetRange"];
+        public CustomValueInfo segmentAngleInfo => CustomValueInfoMap["segmentAngle"];
+        public CustomValueInfo segmentRangeInfo => CustomValueInfoMap["segmentRange"];
+        public CustomValueInfo autoPositionInfo => CustomValueInfoMap["autoPosition"];
+        public CustomValueInfo autoRotationInfo => CustomValueInfoMap["autoRotation"];
+        public CustomValueInfo autoColorInfo => CustomValueInfoMap["autoColor"];
+        public CustomValueInfo autoLightInfoInfo => CustomValueInfoMap["autoLightInfo"];
+        public CustomValueInfo autoVisibleInfo => CustomValueInfoMap["autoVisible"];
+        public CustomValueInfo zTestInfo => CustomValueInfoMap["zTest"];
 
         public float spotAngle
         {
@@ -300,10 +362,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => offsetRangeValue.value = value;
         }
 
-        public float segmentAngle
+        public int segmentAngle
         {
-            get => segmentAngleValue.value;
-            set => segmentAngleValue.value = value;
+            get => segmentAngleValue.intValue;
+            set => segmentAngleValue.intValue = value;
         }
 
         public int segmentRange
@@ -342,6 +404,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => autoVisibleValue.boolValue = value;
         }
 
+        public bool zTest
+        {
+            get => zTestValue.boolValue;
+            set => zTestValue.boolValue = value;
+        }
+
         public void FromStageLightController(StageLightController controller)
         {
             var lightInfo = controller.lightInfo;
@@ -363,6 +431,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             offsetRange = lightInfo.offsetRange;
             segmentAngle = lightInfo.segmentAngle;
             segmentRange = lightInfo.segmentRange;
+            zTest = lightInfo.zTest;
             autoPosition = controller.autoPosition;
             autoRotation = controller.autoRotation;
             autoColor = controller.autoColor;

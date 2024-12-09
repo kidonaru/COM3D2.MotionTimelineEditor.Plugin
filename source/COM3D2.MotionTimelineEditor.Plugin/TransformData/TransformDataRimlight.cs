@@ -66,7 +66,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     min = 0f,
                     max = 2f,
                     step = 0.01f,
-                    defaultValue = 0.4f,
+                    defaultValue = 0.2f,
                 }
             },
             {

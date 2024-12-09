@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Rendering;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -43,6 +44,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string displayName;
 
         public Light spotLight;
+
+        [SerializeField]
+        private Vector3 _position = DefaultPosition;
+        public Vector3 position
+        {
+            get
+            {
+                return _position;
+            }
+            set
+            {
+                if (_position == value) return;
+                _position = value;
+                transform.localPosition = value;
+            }
+        }
+
+        [SerializeField]
+        private Vector3 _eulerAngles = DefaultEulerAngles;
+        public Vector3 eulerAngles
+        {
+            get
+            {
+                return _eulerAngles;
+            }
+            set
+            {
+                if (_eulerAngles == value) return;
+                _eulerAngles = value;
+                transform.localEulerAngles = value;
+            }
+        }
 
         [SerializeField]
         private Color _color = Color.white;
@@ -166,7 +199,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         [SerializeField]
         [Range(0f, 1f)]
-        private float _coreRadius = 0.8f;
+        private float _coreRadius = 0.2f;
         public float coreRadius
         {
             get
@@ -198,9 +231,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         [SerializeField]
-        [Range(1f, 90f)]
-        private float _segmentAngle = 1f;
-        public float segmentAngle
+        [Range(1f, 64)]
+        private int _segmentAngle = 10;
+        public int segmentAngle
         {
             get
             {
@@ -228,6 +261,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (_segmentRange == value) return;
                 _segmentRange = value;
                 UpdateMesh();
+            }
+        }
+
+        [SerializeField]
+        private bool _zTest = true;
+        public bool zTest
+        {
+            get
+            {
+                return _zTest;
+            }
+            set
+            {
+                if (_zTest == value) return;
+                _zTest = value;
+                UpdateMaterial();
             }
         }
 
@@ -347,8 +396,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void CopyFrom(StageLight other)
         {
             if (other == null) return;
-            transform.position = other.transform.position;
-            transform.rotation = other.transform.rotation;
+            position = other.position;
+            eulerAngles = other.eulerAngles;
             color = other.color;
             spotAngle = other.spotAngle;
             spotRange = other.spotRange;
@@ -412,6 +461,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _meshRenderer.sharedMaterial = material;
             }
 
+            transform.localPosition = _position;
+            transform.localEulerAngles = _eulerAngles;
+
             UpdateName();
             UpdateMesh();
             UpdateMaterial();
@@ -437,14 +489,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             float radius = Mathf.Tan(angle) * range;
 
             // 角度方向の分割数
-            int angularSegments = Mathf.Max(1, Mathf.CeilToInt(spotAngle / segmentAngle));
-            float radiusStep = radius * 2f / angularSegments;
+            float radiusStep = radius * 2f / segmentAngle;
 
             // 範囲方向の分割
             float rangeStep = (range - offsetRange) / segmentRange;
 
             // 頂点の計算
-            int verticesCount = (angularSegments + 1) * (segmentRange + 1);
+            int verticesCount = (segmentAngle + 1) * (segmentRange + 1);
             Vector3[] vertices = new Vector3[verticesCount];
             int vertexIndex = 0;
 
@@ -453,7 +504,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 float z = offsetRange + rangeStep * r;
                 float radiusRate = z / range;
 
-                for (int a = 0; a <= angularSegments; a++)
+                for (int a = 0; a <= segmentAngle; a++)
                 {
                     float x = (-radius + radiusStep * a) * radiusRate;
                     vertices[vertexIndex++] = new Vector3(x, 0, z);
@@ -461,15 +512,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             // インデックスの計算
-            int[] triangles = new int[angularSegments * segmentRange * 6];
+            int[] triangles = new int[segmentAngle * segmentRange * 6];
             int triangleIndex = 0;
 
             for (int r = 0; r < segmentRange; r++)
             {
-                for (int a = 0; a < angularSegments; a++)
+                for (int a = 0; a < segmentAngle; a++)
                 {
-                    int current = r * (angularSegments + 1) + a;
-                    int next = current + (angularSegments + 1);
+                    int current = r * (segmentAngle + 1) + a;
+                    int next = current + (segmentAngle + 1);
 
                     // 1つ目の三角形
                     triangles[triangleIndex++] = current;
@@ -533,6 +584,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 material.SetFloat(Uniforms._NoiseScaleInv, 1f / noiseScale);
                 material.SetFloat(Uniforms._CoreRadius, coreRadius);
                 material.SetFloat(Uniforms._TanHalfAngle, Mathf.Tan(spotAngle * 0.5f * Mathf.Deg2Rad));
+                material.SetInt(Uniforms._zTest, (int) (zTest ? CompareFunction.LessEqual : CompareFunction.Always));
             }
         }
 
@@ -547,6 +599,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             internal static readonly int _NoiseScaleInv = Shader.PropertyToID("_NoiseScaleInv");
             internal static readonly int _CoreRadius = Shader.PropertyToID("_CoreRadius");
             internal static readonly int _TanHalfAngle = Shader.PropertyToID("_TanHalfAngle");
+            internal static readonly int _zTest = Shader.PropertyToID("_ZTest");
         }
 
         private void UpdateName()

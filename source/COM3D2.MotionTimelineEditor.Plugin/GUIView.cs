@@ -1733,7 +1733,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return fieldCaches;
         }
 
-        public TransformCache GetTransformCache(Transform transform)
+        public TransformCache GetTransformCache(Transform transform = null)
         {
             if (parent != null)
             {

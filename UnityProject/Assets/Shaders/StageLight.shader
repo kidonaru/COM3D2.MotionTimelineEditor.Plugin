@@ -14,6 +14,7 @@ Shader "MTE/StageLight"
         _NoiseScaleInv ("Noise Scale Inverse", Range(0.1, 1)) = 0.2
         _CoreRadius ("Core Radius Ratio", Range(0, 1)) = 0.2
         _TanHalfAngle ("Tan Half Angle", Float) = 1.0
+        [Enum(UnityEngine.Rendering.CompareFunction)]_ZTest("ZTest Mode", Float) = 0
     }
     
     SubShader
@@ -28,6 +29,7 @@ Shader "MTE/StageLight"
         Blend One One
         ZWrite Off
         Cull Off
+        ZTest [_ZTest]
         
         Pass
         {
@@ -35,7 +37,7 @@ Shader "MTE/StageLight"
             #pragma vertex vert
             #pragma fragment frag
             #include "UnityCG.cginc"
-            
+
             struct appdata
             {
                 float4 vertex : POSITION;

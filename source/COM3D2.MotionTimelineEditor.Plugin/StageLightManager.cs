@@ -214,6 +214,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             go.transform.parent = transform;
             var controller = go.AddComponent<StageLightController>();
             controller.groupIndex = groupIndex;
+            controller.isManualUpdate = true;
             controllers.Add(controller);
             
             if (notify)

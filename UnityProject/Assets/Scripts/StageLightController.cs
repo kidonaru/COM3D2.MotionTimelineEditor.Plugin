@@ -17,10 +17,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float falloffExp = 0.5f;
         public float noiseStrength = 0.2f;
         public float noiseScale = 5f;
-        public float coreRadius = 0.8f;
+        public float coreRadius = 0.2f;
         public float offsetRange = 0.5f;
-        public float segmentAngle = 1f;
+        public int segmentAngle = 10;
         public int segmentRange = 10;
+        public bool zTest = true;
     }
 
     [ExecuteInEditMode]
@@ -78,6 +79,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public PatternType patternType = PatternType.None;
         public float patternCycleTime = 5f;
 
+        public bool isManualUpdate = false;
+
         void OnEnable()
         {
             Initialize();
@@ -104,6 +107,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         void LateUpdate()
         {
+            if (isManualUpdate) return;
             UpdateLights();
         }
 
@@ -122,8 +126,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             light.controller = this;
             light.index = index;
             light.transform.SetParent(transform);
-            light.transform.localPosition = StageLight.DefaultPosition;
-            light.transform.localEulerAngles = StageLight.DefaultEulerAngles;
             lights.Add(light);
 
             return light.name;
@@ -148,7 +150,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             displayName = "コントローラー" + suffix;
         }
 
-        void UpdateLights()
+        public void UpdateLights()
         {
             if (lights.Count == 0) return;
 
@@ -168,7 +170,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (autoPosition)
                 {
-                    light.transform.localPosition = new Vector3(
+                    light.position = new Vector3(
                         Mathf.Lerp(positionMin.x, positionMax.x, t),
                         Mathf.Lerp(positionMin.y, positionMax.y, t),
                         Mathf.Lerp(positionMin.z, positionMax.z, t)
@@ -182,7 +184,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         Mathf.Lerp(rotationMin.y, rotationMax.y, t),
                         Mathf.Lerp(rotationMin.z, rotationMax.z, t)
                     );
-                    light.transform.localRotation = Quaternion.Euler(rotation);
+                    light.eulerAngles = rotation;
                 }
 
                 if (autoColor)
@@ -202,6 +204,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     light.offsetRange = lightInfo.offsetRange;
                     light.segmentAngle = lightInfo.segmentAngle;
                     light.segmentRange = lightInfo.segmentRange;
+                    light.zTest = lightInfo.zTest;
                 }
             }
         }
