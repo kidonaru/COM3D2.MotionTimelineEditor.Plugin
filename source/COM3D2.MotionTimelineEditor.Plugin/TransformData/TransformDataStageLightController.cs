@@ -136,7 +136,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     index = 24,
                     name = "減衰指数",
                     min = 0f,
-                    max = 1f,
+                    max = 5f,
                     step = 0.01f,
                     defaultValue = 0.5f,
                 }

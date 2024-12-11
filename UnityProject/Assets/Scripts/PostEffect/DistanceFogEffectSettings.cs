@@ -6,8 +6,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 	public class DistanceFogData : IPostEffectData
 	{
 		public bool enabled = false;
-		public Color color1 = new Color(0.35f, 0f, 1f, 0f);
-		public Color color2 = new Color(0.35f, 0f, 1f, 0.3f);
+		public Color color1 = new Color(1f, 1f, 1f, 1f);
+		public Color color2 = new Color(1f, 1f, 1f, 0f);
 
 		public float fogStart = 0f;
 		public float fogEnd = 40f;

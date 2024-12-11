@@ -33,9 +33,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override ValueData easingValue => values[9];
 
-        public override Color initialColor => new Color(1f, 1f, 1f, 0f);
+        public override Color initialColor => new Color(1f, 1f, 1f, 1f);
 
-        public override Color initialSubColor => new Color(1f, 1f, 1f, 1f);
+        public override Color initialSubColor => new Color(1f, 1f, 1f, 0f);
 
         public TransformDataDistanceFog()
         {
@@ -55,7 +55,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     index = 10,
                     name = "開始深度",
                     min = 0f,
-                    max = 1000f,
+                    max = 100f,
                     step = 0.1f,
                     defaultValue = 0f,
                 }
@@ -66,7 +66,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     index = 11,
                     name = "終了深度",
                     min = 0f,
-                    max = 1000f,
+                    max = 100f,
                     step = 0.1f,
                     defaultValue = 50f,
                 }
@@ -77,7 +77,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     index = 12,
                     name = "指数",
                     min = 0f,
-                    max = 10f,
+                    max = 5f,
                     step = 0.01f,
                     defaultValue = 1f,
                 }

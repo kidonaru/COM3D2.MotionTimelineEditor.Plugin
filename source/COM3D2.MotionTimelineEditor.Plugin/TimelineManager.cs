@@ -918,9 +918,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             this.currentFrameNo = frameNo;
 
+            bool isPoseEditing = studioHack.isPoseEditing;
+            if (isPoseEditing)
+            {
+                OnEndPoseEdit();
+            }
+
             ApplyCurrentFrame(false);
 
-            if (initialEditFrame != null)
+            if (isPoseEditing)
             {
                 OnEditPoseUpdated();
             }

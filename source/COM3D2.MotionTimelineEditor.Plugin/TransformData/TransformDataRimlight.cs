@@ -75,7 +75,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     index = 15,
                     name = "指数",
                     min = 0f,
-                    max = 10f,
+                    max = 5f,
                     step = 0.01f,
                     defaultValue = 1f,
                 }
@@ -86,7 +86,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     index = 16,
                     name = "最小深度",
                     min = 0f,
-                    max = 1000f,
+                    max = 100f,
                     step = 0.1f,
                     defaultValue = 0f,
                 }
@@ -97,7 +97,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     index = 17,
                     name = "最大深度",
                     min = 0f,
-                    max = 1000f,
+                    max = 100f,
                     step = 0.1f,
                     defaultValue = 5f,
                 }

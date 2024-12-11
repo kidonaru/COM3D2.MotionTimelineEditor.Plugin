@@ -81,7 +81,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void DrawDistanceFog(GUIView view)
         {
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused());
 
             view.BeginHorizontal();
             {
@@ -164,28 +164,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             else
             {
                 updateTransform |= view.DrawColor(
-                    _color2FieldValue,
-                    distanceFog.color2,
-                    defaultTrans.initialSubColor,
+                    _color1FieldValue,
+                    distanceFog.color1,
+                    defaultTrans.initialColor,
                     newValue =>
                     {
-                        var alpha1 = distanceFog.color1.a;
+                        var alpha2 = distanceFog.color2.a;
                         distanceFog.color1 = newValue;
                         distanceFog.color2 = newValue;
-                        distanceFog.color1.a = alpha1;
+                        distanceFog.color2.a = alpha2;
                     }
                 );
 
                 updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
                 {
-                    label = "A1",
+                    label = "A2",
                     labelWidth = 30,
                     min = 0f,
                     max = 1f,
                     step = 0.01f,
                     defaultValue = 0f,
-                    value = distanceFog.color1.a,
-                    onChanged = newValue => distanceFog.color1.a = newValue,
+                    value = distanceFog.color2.a,
+                    onChanged = newValue => distanceFog.color2.a = newValue,
                 });
             }
 
@@ -203,6 +203,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 defaultTrans.fogExpInfo,
                 distanceFog.fogExp,
                 newValue => distanceFog.fogExp = newValue);
+
+            view.DrawLabel("ブレンドモード", 100, 20);
 
             if (timeline.usePostEffectExtraBlend)
             {

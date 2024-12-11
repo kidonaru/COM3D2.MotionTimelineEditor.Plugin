@@ -4,6 +4,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataDepthOfField : TransformDataBase
     {
+        public static TransformDataDepthOfField defaultTrans = new TransformDataDepthOfField();
+
         public override TransformType type => TransformType.DepthOfField;
 
         public override int valueCount => 7;
@@ -26,7 +28,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "focalLength", new CustomValueInfo
                 {
                     index = 2,
-                    name = "焦点距離",
+                    name = "ﾋﾟﾝﾄ距離",
+                    min = 0f,
+                    max = config.positionRange,
+                    step = 0.1f,
                     defaultValue = 10f,
                 }
             },
@@ -34,7 +39,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "focalSize", new CustomValueInfo
                 {
                     index = 3,
-                    name = "焦点サイズ",
+                    name = "焦点距離",
+                    min = 0f,
+                    max = 2f,
+                    step = 0.01f,
                     defaultValue = 0.05f,
                 }
             },
@@ -43,6 +51,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = 4,
                     name = "絞り値",
+                    min = 0f,
+                    max = 60f,
+                    step = 0.1f,
                     defaultValue = 11.5f,
                 }
             },
@@ -50,7 +61,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "maxBlurSize", new CustomValueInfo
                 {
                     index = 5,
-                    name = "ブラーサイズ",
+                    name = "ﾌﾞﾗｰｻｲｽﾞ",
+                    min = 0f,
+                    max = 10f,
+                    step = 0.1f,
                     defaultValue = 2f,
                 }
             },
@@ -70,14 +84,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public ValueData focalLengthValue => this["focalLength"];
-
         public ValueData focalSizeValue => this["focalSize"];
-
         public ValueData apertureValue => this["aperture"];
-
         public ValueData maxBlurSizeValue => this["maxBlurSize"];
-
         public ValueData maidSlotNoValue => this["maidSlotNo"];
+
+        public CustomValueInfo focalLengthInfo => CustomValueInfoMap["focalLength"];
+        public CustomValueInfo focalSizeInfo => CustomValueInfoMap["focalSize"];
+        public CustomValueInfo apertureInfo => CustomValueInfoMap["aperture"];
+        public CustomValueInfo maxBlurSizeInfo => CustomValueInfoMap["maxBlurSize"];
+        public CustomValueInfo maidSlotNoInfo => CustomValueInfoMap["maidSlotNo"];
 
         public float focalLength
         {

@@ -293,7 +293,7 @@ Shader "MTE/PostEffect"
                 float fogFactor = pow(saturate((depth - data.fogStart) / range), data.fogExp);
                 fogFactor = smoothstep(0, 1, fogFactor);
 
-                float4 fogColor = lerp(data.color1, data.color2, fogFactor);
+                float4 fogColor = lerp(data.color2, data.color1, fogFactor);
 
                 #if DEBUG_VIEW
                 return CalculateBlendDebug(src, fogColor, data.useNormal, data.useAdd, data.useMultiply, data.useOverlay, data.useSubstruct);

@@ -68,6 +68,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (indexUpdated)
             {
+                PluginUtils.LogDebug("MoveTimelineLayer: ApplyMotion indexUpdated frameNo={0}", motion.frameNo);
                 transform.localPosition = start.position;
                 transform.localRotation = Quaternion.Euler(start.eulerAngles);
             }

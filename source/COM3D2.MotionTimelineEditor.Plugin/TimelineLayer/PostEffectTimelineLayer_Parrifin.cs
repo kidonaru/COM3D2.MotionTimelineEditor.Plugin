@@ -81,7 +81,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void DrawParaffin(GUIView view)
         {
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused());
 
             view.BeginHorizontal();
             {
