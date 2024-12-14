@@ -7,30 +7,30 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class StageLightManager : MonoBehaviour
+    public class StageLaserManager : MonoBehaviour
     {
-        public List<StageLightController> controllers = new List<StageLightController>();
-        public Dictionary<string, StageLightController> controllerMap = new Dictionary<string, StageLightController>();
+        public List<StageLaserController> controllers = new List<StageLaserController>();
+        public Dictionary<string, StageLaserController> controllerMap = new Dictionary<string, StageLaserController>();
         public List<string> controllerNames = new List<string>();
-        public List<StageLight> lights = new List<StageLight>();
-        public Dictionary<string, StageLight> lightMap = new Dictionary<string, StageLight>();
-        public List<string> lightNames = new List<string>();
+        public List<StageLaser> lasers = new List<StageLaser>();
+        public Dictionary<string, StageLaser> laserMap = new Dictionary<string, StageLaser>();
+        public List<string> laserNames = new List<string>();
 
         public static event UnityAction onSetup;
         public static event UnityAction<string> onControllerAdded;
         public static event UnityAction<string> onControllerRemoved;
-        public static event UnityAction<string> onLightAdded;
-        public static event UnityAction<string> onLightRemoved;
+        public static event UnityAction<string> onLaserAdded;
+        public static event UnityAction<string> onLaserRemoved;
 
-        private static StageLightManager _instance = null;
-        public static StageLightManager instance
+        private static StageLaserManager _instance = null;
+        public static StageLaserManager instance
         {
             get
             {
                 if (_instance == null)
                 {
-                    var go = new GameObject("StageLightManager");
-                    _instance = go.AddComponent<StageLightManager>();
+                    var go = new GameObject("StageLaserManager");
+                    _instance = go.AddComponent<StageLaserManager>();
                     DontDestroyOnLoad(go);
                 }
                 return _instance;
@@ -38,7 +38,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         private static StudioHackBase studioHack => StudioHackManager.studioHack;
-
         private static TimelineData timeline => TimelineManager.instance.timeline;
 
         private void Awake()
@@ -62,9 +61,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public StageLightController GetController(string name)
+        public StageLaserController GetController(string name)
         {
-            StageLightController controller;
+            StageLaserController controller;
             if (controllerMap.TryGetValue(name, out controller))
             {
                 return controller;
@@ -72,12 +71,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return null;
         }
 
-        public StageLight GetLight(string name)
+        public StageLaser GetLaser(string name)
         {
-            StageLight light;
-            if (lightMap.TryGetValue(name, out light))
+            StageLaser laser;
+            if (laserMap.TryGetValue(name, out laser))
             {
-                return light;
+                return laser;
             }
             return null;
         }
@@ -90,89 +89,89 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void UpdateLights()
+        public void UpdateLasers()
         {
             controllerMap.Clear();
             controllerNames.Clear();
-            lights.Clear();
-            lightMap.Clear();
-            lightNames.Clear();
+            lasers.Clear();
+            laserMap.Clear();
+            laserNames.Clear();
 
             foreach (var controller in controllers)
             {
                 controllerMap.Add(controller.name, controller);
                 controllerNames.Add(controller.name);
 
-                foreach (var light in controller.lights)
+                foreach (var laser in controller.lasers)
                 {
-                    lights.Add(light);
-                    lightMap.Add(light.name, light);
-                    lightNames.Add(light.name);
+                    lasers.Add(laser);
+                    laserMap.Add(laser.name, laser);
+                    laserNames.Add(laser.name);
                 }
             }
 
-            PluginUtils.Log("StageLightManager: Light list updated");
+            PluginUtils.Log("StageLaserManager: Laser list updated");
 
-            foreach (var light in lights)
+            foreach (var laser in lasers)
             {
-                PluginUtils.LogDebug("light: displayName={0} name={1}",
-                    light.displayName, light.name);
+                PluginUtils.LogDebug("laser: displayName={0} name={1}",
+                    laser.displayName, laser.name);
             }
 
-            UpdateLightCount();
+            UpdateLaserCount();
         }
 
-        private void UpdateLightCount()
+        private void UpdateLaserCount()
         {
             if (timeline == null)
             {
                 return;
             }
 
-            timeline.stageLightCountList.Clear();
+            timeline.stageLaserCountList.Clear();
 
             foreach (var controller in controllers)
             {
-                timeline.stageLightCountList.Add(controller.lights.Count);
+                timeline.stageLaserCountList.Add(controller.lasers.Count);
             }
         }
 
-        public void SetupLights(List<int> lightCounts)
+        public void SetupLasers(List<int> laserCounts)
         {
-            lightCounts = new List<int>(lightCounts);
+            laserCounts = new List<int>(laserCounts);
 
-            for (var i = 0; i < lightCounts.Count; i++)
+            for (var i = 0; i < laserCounts.Count; i++)
             {
-                PluginUtils.LogDebug("StageLight.SetupLights: [{0}]={1}", i, lightCounts[i]);
+                PluginUtils.LogDebug("StageLaser.SetupLasers: [{0}]={1}", i, laserCounts[i]);
             }
 
-            while (controllers.Count < lightCounts.Count)
+            while (controllers.Count < laserCounts.Count)
             {
                 AddController(false);
             }
 
-            while (controllers.Count > lightCounts.Count)
+            while (controllers.Count > laserCounts.Count)
             {
                 RemoveController(false);
             }
 
-            for (int i = 0; i < lightCounts.Count; i++)
+            for (int i = 0; i < laserCounts.Count; i++)
             {
                 var controller = controllers[i];
-                var lightCount = lightCounts[i];
+                var laserCount = laserCounts[i];
 
-                while (controller.lights.Count < lightCount)
+                while (controller.lasers.Count < laserCount)
                 {
-                    AddLight(i, false);
+                    AddLaser(i, false);
                 }
 
-                while (controller.lights.Count > lightCount)
+                while (controller.lasers.Count > laserCount)
                 {
-                    RemoveLight(i, false);
+                    RemoveLaser(i, false);
                 }
             }
 
-            UpdateLights();
+            UpdateLasers();
 
             if (onSetup != null)
             {
@@ -187,7 +186,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void OnPluginEnable()
         {
-            // SetupLightsが呼ばれるので不要
+            // SetupLasersが呼ばれるので不要
         }
 
         public void Reset()
@@ -198,22 +197,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             controllers.Clear();
 
-            UpdateLights();
+            UpdateLasers();
         }
 
         public void AddController(bool notify)
         {
             var groupIndex = controllers.Count;
-            var go = new GameObject("StageLightController");
+            var go = new GameObject("StageLaserController");
             go.transform.parent = transform;
-            var controller = go.AddComponent<StageLightController>();
+            var controller = go.AddComponent<StageLaserController>();
             controller.groupIndex = groupIndex;
             controller.isManualUpdate = true;
             controllers.Add(controller);
             
             if (notify)
             {
-                UpdateLights();
+                UpdateLasers();
 
                 if (onControllerAdded != null)
                 {
@@ -237,7 +236,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             
             if (notify)
             {
-                UpdateLights();
+                UpdateLasers();
 
                 if (onControllerRemoved != null)
                 {
@@ -246,39 +245,39 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void AddLight(int groupIndex, bool notify)
+        public void AddLaser(int groupIndex, bool notify)
         {
             var controller = controllers[groupIndex];
-            var lightName = controller.AddLight();
+            var laserName = controller.AddLaser();
             
             if (notify)
             {
-                UpdateLights();
+                UpdateLasers();
 
-                if (onLightAdded != null)
+                if (onLaserAdded != null)
                 {
-                    onLightAdded.Invoke(lightName);
+                    onLaserAdded.Invoke(laserName);
                 }
             }
         }
 
-        public void RemoveLight(int groupIndex, bool notify)
+        public void RemoveLaser(int groupIndex, bool notify)
         {
             var controller = controllers[groupIndex];
-            if (controller.lights.Count == 0)
+            if (controller.lasers.Count == 0)
             {
                 return;
             }
 
-            var lightName = controller.RemoveLight();
+            var laserName = controller.RemoveLaser();
 
             if (notify)
             {
-                UpdateLights();
+                UpdateLasers();
 
-                if (onLightRemoved != null)
+                if (onLaserRemoved != null)
                 {
-                    onLightRemoved.Invoke(lightName);
+                    onLaserRemoved.Invoke(laserName);
                 }
             }
         }

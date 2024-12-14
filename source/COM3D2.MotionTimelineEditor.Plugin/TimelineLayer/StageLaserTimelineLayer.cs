@@ -5,10 +5,10 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    [TimelineLayerDesc("ステージライト", 42)]
-    public class StageLightTimelineLayer : TimelineLayerBase
+    [TimelineLayerDesc("ステージレーザー", 43)]
+    public class StageLaserTimelineLayer : TimelineLayerBase
     {
-        public override string className => typeof(StageLightTimelineLayer).Name;
+        public override string className => typeof(StageLaserTimelineLayer).Name;
 
         private List<string> _allBoneNames = null;
 
@@ -18,21 +18,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_allBoneNames == null)
                 {
-                    _allBoneNames = new List<string>(stageLightManager.lightNames.Count + stageLightManager.controllerNames.Count);
-                    _allBoneNames.AddRange(stageLightManager.lightNames);
-                    _allBoneNames.AddRange(stageLightManager.controllerNames);
+                    _allBoneNames = new List<string>(stageLaserManager.laserNames.Count + stageLaserManager.controllerNames.Count);
+                    _allBoneNames.AddRange(stageLaserManager.laserNames);
+                    _allBoneNames.AddRange(stageLaserManager.controllerNames);
                 }
                 return _allBoneNames;
             }
         }
 
-        private StageLightTimelineLayer(int slotNo) : base(slotNo)
+        private StageLaserTimelineLayer(int slotNo) : base(slotNo)
         {
         }
 
-        public static StageLightTimelineLayer Create(int slotNo)
+        public static StageLaserTimelineLayer Create(int slotNo)
         {
-            return new StageLightTimelineLayer(0);
+            return new StageLaserTimelineLayer(0);
         }
 
         public static bool ValidateLayer()
@@ -44,11 +44,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Init();
 
-            StageLightManager.onSetup += OnLightSetup;
-            StageLightManager.onControllerAdded += OnControllerAdded;
-            StageLightManager.onControllerRemoved += OnControllerRemoved;
-            StageLightManager.onLightAdded += OnLightAdded;
-            StageLightManager.onLightRemoved += OnLightRemoved;
+            StageLaserManager.onSetup += OnLaserSetup;
+            StageLaserManager.onControllerAdded += OnControllerAdded;
+            StageLaserManager.onControllerRemoved += OnControllerRemoved;
+            StageLaserManager.onLaserAdded += OnLaserAdded;
+            StageLaserManager.onLaserRemoved += OnLaserRemoved;
 
             InitMenuItems();
         }
@@ -58,9 +58,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _allBoneNames = null;
             allMenuItems.Clear();
 
-            foreach (var controller in stageLightManager.controllers)
+            foreach (var controller in stageLaserManager.controllers)
             {
-                var name = "StageLightGroup (" + controller.groupIndex + ")";
+                var name = "StageLaserGroup (" + controller.groupIndex + ")";
                 var displayName = "グループ (" + controller.groupIndex + ")";
                 var setMenuItem = new BoneSetMenuItem(name, displayName);
                 allMenuItems.Add(setMenuItem);
@@ -70,9 +70,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     setMenuItem.AddChild(menuItem);
                 }
 
-                foreach (var light in controller.lights)
+                foreach (var laser in controller.lasers)
                 {
-                    var menuItem = new BoneMenuItem(light.name, light.displayName);
+                    var menuItem = new BoneMenuItem(laser.name, laser.displayName);
                     setMenuItem.AddChild(menuItem);
                 }
             }
@@ -82,11 +82,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Dispose();
 
-            StageLightManager.onSetup -= OnLightSetup;
-            StageLightManager.onControllerAdded -= OnControllerAdded;
-            StageLightManager.onControllerRemoved -= OnControllerRemoved;
-            StageLightManager.onLightAdded -= OnLightAdded;
-            StageLightManager.onLightRemoved -= OnLightRemoved;
+            StageLaserManager.onSetup -= OnLaserSetup;
+            StageLaserManager.onControllerAdded -= OnControllerAdded;
+            StageLaserManager.onControllerRemoved -= OnControllerRemoved;
+            StageLaserManager.onLaserAdded -= OnLaserAdded;
+            StageLaserManager.onLaserRemoved -= OnLaserRemoved;
         }
 
         public override bool IsValidData()
@@ -118,12 +118,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            ApplyPlayDataByType(TransformType.StageLightController);
-            ApplyPlayDataByType(TransformType.StageLight);
+            ApplyPlayDataByType(TransformType.StageLaserController);
+            ApplyPlayDataByType(TransformType.StageLaser);
 
-            foreach (var controller in stageLightManager.controllers)
+            foreach (var controller in stageLaserManager.controllers)
             {
-                controller.UpdateLights();
+                controller.UpdateLasers();
             }
         }
 
@@ -131,14 +131,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             switch (motion.start.type)
             {
-                case TransformType.StageLight:
+                case TransformType.StageLaser:
                     if (indexUpdated)
                     {
-                        ApplyLightMotionInit(motion, t);
+                        ApplyLaserMotionInit(motion, t);
                     }
-                    ApplyLightMotionUpdate(motion, t);
+                    ApplyLaserMotionUpdate(motion, t);
                     break;
-                case TransformType.StageLightController:
+                case TransformType.StageLaserController:
                     if (indexUpdated)
                     {
                         ApplyControllerMotionInit(motion, t);
@@ -148,87 +148,87 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void ApplyLightMotionInit(MotionData motion, float t)
+        private void ApplyLaserMotionInit(MotionData motion, float t)
         {
-            var light = stageLightManager.GetLight(motion.name);
-            if (light == null)
+            var laser = stageLaserManager.GetLaser(motion.name);
+            if (laser == null)
             {
                 return;
             }
 
-            var controller = light.controller;
+            var controller = laser.controller;
             if (controller == null)
             {
                 return;
             }
 
-            var start = motion.start as TransformDataStageLight;
+            var start = motion.start as TransformDataStageLaser;
 
             if (!controller.autoVisible)
             {
-                light.visible = start.visible;
+                laser.visible = start.visible;
             }
 
             if (!controller.autoPosition)
             {
-                light.position = start.position;
+                laser.position = start.position;
             }
 
             if (!controller.autoRotation)
             {
-                light.eulerAngles = start.eulerAngles;
+                laser.eulerAngles = start.eulerAngles;
             }
 
             if (!controller.autoColor)
             {
-                light.color = start.color;
+                laser.color1 = start.color;
+                laser.color2 = start.subColor;
             }
 
-            if (!controller.autoLightInfo)
+            if (!controller.autoLaserInfo)
             {
-                light.spotAngle = start.spotAngle;
-                light.spotRange = start.spotRange;
+                laser.laserRange = start.laserRange;
+                laser.laserWidth = start.laserWidth;
 
-                light.rangeMultiplier = start.rangeMultiplier;
-                light.falloffExp = start.falloffExp;
-                light.noiseStrength = start.noiseStrength;
-                light.noiseScale = start.noiseScale;
-                light.coreRadius = start.coreRadius;
-                light.offsetRange = start.offsetRange;
-                light.segmentAngle = start.segmentAngle;
-                light.segmentRange = start.segmentRange;
-                light.zTest = start.zTest;
+                laser.falloffExp = start.falloffExp;
+                laser.noiseStrength = start.noiseStrength;
+                laser.noiseScale = start.noiseScale;
+                laser.coreRadius = start.coreRadius;
+                laser.offsetRange = start.offsetRange;
+                laser.glowWidth = start.glowWidth;
+                laser.segmentRange = start.segmentRange;
+                laser.zTest = start.zTest;
             }
         }
 
-        private void ApplyLightMotionUpdate(MotionData motion, float t)
+        private void ApplyLaserMotionUpdate(MotionData motion, float t)
         {
-            var light = stageLightManager.GetLight(motion.name);
-            if (light == null)
+            var laser = stageLaserManager.GetLaser(motion.name);
+            if (laser == null)
             {
                 return;
             }
 
-            var controller = light.controller;
+            var controller = laser.controller;
             if (controller == null)
             {
                 return;
             }
 
-            var start = motion.start as TransformDataStageLight;
-            var end = motion.end as TransformDataStageLight;
+            var start = motion.start as TransformDataStageLaser;
+            var end = motion.end as TransformDataStageLaser;
 
             var t0 = motion.stFrame * timeline.frameDuration;
             var t1 = motion.edFrame * timeline.frameDuration;
 
             if (!controller.autoVisible)
             {
-                light.visible = start.visible;
+                laser.visible = start.visible;
             }
 
             if (!controller.autoPosition)
             {
-                light.position = PluginUtils.HermiteValues(
+                laser.position = PluginUtils.HermiteValues(
                     t0,
                     t1,
                     start.positionValues,
@@ -239,7 +239,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (!controller.autoRotation)
             {
-                light.eulerAngles = PluginUtils.HermiteValues(
+                laser.eulerAngles = PluginUtils.HermiteValues(
                     t0,
                     t1,
                     start.eulerAnglesValues,
@@ -250,97 +250,88 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (!controller.autoColor)
             {
-                light.color = Color.Lerp(start.color, end.color, t);
+                laser.color1 = Color.Lerp(start.color, end.color, t);
+                laser.color2 = Color.Lerp(start.subColor, end.subColor, t);
             }
 
-            if (!controller.autoLightInfo)
+            if (!controller.autoLaserInfo)
             {
-                light.spotAngle = PluginUtils.HermiteValue(
+                laser.laserRange = PluginUtils.HermiteValue(
                     t0,
                     t1,
-                    start.spotAngleValue,
-                    end.spotAngleValue,
+                    start.laserRangeValue,
+                    end.laserRangeValue,
                     t);
 
-                light.spotRange = PluginUtils.HermiteValue(
+                laser.laserWidth = PluginUtils.HermiteValue(
                     t0,
                     t1,
-                    start.spotRangeValue,
-                    end.spotRangeValue,
+                    start.laserWidthValue,
+                    end.laserWidthValue,
                     t);
             }
         }
 
         private void ApplyControllerMotionInit(MotionData motion, float t)
         {
-            var controller = stageLightManager.GetController(motion.name);
+            var controller = stageLaserManager.GetController(motion.name);
             if (controller == null)
             {
                 return;
             }
 
-            var start = motion.start as TransformDataStageLightController;
+            var start = motion.start as TransformDataStageLaserController;
 
             controller.visible = start.visible;
 
-            controller.positionMin = start.position;
-            controller.positionMax = start.subPosition;
+            controller.position = start.position;
             controller.rotationMin = start.eulerAngles;
             controller.rotationMax = start.subEulerAngles;
-            controller.colorMin = start.color;
-            controller.colorMax = start.subColor;
+            controller.color1 = start.color;
+            controller.color2 = start.subColor;
 
-            var lightInfo = controller.lightInfo;
+            var laserInfo = controller.laserInfo;
 
-            lightInfo.spotAngle = start.spotAngle;
-            lightInfo.spotRange = start.spotRange;
+            laserInfo.laserRange = start.laserRange;
+            laserInfo.laserWidth = start.laserWidth;
 
-            lightInfo.rangeMultiplier = start.rangeMultiplier;
-            lightInfo.falloffExp = start.falloffExp;
-            lightInfo.noiseStrength = start.noiseStrength;
-            lightInfo.noiseScale = start.noiseScale;
-            lightInfo.coreRadius = start.coreRadius;
-            lightInfo.offsetRange = start.offsetRange;
-            lightInfo.segmentAngle = start.segmentAngle;
-            lightInfo.segmentRange = start.segmentRange;
-            lightInfo.zTest = start.zTest;
+            laserInfo.falloffExp = start.falloffExp;
+            laserInfo.noiseStrength = start.noiseStrength;
+            laserInfo.noiseScale = start.noiseScale;
+            laserInfo.coreRadius = start.coreRadius;
+            laserInfo.offsetRange = start.offsetRange;
+            laserInfo.glowWidth = start.glowWidth;
+            laserInfo.segmentRange = start.segmentRange;
+            laserInfo.zTest = start.zTest;
 
             controller.autoPosition = start.autoPosition;
             controller.autoRotation = start.autoRotation;
             controller.autoColor = start.autoColor;
-            controller.autoLightInfo = start.autoLightInfo;
+            controller.autoLaserInfo = start.autoLaserInfo;
             controller.autoVisible = start.autoVisible;
         }
 
         private void ApplyControllerMotionUpdate(MotionData motion, float t)
         {
-            var controller = stageLightManager.GetController(motion.name);
+            var controller = stageLaserManager.GetController(motion.name);
             if (controller == null)
             {
                 return;
             }
 
-            var start = motion.start as TransformDataStageLightController;
-            var end = motion.end as TransformDataStageLightController;
+            var start = motion.start as TransformDataStageLaserController;
+            var end = motion.end as TransformDataStageLaserController;
 
             var t0 = motion.stFrame * timeline.frameDuration;
             var t1 = motion.edFrame * timeline.frameDuration;
 
             if (controller.autoPosition)
             {
-                controller.positionMin = PluginUtils.HermiteValues(
+                controller.position = PluginUtils.HermiteValues(
                     t0,
                     t1,
                     start.positionValues,
                     end.positionValues,
-                    t
-                ).ToVector3();
-
-                controller.positionMax = PluginUtils.HermiteValues(
-                    t0,
-                    t1,
-                    start.subPositionValues,
-                    end.subPositionValues,
                     t
                 ).ToVector3();
             }
@@ -366,31 +357,31 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (controller.autoColor)
             {
-                controller.colorMin = Color.Lerp(start.color, end.color, t);
-                controller.colorMax = Color.Lerp(start.subColor, end.subColor, t);
+                controller.color1 = Color.Lerp(start.color, end.color, t);
+                controller.color2 = Color.Lerp(start.subColor, end.subColor, t);
             }
 
-            var lightInfo = controller.lightInfo;
+            var laserInfo = controller.laserInfo;
 
-            if (controller.autoLightInfo)
+            if (controller.autoLaserInfo)
             {
-                lightInfo.spotAngle = PluginUtils.HermiteValue(
+                laserInfo.laserRange = PluginUtils.HermiteValue(
                     t0,
                     t1,
-                    start.spotAngleValue,
-                    end.spotAngleValue,
+                    start.laserRangeValue,
+                    end.laserRangeValue,
                     t);
 
-                lightInfo.spotRange = PluginUtils.HermiteValue(
+                laserInfo.laserWidth = PluginUtils.HermiteValue(
                     t0,
                     t1,
-                    start.spotRangeValue,
-                    end.spotRangeValue,
+                    start.laserWidthValue,
+                    end.laserWidthValue,
                     t);
             }
         }
 
-        public void OnLightSetup()
+        public void OnLaserSetup()
         {
             InitMenuItems();
             AddFirstBones(allBoneNames);
@@ -411,39 +402,39 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyCurrentFrame(true);
         }
 
-        public void OnLightAdded(string lightName)
+        public void OnLaserAdded(string laserName)
         {
             InitMenuItems();
-            AddFirstBones(new List<string> { lightName });
+            AddFirstBones(new List<string> { laserName });
             ApplyCurrentFrame(true);
         }
 
-        public void OnLightRemoved(string lightName)
+        public void OnLaserRemoved(string laserName)
         {
             InitMenuItems();
-            RemoveAllBones(new List<string> { lightName });
+            RemoveAllBones(new List<string> { laserName });
             ApplyCurrentFrame(true);
         }
 
         public override void UpdateFrame(FrameData frame)
         {
-            foreach (var light in stageLightManager.lights)
+            foreach (var laser in stageLaserManager.lasers)
             {
-                if (light == null || light.transform == null)
+                if (laser == null || laser.transform == null)
                 {
                     continue;
                 }
 
-                var lightName = light.name;
+                var laserName = laser.name;
 
-                var trans = CreateTransformData<TransformDataStageLight>(lightName);
-                trans.FromStageLight(light);
+                var trans = CreateTransformData<TransformDataStageLaser>(laserName);
+                trans.FromStageLaser(laser);
 
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
             }
 
-            foreach (var controller in stageLightManager.controllers)
+            foreach (var controller in stageLaserManager.controllers)
             {
                 if (controller == null || controller.transform == null)
                 {
@@ -452,40 +443,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var controllerName = controller.name;
 
-                var trans = CreateTransformData<TransformDataStageLightController>(controllerName);
-                trans.FromStageLightController(controller);
+                var trans = CreateTransformData<TransformDataStageLaserController>(controllerName);
+                trans.FromStageLaserController(controller);
 
                 var bone = frame.CreateBone(trans);
                 frame.UpdateBone(bone);
             }
         }
 
-        private GUIComboBox<StageLightController> _controllerComboBox = new GUIComboBox<StageLightController>
+        private GUIComboBox<StageLaserController> _controllerComboBox = new GUIComboBox<StageLaserController>
         {
-            getName = (light, index) => light.displayName,
+            getName = (laser, index) => laser.displayName,
             labelWidth = 70,
             buttonSize = new Vector2(150, 20),
             contentSize = new Vector2(150, 300),
         };
 
-        private GUIComboBox<StageLight> _lightComboBox = new GUIComboBox<StageLight>
+        private GUIComboBox<StageLaser> _laserComboBox = new GUIComboBox<StageLaser>
         {
-            getName = (light, index) => light.displayName,
+            getName = (laser, index) => laser.displayName,
             labelWidth = 70,
             buttonSize = new Vector2(150, 20),
             contentSize = new Vector2(150, 300),
         };
 
-        private GUIComboBox<StageLight> _copyToLightComboBox = new GUIComboBox<StageLight>
+        private GUIComboBox<StageLaser> _copyToLaserComboBox = new GUIComboBox<StageLaser>
         {
-            getName = (light, index) => light.displayName,
+            getName = (laser, index) => laser.displayName,
             labelWidth = 70,
             buttonSize = new Vector2(150, 20),
             contentSize = new Vector2(150, 300),
         };
 
-        private ColorFieldCache _color1FieldValue = new ColorFieldCache("Color1", true);
-        private ColorFieldCache _color2FieldValue = new ColorFieldCache("Color2", true);
+        private ColorFieldCache _color1FieldValue = new ColorFieldCache("", true);
+        private ColorFieldCache _color2FieldValue = new ColorFieldCache("", true);
 
         private enum TabType
         {
@@ -502,17 +493,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             switch (_tabType)
             {
                 case TabType.一括:
-                    DrawStageLightControllEdit(view);
+                    DrawStageLaserControllEdit(view);
                     break;
                 case TabType.個別:
-                    DrawStageLightEdit(view);
+                    DrawStageLaserEdit(view);
                     break;
             }
 
             view.DrawComboBox();
         }
         
-        public void DrawStageLightControllEdit(GUIView view)
+        public void DrawStageLaserControllEdit(GUIView view)
         {
             view.SetEnabled(!view.IsComboBoxFocused());
 
@@ -524,25 +515,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.DrawIntField(new GUIView.IntFieldOption
                 {
-                    value = stageLightManager.controllers.Count,
+                    value = stageLaserManager.controllers.Count,
                     width = view.viewRect.width - (view.labelWidth + 40 + view.padding.x * 2),
                     height = 20,
                 });
 
                 if (view.DrawButton("-", 20, 20))
                 {
-                    stageLightManager.RemoveController(true);
+                    stageLaserManager.RemoveController(true);
                 }
                 if (view.DrawButton("+", 20, 20))
                 {
-                    stageLightManager.AddController(true);
+                    stageLaserManager.AddController(true);
                 }
 
                 view.margin = GUIView.defaultMargin;
             }
             view.EndLayout();
 
-            var controllers = stageLightManager.controllers;
+            var controllers = stageLaserManager.controllers;
             if (controllers.Count == 0)
             {
                 view.DrawLabel("コントローラーが存在しません", 200, 20);
@@ -567,18 +558,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.DrawIntField(new GUIView.IntFieldOption
                 {
-                    value = controller.lights.Count,
+                    value = controller.lasers.Count,
                     width = view.viewRect.width - (view.labelWidth + 40 + view.padding.x * 2),
                     height = 20,
                 });
 
                 if (view.DrawButton("-", 20, 20))
                 {
-                    stageLightManager.RemoveLight(controller.groupIndex, true);
+                    stageLaserManager.RemoveLaser(controller.groupIndex, true);
                 }
                 if (view.DrawButton("+", 20, 20))
                 {
-                    stageLightManager.AddLight(controller.groupIndex, true);
+                    stageLaserManager.AddLaser(controller.groupIndex, true);
                 }
 
                 view.margin = GUIView.defaultMargin;
@@ -593,7 +584,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
             var updateTransform = false;
-            var defaultTrans = TransformDataStageLightController.defaultTrans;
+            var defaultTrans = TransformDataStageLaserController.defaultTrans;
 
             updateTransform |= view.DrawToggle("一括表示設定", controller.autoVisible, 200, 20, newValue =>
             {
@@ -617,26 +608,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var initialPosition = defaultTrans.initialPosition;
                 var transformCache = view.GetTransformCache(null);
-                transformCache.position = controller.positionMin;
+                transformCache.position = controller.position;
 
-                view.DrawLabel("最小位置", 200, 20);
-
-                updateTransform |= DrawPosition(
-                    view,
-                    transformCache,
-                    TransformEditType.全て,
-                    initialPosition);
-
-                if (updateTransform)
-                {
-                    controller.positionMin = transformCache.position;
-                }
-
-                initialPosition = defaultTrans.initialSubPosition;
-                transformCache = view.GetTransformCache(null);
-                transformCache.position = controller.positionMax;
-
-                view.DrawLabel("最大位置", 200, 20);
+                view.DrawLabel("位置", 200, 20);
 
                 updateTransform |= DrawPosition(
                     view,
@@ -646,7 +620,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (updateTransform)
                 {
-                    controller.positionMax = transformCache.position;
+                    controller.position = transformCache.position;
                 }
             }
 
@@ -675,6 +649,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     controller.rotationMin = transformCache.eulerAngles;
                 }
 
+                initialEulerAngles = defaultTrans.initialSubEulerAngles;
                 transformCache = view.GetTransformCache(null);
                 transformCache.eulerAngles = controller.rotationMax;
 
@@ -700,102 +675,97 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (controller.autoColor)
             {
-                view.DrawLabel("最小色", 200, 20);
+                view.DrawLabel("中心色", 200, 20);
 
                 updateTransform |= view.DrawColor(
                     _color1FieldValue,
-                    controller.colorMin,
+                    controller.color1,
                     defaultTrans.initialColor,
-                    c => controller.colorMin = c);
+                    c => controller.color1 = c);
 
-                view.DrawLabel("最大色", 200, 20);
+                view.DrawLabel("錯乱色", 200, 20);
 
                 updateTransform |= view.DrawColor(
                     _color2FieldValue,
-                    controller.colorMax,
+                    controller.color2,
                     defaultTrans.initialSubColor,
-                    c => controller.colorMax = c);
+                    c => controller.color2 = c);
             }
 
-            updateTransform |= view.DrawToggle("一括ライト情報設定", controller.autoLightInfo, 200, 20, newValue =>
+            updateTransform |= view.DrawToggle("一括ライト情報設定", controller.autoLaserInfo, 200, 20, newValue =>
             {
-                controller.autoLightInfo = newValue;
+                controller.autoLaserInfo = newValue;
             });
 
-            if (controller.autoLightInfo)
+            if (controller.autoLaserInfo)
             {
-                var lightInfo = controller.lightInfo;
+                var laserInfo = controller.laserInfo;
 
                 updateTransform |= view.DrawCustomValueFloat(
-                    defaultTrans.spotAngleInfo,
-                    lightInfo.spotAngle,
-                    x => lightInfo.spotAngle = x);
-                
+                    defaultTrans.laserRangeInfo,
+                    laserInfo.laserRange,
+                    x => laserInfo.laserRange = x);
+
                 updateTransform |= view.DrawCustomValueFloat(
-                    defaultTrans.spotRangeInfo,
-                    lightInfo.spotRange,
-                    x => lightInfo.spotRange = x);
-                
-                updateTransform |= view.DrawCustomValueFloat(
-                    defaultTrans.rangeMultiplierInfo,
-                    lightInfo.rangeMultiplier,
-                    x => lightInfo.rangeMultiplier = x);
+                    defaultTrans.laserWidthInfo,
+                    laserInfo.laserWidth,
+                    x => laserInfo.laserWidth = x);
 
                 updateTransform |= view.DrawCustomValueFloat(
                     defaultTrans.falloffExpInfo,
-                    lightInfo.falloffExp,
-                    x => lightInfo.falloffExp = x);
+                    laserInfo.falloffExp,
+                    x => laserInfo.falloffExp = x);
 
                 updateTransform |= view.DrawCustomValueFloat(
                     defaultTrans.noiseStrengthInfo,
-                    lightInfo.noiseStrength,
-                    x => lightInfo.noiseStrength = x);
+                    laserInfo.noiseStrength,
+                    x => laserInfo.noiseStrength = x);
 
                 updateTransform |= view.DrawCustomValueFloat(
                     defaultTrans.noiseScaleInfo,
-                    lightInfo.noiseScale,
-                    x => lightInfo.noiseScale = x);
+                    laserInfo.noiseScale,
+                    x => laserInfo.noiseScale = x);
                 
                 updateTransform |= view.DrawCustomValueFloat(
                     defaultTrans.coreRadiusInfo,
-                    lightInfo.coreRadius,
-                    x => lightInfo.coreRadius = x);
+                    laserInfo.coreRadius,
+                    x => laserInfo.coreRadius = x);
                 
                 updateTransform |= view.DrawCustomValueFloat(
                     defaultTrans.offsetRangeInfo,
-                    lightInfo.offsetRange,
-                    x => lightInfo.offsetRange = x);
+                    laserInfo.offsetRange,
+                    x => laserInfo.offsetRange = x);
                 
-                updateTransform |= view.DrawCustomValueInt(
-                    defaultTrans.segmentAngleInfo,
-                    lightInfo.segmentAngle,
-                    x => lightInfo.segmentAngle = x);
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.glowWidthInfo,
+                    laserInfo.glowWidth,
+                    x => laserInfo.glowWidth = x);
                 
                 updateTransform |= view.DrawCustomValueInt(
                     defaultTrans.segmentRangeInfo,
-                    lightInfo.segmentRange,
-                    x => lightInfo.segmentRange = x);
+                    laserInfo.segmentRange,
+                    x => laserInfo.segmentRange = x);
 
                 updateTransform |= view.DrawCustomValueBool(
                     defaultTrans.zTestInfo,
-                    lightInfo.zTest,
-                    x => lightInfo.zTest = x);
+                    laserInfo.zTest,
+                    x => laserInfo.zTest = x);
             }
 
             if (updateTransform)
             {
-                controller.UpdateLights();
+                controller.UpdateLasers();
             }
 
             view.SetEnabled(!view.IsComboBoxFocused());
             view.EndScrollView();
         }
 
-        public void DrawStageLightEdit(GUIView view)
+        public void DrawStageLaserEdit(GUIView view)
         {
             view.SetEnabled(!view.IsComboBoxFocused());
 
-            var controllers = stageLightManager.controllers;
+            var controllers = stageLaserManager.controllers;
             if (controllers.Count == 0)
             {
                 view.DrawLabel("コントローラーが存在しません", 200, 20);
@@ -812,19 +782,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var lights = controller.lights;
-            if (lights.Count == 0)
+            var lasers = controller.lasers;
+            if (lasers.Count == 0)
             {
                 view.DrawLabel("ライトが存在しません", 200, 20);
                 return;
             }
 
-            _lightComboBox.items = lights;
-            _lightComboBox.DrawButton("操作対象", view);
+            _laserComboBox.items = lasers;
+            _laserComboBox.DrawButton("操作対象", view);
 
-            var light = _lightComboBox.currentItem;
+            var laser = _laserComboBox.currentItem;
 
-            if (light == null || light.transform == null)
+            if (laser == null || laser.transform == null)
             {
                 view.DrawLabel("ライトを選択してください", 200, 20);
                 return;
@@ -838,20 +808,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
-            view.DrawLabel(light.displayName, 200, 20);
+            view.DrawLabel(laser.displayName, 200, 20);
 
             if (!controller.autoVisible)
             {
-                view.DrawToggle("表示", light.visible, 120, 20, newValue =>
+                view.DrawToggle("表示", laser.visible, 120, 20, newValue =>
                 {
-                    light.visible = newValue;
+                    laser.visible = newValue;
                 });
             }
 
             var transformCache = view.GetTransformCache();
-            var defaultTrans = TransformDataStageLight.defaultTrans;
-            transformCache.position = light.position;
-            transformCache.eulerAngles = light.eulerAngles;
+            var defaultTrans = TransformDataStageLaser.defaultTrans;
+            transformCache.position = laser.position;
+            transformCache.eulerAngles = laser.eulerAngles;
             var initialPosition = defaultTrans.initialPosition;
             var initialEulerAngles = defaultTrans.initialEulerAngles;
             var initialScale = Vector3.one;
@@ -865,95 +835,100 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (!controller.autoRotation)
             {
-                updateTransform |= DrawEulerAngles(view, transformCache, editType, light.name, initialEulerAngles);
+                updateTransform |= DrawEulerAngles(view, transformCache, editType, laser.name, initialEulerAngles);
             }
 
             if (updateTransform)
             {
-                light.position = transformCache.position;
-                light.eulerAngles = transformCache.eulerAngles;
+                laser.position = transformCache.position;
+                laser.eulerAngles = transformCache.eulerAngles;
             }
 
             if (!controller.autoColor)
             {
+                view.DrawLabel("中心色", 200, 20);
+
                 updateTransform |= view.DrawColor(
                     _color1FieldValue,
-                    light.color,
+                    laser.color1,
                     Color.white,
-                    c => light.color = c);
+                    c => laser.color1 = c);
+
+                view.DrawLabel("錯乱色", 200, 20);
+
+                updateTransform |= view.DrawColor(
+                    _color2FieldValue,
+                    laser.color2,
+                    Color.white,
+                    c => laser.color2 = c);
             }
 
-            if (!controller.autoLightInfo)
+            if (!controller.autoLaserInfo)
             {
                 updateTransform |= view.DrawCustomValueFloat(
-                    defaultTrans.spotAngleInfo,
-                    light.spotAngle,
-                    x => light.spotAngle = x);
+                    defaultTrans.laserRangeInfo,
+                    laser.laserRange,
+                    x => laser.laserRange = x);
                 
                 updateTransform |= view.DrawCustomValueFloat(
-                    defaultTrans.spotRangeInfo,
-                    light.spotRange,
-                    x => light.spotRange = x);
-                
-                updateTransform |= view.DrawCustomValueFloat(
-                    defaultTrans.rangeMultiplierInfo,
-                    light.rangeMultiplier,
-                    x => light.rangeMultiplier = x);
+                    defaultTrans.laserWidthInfo,
+                    laser.laserWidth,
+                    x => laser.laserWidth = x);
 
                 updateTransform |= view.DrawCustomValueFloat(
                     defaultTrans.falloffExpInfo,
-                    light.falloffExp,
-                    x => light.falloffExp = x);
+                    laser.falloffExp,
+                    x => laser.falloffExp = x);
 
                 updateTransform |= view.DrawCustomValueFloat(
                     defaultTrans.noiseStrengthInfo,
-                    light.noiseStrength,
-                    x => light.noiseStrength = x);
+                    laser.noiseStrength,
+                    x => laser.noiseStrength = x);
 
                 updateTransform |= view.DrawCustomValueFloat(
                     defaultTrans.noiseScaleInfo,
-                    light.noiseScale,
-                    x => light.noiseScale = x);
+                    laser.noiseScale,
+                    x => laser.noiseScale = x);
                 
                 updateTransform |= view.DrawCustomValueFloat(
                     defaultTrans.coreRadiusInfo,
-                    light.coreRadius,
-                    x => light.coreRadius = x);
+                    laser.coreRadius,
+                    x => laser.coreRadius = x);
                 
                 updateTransform |= view.DrawCustomValueFloat(
                     defaultTrans.offsetRangeInfo,
-                    light.offsetRange,
-                    x => light.offsetRange = x);
+                    laser.offsetRange,
+                    x => laser.offsetRange = x);
                 
-                updateTransform |= view.DrawCustomValueInt(
-                    defaultTrans.segmentAngleInfo,
-                    light.segmentAngle,
-                    x => light.segmentAngle = x);
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.glowWidthInfo,
+                    laser.glowWidth,
+                    x => laser.glowWidth = x);
                 
                 updateTransform |= view.DrawCustomValueInt(
                     defaultTrans.segmentRangeInfo,
-                    light.segmentRange,
-                    x => light.segmentRange = x);
+                    laser.segmentRange,
+                    x => laser.segmentRange = x);
 
                 updateTransform |= view.DrawCustomValueBool(
                     defaultTrans.zTestInfo,
-                    light.zTest,
-                    x => light.zTest = x);
+                    laser.zTest,
+                    x => laser.zTest = x);
             }
 
             view.DrawHorizontalLine(Color.gray);
 
             {
-                _copyToLightComboBox.items = lights;
-                _copyToLightComboBox.DrawButton("コピー先", view);
+                _copyToLaserComboBox.items = lasers;
+                _copyToLaserComboBox.DrawButton("コピー先", view);
 
-                var copyToLight = _copyToLightComboBox.currentItem;
+                var copyToLaser = _copyToLaserComboBox.currentItem;
 
                 if (view.DrawButton("コピー", 60, 20))
                 {
-                    if (copyToLight != null && copyToLight != light)
+                    if (copyToLaser != null && copyToLaser != laser)
                     {
-                        copyToLight.CopyFrom(light);
+                        copyToLaser.CopyFrom(laser);
                     }
                 }
 
@@ -967,13 +942,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override TransformType GetTransformType(string name)
         {
-            if (name.StartsWith("StageLightController", StringComparison.Ordinal))
+            if (name.StartsWith("StageLaserController", StringComparison.Ordinal))
             {
-                return TransformType.StageLightController;
+                return TransformType.StageLaserController;
             }
             else
             {
-                return TransformType.StageLight;
+                return TransformType.StageLaser;
             }
         }
     }

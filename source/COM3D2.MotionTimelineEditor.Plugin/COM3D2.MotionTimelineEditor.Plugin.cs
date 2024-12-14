@@ -66,6 +66,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static StudioLightManager lightManager => StudioLightManager.instance;
 
+        private static StageLaserManager stageLaserManager => StageLaserManager.instance;
+
         private static StageLightManager stageLightManager => StageLightManager.instance;
 
         private static TimelineHistoryManager historyManager => TimelineHistoryManager.instance;
@@ -392,6 +394,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     typeof(ShapeKeyTimelineLayer), ShapeKeyTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
+                    typeof(StageLaserTimelineLayer), StageLaserTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
                     typeof(StageLightTimelineLayer), StageLightTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
@@ -463,6 +468,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 );
                 timelineManager.RegisterTransform(
                     TransformType.ShapeKey, TimelineManager.CreateTransform<TransformDataShapeKey>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.StageLaser, TimelineManager.CreateTransform<TransformDataStageLaser>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.StageLaserController, TimelineManager.CreateTransform<TransformDataStageLaserController>
                 );
                 timelineManager.RegisterTransform(
                     TransformType.StageLight, TimelineManager.CreateTransform<TransformDataStageLight>
@@ -588,6 +599,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             modelManager.OnPluginEnable();
             bgModelManager.OnPluginEnable();
             lightManager.OnPluginEnable();
+            stageLaserManager.OnPluginEnable();
             stageLightManager.OnPluginEnable();
             movieManager.OnPluginEnable();
             timelineManager.OnPluginEnable();
@@ -607,6 +619,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             modelManager.OnPluginDisable();
             bgModelManager.OnPluginDisable();
             lightManager.OnPluginDisable();
+            stageLaserManager.OnPluginDisable();
             stageLightManager.OnPluginDisable();
             movieManager.OnPluginDisable();
             timelineManager.OnPluginDisable();

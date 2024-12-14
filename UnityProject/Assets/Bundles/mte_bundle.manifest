@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 891460216
+CRC: 2386880454
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 0f34b195616a200660d1768c866358dc
+    Hash: 883161befb0c3bc3c3d3aa441231794c
   TypeTreeHash:
     serializedVersion: 2
     Hash: 2ba8c92af2093cc583317c61ec0c8748
@@ -26,7 +26,9 @@ Assets:
 - Assets/Resources/icon.png.bytes
 - Assets/Resources/song.ogg.bytes
 - Assets/Shaders/PostEffect.mat
+- Assets/Shaders/StageLaser.mat
 - Assets/Resources/noise_texture.png
+- Assets/Shaders/StageLaser.shader
 - Assets/Shaders/StageLight.mat
 - Assets/Shaders/PostEffect.shader
 Dependencies: []

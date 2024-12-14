@@ -145,6 +145,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("IsLightColorEasing")]
         public bool isLightColorEasing = true;
 
+        [XmlElement("StageLaserCountList")]
+        public List<int> stageLaserCountList = new List<int>();
+
         [XmlElement("StageLightCountList")]
         public List<int> stageLightCountList = new List<int>();
 

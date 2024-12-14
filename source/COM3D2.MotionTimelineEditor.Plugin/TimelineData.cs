@@ -347,6 +347,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool isLightColorEasing = true;
 
+        public List<int> stageLaserCountList = new List<int>();
+
         public List<int> stageLightCountList = new List<int>();
 
         public int activeTrackIndex = -1;
@@ -775,6 +777,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             singleFrameType = xml.singleFrameType;
             isTangentCamera = xml.isTangentCamera;
             isLightColorEasing = xml.isLightColorEasing;
+            stageLaserCountList = xml.stageLaserCountList.ToList();
             stageLightCountList = xml.stageLightCountList.ToList();
             activeTrackIndex = xml.activeTrackIndex;
             bgmPath = xml.bgmPath;
@@ -905,6 +908,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.singleFrameType = singleFrameType;
             xml.isTangentCamera = isTangentCamera;
             xml.isLightColorEasing = isLightColorEasing;
+            xml.stageLaserCountList = stageLaserCountList.ToList();
             xml.stageLightCountList = stageLightCountList.ToList();
             xml.activeTrackIndex = activeTrackIndex;
             xml.bgmPath = bgmPath;

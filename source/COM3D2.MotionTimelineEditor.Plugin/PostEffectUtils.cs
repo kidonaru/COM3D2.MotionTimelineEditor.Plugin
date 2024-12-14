@@ -13,13 +13,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public static class PostEffectUtils
     {
-        private static TimelineData timeline
-        {
-            get
-            {
-                return TimelineManager.instance.timeline;
-            }
-        }
+        private static TimelineData timeline => TimelineManager.instance.timeline;
 
         public static readonly Dictionary<PostEffectType, string> PostEffectTypeToJpNameMap = new Dictionary<PostEffectType, string>
         {

@@ -128,13 +128,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static MaidManager maidManager => MaidManager.instance;
 
-        private static TimelineData timeline
-        {
-            get
-            {
-                return TimelineManager.instance.timeline;
-            }
-        }
+        private static TimelineData timeline => TimelineManager.instance.timeline;
 
         private static StudioHackBase studioHack => StudioHackManager.studioHack;
 

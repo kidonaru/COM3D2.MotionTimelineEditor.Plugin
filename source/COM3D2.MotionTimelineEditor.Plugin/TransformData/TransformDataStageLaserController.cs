@@ -3,19 +3,18 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class TransformDataStageLightController : TransformDataBase
+    public class TransformDataStageLaserController : TransformDataBase
     {
-        public static TransformDataStageLightController defaultTrans = new TransformDataStageLightController();
+        public static TransformDataStageLaserController defaultTrans = new TransformDataStageLaserController();
 
-        public override TransformType type => TransformType.StageLightController;
+        public override TransformType type => TransformType.StageLaserController;
 
-        public override int valueCount => 37;
+        public override int valueCount => 33;
 
         public override bool hasPosition => true;
-        public override bool hasSubPosition => true;
-        public override bool hasEulerAngles => true;
+        public override bool hasEulerAngles =>  true;
         public override bool hasSubEulerAngles => true;
-        public override bool hasColor => true;
+        public override bool hasColor =>  true;
         public override bool hasSubColor => true;
         public override bool hasVisible => true;
         public override bool hasTangent => true;
@@ -25,32 +24,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get => new ValueData[] { values[0], values[1], values[2] };
         }
 
-        public override ValueData[] subPositionValues
+        public override ValueData[] eulerAnglesValues
         {
             get => new ValueData[] { values[3], values[4], values[5] };
         }
 
-        public override ValueData[] eulerAnglesValues
+        public override ValueData[] subEulerAnglesValues
         {
             get => new ValueData[] { values[6], values[7], values[8] };
         }
 
-        public override ValueData[] subEulerAnglesValues
-        {
-            get => new ValueData[] { values[9], values[10], values[11] };
-        }
-
         public override ValueData[] colorValues
         {
-            get => new ValueData[] { values[12], values[13], values[14], values[15] };
+            get => new ValueData[] { values[9], values[10], values[11], values[12] };
         }
 
         public override ValueData[] subColorValues
         {
-            get => new ValueData[] { values[16], values[17], values[18], values[19] };
+            get => new ValueData[] { values[13], values[14], values[15], values[16] };
         }
 
-        public override ValueData visibleValue => values[20];
+        public override ValueData visibleValue => values[17];
 
         private List<ValueData> _tangentValues = null;
         public override ValueData[] tangentValues
@@ -66,73 +60,61 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _tangentValues.AddRange(subEulerAnglesValues);
                     _tangentValues.AddRange(colorValues);
                     _tangentValues.AddRange(subColorValues);
-                    _tangentValues.AddRange(new ValueData[] { values[21], values[22] });
+                    _tangentValues.AddRange(new ValueData[] { values[18], values[19] });
                 }
                 return _tangentValues.ToArray();
             }
         }
 
-        public override Vector3 initialPosition => new Vector3(-5f, 10f, 0f);
-        public override Vector3 initialSubPosition => new Vector3(5f, 10f, 0f);
-        public override Vector3 initialEulerAngles => new Vector3(90f, 0f, 0f);
-        public override Vector3 initialSubEulerAngles => new Vector3(90f, 0f, 0f);
-        public override Color initialColor => new Color(1f, 1f, 1f, 0.3f);
-        public override Color initialSubColor => new Color(1f, 1f, 1f, 0.3f);
+        public override Vector3 initialPosition => StageLaser.DefaultPosition;
+        public override Vector3 initialEulerAngles => new Vector3(-15f, 40f, 0f);
+        public override Vector3 initialSubEulerAngles => new Vector3(-15f, -40f, 0f);
+        public override Color initialColor => StageLaser.DefaultColor1;
+        public override Color initialSubColor => StageLaser.DefaultColor2;
 
-        public TransformDataStageLightController()
+        public TransformDataStageLaserController()
         {
         }
 
         private readonly static Dictionary<string, CustomValueInfo> CustomValueInfoMap = new Dictionary<string, CustomValueInfo>
         {
             {
-                "spotAngle", new CustomValueInfo
+                "laserRange", new CustomValueInfo
                 {
-                    index = 21,
-                    name = "角度",
-                    min = 1f,
-                    max = 179f,
-                    step = 0.1f,
-                    defaultValue = 10f,
-                }
-            },
-            {
-                "spotRange", new CustomValueInfo
-                {
-                    index = 22,
+                    index = 18,
                     name = "範囲",
                     min = 0f,
                     max = 100f,
                     step = 0.1f,
-                    defaultValue = 10f,
+                    defaultValue = 13f,
                 }
             },
             {
-                "rangeMultiplier", new CustomValueInfo
+                "laserWidth", new CustomValueInfo
                 {
-                    index = 23,
-                    name = "範囲補正",
+                    index = 19,
+                    name = "幅",
                     min = 0f,
-                    max = 1f,
+                    max = 2f,
                     step = 0.01f,
-                    defaultValue = 0.8f,
+                    defaultValue = 0.05f,
                 }
             },
             {
                 "falloffExp", new CustomValueInfo
                 {
-                    index = 24,
+                    index = 20,
                     name = "減衰指数",
                     min = 0f,
                     max = 5f,
                     step = 0.01f,
-                    defaultValue = 0.5f,
+                    defaultValue = 0.2f,
                 }
             },
             {
                 "noiseStrength", new CustomValueInfo
                 {
-                    index = 25,
+                    index = 21,
                     name = "ﾉｲｽﾞ強度",
                     min = 0f,
                     max = 1f,
@@ -143,7 +125,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "noiseScale", new CustomValueInfo
                 {
-                    index = 26,
+                    index = 22,
                     name = "ﾉｲｽﾞｻｲｽﾞ",
                     min = 1f,
                     max = 100f,
@@ -154,40 +136,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "coreRadius", new CustomValueInfo
                 {
-                    index = 27,
+                    index = 23,
                     name = "中心半径",
                     min = 0f,
                     max = 1f,
                     step = 0.01f,
-                    defaultValue = 0.2f,
+                    defaultValue = 0f,
                 }
             },
             {
                 "offsetRange", new CustomValueInfo
                 {
-                    index = 28,
+                    index = 24,
                     name = "ｵﾌｾｯﾄ範囲",
                     min = 0f,
                     max = 10f,
                     step = 0.1f,
-                    defaultValue = 0.5f,
+                    defaultValue = 0f,
                 }
             },
             {
-                "segmentAngle", new CustomValueInfo
+                "glowWidth", new CustomValueInfo
                 {
-                    index = 29,
-                    name = "分割角度",
-                    min = 1,
-                    max = 64,
-                    step = 1,
-                    defaultValue = 10,
+                    index = 25,
+                    name = "散乱幅",
+                    min = 0f,
+                    max = 5f,
+                    step = 0.01f,
+                    defaultValue = 0.1f,
                 }
             },
             {
                 "segmentRange", new CustomValueInfo
                 {
-                    index = 30,
+                    index = 26,
                     name = "分割範囲",
                     min = 1,
                     max = 64,
@@ -198,62 +180,62 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "autoPosition", new CustomValueInfo
                 {
-                    index = 31,
+                    index = 27,
                     name = "一括位置",
                     min = 0,
                     max = 1,
                     step = 1,
-                    defaultValue = 0f,
+                    defaultValue = 1f,
                 }
             },
             {
                 "autoRotation", new CustomValueInfo
                 {
-                    index = 32,
+                    index = 28,
                     name = "一括回転",
                     min = 0,
                     max = 1,
                     step = 1,
-                    defaultValue = 0f,
+                    defaultValue = 1f,
                 }
             },
             {
                 "autoColor", new CustomValueInfo
                 {
-                    index = 33,
+                    index = 29,
                     name = "一括色",
                     min = 0,
                     max = 1,
                     step = 1,
-                    defaultValue = 0f,
+                    defaultValue = 1f,
                 }
             },
             {
-                "autoLightInfo", new CustomValueInfo
+                "autoLaserInfo", new CustomValueInfo
                 {
-                    index = 34,
+                    index = 30,
                     name = "一括情報",
                     min = 0,
                     max = 1,
                     step = 1,
-                    defaultValue = 0f,
+                    defaultValue = 1f,
                 }
             },
             {
                 "autoVisible", new CustomValueInfo
                 {
-                    index = 35,
+                    index = 31,
                     name = "一括表示",
                     min = 0,
                     max = 1,
                     step = 1,
-                    defaultValue = 0f,
+                    defaultValue = 1f,
                 }
             },
             {
                 "zTest", new CustomValueInfo
                 {
-                    index = 36,
+                    index = 32,
                     name = "Zテスト",
                     min = 0,
                     max = 1,
@@ -268,56 +250,48 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData spotAngleValue => this["spotAngle"];
-        public ValueData spotRangeValue => this["spotRange"];
-        public ValueData rangeMultiplierValue => this["rangeMultiplier"];
+        public ValueData laserRangeValue => this["laserRange"];
+        public ValueData laserWidthValue => this["laserWidth"];
         public ValueData falloffExpValue => this["falloffExp"];
         public ValueData noiseStrengthValue => this["noiseStrength"];
         public ValueData noiseScaleValue => this["noiseScale"];
         public ValueData coreRadiusValue => this["coreRadius"];
         public ValueData offsetRangeValue => this["offsetRange"];
-        public ValueData segmentAngleValue => this["segmentAngle"];
+        public ValueData glowWidthValue => this["glowWidth"];
         public ValueData segmentRangeValue => this["segmentRange"];
         public ValueData autoPositionValue => this["autoPosition"];
         public ValueData autoRotationValue => this["autoRotation"];
         public ValueData autoColorValue => this["autoColor"];
-        public ValueData autoLightInfoValue => this["autoLightInfo"];
+        public ValueData autoLaserInfoValue => this["autoLaserInfo"];
         public ValueData autoVisibleValue => this["autoVisible"];
         public ValueData zTestValue => this["zTest"];
 
-        public CustomValueInfo spotAngleInfo => CustomValueInfoMap["spotAngle"];
-        public CustomValueInfo spotRangeInfo => CustomValueInfoMap["spotRange"];
-        public CustomValueInfo rangeMultiplierInfo => CustomValueInfoMap["rangeMultiplier"];
+        public CustomValueInfo laserRangeInfo => CustomValueInfoMap["laserRange"];
+        public CustomValueInfo laserWidthInfo => CustomValueInfoMap["laserWidth"];
         public CustomValueInfo falloffExpInfo => CustomValueInfoMap["falloffExp"];
         public CustomValueInfo noiseStrengthInfo => CustomValueInfoMap["noiseStrength"];
         public CustomValueInfo noiseScaleInfo => CustomValueInfoMap["noiseScale"];
         public CustomValueInfo coreRadiusInfo => CustomValueInfoMap["coreRadius"];
         public CustomValueInfo offsetRangeInfo => CustomValueInfoMap["offsetRange"];
-        public CustomValueInfo segmentAngleInfo => CustomValueInfoMap["segmentAngle"];
+        public CustomValueInfo glowWidthInfo => CustomValueInfoMap["glowWidth"];
         public CustomValueInfo segmentRangeInfo => CustomValueInfoMap["segmentRange"];
         public CustomValueInfo autoPositionInfo => CustomValueInfoMap["autoPosition"];
         public CustomValueInfo autoRotationInfo => CustomValueInfoMap["autoRotation"];
         public CustomValueInfo autoColorInfo => CustomValueInfoMap["autoColor"];
-        public CustomValueInfo autoLightInfoInfo => CustomValueInfoMap["autoLightInfo"];
+        public CustomValueInfo autoLaserInfoInfo => CustomValueInfoMap["autoLaserInfo"];
         public CustomValueInfo autoVisibleInfo => CustomValueInfoMap["autoVisible"];
         public CustomValueInfo zTestInfo => CustomValueInfoMap["zTest"];
 
-        public float spotAngle
+        public float laserRange
         {
-            get => spotAngleValue.value;
-            set => spotAngleValue.value = value;
+            get => laserRangeValue.value;
+            set => laserRangeValue.value = value;
         }
 
-        public float spotRange
+        public float laserWidth
         {
-            get => spotRangeValue.value;
-            set => spotRangeValue.value = value;
-        }
-
-        public float rangeMultiplier
-        {
-            get => rangeMultiplierValue.value;
-            set => rangeMultiplierValue.value = value;
+            get => laserWidthValue.value;
+            set => laserWidthValue.value = value;
         }
 
         public float falloffExp
@@ -350,10 +324,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => offsetRangeValue.value = value;
         }
 
-        public int segmentAngle
+        public float glowWidth
         {
-            get => segmentAngleValue.intValue;
-            set => segmentAngleValue.intValue = value;
+            get => glowWidthValue.value;
+            set => glowWidthValue.value = value;
         }
 
         public int segmentRange
@@ -380,10 +354,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => autoColorValue.boolValue = value;
         }
 
-        public bool autoLightInfo
+        public bool autoLaserInfo
         {
-            get => autoLightInfoValue.boolValue;
-            set => autoLightInfoValue.boolValue = value;
+            get => autoLaserInfoValue.boolValue;
+            set => autoLaserInfoValue.boolValue = value;
         }
 
         public bool autoVisible
@@ -398,32 +372,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => zTestValue.boolValue = value;
         }
 
-        public void FromStageLightController(StageLightController controller)
+        public void FromStageLaserController(StageLaserController controller)
         {
-            var lightInfo = controller.lightInfo;
+            var laserInfo = controller.laserInfo;
 
-            position = controller.positionMin;
-            subPosition = controller.positionMax;
+            position = controller.position;
             eulerAngles = controller.rotationMin;
             subEulerAngles = controller.rotationMax;
-            color = controller.colorMin;
-            subColor = controller.colorMax;
+            color = controller.color1;
+            subColor = controller.color2;
             visible = controller.visible;
-            spotAngle = lightInfo.spotAngle;
-            spotRange = lightInfo.spotRange;
-            rangeMultiplier = lightInfo.rangeMultiplier;
-            falloffExp = lightInfo.falloffExp;
-            noiseStrength = lightInfo.noiseStrength;
-            noiseScale = lightInfo.noiseScale;
-            coreRadius = lightInfo.coreRadius;
-            offsetRange = lightInfo.offsetRange;
-            segmentAngle = lightInfo.segmentAngle;
-            segmentRange = lightInfo.segmentRange;
-            zTest = lightInfo.zTest;
+            laserRange = laserInfo.laserRange;
+            laserWidth = laserInfo.laserWidth;
+            falloffExp = laserInfo.falloffExp;
+            noiseStrength = laserInfo.noiseStrength;
+            noiseScale = laserInfo.noiseScale;
+            coreRadius = laserInfo.coreRadius;
+            offsetRange = laserInfo.offsetRange;
+            glowWidth = laserInfo.glowWidth;
+            segmentRange = laserInfo.segmentRange;
+            zTest = laserInfo.zTest;
             autoPosition = controller.autoPosition;
             autoRotation = controller.autoRotation;
             autoColor = controller.autoColor;
-            autoLightInfo = controller.autoLightInfo;
+            autoLaserInfo = controller.autoLaserInfo;
             autoVisible = controller.autoVisible;
         }
     }

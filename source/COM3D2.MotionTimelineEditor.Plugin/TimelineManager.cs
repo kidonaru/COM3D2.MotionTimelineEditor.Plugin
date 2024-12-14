@@ -130,30 +130,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         private static StudioHackBase studioHack => StudioHackManager.studioHack;
-
         private static MaidManager maidManager => MaidManager.instance;
-
         private static StudioModelManager modelManager => StudioModelManager.instance;
         private static BGModelManager bgModelManager => BGModelManager.instance;
-
         private static StudioLightManager lightManager => StudioLightManager.instance;
-
+        private static StageLaserManager stageLaserManager => StageLaserManager.instance;
         private static StageLightManager stageLightManager => StageLightManager.instance;
-
-        private static ModelHackManager modelHackManager => ModelHackManager.instance;
-
         private static IPartsEditHack partsEditHack => PartsEditHackManager.instance.partsEditHack;
-
         private static Maid maid => maidManager.maid;
-
         private static MaidCache maidCache => maidManager.maidCache;
-
         private static Config config => ConfigManager.config;
-
         private static BoneMenuManager boneMenuManager => BoneMenuManager.Instance;
-
         private static TimelineHistoryManager historyManager => TimelineHistoryManager.instance;
-
         protected static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
 
         private TimelineManager()
@@ -407,6 +395,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             modelManager.SetupModels(timeline.models);
             bgModelManager.SetupModels(timeline.bgModels);
             lightManager.SetupLights(timeline.lights);
+            stageLaserManager.SetupLasers(timeline.stageLaserCountList);
             stageLightManager.SetupLights(timeline.stageLightCountList);
 
             CreateAndApplyAnmAll();
@@ -469,6 +458,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             modelManager.SetupModels(timeline.models);
             bgModelManager.SetupModels(timeline.bgModels);
             lightManager.SetupLights(timeline.lights);
+            stageLaserManager.SetupLasers(timeline.stageLaserCountList);
             stageLightManager.SetupLights(timeline.stageLightCountList);
 
             CreateAndApplyAnmAll();
@@ -1673,6 +1663,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 modelManager.SetupModels(timeline.models);
                 bgModelManager.SetupModels(timeline.bgModels);
                 lightManager.SetupLights(timeline.lights);
+                stageLaserManager.SetupLasers(timeline.stageLaserCountList);
                 stageLightManager.SetupLights(timeline.stageLightCountList);
             }
         }

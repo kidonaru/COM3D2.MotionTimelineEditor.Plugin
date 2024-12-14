@@ -12,7 +12,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
     using TransformType = MotionTimelineEditor.Plugin.TransformType;
 
-    [TimelineLayerDesc("テキスト", 45)]
+    [TimelineLayerDesc("テキスト", 46)]
     public partial class TextTimelineLayer : TimelineLayerBase
     {
         public override string className => typeof(TextTimelineLayer).Name;

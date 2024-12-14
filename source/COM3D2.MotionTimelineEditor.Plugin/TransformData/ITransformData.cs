@@ -27,6 +27,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Root,
         Rotation,
         ShapeKey,
+        StageLaser,
+        StageLaserController,
         StageLight,
         StageLightController,
         Undress,

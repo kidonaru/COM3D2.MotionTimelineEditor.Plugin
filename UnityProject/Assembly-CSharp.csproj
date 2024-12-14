@@ -103,6 +103,8 @@
      <Compile Include="Assets\Scripts\PostEffect\PostEffectSettingsBase.cs" />
      <Compile Include="Assets\Scripts\PostEffect\RimlightEffectModel.cs" />
      <Compile Include="Assets\Scripts\PostEffect\RimlightEffectSettings.cs" />
+     <Compile Include="Assets\Scripts\StageLaser.cs" />
+     <Compile Include="Assets\Scripts\StageLaserController.cs" />
      <Compile Include="Assets\Scripts\StageLight.cs" />
      <Compile Include="Assets\Scripts\StageLightController.cs" />
      <None Include="Assets\PostProcessing\Resources\Shaders\DepthOfField.shader" />
@@ -143,6 +145,7 @@
      <None Include="Assets\PostProcessing\Resources\Shaders\ScreenSpaceRaytrace.cginc" />
      <None Include="Assets\PostProcessing\Resources\Shaders\Bloom.shader" />
      <None Include="Assets\PostProcessing\Editor Resources\Monitors\VectorscopeRender.shader" />
+     <None Include="Assets\Shaders\StageLaser.shader" />
      <None Include="Assets\PostProcessing\Resources\Shaders\EyeAdaptation.shader" />
      <None Include="Assets\PostProcessing\Resources\Shaders\ColorGrading.cginc" />
      <None Include="Assets\PostProcessing\Resources\Shaders\AmbientOcclusion.cginc" />

@@ -123,6 +123,8 @@
     <Compile Include="PostEffectManager.cs" />
     <Compile Include="PostEffectUtils.cs" />
     <Compile Include="ScriptLoader.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\StageLaser.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\StageLaserController.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\StageLight.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\StageLightController.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\ColorParaffinEffectModel.cs" />
@@ -135,6 +137,7 @@
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\PostEffectSettingsBase.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\RimlightEffectModel.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\RimlightEffectSettings.cs" />
+    <Compile Include="StageLaserManager.cs" />
     <Compile Include="StageLightManager.cs" />
     <Compile Include="StopwatchDebug.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -179,6 +182,7 @@
     <Compile Include="TimelineLayer\PostEffectTimelineLayer_Parrifin.cs" />
     <Compile Include="TimelineLayer\PostEffectTimelineLayer_Rimlight.cs" />
     <Compile Include="TimelineLayer\ShapeKeyTimelineLayer.cs" />
+    <Compile Include="TimelineLayer\StageLaserTimelineLayer.cs" />
     <Compile Include="TimelineLayer\StageLightTimelineLayer.cs" />
     <Compile Include="TimelineLayer\TimelineLayerBase.cs" />
     <Compile Include="TimelineLayer\UndressTimelineLayer.cs" />
@@ -214,6 +218,8 @@
     <Compile Include="TransformData\TransformDataRoot.cs" />
     <Compile Include="TransformData\TransformDataRotation.cs" />
     <Compile Include="TransformData\TransformDataShapeKey.cs" />
+    <Compile Include="TransformData\TransformDataStageLaser.cs" />
+    <Compile Include="TransformData\TransformDataStageLaserController.cs" />
     <Compile Include="TransformData\TransformDataStageLight.cs" />
     <Compile Include="TransformData\TransformDataStageLightController.cs" />
     <Compile Include="TransformData\TransformDataUndress.cs" />
