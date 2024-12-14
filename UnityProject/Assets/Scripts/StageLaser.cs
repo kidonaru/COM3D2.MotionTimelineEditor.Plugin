@@ -272,6 +272,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        [SerializeField]
+        private float _intensity = 1f;
+        public float intensity
+        {
+            get
+            {
+                return _intensity;
+            }
+            set
+            {
+                if (_intensity == value) return;
+                _intensity = value;
+                UpdateMesh();
+            }
+        }
+
         public bool visible
         {
             get
@@ -386,6 +402,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             glowWidth = other.glowWidth;
             segmentRange = other.segmentRange;
             zTest = other.zTest;
+            intensity = other.intensity;
         }
 
         public void Initialize()
@@ -474,11 +491,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 float distanceFalloff = Mathf.Pow(1 - Mathf.Clamp01(z / laserRange), falloffExp);
                 distanceFalloff = Smoothstep(0, 1, distanceFalloff);
+                distanceFalloff *= intensity;
 
                 float currentGlowWidth = Mathf.Lerp(0, glowWidth, distanceFalloff);
 
                 var currentColor2 = Color.Lerp(zeroColor, color2, distanceFalloff);
-                //if (r == 0) currentColor2 = zeroColor;
 
                 // 散乱光の左端（完全に透明）
                 vertices[vertexIndex] = new Vector3(-(currentGlowWidth + width), 0, z);

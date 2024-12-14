@@ -21,6 +21,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float glowWidth = 0.1f;
         public int segmentRange = 10;
         public bool zTest = true;
+        public float intensity = 1f;
+
+        public void CopyFrom(StageLaserInfo other)
+        {
+            laserRange = other.laserRange;
+            laserWidth = other.laserWidth;
+            falloffExp = other.falloffExp;
+            noiseStrength = other.noiseStrength;
+            noiseScale = other.noiseScale;
+            coreRadius = other.coreRadius;
+            offsetRange = other.offsetRange;
+            glowWidth = other.glowWidth;
+            segmentRange = other.segmentRange;
+            zTest = other.zTest;
+            intensity = other.intensity;
+        }
     }
 
     [ExecuteInEditMode]
@@ -192,8 +208,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     laser.glowWidth = laserInfo.glowWidth;
                     laser.segmentRange = laserInfo.segmentRange;
                     laser.zTest = laserInfo.zTest;
+                    laser.intensity = laserInfo.intensity;
                 }
             }
+        }
+
+        public void CopyFrom(StageLaserController other)
+        {
+            if (other == null) return;
+            autoVisible = other.autoVisible;
+            visible = other.visible;
+            autoPosition = other.autoPosition;
+            position = other.position;
+            autoRotation = other.autoRotation;
+            rotationMin = other.rotationMin;
+            rotationMax = other.rotationMax;
+            autoColor = other.autoColor;
+            color1 = other.color1;
+            color2 = other.color2;
+            autoLaserInfo = other.autoLaserInfo;
+            laserInfo.CopyFrom(other.laserInfo);
         }
     }
 

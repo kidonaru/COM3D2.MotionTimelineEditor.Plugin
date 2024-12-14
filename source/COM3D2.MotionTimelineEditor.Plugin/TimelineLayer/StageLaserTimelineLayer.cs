@@ -187,6 +187,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (!controller.autoLaserInfo)
             {
+                laser.intensity = start.intensity;
                 laser.laserRange = start.laserRange;
                 laser.laserWidth = start.laserWidth;
 
@@ -256,6 +257,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (!controller.autoLaserInfo)
             {
+                laser.intensity = PluginUtils.HermiteValue(
+                    t0,
+                    t1,
+                    start.intensityValue,
+                    end.intensityValue,
+                    t);
+
                 laser.laserRange = PluginUtils.HermiteValue(
                     t0,
                     t1,
@@ -292,6 +300,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var laserInfo = controller.laserInfo;
 
+            laserInfo.intensity = start.intensity;
             laserInfo.laserRange = start.laserRange;
             laserInfo.laserWidth = start.laserWidth;
 
@@ -365,6 +374,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (controller.autoLaserInfo)
             {
+                laserInfo.intensity = PluginUtils.HermiteValue(
+                    t0,
+                    t1,
+                    start.intensityValue,
+                    end.intensityValue,
+                    t);
+
                 laserInfo.laserRange = PluginUtils.HermiteValue(
                     t0,
                     t1,
@@ -460,6 +476,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         };
 
         private GUIComboBox<StageLaser> _laserComboBox = new GUIComboBox<StageLaser>
+        {
+            getName = (laser, index) => laser.displayName,
+            labelWidth = 70,
+            buttonSize = new Vector2(150, 20),
+            contentSize = new Vector2(150, 300),
+        };
+
+        private GUIComboBox<StageLaserController> _copyToControllerComboBox = new GUIComboBox<StageLaserController>
         {
             getName = (laser, index) => laser.displayName,
             labelWidth = 70,
@@ -702,6 +726,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var laserInfo = controller.laserInfo;
 
                 updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.intensityInfo,
+                    laserInfo.intensity,
+                    x => laserInfo.intensity = x);
+
+                updateTransform |= view.DrawCustomValueFloat(
                     defaultTrans.laserRangeInfo,
                     laserInfo.laserRange,
                     x => laserInfo.laserRange = x);
@@ -755,6 +784,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (updateTransform)
             {
                 controller.UpdateLasers();
+            }
+
+            view.DrawHorizontalLine(Color.gray);
+
+            {
+                _copyToControllerComboBox.items = controllers;
+                _copyToControllerComboBox.DrawButton("コピー先", view);
+
+                var copyToController = _copyToControllerComboBox.currentItem;
+
+                if (view.DrawButton("コピー", 60, 20))
+                {
+                    if (copyToController != null && copyToController != controller)
+                    {
+                        copyToController.CopyFrom(controller);
+                        copyToController.UpdateLasers();
+                    }
+                }
+
+                view.DrawHorizontalLine(Color.gray);
+                view.AddSpace(5);
             }
 
             view.SetEnabled(!view.IsComboBoxFocused());
@@ -865,6 +915,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (!controller.autoLaserInfo)
             {
+                updateTransform |= view.DrawCustomValueFloat(
+                    defaultTrans.intensityInfo,
+                    laser.intensity,
+                    x => laser.intensity = x);
+
                 updateTransform |= view.DrawCustomValueFloat(
                     defaultTrans.laserRangeInfo,
                     laser.laserRange,

@@ -9,7 +9,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override TransformType type => TransformType.StageLaser;
 
-        public override int valueCount => 26;
+        public override int valueCount => 27;
 
         public override bool hasPosition => true;
         public override bool hasEulerAngles => true;
@@ -52,7 +52,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _tangentValues.AddRange(eulerAnglesValues);
                     _tangentValues.AddRange(colorValues);
                     _tangentValues.AddRange(subColorValues);
-                    _tangentValues.AddRange(new ValueData[] { values[16], values[17] });
+                    _tangentValues.AddRange(new ValueData[] { values[16], values[17], values[26] });
                 }
                 return _tangentValues.ToArray();
             }
@@ -179,6 +179,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     defaultValue = 1,
                 }
             },
+            {
+                "intensity", new CustomValueInfo
+                {
+                    index = 26,
+                    name = "強度",
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 1f,
+                }
+            },
         };
 
         public override Dictionary<string, CustomValueInfo> GetCustomValueInfoMap()
@@ -196,6 +207,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public ValueData glowWidthValue => this["glowWidth"];
         public ValueData segmentRangeValue => this["segmentRange"];
         public ValueData zTestValue => this["zTest"];
+        public ValueData intensityValue => this["intensity"];
 
         public CustomValueInfo laserRangeInfo => CustomValueInfoMap["laserRange"];
         public CustomValueInfo laserWidthInfo => CustomValueInfoMap["laserWidth"];
@@ -207,6 +219,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public CustomValueInfo glowWidthInfo => CustomValueInfoMap["glowWidth"];
         public CustomValueInfo segmentRangeInfo => CustomValueInfoMap["segmentRange"];
         public CustomValueInfo zTestInfo => CustomValueInfoMap["zTest"];
+        public CustomValueInfo intensityInfo => CustomValueInfoMap["intensity"];
 
         public float laserRange
         {
@@ -268,6 +281,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => zTestValue.boolValue = value;
         }
 
+        public float intensity
+        {
+            get => intensityValue.value;
+            set => intensityValue.value = value;
+        }
+
         public void FromStageLaser(StageLaser laser)
         {
             position = laser.position;
@@ -285,6 +304,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             glowWidth = laser.glowWidth;
             segmentRange = laser.segmentRange;
             zTest = laser.zTest;
+            intensity = laser.intensity;
         }
     }
 }

@@ -8,12 +8,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int group { get; private set; }
         public BGModelInfo info { get; private set; }
 
-        public GameObject obj { get; private set; }
-        public Transform transform { get; private set; }
         public string name { get; private set; }
         public string displayName { get; private set; }
 
         public GameObject sourceObj => info?.gameObject;
+        public GameObject obj => sourceObj;
+        public Transform transform => obj?.transform;
 
         public bool visible
         {
@@ -52,19 +52,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 PluginUtils.Log($"背景モデルが見つかりません: {sourceName}");
                 return;
             }
-
-            if (group == 0)
-            {
-                this.obj = sourceObj;
-                this.transform = sourceObj.transform;
-            }
-            else
-            {
-                this.obj = Object.Instantiate(sourceObj);
-                this.transform = obj.transform;
-                this.transform.SetParent(sourceObj.transform.parent, true);
-                this.obj.name = name;
-            }
         }
 
         public void InitName()
@@ -78,21 +65,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (obj != null)
             {
-                if (obj == sourceObj)
-                {
-                    obj.SetActive(info.initialVisible);
-                    obj.transform.localPosition = info.initialPosition;
-                    obj.transform.localRotation = info.initialRotation;
-                    obj.transform.localScale = info.initialScale; 
-                }
-                else
-                {
-                    Object.Destroy(obj);
-                }
+                obj.SetActive(info.initialVisible);
+                obj.transform.localPosition = info.initialPosition;
+                obj.transform.localRotation = info.initialRotation;
+                obj.transform.localScale = info.initialScale; 
             }
-
-            obj = null;
-            transform = null;
         }
     }
 }

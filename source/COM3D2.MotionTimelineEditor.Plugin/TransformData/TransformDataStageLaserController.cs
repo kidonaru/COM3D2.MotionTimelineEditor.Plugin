@@ -9,7 +9,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override TransformType type => TransformType.StageLaserController;
 
-        public override int valueCount => 33;
+        public override int valueCount => 34;
 
         public override bool hasPosition => true;
         public override bool hasEulerAngles =>  true;
@@ -60,7 +60,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _tangentValues.AddRange(subEulerAnglesValues);
                     _tangentValues.AddRange(colorValues);
                     _tangentValues.AddRange(subColorValues);
-                    _tangentValues.AddRange(new ValueData[] { values[18], values[19] });
+                    _tangentValues.AddRange(new ValueData[] { values[18], values[19], values[33] });
                 }
                 return _tangentValues.ToArray();
             }
@@ -243,6 +243,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     defaultValue = 1,
                 }
             },
+            {
+                "intensity", new CustomValueInfo
+                {
+                    index = 33,
+                    name = "強度",
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = 1f,
+                }
+            }
         };
 
         public override Dictionary<string, CustomValueInfo> GetCustomValueInfoMap()
@@ -265,6 +276,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public ValueData autoLaserInfoValue => this["autoLaserInfo"];
         public ValueData autoVisibleValue => this["autoVisible"];
         public ValueData zTestValue => this["zTest"];
+        public ValueData intensityValue => this["intensity"];
 
         public CustomValueInfo laserRangeInfo => CustomValueInfoMap["laserRange"];
         public CustomValueInfo laserWidthInfo => CustomValueInfoMap["laserWidth"];
@@ -281,6 +293,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public CustomValueInfo autoLaserInfoInfo => CustomValueInfoMap["autoLaserInfo"];
         public CustomValueInfo autoVisibleInfo => CustomValueInfoMap["autoVisible"];
         public CustomValueInfo zTestInfo => CustomValueInfoMap["zTest"];
+        public CustomValueInfo intensityInfo => CustomValueInfoMap["intensity"];
 
         public float laserRange
         {
@@ -372,6 +385,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => zTestValue.boolValue = value;
         }
 
+        public float intensity
+        {
+            get => intensityValue.value;
+            set => intensityValue.value = value;
+        }
+
         public void FromStageLaserController(StageLaserController controller)
         {
             var laserInfo = controller.laserInfo;
@@ -392,6 +411,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             glowWidth = laserInfo.glowWidth;
             segmentRange = laserInfo.segmentRange;
             zTest = laserInfo.zTest;
+            intensity = laserInfo.intensity;
             autoPosition = controller.autoPosition;
             autoRotation = controller.autoRotation;
             autoColor = controller.autoColor;

@@ -99,6 +99,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return bonePath.Substring(bonePath.LastIndexOf('/') + 1);
         }
 
+        public static string ConvertToParentPath(string bonePath)
+        {
+            var lastIndex = bonePath.LastIndexOf('/');
+            if (lastIndex == -1)
+            {
+                return "";
+            }
+            return bonePath.Substring(0, lastIndex);
+        }
+
         public static string ConvertToBonePath(string boneName)
         {
             string bonePath;

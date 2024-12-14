@@ -15,8 +15,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var infoMap = bgModelManager.modelInfoMap;
-            if (infoMap.Count == 0)
+            var infoList = bgModelManager.modelInfoList;
+            if (infoList.Count == 0)
             {
                 view.DrawLabel("背景モデルがありません", -1, 20);
                 return;
@@ -32,7 +32,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.margin = 0f;
 
-            foreach (var info in infoMap.Values)
+            foreach (var info in infoList)
             {
                 var models = bgModelManager.GetModels(info.sourceName);
 
