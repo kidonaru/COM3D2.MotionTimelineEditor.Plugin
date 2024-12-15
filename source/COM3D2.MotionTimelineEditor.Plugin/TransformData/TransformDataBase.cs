@@ -622,7 +622,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return values.Any(value => value.outTangent.shouldSerialize);
         }
 
-        protected int _inSmoothBit
+        protected long _inSmoothBit
         {
             get
             {
@@ -631,10 +631,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     return 0;
                 }
 
-                var result = 0;
+                long result = 0;
                 for (int i = 0; i < values.Length; i++)
                 {
-                    int value = values[i].inTangent.isSmooth ? 1 : 0;
+                    long value = values[i].inTangent.isSmooth ? 1 : 0;
                     result |= value << i;
                 }
                 return result;
@@ -643,12 +643,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    values[i].inTangent.isSmooth = (value & (1 << i)) != 0;
+                    values[i].inTangent.isSmooth = (value & ((long) 1 << i)) != 0;
                 }
             }
         }
 
-        protected int _outSmoothBit
+        protected long _outSmoothBit
         {
             get
             {
@@ -657,10 +657,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     return 0;
                 }
 
-                var result = 0;
+                long result = 0;
                 for (int i = 0; i < values.Length; i++)
                 {
-                    int value = values[i].outTangent.isSmooth ? 1 : 0;
+                    long value = values[i].outTangent.isSmooth ? 1 : 0;
                     result |= value << i;
                 }
                 return result;
@@ -669,7 +669,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    values[i].outTangent.isSmooth = (value & (1 << i)) != 0;
+                    values[i].outTangent.isSmooth = (value & ((long) 1 << i)) != 0;
                 }
             }
         }
@@ -931,7 +931,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                     break;
                 case TangentValueType.すべて:
-                    return baseValues;
+                    return tangentValues;
             }
 
             return new ValueData[0];

@@ -724,6 +724,59 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
             }
+
+            if (version < 22)
+            {
+                // StageLaserTimelineLayerのposition削除
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "StageLaserTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+                                if (transform.type == TransformType.StageLaser)
+                                {
+                                    var values = new List<float>(transform.values);
+                                    if (values.Count > 3)
+                                    {
+                                        PluginUtils.LogDebug("Remove position in StageLaserTimelineLayer name={0}", transform.name);
+                                        values.RemoveRange(0, 3);
+                                    }
+                                    transform.values = values.ToArray();
+                                }
+                                else
+                                {
+                                    var values = new List<float>(transform.values);
+                                    if (values.Count > 33)
+                                    {
+                                        PluginUtils.LogDebug("Fix rotation in StageLaserTimelineLayer name={0}", transform.name);
+                                        var eulerAngles = new float[] {0, 0, 0};
+                                        var rotationMin = new float[] {values[3], values[4], values[5]};
+                                        var rotationMax = new float[] {values[6], values[7], values[8]};
+                                        values.RemoveRange(3, 6);
+                                        values.InsertRange(3, eulerAngles);
+                                        values.InsertRange(31, rotationMin);
+                                        values.InsertRange(34, rotationMax);
+                                    }
+                                    transform.values = values.ToArray();
+                                    if (transform.inSmoothBit == -1)
+                                    {
+                                        transform.inSmoothBit = 137438953471;
+                                    }
+                                    if (transform.outSmoothBit == -1)
+                                    {
+                                        transform.outSmoothBit = 137438953471;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 }

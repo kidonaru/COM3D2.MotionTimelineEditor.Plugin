@@ -58,6 +58,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        [SerializeField]
+        private Vector3 _position = DefaultPosition;
+        public Vector3 position
+        {
+            get
+            {
+                return _position;
+            }
+            set
+            {
+                if (_position == value) return;
+                _position = value;
+                transform.localPosition = value;
+            }
+        }
+
+        [SerializeField]
+        private Vector3 _eulerAngles = DefaultEulerAngles;
+        public Vector3 eulerAngles
+        {
+            get
+            {
+                return _eulerAngles;
+            }
+            set
+            {
+                if (_eulerAngles == value) return;
+                _eulerAngles = value;
+                transform.localEulerAngles = value;
+            }
+        }
+
         public string displayName;
         public List<StageLaser> lasers = new List<StageLaser>();
 
@@ -65,15 +97,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool autoVisible = true;
         public bool visible = true;
 
-        [Header("一括位置設定")]
-        public bool autoPosition = true;
-        public Vector3 position = StageLaser.DefaultPosition;
-
-
         [Header("一括回転設定")]
         public bool autoRotation = true;
-        public Vector3 rotationMin = new Vector3(-15f, 40f, 0f);
-        public Vector3 rotationMax = new Vector3(-15f, -40f, 0f);
+        public Vector3 rotationMin = new Vector3(0f, 40f, 0f);
+        public Vector3 rotationMax = new Vector3(0f, -40f, 0f);
 
         [Header("一括色設定")]
         public bool autoColor = true;
@@ -85,6 +112,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public StageLaserInfo laserInfo = new StageLaserInfo();
 
         public bool isManualUpdate = false;
+
+        public static Vector3 DefaultPosition = new Vector3(0f, 0f, 0f);
+        public static Vector3 DefaultEulerAngles = new Vector3(-15f, 0f, 0f);
 
         void OnEnable()
         {
@@ -121,18 +151,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             lasers = GetComponentsInChildren<StageLaser>().ToList();
             lasers.Sort((a, b) => a.index - b.index);
 
+            transform.localPosition = _position;
+            transform.localEulerAngles = _eulerAngles;
+
             UpdateName();
         }
 
         public string AddLaser()
         {
             var index = lasers.Count;
-            var laser = new GameObject("StageLaser").AddComponent<StageLaser>();
+            var go = new GameObject("StageLaser");
+            go.transform.SetParent(transform, false);
+
+            var laser = go.AddComponent<StageLaser>();
             laser.controller = this;
             laser.index = index;
-            laser.transform.SetParent(transform);
-            laser.position = StageLaser.DefaultPosition;
-            laser.eulerAngles = StageLaser.DefaultEulerAngles;
             lasers.Add(laser);
 
             return laser.name;
@@ -175,11 +208,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     laser.visible = visible;
                 }
 
-                if (autoPosition)
-                {
-                    laser.position = position;
-                }
-
                 if (autoRotation)
                 {
                     Vector3 rotation = new Vector3(
@@ -218,8 +246,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (other == null) return;
             autoVisible = other.autoVisible;
             visible = other.visible;
-            autoPosition = other.autoPosition;
             position = other.position;
+            eulerAngles = other.eulerAngles;
             autoRotation = other.autoRotation;
             rotationMin = other.rotationMin;
             rotationMax = other.rotationMax;

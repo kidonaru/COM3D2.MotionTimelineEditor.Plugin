@@ -9,36 +9,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override TransformType type => TransformType.StageLaser;
 
-        public override int valueCount => 27;
+        public override int valueCount => 24;
 
-        public override bool hasPosition => true;
         public override bool hasEulerAngles => true;
         public override bool hasColor =>  true;
         public override bool hasSubColor =>  true;
         public override bool hasVisible => true;
         public override bool hasTangent => true;
 
-        public override ValueData[] positionValues
-        {
-            get => new ValueData[] { values[0], values[1], values[2] };
-        }
-
         public override ValueData[] eulerAnglesValues
         {
-            get => new ValueData[] { values[3], values[4], values[5] };
+            get => new ValueData[] { values[1], values[2], values[3] };
         }
 
         public override ValueData[] colorValues
         {
-            get => new ValueData[] { values[7], values[8], values[9], values[10] };
+            get => new ValueData[] { values[4], values[5], values[6], values[7] };
         }
 
         public override ValueData[] subColorValues
         {
-            get => new ValueData[] { values[11], values[12], values[13], values[14] };
+            get => new ValueData[] { values[8], values[9], values[10], values[11] };
         }
 
-        public override ValueData visibleValue => values[15];
+        public override ValueData visibleValue => values[12];
 
         private List<ValueData> _tangentValues = null;
         public override ValueData[] tangentValues
@@ -48,11 +42,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (_tangentValues == null)
                 {
                     _tangentValues = new List<ValueData>();
-                    _tangentValues.AddRange(positionValues);
                     _tangentValues.AddRange(eulerAnglesValues);
-                    _tangentValues.AddRange(colorValues);
-                    _tangentValues.AddRange(subColorValues);
-                    _tangentValues.AddRange(new ValueData[] { values[16], values[17], values[26] });
+                    _tangentValues.AddRange(new ValueData[] { values[13], values[14], values[15] });
                 }
                 return _tangentValues.ToArray();
             }
@@ -72,7 +63,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "intensity", new CustomValueInfo
                 {
-                    index = 16,
+                    index = 13,
                     name = "強度",
                     min = 0f,
                     max = 1f,
@@ -83,7 +74,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "laserRange", new CustomValueInfo
                 {
-                    index = 17,
+                    index = 14,
                     name = "範囲",
                     min = 0f,
                     max = 100f,
@@ -94,7 +85,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "laserWidth", new CustomValueInfo
                 {
-                    index = 18,
+                    index = 15,
                     name = "幅",
                     min = 0f,
                     max = 2f,
@@ -105,7 +96,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "falloffExp", new CustomValueInfo
                 {
-                    index = 19,
+                    index = 16,
                     name = "減衰指数",
                     min = 0f,
                     max = 5f,
@@ -116,7 +107,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "noiseStrength", new CustomValueInfo
                 {
-                    index = 20,
+                    index = 17,
                     name = "ﾉｲｽﾞ強度",
                     min = 0f,
                     max = 1f,
@@ -127,7 +118,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "noiseScale", new CustomValueInfo
                 {
-                    index = 21,
+                    index = 18,
                     name = "ﾉｲｽﾞｻｲｽﾞ",
                     min = 1f,
                     max = 100f,
@@ -138,7 +129,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "coreRadius", new CustomValueInfo
                 {
-                    index = 22,
+                    index = 19,
                     name = "中心半径",
                     min = 0f,
                     max = 1f,
@@ -149,7 +140,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "offsetRange", new CustomValueInfo
                 {
-                    index = 23,
+                    index = 20,
                     name = "ｵﾌｾｯﾄ範囲",
                     min = 0f,
                     max = 10f,
@@ -160,7 +151,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "glowWidth", new CustomValueInfo
                 {
-                    index = 24,
+                    index = 21,
                     name = "散乱幅",
                     min = 0f,
                     max = 5f,
@@ -171,7 +162,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "segmentRange", new CustomValueInfo
                 {
-                    index = 25,
+                    index = 22,
                     name = "分割範囲",
                     min = 1,
                     max = 64,
@@ -182,7 +173,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "zTest", new CustomValueInfo
                 {
-                    index = 26,
+                    index = 23,
                     name = "Zテスト",
                     min = 0,
                     max = 1,
@@ -289,7 +280,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void FromStageLaser(StageLaser laser)
         {
-            position = laser.position;
             eulerAngles = laser.eulerAngles;
             color = laser.color1;
             subColor = laser.color2;

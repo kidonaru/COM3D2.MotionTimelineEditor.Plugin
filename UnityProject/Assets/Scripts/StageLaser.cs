@@ -44,22 +44,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string displayName;
 
         [SerializeField]
-        private Vector3 _position = Vector3.zero;
-        public Vector3 position
-        {
-            get
-            {
-                return _position;
-            }
-            set
-            {
-                if (_position == value) return;
-                _position = value;
-                transform.localPosition = value;
-            }
-        }
-
-        [SerializeField]
         private Vector3 _eulerAngles = DefaultEulerAngles;
         public Vector3 eulerAngles
         {
@@ -450,6 +434,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _meshRenderer.sharedMaterial = material;
             }
 
+            transform.localPosition = DefaultPosition;
             transform.localEulerAngles = _eulerAngles;
 
             UpdateName();

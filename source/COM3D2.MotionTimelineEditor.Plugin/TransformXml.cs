@@ -36,10 +36,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         [XmlElement("InSmoothBit")]
-        public int inSmoothBit = 0;
+        public long inSmoothBit = 0;
 
         [XmlElement("OutSmoothBit")]
-        public int outSmoothBit = 0;
+        public long outSmoothBit = 0;
 
         [XmlIgnore]
         private string[] _strValues = null;

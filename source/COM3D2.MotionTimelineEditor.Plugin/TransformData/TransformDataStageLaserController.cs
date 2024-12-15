@@ -9,11 +9,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override TransformType type => TransformType.StageLaserController;
 
-        public override int valueCount => 34;
+        public override int valueCount => 37;
 
         public override bool hasPosition => true;
-        public override bool hasEulerAngles =>  true;
-        public override bool hasSubEulerAngles => true;
+        public override bool hasEulerAngles => true;
         public override bool hasColor =>  true;
         public override bool hasSubColor => true;
         public override bool hasVisible => true;
@@ -29,22 +28,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get => new ValueData[] { values[3], values[4], values[5] };
         }
 
-        public override ValueData[] subEulerAnglesValues
-        {
-            get => new ValueData[] { values[6], values[7], values[8] };
-        }
-
         public override ValueData[] colorValues
         {
-            get => new ValueData[] { values[9], values[10], values[11], values[12] };
+            get => new ValueData[] { values[6], values[7], values[8], values[9] };
         }
 
         public override ValueData[] subColorValues
         {
-            get => new ValueData[] { values[13], values[14], values[15], values[16] };
+            get => new ValueData[] { values[10], values[11], values[12], values[13] };
         }
 
-        public override ValueData visibleValue => values[17];
+        public override ValueData visibleValue => values[14];
 
         private List<ValueData> _tangentValues = null;
         public override ValueData[] tangentValues
@@ -55,22 +49,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     _tangentValues = new List<ValueData>();
                     _tangentValues.AddRange(positionValues);
-                    _tangentValues.AddRange(subPositionValues);
                     _tangentValues.AddRange(eulerAnglesValues);
-                    _tangentValues.AddRange(subEulerAnglesValues);
-                    _tangentValues.AddRange(colorValues);
-                    _tangentValues.AddRange(subColorValues);
-                    _tangentValues.AddRange(new ValueData[] { values[18], values[19], values[33] });
+                    _tangentValues.AddRange(rotationMinValues);
+                    _tangentValues.AddRange(rotationMaxValues);
+                    _tangentValues.AddRange(new ValueData[] { values[15], values[16], values[17] });
                 }
                 return _tangentValues.ToArray();
             }
         }
 
-        public override Vector3 initialPosition => StageLaser.DefaultPosition;
-        public override Vector3 initialEulerAngles => new Vector3(-15f, 40f, 0f);
-        public override Vector3 initialSubEulerAngles => new Vector3(-15f, -40f, 0f);
+        public override Vector3 initialPosition => StageLaserController.DefaultPosition;
+        public override Vector3 initialEulerAngles => StageLaserController.DefaultEulerAngles;
         public override Color initialColor => StageLaser.DefaultColor1;
         public override Color initialSubColor => StageLaser.DefaultColor2;
+
+        public Vector3 initialRotationMin => new Vector3(0f, 40f, 0f);
+        public Vector3 initialRotationMax => new Vector3(0f, -40f, 0f);
 
         public TransformDataStageLaserController()
         {
@@ -81,7 +75,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "intensity", new CustomValueInfo
                 {
-                    index = 18,
+                    index = 15,
                     name = "強度",
                     min = 0f,
                     max = 1f,
@@ -92,7 +86,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "laserRange", new CustomValueInfo
                 {
-                    index = 19,
+                    index = 16,
                     name = "範囲",
                     min = 0f,
                     max = 100f,
@@ -103,7 +97,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "laserWidth", new CustomValueInfo
                 {
-                    index = 20,
+                    index = 17,
                     name = "幅",
                     min = 0f,
                     max = 2f,
@@ -114,7 +108,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "falloffExp", new CustomValueInfo
                 {
-                    index = 21,
+                    index = 18,
                     name = "減衰指数",
                     min = 0f,
                     max = 5f,
@@ -125,7 +119,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "noiseStrength", new CustomValueInfo
                 {
-                    index = 22,
+                    index = 19,
                     name = "ﾉｲｽﾞ強度",
                     min = 0f,
                     max = 1f,
@@ -136,7 +130,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "noiseScale", new CustomValueInfo
                 {
-                    index = 23,
+                    index = 20,
                     name = "ﾉｲｽﾞｻｲｽﾞ",
                     min = 1f,
                     max = 100f,
@@ -147,7 +141,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "coreRadius", new CustomValueInfo
                 {
-                    index = 24,
+                    index = 21,
                     name = "中心半径",
                     min = 0f,
                     max = 1f,
@@ -158,7 +152,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "offsetRange", new CustomValueInfo
                 {
-                    index = 25,
+                    index = 22,
                     name = "ｵﾌｾｯﾄ範囲",
                     min = 0f,
                     max = 10f,
@@ -169,7 +163,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "glowWidth", new CustomValueInfo
                 {
-                    index = 26,
+                    index = 23,
                     name = "散乱幅",
                     min = 0f,
                     max = 5f,
@@ -180,7 +174,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "segmentRange", new CustomValueInfo
                 {
-                    index = 27,
+                    index = 24,
                     name = "分割範囲",
                     min = 1,
                     max = 64,
@@ -189,9 +183,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             },
             {
-                "autoPosition", new CustomValueInfo
+                "autoPosition", new CustomValueInfo // 未使用
                 {
-                    index = 28,
+                    index = 25,
                     name = "一括位置",
                     min = 0,
                     max = 1,
@@ -202,7 +196,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "autoRotation", new CustomValueInfo
                 {
-                    index = 29,
+                    index = 26,
                     name = "一括回転",
                     min = 0,
                     max = 1,
@@ -213,7 +207,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "autoColor", new CustomValueInfo
                 {
-                    index = 30,
+                    index = 27,
                     name = "一括色",
                     min = 0,
                     max = 1,
@@ -224,7 +218,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "autoLaserInfo", new CustomValueInfo
                 {
-                    index = 31,
+                    index = 28,
                     name = "一括情報",
                     min = 0,
                     max = 1,
@@ -235,7 +229,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "autoVisible", new CustomValueInfo
                 {
-                    index = 32,
+                    index = 29,
                     name = "一括表示",
                     min = 0,
                     max = 1,
@@ -246,12 +240,78 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "zTest", new CustomValueInfo
                 {
-                    index = 33,
+                    index = 30,
                     name = "Zテスト",
                     min = 0,
                     max = 1,
                     step = 1,
                     defaultValue = 1,
+                }
+            },
+            {
+                "rotationMinX", new CustomValueInfo
+                {
+                    index = 31,
+                    name = "最小RX",
+                    min = -180f,
+                    max = 180f,
+                    step = 0.1f,
+                    defaultValue = 0f,
+                }
+            },
+            {
+                "rotationMinY", new CustomValueInfo
+                {
+                    index = 32,
+                    name = "最小RY",
+                    min = -180f,
+                    max = 180f,
+                    step = 0.1f,
+                    defaultValue = 0f,
+                }
+            },
+            {
+                "rotationMinZ", new CustomValueInfo
+                {
+                    index = 33,
+                    name = "最小RZ",
+                    min = -180f,
+                    max = 180f,
+                    step = 0.1f,
+                    defaultValue = 0f,
+                }
+            },
+            {
+                "rotationMaxX", new CustomValueInfo
+                {
+                    index = 34,
+                    name = "最大RX",
+                    min = -180f,
+                    max = 180f,
+                    step = 0.1f,
+                    defaultValue = 0f,
+                }
+            },
+            {
+                "rotationMaxY", new CustomValueInfo
+                {
+                    index = 35,
+                    name = "最大RY",
+                    min = -180f,
+                    max = 180f,
+                    step = 0.1f,
+                    defaultValue = 0f,
+                }
+            },
+            {
+                "rotationMaxZ", new CustomValueInfo
+                {
+                    index = 36,
+                    name = "最大RZ",
+                    min = -180f,
+                    max = 180f,
+                    step = 0.1f,
+                    defaultValue = 0f,
                 }
             },
         };
@@ -271,12 +331,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public ValueData offsetRangeValue => this["offsetRange"];
         public ValueData glowWidthValue => this["glowWidth"];
         public ValueData segmentRangeValue => this["segmentRange"];
-        public ValueData autoPositionValue => this["autoPosition"];
         public ValueData autoRotationValue => this["autoRotation"];
         public ValueData autoColorValue => this["autoColor"];
         public ValueData autoLaserInfoValue => this["autoLaserInfo"];
         public ValueData autoVisibleValue => this["autoVisible"];
         public ValueData zTestValue => this["zTest"];
+        public ValueData[] rotationMinValues => new ValueData[] { this["rotationMinX"], this["rotationMinY"], this["rotationMinZ"] };
+        public ValueData[] rotationMaxValues => new ValueData[] { this["rotationMaxX"], this["rotationMaxY"], this["rotationMaxZ"] };
 
         public CustomValueInfo intensityInfo => CustomValueInfoMap["intensity"];
         public CustomValueInfo laserRangeInfo => CustomValueInfoMap["laserRange"];
@@ -288,7 +349,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public CustomValueInfo offsetRangeInfo => CustomValueInfoMap["offsetRange"];
         public CustomValueInfo glowWidthInfo => CustomValueInfoMap["glowWidth"];
         public CustomValueInfo segmentRangeInfo => CustomValueInfoMap["segmentRange"];
-        public CustomValueInfo autoPositionInfo => CustomValueInfoMap["autoPosition"];
         public CustomValueInfo autoRotationInfo => CustomValueInfoMap["autoRotation"];
         public CustomValueInfo autoColorInfo => CustomValueInfoMap["autoColor"];
         public CustomValueInfo autoLaserInfoInfo => CustomValueInfoMap["autoLaserInfo"];
@@ -355,12 +415,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => segmentRangeValue.intValue = value;
         }
 
-        public bool autoPosition
-        {
-            get => autoPositionValue.boolValue;
-            set => autoPositionValue.boolValue = value;
-        }
-
         public bool autoRotation
         {
             get => autoRotationValue.boolValue;
@@ -391,13 +445,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => zTestValue.boolValue = value;
         }
 
+        public Vector3 rotationMin
+        {
+            get => rotationMinValues.ToVector3();
+            set => rotationMinValues.FromVector3(value);
+        }
+
+        public Vector3 rotationMax
+        {
+            get => rotationMaxValues.ToVector3();
+            set => rotationMaxValues.FromVector3(value);
+        }
+
         public void FromStageLaserController(StageLaserController controller)
         {
             var laserInfo = controller.laserInfo;
 
             position = controller.position;
-            eulerAngles = controller.rotationMin;
-            subEulerAngles = controller.rotationMax;
+            eulerAngles = controller.eulerAngles;
             color = controller.color1;
             subColor = controller.color2;
             visible = controller.visible;
@@ -412,11 +477,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             glowWidth = laserInfo.glowWidth;
             segmentRange = laserInfo.segmentRange;
             zTest = laserInfo.zTest;
-            autoPosition = controller.autoPosition;
             autoRotation = controller.autoRotation;
             autoColor = controller.autoColor;
             autoLaserInfo = controller.autoLaserInfo;
             autoVisible = controller.autoVisible;
+            rotationMin = controller.rotationMin;
+            rotationMax = controller.rotationMax;
         }
     }
 }

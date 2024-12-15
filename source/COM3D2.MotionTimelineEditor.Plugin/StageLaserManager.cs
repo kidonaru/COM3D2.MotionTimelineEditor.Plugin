@@ -204,12 +204,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var groupIndex = controllers.Count;
             var go = new GameObject("StageLaserController");
-            go.transform.parent = transform;
+            go.transform.SetParent(transform, false);
+
             var controller = go.AddComponent<StageLaserController>();
             controller.groupIndex = groupIndex;
             controller.isManualUpdate = true;
             controllers.Add(controller);
-            
+
             if (notify)
             {
                 UpdateLasers();

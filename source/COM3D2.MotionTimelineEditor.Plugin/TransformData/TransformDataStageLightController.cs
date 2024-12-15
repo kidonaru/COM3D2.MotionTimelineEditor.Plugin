@@ -64,8 +64,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _tangentValues.AddRange(subPositionValues);
                     _tangentValues.AddRange(eulerAnglesValues);
                     _tangentValues.AddRange(subEulerAnglesValues);
-                    _tangentValues.AddRange(colorValues);
-                    _tangentValues.AddRange(subColorValues);
                     _tangentValues.AddRange(new ValueData[] { values[21], values[22] });
                 }
                 return _tangentValues.ToArray();

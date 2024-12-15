@@ -169,11 +169,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 laser.visible = start.visible;
             }
 
-            if (!controller.autoPosition)
-            {
-                laser.position = start.position;
-            }
-
             if (!controller.autoRotation)
             {
                 laser.eulerAngles = start.eulerAngles;
@@ -225,17 +220,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (!controller.autoVisible)
             {
                 laser.visible = start.visible;
-            }
-
-            if (!controller.autoPosition)
-            {
-                laser.position = PluginUtils.HermiteValues(
-                    t0,
-                    t1,
-                    start.positionValues,
-                    end.positionValues,
-                    t
-                ).ToVector3();
             }
 
             if (!controller.autoRotation)
@@ -293,8 +277,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             controller.visible = start.visible;
 
             controller.position = start.position;
-            controller.rotationMin = start.eulerAngles;
-            controller.rotationMax = start.subEulerAngles;
+            controller.eulerAngles = start.eulerAngles;
+            controller.rotationMin = start.rotationMin;
+            controller.rotationMax = start.rotationMax;
             controller.color1 = start.color;
             controller.color2 = start.subColor;
 
@@ -313,7 +298,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             laserInfo.segmentRange = start.segmentRange;
             laserInfo.zTest = start.zTest;
 
-            controller.autoPosition = start.autoPosition;
             controller.autoRotation = start.autoRotation;
             controller.autoColor = start.autoColor;
             controller.autoLaserInfo = start.autoLaserInfo;
@@ -334,32 +318,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var t0 = motion.stFrame * timeline.frameDuration;
             var t1 = motion.edFrame * timeline.frameDuration;
 
-            if (controller.autoPosition)
-            {
-                controller.position = PluginUtils.HermiteValues(
-                    t0,
-                    t1,
-                    start.positionValues,
-                    end.positionValues,
-                    t
-                ).ToVector3();
-            }
+            controller.position = PluginUtils.HermiteValues(
+                t0,
+                t1,
+                start.positionValues,
+                end.positionValues,
+                t
+            ).ToVector3();
+
+            controller.eulerAngles = PluginUtils.HermiteValues(
+                t0,
+                t1,
+                start.eulerAnglesValues,
+                end.eulerAnglesValues,
+                t
+            ).ToVector3();
 
             if (controller.autoRotation)
             {
                 controller.rotationMin = PluginUtils.HermiteValues(
                     t0,
                     t1,
-                    start.eulerAnglesValues,
-                    end.eulerAnglesValues,
+                    start.rotationMinValues,
+                    end.rotationMinValues,
                     t
                 ).ToVector3();
 
                 controller.rotationMax = PluginUtils.HermiteValues(
                     t0,
                     t1,
-                    start.subEulerAnglesValues,
-                    end.subEulerAnglesValues,
+                    start.rotationMaxValues,
+                    end.rotationMaxValues,
                     t
                 ).ToVector3();
             }
@@ -610,25 +599,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var updateTransform = false;
             var defaultTrans = TransformDataStageLaserController.defaultTrans;
 
-            updateTransform |= view.DrawToggle("一括表示設定", controller.autoVisible, 200, 20, newValue =>
-            {
-                controller.autoVisible = newValue;
-            });
-
-            if (controller.autoVisible)
-            {
-                updateTransform |= view.DrawToggle("表示", controller.visible, 120, 20, newValue =>
-                {
-                    controller.visible = newValue;
-                });
-            }
-
-            updateTransform |= view.DrawToggle("一括位置設定", controller.autoPosition, 200, 20, newValue =>
-            {
-                controller.autoPosition = newValue;
-            });
-
-            if (controller.autoPosition)
             {
                 var initialPosition = defaultTrans.initialPosition;
                 var transformCache = view.GetTransformCache(null);
@@ -648,18 +618,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            updateTransform |= view.DrawToggle("一括回転設定", controller.autoRotation, 200, 20, newValue =>
-            {
-                controller.autoRotation = newValue;
-            });
-
-            if (controller.autoRotation)
             {
                 var initialEulerAngles = defaultTrans.initialEulerAngles;
                 var transformCache = view.GetTransformCache(null);
-                transformCache.eulerAngles = controller.rotationMin;
+                transformCache.eulerAngles = controller.eulerAngles;
 
-                view.DrawLabel("最小回転", 200, 20);
+                view.DrawLabel("回転", 200, 20);
 
                 updateTransform |= DrawEulerAngles(
                     view,
@@ -670,20 +634,65 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (updateTransform)
                 {
-                    controller.rotationMin = transformCache.eulerAngles;
+                    controller.eulerAngles = transformCache.eulerAngles;
                 }
+            }
 
-                initialEulerAngles = defaultTrans.initialSubEulerAngles;
-                transformCache = view.GetTransformCache(null);
-                transformCache.eulerAngles = controller.rotationMax;
+            updateTransform |= view.DrawToggle("一括表示設定", controller.autoVisible, 200, 20, newValue =>
+            {
+                controller.autoVisible = newValue;
+            });
 
-                view.DrawLabel("最大回転", 200, 20);
+            if (controller.autoVisible)
+            {
+                updateTransform |= view.DrawToggle("表示", controller.visible, 120, 20, newValue =>
+                {
+                    controller.visible = newValue;
+                });
+            }
 
-                updateTransform |= DrawSubEulerAngles(
+            updateTransform |= view.DrawToggle("一括回転設定", controller.autoRotation, 200, 20, newValue =>
+            {
+                controller.autoRotation = newValue;
+            });
+
+            if (controller.autoRotation)
+            {
+                var initialEulerAngles = defaultTrans.initialRotationMin;
+                var transformCache = view.GetTransformCache(null);
+                transformCache.eulerAngles = controller.rotationMin;
+
+                var prevBone = GetPrevBone(timelineManager.currentFrameNo, controller.name);
+                var prevTransform = prevBone != null ? prevBone.transform as TransformDataStageLaserController : null;
+                var prevAngles = prevTransform != null ? prevTransform.rotationMin : initialEulerAngles;
+
+                view.DrawLabel("最小回転", 200, 20);
+
+                updateTransform |= DrawEulerAngles(
                     view,
                     transformCache,
                     TransformEditType.全て,
-                    controller.name,
+                    prevAngles,
+                    initialEulerAngles);
+
+                if (updateTransform)
+                {
+                    controller.rotationMin = transformCache.eulerAngles;
+                }
+
+                initialEulerAngles = defaultTrans.initialRotationMax;
+                transformCache = view.GetTransformCache(null);
+                transformCache.eulerAngles = controller.rotationMax;
+
+                prevAngles = prevTransform != null ? prevTransform.rotationMax : initialEulerAngles;
+
+                view.DrawLabel("最大回転", 200, 20);
+
+                updateTransform |= DrawEulerAngles(
+                    view,
+                    transformCache,
+                    TransformEditType.全て,
+                    prevAngles,
                     initialEulerAngles);
 
                 if (updateTransform)
@@ -870,18 +879,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var transformCache = view.GetTransformCache();
             var defaultTrans = TransformDataStageLaser.defaultTrans;
-            transformCache.position = laser.position;
             transformCache.eulerAngles = laser.eulerAngles;
             var initialPosition = defaultTrans.initialPosition;
             var initialEulerAngles = defaultTrans.initialEulerAngles;
             var initialScale = Vector3.one;
             var updateTransform = false;
             var editType = TransformEditType.全て;
-
-            if (!controller.autoPosition)
-            {
-                updateTransform |= DrawPosition(view, transformCache, editType, initialPosition);
-            }
 
             if (!controller.autoRotation)
             {
@@ -890,7 +893,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (updateTransform)
             {
-                laser.position = transformCache.position;
                 laser.eulerAngles = transformCache.eulerAngles;
             }
 
