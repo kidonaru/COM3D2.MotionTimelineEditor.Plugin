@@ -11,6 +11,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [System.Serializable]
     public class StageLaserInfo
     {
+        public float intensity = 1f;
         public float laserRange = 13f;
         public float laserWidth = 0.05f;
         public float falloffExp = 0.2f;
@@ -21,10 +22,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float glowWidth = 0.1f;
         public int segmentRange = 10;
         public bool zTest = true;
-        public float intensity = 1f;
 
         public void CopyFrom(StageLaserInfo other)
         {
+            intensity = other.intensity;
             laserRange = other.laserRange;
             laserWidth = other.laserWidth;
             falloffExp = other.falloffExp;
@@ -35,7 +36,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             glowWidth = other.glowWidth;
             segmentRange = other.segmentRange;
             zTest = other.zTest;
-            intensity = other.intensity;
         }
     }
 
@@ -198,6 +198,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (autoLaserInfo)
                 {
+                    laser.intensity = laserInfo.intensity;
                     laser.laserRange = laserInfo.laserRange;
                     laser.laserWidth = laserInfo.laserWidth;
                     laser.falloffExp = laserInfo.falloffExp;
@@ -208,7 +209,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     laser.glowWidth = laserInfo.glowWidth;
                     laser.segmentRange = laserInfo.segmentRange;
                     laser.zTest = laserInfo.zTest;
-                    laser.intensity = laserInfo.intensity;
                 }
             }
         }

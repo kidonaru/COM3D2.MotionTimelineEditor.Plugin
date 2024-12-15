@@ -1712,9 +1712,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             string boneName,
             Vector3 initialEulerAngles)
         {
-            var angles = transform.eulerAngles;
             var prevBone = GetPrevBone(timelineManager.currentFrameNo, boneName);
             var prevAngles = prevBone != null ? prevBone.transform.eulerAngles : initialEulerAngles;
+
+            return DrawEulerAngles(view, transform, editType, prevAngles, initialEulerAngles);
+        }
+
+        protected bool DrawSubEulerAngles(
+            GUIView view,
+            TransformCache transform,
+            TransformEditType editType,
+            string boneName,
+            Vector3 initialEulerAngles)
+        {
+            var prevBone = GetPrevBone(timelineManager.currentFrameNo, boneName);
+            var prevAngles = prevBone != null ? prevBone.transform.subEulerAngles : initialEulerAngles;
+
+            return DrawEulerAngles(view, transform, editType, prevAngles, initialEulerAngles);
+        }
+
+        protected bool DrawEulerAngles(
+            GUIView view,
+            TransformCache transform,
+            TransformEditType editType,
+            Vector3 prevAngles,
+            Vector3 initialEulerAngles)
+        {
+            var angles = transform.eulerAngles;
             angles = TransformDataBase.GetFixedEulerAngles(angles, prevAngles);
             var updateTransform = false;
             var isFull = editType == TransformEditType.全て || editType == TransformEditType.回転;

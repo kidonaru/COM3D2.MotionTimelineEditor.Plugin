@@ -108,6 +108,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         [SerializeField]
+        private float _intensity = 1f;
+        public float intensity
+        {
+            get
+            {
+                return _intensity;
+            }
+            set
+            {
+                if (_intensity == value) return;
+                _intensity = value;
+                UpdateMesh();
+            }
+        }
+
+        [SerializeField]
         private float _laserRange = 13.0f;
         public float laserRange
         {
@@ -272,22 +288,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        [SerializeField]
-        private float _intensity = 1f;
-        public float intensity
-        {
-            get
-            {
-                return _intensity;
-            }
-            set
-            {
-                if (_intensity == value) return;
-                _intensity = value;
-                UpdateMesh();
-            }
-        }
-
         public bool visible
         {
             get
@@ -392,6 +392,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             eulerAngles = other.eulerAngles;
             color1 = other.color1;
             color2 = other.color2;
+            intensity = other.intensity;
             laserRange = other.laserRange;
             laserWidth = other.laserWidth;
             falloffExp = other.falloffExp;
@@ -402,7 +403,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             glowWidth = other.glowWidth;
             segmentRange = other.segmentRange;
             zTest = other.zTest;
-            intensity = other.intensity;
         }
 
         public void Initialize()

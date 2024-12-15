@@ -48,6 +48,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     if (view.DrawButton("-", 20, 20))
                     {
                         bgModelManager.DeleteModelBySourceName(info.sourceName);
+                        break;
                     }
 
                     view.DrawLabel(models.Count.ToString(), 20, 20);
@@ -55,6 +56,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     if (view.DrawButton("+", 20, 20))
                     {
                         bgModelManager.AddModelBySourceName(info.sourceName);
+                        break;
                     }
                 }
                 view.EndLayout();

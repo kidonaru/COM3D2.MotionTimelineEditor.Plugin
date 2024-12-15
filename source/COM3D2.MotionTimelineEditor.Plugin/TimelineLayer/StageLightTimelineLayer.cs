@@ -680,7 +680,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 view.DrawLabel("最大回転", 200, 20);
 
-                updateTransform |= DrawEulerAngles(
+                updateTransform |= DrawSubEulerAngles(
                     view,
                     transformCache,
                     TransformEditType.全て,

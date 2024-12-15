@@ -683,6 +683,47 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
             }
+
+            if (version < 21)
+            {
+                // StageLaserTimelineLayerのintensityのindex変更
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "StageLaserTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+                                if (transform.type == TransformType.StageLaser)
+                                {
+                                    var values = new List<float>(transform.values);
+                                    if (values.Count > 26)
+                                    {
+                                        PluginUtils.LogDebug("Change intensity index in StageLaserTimelineLayer name={0}", transform.name);
+                                        values.Insert(16, values[26]);
+                                        values.RemoveAt(27);
+                                    }
+                                    transform.values = values.ToArray();
+                                }
+                                else
+                                {
+                                    var values = new List<float>(transform.values);
+                                    if (values.Count > 33)
+                                    {
+                                        PluginUtils.LogDebug("Change intensity index in StageLaserTimelineLayer name={0}", transform.name);
+                                        values.Insert(18, values[33]);
+                                        values.RemoveAt(34);
+                                    }
+                                    transform.values = values.ToArray();
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 }
