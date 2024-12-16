@@ -89,7 +89,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_color == value) return;
                 _color = value;
-                UpdateMaterial();
+                _requestedMaterialUpdate = true;
             }
         }
 
@@ -106,8 +106,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_spotAngle == value) return;
                 _spotAngle = value;
-                UpdateMesh();
-                UpdateMaterial();
+                _requestedMeshUpdate = true;
+                _requestedMaterialUpdate = true;
             }
         }
 
@@ -123,8 +123,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_spotRange == value) return;
                 _spotRange = value;
-                UpdateMesh();
-                UpdateMaterial();
+                _requestedMeshUpdate = true;
+                _requestedMaterialUpdate = true;
             }
         }
 
@@ -141,8 +141,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_rangeMultiplier == value) return;
                 _rangeMultiplier = value;
-                UpdateMesh();
-                UpdateMaterial();
+                _requestedMeshUpdate = true;
+                _requestedMaterialUpdate = true;
             }
         }
 
@@ -159,7 +159,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_falloffExp == value) return;
                 _falloffExp = value;
-                UpdateMaterial();
+                _requestedMaterialUpdate = true;
             }
         }
 
@@ -176,7 +176,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_noiseStrength == value) return;
                 _noiseStrength = value;
-                UpdateMaterial();
+                _requestedMaterialUpdate = true;
             }
         }
 
@@ -193,7 +193,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_noiseScale == value) return;
                 _noiseScale = value;
-                UpdateMaterial();
+                _requestedMaterialUpdate = true;
             }
         }
 
@@ -210,7 +210,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_coreRadius == value) return;
                 _coreRadius = value;
-                UpdateMaterial();
+                _requestedMaterialUpdate = true;
             }
         }
 
@@ -226,7 +226,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_offsetRange == value) return;
                 _offsetRange = value;
-                UpdateMesh();
+                _requestedMeshUpdate = true;
             }
         }
 
@@ -243,7 +243,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_segmentAngle == value) return;
                 _segmentAngle = value;
-                UpdateMesh();
+                _requestedMeshUpdate = true;
             }
         }
 
@@ -260,7 +260,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_segmentRange == value) return;
                 _segmentRange = value;
-                UpdateMesh();
+                _requestedMeshUpdate = true;
             }
         }
 
@@ -276,7 +276,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_zTest == value) return;
                 _zTest = value;
-                UpdateMaterial();
+                _requestedMaterialUpdate = true;
             }
         }
 
@@ -308,8 +308,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public static Vector3 DefaultPosition = new Vector3(0f, 10f, 0f);
-
         public static Vector3 DefaultEulerAngles = new Vector3(90f, 0f, 0f);
+
+        private bool _requestedMeshUpdate = false;
+        private bool _requestedMaterialUpdate = false;
 
         private GameObject _meshObject;
         private MeshFilter _meshFilter;
@@ -368,11 +370,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!Application.isPlaying)
             {
-                Update();
+                LateUpdate();
             }
         }
 
-        void Update()
+        void LateUpdate()
         {
             if (spotLight != null)
             {
@@ -388,6 +390,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     spotLight.range = spotRange;
                 }
+            }
+
+            if (_requestedMeshUpdate)
+            {
+                UpdateMesh();
+                _requestedMeshUpdate = false;
+            }
+
+            if (_requestedMaterialUpdate)
+            {
+                UpdateMaterial();
+                _requestedMaterialUpdate = false;
             }
 
             UpdateTransform();

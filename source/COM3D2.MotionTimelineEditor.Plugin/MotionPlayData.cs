@@ -113,7 +113,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var current = motions[i];
                 var next = motions[i + 1];
 
-                if (current.stFrame + 1 == next.stFrame)
+                if (current.stFrameInEdit + 1 == next.stFrameInEdit)
                 {
                     if (singleFrameType == SingleFrameType.Delay)
                     {
@@ -121,13 +121,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         {
                             prev.edFrame = current.edFrame;
                         }
+                        current.stFrame = current.edFrame;
                     }
                     if (singleFrameType == SingleFrameType.Advance)
                     {
                         next.stFrame = current.stFrame;
+                        current.edFrame = current.stFrame;
                     }
-                    motions.Remove(current);
-                    i--;
                 }
             }
         }

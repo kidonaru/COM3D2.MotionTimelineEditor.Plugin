@@ -217,11 +217,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var t0 = motion.stFrame * timeline.frameDuration;
             var t1 = motion.edFrame * timeline.frameDuration;
 
-            if (!controller.autoVisible)
-            {
-                laser.visible = start.visible;
-            }
-
             if (!controller.autoRotation)
             {
                 laser.eulerAngles = PluginUtils.HermiteValues(
