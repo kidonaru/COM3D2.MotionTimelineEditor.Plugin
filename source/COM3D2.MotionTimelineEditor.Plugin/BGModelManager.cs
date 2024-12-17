@@ -358,7 +358,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var sourceObj = sourceinfo.gameObject;
             var go = Object.Instantiate(sourceObj);
             var transform = go.transform;
-            transform.SetParent(sourceObj.transform.parent, true);
+            transform.SetParent(sourceObj.transform.parent, false);
+            transform.localPosition = sourceinfo.initialPosition;
+            transform.localRotation = sourceinfo.initialRotation;
+            transform.localScale = sourceinfo.initialScale;
+
             go.name = BoneUtils.ConvertToBoneName(name);
             var parentPath = BoneUtils.ConvertToParentPath(name);
 

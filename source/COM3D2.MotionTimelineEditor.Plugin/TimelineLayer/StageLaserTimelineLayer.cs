@@ -562,7 +562,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.margin = 0;
 
-                view.DrawLabel("ライト数", view.labelWidth, 20);
+                view.DrawLabel("レーザー数", view.labelWidth, 20);
 
                 view.DrawIntField(new GUIView.IntFieldOption
                 {
@@ -618,7 +618,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var transformCache = view.GetTransformCache(null);
                 transformCache.eulerAngles = controller.eulerAngles;
 
-                view.DrawLabel("回転", 200, 20);
+                view.DrawLabel("角度", 200, 20);
 
                 updateTransform |= DrawEulerAngles(
                     view,
@@ -646,7 +646,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 });
             }
 
-            updateTransform |= view.DrawToggle("一括回転設定", controller.autoRotation, 200, 20, newValue =>
+            updateTransform |= view.DrawToggle("一括角度設定", controller.autoRotation, 200, 20, newValue =>
             {
                 controller.autoRotation = newValue;
             });
@@ -661,7 +661,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var prevTransform = prevBone != null ? prevBone.transform as TransformDataStageLaserController : null;
                 var prevAngles = prevTransform != null ? prevTransform.rotationMin : initialEulerAngles;
 
-                view.DrawLabel("最小回転", 200, 20);
+                view.DrawLabel("最小角度", 200, 20);
 
                 updateTransform |= DrawEulerAngles(
                     view,
@@ -681,7 +681,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 prevAngles = prevTransform != null ? prevTransform.rotationMax : initialEulerAngles;
 
-                view.DrawLabel("最大回転", 200, 20);
+                view.DrawLabel("最大角度", 200, 20);
 
                 updateTransform |= DrawEulerAngles(
                     view,
@@ -720,7 +720,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     c => controller.color2 = c);
             }
 
-            updateTransform |= view.DrawToggle("一括ライト情報設定", controller.autoLaserInfo, 200, 20, newValue =>
+            updateTransform |= view.DrawToggle("一括レーザー情報設定", controller.autoLaserInfo, 200, 20, newValue =>
             {
                 controller.autoLaserInfo = newValue;
             });
@@ -839,7 +839,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var lasers = controller.lasers;
             if (lasers.Count == 0)
             {
-                view.DrawLabel("ライトが存在しません", 200, 20);
+                view.DrawLabel("レーザーが存在しません", 200, 20);
                 return;
             }
 
@@ -850,7 +850,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (laser == null || laser.transform == null)
             {
-                view.DrawLabel("ライトを選択してください", 200, 20);
+                view.DrawLabel("レーザーを選択してください", 200, 20);
                 return;
             }
 

@@ -650,7 +650,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            updateTransform |= view.DrawToggle("一括回転設定", controller.autoRotation, 200, 20, newValue =>
+            updateTransform |= view.DrawToggle("一括角度設定", controller.autoRotation, 200, 20, newValue =>
             {
                 controller.autoRotation = newValue;
             });
@@ -661,7 +661,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var transformCache = view.GetTransformCache(null);
                 transformCache.eulerAngles = controller.rotationMin;
 
-                view.DrawLabel("最小回転", 200, 20);
+                view.DrawLabel("最小角度", 200, 20);
 
                 updateTransform |= DrawEulerAngles(
                     view,
@@ -678,7 +678,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 transformCache = view.GetTransformCache(null);
                 transformCache.eulerAngles = controller.rotationMax;
 
-                view.DrawLabel("最大回転", 200, 20);
+                view.DrawLabel("最大角度", 200, 20);
 
                 updateTransform |= DrawSubEulerAngles(
                     view,

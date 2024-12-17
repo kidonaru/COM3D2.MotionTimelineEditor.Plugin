@@ -1,0 +1,26 @@
+@startuml
+scale 1 as 20 pixels
+
+concise "調整なし" as N
+concise "1F遅らせる" as P
+concise "1F早める" as F
+
+@N
+0 is A #bef3fe
+9 is B #ff8755
+10 is C #ff8755
+11 is D #c8fcc8
+20 is {hidden}
+
+@P
+0 is A #bef3fe
+10 is B #ff8755
+11 is D #c8fcc8
+20 is {hidden}
+
+@F
+0 is A #bef3fe
+9 is C #ff8755
+10 is D #c8fcc8
+20 is {hidden}
+@enduml

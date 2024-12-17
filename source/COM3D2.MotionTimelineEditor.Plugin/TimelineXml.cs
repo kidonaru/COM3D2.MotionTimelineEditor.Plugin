@@ -570,6 +570,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
+#if DEBUG
             if (version < 17)
             {
                 // StageLightTimelineLayerのrotationをeulerAnglesに変更
@@ -777,6 +778,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
             }
+#endif
+
         }
     }
 }
