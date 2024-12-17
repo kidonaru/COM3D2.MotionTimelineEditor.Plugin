@@ -190,7 +190,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timelineManager.ApplyCurrentFrame(true);
             });
 
-            view.DrawToggle("カメラの補間にTangentを使用", timeline.isTangentCamera, -1, 20, newValue =>
+            view.DrawToggle("カメラのタンジェント補間を有効化", timeline.isTangentCamera, -1, 20, newValue =>
             {
                 timeline.isTangentCamera = newValue;
 
@@ -202,7 +202,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             });
 
-            view.DrawToggle("メイド移動の補間にTangentを使用", timeline.isTangentMove, -1, 20, newValue =>
+            view.DrawToggle("メイド移動のタンジェント補間を有効化", timeline.isTangentMove, -1, 20, newValue =>
             {
                 timeline.isTangentMove = newValue;
 
@@ -214,7 +214,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             });
 
-            view.DrawToggle("ライトの補間にTangentを使用", timeline.isTangentLight, -1, 20, newValue =>
+            view.DrawToggle("ライトのタンジェント補間を有効化", timeline.isTangentLight, -1, 20, newValue =>
             {
                 timeline.isTangentLight = newValue;
 
