@@ -61,16 +61,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
+            if (indexUpdated)
+            {
+                ApplyMotionInit(motion, t);
+            }
+
+            if (timeline.isTangentMove)
+            {
+                ApplyMotionUpdateTangent(motion, t);
+            }
+            else
+            {
+                ApplyMotionUpdateEasing(motion, t);
+            }
+        }
+
+        private void ApplyMotionInit(MotionData motion, float t)
+        {
+            var transform = maid.transform;
+            var start = motion.start;
+
+            transform.localPosition = start.position;
+            transform.localRotation = Quaternion.Euler(start.eulerAngles);
+            transform.localScale = start.scale;
+        }
+
+        private void ApplyMotionUpdateEasing(MotionData motion, float t)
+        {
             var transform = maid.transform;
 
             var start = motion.start;
             var end = motion.end;
-
-            if (indexUpdated)
-            {
-                transform.localPosition = start.position;
-                transform.localRotation = Quaternion.Euler(start.eulerAngles);
-            }
 
             float easingTime = CalcEasingValue(t, start.easing);
 
@@ -82,6 +103,53 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (start.eulerAngles != end.eulerAngles)
             {
                 transform.localRotation = Quaternion.Euler(Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime));
+            }
+
+            if (start.scale != end.scale)
+            {
+                transform.localScale = Vector3.Lerp(start.scale, end.scale, easingTime);
+            }
+        }
+
+        private void ApplyMotionUpdateTangent(MotionData motion, float t)
+        {
+            var transform = maid.transform;
+
+            var start = motion.start;
+            var end = motion.end;
+
+            var t0 = motion.stFrame * timeline.frameDuration;
+            var t1 = motion.edFrame * timeline.frameDuration;
+
+            if (start.position != end.position)
+            {
+                transform.localPosition = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    start.positionValues,
+                    end.positionValues,
+                    t);
+            }
+
+            if (start.eulerAngles != end.eulerAngles)
+            {
+                var eulerAngles = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    start.eulerAnglesValues,
+                    end.eulerAnglesValues,
+                    t);
+                transform.localRotation = Quaternion.Euler(eulerAngles);
+            }
+
+            if (start.scale != end.scale)
+            {
+                transform.localScale = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    start.scaleValues,
+                    end.scaleValues,
+                    t);
             }
         }
 
@@ -103,6 +171,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var trans = CreateTransformData<TransformDataMove>(MoveBoneName);
             trans.position = maid.transform.localPosition;
             trans.eulerAngles = maid.transform.localEulerAngles;
+            trans.scale = maid.transform.localScale;
+            trans.easing = GetEasing(frame.frameNo, MoveBoneName);
 
             var bone = frame.CreateBone(trans);
             frame.UpdateBone(bone);
@@ -213,7 +283,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view,
                 transform,
                 TransformEditType.全て,
-                DrawMaskPositonAndRotation,
+                DrawMaskAll,
                 MoveBoneName,
                 initialPosition,
                 initialEulerAngles,

@@ -1391,6 +1391,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return null;
         }
 
+        public List<ITimelineLayer> GetLayers(string className)
+        {
+            var list = new List<ITimelineLayer>();
+            foreach (var layer in layers)
+            {
+                if (layer.className == className)
+                {
+                    list.Add(layer);
+                }
+            }
+            return list;
+        } 
+
         public void ChangeActiveLayer(string className, int slotNo)
         {
             var layer = GetLayer(className, slotNo);

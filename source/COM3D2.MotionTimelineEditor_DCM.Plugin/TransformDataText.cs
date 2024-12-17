@@ -33,11 +33,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public override bool hasPosition => true;
 
-        public override bool hasEulerAngles =>  true;
+        public override bool hasEulerAngles => true;
 
         public override bool hasScale => true;
 
-        public override bool hasColor =>  true;
+        public override bool hasColor => true;
 
         public override bool hasEasing => true;
 

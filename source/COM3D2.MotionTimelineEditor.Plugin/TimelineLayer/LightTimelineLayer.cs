@@ -77,39 +77,183 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var start = motion.start as TransformDataLight;
-            var end = motion.end as TransformDataLight;
+            if (indexUpdated)
+            {
+                ApplyMotionInit(motion, t, stat);
+            }
 
-            float easingTime = CalcEasingValue(t, start.easing);
+            if (timeline.isTangentLight)
+            {
+                ApplyMotionUpdateTangent(motion, t, stat);
+            }
+            else
+            {
+                ApplyMotionUpdateEasing(motion, t, stat);
+            }
+        }
+
+        private void ApplyMotionInit(MotionData motion, float t, StudioLightStat stat)
+        {
+            var light = stat.light;
+            var followLight = stat.followLight;
+
+            var start = motion.start as TransformDataLight;
 
             followLight.maidSlotNo = start.maidSlotNo;
 
-            var position = Vector3.Lerp(start.position, end.position, easingTime);
-            if (followLight.isFollow)
-            {
-                followLight.offset = position;
-            }
-            else
-            {
-                transform.localPosition = position;
-            }
+            stat.position = start.position;
+            stat.eulerAngles = start.eulerAngles;
 
-            transform.localEulerAngles = Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime);
-
-            if (timeline.isLightColorEasing)
-            {
-                light.color = Color.Lerp(start.color, end.color, easingTime);
-            }
-            else
-            {
-                light.color = start.color;
-            }
-
+            light.color = start.color;
             light.range = start.range;
             light.intensity = start.intensity;
             light.spotAngle = start.spotAngle;
             light.shadowStrength = start.shadowStrength;
             light.shadowBias = start.shadowBias;
+
+            lightManager.ApplyLight(stat);
+        }
+
+        private void ApplyMotionUpdateEasing(MotionData motion, float t, StudioLightStat stat)
+        {
+            var light = stat.light;
+
+            var start = motion.start as TransformDataLight;
+            var end = motion.end as TransformDataLight;
+
+            float easingTime = CalcEasingValue(t, start.easing);
+
+            if (start.position != end.position)
+            {
+                stat.position = Vector3.Lerp(start.position, end.position, easingTime);
+            }
+
+            if (start.eulerAngles != end.eulerAngles)
+            {
+                stat.eulerAngles = Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime);
+            }
+
+            if (timeline.isLightColorEasing)
+            {
+                if (start.color != end.color)
+                {
+                    light.color = Color.Lerp(start.color, end.color, easingTime);
+                }
+            }
+
+            if (timeline.isLightExtraEasing)
+            {
+                if (start.range != end.range)
+                {
+                    light.range = Mathf.Lerp(start.range, end.range, easingTime);
+                }
+                if (start.intensity != end.intensity)
+                {
+                    light.intensity = Mathf.Lerp(start.intensity, end.intensity, easingTime);
+                }
+                if (start.spotAngle != end.spotAngle)
+                {
+                    light.spotAngle = Mathf.Lerp(start.spotAngle, end.spotAngle, easingTime);
+                }
+                if (start.shadowStrength != end.shadowStrength)
+                {
+                    light.shadowStrength = Mathf.Lerp(start.shadowStrength, end.shadowStrength, easingTime);
+                }
+                if (start.shadowBias != end.shadowBias)
+                {
+                    light.shadowBias = Mathf.Lerp(start.shadowBias, end.shadowBias, easingTime);
+                }
+            }
+
+            lightManager.ApplyLight(stat);
+        }
+
+        private void ApplyMotionUpdateTangent(MotionData motion, float t, StudioLightStat stat)
+        {
+            var light = stat.light;
+
+            var start = motion.start as TransformDataLight;
+            var end = motion.end as TransformDataLight;
+
+            var t0 = motion.stFrame * timeline.frameDuration;
+            var t1 = motion.edFrame * timeline.frameDuration;
+
+            if (start.position != end.position)
+            {
+                stat.position = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    start.positionValues,
+                    end.positionValues,
+                    t);
+            }
+
+            if (start.eulerAngles != end.eulerAngles)
+            {
+                stat.eulerAngles = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    start.eulerAnglesValues,
+                    end.eulerAnglesValues,
+                    t);
+            }
+
+            if (timeline.isLightColorEasing)
+            {
+                if (start.color != end.color)
+                {
+                    light.color = Color.Lerp(start.color, end.color, t);
+                }
+            }
+
+            if (timeline.isLightExtraEasing)
+            {
+                if (start.range != end.range)
+                {
+                    light.range = PluginUtils.HermiteValue(
+                        t0,
+                        t1,
+                        start.rangeValue,
+                        end.rangeValue,
+                        t);
+                }
+                if (start.intensity != end.intensity)
+                {
+                    light.intensity = PluginUtils.HermiteValue(
+                        t0,
+                        t1,
+                        start.intensityValue,
+                        end.intensityValue,
+                        t);
+                }
+                if (start.spotAngle != end.spotAngle)
+                {
+                    light.spotAngle = PluginUtils.HermiteValue(
+                        t0,
+                        t1,
+                        start.spotAngleValue,
+                        end.spotAngleValue,
+                        t);
+                }
+                if (start.shadowStrength != end.shadowStrength)
+                {
+                    light.shadowStrength = PluginUtils.HermiteValue(
+                        t0,
+                        t1,
+                        start.shadowStrengthValue,
+                        end.shadowStrengthValue,
+                        t);
+                }
+                if (start.shadowBias != end.shadowBias)
+                {
+                    light.shadowBias = PluginUtils.HermiteValue(
+                        t0,
+                        t1,
+                        start.shadowBiasValue,
+                        end.shadowBiasValue,
+                        t);
+                }
+            }
 
             lightManager.ApplyLight(stat);
         }
@@ -162,18 +306,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var lightName = stat.name;
                 var light = stat.light;
-                var transform = stat.transform;
                 var followLight = stat.followLight;
 
-                var position = transform.localPosition;
-                if (followLight.isFollow)
-                {
-                    position = followLight.offset;
-                }
-
                 var trans = CreateTransformData<TransformDataLight>(lightName);
-                trans.position = position;
-                trans.eulerAngles = transform.localEulerAngles;
+                trans.position = stat.position;
+                trans.eulerAngles = stat.eulerAngles;
                 trans.color = light.color;
                 trans.range = light.range;
                 trans.intensity = light.intensity;

@@ -137,6 +137,44 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public Vector3 position
+        {
+            get
+            {
+                if (followLight.isFollow)
+                {
+                    return followLight.offset;
+                }
+                else
+                {
+                    return transform.localPosition;
+                }
+            }
+            set
+            {
+                if (followLight.isFollow)
+                {
+                    followLight.offset = value;
+                }
+                else
+                {
+                    transform.localPosition = value;
+                }
+            }
+        }
+
+        public Vector3 eulerAngles
+        {
+            get
+            {
+                return transform.localEulerAngles;
+            }
+            set
+            {
+                transform.localEulerAngles = value;
+            }
+        }
+
         public static readonly Vector3 DefaultPosition = new Vector3(0f, 1.9f, 0.4f);
 
 		public static readonly Vector3 DefaultRotation = new Vector3(40f, 180f, 0f);

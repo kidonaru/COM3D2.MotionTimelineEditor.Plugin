@@ -13,7 +13,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override bool hasPosition => true;
         public override bool hasEulerAngles => true;
-        public override bool hasColor =>  true;
+        public override bool hasColor => true;
         public override bool hasSubColor => true;
         public override bool hasVisible => true;
         public override bool hasTangent => true;

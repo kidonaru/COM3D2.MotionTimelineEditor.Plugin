@@ -190,29 +190,58 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timelineManager.ApplyCurrentFrame(true);
             });
 
-            view.DrawToggle("カメラの補間にTangentを使用", timeline.isTangentCamera, 200, 20, newValue =>
+            view.DrawToggle("カメラの補間にTangentを使用", timeline.isTangentCamera, -1, 20, newValue =>
             {
                 timeline.isTangentCamera = newValue;
 
-                var cameraLayer = timelineManager.GetLayer("CameraTimelineLayer", 0);
-                if (cameraLayer != null)
+                var targetLayer = timelineManager.GetLayer("CameraTimelineLayer", 0);
+                if (targetLayer != null)
                 {
-                    cameraLayer.InitTangent();
-                    cameraLayer.ApplyCurrentFrame(true);
+                    targetLayer.InitTangent();
+                    targetLayer.ApplyCurrentFrame(true);
                 }
             });
 
-            view.DrawToggle("ライトで色補間を有効化", timeline.isLightColorEasing, 200, 20, newValue =>
+            view.DrawToggle("メイド移動の補間にTangentを使用", timeline.isTangentMove, -1, 20, newValue =>
+            {
+                timeline.isTangentMove = newValue;
+
+                var targetLayers = timelineManager.GetLayers("MoveTimelineLayer");
+                foreach (var targetLayer in targetLayers)
+                {
+                    targetLayer.InitTangent();
+                    targetLayer.ApplyCurrentFrame(true);
+                }
+            });
+
+            view.DrawToggle("ライトの補間にTangentを使用", timeline.isTangentLight, -1, 20, newValue =>
+            {
+                timeline.isTangentLight = newValue;
+
+                var targetLayer = timelineManager.GetLayer("LightTimelineLayer", 0);
+                if (targetLayer != null)
+                {
+                    targetLayer.InitTangent();
+                    targetLayer.ApplyCurrentFrame(true);
+                }
+            });
+
+            view.DrawToggle("ライトで色補間を有効化", timeline.isLightColorEasing, -1, 20, newValue =>
             {
                 timeline.isLightColorEasing = newValue;
             });
 
-            view.DrawToggle("ポストエフェクトの色拡張", timeline.usePostEffectExtraColor, 200, 20, newValue =>
+            view.DrawToggle("ライトで拡張補間を有効化", timeline.isLightExtraEasing, -1, 20, newValue =>
+            {
+                timeline.isLightExtraEasing = newValue;
+            });
+
+            view.DrawToggle("ポストエフェクトの色拡張", timeline.usePostEffectExtraColor, -1, 20, newValue =>
             {
                 timeline.usePostEffectExtraColor = newValue;
             });
 
-            view.DrawToggle("ポストエフェクトのブレンド拡張", timeline.usePostEffectExtraBlend, 200, 20, newValue =>
+            view.DrawToggle("ポストエフェクトのブレンド拡張", timeline.usePostEffectExtraBlend, -1, 20, newValue =>
             {
                 timeline.usePostEffectExtraBlend = newValue;
             });

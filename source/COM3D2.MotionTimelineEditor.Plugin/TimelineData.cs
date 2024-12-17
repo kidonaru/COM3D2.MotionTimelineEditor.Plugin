@@ -152,7 +152,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class TimelineData
     {
-        public static readonly int CurrentVersion = 22;
+        public static readonly int CurrentVersion = 23;
         public static readonly TimelineData DefaultTimeline = new TimelineData();
 
         public int version = 0;
@@ -344,8 +344,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public SingleFrameType singleFrameType = SingleFrameType.Delay;
 
         public bool isTangentCamera = false;
+        public bool isTangentLight = false;
+        public bool isTangentMove = false;
 
         public bool isLightColorEasing = true;
+        public bool isLightExtraEasing = false;
 
         public List<int> stageLaserCountList = new List<int>();
 
@@ -776,7 +779,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             endFadeTime = xml.endFadeTime;
             singleFrameType = xml.singleFrameType;
             isTangentCamera = xml.isTangentCamera;
+            isTangentLight = xml.isTangentLight;
+            isTangentMove = xml.isTangentMove;
             isLightColorEasing = xml.isLightColorEasing;
+            isLightExtraEasing = xml.isLightExtraEasing;
             stageLaserCountList = xml.stageLaserCountList.ToList();
             stageLightCountList = xml.stageLightCountList.ToList();
             activeTrackIndex = xml.activeTrackIndex;
@@ -907,7 +913,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.endFadeTime = endFadeTime;
             xml.singleFrameType = singleFrameType;
             xml.isTangentCamera = isTangentCamera;
+            xml.isTangentLight = isTangentLight;
+            xml.isTangentMove = isTangentMove;
             xml.isLightColorEasing = isLightColorEasing;
+            xml.isLightExtraEasing = isLightExtraEasing;
             xml.stageLaserCountList = stageLaserCountList.ToList();
             xml.stageLightCountList = stageLightCountList.ToList();
             xml.activeTrackIndex = activeTrackIndex;

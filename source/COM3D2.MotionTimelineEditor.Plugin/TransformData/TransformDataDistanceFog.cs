@@ -11,7 +11,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override int valueCount => 18;
 
-        public override bool hasColor =>  true;
+        public override bool hasColor => true;
 
         public override bool hasSubColor => true;
 

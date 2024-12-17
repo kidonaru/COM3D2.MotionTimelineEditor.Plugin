@@ -9,12 +9,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override int valueCount => 16;
 
         public override bool hasPosition => true;
-
-        public override bool hasEulerAngles =>  true;
-
-        public override bool hasColor =>  true;
-
-        public override bool hasEasing => true;
+        public override bool hasEulerAngles => true;
+        public override bool hasColor => true;
+        public override bool hasEasing => !timeline.isTangentLight;
+        public override bool hasTangent => timeline.isTangentLight;
 
         public override ValueData[] positionValues
         {
@@ -32,6 +30,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public override ValueData easingValue => values[9];
+
+        public override ValueData[] tangentValues => values;
 
         public TransformDataLight()
         {
@@ -95,15 +95,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public ValueData rangeValue => this["range"];
-
         public ValueData intensityValue => this["intensity"];
-
         public ValueData spotAngleValue => this["spotAngle"];
-
         public ValueData shadowStrengthValue => this["shadowStrength"];
-
         public ValueData shadowBiasValue => this["shadowBias"];
-
         public ValueData maidSlotNoValue => this["maidSlotNo"];
 
         public float range

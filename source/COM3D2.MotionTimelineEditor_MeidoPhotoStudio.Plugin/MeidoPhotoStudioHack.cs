@@ -518,7 +518,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             dragPointLight.Intensity = light.intensity;
             dragPointLight.SpotAngle = light.spotAngle;
             dragPointLight.ShadowStrength = light.shadowStrength;
-            light.shadowBias = light.shadowBias;
+            //light.shadowBias = light.shadowBias;
             light.enabled = stat.visible;
         }
 

@@ -142,8 +142,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("IsTangentCamera")]
         public bool isTangentCamera = false;
 
+        [XmlElement("IsTangentLight")]
+        public bool isTangentLight = false;
+
+        [XmlElement("IsTangentMove")]
+        public bool isTangentMove = false;
+
         [XmlElement("IsLightColorEasing")]
         public bool isLightColorEasing = true;
+
+        [XmlElement("IsLightExtraEasing")]
+        public bool isLightExtraEasing = false;
 
         [XmlElement("StageLaserCountList")]
         public List<int> stageLaserCountList = new List<int>();
@@ -780,6 +789,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 #endif
 
+            if (version < 23)
+            {
+                // MoveTimelineLayerにscaleを追加
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "MoveTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+                                var values = new List<float>(transform.values);
+                                if (values.Count == 7)
+                                {
+                                    PluginUtils.LogDebug("Add scale to MoveTimelineLayer name={0}", transform.name);
+                                    values.Add(1f);
+                                    values.Add(1f);
+                                    values.Add(1f);
+                                }
+                                transform.values = values.ToArray();
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 }
