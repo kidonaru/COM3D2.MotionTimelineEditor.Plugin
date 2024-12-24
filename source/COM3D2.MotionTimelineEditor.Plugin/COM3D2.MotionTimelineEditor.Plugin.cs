@@ -70,6 +70,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static StageLightManager stageLightManager => StageLightManager.instance;
 
+        private static PsylliumManager psylliumManager => PsylliumManager.instance;
+
         private static TimelineHistoryManager historyManager => TimelineHistoryManager.instance;
 
         private static BoneMenuManager boneMenuManager => BoneMenuManager.Instance;
@@ -405,6 +407,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timelineManager.RegisterLayer(
                     typeof(VoiceTimelineLayer), VoiceTimelineLayer.Create
                 );
+                timelineManager.RegisterLayer(
+                    typeof(PsylliumTimelineLayer), PsylliumTimelineLayer.Create
+                );
 
                 timelineManager.RegisterTransform(
                     TransformType.BG, TimelineManager.CreateTransform<TransformDataBG>
@@ -456,6 +461,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 );
                 timelineManager.RegisterTransform(
                     TransformType.Paraffin, TimelineManager.CreateTransform<TransformDataParaffin>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.PsylliumAnimation, TimelineManager.CreateTransform<TransformDataPsylliumAnimation>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.PsylliumArea, TimelineManager.CreateTransform<TransformDataPsylliumArea>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.PsylliumBar, TimelineManager.CreateTransform<TransformDataPsylliumBar>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.PsylliumController, TimelineManager.CreateTransform<TransformDataPsylliumController>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.PsylliumHand, TimelineManager.CreateTransform<TransformDataPsylliumHand>
                 );
                 timelineManager.RegisterTransform(
                     TransformType.Rimlight, TimelineManager.CreateTransform<TransformDataRimlight>
@@ -601,6 +621,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             lightManager.OnPluginEnable();
             stageLaserManager.OnPluginEnable();
             stageLightManager.OnPluginEnable();
+            psylliumManager.OnPluginEnable();
             movieManager.OnPluginEnable();
             timelineManager.OnPluginEnable();
             gridViewManager.OnPluginEnable();
@@ -621,6 +642,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             lightManager.OnPluginDisable();
             stageLaserManager.OnPluginDisable();
             stageLightManager.OnPluginDisable();
+            psylliumManager.OnPluginDisable();
             movieManager.OnPluginDisable();
             timelineManager.OnPluginDisable();
             gridViewManager.OnPluginDisable();

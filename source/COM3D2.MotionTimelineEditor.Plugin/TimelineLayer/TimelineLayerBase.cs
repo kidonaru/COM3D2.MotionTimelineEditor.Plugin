@@ -11,8 +11,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public static readonly long TimelineAnmId = 26925014;
 
-        public static Func<float, int, float> EasingFunction { get; set; }
-
         public abstract string className { get; }
         public int slotNo { get; protected set; }
         public virtual bool hasSlotNo => false;
@@ -214,6 +212,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         protected static StudioLightManager lightManager => StudioLightManager.instance;
         protected static StageLaserManager stageLaserManager => StageLaserManager.instance;
         protected static StageLightManager stageLightManager => StageLightManager.instance;
+        protected static PsylliumManager psylliumManager => PsylliumManager.instance;
         protected static StudioHackBase studioHack => StudioHackManager.studioHack;
         protected static PhotoBGManager photoBGManager => PhotoBGManager.instance;
         protected static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
@@ -493,12 +492,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public float CalcEasingValue(float t, int easing)
         {
-            if (EasingFunction != null)
-            {
-                return EasingFunction(t, easing);
-            }
-
-            return t;
+            return EasingFunctions.MoveEasing(t, (MoveEasingType) easing);
         }
 
         public virtual void ResetDraw(GUIView view)

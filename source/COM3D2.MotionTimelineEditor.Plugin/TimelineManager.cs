@@ -136,6 +136,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private static StudioLightManager lightManager => StudioLightManager.instance;
         private static StageLaserManager stageLaserManager => StageLaserManager.instance;
         private static StageLightManager stageLightManager => StageLightManager.instance;
+        private static PsylliumManager psylliumManager => PsylliumManager.instance;
         private static IPartsEditHack partsEditHack => PartsEditHackManager.instance.partsEditHack;
         private static Maid maid => maidManager.maid;
         private static MaidCache maidCache => maidManager.maidCache;
@@ -397,6 +398,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             lightManager.SetupLights(timeline.lights);
             stageLaserManager.SetupLasers(timeline.stageLaserCountList);
             stageLightManager.SetupLights(timeline.stageLightCountList);
+            psylliumManager.SetupAreas(timeline.psylliumAreaCountList);
 
             CreateAndApplyAnmAll();
             SeekCurrentFrame(0);
@@ -460,6 +462,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             lightManager.SetupLights(timeline.lights);
             stageLaserManager.SetupLasers(timeline.stageLaserCountList);
             stageLightManager.SetupLights(timeline.stageLightCountList);
+            psylliumManager.SetupAreas(timeline.psylliumAreaCountList);
 
             CreateAndApplyAnmAll();
             Refresh();
@@ -1678,6 +1681,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 lightManager.SetupLights(timeline.lights);
                 stageLaserManager.SetupLasers(timeline.stageLaserCountList);
                 stageLightManager.SetupLights(timeline.stageLightCountList);
+                psylliumManager.SetupAreas(timeline.psylliumAreaCountList);
             }
         }
 

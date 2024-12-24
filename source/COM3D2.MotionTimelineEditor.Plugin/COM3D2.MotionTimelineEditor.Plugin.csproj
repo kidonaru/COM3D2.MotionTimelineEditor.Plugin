@@ -112,7 +112,6 @@
     <Compile Include="ModMenuLoader.cs" />
     <Compile Include="MotionData.cs" />
     <Compile Include="MotionPlayData.cs" />
-    <Compile Include="MoveEasingType.cs" />
     <Compile Include="MovieManager.cs" />
     <Compile Include="MoviePlayerImpl.cs" />
     <Compile Include="PartsEditHackBase.cs" />
@@ -120,9 +119,17 @@
     <Compile Include="PhotoBGManager.cs" />
     <Compile Include="PluginInfo.cs" />
     <Compile Include="PluginUtils.cs" />
+    <Compile Include="PsylliumManager.cs" />
     <Compile Include="PostEffectManager.cs" />
     <Compile Include="PostEffectUtils.cs" />
     <Compile Include="ScriptLoader.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\EasingFunctions.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\MoveEasingType.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\Psyllium.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PsylliumArea.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PsylliumConfig.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PsylliumController.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PsylliumRandomValues.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\StageLaser.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\StageLaserController.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\StageLight.cs" />
@@ -181,6 +188,7 @@
     <Compile Include="TimelineLayer\PostEffectTimelineLayer_DistanceFog.cs" />
     <Compile Include="TimelineLayer\PostEffectTimelineLayer_Parrifin.cs" />
     <Compile Include="TimelineLayer\PostEffectTimelineLayer_Rimlight.cs" />
+    <Compile Include="TimelineLayer\PsylliumTimelineLayer.cs" />
     <Compile Include="TimelineLayer\ShapeKeyTimelineLayer.cs" />
     <Compile Include="TimelineLayer\StageLaserTimelineLayer.cs" />
     <Compile Include="TimelineLayer\StageLightTimelineLayer.cs" />
@@ -214,6 +222,11 @@
     <Compile Include="TransformData\TransformDataModelBone.cs" />
     <Compile Include="TransformData\TransformDataMove.cs" />
     <Compile Include="TransformData\TransformDataParaffin.cs" />
+    <Compile Include="TransformData\TransformDataPsylliumAnimation.cs" />
+    <Compile Include="TransformData\TransformDataPsylliumArea.cs" />
+    <Compile Include="TransformData\TransformDataPsylliumBar.cs" />
+    <Compile Include="TransformData\TransformDataPsylliumController.cs" />
+    <Compile Include="TransformData\TransformDataPsylliumHand.cs" />
     <Compile Include="TransformData\TransformDataRimlight.cs" />
     <Compile Include="TransformData\TransformDataRoot.cs" />
     <Compile Include="TransformData\TransformDataRotation.cs" />

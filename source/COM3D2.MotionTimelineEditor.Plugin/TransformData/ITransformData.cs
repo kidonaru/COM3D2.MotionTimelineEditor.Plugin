@@ -23,6 +23,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         ModelBone,
         Move,
         Paraffin,
+        PsylliumAnimation,
+        PsylliumArea,
+        PsylliumBar,
+        PsylliumController,
+        PsylliumHand,
         Rimlight,
         Root,
         Rotation,
@@ -124,6 +129,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         bool hasTangent { get; }
         bool isHidden { get; }
         bool isGlobal { get; }
+        bool isFixRotation { get; }
 
         ValueData[] positionValues { get; }
         ValueData[] subPositionValues { get; }

@@ -89,6 +89,7 @@
      <None Include="Assets\PostProcessing\Editor Resources\Monitors\HistogramRender.shader" />
      <None Include="Assets\PostProcessing\Editor Resources\UI\CurveBackground.shader" />
      <None Include="Assets\PostProcessing\Resources\Shaders\ScreenSpaceReflection.shader" />
+     <None Include="Assets\Shaders\PsylliumVert.cginc" />
      <None Include="Assets\PostProcessing\Utilities\CustomMotionTexture\Shaders\CustomMotionVectorTexture.shader" />
      <None Include="Assets\PostProcessing\Resources\Shaders\ACES.cginc" />
      <None Include="Assets\PostProcessing\Resources\Shaders\UberSecondPass.cginc" />
@@ -121,6 +122,7 @@
      <None Include="Assets\Shaders\StageLaser.shader" />
      <None Include="Assets\PostProcessing\Resources\Shaders\EyeAdaptation.shader" />
      <None Include="Assets\PostProcessing\Resources\Shaders\ColorGrading.cginc" />
+     <None Include="Assets\Shaders\Psyllium.shader" />
      <None Include="Assets\PostProcessing\Resources\Shaders\AmbientOcclusion.cginc" />
      <None Include="Assets\PostProcessing\Editor Resources\Monitors\WaveformCompute.compute" />
      <None Include="Assets\Shaders\PostEffect.shader" />

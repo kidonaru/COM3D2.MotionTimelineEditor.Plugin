@@ -37,8 +37,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private void Initialize()
         {
-            TimelineLayerBase.EasingFunction = CalcEasingValue;
-
             timelineManager.RegisterLayer(
                 typeof(MorphTimelineLayer), MorphTimelineLayer.Create
             );

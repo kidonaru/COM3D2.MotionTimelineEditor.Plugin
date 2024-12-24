@@ -351,8 +351,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool isLightExtraEasing = false;
 
         public List<int> stageLaserCountList = new List<int>();
-
         public List<int> stageLightCountList = new List<int>();
+        public List<int> psylliumAreaCountList = new List<int>();
 
         public int activeTrackIndex = -1;
 
@@ -785,6 +785,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             isLightExtraEasing = xml.isLightExtraEasing;
             stageLaserCountList = xml.stageLaserCountList.ToList();
             stageLightCountList = xml.stageLightCountList.ToList();
+            psylliumAreaCountList = xml.psylliumAreaCountList.ToList();
             activeTrackIndex = xml.activeTrackIndex;
             bgmPath = xml.bgmPath;
             aspectWidth = xml.aspectWidth;
@@ -919,6 +920,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.isLightExtraEasing = isLightExtraEasing;
             xml.stageLaserCountList = stageLaserCountList.ToList();
             xml.stageLightCountList = stageLightCountList.ToList();
+            xml.psylliumAreaCountList = psylliumAreaCountList.ToList();
             xml.activeTrackIndex = activeTrackIndex;
             xml.bgmPath = bgmPath;
             xml.aspectWidth = aspectWidth;

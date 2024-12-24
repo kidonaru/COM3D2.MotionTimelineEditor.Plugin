@@ -160,6 +160,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("StageLightCountList")]
         public List<int> stageLightCountList = new List<int>();
 
+        [XmlElement("PsylliumAreaCountList")]
+        public List<int> psylliumAreaCountList = new List<int>();
+
         [XmlElement("ActiveTrackIndex")]
         public int activeTrackIndex = -1;
 

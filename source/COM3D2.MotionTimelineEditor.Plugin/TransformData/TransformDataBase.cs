@@ -151,8 +151,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public virtual bool hasTangent => false;
 
         public virtual bool isHidden => false;
-
         public virtual bool isGlobal => false;
+        public virtual bool isFixRotation => true;
 
         public virtual ValueData[] positionValues => new ValueData[0];
         public virtual ValueData[] subPositionValues => new ValueData[0];

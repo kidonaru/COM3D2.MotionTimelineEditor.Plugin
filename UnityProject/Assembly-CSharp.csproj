@@ -92,6 +92,8 @@
      <Compile Include="Assets\PostProcessing\Runtime\Utils\RenderTextureFactory.cs" />
      <Compile Include="Assets\PostProcessing\Utilities\CustomMotionTexture\ExampleWheelController.cs" />
      <Compile Include="Assets\Scripts\CreateAssetBundles.cs" />
+     <Compile Include="Assets\Scripts\EasingFunctions.cs" />
+     <Compile Include="Assets\Scripts\MoveEasingType.cs" />
      <Compile Include="Assets\Scripts\NoiseTextureGenerator.cs" />
      <Compile Include="Assets\Scripts\PostEffect\ColorParaffinEffectModel.cs" />
      <Compile Include="Assets\Scripts\PostEffect\ColorParaffinEffectSettings.cs" />
@@ -103,6 +105,11 @@
      <Compile Include="Assets\Scripts\PostEffect\PostEffectSettingsBase.cs" />
      <Compile Include="Assets\Scripts\PostEffect\RimlightEffectModel.cs" />
      <Compile Include="Assets\Scripts\PostEffect\RimlightEffectSettings.cs" />
+     <Compile Include="Assets\Scripts\Psyllium.cs" />
+     <Compile Include="Assets\Scripts\PsylliumArea.cs" />
+     <Compile Include="Assets\Scripts\PsylliumConfig.cs" />
+     <Compile Include="Assets\Scripts\PsylliumController.cs" />
+     <Compile Include="Assets\Scripts\PsylliumRandomValues.cs" />
      <Compile Include="Assets\Scripts\StageLaser.cs" />
      <Compile Include="Assets\Scripts\StageLaserController.cs" />
      <Compile Include="Assets\Scripts\StageLight.cs" />
@@ -116,6 +123,7 @@
      <None Include="Assets\PostProcessing\Editor Resources\Monitors\HistogramRender.shader" />
      <None Include="Assets\PostProcessing\Editor Resources\UI\CurveBackground.shader" />
      <None Include="Assets\PostProcessing\Resources\Shaders\ScreenSpaceReflection.shader" />
+     <None Include="Assets\Shaders\PsylliumVert.cginc" />
      <None Include="Assets\PostProcessing\Utilities\CustomMotionTexture\Shaders\CustomMotionVectorTexture.shader" />
      <None Include="Assets\PostProcessing\Resources\Shaders\ACES.cginc" />
      <None Include="Assets\PostProcessing\Resources\Shaders\UberSecondPass.cginc" />
@@ -148,6 +156,7 @@
      <None Include="Assets\Shaders\StageLaser.shader" />
      <None Include="Assets\PostProcessing\Resources\Shaders\EyeAdaptation.shader" />
      <None Include="Assets\PostProcessing\Resources\Shaders\ColorGrading.cginc" />
+     <None Include="Assets\Shaders\Psyllium.shader" />
      <None Include="Assets\PostProcessing\Resources\Shaders\AmbientOcclusion.cginc" />
      <None Include="Assets\PostProcessing\Editor Resources\Monitors\WaveformCompute.compute" />
      <None Include="Assets\Shaders\PostEffect.shader" />
