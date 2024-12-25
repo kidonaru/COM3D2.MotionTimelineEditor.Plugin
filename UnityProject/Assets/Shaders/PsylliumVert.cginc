@@ -5,6 +5,13 @@
 
 sampler2D _MainTex;
 float4 _MainTex_ST;
+float4 _Color1a;
+float4 _Color1b;
+float4 _Color1c;
+float4 _Color2a;
+float4 _Color2b;
+float4 _Color2c;
+float _CutoffAlpha;
 
 struct appdata
 {

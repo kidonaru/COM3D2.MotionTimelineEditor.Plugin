@@ -1,7 +1,7 @@
 ﻿// 参考文献
 // https://qiita.com/kaneta1992/items/af7793e5450b891c2e27
 
-Shader "MTE/Psyllium"
+Shader "MTE/PsylliumAdd"
 {
     Properties
     {
@@ -18,7 +18,7 @@ Shader "MTE/Psyllium"
     {
         Tags
         {
-            "Queue" = "Transparent+1"
+            "Queue" = "Transparent"
             "IgnoreProjector" = "True"
             "RenderType" = "Transparent"
             "DisableBatching" = "True"
@@ -27,9 +27,9 @@ Shader "MTE/Psyllium"
         Pass
         {
             Cull Off
-            ZWrite On
+            ZWrite Off
             ZTest LEqual
-            Blend SrcAlpha OneMinusSrcAlpha
+            Blend One One
             Lighting Off
             Fog { Mode Off }
 
@@ -43,11 +43,9 @@ Shader "MTE/Psyllium"
             fixed4 frag (v2f i) : SV_Target
             {
                 fixed4 col = tex2D(_MainTex, i.uv);
-                clip(col.a - _CutoffAlpha);
-
-                fixed4 colorA = lerp(_Color1a, _Color2a, i.uv2.y);
-                fixed4 colorB = lerp(_Color1b, _Color2b, i.uv2.y);
-                col.rgb = lerp(colorB, colorA, col.r);
+                fixed4 colorC = lerp(_Color1c, _Color2c, i.uv2.y);
+                col.rgb = colorC.rgb * colorC.a * col.a;
+                col.a = 1;
 
                 return col;
             }

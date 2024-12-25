@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 1585068755
+CRC: 3532514695
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: f503575c579c3ee42c318a2f5090bba5
+    Hash: 3cc8ab97f9c2427df65305423a9a4e5e
   TypeTreeHash:
     serializedVersion: 2
     Hash: 57f902138519c9049cf811191ff1db9c
@@ -28,9 +28,11 @@ Assets:
 - Assets/Shaders/PsylliumVert.cginc
 - Assets/Resources/change_icon.png
 - Assets/Resources/icon.png.bytes
+- Assets/Shaders/PsylliumAdd.shader
 - Assets/Resources/song.ogg.bytes
 - Assets/Shaders/PostEffect.mat
 - Assets/Shaders/StageLaser.mat
+- Assets/Shaders/PsylliumAdd.mat
 - Assets/Resources/noise_texture.png
 - Assets/Shaders/StageLaser.shader
 - Assets/Resources/psyllium.png

@@ -36,7 +36,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public PsylliumHandConfig handConfig = new PsylliumHandConfig();
         public PsylliumAnimationConfig animationConfig = new PsylliumAnimationConfig();
         public List<PsylliumArea> areas;
-        public Material material;
+        public Material[] materials;
         public Mesh[] meshes;
         public float time;
         public bool refreshRequired;
@@ -128,25 +128,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Initialize();
         }
 
+        private Material CreateMaterial(string materialName)
+        {
+#if COM3D2
+            var material = bundleManager.LoadMaterial(materialName);
+#else
+            var material = new Material(Shader.Find("MTE/" + materialName));
+            material.SetTexture("_MainTex", Resources.Load<Texture2D>("psyllium"));
+#endif
+            return material;
+        }
+
         public void Initialize()
         {
             time = 0.0f;
             areas = GetComponentsInChildren<PsylliumArea>().ToList();
             areas.Sort((a, b) => a.index - b.index);
 
-#if COM3D2
-            material = bundleManager.LoadMaterial("Psyllium");
-#else
-            material = new Material(Shader.Find("MTE/Psyllium"));
-            material.SetTexture("_MainTex", Resources.Load<Texture2D>("psyllium"));
-#endif
+            materials = new Material[2];
+            materials[0] = CreateMaterial("Psyllium");
+            materials[1] = CreateMaterial("PsylliumAdd");
 
             meshes = new Mesh[2];
             meshes[0] = new Mesh();
             meshes[1] = new Mesh();
 
             UpdateName();
-            UpdateMaterial();
+            UpdateMaterials();
             UpdateMeshs();
         }
 
@@ -181,7 +189,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 area.Refresh();
             }
 
-            UpdateMaterial();
+            UpdateMaterials();
             UpdateMeshs();
 
             refreshRequired = false;
@@ -198,20 +206,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             animationConfig.UpdateName(groupIndex);
         }
 
-        public void UpdateMaterial()
+        public void UpdateMaterials()
         {
-            if (material == null)
+            foreach (var material in materials)
             {
-                return;
+                material.SetColor(Uniforms._Color1a, barConfig.color1a);
+                material.SetColor(Uniforms._Color1b, barConfig.color1b);
+                material.SetColor(Uniforms._Color1c, barConfig.color1c);
+                material.SetColor(Uniforms._Color2a, barConfig.color2a);
+                material.SetColor(Uniforms._Color2b, barConfig.color2b);
+                material.SetColor(Uniforms._Color2c, barConfig.color2c);
+                material.SetFloat(Uniforms._CutoffAlpha, barConfig.cutoffAlpha);
             }
+        }
 
-            material.SetColor(Uniforms._Color1a, barConfig.color1a);
-            material.SetColor(Uniforms._Color1b, barConfig.color1b);
-            material.SetColor(Uniforms._Color1c, barConfig.color1c);
-            material.SetColor(Uniforms._Color2a, barConfig.color2a);
-            material.SetColor(Uniforms._Color2b, barConfig.color2b);
-            material.SetColor(Uniforms._Color2c, barConfig.color2c);
-            material.SetFloat(Uniforms._CutoffAlpha, barConfig.cutoffAlpha);
+        private static class Uniforms
+        {
+            internal static readonly int _Color1a = Shader.PropertyToID("_Color1a");
+            internal static readonly int _Color1b = Shader.PropertyToID("_Color1b");
+            internal static readonly int _Color1c = Shader.PropertyToID("_Color1c");
+            internal static readonly int _Color2a = Shader.PropertyToID("_Color2a");
+            internal static readonly int _Color2b = Shader.PropertyToID("_Color2b");
+            internal static readonly int _Color2c = Shader.PropertyToID("_Color2c");
+            internal static readonly int _CutoffAlpha = Shader.PropertyToID("_CutoffAlpha");
         }
 
         public void UpdateMeshs()
@@ -286,22 +303,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var mesh = meshes[colorIndex];
             mesh.Clear();
 
+            mesh.subMeshCount = 2;
             mesh.vertices = vertices;
             mesh.uv = uv;
             mesh.uv2 = uv2;
 
-            mesh.triangles = triangles;
-        }
-
-        private static class Uniforms
-        {
-            internal static readonly int _Color1a = Shader.PropertyToID("_Color1a");
-            internal static readonly int _Color1b = Shader.PropertyToID("_Color1b");
-            internal static readonly int _Color1c = Shader.PropertyToID("_Color1c");
-            internal static readonly int _Color2a = Shader.PropertyToID("_Color2a");
-            internal static readonly int _Color2b = Shader.PropertyToID("_Color2b");
-            internal static readonly int _Color2c = Shader.PropertyToID("_Color2c");
-            internal static readonly int _CutoffAlpha = Shader.PropertyToID("_CutoffAlpha");
+            mesh.SetTriangles(triangles, 0);
+            mesh.SetTriangles(triangles, 1);
         }
 
         public PsylliumArea AddArea()
