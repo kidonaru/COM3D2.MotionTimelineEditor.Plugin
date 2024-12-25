@@ -120,6 +120,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float colorWeight1 = 0.175f; // 色1の重み
         [Range(0, 1)]
         public float colorWeight2 = 0.5f; // 色2の重み
+        public float timeShiftMin = 0.5f; // 時間シフトの最小値
+        public float timeShiftMax = 1.5f; // 時間シフトの最大値
 
         public float[] barCountWeights
         {
@@ -158,6 +160,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             barOffsetRotation = other.barOffsetRotation;
             colorWeight1 = other.colorWeight1;
             colorWeight2 = other.colorWeight2;
+            timeShiftMin = other.timeShiftMin;
+            timeShiftMax = other.timeShiftMax;
         }
 
         public bool Equals(PsylliumHandConfig other)
@@ -170,7 +174,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 && barOffsetPosition == other.barOffsetPosition
                 && barOffsetRotation == other.barOffsetRotation
                 && colorWeight1 == other.colorWeight1
-                && colorWeight2 == other.colorWeight2;
+                && colorWeight2 == other.colorWeight2
+                && timeShiftMin == other.timeShiftMin
+                && timeShiftMax == other.timeShiftMax;
         }
 
         public override bool Equals(object obj)
@@ -205,55 +211,67 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string name;
         public string displayName;
 
-        public Vector3 position1 = new Vector3(0, 0.3f, 0.5f);
-        public Vector3 position2 = new Vector3(0, 0.1f, 0);
-        public Vector3 rotation1 = new Vector3(30, 0, 0);
-        public Vector3 rotation2 = new Vector3(-120, 0, 0);
+        public Vector3 positionLeft1 = new Vector3(0, 0.3f, 0.5f);
+        public Vector3 positionLeft2 = new Vector3(0, 0.1f, 0);
+        public Vector3 positionRight1 = new Vector3(0, 0.3f, 0.5f);
+        public Vector3 positionRight2 = new Vector3(0, 0.1f, 0);
+        public Vector3 rotationLeft1 = new Vector3(30, 0, 0);
+        public Vector3 rotationLeft2 = new Vector3(-120, 0, 0);
+        public Vector3 rotationRight1 = new Vector3(30, 0, 0);
+        public Vector3 rotationRight2 = new Vector3(-120, 0, 0);
         public Vector3 randomPositionRange = new Vector3(0.01f, 0.01f, 0.01f);
         public Vector3 randomRotationRange = new Vector3(5f, 0f, 10f);
 
         public bool mirrorRotationZ = true;
-        public float cutoffHeight = 0f;
 
         public float bpm = 120f;
         public int randomTimeCount = 10;
         public float randomTime = 0.05f;
         public float timeRatio = 0.75f;
+        public float timeOffset = 0f;
         public MoveEasingType easingType1 = MoveEasingType.SineInOut;
         public MoveEasingType easingType2 = MoveEasingType.SineOut;
 
         public void CopyFrom(PsylliumAnimationConfig other)
         {
-            position1 = other.position1;
-            position2 = other.position2;
-            rotation1 = other.rotation1;
-            rotation2 = other.rotation2;
+            positionLeft1 = other.positionLeft1;
+            positionLeft2 = other.positionLeft2;
+            positionRight1 = other.positionRight1;
+            positionRight2 = other.positionRight2;
+            rotationLeft1 = other.rotationLeft1;
+            rotationLeft2 = other.rotationLeft2;
+            rotationRight1 = other.rotationRight1;
+            rotationRight2 = other.rotationRight2;
             randomPositionRange = other.randomPositionRange;
             randomRotationRange = other.randomRotationRange;
             mirrorRotationZ = other.mirrorRotationZ;
-            cutoffHeight = other.cutoffHeight;
             bpm = other.bpm;
             randomTimeCount = other.randomTimeCount;
             randomTime = other.randomTime;
             timeRatio = other.timeRatio;
+            timeOffset = other.timeOffset;
             easingType1 = other.easingType1;
             easingType2 = other.easingType2;
         }
 
         public bool Equals(PsylliumAnimationConfig other)
         {
-            return position1 == other.position1
-                && position2 == other.position2
-                && rotation1 == other.rotation1
-                && rotation2 == other.rotation2
+            return positionLeft1 == other.positionLeft1
+                && positionLeft2 == other.positionLeft2
+                && positionRight1 == other.positionRight1
+                && positionRight2 == other.positionRight2
+                && rotationLeft1 == other.rotationLeft1
+                && rotationLeft2 == other.rotationLeft2
+                && rotationRight1 == other.rotationRight1
+                && rotationRight2 == other.rotationRight2
                 && randomPositionRange == other.randomPositionRange
                 && randomRotationRange == other.randomRotationRange
                 && mirrorRotationZ == other.mirrorRotationZ
-                && cutoffHeight == other.cutoffHeight
                 && bpm == other.bpm
                 && randomTimeCount == other.randomTimeCount
                 && randomTime == other.randomTime
                 && timeRatio == other.timeRatio
+                && timeOffset == other.timeOffset
                 && easingType1 == other.easingType1
                 && easingType2 == other.easingType2;
         }

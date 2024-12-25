@@ -18,6 +18,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int rightCount;
         public int[] leftColorIndexes;
         public int[] rightColorIndexes;
+        public float timeShift;
 
         public PsylliumRandomValues(PsylliumHandConfig handConfig, PsylliumAreaConfig areaConfig)
         {
@@ -58,7 +59,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 rightColorIndexes[j] = LotteryByWeight(handConfig.colorWeights);
             }
 
-            StepRandom(10); // 乱数の予約
+            timeShift = Random.Range(handConfig.timeShiftMin, handConfig.timeShiftMax);
+
+            StepRandom(9); // 乱数の予約
         }
 
         private static Vector3 GetRandomVector3(float min, float max)

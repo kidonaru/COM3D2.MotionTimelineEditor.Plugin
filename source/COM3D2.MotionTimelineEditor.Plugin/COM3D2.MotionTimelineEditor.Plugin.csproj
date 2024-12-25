@@ -129,6 +129,7 @@
     <Compile Include="..\..\UnityProject\Assets\Scripts\PsylliumArea.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PsylliumConfig.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PsylliumController.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PsylliumHand.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PsylliumRandomValues.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\StageLaser.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\StageLaserController.cs" />

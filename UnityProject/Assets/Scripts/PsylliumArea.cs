@@ -8,10 +8,9 @@ using UnityEditor;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-
     public class PsylliumArea : MonoBehaviour
     {
-        public readonly int MAX_PSYLLIUM_COUNT = 10000;
+        public readonly int MAX_PSYLLIUM_HAND_COUNT = 10000;
 
         [SerializeField]
         public PsylliumController _controller;
@@ -49,10 +48,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public PsylliumAreaConfig areaConfig = new PsylliumAreaConfig();
 
-        public List<Psyllium> psylliums;
+        public List<PsylliumHand> hands;
         public bool refreshRequired;
     
-        private int _psylliumCurrentIndex;
+        private int _handCurrentIndex;
 
         public int groupIndex
         {
@@ -94,7 +93,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Initialize()
         {
-            psylliums = GetComponentsInChildren<Psyllium>().ToList();
+            hands = GetComponentsInChildren<PsylliumHand>().ToList();
             UpdateName();
         }
 
@@ -129,23 +128,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             displayName = "エリア" + suffix;
         }
 
-        public void UpdateMaterial()
-        {
-            foreach (var psyllium in psylliums)
-            {
-                psyllium.UpdateMaterial();
-            }
-        }
-
         public void UpdateTime()
         {
-            foreach (var psyllium in psylliums)
+            foreach (var hand in hands)
             {
-                psyllium.UpdateTime();
+                hand.UpdateTime();
             }
         }
 
-        public Psyllium GetOrAddPsyllium(int index)
+        public PsylliumHand GetOrAddHand(int index)
         {
             if (index < 0)
             {
@@ -153,36 +144,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return null;
             }
 
-            while (psylliums.Count <= index)
+            while (hands.Count <= index)
             {
-                if (psylliums.Count >= MAX_PSYLLIUM_COUNT)
+                if (hands.Count >= MAX_PSYLLIUM_HAND_COUNT)
                 {
-                    Debug.LogError("Too many Psylliums: " + psylliums.Count);
+                    Debug.LogError("Too many hands: " + hands.Count);
                     return null;
                 }
 
-                var obj = new GameObject("Psyllium");
+                var obj = new GameObject("PsylliumHand");
                 obj.transform.SetParent(this.transform, false);
 
-                var psyllium = obj.AddComponent<Psyllium>();
-                psyllium.controller = controller;
-                psylliums.Add(psyllium);
+                var psyllium = obj.AddComponent<PsylliumHand>();
+                psyllium.Setup(controller, this);
+                hands.Add(psyllium);
             }
 
-            return psylliums[index];
+            return hands[index];
         }
 
-        public Psyllium GetOrAddPsyllium()
+        public PsylliumHand GetOrCreateHand()
         {
-            return GetOrAddPsyllium(++_psylliumCurrentIndex);
+            return GetOrAddHand(++_handCurrentIndex);
         }
 
-        public void RemoveUnusedPsylliums()
+        public void RemoveUnusedHands()
         {
-            while (psylliums.Count > _psylliumCurrentIndex + 1)
+            while (hands.Count > _handCurrentIndex + 1)
             {
-                var psyllium = psylliums[psylliums.Count - 1];
-                psylliums.RemoveAt(psylliums.Count - 1);
+                var psyllium = hands[hands.Count - 1];
+                hands.RemoveAt(hands.Count - 1);
+
                 if (Application.isPlaying)
                 {
                     Destroy(psyllium.gameObject);
@@ -208,7 +200,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             transform.localPosition = areaConfig.position;
             transform.localEulerAngles = areaConfig.rotation;
 
-            _psylliumCurrentIndex = -1;
+            _handCurrentIndex = -1;
 
             var areaSize = areaConfig.size;
             var halfAreaSize = areaSize * 0.5f;
@@ -222,34 +214,46 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     // 基準位置を計算
                     var basePosition = new Vector3(x, 0, z) + randomValues.basePosition;
-                    
+
                     // 左手と右手の位置を計算
                     var leftHandPos = basePosition + new Vector3(-halfDistance, 0f, 0f);
                     var rightHandPos = basePosition + new Vector3(halfDistance, 0f, 0f);
 
-                    // 左手のPsylliumを配置
-                    UpdatePsylliums(
-                        leftHandPos,
-                        randomValues.leftCount,
-                        randomValues.timeIndex,
-                        randomValues.leftColorIndexes,
-                        randomValues.leftPositionParam,
-                        randomValues.leftRotationParam,
-                        true);
+                    if (randomValues.leftCount > 0)
+                    {
+                        var hand = GetOrCreateHand();
+                        if (hand == null) return;
 
-                    // 右手のPsylliumを配置
-                    UpdatePsylliums(
-                        rightHandPos,
-                        randomValues.rightCount,
-                        randomValues.timeIndex,
-                        randomValues.rightColorIndexes,
-                        randomValues.rightPositionParam,
-                        randomValues.rightRotationParam,
-                        false);
+                        hand.UpdatePsylliums(
+                            leftHandPos,
+                            randomValues.leftCount,
+                            randomValues.timeIndex,
+                            randomValues.timeShift,
+                            randomValues.leftColorIndexes,
+                            randomValues.leftPositionParam,
+                            randomValues.leftRotationParam,
+                            true);
+                    }
+
+                    if (randomValues.rightCount > 0)
+                    {
+                        var rightHand = GetOrCreateHand();
+                        if (rightHand == null) return;
+
+                        rightHand.UpdatePsylliums(
+                            rightHandPos,
+                            randomValues.rightCount,
+                            randomValues.timeIndex,
+                            randomValues.timeShift,
+                            randomValues.rightColorIndexes,
+                            randomValues.rightPositionParam,
+                            randomValues.rightRotationParam,
+                            false);
+                    }
                 }
             }
 
-            RemoveUnusedPsylliums();
+            RemoveUnusedHands();
 
             refreshRequired = false;
         }
@@ -258,46 +262,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             areaConfig.CopyFrom(src.areaConfig);
             Refresh();
-        }
-
-        private void UpdatePsylliums(
-            Vector3 handPos,
-            int count,
-            int timeIndex,
-            int[] colorIndexes,
-            Vector3 positionParam,
-            Vector3 rotationParam,
-            bool isLeftHand)
-        {
-            for (int j = 0; j < count; j++)
-            {
-                var barPosition = (j - (count - 1) * 0.5f) * handConfig.barOffsetPosition;
-                var barRotation = (j - (count - 1) * 0.5f) * handConfig.barOffsetRotation;
-                var position = handPos;
-                var rotation = new Vector3();
-
-                if (!isLeftHand)
-                {
-                    barPosition.x = -barPosition.x;
-                    barRotation.z = -barRotation.z;
-                }
-
-                var psyllium = GetOrAddPsyllium();
-                if (psyllium == null) return;
-
-                psyllium.randomTimeIndex = timeIndex;
-                psyllium.colorIndex = colorIndexes[j];
-                psyllium.randomPositionParam = positionParam;
-                psyllium.randomRotationParam = rotationParam;
-                psyllium.barPosition = barPosition;
-                psyllium.barRotation = barRotation;
-                psyllium.isLeftHand = isLeftHand;
-                psyllium.transform.localPosition = position;
-                psyllium.transform.localEulerAngles = rotation;
-
-                psyllium.UpdateMesh();
-                psyllium.UpdateMaterial();
-            }
         }
     }
 }

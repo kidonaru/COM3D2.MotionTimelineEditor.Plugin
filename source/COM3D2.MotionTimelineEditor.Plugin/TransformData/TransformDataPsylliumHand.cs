@@ -10,7 +10,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override TransformType type => TransformType.PsylliumHand;
 
-        public override int valueCount => 13;
+        public override int valueCount => 15;
 
         public TransformDataPsylliumHand()
         {
@@ -161,6 +161,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     defaultValue = defaultConfig.colorWeight2,
                 }
             },
+            {
+                "timeShiftMin", new CustomValueInfo
+                {
+                    index = 13,
+                    name = "ShiftMin",
+                    min = 0f,
+                    max = 10f,
+                    step = 0.1f,
+                    defaultValue = defaultConfig.timeShiftMin,
+                }
+            },
+            {
+                "timeShiftMax", new CustomValueInfo
+                {
+                    index = 14,
+                    name = "ShiftMax",
+                    min = 0f,
+                    max = 10f,
+                    step = 0.1f,
+                    defaultValue = defaultConfig.timeShiftMax,
+                }
+            },
         };
 
         public override Dictionary<string, CustomValueInfo> GetCustomValueInfoMap()
@@ -183,6 +205,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
         public ValueData colorWeight1Value => this["colorWeight1"];
         public ValueData colorWeight2Value => this["colorWeight2"];
+        public ValueData timeShiftMinValue => this["timeShiftMin"];
+        public ValueData timeShiftMaxValue => this["timeShiftMax"];
 
         public CustomValueInfo handSpacingInfo => CustomValueInfoMap["handSpacing"];
         public CustomValueInfo barCountWeight0Info => CustomValueInfoMap["barCountWeight0"];
@@ -191,6 +215,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public CustomValueInfo barCountWeight3Info => CustomValueInfoMap["barCountWeight3"];
         public CustomValueInfo colorWeight1Info => CustomValueInfoMap["colorWeight1"];
         public CustomValueInfo colorWeight2Info => CustomValueInfoMap["colorWeight2"];
+        public CustomValueInfo timeShiftMinInfo => CustomValueInfoMap["timeShiftMin"];
+        public CustomValueInfo timeShiftMaxInfo => CustomValueInfoMap["timeShiftMax"];
 
         public float handSpacing
         {
@@ -237,6 +263,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get => colorWeight2Value.value;
             set => colorWeight2Value.value = value;
         }
+        public float timeShiftMin
+        {
+            get => timeShiftMinValue.value;
+            set => timeShiftMinValue.value = value;
+        }
+        public float timeShiftMax
+        {
+            get => timeShiftMaxValue.value;
+            set => timeShiftMaxValue.value = value;
+        }
 
         public void FromConfig(PsylliumHandConfig config)
         {
@@ -249,6 +285,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             barOffsetRotation = config.barOffsetRotation;
             colorWeight1 = config.colorWeight1;
             colorWeight2 = config.colorWeight2;
+            timeShiftMin = config.timeShiftMin;
+            timeShiftMax = config.timeShiftMax;
         }
 
         private PsylliumHandConfig _config = new PsylliumHandConfig();
@@ -264,6 +302,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _config.barOffsetRotation = barOffsetRotation;
             _config.colorWeight1 = colorWeight1;
             _config.colorWeight2 = colorWeight2;
+            _config.timeShiftMin = timeShiftMin;
+            _config.timeShiftMax = timeShiftMax;
             return _config;
         }
     }

@@ -109,6 +109,7 @@
      <Compile Include="Assets\Scripts\PsylliumArea.cs" />
      <Compile Include="Assets\Scripts\PsylliumConfig.cs" />
      <Compile Include="Assets\Scripts\PsylliumController.cs" />
+     <Compile Include="Assets\Scripts\PsylliumHand.cs" />
      <Compile Include="Assets\Scripts\PsylliumRandomValues.cs" />
      <Compile Include="Assets\Scripts\StageLaser.cs" />
      <Compile Include="Assets\Scripts\StageLaserController.cs" />

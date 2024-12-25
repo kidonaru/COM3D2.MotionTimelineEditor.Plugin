@@ -6,18 +6,13 @@ Shader "MTE/Psyllium"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _Color1 ("Color1", Color) = (1, 1, 1, 1)
-        _Color2 ("Color2", Color) = (1, 1, 1, 1)
-        _Color3 ("Color3", Color) = (1, 1, 1, 1)
+        _Color1a ("Color1a", Color) = (1, 1, 1, 1)
+        _Color1b ("Color1b", Color) = (1, 1, 1, 1)
+        _Color1c ("Color1c", Color) = (1, 1, 1, 1)
+        _Color2a ("Color2a", Color) = (1, 1, 1, 1)
+        _Color2b ("Color2b", Color) = (1, 1, 1, 1)
+        _Color2c ("Color2c", Color) = (1, 1, 1, 1)
         _CutoffAlpha ("Cutoff Alpha", Float) = 0.5
-        _CutoffHeight ("Cutoff Height", Float) = 0
-        _Position1 ("Position1", Vector) = ( 0,  0, 0, 0)
-        _Rotation1 ("Rotation1", Vector) = ( 0,  0, 0, 0)
-        _Position2 ("Position2", Vector) = ( 0, 10, 0, 0)
-        _Rotation2 ("Rotation2", Vector) = (45,  0, 0, 0)
-        _BarPosition ("Bar Position", Vector) = (0, 0, 0, 0)
-        _BarRotation ("Bar Rotation", Vector) = (0, 0, 0, 0)
-        _AnimationTime ("Animation Time", Float) = 1
     }
     SubShader
     {
@@ -44,19 +39,19 @@ Shader "MTE/Psyllium"
 
             #include "PsylliumVert.cginc"
 
-            float4 _Color1;
-            float4 _Color2;
-            float4 _Color3;
-            float _CutoffAlpha;
-            float _CutoffHeight;
+            float4 _Color1a;
+            float4 _Color1b;
+            float4 _Color1c;
+            float4 _Color2a;
+            float4 _Color2b;
+            float4 _Color2c;
 
             fixed4 frag (v2f i) : SV_Target
             {
                 fixed4 col = tex2D(_MainTex, i.uv);
-                col.rgb = _Color3.rgb * _Color3.a * col.a;
+                fixed4 colorC = lerp(_Color1c, _Color2c, i.uv2.y);
+                col.rgb = colorC.rgb * colorC.a * col.a;
                 col.a = 1;
-
-                clip(i.worldPos.y - _CutoffHeight);
 
                 return col;
             }
@@ -79,19 +74,22 @@ Shader "MTE/Psyllium"
 
             #include "PsylliumVert.cginc"
 
-            float4 _Color1;
-            float4 _Color2;
-            float4 _Color3;
+            float4 _Color1a;
+            float4 _Color1b;
+            float4 _Color1c;
+            float4 _Color2a;
+            float4 _Color2b;
+            float4 _Color2c;
             float _CutoffAlpha;
-            float _CutoffHeight;
 
             fixed4 frag (v2f i) : SV_Target
             {
                 fixed4 col = tex2D(_MainTex, i.uv);
-                col.rgb = lerp(_Color2.rgb, _Color1.rgb, col.r);
-
                 clip(col.a - _CutoffAlpha);
-                clip(i.worldPos.y - _CutoffHeight);
+
+                fixed4 colorA = lerp(_Color1a, _Color2a, i.uv2.y);
+                fixed4 colorB = lerp(_Color1b, _Color2b, i.uv2.y);
+                col.rgb = lerp(colorB, colorA, col.r);
 
                 return col;
             }

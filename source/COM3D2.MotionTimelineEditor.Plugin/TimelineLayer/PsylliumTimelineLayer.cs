@@ -301,24 +301,44 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var startConfig = start.ToConfig();
             var endConfig = end.ToConfig();
 
-            if (startConfig.position1 != endConfig.position1)
+            if (startConfig.positionLeft1 != endConfig.positionLeft1)
             {
-                animationConfig.position1 = Vector3.Lerp(startConfig.position1, endConfig.position1, t);
+                animationConfig.positionLeft1 = Vector3.Lerp(startConfig.positionLeft1, endConfig.positionLeft1, t);
             }
 
-            if (startConfig.position2 != endConfig.position2)
+            if (startConfig.positionLeft2 != endConfig.positionLeft2)
             {
-                animationConfig.position2 = Vector3.Lerp(startConfig.position2, endConfig.position2, t);
+                animationConfig.positionLeft2 = Vector3.Lerp(startConfig.positionLeft2, endConfig.positionLeft2, t);
             }
 
-            if (startConfig.rotation1 != endConfig.rotation1)
+            if (startConfig.positionRight1 != endConfig.positionRight1)
             {
-                animationConfig.rotation1 = Vector3.Lerp(startConfig.rotation1, endConfig.rotation1, t);
+                animationConfig.positionRight1 = Vector3.Lerp(startConfig.positionRight1, endConfig.positionRight1, t);
             }
 
-            if (startConfig.rotation2 != endConfig.rotation2)
+            if (startConfig.positionRight2 != endConfig.positionRight2)
             {
-                animationConfig.rotation2 = Vector3.Lerp(startConfig.rotation2, endConfig.rotation2, t);
+                animationConfig.positionRight2 = Vector3.Lerp(startConfig.positionRight2, endConfig.positionRight2, t);
+            }
+
+            if (startConfig.rotationLeft1 != endConfig.rotationLeft1)
+            {
+                animationConfig.rotationLeft1 = Vector3.Lerp(startConfig.rotationLeft1, endConfig.rotationLeft1, t);
+            }
+
+            if (startConfig.rotationLeft2 != endConfig.rotationLeft2)
+            {
+                animationConfig.rotationLeft2 = Vector3.Lerp(startConfig.rotationLeft2, endConfig.rotationLeft2, t);
+            }
+
+            if (startConfig.rotationRight1 != endConfig.rotationRight1)
+            {
+                animationConfig.rotationRight1 = Vector3.Lerp(startConfig.rotationRight1, endConfig.rotationRight1, t);
+            }
+
+            if (startConfig.rotationRight2 != endConfig.rotationRight2)
+            {
+                animationConfig.rotationRight2 = Vector3.Lerp(startConfig.rotationRight2, endConfig.rotationRight2, t);
             }
 
             if (startConfig.randomPositionRange != endConfig.randomPositionRange)
@@ -331,9 +351,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 animationConfig.randomRotationRange = Vector3.Lerp(startConfig.randomRotationRange, endConfig.randomRotationRange, t);
             }
 
+            if (startConfig.bpm != endConfig.bpm)
+            {
+                animationConfig.bpm = Mathf.Lerp(startConfig.bpm, endConfig.bpm, t);
+            }
+
             if (startConfig.timeRatio != endConfig.timeRatio)
             {
                 animationConfig.timeRatio = Mathf.Lerp(startConfig.timeRatio, endConfig.timeRatio, t);
+            }
+
+            if (startConfig.timeOffset != endConfig.timeOffset)
+            {
+                animationConfig.timeOffset = Mathf.Lerp(startConfig.timeOffset, endConfig.timeOffset, t);
             }
         }
 
@@ -938,6 +968,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 handConfig.colorWeight2,
                 y => handConfig.colorWeight2 = y);
 
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.timeShiftMinInfo,
+                handConfig.timeShiftMin,
+                y => handConfig.timeShiftMin = y);
+
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.timeShiftMaxInfo,
+                handConfig.timeShiftMax,
+                y => handConfig.timeShiftMax = y);
+
             if (updateTransform)
             {
                 controller.handConfig.CopyFrom(handConfig);
@@ -981,82 +1021,163 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var defaultTrans = TransformDataPsylliumAnimation.defaultTrans;
             var defaultConfig = TransformDataPsylliumAnimation.defaultConfig;
 
-            var transformCache1 = view.GetTransformCache(null);
-            var transformCache2 = view.GetTransformCache(null);
-
-            view.DrawLabel("移動1", 200, 20);
+            view.DrawLabel("左手移動1", 200, 20);
 
             {
-                var initialPosition = defaultConfig.position1;
-                transformCache1.position = animationConfig.position1;
+                var initialPosition = defaultConfig.positionLeft1;
+                var transformCache = view.GetTransformCache(null);
+                transformCache.position = animationConfig.positionLeft1;
 
                 updateTransform |= DrawPosition(
                     view,
-                    transformCache1,
+                    transformCache,
                     TransformEditType.全て,
                     initialPosition);
 
                 if (updateTransform)
                 {
-                    animationConfig.position1 = transformCache1.position;
+                    animationConfig.positionLeft1 = transformCache.position;
                 }
             }
 
-            view.DrawLabel("移動2", 200, 20);
+            view.DrawLabel("左手移動2", 200, 20);
 
             {
-                var initialPosition = defaultConfig.position2;
-                transformCache2.position = animationConfig.position2;
+                var initialPosition = defaultConfig.positionLeft2;
+                var transformCache = view.GetTransformCache(null);
+                transformCache.position = animationConfig.positionLeft2;
 
                 updateTransform |= DrawPosition(
                     view,
-                    transformCache2,
+                    transformCache,
                     TransformEditType.全て,
                     initialPosition);
 
                 if (updateTransform)
                 {
-                    animationConfig.position2 = transformCache2.position;
+                    animationConfig.positionLeft2 = transformCache.position;
                 }
             }
 
-            view.DrawLabel("回転1", 200, 20);
+            view.DrawLabel("左手回転1", 200, 20);
 
             {
-                var initialEulerAngles = defaultConfig.rotation1;
+                var initialEulerAngles = defaultConfig.rotationLeft1;
                 var prevEulerAngles = Vector3.zero;
-                transformCache1.eulerAngles = animationConfig.rotation1;
+                var transformCache = view.GetTransformCache(null);
+                transformCache.eulerAngles = animationConfig.rotationLeft1;
 
                 updateTransform |= DrawEulerAngles(
                     view,
-                    transformCache1,
+                    transformCache,
                     TransformEditType.全て,
                     prevEulerAngles,
                     initialEulerAngles);
 
                 if (updateTransform)
                 {
-                    animationConfig.rotation1 = transformCache1.eulerAngles;
+                    animationConfig.rotationLeft1 = transformCache.eulerAngles;
                 }
             }
 
-            view.DrawLabel("回転2", 200, 20);
+            view.DrawLabel("左手回転2", 200, 20);
 
             {
-                var initialEulerAngles = defaultConfig.rotation2;
+                var initialEulerAngles = defaultConfig.rotationLeft2;
                 var prevEulerAngles = Vector3.zero;
-                transformCache2.eulerAngles = animationConfig.rotation2;
+                var transformCache = view.GetTransformCache(null);
+                transformCache.eulerAngles = animationConfig.rotationLeft2;
 
                 updateTransform |= DrawEulerAngles(
                     view,
-                    transformCache2,
+                    transformCache,
                     TransformEditType.全て,
                     prevEulerAngles,
                     initialEulerAngles);
 
                 if (updateTransform)
                 {
-                    animationConfig.rotation2 = transformCache2.eulerAngles;
+                    animationConfig.rotationLeft2 = transformCache.eulerAngles;
+                }
+            }
+
+            view.DrawLabel("右手移動1", 200, 20);
+
+            {
+                var initialPosition = defaultConfig.positionRight1;
+                var transformCache = view.GetTransformCache(null);
+                transformCache.position = animationConfig.positionRight1;
+
+                updateTransform |= DrawPosition(
+                    view,
+                    transformCache,
+                    TransformEditType.全て,
+                    initialPosition);
+
+                if (updateTransform)
+                {
+                    animationConfig.positionRight1 = transformCache.position;
+                }
+            }
+
+            view.DrawLabel("右手移動2", 200, 20);
+
+            {
+                var initialPosition = defaultConfig.positionRight2;
+                var transformCache = view.GetTransformCache(null);
+                transformCache.position = animationConfig.positionRight2;
+
+                updateTransform |= DrawPosition(
+                    view,
+                    transformCache,
+                    TransformEditType.全て,
+                    initialPosition);
+
+                if (updateTransform)
+                {
+                    animationConfig.positionRight2 = transformCache.position;
+                }
+            }
+
+            view.DrawLabel("右手回転1", 200, 20);
+
+            {
+                var initialEulerAngles = defaultConfig.rotationRight1;
+                var prevEulerAngles = Vector3.zero;
+                var transformCache = view.GetTransformCache(null);
+                transformCache.eulerAngles = animationConfig.rotationRight1;
+
+                updateTransform |= DrawEulerAngles(
+                    view,
+                    transformCache,
+                    TransformEditType.全て,
+                    prevEulerAngles,
+                    initialEulerAngles);
+
+                if (updateTransform)
+                {
+                    animationConfig.rotationRight1 = transformCache.eulerAngles;
+                }
+            }
+
+            view.DrawLabel("右手回転2", 200, 20);
+
+            {
+                var initialEulerAngles = defaultConfig.rotationRight2;
+                var prevEulerAngles = Vector3.zero;
+                var transformCache = view.GetTransformCache(null);
+                transformCache.eulerAngles = animationConfig.rotationRight2;
+
+                updateTransform |= DrawEulerAngles(
+                    view,
+                    transformCache,
+                    TransformEditType.全て,
+                    prevEulerAngles,
+                    initialEulerAngles);
+
+                if (updateTransform)
+                {
+                    animationConfig.rotationRight2 = transformCache.eulerAngles;
                 }
             }
 
@@ -1104,11 +1225,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 defaultTrans.mirrorRotationZInfo,
                 animationConfig.mirrorRotationZ,
                 y => animationConfig.mirrorRotationZ = y);
-
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.cutoffHeightInfo,
-                animationConfig.cutoffHeight,
-                y => animationConfig.cutoffHeight = y);
             
             updateTransform |= view.DrawCustomValueFloat(
                 defaultTrans.bpmInfo,
@@ -1129,6 +1245,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 defaultTrans.timeRatioInfo,
                 animationConfig.timeRatio,
                 y => animationConfig.timeRatio = y);
+
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.timeOffsetInfo,
+                animationConfig.timeOffset,
+                y => animationConfig.timeOffset = y);
 
             _easingType1ComboBox.currentIndex = (int)animationConfig.easingType1;
             _easingType1ComboBox.onSelected = (type, _) =>
