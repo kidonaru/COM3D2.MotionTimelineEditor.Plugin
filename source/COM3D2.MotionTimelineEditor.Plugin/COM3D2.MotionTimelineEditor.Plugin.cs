@@ -466,6 +466,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     TransformType.PsylliumAnimation, TimelineManager.CreateTransform<TransformDataPsylliumAnimation>
                 );
                 timelineManager.RegisterTransform(
+                    TransformType.PsylliumAnimationHand, TimelineManager.CreateTransform<TransformDataPsylliumAnimationHand>
+                );
+                timelineManager.RegisterTransform(
                     TransformType.PsylliumArea, TimelineManager.CreateTransform<TransformDataPsylliumArea>
                 );
                 timelineManager.RegisterTransform(

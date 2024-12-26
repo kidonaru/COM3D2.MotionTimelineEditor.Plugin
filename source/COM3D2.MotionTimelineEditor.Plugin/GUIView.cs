@@ -644,20 +644,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             public int maxLines;
         }
 
+        public GUIView subView;
+
+        public GUIView BeginSubView(Rect subViewRect, LayoutDirection direction)
+        {
+            if (subView == null)
+            {
+                subView = new GUIView();
+            }
+
+            subView.parent = this;
+            subView.Init(subViewRect);
+            subView.margin = 0;
+            subView.padding = Vector2.zero;
+            subView.BeginLayout(direction);
+
+            return subView;
+        }
+
+        public void EndSubView()
+        {
+            subView.EndLayout();
+            NextElement(subView._viewRect);
+        }
+
         public bool DrawTextField(TextFieldOption option)
         {
             var height = option.maxLines > 1 ? 20 * option.maxLines : 20;
             var subViewRect = GetDrawRect(-1, height);
-            var subView = new GUIView(subViewRect)
-            {
-                parent = this,
-                margin = 0,
-                padding = Vector2.zero
-            };
-
             var updated = false;
 
-            subView.BeginLayout(LayoutDirection.Horizontal);
+            BeginSubView(subViewRect, LayoutDirection.Horizontal);
             {
                 if (!string.IsNullOrEmpty(option.label))
                 {
@@ -685,9 +702,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     option.onChanged(GUIUtility.systemCopyBuffer);
                 }
             }
-            subView.EndLayout();
-
-            NextElement(subViewRect);
+            EndSubView();
 
             return updated;
         }
@@ -704,6 +719,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             public float height;
             public FloatFieldCache fieldCache;
             public Action<float> onChanged;
+            public Action onReset;
         }
 
         public bool DrawFloatField(FloatFieldOption option)
@@ -738,13 +754,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 };
             }
 
-            DrawTextField(
-                option.label,
-                option.labelWidth,
-                fieldCache.text,
-                option.width,
-                option.height,
-                onChanged);
+            if (option.onReset != null)
+            {
+                var subViewRect = GetDrawRect(option.width, option.height);
+
+                BeginSubView(subViewRect, LayoutDirection.Horizontal);
+                {
+                    var fieldWidth = subViewRect.width - 20;
+
+                    subView.DrawTextField(
+                        option.label,
+                        option.labelWidth,
+                        fieldCache.text,
+                        fieldWidth,
+                        option.height,
+                        onChanged);
+
+                    if (subView.DrawButton("R", 20, 20))
+                    {
+                        option.onReset();
+                        updated = true;
+                    }
+                }
+                EndSubView();
+            }
+            else
+            {
+                DrawTextField(
+                    option.label,
+                    option.labelWidth,
+                    fieldCache.text,
+                    option.width,
+                    option.height,
+                    onChanged);
+            }
 
             return updated;
         }
@@ -760,6 +803,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             public float height;
             public FloatFieldCache fieldCache;
             public Action<int> onChanged;
+            public Action onReset;
         }
 
         public bool DrawIntField(IntFieldOption option)
@@ -775,6 +819,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 width = option.width,
                 height = option.height,
                 fieldCache = option.fieldCache,
+                onReset = option.onReset,
             };
             if (option.onChanged != null)
             {
@@ -1409,14 +1454,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var updated = false;
 
             var subViewRect = GetDrawRect(250, 20);
-            var subView = new GUIView(subViewRect)
-            {
-                parent = this,
-                margin = 0,
-                padding = Vector2.zero
-            };
-
-            subView.BeginLayout(LayoutDirection.Horizontal);
+            
+            BeginSubView(subViewRect, LayoutDirection.Horizontal);
             {
                 var sliderWidth = 170f;
 
@@ -1462,9 +1501,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     newValue = option.defaultValue;
                 }
             }
-            subView.EndLayout();
-
-            NextElement(subViewRect);
+            EndSubView();
 
             if (!float.IsNaN(newValue) && newValue != option.value)
             {
@@ -1808,6 +1845,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 defaultValue = info.defaultValue,
                 value = value,
                 onChanged = x => onChanged((int) x),
+            });
+        }
+
+        public bool DrawCustomValueIntRandom(
+            CustomValueInfo info,
+            int value,
+            Action<int> onChanged)
+        {
+            return DrawIntField(new IntFieldOption
+            {
+                label = info.name,
+                labelWidth = 40,
+                minValue = info.min,
+                maxValue = info.max,
+                value = value,
+                width = 150,
+                height = 20,
+                onChanged = onChanged,
+                onReset = () => onChanged(UnityEngine.Random.Range(int.MinValue, int.MaxValue)),
             });
         }
 

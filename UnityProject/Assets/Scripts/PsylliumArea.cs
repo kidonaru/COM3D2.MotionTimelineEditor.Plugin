@@ -104,10 +104,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 #endif
 
-        public void Setup(PsylliumController scatter)
+        public void Setup(PsylliumController controller)
         {
-            this.controller = scatter;
-            areaConfig.randomSeed = Random.value.GetHashCode();
+            this.controller = controller;
+            areaConfig.randomSeed = Random.Range(int.MinValue, int.MaxValue);
             Refresh();
         }
 
@@ -116,6 +116,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (refreshRequired)
             {
                 Refresh();
+                return;
             }
 
             UpdateTime();
@@ -188,11 +189,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Refresh()
         {
-            var halfDistance = handConfig.handSpacing / 2f;
-
-            // 0割り回避
-            areaConfig.seatDistance.x = Mathf.Max(0.01f, areaConfig.seatDistance.x);
-            areaConfig.seatDistance.y = Mathf.Max(0.01f, areaConfig.seatDistance.y);
+            var halfHandSpacing = handConfig.handSpacing * barConfig.baseScale * 0.5f;
 
             Random.InitState(areaConfig.randomSeed);
 
@@ -204,20 +201,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var areaSize = areaConfig.size;
             var halfAreaSize = areaSize * 0.5f;
-            var seatDistance = areaConfig.seatDistance;
+            var seatDistance = areaConfig.seatDistance * barConfig.baseScale;
+
+            // 無限ループ回避
+            seatDistance.x = Mathf.Max(0.01f, seatDistance.x);
+            seatDistance.y = Mathf.Max(0.01f, seatDistance.y);
 
             for (float x = -halfAreaSize.x; x < halfAreaSize.x; x += seatDistance.x)
             {
                 for (float z = -halfAreaSize.y; z < halfAreaSize.y; z += seatDistance.y)
                 {
-                    var randomValues = new PsylliumRandomValues(handConfig, areaConfig);
+                    var randomValues = new PsylliumRandomValues(areaConfig);
 
                     // 基準位置を計算
-                    var basePosition = new Vector3(x, 0, z) + randomValues.basePosition;
+                    var basePosition = new Vector3(x, 0, z) + randomValues.basePosition * barConfig.baseScale;
 
                     // 左手と右手の位置を計算
-                    var leftHandPos = basePosition + new Vector3(-halfDistance, 0f, 0f);
-                    var rightHandPos = basePosition + new Vector3(halfDistance, 0f, 0f);
+                    var leftHandPos = basePosition + new Vector3(-halfHandSpacing, 0f, 0f);
+                    var rightHandPos = basePosition + new Vector3(halfHandSpacing, 0f, 0f);
 
                     if (randomValues.leftCount > 0)
                     {
@@ -228,7 +229,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             leftHandPos,
                             randomValues.leftCount,
                             randomValues.timeIndex,
-                            randomValues.timeShift,
+                            randomValues.timeShiftParam,
                             randomValues.leftColorIndexes,
                             randomValues.leftPositionParam,
                             randomValues.leftRotationParam,
@@ -244,7 +245,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             rightHandPos,
                             randomValues.rightCount,
                             randomValues.timeIndex,
-                            randomValues.timeShift,
+                            randomValues.timeShiftParam,
                             randomValues.rightColorIndexes,
                             randomValues.rightPositionParam,
                             randomValues.rightRotationParam,
@@ -254,13 +255,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             RemoveUnusedHands();
+            UpdateTime();
+
+            Random.InitState(Time.frameCount);
 
             refreshRequired = false;
         }
 
-        public void CopyFrom(PsylliumArea src)
+        public void CopyFrom(PsylliumArea src, bool ignoreTransform)
         {
-            areaConfig.CopyFrom(src.areaConfig);
+            areaConfig.CopyFrom(src.areaConfig, ignoreTransform);
             Refresh();
         }
     }

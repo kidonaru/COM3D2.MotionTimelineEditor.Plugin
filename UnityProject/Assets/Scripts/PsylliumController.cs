@@ -35,6 +35,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public PsylliumBarConfig barConfig = new PsylliumBarConfig();
         public PsylliumHandConfig handConfig = new PsylliumHandConfig();
         public PsylliumAnimationConfig animationConfig = new PsylliumAnimationConfig();
+        public PsylliumAnimationHandConfig animationHandConfigLeft = new PsylliumAnimationHandConfig();
+        public PsylliumAnimationHandConfig animationHandConfigRight = new PsylliumAnimationHandConfig();
         public List<PsylliumArea> areas;
         public Material[] materials;
         public Mesh[] meshes;
@@ -108,11 +110,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private List<Quaternion> _animationRotationsLeft = new List<Quaternion>();
         private List<Quaternion> _animationRotationsRight = new List<Quaternion>();
 
-        public static Vector3 DefaultPosition = new Vector3(0f, 0f, 10f);
-        public static Vector3 DefaultEulerAngles = new Vector3(0f, 180f, 0f);
+        public static Vector3 DefaultPosition = new Vector3(0f, 0f, 0f);
+        public static Vector3 DefaultEulerAngles = new Vector3(0f, 0f, 0f);
 
 #if COM3D2
         private static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
+
+        private Config config => ConfigManager.config;
 #endif
 
         void OnEnable()
@@ -204,6 +208,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             barConfig.UpdateName(groupIndex);
             handConfig.UpdateName(groupIndex);
             animationConfig.UpdateName(groupIndex);
+            animationHandConfigLeft.UpdateName(groupIndex, true);
+            animationHandConfigRight.UpdateName(groupIndex, false);
         }
 
         public void UpdateMaterials()
@@ -239,9 +245,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void UpdateMesh(int colorIndex)
         {
-            var halfWidth = barConfig.width / 2;
-            var barHeight = barConfig.height;
-            var barRadius = barConfig.radius;
+            var halfWidth = barConfig.width * 0.5f * barConfig.baseScale;
+            var barHeight = barConfig.height * barConfig.baseScale;
+            var barRadius = barConfig.radius * barConfig.baseScale;
+            var positionY = barConfig.positionY * barConfig.baseScale;
             var barTopThreshold = barConfig.topThreshold;
 
             var vertices = new Vector3[] {
@@ -258,7 +265,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             for (int i = 0; i < vertices.Length; i++)
             {
                 var v = vertices[i];
-                v.y += barConfig.positionY;
+                v.y += positionY;
                 vertices[i] = v;
             }
 
@@ -322,6 +329,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             area.Setup(this);
 
             areas.Add(area);
+
+#if COM3D2
+            // 1つ前のエリア設定を引き継ぐ
+            if (areas.Count > 1)
+            {
+                var prevArea = areas[areas.Count - 2];
+                area.CopyFrom(prevArea, false);
+            }
+#endif
 
             return area;
         }
@@ -410,20 +426,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _animationRotationsLeft.Clear();
             _animationRotationsRight.Clear();
 
-            var positionLeft1 = animationConfig.positionLeft1;
-            var positionLeft2 = animationConfig.positionLeft2;
-            var positionRight1 = animationConfig.positionRight1;
-            var positionRight2 = animationConfig.positionRight2;
-            var rotationLeft1 = Quaternion.Euler(animationConfig.rotationLeft1);
-            var rotationLeft2 = Quaternion.Euler(animationConfig.rotationLeft2);
-            var rotationRight1 = Quaternion.Euler(animationConfig.rotationRight1);
-            var rotationRight2 = Quaternion.Euler(animationConfig.rotationRight2);
+            var positionLeft1 = animationHandConfigLeft.position1 * barConfig.baseScale;
+            var positionLeft2 = animationHandConfigLeft.position2 * barConfig.baseScale;
+            var positionRight1 = animationHandConfigRight.position1 * barConfig.baseScale;
+            var positionRight2 = animationHandConfigRight.position2 * barConfig.baseScale;
+            var rotationLeft1 = Quaternion.Euler(animationHandConfigLeft.eulerAngles1);
+            var rotationLeft2 = Quaternion.Euler(animationHandConfigLeft.eulerAngles2);
+            var rotationRight1 = Quaternion.Euler(animationHandConfigRight.eulerAngles1);
+            var rotationRight2 = Quaternion.Euler(animationHandConfigRight.eulerAngles2);
 
             for (int i = 0; i < randomTimeCount; ++i)
             {
                 float t = time + timeOffset - randomTime * 0.5f + i * randomTimePerCount;
 
                 float normalizedTime = (t * 0.5f * animationConfig.bpm * BPM_TO_TIME) % 1;
+                normalizedTime = (normalizedTime + 1) % 1;
 
                 if (normalizedTime < timeRatio)
                 {
@@ -466,6 +483,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             barConfig.CopyFrom(src.barConfig);
             handConfig.CopyFrom(src.handConfig);
             animationConfig.CopyFrom(src.animationConfig);
+            animationHandConfigLeft.CopyFrom(src.animationHandConfigLeft);
+            animationHandConfigRight.CopyFrom(src.animationHandConfigRight);
         }
     }
 

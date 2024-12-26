@@ -30,6 +30,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _allBoneNames.AddRange(psylliumManager.barConfigNames);
                     _allBoneNames.AddRange(psylliumManager.handConfigNames);
                     _allBoneNames.AddRange(psylliumManager.animationConfigNames);
+                    _allBoneNames.AddRange(psylliumManager.animationHandConfigNames);
                     _allBoneNames.AddRange(psylliumManager.areaNames);
                 }
                 return _allBoneNames;
@@ -95,6 +96,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var animationConfig = controller.animationConfig;
                     var menuItem = new BoneMenuItem(animationConfig.name, animationConfig.displayName);
+                    setMenuItem.AddChild(menuItem);
+                }
+
+                {
+                    var animationHandConfigLeft = controller.animationHandConfigLeft;
+                    var menuItem = new BoneMenuItem(animationHandConfigLeft.name, animationHandConfigLeft.displayName);
+                    setMenuItem.AddChild(menuItem);
+                }
+
+                {
+                    var animationHandConfigRight = controller.animationHandConfigRight;
+                    var menuItem = new BoneMenuItem(animationHandConfigRight.name, animationHandConfigRight.displayName);
                     setMenuItem.AddChild(menuItem);
                 }
 
@@ -177,6 +190,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         ApplyAnimationConfigMotionInit(motion, t);
                     }
                     ApplyAnimationConfigMotionUpdate(motion, t);
+                    break;
+                case TransformType.PsylliumAnimationHand:
+                    if (indexUpdated)
+                    {
+                        ApplyAnimationHandConfigMotionInit(motion, t);
+                    }
+                    ApplyAnimationHandConfigMotionUpdate(motion, t);
                     break;
                 case TransformType.PsylliumArea:
                     if (indexUpdated)
@@ -301,46 +321,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var startConfig = start.ToConfig();
             var endConfig = end.ToConfig();
 
-            if (startConfig.positionLeft1 != endConfig.positionLeft1)
-            {
-                animationConfig.positionLeft1 = Vector3.Lerp(startConfig.positionLeft1, endConfig.positionLeft1, t);
-            }
-
-            if (startConfig.positionLeft2 != endConfig.positionLeft2)
-            {
-                animationConfig.positionLeft2 = Vector3.Lerp(startConfig.positionLeft2, endConfig.positionLeft2, t);
-            }
-
-            if (startConfig.positionRight1 != endConfig.positionRight1)
-            {
-                animationConfig.positionRight1 = Vector3.Lerp(startConfig.positionRight1, endConfig.positionRight1, t);
-            }
-
-            if (startConfig.positionRight2 != endConfig.positionRight2)
-            {
-                animationConfig.positionRight2 = Vector3.Lerp(startConfig.positionRight2, endConfig.positionRight2, t);
-            }
-
-            if (startConfig.rotationLeft1 != endConfig.rotationLeft1)
-            {
-                animationConfig.rotationLeft1 = Vector3.Lerp(startConfig.rotationLeft1, endConfig.rotationLeft1, t);
-            }
-
-            if (startConfig.rotationLeft2 != endConfig.rotationLeft2)
-            {
-                animationConfig.rotationLeft2 = Vector3.Lerp(startConfig.rotationLeft2, endConfig.rotationLeft2, t);
-            }
-
-            if (startConfig.rotationRight1 != endConfig.rotationRight1)
-            {
-                animationConfig.rotationRight1 = Vector3.Lerp(startConfig.rotationRight1, endConfig.rotationRight1, t);
-            }
-
-            if (startConfig.rotationRight2 != endConfig.rotationRight2)
-            {
-                animationConfig.rotationRight2 = Vector3.Lerp(startConfig.rotationRight2, endConfig.rotationRight2, t);
-            }
-
             if (startConfig.randomPositionRange != endConfig.randomPositionRange)
             {
                 animationConfig.randomPositionRange = Vector3.Lerp(startConfig.randomPositionRange, endConfig.randomPositionRange, t);
@@ -364,6 +344,72 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (startConfig.timeOffset != endConfig.timeOffset)
             {
                 animationConfig.timeOffset = Mathf.Lerp(startConfig.timeOffset, endConfig.timeOffset, t);
+            }
+        }
+
+        private void ApplyAnimationHandConfigMotionInit(MotionData motion, float t)
+        {
+            var animationConfig = psylliumManager.GetAnimationHandConfig(motion.name);
+            if (animationConfig == null)
+            {
+                return;
+            }
+
+            var controller = psylliumManager.GetController(animationConfig.groupIndex);
+            if (controller == null)
+            {
+                return;
+            }
+
+            var start = motion.start as TransformDataPsylliumAnimationHand;
+            var targetConfig = start.ToConfig();
+
+            if (targetConfig.Equals(animationConfig))
+            {
+                return;
+            }
+
+            animationConfig.CopyFrom(targetConfig);
+        }
+
+        private void ApplyAnimationHandConfigMotionUpdate(MotionData motion, float t)
+        {
+            var animationConfig = psylliumManager.GetAnimationHandConfig(motion.name);
+            if (animationConfig == null)
+            {
+                return;
+            }
+
+            var controller = psylliumManager.GetController(animationConfig.groupIndex);
+            if (controller == null)
+            {
+                return;
+            }
+
+            var start = motion.start as TransformDataPsylliumAnimationHand;
+            var end = motion.end as TransformDataPsylliumAnimationHand;
+
+            var startConfig = start.ToConfig();
+            var endConfig = end.ToConfig();
+
+            if (startConfig.position1 != endConfig.position1)
+            {
+                animationConfig.position1 = Vector3.Lerp(startConfig.position1, endConfig.position1, t);
+            }
+
+            if (startConfig.position2 != endConfig.position2)
+            {
+                animationConfig.position2 = Vector3.Lerp(startConfig.position2, endConfig.position2, t);
+            }
+
+            if (startConfig.eulerAngles1 != endConfig.eulerAngles1)
+            {
+                animationConfig.eulerAngles1 = Vector3.Lerp(startConfig.eulerAngles1, endConfig.eulerAngles1, t);
+            }
+
+            if (startConfig.eulerAngles2 != endConfig.eulerAngles2)
+            {
+                animationConfig.eulerAngles2 = Vector3.Lerp(startConfig.eulerAngles2, endConfig.eulerAngles2, t);
             }
         }
 
@@ -439,11 +485,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var areaName = area.name;
 
-                var trans = CreateTransformData<TransformDataPsylliumArea>(areaName);
+                var trans = frame.GetOrCreateTransformData<TransformDataPsylliumArea>(areaName);
                 trans.FromConfig(area.areaConfig);
-
-                var bone = frame.CreateBone(trans);
-                frame.UpdateBone(bone);
             }
 
             foreach (var controller in psylliumManager.controllers)
@@ -456,46 +499,50 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var controllerName = controller.name;
 
-                    var trans = CreateTransformData<TransformDataPsylliumController>(controllerName);
+                    var trans = frame.GetOrCreateTransformData<TransformDataPsylliumController>(controllerName);
                     trans.position = controller.position;
                     trans.eulerAngles = controller.eulerAngles;
                     trans.visible = controller.visible;
-
-                    var bone = frame.CreateBone(trans);
-                    frame.UpdateBone(bone);
                 }
 
                 {
-                    var barConfig = controller.barConfig;
-                    var barConfigName = barConfig.name;
+                    var config = controller.barConfig;
+                    var barConfigName = config.name;
 
-                    var trans = CreateTransformData<TransformDataPsylliumBar>(barConfigName);
-                    trans.FromConfig(barConfig);
-
-                    var bone = frame.CreateBone(trans);
-                    frame.UpdateBone(bone);
+                    var trans = frame.GetOrCreateTransformData<TransformDataPsylliumBar>(barConfigName);
+                    trans.FromConfig(config);
                 }
 
                 {
-                    var handConfig = controller.handConfig;
-                    var handConfigName = handConfig.name;
+                    var config = controller.handConfig;
+                    var handConfigName = config.name;
 
-                    var trans = CreateTransformData<TransformDataPsylliumHand>(handConfigName);
-                    trans.FromConfig(handConfig);
-
-                    var bone = frame.CreateBone(trans);
-                    frame.UpdateBone(bone);
+                    var trans = frame.GetOrCreateTransformData<TransformDataPsylliumHand>(handConfigName);
+                    trans.FromConfig(config);
                 }
 
                 {
-                    var animationConfig = controller.animationConfig;
-                    var animationConfigName = animationConfig.name;
+                    var config = controller.animationConfig;
+                    var animationConfigName = config.name;
 
-                    var trans = CreateTransformData<TransformDataPsylliumAnimation>(animationConfigName);
-                    trans.FromConfig(animationConfig);
+                    var trans = frame.GetOrCreateTransformData<TransformDataPsylliumAnimation>(animationConfigName);
+                    trans.FromConfig(config);
+                }
 
-                    var bone = frame.CreateBone(trans);
-                    frame.UpdateBone(bone);
+                {
+                    var config = controller.animationHandConfigLeft;
+                    var animationConfigName = config.name;
+
+                    var trans = frame.GetOrCreateTransformData<TransformDataPsylliumAnimationHand>(animationConfigName);
+                    trans.FromConfig(config);
+                }
+
+                {
+                    var config = controller.animationHandConfigRight;
+                    var animationConfigName = config.name;
+
+                    var trans = frame.GetOrCreateTransformData<TransformDataPsylliumAnimationHand>(animationConfigName);
+                    trans.FromConfig(config);
                 }
             }
         }
@@ -560,7 +607,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             エリア,
         }
 
+        private enum HandTabType
+        {
+            両手,
+            左手,
+            右手,
+        }
+
         private TabType _tabType = TabType.基本;
+        private HandTabType _handTabType = HandTabType.両手;
 
         public override void DrawWindow(GUIView view)
         {
@@ -634,32 +689,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.DrawLabel("コントローラーを選択してください", 200, 20);
                 return;
             }
-            
-            view.BeginHorizontal();
-            {
-                view.margin = 0;
-
-                view.DrawLabel("エリア数", view.labelWidth, 20);
-
-                view.DrawIntField(new GUIView.IntFieldOption
-                {
-                    value = controller.areas.Count,
-                    width = view.viewRect.width - (view.labelWidth + 40 + view.padding.x * 2),
-                    height = 20,
-                });
-
-                if (view.DrawButton("-", 20, 20))
-                {
-                    psylliumManager.RemoveArea(controller.groupIndex, true);
-                }
-                if (view.DrawButton("+", 20, 20))
-                {
-                    psylliumManager.AddArea(controller.groupIndex, true);
-                }
-
-                view.margin = GUIView.defaultMargin;
-            }
-            view.EndLayout();
 
             view.DrawHorizontalLine(Color.gray);
             view.AddSpace(5);
@@ -731,12 +760,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         copyToController.Refresh();
                     }
                 }
-
-                view.DrawHorizontalLine(Color.gray);
-                view.AddSpace(5);
             }
 
+            view.DrawHorizontalLine(Color.gray);
+
             view.SetEnabled(!view.IsComboBoxFocused());
+
+            view.DrawToggle("編集中のアニメ再生", config.psylliumEditUpdate, 200, 20, newValue =>
+            {
+                config.psylliumEditUpdate = newValue;
+            });
+
             view.EndScrollView();
         }
 
@@ -821,6 +855,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 c => barConfig.color2c = c);
 
             updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.baseScaleInfo,
+                barConfig.baseScale,
+                y => barConfig.baseScale = y);
+
+            updateTransform |= view.DrawCustomValueFloat(
                 defaultTrans.widthInfo,
                 barConfig.width,
                 y => barConfig.width = y);
@@ -852,7 +891,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (updateTransform)
             {
-                controller.barConfig.CopyFrom(barConfig);
                 controller.Refresh();
             }
 
@@ -898,29 +936,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 handConfig.handSpacing,
                 y => handConfig.handSpacing = y);
             
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.barCountWeight0Info,
-                handConfig.barCountWeight0,
-                y => handConfig.barCountWeight0 = y);
-            
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.barCountWeight1Info,
-                handConfig.barCountWeight1,
-                y => handConfig.barCountWeight1 = y);
-            
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.barCountWeight2Info,
-                handConfig.barCountWeight2,
-                y => handConfig.barCountWeight2 = y);
-            
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.barCountWeight3Info,
-                handConfig.barCountWeight3,
-                y => handConfig.barCountWeight3 = y);
-            
             var transformCache = view.GetTransformCache(null);
 
-            view.DrawLabel("バー毎の位置", 200, 20);
+            view.DrawLabel("サイリウム間の位置", 200, 20);
 
             {
                 var initialPosition = defaultConfig.barOffsetPosition;
@@ -938,7 +956,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            view.DrawLabel("バー毎の角度", 200, 20);
+            view.DrawLabel("サイリウム間の角度", 200, 20);
 
             {
                 var initialEulerAngles = defaultConfig.barOffsetRotation;
@@ -958,29 +976,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.colorWeight1Info,
-                handConfig.colorWeight1,
-                y => handConfig.colorWeight1 = y);
-            
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.colorWeight2Info,
-                handConfig.colorWeight2,
-                y => handConfig.colorWeight2 = y);
-
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.timeShiftMinInfo,
-                handConfig.timeShiftMin,
-                y => handConfig.timeShiftMin = y);
-
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.timeShiftMaxInfo,
-                handConfig.timeShiftMax,
-                y => handConfig.timeShiftMax = y);
-
             if (updateTransform)
             {
-                controller.handConfig.CopyFrom(handConfig);
                 controller.Refresh();
             }
 
@@ -1021,165 +1018,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var defaultTrans = TransformDataPsylliumAnimation.defaultTrans;
             var defaultConfig = TransformDataPsylliumAnimation.defaultConfig;
 
-            view.DrawLabel("左手移動1", 200, 20);
+            _handTabType = view.DrawTabs(_handTabType, 50, 20);
 
-            {
-                var initialPosition = defaultConfig.positionLeft1;
-                var transformCache = view.GetTransformCache(null);
-                transformCache.position = animationConfig.positionLeft1;
-
-                updateTransform |= DrawPosition(
-                    view,
-                    transformCache,
-                    TransformEditType.全て,
-                    initialPosition);
-
-                if (updateTransform)
-                {
-                    animationConfig.positionLeft1 = transformCache.position;
-                }
-            }
-
-            view.DrawLabel("左手移動2", 200, 20);
-
-            {
-                var initialPosition = defaultConfig.positionLeft2;
-                var transformCache = view.GetTransformCache(null);
-                transformCache.position = animationConfig.positionLeft2;
-
-                updateTransform |= DrawPosition(
-                    view,
-                    transformCache,
-                    TransformEditType.全て,
-                    initialPosition);
-
-                if (updateTransform)
-                {
-                    animationConfig.positionLeft2 = transformCache.position;
-                }
-            }
-
-            view.DrawLabel("左手回転1", 200, 20);
-
-            {
-                var initialEulerAngles = defaultConfig.rotationLeft1;
-                var prevEulerAngles = Vector3.zero;
-                var transformCache = view.GetTransformCache(null);
-                transformCache.eulerAngles = animationConfig.rotationLeft1;
-
-                updateTransform |= DrawEulerAngles(
-                    view,
-                    transformCache,
-                    TransformEditType.全て,
-                    prevEulerAngles,
-                    initialEulerAngles);
-
-                if (updateTransform)
-                {
-                    animationConfig.rotationLeft1 = transformCache.eulerAngles;
-                }
-            }
-
-            view.DrawLabel("左手回転2", 200, 20);
-
-            {
-                var initialEulerAngles = defaultConfig.rotationLeft2;
-                var prevEulerAngles = Vector3.zero;
-                var transformCache = view.GetTransformCache(null);
-                transformCache.eulerAngles = animationConfig.rotationLeft2;
-
-                updateTransform |= DrawEulerAngles(
-                    view,
-                    transformCache,
-                    TransformEditType.全て,
-                    prevEulerAngles,
-                    initialEulerAngles);
-
-                if (updateTransform)
-                {
-                    animationConfig.rotationLeft2 = transformCache.eulerAngles;
-                }
-            }
-
-            view.DrawLabel("右手移動1", 200, 20);
-
-            {
-                var initialPosition = defaultConfig.positionRight1;
-                var transformCache = view.GetTransformCache(null);
-                transformCache.position = animationConfig.positionRight1;
-
-                updateTransform |= DrawPosition(
-                    view,
-                    transformCache,
-                    TransformEditType.全て,
-                    initialPosition);
-
-                if (updateTransform)
-                {
-                    animationConfig.positionRight1 = transformCache.position;
-                }
-            }
-
-            view.DrawLabel("右手移動2", 200, 20);
-
-            {
-                var initialPosition = defaultConfig.positionRight2;
-                var transformCache = view.GetTransformCache(null);
-                transformCache.position = animationConfig.positionRight2;
-
-                updateTransform |= DrawPosition(
-                    view,
-                    transformCache,
-                    TransformEditType.全て,
-                    initialPosition);
-
-                if (updateTransform)
-                {
-                    animationConfig.positionRight2 = transformCache.position;
-                }
-            }
-
-            view.DrawLabel("右手回転1", 200, 20);
-
-            {
-                var initialEulerAngles = defaultConfig.rotationRight1;
-                var prevEulerAngles = Vector3.zero;
-                var transformCache = view.GetTransformCache(null);
-                transformCache.eulerAngles = animationConfig.rotationRight1;
-
-                updateTransform |= DrawEulerAngles(
-                    view,
-                    transformCache,
-                    TransformEditType.全て,
-                    prevEulerAngles,
-                    initialEulerAngles);
-
-                if (updateTransform)
-                {
-                    animationConfig.rotationRight1 = transformCache.eulerAngles;
-                }
-            }
-
-            view.DrawLabel("右手回転2", 200, 20);
-
-            {
-                var initialEulerAngles = defaultConfig.rotationRight2;
-                var prevEulerAngles = Vector3.zero;
-                var transformCache = view.GetTransformCache(null);
-                transformCache.eulerAngles = animationConfig.rotationRight2;
-
-                updateTransform |= DrawEulerAngles(
-                    view,
-                    transformCache,
-                    TransformEditType.全て,
-                    prevEulerAngles,
-                    initialEulerAngles);
-
-                if (updateTransform)
-                {
-                    animationConfig.rotationRight2 = transformCache.eulerAngles;
-                }
-            }
+            DrawPsylliumAnimationHandConfigEdit(view);
 
             var transformCacheRandom = view.GetTransformCache(null);
 
@@ -1251,6 +1092,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 animationConfig.timeOffset,
                 y => animationConfig.timeOffset = y);
 
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.timeShiftMinInfo,
+                animationConfig.timeShiftMin,
+                y => animationConfig.timeShiftMin = y);
+
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.timeShiftMaxInfo,
+                animationConfig.timeShiftMax,
+                y => animationConfig.timeShiftMax = y);
+
             _easingType1ComboBox.currentIndex = (int)animationConfig.easingType1;
             _easingType1ComboBox.onSelected = (type, _) =>
             {
@@ -1269,12 +1120,120 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (updateTransform)
             {
-                controller.animationConfig.CopyFrom(animationConfig);
                 controller.ManualUpdate(this.playingTime);
             }
 
             view.SetEnabled(!view.IsComboBoxFocused());
             view.EndScrollView();
+        }
+
+        public void DrawPsylliumAnimationHandConfigEdit(GUIView view)
+        {
+            var controller = _controllerComboBox.currentItem;
+            if (controller == null)
+            {
+                view.DrawLabel("コントローラーを選択してください", 200, 20);
+                return;
+            }
+
+            var animationConfig = _handTabType == HandTabType.右手
+                ? controller.animationHandConfigRight
+                : controller.animationHandConfigLeft;
+            var updateTransform = false;
+            var defaultTrans = TransformDataPsylliumAnimationHand.defaultTrans;
+            var defaultConfig = TransformDataPsylliumAnimationHand.defaultConfig;
+
+            view.DrawLabel("移動1", 200, 20);
+
+            {
+                var initialPosition = defaultConfig.position1;
+                var transformCache = view.GetTransformCache(null);
+                transformCache.position = animationConfig.position1;
+
+                updateTransform |= DrawPosition(
+                    view,
+                    transformCache,
+                    TransformEditType.全て,
+                    initialPosition);
+
+                if (updateTransform)
+                {
+                    animationConfig.position1 = transformCache.position;
+                }
+            }
+
+            view.DrawLabel("移動2", 200, 20);
+
+            {
+                var initialPosition = defaultConfig.position2;
+                var transformCache = view.GetTransformCache(null);
+                transformCache.position = animationConfig.position2;
+
+                updateTransform |= DrawPosition(
+                    view,
+                    transformCache,
+                    TransformEditType.全て,
+                    initialPosition);
+
+                if (updateTransform)
+                {
+                    animationConfig.position2 = transformCache.position;
+                }
+            }
+
+            view.DrawLabel("回転1", 200, 20);
+
+            {
+                var initialEulerAngles = defaultConfig.eulerAngles1;
+                var prevEulerAngles = Vector3.zero;
+                var transformCache = view.GetTransformCache(null);
+                transformCache.eulerAngles = animationConfig.eulerAngles1;
+
+                updateTransform |= DrawEulerAngles(
+                    view,
+                    transformCache,
+                    TransformEditType.全て,
+                    prevEulerAngles,
+                    initialEulerAngles);
+
+                if (updateTransform)
+                {
+                    animationConfig.eulerAngles1 = transformCache.eulerAngles;
+                }
+            }
+
+            view.DrawLabel("回転2", 200, 20);
+
+            {
+                var initialEulerAngles = defaultConfig.eulerAngles2;
+                var prevEulerAngles = Vector3.zero;
+                var transformCache = view.GetTransformCache(null);
+                transformCache.eulerAngles = animationConfig.eulerAngles2;
+
+                updateTransform |= DrawEulerAngles(
+                    view,
+                    transformCache,
+                    TransformEditType.全て,
+                    prevEulerAngles,
+                    initialEulerAngles);
+
+                if (updateTransform)
+                {
+                    animationConfig.eulerAngles2 = transformCache.eulerAngles;
+                }
+            }
+
+            if (updateTransform)
+            {
+                if (_handTabType == HandTabType.両手)
+                {
+                    controller.animationHandConfigRight.CopyFrom(animationConfig);
+                }
+
+                controller.ManualUpdate(this.playingTime);
+            }
+
+            view.DrawHorizontalLine(Color.gray);
         }
 
         public void DrawPsylliumAreaEdit(GUIView view)
@@ -1297,6 +1256,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.DrawLabel("コントローラーを選択してください", 200, 20);
                 return;
             }
+
+            view.BeginHorizontal();
+            {
+                view.margin = 0;
+
+                view.DrawLabel("エリア数", view.labelWidth, 20);
+
+                view.DrawIntField(new GUIView.IntFieldOption
+                {
+                    value = controller.areas.Count,
+                    width = view.viewRect.width - (view.labelWidth + 40 + view.padding.x * 2),
+                    height = 20,
+                });
+
+                if (view.DrawButton("-", 20, 20))
+                {
+                    psylliumManager.RemoveArea(controller.groupIndex, true);
+                }
+                if (view.DrawButton("+", 20, 20))
+                {
+                    psylliumManager.AddArea(controller.groupIndex, true);
+                }
+
+                view.margin = GUIView.defaultMargin;
+            }
+            view.EndLayout();
 
             var areas = controller.areas;
             if (areas.Count == 0)
@@ -1326,7 +1311,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawLabel(area.displayName, 200, 20);
 
-            var areaConfig = area.areaConfig.Clone();
+            var areaConfig = area.areaConfig;
             var transformCache = view.GetTransformCache();
             var defaultTrans = TransformDataPsylliumArea.defaultTrans;
             transformCache.position = areaConfig.position;
@@ -1389,14 +1374,43 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 areaConfig.randomPositionRange.z,
                 z => areaConfig.randomPositionRange.z = z);
 
-            updateTransform |= view.DrawCustomValueInt(
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.barCountWeight0Info,
+                areaConfig.barCountWeight0,
+                y => areaConfig.barCountWeight0 = y);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.barCountWeight1Info,
+                areaConfig.barCountWeight1,
+                y => areaConfig.barCountWeight1 = y);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.barCountWeight2Info,
+                areaConfig.barCountWeight2,
+                y => areaConfig.barCountWeight2 = y);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.barCountWeight3Info,
+                areaConfig.barCountWeight3,
+                y => areaConfig.barCountWeight3 = y);
+
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.colorWeight1Info,
+                areaConfig.colorWeight1,
+                y => areaConfig.colorWeight1 = y);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.colorWeight2Info,
+                areaConfig.colorWeight2,
+                y => areaConfig.colorWeight2 = y);
+
+            updateTransform |= view.DrawCustomValueIntRandom(
                 defaultTrans.randomSeedInfo,
                 areaConfig.randomSeed,
                 y => areaConfig.randomSeed = y);
 
             if (updateTransform)
             {
-                area.areaConfig.CopyFrom(areaConfig);
                 area.Refresh();
             }
 
@@ -1406,15 +1420,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _copyToAreaComboBox.items = areas;
                 _copyToAreaComboBox.DrawButton("コピー先", view);
 
-                var copyToArea = _copyToAreaComboBox.currentItem;
-
-                if (view.DrawButton("コピー", 60, 20))
+                view.BeginHorizontal();
                 {
-                    if (copyToArea != null && copyToArea != area)
+                    var copyToArea = _copyToAreaComboBox.currentItem;
+
+                    if (view.DrawButton("コピー", 60, 20))
                     {
-                        copyToArea.CopyFrom(area);
+                        if (copyToArea != null && copyToArea != area)
+                        {
+                            copyToArea.CopyFrom(area, config.psylliumAreaCopyIgnoreTransform);
+                        }
+                    }
+
+                    if (view.DrawButton("全エリアにコピー", 120, 20))
+                    {
+                        foreach (var a in areas)
+                        {
+                            if (a != area)
+                            {
+                                a.CopyFrom(area, config.psylliumAreaCopyIgnoreTransform);
+                            }
+                        }
                     }
                 }
+                view.EndLayout();
+
+                view.DrawToggle("位置/角度/サイズを反映しない", config.psylliumAreaCopyIgnoreTransform, 200, 20, newValue =>
+                {
+                    config.psylliumAreaCopyIgnoreTransform = newValue;
+                });
 
                 view.DrawHorizontalLine(Color.gray);
                 view.AddSpace(5);

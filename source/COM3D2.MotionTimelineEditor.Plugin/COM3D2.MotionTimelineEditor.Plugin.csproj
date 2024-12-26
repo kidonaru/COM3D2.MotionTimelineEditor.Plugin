@@ -224,6 +224,7 @@
     <Compile Include="TransformData\TransformDataMove.cs" />
     <Compile Include="TransformData\TransformDataParaffin.cs" />
     <Compile Include="TransformData\TransformDataPsylliumAnimation.cs" />
+    <Compile Include="TransformData\TransformDataPsylliumAnimationHand.cs" />
     <Compile Include="TransformData\TransformDataPsylliumArea.cs" />
     <Compile Include="TransformData\TransformDataPsylliumBar.cs" />
     <Compile Include="TransformData\TransformDataPsylliumController.cs" />

@@ -10,7 +10,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override TransformType type => TransformType.PsylliumBar;
 
-        public override int valueCount => 30;
+        public override int valueCount => 31;
 
         public TransformDataPsylliumBar()
         {
@@ -283,9 +283,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             },
             {
-                "width", new CustomValueInfo
+                "baseScale", new CustomValueInfo
                 {
                     index = 24,
+                    name = "スケール",
+                    min = 0f,
+                    max = 5f,
+                    step = 0.01f,
+                    defaultValue = defaultConfig.baseScale,
+                }
+            },
+            {
+                "width", new CustomValueInfo
+                {
+                    index = 25,
                     name = "幅",
                     min = 0f,
                     max = 5f,
@@ -296,7 +307,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "height", new CustomValueInfo
                 {
-                    index = 25,
+                    index = 26,
                     name = "高さ",
                     min = 0f,
                     max = 5f,
@@ -307,7 +318,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "positionY", new CustomValueInfo
                 {
-                    index = 26,
+                    index = 27,
                     name = "Y",
                     min = 0f,
                     max = 5f,
@@ -318,7 +329,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "radius", new CustomValueInfo
                 {
-                    index = 27,
+                    index = 28,
                     name = "半径",
                     min = 0f,
                     max = 1f,
@@ -329,7 +340,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "topThreshold", new CustomValueInfo
                 {
-                    index = 28,
+                    index = 29,
                     name = "上部閾値",
                     min = 0f,
                     max = 1f,
@@ -340,7 +351,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "cutoffAlpha", new CustomValueInfo
                 {
-                    index = 29,
+                    index = 30,
                     name = "A閾値",
                     min = 0f,
                     max = 1f,
@@ -379,6 +390,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get => new ValueData[] { this["color2cR"], this["color2cG"], this["color2cB"], this["color2cA"] };
         }
+        public ValueData baseScaleValue => this["baseScale"];
         public ValueData widthValue => this["width"];
         public ValueData heightValue => this["height"];
         public ValueData positionYValue => this["positionY"];
@@ -386,6 +398,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public ValueData topThresholdValue => this["topThreshold"];
         public ValueData cutoffAlphaValue => this["cutoffAlpha"];
 
+        public CustomValueInfo baseScaleInfo => CustomValueInfoMap["baseScale"];
         public CustomValueInfo widthInfo => CustomValueInfoMap["width"];
         public CustomValueInfo heightInfo => CustomValueInfoMap["height"];
         public CustomValueInfo positionYInfo => CustomValueInfoMap["positionY"];
@@ -423,7 +436,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get => color2cValues.ToColor();
             set => color2cValues.FromColor(value);
         }
-
+        public float baseScale
+        {
+            get => baseScaleValue.value;
+            set => baseScaleValue.value = value;
+        }
         public float width
         {
             get => widthValue.value;
@@ -463,6 +480,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             color2a = config.color2a;
             color2b = config.color2b;
             color2c = config.color2c;
+            baseScale = config.baseScale;
             width = config.width;
             height = config.height;
             positionY = config.positionY;
@@ -481,6 +499,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _config.color2a = color2a;
             _config.color2b = color2b;
             _config.color2c = color2c;
+            _config.baseScale = baseScale;
             _config.width = width;
             _config.height = height;
             _config.positionY = positionY;

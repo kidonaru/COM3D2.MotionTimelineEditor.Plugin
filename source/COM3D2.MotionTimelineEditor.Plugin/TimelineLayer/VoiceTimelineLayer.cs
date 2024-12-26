@@ -175,77 +175,69 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
-                {
-                    label = "開始",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = config.voiceMaxLength,
-                    step = 0.01f,
-                    defaultValue = 0f,
-                    value = maidCache.oneShotVoiceStartTime,
-                    onChanged = value => maidCache.oneShotVoiceStartTime = value,
-                });
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "開始",
+                labelWidth = 30,
+                min = 0f,
+                max = config.voiceMaxLength,
+                step = 0.01f,
+                defaultValue = 0f,
+                value = maidCache.oneShotVoiceStartTime,
+                onChanged = value => maidCache.oneShotVoiceStartTime = value,
+            });
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
-                {
-                    label = "長さ",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = config.voiceMaxLength,
-                    step = 0.01f,
-                    defaultValue = 0f,
-                    value = maidCache.oneShotVoiceLength,
-                    onChanged = value => maidCache.oneShotVoiceLength = value,
-                });
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "長さ",
+                labelWidth = 30,
+                min = 0f,
+                max = config.voiceMaxLength,
+                step = 0.01f,
+                defaultValue = 0f,
+                value = maidCache.oneShotVoiceLength,
+                onChanged = value => maidCache.oneShotVoiceLength = value,
+            });
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
-                {
-                    label = "Fade",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = config.voiceMaxLength,
-                    step = 0.01f,
-                    defaultValue = 0.1f,
-                    value = maidCache.voiceFadeTime,
-                    onChanged = value => maidCache.voiceFadeTime = value,
-                });
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "Fade",
+                labelWidth = 30,
+                min = 0f,
+                max = config.voiceMaxLength,
+                step = 0.01f,
+                defaultValue = 0.1f,
+                value = maidCache.voiceFadeTime,
+                onChanged = value => maidCache.voiceFadeTime = value,
+            });
 
-            view.DrawSliderValue(
-                new GUIView.SliderOption
-                {
-                    label = "音程",
-                    labelWidth = 30,
-                    min = 0f,
-                    max = 2f,
-                    step = 0.01f,
-                    defaultValue = 1f,
-                    value = maidCache.voicePitch,
-                    onChanged = value => maidCache.voicePitch = value,
-                });
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "音程",
+                labelWidth = 30,
+                min = 0f,
+                max = 2f,
+                step = 0.01f,
+                defaultValue = 1f,
+                value = maidCache.voicePitch,
+                onChanged = value => maidCache.voicePitch = value,
+            });
 
-            view.DrawTextField(
-                new GUIView.TextFieldOption
-                {
-                    label = "ボイス名",
-                    labelWidth = 75,
-                    value = maidCache.oneShotVoiceName,
-                    onChanged = value => maidCache.oneShotVoiceName = value,
-                }
-            );
+            view.DrawTextField(new GUIView.TextFieldOption
+            {
+                label = "ボイス名",
+                labelWidth = 75,
+                value = maidCache.oneShotVoiceName,
+                onChanged = value => maidCache.oneShotVoiceName = value,
+            });
 
-            view.DrawTextField(
-                new GUIView.TextFieldOption
-                {
-                    label = "ループボイス",
-                    labelWidth = 75,
-                    value = maidCache.loopVoiceName,
-                    onChanged = value => maidCache.loopVoiceName = value,
-                }
-            );
+            view.DrawTextField(new GUIView.TextFieldOption
+            {
+                label = "ループボイス",
+                labelWidth = 75,
+                value = maidCache.loopVoiceName,
+                onChanged = value => maidCache.loopVoiceName = value,
+            });
 
             if (view.DrawButton("再生", 100, 20))
             {

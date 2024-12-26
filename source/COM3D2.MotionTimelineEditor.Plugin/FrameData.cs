@@ -53,6 +53,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return bone;
         }
 
+        public T GetOrCreateTransformData<T>(string name)
+            where T : class, ITransformData, new()
+        {
+            var bone = GetBone(name);
+            if (bone != null)
+            {
+                return bone.transform as T;
+            }
+
+            var trans = TimelineManager.CreateTransform<T>(name);
+            bone = CreateBone(trans);
+            _boneMap[name] = bone;
+            return trans;
+        }
+
         public BoneData GetBone(string name)
         {
             BoneData bone;

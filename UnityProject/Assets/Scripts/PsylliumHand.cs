@@ -15,7 +15,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public PsylliumController controller;
         public PsylliumArea area;
         public int timeIndex;
-        public float timeShift;
+        public float timeShiftParam;
         public Vector3 randomPositionParam;
         public Vector3 randomRotationParam;
         public Vector3 basePosition;
@@ -76,11 +76,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.area = area;
         }
 
-        public void ManualUpdate()
-        {
-            UpdateTime();
-        }
-
         public void UpdateTime()
         {
             if (controller == null || area == null)
@@ -88,6 +83,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
+            var timeShift = animationConfig.timeShiftMin + (animationConfig.timeShiftMax - animationConfig.timeShiftMin) * timeShiftParam;
             var timeIndex = this.timeIndex + (int)(controller.time * timeShift);
             var position = controller.GetAnimationPosition(timeIndex, isLeftHand);
             var rotation = controller.GetAnimationRotation(timeIndex, isLeftHand);
@@ -102,7 +98,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Vector3 handPos,
             int count,
             int timeIndex,
-            float timeShift,
+            float timeShiftParam,
             int[] colorIndexes,
             Vector3 positionParam,
             Vector3 rotationParam,
@@ -111,7 +107,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.basePosition = handPos;
             this.isLeftHand = isLeftHand;
             this.timeIndex = timeIndex;
-            this.timeShift = timeShift;
+            this.timeShiftParam = timeShiftParam;
             this.randomPositionParam = positionParam;
             this.randomRotationParam = rotationParam;
 
@@ -119,14 +115,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             for (int j = 0; j < count; j++)
             {
-                var barPosition = (j - (count - 1) * 0.5f) * handConfig.barOffsetPosition;
-                var barRotation = (j - (count - 1) * 0.5f) * handConfig.barOffsetRotation;
+                var barPosition = (j - (count - 1) * 0.5f) * handConfig.barOffsetPosition * barConfig.baseScale;
+                var barEulerAngles = (j - (count - 1) * 0.5f) * handConfig.barOffsetRotation;
 
                 if (!isLeftHand)
                 {
                     barPosition.x = -barPosition.x;
-                    barRotation.y = -barRotation.y;
-                    barRotation.z = -barRotation.z;
+                    barEulerAngles.y = -barEulerAngles.y;
+                    barEulerAngles.z = -barEulerAngles.z;
                 }
 
                 var psyllium = psylliums[j];
@@ -135,7 +131,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 psyllium.Setup(controller, colorIndexes[j]);
 
                 psyllium.transform.localPosition = barPosition;
-                psyllium.transform.localEulerAngles = barRotation;
+                psyllium.transform.localEulerAngles = barEulerAngles;
             }
         }
 

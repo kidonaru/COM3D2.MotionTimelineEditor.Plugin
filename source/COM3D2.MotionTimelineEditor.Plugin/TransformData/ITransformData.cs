@@ -24,6 +24,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Move,
         Paraffin,
         PsylliumAnimation,
+        PsylliumAnimationHand,
         PsylliumArea,
         PsylliumBar,
         PsylliumController,

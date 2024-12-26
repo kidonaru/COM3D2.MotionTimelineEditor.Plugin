@@ -28,7 +28,7 @@ Shader "MTE/PsylliumAdd"
         {
             Cull Off
             ZWrite Off
-            ZTest LEqual
+            ZTest Less
             Blend One One
             Lighting Off
             Fog { Mode Off }

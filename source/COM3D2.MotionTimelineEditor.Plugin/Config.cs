@@ -38,6 +38,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool paraffinDebug = false;
         public bool distanceFogDebug = false;
         public bool rimlightDebug = false;
+        public bool psylliumEditUpdate = false;
+        public bool psylliumAreaCopyIgnoreTransform = false;
         public float videoPrebufferTime = 0.5f;
         public bool outputElapsedTime = false;
         public bool useHSVColor = false;

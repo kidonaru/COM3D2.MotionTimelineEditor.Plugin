@@ -18,9 +18,9 @@ Shader "MTE/Psyllium"
     {
         Tags
         {
-            "Queue" = "Transparent+1"
+            "Queue" = "AlphaTest"
             "IgnoreProjector" = "True"
-            "RenderType" = "Transparent"
+            "RenderType" = "TransparentCutout"
             "DisableBatching" = "True"
         }
 

@@ -18,11 +18,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int rightCount;
         public int[] leftColorIndexes;
         public int[] rightColorIndexes;
-        public float timeShift;
+        public float timeShiftParam;
 
-        public PsylliumRandomValues(PsylliumHandConfig handConfig, PsylliumAreaConfig areaConfig)
+        public PsylliumRandomValues(PsylliumAreaConfig areaConfig)
         {
-            timeIndex = Random.value.GetHashCode();
+            timeIndex = Random.Range(int.MinValue, int.MaxValue);
             leftPositionParam = GetRandomVector3(-1f, 1f);
             rightPositionParam = GetRandomVector3(-1f, 1f);
             leftRotationParam = GetRandomVector3(-1f, 1f);
@@ -30,8 +30,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             basePosition = areaConfig.randomPosition;
 
             // 各手のPsylliumの本数をランダムに決定
-            leftCount = LotteryByWeight(handConfig.barCountWeights);
-            rightCount = LotteryByWeight(handConfig.barCountWeights);
+            leftCount = LotteryByWeight(areaConfig.barCountWeights);
+            rightCount = LotteryByWeight(areaConfig.barCountWeights);
             
             // 最低どちらかに1本は配置
             if (leftCount == 0 && rightCount == 0)
@@ -52,14 +52,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // 色を決定
             for (int j = 0; j < leftCount; j++)
             {
-                leftColorIndexes[j] = LotteryByWeight(handConfig.colorWeights);
+                leftColorIndexes[j] = LotteryByWeight(areaConfig.colorWeights);
             }
             for (int j = 0; j < rightCount; j++)
             {
-                rightColorIndexes[j] = LotteryByWeight(handConfig.colorWeights);
+                rightColorIndexes[j] = LotteryByWeight(areaConfig.colorWeights);
             }
 
-            timeShift = Random.Range(handConfig.timeShiftMin, handConfig.timeShiftMax);
+            timeShiftParam = Random.value;
 
             StepRandom(9); // 乱数の予約
         }

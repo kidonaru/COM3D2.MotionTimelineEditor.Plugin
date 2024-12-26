@@ -29,6 +29,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Dictionary<string, PsylliumAnimationConfig> animationConfigMap = new Dictionary<string, PsylliumAnimationConfig>();
         public List<string> animationConfigNames = new List<string>();
 
+        public List<PsylliumAnimationHandConfig> animationHandConfigs = new List<PsylliumAnimationHandConfig>();
+        public Dictionary<string, PsylliumAnimationHandConfig> animationHandConfigMap = new Dictionary<string, PsylliumAnimationHandConfig>();
+        public List<string> animationHandConfigNames = new List<string>();
+
         public static event UnityAction onSetup;
         public static event UnityAction<string> onControllerAdded;
         public static event UnityAction<string> onControllerRemoved;
@@ -52,6 +56,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static StudioHackBase studioHack => StudioHackManager.studioHack;
         private static TimelineData timeline => TimelineManager.instance.timeline;
+        private static Config config => ConfigManager.config;
 
         private void Awake()
         {
@@ -112,11 +117,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return animationConfigMap.GetOrNull(name);
         }
 
+        public PsylliumAnimationHandConfig GetAnimationHandConfig(string name)
+        {
+            return animationHandConfigMap.GetOrNull(name);
+        }
+
         public void Update()
         {
             if (studioHack == null || !studioHack.IsValid())
             {
                 return;
+            }
+
+            if (studioHack.isPoseEditing && config.psylliumEditUpdate)
+            {
+                foreach (var controller in controllers)
+                {
+                    controller.ManualUpdate(controller.time + Time.deltaTime);
+                }
             }
         }
 
@@ -140,6 +158,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             animationConfigs.Clear();
             animationConfigMap.Clear();
             animationConfigNames.Clear();
+
+            animationHandConfigs.Clear();
+            animationHandConfigMap.Clear();
+            animationHandConfigNames.Clear();
         }
 
         public void UpdateCache()
@@ -170,6 +192,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 animationConfigs.Add(animationConfig);
                 animationConfigMap.Add(animationConfig.name, animationConfig);
                 animationConfigNames.Add(animationConfig.name);
+
+                var animationHandConfigLeft = controller.animationHandConfigLeft;
+                animationHandConfigs.Add(animationHandConfigLeft);
+                animationHandConfigMap.Add(animationHandConfigLeft.name, animationHandConfigLeft);
+                animationHandConfigNames.Add(animationHandConfigLeft.name);
+
+                var animationHandConfigRight = controller.animationHandConfigRight;
+                animationHandConfigs.Add(animationHandConfigRight);
+                animationHandConfigMap.Add(animationHandConfigRight.name, animationHandConfigRight);
+                animationHandConfigNames.Add(animationHandConfigRight.name);
 
                 foreach (var area in controller.areas)
                 {
