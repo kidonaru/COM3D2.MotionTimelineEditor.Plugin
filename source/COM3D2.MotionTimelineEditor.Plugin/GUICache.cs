@@ -63,6 +63,39 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
     }
 
+    public class IntFieldCache
+    {
+        public string label = null;
+        public string text = "";
+
+        private int _value = 0;
+        public int value => _value;
+
+        public void UpdateValue(int value, bool updateText)
+        {
+            if (value == _value)
+            {
+                return;
+            }
+
+            _value = value;
+
+            if (updateText)
+            {
+                text = value.ToString();
+            }
+        }
+
+        public void UpdateValue(int value)
+        {
+            UpdateValue(value, true);
+        }
+
+        public IntFieldCache()
+        {
+        }
+    }
+
     public class ColorFieldCache
     {
         public string label = null;

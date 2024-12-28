@@ -819,6 +819,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
             }
+
+            if (version < 24)
+            {
+                // PsylliumAnimationにsubPositionを追加
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "PsylliumTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+                                if (transform.type != TransformType.PsylliumAnimation) continue;
+                                var values = new List<float>(transform.values);
+                                if (values.Count == 17)
+                                {
+                                    PluginUtils.LogDebug("Add subPosition to PsylliumTimelineLayer name={0}", transform.name);
+                                    values.InsertRange(3, new float[] {values[0], values[1], values[2]});
+                                }
+                                transform.values = values.ToArray();
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 }

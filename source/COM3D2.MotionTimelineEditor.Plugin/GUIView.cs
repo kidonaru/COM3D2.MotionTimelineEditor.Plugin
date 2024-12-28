@@ -128,6 +128,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private List<FloatFieldCache> _fieldCaches = new List<FloatFieldCache>();
         private int _fieldCacheIndex = 0;
 
+        private List<IntFieldCache> _intFieldCaches = new List<IntFieldCache>();
+        private int _intFieldCacheIndex = 0;
+
         private List<TransformCache> _transformCaches = new List<TransformCache>();
         private int _transformCacheIndex = 0;
 
@@ -249,6 +252,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             //    Time.frameCount, _fieldCacheIndex, _transformCacheIndex);
 
             this._fieldCacheIndex = 0;
+            this._intFieldCacheIndex = 0;
             this._transformCacheIndex = 0;
 
             EndEnabled();
@@ -796,36 +800,84 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             public string label;
             public float labelWidth;
-            public float value;
-            public float minValue;
-            public float maxValue;
+            public int value;
+            public int minValue;
+            public int maxValue;
             public float width;
             public float height;
-            public FloatFieldCache fieldCache;
+            public IntFieldCache fieldCache;
             public Action<int> onChanged;
             public Action onReset;
         }
 
         public bool DrawIntField(IntFieldOption option)
         {
-            var floatOption = new FloatFieldOption
+            var fieldCache = option.fieldCache;
+            if (fieldCache == null)
             {
-                label = option.label,
-                labelWidth = option.labelWidth,
-                fieldType = FloatFieldType.Int,
-                value = option.value,
-                minValue = option.minValue,
-                maxValue = option.maxValue,
-                width = option.width,
-                height = option.height,
-                fieldCache = option.fieldCache,
-                onReset = option.onReset,
-            };
+                fieldCache = GetIntFieldCache(option.label);
+                fieldCache.UpdateValue(option.value);
+            }
+
+            var updated = false;
+
+            Action<string> onChanged = null;
             if (option.onChanged != null)
             {
-                floatOption.onChanged = value => option.onChanged((int) value);
+                onChanged = newText =>
+                {
+                    fieldCache.text = newText;
+
+                    int newValue;
+                    if (int.TryParse(newText, out newValue))
+                    {
+                        if (option.minValue != 0 || option.maxValue != 0)
+                        {
+                            newValue = Mathf.Clamp(newValue, option.minValue, option.maxValue);
+                        }
+                        fieldCache.UpdateValue(newValue, false);
+                        option.onChanged(newValue);
+                        updated = true;
+                    }
+                };
             }
-            return DrawFloatField(floatOption);
+
+            if (option.onReset != null)
+            {
+                var subViewRect = GetDrawRect(option.width, option.height);
+
+                BeginSubView(subViewRect, LayoutDirection.Horizontal);
+                {
+                    var fieldWidth = subViewRect.width - 20;
+
+                    subView.DrawTextField(
+                        option.label,
+                        option.labelWidth,
+                        fieldCache.text,
+                        fieldWidth,
+                        option.height,
+                        onChanged);
+
+                    if (subView.DrawButton("R", 20, 20))
+                    {
+                        option.onReset();
+                        updated = true;
+                    }
+                }
+                EndSubView();
+            }
+            else
+            {
+                DrawTextField(
+                    option.label,
+                    option.labelWidth,
+                    fieldCache.text,
+                    option.width,
+                    option.height,
+                    onChanged);
+            }
+
+            return updated;
         }
 
         public Color DrawColorFieldCache(
@@ -1748,15 +1800,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return fieldCache;
         }
 
-        public FloatFieldCache GetIntFieldCache(string label)
+        public IntFieldCache GetIntFieldCache(string label)
         {
-            return GetFieldCache(label, FloatFieldType.Int);
-        }
+            if (parent != null)
+            {
+                return parent.GetIntFieldCache(label);
+            }
 
-        public FloatFieldCache GetIntFieldCache(string label, int value)
-        {
-            var fieldCache = GetIntFieldCache(label);
-            fieldCache.UpdateValue(value);
+            IntFieldCache fieldCache;
+            if (_intFieldCacheIndex >= _intFieldCaches.Count)
+            {
+                fieldCache = new IntFieldCache();
+                _intFieldCaches.Add(fieldCache);
+            }
+
+            fieldCache = _intFieldCaches[_intFieldCacheIndex++];
+            fieldCache.label = label;
             return fieldCache;
         }
 
@@ -1857,13 +1916,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 label = info.name,
                 labelWidth = 40,
-                minValue = info.min,
-                maxValue = info.max,
+                minValue = 1,
+                maxValue = int.MaxValue,
                 value = value,
                 width = 150,
                 height = 20,
                 onChanged = onChanged,
-                onReset = () => onChanged(UnityEngine.Random.Range(int.MinValue, int.MaxValue)),
+                onReset = () => onChanged(UnityEngine.Random.Range(1, int.MaxValue)),
             });
         }
 

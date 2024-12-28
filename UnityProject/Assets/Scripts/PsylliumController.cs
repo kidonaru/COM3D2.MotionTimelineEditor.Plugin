@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -110,6 +111,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private List<Quaternion> _animationRotationsLeft = new List<Quaternion>();
         private List<Quaternion> _animationRotationsRight = new List<Quaternion>();
 
+        private int _randomAnimationSeed = 0;
+        private List<Vector3> _randomAnimationPosition1Params = new List<Vector3>();
+        private List<Vector3> _randomAnimationPosition2Params = new List<Vector3>();
+        private List<Vector3> _randomAnimationEulerAnglesParams = new List<Vector3>();
+        private List<Vector3> _randomAnimationPositions1 = new List<Vector3>();
+        private List<Vector3> _randomAnimationPositions2 = new List<Vector3>();
+        private List<Quaternion> _randomAnimationRotations = new List<Quaternion>();
+
         public static Vector3 DefaultPosition = new Vector3(0f, 0f, 0f);
         public static Vector3 DefaultEulerAngles = new Vector3(0f, 0f, 0f);
 
@@ -148,6 +157,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             time = 0.0f;
             areas = GetComponentsInChildren<PsylliumArea>().ToList();
             areas.Sort((a, b) => a.index - b.index);
+
+            if (animationConfig.randomSeed == 0)
+            {
+                animationConfig.randomSeed = UnityEngine.Random.Range(1, int.MaxValue);
+            }
 
             materials = new Material[2];
             materials[0] = CreateMaterial("Psyllium");
@@ -404,6 +418,31 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public Vector3 GetRandomAnimationPosition1(int randomIndex)
+        {
+            if (_randomAnimationPositions1.Count == 0) return Vector3.zero;
+            return _randomAnimationPositions1[CalcLoopIndex(randomIndex, _randomAnimationPositions1.Count)];
+        }
+
+        public Vector3 GetRandomAnimationPosition2(int randomIndex)
+        {
+            if (_randomAnimationPositions2.Count == 0) return Vector3.zero;
+            return _randomAnimationPositions2[CalcLoopIndex(randomIndex, _randomAnimationPositions2.Count)];
+        }
+
+        public Vector3 GetRandomAnimationPosition(int randomIndex, int timeIndex)
+        {
+            var position1 = GetRandomAnimationPosition1(randomIndex);
+            var position2 = GetRandomAnimationPosition2(randomIndex);
+            return Vector3.Lerp(position1, position2, GetAnimationTime(timeIndex));
+        }
+
+        public Quaternion GetRandomAnimationRotation(int randomIndex)
+        {
+            if (_randomAnimationRotations.Count == 0) return Quaternion.identity;
+            return _randomAnimationRotations[CalcLoopIndex(randomIndex, _randomAnimationRotations.Count)];
+        }
+
         public void ManualUpdate(float time)
         {
             if (refreshRequired)
@@ -413,9 +452,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             this.time = time;
 
-            var randomTimeCount = animationConfig.randomTimeCount;
+            var patternCount = animationConfig.patternCount;
             var randomTime = animationConfig.randomTime;
-            var randomTimePerCount = randomTime / randomTimeCount;
+            var randomTimePerCount = randomTime / patternCount;
 
             float timeRatio = animationConfig.timeRatio;
             float timeOffset = animationConfig.timeOffset;
@@ -435,7 +474,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var rotationRight1 = Quaternion.Euler(animationHandConfigRight.eulerAngles1);
             var rotationRight2 = Quaternion.Euler(animationHandConfigRight.eulerAngles2);
 
-            for (int i = 0; i < randomTimeCount; ++i)
+            for (int i = 0; i < patternCount; ++i)
             {
                 float t = time + timeOffset - randomTime * 0.5f + i * randomTimePerCount;
 
@@ -467,10 +506,96 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _animationRotationsRight.Add(rotationRight);
             }
 
+            CalcRandomAnimationParams(animationConfig.randomSeed, patternCount);
+
+            _randomAnimationPositions1.Clear();
+            _randomAnimationPositions2.Clear();
+            _randomAnimationRotations.Clear();
+
+            var randomPosition1Range = animationConfig.randomPosition1Range;
+            var randomPosition2Range = animationConfig.randomPosition2Range;
+            var randomEulerAnglesRange = animationConfig.randomEulerAnglesRange;
+
+            for (int i = 0; i < patternCount; ++i)
+            {
+                var param = _randomAnimationPosition1Params[i];
+                var position1 = new Vector3(
+                    param.x * randomPosition1Range.x * barConfig.baseScale,
+                    param.y * randomPosition1Range.y * barConfig.baseScale,
+                    param.z * randomPosition1Range.z * barConfig.baseScale
+                );
+                _randomAnimationPositions1.Add(position1);
+
+                param = Vector3.Lerp(
+                    _randomAnimationPosition2Params[i],
+                    _randomAnimationPosition1Params[i],
+                    animationConfig.positionSyncRate);
+
+                var position2 = new Vector3(
+                    param.x * randomPosition2Range.x * barConfig.baseScale,
+                    param.y * randomPosition2Range.y * barConfig.baseScale,
+                    param.z * randomPosition2Range.z * barConfig.baseScale
+                );
+                _randomAnimationPositions2.Add(position2);
+
+                param = _randomAnimationEulerAnglesParams[i];
+                var eulerAngles = new Vector3(
+                    param.x * randomEulerAnglesRange.x,
+                    param.y * randomEulerAnglesRange.y,
+                    param.z * randomEulerAnglesRange.z
+                );
+                _randomAnimationRotations.Add(Quaternion.Euler(eulerAngles));
+            }
+
             foreach (var area in areas)
             {
                 area.ManualUpdate();
             }
+        }
+
+        private void CalcRandomAnimationParams(int randomSeed, int patternCount)
+        {
+            if (randomSeed == _randomAnimationSeed &&
+                patternCount == _randomAnimationPosition1Params.Count &&
+                patternCount == _randomAnimationPosition2Params.Count &&
+                patternCount == _randomAnimationEulerAnglesParams.Count)
+            {
+                return;
+            }
+
+#if COM3D2
+            PluginUtils.LogDebug("CalcRandomAnimationParams");
+#endif
+
+            _randomAnimationSeed = randomSeed;
+            _randomAnimationPosition1Params.Clear();
+            _randomAnimationPosition2Params.Clear();
+            _randomAnimationEulerAnglesParams.Clear();
+
+            UnityEngine.Random.InitState(randomSeed);
+
+            for (int i = 0; i < patternCount; ++i)
+            {
+                var position1 = GetRandomVector3(-1f, 1f);
+                _randomAnimationPosition1Params.Add(position1);
+
+                var position2 = GetRandomVector3(-1f, 1f);
+                _randomAnimationPosition2Params.Add(position2);
+
+                var eulerAngles = GetRandomVector3(-1f, 1f);
+                _randomAnimationEulerAnglesParams.Add(eulerAngles);
+            }
+
+            UnityEngine.Random.InitState((int) (Time.realtimeSinceStartup * 1000));
+        }
+
+        private static Vector3 GetRandomVector3(float min, float max)
+        {
+            return new Vector3(
+                UnityEngine.Random.Range(min, max),
+                UnityEngine.Random.Range(min, max),
+                UnityEngine.Random.Range(min, max)
+            );
         }
 
         public void CopyFrom(PsylliumController src)

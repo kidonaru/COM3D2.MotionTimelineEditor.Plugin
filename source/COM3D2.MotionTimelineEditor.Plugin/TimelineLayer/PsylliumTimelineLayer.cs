@@ -321,14 +321,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var startConfig = start.ToConfig();
             var endConfig = end.ToConfig();
 
-            if (startConfig.randomPositionRange != endConfig.randomPositionRange)
+            if (startConfig.randomPosition1Range != endConfig.randomPosition1Range)
             {
-                animationConfig.randomPositionRange = Vector3.Lerp(startConfig.randomPositionRange, endConfig.randomPositionRange, t);
+                animationConfig.randomPosition1Range = Vector3.Lerp(startConfig.randomPosition1Range, endConfig.randomPosition1Range, t);
             }
 
-            if (startConfig.randomRotationRange != endConfig.randomRotationRange)
+            if (startConfig.randomPosition2Range != endConfig.randomPosition2Range)
             {
-                animationConfig.randomRotationRange = Vector3.Lerp(startConfig.randomRotationRange, endConfig.randomRotationRange, t);
+                animationConfig.randomPosition2Range = Vector3.Lerp(startConfig.randomPosition2Range, endConfig.randomPosition2Range, t);
+            }
+
+            if (startConfig.randomEulerAnglesRange != endConfig.randomEulerAnglesRange)
+            {
+                animationConfig.randomEulerAnglesRange = Vector3.Lerp(startConfig.randomEulerAnglesRange, endConfig.randomEulerAnglesRange, t);
+            }
+
+            if (startConfig.positionSyncRate != endConfig.positionSyncRate)
+            {
+                animationConfig.positionSyncRate = Mathf.Lerp(startConfig.positionSyncRate, endConfig.positionSyncRate, t);
             }
 
             if (startConfig.bpm != endConfig.bpm)
@@ -762,15 +772,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            view.DrawHorizontalLine(Color.gray);
-
             view.SetEnabled(!view.IsComboBoxFocused());
-
-            view.DrawToggle("編集中のアニメ再生", config.psylliumEditUpdate, 200, 20, newValue =>
-            {
-                config.psylliumEditUpdate = newValue;
-            });
-
             view.EndScrollView();
         }
 
@@ -1022,50 +1024,69 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             DrawPsylliumAnimationHandConfigEdit(view);
 
-            var transformCacheRandom = view.GetTransformCache(null);
-
-            view.DrawLabel("ランダム位置", 200, 20);
+            view.DrawLabel("ランダム位置1", 200, 20);
 
             {
-                var initialPosition = defaultConfig.randomPositionRange;
-                transformCacheRandom.position = animationConfig.randomPositionRange;
+                var initialPosition = defaultConfig.randomPosition1Range;
+                var transformCache = view.GetTransformCache(null);
+                transformCache.position = animationConfig.randomPosition1Range;
 
                 updateTransform |= DrawPosition(
                     view,
-                    transformCacheRandom,
+                    transformCache,
                     TransformEditType.全て,
                     initialPosition);
 
                 if (updateTransform)
                 {
-                    animationConfig.randomPositionRange = transformCacheRandom.position;
+                    animationConfig.randomPosition1Range = transformCache.position;
+                }
+            }
+
+            view.DrawLabel("ランダム位置2", 200, 20);
+
+            {
+                var initialPosition = defaultConfig.randomPosition2Range;
+                var transformCache = view.GetTransformCache(null);
+                transformCache.position = animationConfig.randomPosition2Range;
+
+                updateTransform |= DrawPosition(
+                    view,
+                    transformCache,
+                    TransformEditType.全て,
+                    initialPosition);
+
+                if (updateTransform)
+                {
+                    animationConfig.randomPosition2Range = transformCache.position;
                 }
             }
 
             view.DrawLabel("ランダム角度", 200, 20);
 
             {
-                var initialEulerAngles = defaultConfig.randomRotationRange;
+                var initialEulerAngles = defaultConfig.randomEulerAnglesRange;
+                var transformCache = view.GetTransformCache(null);
                 var prevEulerAngles = Vector3.zero;
-                transformCacheRandom.eulerAngles = animationConfig.randomRotationRange;
+                transformCache.eulerAngles = animationConfig.randomEulerAnglesRange;
 
                 updateTransform |= DrawEulerAngles(
                     view,
-                    transformCacheRandom,
+                    transformCache,
                     TransformEditType.全て,
                     prevEulerAngles,
                     initialEulerAngles);
 
                 if (updateTransform)
                 {
-                    animationConfig.randomRotationRange = transformCacheRandom.eulerAngles;
+                    animationConfig.randomEulerAnglesRange = transformCache.eulerAngles;
                 }
             }
 
-            updateTransform |= view.DrawCustomValueBool(
-                defaultTrans.mirrorRotationZInfo,
-                animationConfig.mirrorRotationZ,
-                y => animationConfig.mirrorRotationZ = y);
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.positionSyncRateInfo,
+                animationConfig.positionSyncRate,
+                y => animationConfig.positionSyncRate = y);
             
             updateTransform |= view.DrawCustomValueFloat(
                 defaultTrans.bpmInfo,
@@ -1073,9 +1094,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 y => animationConfig.bpm = y);
             
             updateTransform |= view.DrawCustomValueInt(
-                defaultTrans.randomTimeCountInfo,
-                animationConfig.randomTimeCount,
-                y => animationConfig.randomTimeCount = y);
+                defaultTrans.patternCountInfo,
+                animationConfig.patternCount,
+                y => animationConfig.patternCount = y);
 
             updateTransform |= view.DrawCustomValueFloat(
                 defaultTrans.randomTimeInfo,
@@ -1118,12 +1139,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             };
             _easingType2ComboBox.DrawButton("イージング2", view);
 
+            updateTransform |= view.DrawCustomValueIntRandom(
+                defaultTrans.randomSeedInfo,
+                animationConfig.randomSeed,
+                y => animationConfig.randomSeed = y);
+
             if (updateTransform)
             {
                 controller.ManualUpdate(this.playingTime);
             }
 
+            view.DrawHorizontalLine(Color.gray);
+
             view.SetEnabled(!view.IsComboBoxFocused());
+
+            view.DrawToggle("編集中のアニメ再生", config.psylliumEditUpdate, 200, 20, newValue =>
+            {
+                config.psylliumEditUpdate = newValue;
+            });
+
             view.EndScrollView();
         }
 

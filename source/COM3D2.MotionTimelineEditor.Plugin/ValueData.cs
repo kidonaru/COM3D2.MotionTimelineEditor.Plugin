@@ -2,39 +2,45 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class ValueData
     {
-        public float value = 0f;
+        public double _value = 0f;
         public TangentData inTangent = new TangentData();
         public TangentData outTangent = new TangentData();
 
+        public float value
+        {
+            get => (float)_value;
+            set => this._value = value;
+        }
+
         public int intValue
         {
-            get => (int)value;
-            set => this.value = value;
+            get => (int)_value;
+            set => this._value = value;
         }
 
         public bool boolValue
         {
-            get => value != 0f;
-            set => this.value = value == true ? 1f : 0f;
+            get => _value != 0f;
+            set => this._value = value == true ? 1f : 0f;
         }
 
-        public void FromValue(ValueData value)
+        public void FromValue(ValueData _value)
         {
-            this.value = value.value;
-            inTangent.FromTangentData(value.inTangent);
-            outTangent.FromTangentData(value.outTangent);
+            this._value = _value._value;
+            inTangent.FromTangentData(_value.inTangent);
+            outTangent.FromTangentData(_value.outTangent);
         }
 
         public ValueData Clone()
         {
-            ValueData value = new ValueData();
-            value.FromValue(this);
-            return value;
+            ValueData _value = new ValueData();
+            _value.FromValue(this);
+            return _value;
         }
 
         public bool Equals(ValueData other)
         {
-            return value == other.value;
+            return _value == other._value;
         }
 
         public override bool Equals(object obj)
@@ -45,7 +51,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override int GetHashCode()
         {
-            return value.GetHashCode()
+            return _value.GetHashCode()
                     ^ inTangent.GetHashCode()
                     ^ outTangent.GetHashCode();
         }

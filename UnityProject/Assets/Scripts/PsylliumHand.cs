@@ -16,8 +16,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public PsylliumArea area;
         public int timeIndex;
         public float timeShiftParam;
-        public Vector3 randomPositionParam;
-        public Vector3 randomRotationParam;
+        public int randomPositionIndex;
+        public int randomRotationIndex;
         public Vector3 basePosition;
         public bool isLeftHand;
 
@@ -85,10 +85,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var timeShift = animationConfig.timeShiftMin + (animationConfig.timeShiftMax - animationConfig.timeShiftMin) * timeShiftParam;
             var timeIndex = this.timeIndex + (int)(controller.time * timeShift);
+
             var position = controller.GetAnimationPosition(timeIndex, isLeftHand);
             var rotation = controller.GetAnimationRotation(timeIndex, isLeftHand);
 
-            position += basePosition;
+            var randomPosition = controller.GetRandomAnimationPosition(randomPositionIndex, timeIndex);
+            var randomRotation = controller.GetRandomAnimationRotation(randomRotationIndex);
+
+            position += basePosition + randomPosition;
+            rotation *= randomRotation;
 
             transform.localPosition = position;
             transform.localRotation = rotation;
@@ -100,16 +105,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             int timeIndex,
             float timeShiftParam,
             int[] colorIndexes,
-            Vector3 positionParam,
-            Vector3 rotationParam,
+            int randomPositionIndex,
+            int randomRotationIndex,
             bool isLeftHand)
         {
             this.basePosition = handPos;
             this.isLeftHand = isLeftHand;
             this.timeIndex = timeIndex;
             this.timeShiftParam = timeShiftParam;
-            this.randomPositionParam = positionParam;
-            this.randomRotationParam = rotationParam;
+            this.randomPositionIndex = randomPositionIndex;
+            this.randomRotationIndex = randomRotationIndex;
 
             CreatePsylliums(count);
 

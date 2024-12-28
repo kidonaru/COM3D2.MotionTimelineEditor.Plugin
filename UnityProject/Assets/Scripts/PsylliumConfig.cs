@@ -158,28 +158,31 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string name;
         public string displayName;
     
-        public Vector3 randomPositionRange = new Vector3(0.01f, 0.01f, 0.01f);
-        public Vector3 randomRotationRange = new Vector3(5f, 0f, 10f);
+        public Vector3 randomPosition1Range = new Vector3(0.1f, 0.1f, 0.1f);
+        public Vector3 randomPosition2Range = new Vector3(0.1f, 0.1f, 0.1f);
+        public Vector3 randomEulerAnglesRange = new Vector3(5f, 0f, 10f);
 
-        public bool mirrorRotationZ = true;
+        public float positionSyncRate = 0f;
 
         public float bpm = 120f;
-        public int randomTimeCount = 10;
+        public int patternCount = 10;
         public float randomTime = 0.05f;
         public float timeRatio = 0.75f;
         public float timeOffset = 0f;
         public float timeShiftMin = 0.5f;
         public float timeShiftMax = 1.5f;
-        public MoveEasingType easingType1 = MoveEasingType.SineInOut;
+        public MoveEasingType easingType1 = MoveEasingType.QuadInOut;
         public MoveEasingType easingType2 = MoveEasingType.SineOut;
+        public int randomSeed;
 
         public void CopyFrom(PsylliumAnimationConfig other)
         {
-            randomPositionRange = other.randomPositionRange;
-            randomRotationRange = other.randomRotationRange;
-            mirrorRotationZ = other.mirrorRotationZ;
+            randomPosition1Range = other.randomPosition1Range;
+            randomPosition2Range = other.randomPosition2Range;
+            randomEulerAnglesRange = other.randomEulerAnglesRange;
+            positionSyncRate = other.positionSyncRate;
             bpm = other.bpm;
-            randomTimeCount = other.randomTimeCount;
+            patternCount = other.patternCount;
             randomTime = other.randomTime;
             timeRatio = other.timeRatio;
             timeOffset = other.timeOffset;
@@ -187,22 +190,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             timeShiftMax = other.timeShiftMax;
             easingType1 = other.easingType1;
             easingType2 = other.easingType2;
+            randomSeed = other.randomSeed;
         }
 
         public bool Equals(PsylliumAnimationConfig other)
         {
-            return randomPositionRange == other.randomPositionRange
-                && randomRotationRange == other.randomRotationRange
-                && mirrorRotationZ == other.mirrorRotationZ
+            return randomPosition1Range == other.randomPosition1Range
+                && randomPosition2Range == other.randomPosition2Range
+                && randomEulerAnglesRange == other.randomEulerAnglesRange
+                && positionSyncRate == other.positionSyncRate
                 && bpm == other.bpm
-                && randomTimeCount == other.randomTimeCount
+                && patternCount == other.patternCount
                 && randomTime == other.randomTime
                 && timeRatio == other.timeRatio
                 && timeOffset == other.timeOffset
                 && timeShiftMin == other.timeShiftMin
                 && timeShiftMax == other.timeShiftMax
                 && easingType1 == other.easingType1
-                && easingType2 == other.easingType2;
+                && easingType2 == other.easingType2
+                && randomSeed == other.randomSeed;
         }
 
         public override bool Equals(object obj)
@@ -240,7 +246,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public Vector3 position1 = new Vector3(0, 0.3f, -0.5f);
         public Vector3 position2 = new Vector3(0, 0.1f, 0);
-        public Vector3 eulerAngles1 = new Vector3(-30, 0, 0);
+        public Vector3 eulerAngles1 = new Vector3(-10, 0, 0);
         public Vector3 eulerAngles2 = new Vector3(120, 0, 0);
 
         public void CopyFrom(PsylliumAnimationHandConfig other)

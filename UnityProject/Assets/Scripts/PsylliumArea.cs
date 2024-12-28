@@ -94,6 +94,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void Initialize()
         {
             hands = GetComponentsInChildren<PsylliumHand>().ToList();
+
+            if (areaConfig.randomSeed == 0)
+            {
+                areaConfig.randomSeed = Random.Range(1, int.MaxValue);
+            }
+
             UpdateName();
         }
 
@@ -107,7 +113,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void Setup(PsylliumController controller)
         {
             this.controller = controller;
-            areaConfig.randomSeed = Random.Range(int.MinValue, int.MaxValue);
             Refresh();
         }
 
@@ -217,8 +222,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var basePosition = new Vector3(x, 0, z) + randomValues.basePosition * barConfig.baseScale;
 
                     // 左手と右手の位置を計算
-                    var leftHandPos = basePosition + new Vector3(-halfHandSpacing, 0f, 0f);
-                    var rightHandPos = basePosition + new Vector3(halfHandSpacing, 0f, 0f);
+                    var leftHandPos = basePosition + new Vector3(halfHandSpacing, 0f, 0f);
+                    var rightHandPos = basePosition + new Vector3(-halfHandSpacing, 0f, 0f);
 
                     if (randomValues.leftCount > 0)
                     {
@@ -231,8 +236,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             randomValues.timeIndex,
                             randomValues.timeShiftParam,
                             randomValues.leftColorIndexes,
-                            randomValues.leftPositionParam,
-                            randomValues.leftRotationParam,
+                            randomValues.leftRandomPositionIndex,
+                            randomValues.leftRandomRotationIndex,
                             true);
                     }
 
@@ -247,8 +252,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             randomValues.timeIndex,
                             randomValues.timeShiftParam,
                             randomValues.rightColorIndexes,
-                            randomValues.rightPositionParam,
-                            randomValues.rightRotationParam,
+                            randomValues.rightRandomPositionIndex,
+                            randomValues.rightRandomRotationIndex,
                             false);
                     }
                 }
@@ -257,7 +262,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             RemoveUnusedHands();
             UpdateTime();
 
-            Random.InitState(Time.frameCount);
+            Random.InitState((int) (Time.realtimeSinceStartup * 1000));
 
             refreshRequired = false;
         }

@@ -9,10 +9,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public struct PsylliumRandomValues
     {
         public int timeIndex;
-        public Vector3 leftPositionParam;
-        public Vector3 rightPositionParam;
-        public Vector3 leftRotationParam;
-        public Vector3 rightRotationParam;
+        public int leftRandomPositionIndex;
+        public int rightRandomPositionIndex;
+        public int leftRandomRotationIndex;
+        public int rightRandomRotationIndex;
         public Vector3 basePosition;
         public int leftCount;
         public int rightCount;
@@ -22,28 +22,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public PsylliumRandomValues(PsylliumAreaConfig areaConfig)
         {
-            timeIndex = Random.Range(int.MinValue, int.MaxValue);
-            leftPositionParam = GetRandomVector3(-1f, 1f);
-            rightPositionParam = GetRandomVector3(-1f, 1f);
-            leftRotationParam = GetRandomVector3(-1f, 1f);
-            rightRotationParam = GetRandomVector3(-1f, 1f);
+            timeIndex = Random.Range(1, int.MaxValue);
+            leftRandomPositionIndex = Random.Range(1, int.MaxValue);
+            rightRandomPositionIndex = Random.Range(1, int.MaxValue);
+            leftRandomRotationIndex = Random.Range(1, int.MaxValue);
+            rightRandomRotationIndex = Random.Range(1, int.MaxValue);
             basePosition = areaConfig.randomPosition;
 
             // 各手のPsylliumの本数をランダムに決定
             leftCount = LotteryByWeight(areaConfig.barCountWeights);
             rightCount = LotteryByWeight(areaConfig.barCountWeights);
-            
-            // 最低どちらかに1本は配置
+
+            // 何も持っていない場合右手に1本持たせる
             if (leftCount == 0 && rightCount == 0)
             {
-                if (timeIndex < 0f)
-                {
-                    leftCount = 1;
-                }
-                else
-                {
-                    rightCount = 1;
-                }
+                rightCount = 1;
             }
 
             leftColorIndexes = new int[leftCount];
@@ -61,16 +54,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             timeShiftParam = Random.value;
 
-            StepRandom(9); // 乱数の予約
-        }
-
-        private static Vector3 GetRandomVector3(float min, float max)
-        {
-            return new Vector3(
-                Random.Range(min, max),
-                Random.Range(min, max),
-                Random.Range(min, max)
-            );
+            StepRandom(8); // 乱数の予約
         }
 
         private static int LotteryByWeight(float[] weights)
