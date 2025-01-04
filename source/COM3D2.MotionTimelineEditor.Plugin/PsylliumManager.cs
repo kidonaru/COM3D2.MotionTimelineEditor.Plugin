@@ -17,6 +17,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Dictionary<string, PsylliumArea> areaMap = new Dictionary<string, PsylliumArea>();
         public List<string> areaNames = new List<string>();
 
+        public List<PsylliumPattern> patterns = new List<PsylliumPattern>();
+        public Dictionary<string, PsylliumPatternConfig> patternConfigMap = new Dictionary<string, PsylliumPatternConfig>();
+        public List<string> patternConfigNames = new List<string>();
+        public Dictionary<string, PsylliumTransformConfig> transformConfigMap = new Dictionary<string, PsylliumTransformConfig>();
+        public List<string> transformConfigNames = new List<string>();
+
         public List<PsylliumBarConfig> barConfigs = new List<PsylliumBarConfig>();
         public Dictionary<string, PsylliumBarConfig> barConfigMap = new Dictionary<string, PsylliumBarConfig>();
         public List<string> barConfigNames = new List<string>();
@@ -25,19 +31,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Dictionary<string, PsylliumHandConfig> handConfigMap = new Dictionary<string, PsylliumHandConfig>();
         public List<string> handConfigNames = new List<string>();
 
-        public List<PsylliumAnimationConfig> animationConfigs = new List<PsylliumAnimationConfig>();
-        public Dictionary<string, PsylliumAnimationConfig> animationConfigMap = new Dictionary<string, PsylliumAnimationConfig>();
-        public List<string> animationConfigNames = new List<string>();
-
-        public List<PsylliumAnimationHandConfig> animationHandConfigs = new List<PsylliumAnimationHandConfig>();
-        public Dictionary<string, PsylliumAnimationHandConfig> animationHandConfigMap = new Dictionary<string, PsylliumAnimationHandConfig>();
-        public List<string> animationHandConfigNames = new List<string>();
-
         public static event UnityAction onSetup;
         public static event UnityAction<string> onControllerAdded;
         public static event UnityAction<string> onControllerRemoved;
         public static event UnityAction<string> onAreaAdded;
         public static event UnityAction<string> onAreaRemoved;
+        public static event UnityAction<string> onPatternAdded;
+        public static event UnityAction<string> onPatternRemoved;
 
         private static PsylliumManager _instance = null;
         public static PsylliumManager instance
@@ -102,6 +102,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return areaMap.GetOrNull(name);
         }
 
+        public PsylliumPattern GetPattern(int groupIndex, int patternIndex)
+        {
+            var controller = GetController(groupIndex);
+            if (controller == null)
+            {
+                return null;
+            }
+
+            return controller.GetPattern(patternIndex);
+        }
+
+        public PsylliumPatternConfig GetPatternConfig(string name)
+        {
+            return patternConfigMap.GetOrNull(name);
+        }
+
+        public PsylliumTransformConfig GetTransformConfig(string name)
+        {
+            return transformConfigMap.GetOrNull(name);
+        }
+
         public PsylliumBarConfig GetBarConfig(string name)
         {
             return barConfigMap.GetOrNull(name);
@@ -112,30 +133,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return handConfigMap.GetOrNull(name);
         }
 
-        public PsylliumAnimationConfig GetAnimationConfig(string name)
-        {
-            return animationConfigMap.GetOrNull(name);
-        }
-
-        public PsylliumAnimationHandConfig GetAnimationHandConfig(string name)
-        {
-            return animationHandConfigMap.GetOrNull(name);
-        }
-
         public void Update()
         {
-            if (studioHack == null || !studioHack.IsValid())
-            {
-                return;
-            }
-
-            if (studioHack.isPoseEditing && config.psylliumEditUpdate)
-            {
-                foreach (var controller in controllers)
-                {
-                    controller.ManualUpdate(controller.time + Time.deltaTime);
-                }
-            }
         }
 
         public void ClearCache()
@@ -147,6 +146,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             areaMap.Clear();
             areaNames.Clear();
 
+            patterns.Clear();
+            patternConfigMap.Clear();
+            patternConfigNames.Clear();
+            transformConfigMap.Clear();
+            transformConfigNames.Clear();
+
             barConfigs.Clear();
             barConfigMap.Clear();
             barConfigNames.Clear();
@@ -154,14 +159,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             handConfigs.Clear();
             handConfigMap.Clear();
             handConfigNames.Clear();
-
-            animationConfigs.Clear();
-            animationConfigMap.Clear();
-            animationConfigNames.Clear();
-
-            animationHandConfigs.Clear();
-            animationHandConfigMap.Clear();
-            animationHandConfigNames.Clear();
         }
 
         public void UpdateCache()
@@ -188,26 +185,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 handConfigMap.Add(handConfig.name, handConfig);
                 handConfigNames.Add(handConfig.name);
 
-                var animationConfig = controller.animationConfig;
-                animationConfigs.Add(animationConfig);
-                animationConfigMap.Add(animationConfig.name, animationConfig);
-                animationConfigNames.Add(animationConfig.name);
-
-                var animationHandConfigLeft = controller.animationHandConfigLeft;
-                animationHandConfigs.Add(animationHandConfigLeft);
-                animationHandConfigMap.Add(animationHandConfigLeft.name, animationHandConfigLeft);
-                animationHandConfigNames.Add(animationHandConfigLeft.name);
-
-                var animationHandConfigRight = controller.animationHandConfigRight;
-                animationHandConfigs.Add(animationHandConfigRight);
-                animationHandConfigMap.Add(animationHandConfigRight.name, animationHandConfigRight);
-                animationHandConfigNames.Add(animationHandConfigRight.name);
-
                 foreach (var area in controller.areas)
                 {
                     areas.Add(area);
                     areaMap.Add(area.name, area);
                     areaNames.Add(area.name);
+                }
+
+                foreach (var pattern in controller.patterns)
+                {
+                    patterns.Add(pattern);
+                    patternConfigMap.Add(pattern.patternConfig.name, pattern.patternConfig);
+                    patternConfigNames.Add(pattern.patternConfig.name);
+                    transformConfigMap.Add(pattern.transformConfig.name, pattern.transformConfig);
+                    transformConfigNames.Add(pattern.transformConfig.name);
                 }
             }
 
@@ -217,56 +208,74 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     area.displayName, area.name);
             }
 
-            UpdateAreaCount();
+            foreach (var pattern in patterns)
+            {
+                PluginUtils.LogDebug(" Pattern: displayName={0} name={1}",
+                    pattern.patternConfig.displayName, pattern.patternConfig.name);
+            }
+
+            UpdateTimelineData();
         }
 
-        private void UpdateAreaCount()
+        private void UpdateTimelineData()
         {
             if (timeline == null)
             {
                 return;
             }
 
-            timeline.psylliumAreaCountList.Clear();
+            timeline.psylliums.Clear();
 
             foreach (var controller in controllers)
             {
-                timeline.psylliumAreaCountList.Add(controller.areas.Count);
+                var psylliumData = new TimelinePsylliumData();
+                psylliumData.areaCount = controller.areas.Count;
+                psylliumData.patternCount = controller.patterns.Count;
+                timeline.psylliums.Add(psylliumData);
             }
         }
 
-        public void SetupAreas(List<int> areaCounts)
+        public void Setup(List<TimelinePsylliumData> psylliumDatas)
         {
-            areaCounts = new List<int>(areaCounts);
-
-            for (var i = 0; i < areaCounts.Count; i++)
+            for (var i = 0; i < psylliumDatas.Count; i++)
             {
-                PluginUtils.LogDebug("Psyllium.SetupAreas: [{0}]={1}", i, areaCounts[i]);
+                PluginUtils.LogDebug("Psyllium.Setup: [{0}] areaCount={1} patternCount={2}",
+                        i, psylliumDatas[i].areaCount, psylliumDatas[i].patternCount);
             }
 
-            while (controllers.Count < areaCounts.Count)
+            while (controllers.Count < psylliumDatas.Count)
             {
                 AddController(false);
             }
 
-            while (controllers.Count > areaCounts.Count)
+            while (controllers.Count > psylliumDatas.Count)
             {
                 RemoveController(false);
             }
 
-            for (int i = 0; i < areaCounts.Count; i++)
+            for (int i = 0; i < psylliumDatas.Count; i++)
             {
                 var controller = controllers[i];
-                var areaCount = areaCounts[i];
+                var psylliumData = psylliumDatas[i];
+                var areaCount = psylliumData.areaCount;
+                var patternCount = psylliumData.patternCount;
 
                 while (controller.areas.Count < areaCount)
                 {
                     AddArea(i, false);
                 }
-
                 while (controller.areas.Count > areaCount)
                 {
                     RemoveArea(i, false);
+                }
+
+                while (controller.patterns.Count < patternCount)
+                {
+                    AddPattern(i, false);
+                }
+                while (controller.patterns.Count > patternCount)
+                {
+                    RemovePattern(i, false);
                 }
             }
 
@@ -322,6 +331,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             AddArea(groupIndex, notify);
+            AddPattern(groupIndex, notify);
         }
 
         public void RemoveController(bool notify)
@@ -380,6 +390,43 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (onAreaRemoved != null)
                 {
                     onAreaRemoved.Invoke(areaName);
+                }
+            }
+        }
+
+        public void AddPattern(int groupIndex, bool notify)
+        {
+            var controller = controllers[groupIndex];
+            var pattern = controller.AddPattern();
+            
+            if (notify)
+            {
+                UpdateCache();
+
+                if (onPatternAdded != null)
+                {
+                    onPatternAdded.Invoke(pattern.patternConfig.name);
+                }
+            }
+        }
+
+        public void RemovePattern(int groupIndex, bool notify)
+        {
+            var controller = controllers[groupIndex];
+            if (controller.patterns.Count == 0)
+            {
+                return;
+            }
+
+            var patternName = controller.RemovePatternLast();
+
+            if (notify)
+            {
+                UpdateCache();
+
+                if (onPatternRemoved != null)
+                {
+                    onPatternRemoved.Invoke(patternName);
                 }
             }
         }

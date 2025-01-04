@@ -14,6 +14,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public PsylliumController controller;
         public PsylliumArea area;
+        public int patternIndex;
         public int timeIndex;
         public float timeShiftParam;
         public int randomPositionIndex;
@@ -37,11 +38,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public PsylliumAnimationConfig animationConfig
+        public PsylliumPattern pattern
         {
             get
             {
-                return controller.animationConfig;
+                return controller.GetPattern(patternIndex);
+            }
+        }
+
+        public PsylliumPatternConfig patternConfig
+        {
+            get
+            {
+                if (pattern == null) return null;
+                return pattern.patternConfig;
             }
         }
 
@@ -78,19 +88,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void UpdateTime()
         {
-            if (controller == null || area == null)
+            if (controller == null || area == null || pattern == null)
             {
                 return;
             }
 
-            var timeShift = animationConfig.timeShiftMin + (animationConfig.timeShiftMax - animationConfig.timeShiftMin) * timeShiftParam;
+            var timeShift = patternConfig.timeShiftMin + (patternConfig.timeShiftMax - patternConfig.timeShiftMin) * timeShiftParam;
             var timeIndex = this.timeIndex + (int)(controller.time * timeShift);
 
-            var position = controller.GetAnimationPosition(timeIndex, isLeftHand);
-            var rotation = controller.GetAnimationRotation(timeIndex, isLeftHand);
+            var position = pattern.GetAnimationPosition(timeIndex, isLeftHand);
+            var rotation = pattern.GetAnimationRotation(timeIndex, isLeftHand);
 
-            var randomPosition = controller.GetRandomAnimationPosition(randomPositionIndex, timeIndex);
-            var randomRotation = controller.GetRandomAnimationRotation(randomRotationIndex);
+            var randomPosition = pattern.GetRandomAnimationPosition(randomPositionIndex);
+            var randomRotation = pattern.GetRandomAnimationRotation(randomRotationIndex);
 
             position += basePosition + randomPosition;
             rotation *= randomRotation;
@@ -102,6 +112,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void UpdatePsylliums(
             Vector3 handPos,
             int count,
+            int patternIndex,
             int timeIndex,
             float timeShiftParam,
             int[] colorIndexes,
@@ -111,6 +122,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             this.basePosition = handPos;
             this.isLeftHand = isLeftHand;
+            this.patternIndex = patternIndex;
             this.timeIndex = timeIndex;
             this.timeShiftParam = timeShiftParam;
             this.randomPositionIndex = randomPositionIndex;

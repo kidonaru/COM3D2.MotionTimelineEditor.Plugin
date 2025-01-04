@@ -638,6 +638,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 },
             });
 
+            view.DrawToggle("BPMライン表示", timeline.isShowBPMLine, 120, 20, newValue =>
+            {
+                timeline.isShowBPMLine = newValue;
+            });
+
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "BPM",
+                labelWidth = 50,
+                min = 1,
+                max = 300,
+                step = 0.1f,
+                defaultValue = 120,
+                value = timeline.bpm,
+                onChanged = value => timeline.bpm = value,
+            });
+
+            view.DrawSliderValue(new GUIView.SliderOption
+            {
+                label = "オフセット",
+                labelWidth = 50,
+                min = -timeline.frameRate,
+                max = timeline.frameRate,
+                step = 0.1f,
+                defaultValue = 0,
+                value = timeline.bpmLineOffsetFrame,
+                onChanged = value => timeline.bpmLineOffsetFrame = value,
+            });
+
             view.AddSpace(10);
             view.DrawHorizontalLine(Color.gray);
         }

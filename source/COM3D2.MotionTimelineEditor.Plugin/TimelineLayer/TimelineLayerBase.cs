@@ -389,10 +389,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        protected void ApplyPlayDataByType(TransformType transformType)
+        protected void ApplyPlayDataByType(
+            TransformType transformType,
+            float playingFrameNoFloat)
         {
-            var playingFrameNoFloat = this.playingFrameNoFloat;
-
             foreach (var playData in _playDataMap.Values)
             {
                 if (playData.motions.Count == 0)
@@ -414,6 +414,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     ApplyMotion(current, playData.lerpFrame, indexUpdated);
                 }
             }
+        }
+
+        protected void ApplyPlayDataByType(TransformType transformType)
+        {
+            ApplyPlayDataByType(transformType, this.playingFrameNoFloat);
         }
 
         protected abstract void ApplyMotion(MotionData motion, float t, bool indexUpdated);
@@ -1807,50 +1812,47 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (isFull || editType == TransformEditType.SX)
             {
-                updateTransform |= view.DrawSliderValue(
-                    new GUIView.SliderOption
-                    {
-                        label = "SX",
-                        labelWidth = 30,
-                        min = 0,
-                        max = config.scaleRange,
-                        step = 0.01f,
-                        defaultValue = initialScale.x,
-                        value = scale.x,
-                        onChanged = x => scale.x = x,
-                    });
+                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+                {
+                    label = "SX",
+                    labelWidth = 30,
+                    min = 0,
+                    max = config.scaleRange,
+                    step = 0.01f,
+                    defaultValue = initialScale.x,
+                    value = scale.x,
+                    onChanged = x => scale.x = x,
+                });
             }
 
             if (isFull || editType == TransformEditType.SY)
             {
-                updateTransform |= view.DrawSliderValue(
-                    new GUIView.SliderOption
-                    {
-                        label = "SY",
-                        labelWidth = 30,
-                        min = 0,
-                        max = config.scaleRange,
-                        step = 0.01f,
-                        defaultValue = initialScale.y,
-                        value = scale.y,
-                        onChanged = y => scale.y = y,
-                    });
+                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+                {
+                    label = "SY",
+                    labelWidth = 30,
+                    min = 0,
+                    max = config.scaleRange,
+                    step = 0.01f,
+                    defaultValue = initialScale.y,
+                    value = scale.y,
+                    onChanged = y => scale.y = y,
+                });
             }
 
             if (isFull || editType == TransformEditType.SZ)
             {
-                updateTransform |= view.DrawSliderValue(
-                    new GUIView.SliderOption
-                    {
-                        label = "SZ",
-                        labelWidth = 30,
-                        min = 0,
-                        max = config.scaleRange,
-                        step = 0.01f,
-                        defaultValue = initialScale.z,
-                        value = scale.z,
-                        onChanged = z => scale.z = z,
-                    });
+                updateTransform |= view.DrawSliderValue(new GUIView.SliderOption
+                {
+                    label = "SZ",
+                    labelWidth = 30,
+                    min = 0,
+                    max = config.scaleRange,
+                    step = 0.01f,
+                    defaultValue = initialScale.z,
+                    value = scale.z,
+                    onChanged = z => scale.z = z,
+                });
             }
 
             if (updateTransform)

@@ -38,7 +38,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool paraffinDebug = false;
         public bool distanceFogDebug = false;
         public bool rimlightDebug = false;
-        public bool psylliumEditUpdate = false;
         public bool psylliumAreaCopyIgnoreTransform = false;
         public float videoPrebufferTime = 0.5f;
         public bool outputElapsedTime = false;
@@ -87,6 +86,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Color gridColorInDisplay = new Color(1, 1, 1);
         public Color gridColorInWorld = new Color(1, 1, 1);
         public Color gridColorInVideo = new Color(1, 1, 1);
+        public Color bpmLineColor = new Color(1f, 47f / 51f, 0.015686275f, 0.5f);
 
         [XmlIgnore]
         public Dictionary<KeyBindType, KeyBind> keyBinds = new Dictionary<KeyBindType, KeyBind>

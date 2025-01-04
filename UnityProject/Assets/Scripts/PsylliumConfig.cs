@@ -76,21 +76,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 && cutoffAlpha == other.cutoffAlpha;
         }
 
-        public override bool Equals(object obj)
-        {
-            if (obj == null || GetType() != obj.GetType())
-            {
-                return false;
-            }
-
-            return Equals((PsylliumBarConfig)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         public void UpdateName(int groupIndex)
         {
             this.groupIndex = groupIndex;
@@ -126,21 +111,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 && barOffsetRotation == other.barOffsetRotation;
         }
 
-        public override bool Equals(object obj)
-        {
-            if (obj == null || GetType() != obj.GetType())
-            {
-                return false;
-            }
-
-            return Equals((PsylliumHandConfig)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         public void UpdateName(int groupIndex)
         {
             this.groupIndex = groupIndex;
@@ -152,142 +122,92 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     }
 
     [System.Serializable]
-    public class PsylliumAnimationConfig
+    public class PsylliumPatternConfig
     {
         public int groupIndex;
+        public int patternIndex;
         public string name;
         public string displayName;
-    
-        public Vector3 randomPosition1Range = new Vector3(0.1f, 0.1f, 0.1f);
-        public Vector3 randomPosition2Range = new Vector3(0.1f, 0.1f, 0.1f);
+
+        public Vector3 randomPositionRange = new Vector3(0.1f, 0.1f, 0.1f);
         public Vector3 randomEulerAnglesRange = new Vector3(5f, 0f, 10f);
 
-        public float positionSyncRate = 0f;
-
-        public float bpm = 120f;
-        public int patternCount = 10;
-        public float randomTime = 0.05f;
-        public float timeRatio = 0.75f;
-        public float timeOffset = 0f;
+        public int timeCount = 10;
+        public float timeRange = 0.05f;
         public float timeShiftMin = 0.5f;
         public float timeShiftMax = 1.5f;
-        public MoveEasingType easingType1 = MoveEasingType.QuadInOut;
-        public MoveEasingType easingType2 = MoveEasingType.SineOut;
         public int randomSeed;
 
-        public void CopyFrom(PsylliumAnimationConfig other)
+        public void CopyFrom(PsylliumPatternConfig other)
         {
-            randomPosition1Range = other.randomPosition1Range;
-            randomPosition2Range = other.randomPosition2Range;
+            randomPositionRange = other.randomPositionRange;
             randomEulerAnglesRange = other.randomEulerAnglesRange;
-            positionSyncRate = other.positionSyncRate;
-            bpm = other.bpm;
-            patternCount = other.patternCount;
-            randomTime = other.randomTime;
-            timeRatio = other.timeRatio;
-            timeOffset = other.timeOffset;
+            timeCount = other.timeCount;
+            timeRange = other.timeRange;
             timeShiftMin = other.timeShiftMin;
             timeShiftMax = other.timeShiftMax;
-            easingType1 = other.easingType1;
-            easingType2 = other.easingType2;
             randomSeed = other.randomSeed;
         }
 
-        public bool Equals(PsylliumAnimationConfig other)
+        public bool Equals(PsylliumPatternConfig other)
         {
-            return randomPosition1Range == other.randomPosition1Range
-                && randomPosition2Range == other.randomPosition2Range
+            return randomPositionRange == other.randomPositionRange
                 && randomEulerAnglesRange == other.randomEulerAnglesRange
-                && positionSyncRate == other.positionSyncRate
-                && bpm == other.bpm
-                && patternCount == other.patternCount
-                && randomTime == other.randomTime
-                && timeRatio == other.timeRatio
-                && timeOffset == other.timeOffset
+                && timeCount == other.timeCount
+                && timeRange == other.timeRange
                 && timeShiftMin == other.timeShiftMin
                 && timeShiftMax == other.timeShiftMax
-                && easingType1 == other.easingType1
-                && easingType2 == other.easingType2
                 && randomSeed == other.randomSeed;
         }
 
-        public override bool Equals(object obj)
-        {
-            if (obj == null || GetType() != obj.GetType())
-            {
-                return false;
-            }
-
-            return Equals((PsylliumAnimationConfig)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        public void UpdateName(int groupIndex)
+        public void UpdateName(int groupIndex, int patternIndex)
         {
             this.groupIndex = groupIndex;
+            this.patternIndex = patternIndex;
 
-            var suffix = " (" + groupIndex + ")";
-            name = "PsylliumAnimationConfig" + suffix;
-            displayName = "アニメ設定" + suffix;
+            var suffix = " (" + groupIndex + ", " + patternIndex + ")";
+            name = "PsylliumPattern" + suffix;
+            displayName = "パターン" + suffix;
         }
     }
 
     [System.Serializable]
-    public class PsylliumAnimationHandConfig
+    public class PsylliumTransformConfig
     {
         public int groupIndex;
-        public bool isLeftHand;
+        public int patternIndex;
         public string name;
         public string displayName;
 
-        public Vector3 position1 = new Vector3(0, 0.3f, -0.5f);
-        public Vector3 position2 = new Vector3(0, 0.1f, 0);
-        public Vector3 eulerAngles1 = new Vector3(-10, 0, 0);
-        public Vector3 eulerAngles2 = new Vector3(120, 0, 0);
+        public Vector3 positionLeft = new Vector3(0, 0.3f, -0.5f);
+        public Vector3 positionRight = new Vector3(0, 0.3f, -0.5f);
+        public Vector3 eulerAnglesLeft = new Vector3(-10, 0, 0);
+        public Vector3 eulerAnglesRight = new Vector3(-10, 0, 0);
 
-        public void CopyFrom(PsylliumAnimationHandConfig other)
+        public void CopyFrom(PsylliumTransformConfig other)
         {
-            position1 = other.position1;
-            position2 = other.position2;
-            eulerAngles1 = other.eulerAngles1;
-            eulerAngles2 = other.eulerAngles2;
+            positionLeft = other.positionLeft;
+            positionRight = other.positionRight;
+            eulerAnglesLeft = other.eulerAnglesLeft;
+            eulerAnglesRight = other.eulerAnglesRight;
         }
 
-        public bool Equals(PsylliumAnimationHandConfig other)
+        public bool Equals(PsylliumTransformConfig other)
         {
-            return position1 == other.position1
-                && position2 == other.position2
-                && eulerAngles1 == other.eulerAngles1
-                && eulerAngles2 == other.eulerAngles2;
+            return positionLeft == other.positionLeft
+                && positionRight == other.positionRight
+                && eulerAnglesLeft == other.eulerAnglesLeft
+                && eulerAnglesRight == other.eulerAnglesRight;
         }
 
-        public override bool Equals(object obj)
-        {
-            if (obj == null || GetType() != obj.GetType())
-            {
-                return false;
-            }
-
-            return Equals((PsylliumAnimationConfig)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        public void UpdateName(int groupIndex, bool isLeftHand)
+        public void UpdateName(int groupIndex, int patternIndex)
         {
             this.groupIndex = groupIndex;
-            this.isLeftHand = isLeftHand;
+            this.patternIndex = patternIndex;
 
-            var suffix = " (" + groupIndex + ")";
-            name = "PsylliumAnimationHandConfig" + (isLeftHand ? "Left" : "Right") + suffix;
-            displayName = "アニメ設定 " + (isLeftHand ? "左手" : "右手") + suffix;
+            var suffix = " (" + groupIndex + ", " + patternIndex + ")";
+            name = "PsylliumTransform" + suffix;
+            displayName = "移動回転" + suffix;
         }
     }
 
@@ -312,6 +232,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float colorWeight1 = 0.175f; // 色1の重み
         [Range(0, 1)]
         public float colorWeight2 = 0.5f; // 色2の重み
+        [Range(0, 1)]
+        public float patternWeight0 = 0.5f; // パターン0の重み
+        [Range(0, 1)]
+        public float patternWeight1 = 0.5f; // パターン1の重み
+        [Range(0, 1)]
+        public float patternWeight2 = 0.5f; // パターン2の重み
+        [Range(0, 1)]
+        public float patternWeight3 = 0.5f; // パターン3の重み
+        [Range(0, 1)]
+        public float patternWeight4 = 0.5f; // パターン4の重み
+        [Range(0, 1)]
+        public float patternWeight5 = 0.5f; // パターン5の重み
+        [Range(0, 1)]
+        public float patternWeight6 = 0.5f; // パターン6の重み
+        [Range(0, 1)]
+        public float patternWeight7 = 0.5f; // パターン7の重み
+        [Range(0, 1)]
+        public float patternWeight8 = 0.5f; // パターン8の重み
+        [Range(0, 1)]
+        public float patternWeight9 = 0.5f; // パターン9の重み
+
         public int randomSeed;
 
         public Vector3 randomPosition
@@ -352,6 +293,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public float[] patternWeights
+        {
+            get
+            {
+                return new float[]
+                {
+                    patternWeight0,
+                    patternWeight1,
+                    patternWeight2,
+                    patternWeight3,
+                    patternWeight4,
+                    patternWeight5,
+                    patternWeight6,
+                    patternWeight7,
+                    patternWeight8,
+                    patternWeight9
+                };
+            }
+        }
+
         public void CopyFrom(PsylliumAreaConfig other, bool ignoreTransform)
         {
             visible = other.visible;
@@ -363,13 +324,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             barCountWeight3 = other.barCountWeight3;
             colorWeight1 = other.colorWeight1;
             colorWeight2 = other.colorWeight2;
+            patternWeight0 = other.patternWeight0;
+            patternWeight1 = other.patternWeight1;
+            patternWeight2 = other.patternWeight2;
+            patternWeight3 = other.patternWeight3;
+            patternWeight4 = other.patternWeight4;
+            patternWeight5 = other.patternWeight5;
+            patternWeight6 = other.patternWeight6;
+            patternWeight7 = other.patternWeight7;
+            patternWeight8 = other.patternWeight8;
+            patternWeight9 = other.patternWeight9;
 
             if (!ignoreTransform)
             {
                 position = other.position;
                 rotation = other.rotation;
                 size = other.size;
-                //randomSeed = other.randomSeed;
+                randomSeed = other.randomSeed;
             }
         }
 
@@ -387,22 +358,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 && barCountWeight3 == other.barCountWeight3
                 && colorWeight1 == other.colorWeight1
                 && colorWeight2 == other.colorWeight2
+                && patternWeight0 == other.patternWeight0
+                && patternWeight1 == other.patternWeight1
+                && patternWeight2 == other.patternWeight2
+                && patternWeight3 == other.patternWeight3
+                && patternWeight4 == other.patternWeight4
+                && patternWeight5 == other.patternWeight5
+                && patternWeight6 == other.patternWeight6
+                && patternWeight7 == other.patternWeight7
+                && patternWeight8 == other.patternWeight8
+                && patternWeight9 == other.patternWeight9
                 && randomSeed == other.randomSeed;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null || GetType() != obj.GetType())
-            {
-                return false;
-            }
-
-            return Equals((PsylliumAreaConfig)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
         }
 
         public PsylliumAreaConfig Clone()

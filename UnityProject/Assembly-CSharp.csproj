@@ -91,6 +91,7 @@
      <Compile Include="Assets\PostProcessing\Runtime\Utils\MaterialFactory.cs" />
      <Compile Include="Assets\PostProcessing\Runtime\Utils\RenderTextureFactory.cs" />
      <Compile Include="Assets\PostProcessing\Utilities\CustomMotionTexture\ExampleWheelController.cs" />
+     <Compile Include="Assets\Scripts\BGGround.cs" />
      <Compile Include="Assets\Scripts\CreateAssetBundles.cs" />
      <Compile Include="Assets\Scripts\EasingFunctions.cs" />
      <Compile Include="Assets\Scripts\MoveEasingType.cs" />
@@ -110,6 +111,7 @@
      <Compile Include="Assets\Scripts\PsylliumConfig.cs" />
      <Compile Include="Assets\Scripts\PsylliumController.cs" />
      <Compile Include="Assets\Scripts\PsylliumHand.cs" />
+     <Compile Include="Assets\Scripts\PsylliumPattern.cs" />
      <Compile Include="Assets\Scripts\PsylliumRandomValues.cs" />
      <Compile Include="Assets\Scripts\StageLaser.cs" />
      <Compile Include="Assets\Scripts\StageLaserController.cs" />

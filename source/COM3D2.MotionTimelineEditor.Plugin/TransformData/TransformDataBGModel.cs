@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataBGModel : TransformDataBase

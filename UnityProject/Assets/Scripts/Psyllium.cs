@@ -22,14 +22,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public PsylliumAnimationConfig animationConfig
-        {
-            get
-            {
-                return controller.animationConfig;
-            }
-        }
-
         void Awake()
         {
             _filter = GetOrAddComponent<MeshFilter>();

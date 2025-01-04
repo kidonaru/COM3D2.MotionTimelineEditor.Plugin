@@ -24,12 +24,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void Clear()
         {
             ResetIndex();
-            motions.Clear();
+
+            if (motions != null)
+            {
+                motions.Clear();
+            };
         }
 
         public bool Update(float playingFrame)
         {
-            if (motions.Count == 0)
+            if (motions == null || motions.Count == 0)
             {
                 return false;
             }
@@ -96,6 +100,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Setup(SingleFrameType singleFrameType)
         {
+            if (motions == null || motions.Count == 0)
+            {
+                return;
+            }
+
             foreach (var motion in motions)
             {
                 motion.stFrameInEdit = motion.stFrame;

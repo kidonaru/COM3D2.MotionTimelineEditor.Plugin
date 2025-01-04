@@ -8,6 +8,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public struct PsylliumRandomValues
     {
+        public int patternIndex;
         public int timeIndex;
         public int leftRandomPositionIndex;
         public int rightRandomPositionIndex;
@@ -20,8 +21,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int[] rightColorIndexes;
         public float timeShiftParam;
 
-        public PsylliumRandomValues(PsylliumAreaConfig areaConfig)
+        public PsylliumRandomValues(
+            PsylliumController controller,
+            PsylliumAreaConfig areaConfig)
         {
+            patternIndex = LotteryByWeight(areaConfig.patternWeights, controller.patterns.Count);
             timeIndex = Random.Range(1, int.MaxValue);
             leftRandomPositionIndex = Random.Range(1, int.MaxValue);
             rightRandomPositionIndex = Random.Range(1, int.MaxValue);
@@ -57,16 +61,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             StepRandom(8); // 乱数の予約
         }
 
-        private static int LotteryByWeight(float[] weights)
+        private static int LotteryByWeight(float[] weights, int count)
         {
             float sum = 0;
-            foreach (var weight in weights)
+            count = Mathf.Min(count, weights.Length);
+
+            if (count <= 0)
             {
-                sum += weight;
+                return 0;
+            }
+
+            for (var i = 0; i < count; i++)
+            {
+                sum += weights[i];
             }
 
             float value = Random.value * sum;
-            for (int i = 0; i < weights.Length; i++)
+            for (int i = 0; i < count; i++)
             {
                 if (value < weights[i])
                 {
@@ -76,7 +87,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 value -= weights[i];
             }
 
-            return weights.Length - 1;
+            return count - 1;
+        }
+
+        private static int LotteryByWeight(float[] weights)
+        {
+            return LotteryByWeight(weights, weights.Length);
         }
 
         private static void StepRandom(int step)

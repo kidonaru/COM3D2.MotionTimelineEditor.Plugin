@@ -956,6 +956,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
+            // BPMライン表示
+            if (timeline.isShowBPMLine && timeline.bpm > 0)
+            {
+                var frameNoPerBeat = timeline.frameRate * 60.0 / timeline.bpm;
+                var offsetFrame = timeline.bpmLineOffsetFrame;
+                var beatCount = timeline.maxFrameCount / frameNoPerBeat;
+                for (var i = 1; i < beatCount; i++)
+                {
+                    var frameNo = Mathf.Round((float)(i * frameNoPerBeat) + offsetFrame);
+                    view.currentPos.x = frameNo * frameWidth + halfFrameWidth;
+                    if (view.currentPos.x < scrollPosition.x ||
+                        view.currentPos.x > scrollPosition.x + viewWidth)
+                    {
+                        continue;
+                    }
+
+                    view.currentPos.y = 0;
+                    view.DrawTexture(texWhite, 2, -1, config.bpmLineColor);
+                }
+            }
+
             // トラック範囲表示
             var activeTrack = timeline.activeTrack;
             if (activeTrack != null)

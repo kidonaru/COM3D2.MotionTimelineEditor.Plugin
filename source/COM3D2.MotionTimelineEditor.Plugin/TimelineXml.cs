@@ -55,6 +55,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int group;
     }
 
+    public class TimelinePsylliumXml
+    {
+        [XmlElement("AreaCount")]
+        public int areaCount;
+        [XmlElement("PatternCount")]
+        public int patternCount;
+    }
+
     [XmlRoot("TimelineData")]
     public class TimelineXml
     {
@@ -82,6 +90,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlArray("BGModels")]
         [XmlArrayItem("BGModel")]
         public List<TimelineBGModelXml> bgModels = new List<TimelineBGModelXml>();
+
+        [XmlArray("Psylliums")]
+        [XmlArrayItem("Psyllium")]
+        public List<TimelinePsylliumXml> psylliums = new List<TimelinePsylliumXml>();
 
         [XmlArray("MaidShapeKeys")]
         [XmlArrayItem("MaidShapeKey")]
@@ -160,14 +172,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("StageLightCountList")]
         public List<int> stageLightCountList = new List<int>();
 
-        [XmlElement("PsylliumAreaCountList")]
-        public List<int> psylliumAreaCountList = new List<int>();
-
         [XmlElement("ActiveTrackIndex")]
         public int activeTrackIndex = -1;
 
         [XmlElement("BGMPath")]
         public string bgmPath = "";
+
+        [XmlElement("BPM")]
+        public float bpm = 120f;
+
+        [XmlElement("IsShowBPMLine")]
+        public bool isShowBPMLine = false;
+
+        [XmlElement("BPMLineOffsetFrame")]
+        public float bpmLineOffsetFrame = 0f;
 
         [XmlElement("AspectWidth")]
         public float aspectWidth = 0f;
@@ -811,33 +829,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                     values.Add(1f);
                                     values.Add(1f);
                                     values.Add(1f);
-                                }
-                                transform.values = values.ToArray();
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-
-            if (version < 24)
-            {
-                // PsylliumAnimationにsubPositionを追加
-                foreach (var layer in layers)
-                {
-                    if (layer.className == "PsylliumTimelineLayer")
-                    {
-                        foreach (var keyFrame in layer.keyFrames)
-                        {
-                            foreach (var bone in keyFrame.bones)
-                            {
-                                var transform = bone.transform;
-                                if (transform.type != TransformType.PsylliumAnimation) continue;
-                                var values = new List<float>(transform.values);
-                                if (values.Count == 17)
-                                {
-                                    PluginUtils.LogDebug("Add subPosition to PsylliumTimelineLayer name={0}", transform.name);
-                                    values.InsertRange(3, new float[] {values[0], values[1], values[2]});
                                 }
                                 transform.values = values.ToArray();
                             }

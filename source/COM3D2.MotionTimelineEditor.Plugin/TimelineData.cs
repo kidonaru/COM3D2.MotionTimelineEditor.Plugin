@@ -150,6 +150,43 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
     }
 
+    public class TimelinePsylliumData
+    {
+        public int areaCount;
+        public int patternCount;
+
+        public TimelinePsylliumData()
+        {
+        }
+
+        public TimelinePsylliumData(PsylliumController controller)
+        {
+            FromController(controller);
+        }
+
+        public void FromController(PsylliumController controller)
+        {
+            areaCount = controller.areas.Count;
+            patternCount = controller.patterns.Count;
+        }
+
+        public void FromXml(TimelinePsylliumXml xml)
+        {
+            areaCount = xml.areaCount;
+            patternCount = xml.patternCount;
+        }
+
+        public TimelinePsylliumXml ToXml()
+        {
+            var xml = new TimelinePsylliumXml
+            {
+                areaCount = areaCount,
+                patternCount = patternCount,
+            };
+            return xml;
+        }
+    }
+
     public class TimelineData
     {
         public static readonly int CurrentVersion = 24;
@@ -160,12 +197,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public List<ITimelineLayer> layers = new List<ITimelineLayer>();
 
         public List<TrackData> tracks = new List<TrackData>();
-
         public List<TimelineModelData> models = new List<TimelineModelData>();
-
         public List<TimelineLightData> lights = new List<TimelineLightData>();
-
         public List<TimelineBGModelData> bgModels = new List<TimelineBGModelData>();
+        public List<TimelinePsylliumData> psylliums = new List<TimelinePsylliumData>();
 
         // maidSlotNo -> shapeKeys
         public Dictionary<int, HashSet<string>> maidShapeKeysMap = new Dictionary<int, HashSet<string>>();
@@ -352,11 +387,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public List<int> stageLaserCountList = new List<int>();
         public List<int> stageLightCountList = new List<int>();
-        public List<int> psylliumAreaCountList = new List<int>();
 
         public int activeTrackIndex = -1;
 
         public string bgmPath = "";
+        public float bpm = 120f;
+        public bool isShowBPMLine = false;
+        public float bpmLineOffsetFrame = 0f;
 
         public float aspectWidth = 0f;
         public float aspectHeight = 0f;
@@ -747,6 +784,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 bgModels.Add(bgModel);
             }
 
+            psylliums = new List<TimelinePsylliumData>(xml.psylliums.Count);
+            foreach (var psylliumXml in xml.psylliums)
+            {
+                var psyllium = new TimelinePsylliumData();
+                psyllium.FromXml(psylliumXml);
+                psylliums.Add(psyllium);
+            }
+
             maidShapeKeysMap.Clear();
             foreach (var shapeKeyml in xml.maidShapeKeys)
             {
@@ -785,9 +830,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             isLightExtraEasing = xml.isLightExtraEasing;
             stageLaserCountList = xml.stageLaserCountList.ToList();
             stageLightCountList = xml.stageLightCountList.ToList();
-            psylliumAreaCountList = xml.psylliumAreaCountList.ToList();
             activeTrackIndex = xml.activeTrackIndex;
             bgmPath = xml.bgmPath;
+            bpm = xml.bpm;
+            isShowBPMLine = xml.isShowBPMLine;
+            bpmLineOffsetFrame = xml.bpmLineOffsetFrame;
             aspectWidth = xml.aspectWidth;
             aspectHeight = xml.aspectHeight;
             letterBoxAlpha = xml.letterBoxAlpha;
@@ -872,6 +919,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 xml.bgModels.Add(bgModelXml);
             }
 
+            xml.psylliums = new List<TimelinePsylliumXml>(psylliums.Count);
+            foreach (var psyllium in psylliums)
+            {
+                var psylliumXml = psyllium.ToXml();
+                xml.psylliums.Add(psylliumXml);
+            }
+
             xml.maidShapeKeys = new List<TimelineMaidShapeKeyXml>();
             foreach (var pair in maidShapeKeysMap)
             {
@@ -920,9 +974,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.isLightExtraEasing = isLightExtraEasing;
             xml.stageLaserCountList = stageLaserCountList.ToList();
             xml.stageLightCountList = stageLightCountList.ToList();
-            xml.psylliumAreaCountList = psylliumAreaCountList.ToList();
             xml.activeTrackIndex = activeTrackIndex;
             xml.bgmPath = bgmPath;
+            xml.bpm = bpm;
+            xml.isShowBPMLine = isShowBPMLine;
+            xml.bpmLineOffsetFrame = bpmLineOffsetFrame;
             xml.aspectWidth = aspectWidth;
             xml.aspectHeight = aspectHeight;
             xml.letterBoxAlpha = letterBoxAlpha;

@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Xml.Linq;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
@@ -23,15 +21,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         psylliumManager.controllerNames.Count +
                         psylliumManager.barConfigNames.Count +
                         psylliumManager.handConfigNames.Count +
-                        psylliumManager.animationConfigNames.Count + 
-                        psylliumManager.areaNames.Count);
+                        psylliumManager.areaNames.Count +
+                        psylliumManager.patternConfigNames.Count +
+                        psylliumManager.transformConfigNames.Count);
 
                     _allBoneNames.AddRange(psylliumManager.controllerNames);
                     _allBoneNames.AddRange(psylliumManager.barConfigNames);
                     _allBoneNames.AddRange(psylliumManager.handConfigNames);
-                    _allBoneNames.AddRange(psylliumManager.animationConfigNames);
-                    _allBoneNames.AddRange(psylliumManager.animationHandConfigNames);
                     _allBoneNames.AddRange(psylliumManager.areaNames);
+                    _allBoneNames.AddRange(psylliumManager.patternConfigNames);
+                    _allBoneNames.AddRange(psylliumManager.transformConfigNames);
                 }
                 return _allBoneNames;
             }
@@ -60,8 +59,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             PsylliumManager.onControllerRemoved += OnControllerRemoved;
             PsylliumManager.onAreaAdded += OnAreaAdded;
             PsylliumManager.onAreaRemoved += OnAreaRemoved;
-
-            InitMenuItems();
+            PsylliumManager.onPatternAdded += OnPatternAdded;
+            PsylliumManager.onPatternRemoved += OnPatternRemoved;
         }
 
         protected override void InitMenuItems()
@@ -92,30 +91,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var menuItem = new BoneMenuItem(handConfig.name, handConfig.displayName);
                     setMenuItem.AddChild(menuItem);
                 }
+            }
 
-                {
-                    var animationConfig = controller.animationConfig;
-                    var menuItem = new BoneMenuItem(animationConfig.name, animationConfig.displayName);
-                    setMenuItem.AddChild(menuItem);
-                }
+            var areaSetMenuItem = new BoneSetMenuItem("PsylliumArea", "エリア");
+            allMenuItems.Add(areaSetMenuItem);
 
-                {
-                    var animationHandConfigLeft = controller.animationHandConfigLeft;
-                    var menuItem = new BoneMenuItem(animationHandConfigLeft.name, animationHandConfigLeft.displayName);
-                    setMenuItem.AddChild(menuItem);
-                }
+            foreach (var area in psylliumManager.areas)
+            {
+                var menuItem = new BoneMenuItem(area.name, area.displayName);
+                areaSetMenuItem.AddChild(menuItem);
+            }
 
-                {
-                    var animationHandConfigRight = controller.animationHandConfigRight;
-                    var menuItem = new BoneMenuItem(animationHandConfigRight.name, animationHandConfigRight.displayName);
-                    setMenuItem.AddChild(menuItem);
-                }
+            var patternSetMenuItem = new BoneSetMenuItem("PsylliumPattern", "パターン");
+            allMenuItems.Add(patternSetMenuItem);
 
-                foreach (var area in controller.areas)
-                {
-                    var menuItem = new BoneMenuItem(area.name, area.displayName);
-                    setMenuItem.AddChild(menuItem);
-                }
+            var transformSetMenuItem = new BoneSetMenuItem("PsylliumTransform", "移動回転");
+            allMenuItems.Add(transformSetMenuItem);
+
+            foreach (var pattern in psylliumManager.patterns)
+            {
+                var menuItem = new BoneMenuItem(pattern.patternConfig.name, pattern.patternConfig.displayName);
+                patternSetMenuItem.AddChild(menuItem);
+
+                var menuItem2 = new BoneMenuItem(pattern.transformConfig.name, pattern.transformConfig.displayName);
+                transformSetMenuItem.AddChild(menuItem2);
             }
         }
 
@@ -128,6 +127,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             PsylliumManager.onControllerRemoved -= OnControllerRemoved;
             PsylliumManager.onAreaAdded -= OnAreaAdded;
             PsylliumManager.onAreaRemoved -= OnAreaRemoved;
+            PsylliumManager.onPatternAdded -= OnPatternAdded;
+            PsylliumManager.onPatternRemoved -= OnPatternRemoved;
         }
 
         public override bool IsValidData()
@@ -153,12 +154,58 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected override void ApplyPlayData()
         {
-            base.ApplyPlayData();
+            var maid = this.maid;
+            if (maid == null || maid.body0 == null || !maid.body0.isLoadedBody)
+            {
+                return;
+            }
+
+            ApplyPlayDataByType(TransformType.PsylliumController);
+            ApplyPlayDataByType(TransformType.PsylliumArea);
+            ApplyPlayDataByType(TransformType.PsylliumBar);
+            ApplyPlayDataByType(TransformType.PsylliumHand);
+            ApplyPlayDataByType(TransformType.PsylliumPattern);
+            ApplyPlayDataByType(TransformType.PsylliumTransform);
+
+            ApplyTempPlayData();
 
             var playingTime = this.playingTime;
             foreach (var controller in psylliumManager.controllers)
             {
                 controller.ManualUpdate(playingTime);
+            }
+        }
+
+        protected Dictionary<string, MotionPlayData> _tempPlayDataMap = new Dictionary<string, MotionPlayData>(32);
+
+        protected override void BuildPlayData()
+        {
+            base.BuildPlayData();
+
+            foreach (var playData in _tempPlayDataMap.Values)
+            {
+                playData.ResetIndex();
+                playData.motions = null;
+            }
+
+            foreach (var pair in _playDataMap)
+            {
+                var name = pair.Key;
+                var playData = pair.Value;
+
+                if (playData.motions.Count == 0)
+                {
+                    continue;
+                }
+
+                MotionPlayData tempPlayData;
+                if (!_tempPlayDataMap.TryGetValue(name, out tempPlayData))
+                {
+                    tempPlayData = new MotionPlayData(playData.motions.Count);
+                    _tempPlayDataMap[name] = tempPlayData;
+                }
+
+                tempPlayData.motions = playData.motions;
             }
         }
 
@@ -184,25 +231,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         ApplyHandConfigMotionInit(motion, t);
                     }
                     break;
-                case TransformType.PsylliumAnimation:
-                    if (indexUpdated)
-                    {
-                        ApplyAnimationConfigMotionInit(motion, t);
-                    }
-                    ApplyAnimationConfigMotionUpdate(motion, t);
-                    break;
-                case TransformType.PsylliumAnimationHand:
-                    if (indexUpdated)
-                    {
-                        ApplyAnimationHandConfigMotionInit(motion, t);
-                    }
-                    ApplyAnimationHandConfigMotionUpdate(motion, t);
-                    break;
                 case TransformType.PsylliumArea:
                     if (indexUpdated)
                     {
                         ApplyAreaMotionInit(motion, t);
                     }
+                    break;
+                case TransformType.PsylliumPattern:
+                    if (indexUpdated)
+                    {
+                        ApplyPatternMotionInit(motion, t);
+                    }
+                    ApplyPatternMotionUpdate(motion, t);
+                    break;
+                case TransformType.PsylliumTransform:
+                    if (indexUpdated)
+                    {
+                        ApplyTransformMotionInit(motion, t);
+                    }
+                    ApplyTransformMotionUpdate(motion, t);
                     break;
             }
         }
@@ -276,153 +323,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             controller.refreshRequired = true;
         }
 
-        private void ApplyAnimationConfigMotionInit(MotionData motion, float t)
-        {
-            var animationConfig = psylliumManager.GetAnimationConfig(motion.name);
-            if (animationConfig == null)
-            {
-                return;
-            }
-
-            var controller = psylliumManager.GetController(animationConfig.groupIndex);
-            if (controller == null)
-            {
-                return;
-            }
-
-            var start = motion.start as TransformDataPsylliumAnimation;
-            var targetConfig = start.ToConfig();
-
-            if (targetConfig.Equals(animationConfig))
-            {
-                return;
-            }
-
-            animationConfig.CopyFrom(targetConfig);
-        }
-
-        private void ApplyAnimationConfigMotionUpdate(MotionData motion, float t)
-        {
-            var animationConfig = psylliumManager.GetAnimationConfig(motion.name);
-            if (animationConfig == null)
-            {
-                return;
-            }
-
-            var controller = psylliumManager.GetController(animationConfig.groupIndex);
-            if (controller == null)
-            {
-                return;
-            }
-
-            var start = motion.start as TransformDataPsylliumAnimation;
-            var end = motion.end as TransformDataPsylliumAnimation;
-
-            var startConfig = start.ToConfig();
-            var endConfig = end.ToConfig();
-
-            if (startConfig.randomPosition1Range != endConfig.randomPosition1Range)
-            {
-                animationConfig.randomPosition1Range = Vector3.Lerp(startConfig.randomPosition1Range, endConfig.randomPosition1Range, t);
-            }
-
-            if (startConfig.randomPosition2Range != endConfig.randomPosition2Range)
-            {
-                animationConfig.randomPosition2Range = Vector3.Lerp(startConfig.randomPosition2Range, endConfig.randomPosition2Range, t);
-            }
-
-            if (startConfig.randomEulerAnglesRange != endConfig.randomEulerAnglesRange)
-            {
-                animationConfig.randomEulerAnglesRange = Vector3.Lerp(startConfig.randomEulerAnglesRange, endConfig.randomEulerAnglesRange, t);
-            }
-
-            if (startConfig.positionSyncRate != endConfig.positionSyncRate)
-            {
-                animationConfig.positionSyncRate = Mathf.Lerp(startConfig.positionSyncRate, endConfig.positionSyncRate, t);
-            }
-
-            if (startConfig.bpm != endConfig.bpm)
-            {
-                animationConfig.bpm = Mathf.Lerp(startConfig.bpm, endConfig.bpm, t);
-            }
-
-            if (startConfig.timeRatio != endConfig.timeRatio)
-            {
-                animationConfig.timeRatio = Mathf.Lerp(startConfig.timeRatio, endConfig.timeRatio, t);
-            }
-
-            if (startConfig.timeOffset != endConfig.timeOffset)
-            {
-                animationConfig.timeOffset = Mathf.Lerp(startConfig.timeOffset, endConfig.timeOffset, t);
-            }
-        }
-
-        private void ApplyAnimationHandConfigMotionInit(MotionData motion, float t)
-        {
-            var animationConfig = psylliumManager.GetAnimationHandConfig(motion.name);
-            if (animationConfig == null)
-            {
-                return;
-            }
-
-            var controller = psylliumManager.GetController(animationConfig.groupIndex);
-            if (controller == null)
-            {
-                return;
-            }
-
-            var start = motion.start as TransformDataPsylliumAnimationHand;
-            var targetConfig = start.ToConfig();
-
-            if (targetConfig.Equals(animationConfig))
-            {
-                return;
-            }
-
-            animationConfig.CopyFrom(targetConfig);
-        }
-
-        private void ApplyAnimationHandConfigMotionUpdate(MotionData motion, float t)
-        {
-            var animationConfig = psylliumManager.GetAnimationHandConfig(motion.name);
-            if (animationConfig == null)
-            {
-                return;
-            }
-
-            var controller = psylliumManager.GetController(animationConfig.groupIndex);
-            if (controller == null)
-            {
-                return;
-            }
-
-            var start = motion.start as TransformDataPsylliumAnimationHand;
-            var end = motion.end as TransformDataPsylliumAnimationHand;
-
-            var startConfig = start.ToConfig();
-            var endConfig = end.ToConfig();
-
-            if (startConfig.position1 != endConfig.position1)
-            {
-                animationConfig.position1 = Vector3.Lerp(startConfig.position1, endConfig.position1, t);
-            }
-
-            if (startConfig.position2 != endConfig.position2)
-            {
-                animationConfig.position2 = Vector3.Lerp(startConfig.position2, endConfig.position2, t);
-            }
-
-            if (startConfig.eulerAngles1 != endConfig.eulerAngles1)
-            {
-                animationConfig.eulerAngles1 = Vector3.Lerp(startConfig.eulerAngles1, endConfig.eulerAngles1, t);
-            }
-
-            if (startConfig.eulerAngles2 != endConfig.eulerAngles2)
-            {
-                animationConfig.eulerAngles2 = Vector3.Lerp(startConfig.eulerAngles2, endConfig.eulerAngles2, t);
-            }
-        }
-
         private void ApplyAreaMotionInit(MotionData motion, float t)
         {
             var area = psylliumManager.GetArea(motion.name);
@@ -449,6 +349,279 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             area.refreshRequired = true;
         }
 
+        private void ApplyPatternMotionInit(MotionData motion, float t)
+        {
+            var patternConfig = psylliumManager.GetPatternConfig(motion.name);
+            if (patternConfig == null)
+            {
+                return;
+            }
+
+            var start = motion.start as TransformDataPsylliumPattern;
+            var targetConfig = start.ToConfig();
+
+            if (targetConfig.Equals(patternConfig))
+            {
+                return;
+            }
+
+            patternConfig.CopyFrom(targetConfig);
+        }
+
+        private void ApplyPatternMotionUpdate(MotionData motion, float t)
+        {
+            var patternConfig = psylliumManager.GetPatternConfig(motion.name);
+            if (patternConfig == null)
+            {
+                return;
+            }
+
+            var start = motion.start as TransformDataPsylliumPattern;
+            var end = motion.end as TransformDataPsylliumPattern;
+
+            var startConfig = start.ToConfig();
+            var endConfig = end.ToConfig();
+
+            if (startConfig.randomPositionRange != endConfig.randomPositionRange)
+            {
+                patternConfig.randomPositionRange = Vector3.Lerp(startConfig.randomPositionRange, endConfig.randomPositionRange, t);
+            }
+
+            if (startConfig.randomEulerAnglesRange != endConfig.randomEulerAnglesRange)
+            {
+                patternConfig.randomEulerAnglesRange = Vector3.Lerp(startConfig.randomEulerAnglesRange, endConfig.randomEulerAnglesRange, t);
+            }
+        }
+
+        private void ApplyTransformMotionInit(MotionData motion, float t)
+        {
+            var transformConfig = psylliumManager.GetTransformConfig(motion.name);
+            if (transformConfig == null)
+            {
+                return;
+            }
+
+            var start = motion.start as TransformDataPsylliumTransform;
+            var targetConfig = start.ToConfig();
+
+            if (targetConfig.Equals(transformConfig))
+            {
+                return;
+            }
+
+            transformConfig.CopyFrom(targetConfig);
+        }
+
+        private void ApplyTransformMotionUpdate(MotionData motion, float t)
+        {
+            var transformConfig = psylliumManager.GetTransformConfig(motion.name);
+            if (transformConfig == null)
+            {
+                return;
+            }
+
+            var pattern = psylliumManager.GetPattern(transformConfig.groupIndex, transformConfig.patternIndex);
+            if (pattern == null)
+            {
+                return;
+            }
+
+            var start = motion.start as TransformDataPsylliumTransform;
+            var end = motion.end as TransformDataPsylliumTransform;
+
+            var t0 = motion.stFrame * timeline.frameDuration;
+            var t1 = motion.edFrame * timeline.frameDuration;
+
+            if (start.position != end.position)
+            {
+                transformConfig.positionLeft = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    start.positionValues,
+                    end.positionValues,
+                    t);
+            }
+
+            if (start.subPosition != end.subPosition)
+            {
+                transformConfig.positionRight = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    start.subPositionValues,
+                    end.subPositionValues,
+                    t);
+            }
+
+            if (start.eulerAngles != end.eulerAngles)
+            {
+                transformConfig.eulerAnglesLeft = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    start.eulerAnglesValues,
+                    end.eulerAnglesValues,
+                    t);
+            }
+
+            if (start.subEulerAngles != end.subEulerAngles)
+            {
+                transformConfig.eulerAnglesRight = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    start.subEulerAnglesValues,
+                    end.subEulerAnglesValues,
+                    t);
+            }
+        }
+
+        private void ApplyTempPlayData()
+        {
+            var maid = this.maid;
+            if (maid == null || maid.body0 == null || !maid.body0.isLoadedBody)
+            {
+                return;
+            }
+
+            var playingFrameNoFloat = this.playingFrameNoFloat;
+
+            foreach (var pattern in psylliumManager.patterns)
+            {
+                var patternConfig = pattern.patternConfig;
+                var transformConfig = pattern.transformConfig;
+                var name = transformConfig.name;
+
+                var timeRange = patternConfig.timeRange;
+                var timeCount = patternConfig.timeCount;
+                var deltaFrameNo = timeRange / timeCount * timeline.frameRate;
+                var tempFrameNoFloat = playingFrameNoFloat - deltaFrameNo * timeCount * 0.5f;
+
+                pattern.ClearTransformData();
+
+                for (var i = 0; i < timeCount; i++)
+                {
+                    tempFrameNoFloat += deltaFrameNo;
+                    ApplyTempPlayDataByName(name, tempFrameNoFloat);
+                }
+            }
+        }
+
+        private void ApplyTempPlayDataByName(
+            string name,
+            float playingFrameNoFloat)
+        {
+            var playData = _tempPlayDataMap.GetOrNull(name);
+            if (playData == null || playData.motions.Count == 0)
+            {
+                return;
+            }
+
+            playingFrameNoFloat = Mathf.Max(0, playingFrameNoFloat);
+
+            var indexUpdated = playData.Update(playingFrameNoFloat);
+
+            var current = playData.current;
+            if (current != null)
+            {
+                ApplyTempMotion(current, playData.lerpFrame, indexUpdated);
+            }
+        }
+
+        private void ApplyTempMotion(MotionData motion, float t, bool indexUpdated)
+        {
+            switch (motion.start.type)
+            {
+                case TransformType.PsylliumTransform:
+                    if (indexUpdated)
+                    {
+                        ApplyTransformTempMotionInit(motion, t);
+                    }
+                    ApplyTransformTempMotionUpdate(motion, t);
+                    break;
+            }
+        }
+
+        private Dictionary<string, PsylliumTransformConfig> _tempTransformConfigMap = new Dictionary<string, PsylliumTransformConfig>(32);
+
+        private void ApplyTransformTempMotionInit(MotionData motion, float t)
+        {
+            var transformConfig = _tempTransformConfigMap.GetOrCreate(motion.name);
+            if (transformConfig == null)
+            {
+                return;
+            }
+
+            var start = motion.start as TransformDataPsylliumTransform;
+            var targetConfig = start.ToConfig();
+            transformConfig.CopyFrom(targetConfig);
+
+            var sourceConfig = psylliumManager.GetTransformConfig(motion.name);
+            transformConfig.groupIndex = sourceConfig.groupIndex;
+            transformConfig.patternIndex = sourceConfig.patternIndex;
+        }
+
+        private void ApplyTransformTempMotionUpdate(MotionData motion, float t)
+        {
+            var transformConfig = _tempTransformConfigMap.GetOrCreate(motion.name);
+            if (transformConfig == null)
+            {
+                return;
+            }
+
+            var pattern = psylliumManager.GetPattern(transformConfig.groupIndex, transformConfig.patternIndex);
+            if (pattern == null)
+            {
+                PluginUtils.LogDebug("ApplyTransformTempMotionUpdate: pattern is null");
+                return;
+            }
+
+            var start = motion.start as TransformDataPsylliumTransform;
+            var end = motion.end as TransformDataPsylliumTransform;
+
+            var t0 = motion.stFrame * timeline.frameDuration;
+            var t1 = motion.edFrame * timeline.frameDuration;
+
+            if (start.position != end.position)
+            {
+                transformConfig.positionLeft = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    start.positionValues,
+                    end.positionValues,
+                    t);
+            }
+
+            if (start.subPosition != end.subPosition)
+            {
+                transformConfig.positionRight = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    start.subPositionValues,
+                    end.subPositionValues,
+                    t);
+            }
+
+            if (start.eulerAngles != end.eulerAngles)
+            {
+                transformConfig.eulerAnglesLeft = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    start.eulerAnglesValues,
+                    end.eulerAnglesValues,
+                    t);
+            }
+
+            if (start.subEulerAngles != end.subEulerAngles)
+            {
+                transformConfig.eulerAnglesRight = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    start.subEulerAnglesValues,
+                    end.subEulerAnglesValues,
+                    t);
+            }
+
+            pattern.ApplyTransformData(transformConfig);
+        }
+
         public void OnAreaSetup()
         {
             InitMenuItems();
@@ -473,7 +646,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void OnAreaAdded(string areaName)
         {
             InitMenuItems();
-            AddFirstBones(new List<string> { areaName });
+            AddFirstBones(allBoneNames);
             ApplyCurrentFrame(true);
         }
 
@@ -481,6 +654,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             InitMenuItems();
             RemoveAllBones(new List<string> { areaName });
+            ApplyCurrentFrame(true);
+        }
+
+        public void OnPatternAdded(string patternName)
+        {
+            InitMenuItems();
+            AddFirstBones(allBoneNames);
+            ApplyCurrentFrame(true);
+        }
+
+        public void OnPatternRemoved(string patternName)
+        {
+            InitMenuItems();
+            RemoveAllBones(new List<string> { patternName });
             ApplyCurrentFrame(true);
         }
 
@@ -497,6 +684,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var trans = frame.GetOrCreateTransformData<TransformDataPsylliumArea>(areaName);
                 trans.FromConfig(area.areaConfig);
+            }
+
+            foreach (var pattern in psylliumManager.patterns)
+            {
+                if (pattern == null || pattern.controller == null)
+                {
+                    continue;
+                }
+
+                {
+                    var patternConfig = pattern.patternConfig;
+                    var patternName = patternConfig.name;
+
+                    var trans = frame.GetOrCreateTransformData<TransformDataPsylliumPattern>(patternName);
+                    trans.FromConfig(patternConfig);
+                }
+
+                {
+                    var transformConfig = pattern.transformConfig;
+                    var transformName = transformConfig.name;
+
+                    var trans = frame.GetOrCreateTransformData<TransformDataPsylliumTransform>(transformName);
+                    trans.FromConfig(transformConfig);
+                }
             }
 
             foreach (var controller in psylliumManager.controllers)
@@ -530,30 +741,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var trans = frame.GetOrCreateTransformData<TransformDataPsylliumHand>(handConfigName);
                     trans.FromConfig(config);
                 }
-
-                {
-                    var config = controller.animationConfig;
-                    var animationConfigName = config.name;
-
-                    var trans = frame.GetOrCreateTransformData<TransformDataPsylliumAnimation>(animationConfigName);
-                    trans.FromConfig(config);
-                }
-
-                {
-                    var config = controller.animationHandConfigLeft;
-                    var animationConfigName = config.name;
-
-                    var trans = frame.GetOrCreateTransformData<TransformDataPsylliumAnimationHand>(animationConfigName);
-                    trans.FromConfig(config);
-                }
-
-                {
-                    var config = controller.animationHandConfigRight;
-                    var animationConfigName = config.name;
-
-                    var trans = frame.GetOrCreateTransformData<TransformDataPsylliumAnimationHand>(animationConfigName);
-                    trans.FromConfig(config);
-                }
             }
         }
 
@@ -573,9 +760,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             contentSize = new Vector2(150, 300),
         };
 
+        private GUIComboBox<PsylliumPattern> _patternComboBox = new GUIComboBox<PsylliumPattern>
+        {
+            getName = (pattern, index) => pattern.patternConfig.displayName,
+            labelWidth = 70,
+            buttonSize = new Vector2(150, 20),
+            contentSize = new Vector2(150, 300),
+        };
+
         private GUIComboBox<PsylliumController> _copyToControllerComboBox = new GUIComboBox<PsylliumController>
         {
             getName = (area, index) => area.displayName,
+            labelWidth = 70,
+            buttonSize = new Vector2(150, 20),
+            contentSize = new Vector2(150, 300),
+        };
+
+        private GUIComboBox<PsylliumPattern> _copyToPatternComboBox = new GUIComboBox<PsylliumPattern>
+        {
+            getName = (area, index) => area.patternConfig.displayName,
+            labelWidth = 70,
+            buttonSize = new Vector2(150, 20),
+            contentSize = new Vector2(150, 300),
+        };
+
+        private GUIComboBox<PsylliumPattern> _copyToTransformComboBox = new GUIComboBox<PsylliumPattern>
+        {
+            getName = (area, index) => area.transformConfig.displayName,
             labelWidth = 70,
             buttonSize = new Vector2(150, 20),
             contentSize = new Vector2(150, 300),
@@ -587,18 +798,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             labelWidth = 70,
             buttonSize = new Vector2(150, 20),
             contentSize = new Vector2(150, 300),
-        };
-
-        private GUIComboBox<MoveEasingType> _easingType1ComboBox = new GUIComboBox<MoveEasingType>
-        {
-            items = Enum.GetValues(typeof(MoveEasingType)).Cast<MoveEasingType>().ToList(),
-            getName = (type, index) => type.ToString(),
-        };
-
-        private GUIComboBox<MoveEasingType> _easingType2ComboBox = new GUIComboBox<MoveEasingType>
-        {
-            items = Enum.GetValues(typeof(MoveEasingType)).Cast<MoveEasingType>().ToList(),
-            getName = (type, index) => type.ToString(),
         };
 
         private ColorFieldCache _color1aFieldValue = new ColorFieldCache("", true);
@@ -643,7 +842,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     DrawPsylliumHandConfigEdit(view);
                     break;
                 case TabType.アニメ:
-                    DrawPsylliumAnimationConfigEdit(view);
+                    DrawPsylliumPatternConfigEdit(view);
                     break;
                 case TabType.エリア:
                     DrawPsylliumAreaEdit(view);
@@ -987,7 +1186,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.EndScrollView();
         }
 
-        public void DrawPsylliumAnimationConfigEdit(GUIView view)
+        public void DrawPsylliumPatternConfigEdit(GUIView view)
         {
             view.SetEnabled(!view.IsComboBoxFocused());
 
@@ -1008,6 +1207,50 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
+            view.BeginHorizontal();
+            {
+                view.margin = 0;
+
+                view.DrawLabel("パターン数", view.labelWidth, 20);
+
+                view.DrawIntField(new GUIView.IntFieldOption
+                {
+                    value = controller.patterns.Count,
+                    width = view.viewRect.width - (view.labelWidth + 40 + view.padding.x * 2),
+                    height = 20,
+                });
+
+                if (view.DrawButton("-", 20, 20))
+                {
+                    psylliumManager.RemovePattern(controller.groupIndex, true);
+                }
+                if (view.DrawButton("+", 20, 20))
+                {
+                    psylliumManager.AddPattern(controller.groupIndex, true);
+                }
+
+                view.margin = GUIView.defaultMargin;
+            }
+            view.EndLayout();
+
+            var patterns = controller.patterns;
+            if (patterns.Count == 0)
+            {
+                view.DrawLabel("パターンが存在しません", 200, 20);
+                return;
+            }
+
+            _patternComboBox.items = patterns;
+            _patternComboBox.DrawButton("操作対象", view);
+
+            var pattern = _patternComboBox.currentItem;
+
+            if (pattern == null)
+            {
+                view.DrawLabel("パターンを選択してください", 200, 20);
+                return;
+            }
+
             view.DrawHorizontalLine(Color.gray);
             view.AddSpace(5);
 
@@ -1015,21 +1258,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
-            var animationConfig = controller.animationConfig;
+            var patternConfig = pattern.patternConfig;
             var updateTransform = false;
-            var defaultTrans = TransformDataPsylliumAnimation.defaultTrans;
-            var defaultConfig = TransformDataPsylliumAnimation.defaultConfig;
+            var defaultTrans = TransformDataPsylliumPattern.defaultTrans;
+            var defaultConfig = TransformDataPsylliumPattern.defaultConfig;
 
             _handTabType = view.DrawTabs(_handTabType, 50, 20);
 
-            DrawPsylliumAnimationHandConfigEdit(view);
+            DrawPsylliumTransformConfigEdit(view);
 
-            view.DrawLabel("ランダム位置1", 200, 20);
+            view.DrawLabel("ランダム位置", 200, 20);
 
             {
-                var initialPosition = defaultConfig.randomPosition1Range;
+                var initialPosition = defaultConfig.randomPositionRange;
                 var transformCache = view.GetTransformCache(null);
-                transformCache.position = animationConfig.randomPosition1Range;
+                transformCache.position = patternConfig.randomPositionRange;
 
                 updateTransform |= DrawPosition(
                     view,
@@ -1039,26 +1282,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (updateTransform)
                 {
-                    animationConfig.randomPosition1Range = transformCache.position;
-                }
-            }
-
-            view.DrawLabel("ランダム位置2", 200, 20);
-
-            {
-                var initialPosition = defaultConfig.randomPosition2Range;
-                var transformCache = view.GetTransformCache(null);
-                transformCache.position = animationConfig.randomPosition2Range;
-
-                updateTransform |= DrawPosition(
-                    view,
-                    transformCache,
-                    TransformEditType.全て,
-                    initialPosition);
-
-                if (updateTransform)
-                {
-                    animationConfig.randomPosition2Range = transformCache.position;
+                    patternConfig.randomPositionRange = transformCache.position;
                 }
             }
 
@@ -1068,7 +1292,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var initialEulerAngles = defaultConfig.randomEulerAnglesRange;
                 var transformCache = view.GetTransformCache(null);
                 var prevEulerAngles = Vector3.zero;
-                transformCache.eulerAngles = animationConfig.randomEulerAnglesRange;
+                transformCache.eulerAngles = patternConfig.randomEulerAnglesRange;
 
                 updateTransform |= DrawEulerAngles(
                     view,
@@ -1079,89 +1303,62 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (updateTransform)
                 {
-                    animationConfig.randomEulerAnglesRange = transformCache.eulerAngles;
+                    patternConfig.randomEulerAnglesRange = transformCache.eulerAngles;
                 }
             }
-
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.positionSyncRateInfo,
-                animationConfig.positionSyncRate,
-                y => animationConfig.positionSyncRate = y);
-            
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.bpmInfo,
-                animationConfig.bpm,
-                y => animationConfig.bpm = y);
             
             updateTransform |= view.DrawCustomValueInt(
-                defaultTrans.patternCountInfo,
-                animationConfig.patternCount,
-                y => animationConfig.patternCount = y);
+                defaultTrans.timeCountInfo,
+                patternConfig.timeCount,
+                y => patternConfig.timeCount = y);
 
             updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.randomTimeInfo,
-                animationConfig.randomTime,
-                y => animationConfig.randomTime = y);
-            
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.timeRatioInfo,
-                animationConfig.timeRatio,
-                y => animationConfig.timeRatio = y);
-
-            updateTransform |= view.DrawCustomValueFloat(
-                defaultTrans.timeOffsetInfo,
-                animationConfig.timeOffset,
-                y => animationConfig.timeOffset = y);
+                defaultTrans.timeRangeInfo,
+                patternConfig.timeRange,
+                y => patternConfig.timeRange = y);
 
             updateTransform |= view.DrawCustomValueFloat(
                 defaultTrans.timeShiftMinInfo,
-                animationConfig.timeShiftMin,
-                y => animationConfig.timeShiftMin = y);
+                patternConfig.timeShiftMin,
+                y => patternConfig.timeShiftMin = y);
 
             updateTransform |= view.DrawCustomValueFloat(
                 defaultTrans.timeShiftMaxInfo,
-                animationConfig.timeShiftMax,
-                y => animationConfig.timeShiftMax = y);
-
-            _easingType1ComboBox.currentIndex = (int)animationConfig.easingType1;
-            _easingType1ComboBox.onSelected = (type, _) =>
-            {
-                animationConfig.easingType1 = type;
-                updateTransform = true;
-            };
-            _easingType1ComboBox.DrawButton("イージング1", view);
-
-            _easingType2ComboBox.currentIndex = (int)animationConfig.easingType2;
-            _easingType2ComboBox.onSelected = (type, _) =>
-            {
-                animationConfig.easingType2 = type;
-                updateTransform = true;
-            };
-            _easingType2ComboBox.DrawButton("イージング2", view);
+                patternConfig.timeShiftMax,
+                y => patternConfig.timeShiftMax = y);
 
             updateTransform |= view.DrawCustomValueIntRandom(
                 defaultTrans.randomSeedInfo,
-                animationConfig.randomSeed,
-                y => animationConfig.randomSeed = y);
+                patternConfig.randomSeed,
+                y => patternConfig.randomSeed = y);
 
             if (updateTransform)
             {
-                controller.ManualUpdate(this.playingTime);
+                controller.ManualUpdate(playingTime);
             }
 
-            view.DrawHorizontalLine(Color.gray);
+            {
+                _copyToPatternComboBox.items = controller.patterns;
+                _copyToPatternComboBox.DrawButton("コピー先", view);
+
+                var copyToPattern = _copyToPatternComboBox.currentItem;
+
+                if (view.DrawButton("コピー", 60, 20))
+                {
+                    if (copyToPattern != null && copyToPattern != pattern)
+                    {
+                        copyToPattern.patternConfig.CopyFrom(patternConfig);
+                        controller.ManualUpdate(playingTime);
+                    }
+                }
+            }
 
             view.SetEnabled(!view.IsComboBoxFocused());
-
-            view.DrawToggle("編集中のアニメ再生", config.psylliumEditUpdate, 200, 20, newValue =>
-            {
-                config.psylliumEditUpdate = newValue;
-            });
 
             view.EndScrollView();
         }
 
-        public void DrawPsylliumAnimationHandConfigEdit(GUIView view)
+        public void DrawPsylliumTransformConfigEdit(GUIView view)
         {
             var controller = _controllerComboBox.currentItem;
             if (controller == null)
@@ -1170,19 +1367,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var animationConfig = _handTabType == HandTabType.右手
-                ? controller.animationHandConfigRight
-                : controller.animationHandConfigLeft;
+            var pattern = _patternComboBox.currentItem;
+            if (pattern == null)
+            {
+                view.DrawLabel("パターンを選択してください", 200, 20);
+                return;
+            }
+
+            var transformConfig = pattern.transformConfig;
             var updateTransform = false;
-            var defaultTrans = TransformDataPsylliumAnimationHand.defaultTrans;
-            var defaultConfig = TransformDataPsylliumAnimationHand.defaultConfig;
+            var defaultTrans = TransformDataPsylliumTransform.defaultTrans;
+            var defaultConfig = TransformDataPsylliumTransform.defaultConfig;
 
-            view.DrawLabel("移動1", 200, 20);
+            view.DrawLabel("移動", 200, 20);
 
+            if (_handTabType == HandTabType.右手)
             {
-                var initialPosition = defaultConfig.position1;
+                var initialPosition = defaultConfig.positionRight;
                 var transformCache = view.GetTransformCache(null);
-                transformCache.position = animationConfig.position1;
+                transformCache.position = transformConfig.positionRight;
 
                 updateTransform |= DrawPosition(
                     view,
@@ -1192,16 +1395,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (updateTransform)
                 {
-                    animationConfig.position1 = transformCache.position;
+                    transformConfig.positionRight = transformCache.position;
                 }
             }
-
-            view.DrawLabel("移動2", 200, 20);
-
+            else
             {
-                var initialPosition = defaultConfig.position2;
+                var initialPosition = defaultConfig.positionLeft;
                 var transformCache = view.GetTransformCache(null);
-                transformCache.position = animationConfig.position2;
+                transformCache.position = transformConfig.positionLeft;
 
                 updateTransform |= DrawPosition(
                     view,
@@ -1211,17 +1412,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (updateTransform)
                 {
-                    animationConfig.position2 = transformCache.position;
+                    transformConfig.positionLeft = transformCache.position;
                 }
             }
 
-            view.DrawLabel("回転1", 200, 20);
+            view.DrawLabel("回転", 200, 20);
 
+            if (_handTabType == HandTabType.右手)
             {
-                var initialEulerAngles = defaultConfig.eulerAngles1;
+                var initialEulerAngles = defaultConfig.eulerAnglesRight;
                 var prevEulerAngles = Vector3.zero;
                 var transformCache = view.GetTransformCache(null);
-                transformCache.eulerAngles = animationConfig.eulerAngles1;
+                transformCache.eulerAngles = transformConfig.eulerAnglesRight;
 
                 updateTransform |= DrawEulerAngles(
                     view,
@@ -1232,17 +1434,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (updateTransform)
                 {
-                    animationConfig.eulerAngles1 = transformCache.eulerAngles;
+                    transformConfig.eulerAnglesRight = transformCache.eulerAngles;
                 }
             }
-
-            view.DrawLabel("回転2", 200, 20);
-
+            else
             {
-                var initialEulerAngles = defaultConfig.eulerAngles2;
+                var initialEulerAngles = defaultConfig.eulerAnglesLeft;
                 var prevEulerAngles = Vector3.zero;
                 var transformCache = view.GetTransformCache(null);
-                transformCache.eulerAngles = animationConfig.eulerAngles2;
+                transformCache.eulerAngles = transformConfig.eulerAnglesLeft;
 
                 updateTransform |= DrawEulerAngles(
                     view,
@@ -1253,7 +1453,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (updateTransform)
                 {
-                    animationConfig.eulerAngles2 = transformCache.eulerAngles;
+                    transformConfig.eulerAnglesLeft = transformCache.eulerAngles;
                 }
             }
 
@@ -1261,10 +1461,31 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_handTabType == HandTabType.両手)
                 {
-                    controller.animationHandConfigRight.CopyFrom(animationConfig);
+                    transformConfig.positionRight = transformConfig.positionLeft;
+                    transformConfig.eulerAnglesRight = transformConfig.eulerAnglesLeft;
                 }
 
-                controller.ManualUpdate(this.playingTime);
+                pattern.ClearTransformData();
+                pattern.ApplyTransformData(transformConfig);
+                controller.ManualUpdate(playingTime);
+            }
+
+            {
+                _copyToTransformComboBox.items = controller.patterns;
+                _copyToTransformComboBox.DrawButton("コピー先", view);
+
+                var copyToPattern = _copyToTransformComboBox.currentItem;
+
+                if (view.DrawButton("コピー", 60, 20))
+                {
+                    if (copyToPattern != null && copyToPattern != pattern)
+                    {
+                        copyToPattern.transformConfig.CopyFrom(transformConfig);
+                        copyToPattern.ClearTransformData();
+                        copyToPattern.ApplyTransformData(transformConfig);
+                        controller.ManualUpdate(playingTime);
+                    }
+                }
             }
 
             view.DrawHorizontalLine(Color.gray);
@@ -1408,6 +1629,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 areaConfig.randomPositionRange.z,
                 z => areaConfig.randomPositionRange.z = z);
 
+            view.DrawLabel("バー数の重み", 200, 20);
+
             updateTransform |= view.DrawCustomValueFloat(
                 defaultTrans.barCountWeight0Info,
                 areaConfig.barCountWeight0,
@@ -1428,6 +1651,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 areaConfig.barCountWeight3,
                 y => areaConfig.barCountWeight3 = y);
 
+            view.DrawLabel("色の重み", 200, 20);
+
             updateTransform |= view.DrawCustomValueFloat(
                 defaultTrans.colorWeight1Info,
                 areaConfig.colorWeight1,
@@ -1437,6 +1662,58 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 defaultTrans.colorWeight2Info,
                 areaConfig.colorWeight2,
                 y => areaConfig.colorWeight2 = y);
+
+            view.DrawLabel("パターンの重み", 200, 20);
+
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.patternWeight0Info,
+                areaConfig.patternWeight0,
+                y => areaConfig.patternWeight0 = y);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.patternWeight1Info,
+                areaConfig.patternWeight1,
+                y => areaConfig.patternWeight1 = y);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.patternWeight2Info,
+                areaConfig.patternWeight2,
+                y => areaConfig.patternWeight2 = y);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.patternWeight3Info,
+                areaConfig.patternWeight3,
+                y => areaConfig.patternWeight3 = y);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.patternWeight4Info,
+                areaConfig.patternWeight4,
+                y => areaConfig.patternWeight4 = y);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.patternWeight5Info,
+                areaConfig.patternWeight5,
+                y => areaConfig.patternWeight5 = y);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.patternWeight6Info,
+                areaConfig.patternWeight6,
+                y => areaConfig.patternWeight6 = y);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.patternWeight7Info,
+                areaConfig.patternWeight7,
+                y => areaConfig.patternWeight7 = y);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.patternWeight8Info,
+                areaConfig.patternWeight8,
+                y => areaConfig.patternWeight8 = y);
+            
+            updateTransform |= view.DrawCustomValueFloat(
+                defaultTrans.patternWeight9Info,
+                areaConfig.patternWeight9,
+                y => areaConfig.patternWeight9 = y);
 
             updateTransform |= view.DrawCustomValueIntRandom(
                 defaultTrans.randomSeedInfo,
@@ -1492,6 +1769,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.EndScrollView();
         }
 
+        public override SingleFrameType GetSingleFrameType(TransformType transformType)
+        {
+            return SingleFrameType.None;
+        }
+
         public override TransformType GetTransformType(string name)
         {
             if (name.StartsWith("PsylliumController", StringComparison.Ordinal))
@@ -1506,9 +1788,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return TransformType.PsylliumHand;
             }
-            else if (name.StartsWith("PsylliumAnimation", StringComparison.Ordinal))
+            else if (name.StartsWith("PsylliumPattern", StringComparison.Ordinal))
             {
-                return TransformType.PsylliumAnimation;
+                return TransformType.PsylliumPattern;
+            }
+            else if (name.StartsWith("PsylliumTransform", StringComparison.Ordinal))
+            {
+                return TransformType.PsylliumTransform;
             }
             else
             {

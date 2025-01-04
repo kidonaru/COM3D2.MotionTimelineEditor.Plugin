@@ -12,6 +12,12 @@ public class CreateAssetBundles
         AssetDatabase.Refresh();
 
         Debug.Log("Asset bundles created at " + assetBundleDirectory);
+
+        EditorUtility.DisplayDialog(
+            "ビルド完了",
+            "AssetBundleの作成が完了しました。\n保存先: " + assetBundleDirectory,
+            "OK"
+        );
     }
 }
 #endif

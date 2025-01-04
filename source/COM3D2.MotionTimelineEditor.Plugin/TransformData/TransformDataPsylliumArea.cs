@@ -10,7 +10,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override TransformType type => TransformType.PsylliumArea;
 
-        public override int valueCount => 20;
+        public override int valueCount => 30;
 
         public override bool hasPosition => true;
         public override bool hasEulerAngles => true;
@@ -115,7 +115,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "barCountWeight0", new CustomValueInfo
                 {
                     index = 13,
-                    name = "0個重み",
+                    name = "0個",
                     min = 0f,
                     max = 1f,
                     step = 0.01f,
@@ -126,7 +126,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "barCountWeight1", new CustomValueInfo
                 {
                     index = 14,
-                    name = "1個重み",
+                    name = "1個",
                     min = 0f,
                     max = 1f,
                     step = 0.01f,
@@ -137,7 +137,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "barCountWeight2", new CustomValueInfo
                 {
                     index = 15,
-                    name = "2個重み",
+                    name = "2個",
                     min = 0f,
                     max = 1f,
                     step = 0.01f,
@@ -148,7 +148,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "barCountWeight3", new CustomValueInfo
                 {
                     index = 16,
-                    name = "3個重み",
+                    name = "3個",
                     min = 0f,
                     max = 1f,
                     step = 0.01f,
@@ -159,7 +159,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "colorWeight1", new CustomValueInfo
                 {
                     index = 17,
-                    name = "色1重み",
+                    name = "色1",
                     min = 0f,
                     max = 1f,
                     step = 0.01f,
@@ -170,7 +170,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "colorWeight2", new CustomValueInfo
                 {
                     index = 18,
-                    name = "色2重み",
+                    name = "色2",
                     min = 0f,
                     max = 1f,
                     step = 0.01f,
@@ -178,9 +178,119 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             },
             {
-                "randomSeed", new CustomValueInfo
+                "patternWeight0", new CustomValueInfo
                 {
                     index = 19,
+                    name = "P0",
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = defaultConfig.patternWeight0,
+                }
+            },
+            {
+                "patternWeight1", new CustomValueInfo
+                {
+                    index = 20,
+                    name = "P1",
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = defaultConfig.patternWeight1,
+                }
+            },
+            {
+                "patternWeight2", new CustomValueInfo
+                {
+                    index = 21,
+                    name = "P2",
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = defaultConfig.patternWeight2,
+                }
+            },
+            {
+                "patternWeight3", new CustomValueInfo
+                {
+                    index = 22,
+                    name = "P3",
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = defaultConfig.patternWeight3,
+                }
+            },
+            {
+                "patternWeight4", new CustomValueInfo
+                {
+                    index = 23,
+                    name = "P4",
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = defaultConfig.patternWeight4,
+                }
+            },
+            {
+                "patternWeight5", new CustomValueInfo
+                {
+                    index = 24,
+                    name = "P5",
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = defaultConfig.patternWeight5,
+                }
+            },
+            {
+                "patternWeight6", new CustomValueInfo
+                {
+                    index = 25,
+                    name = "P6",
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = defaultConfig.patternWeight6,
+                }
+            },
+            {
+                "patternWeight7", new CustomValueInfo
+                {
+                    index = 26,
+                    name = "P7",
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = defaultConfig.patternWeight7,
+                }
+            },
+            {
+                "patternWeight8", new CustomValueInfo
+                {
+                    index = 27,
+                    name = "P8",
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = defaultConfig.patternWeight8,
+                }
+            },
+            {
+                "patternWeight9", new CustomValueInfo
+                {
+                    index = 28,
+                    name = "P9",
+                    min = 0f,
+                    max = 1f,
+                    step = 0.01f,
+                    defaultValue = defaultConfig.patternWeight9,
+                }
+            },
+            {
+                "randomSeed", new CustomValueInfo
+                {
+                    index = 29,
                     name = "乱数Seed",
                     min = 0f,
                     max = int.MaxValue,
@@ -213,6 +323,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public ValueData barCountWeight3Value => this["barCountWeight3"];
         public ValueData colorWeight1Value => this["colorWeight1"];
         public ValueData colorWeight2Value => this["colorWeight2"];
+        public ValueData patternWeight0Value => this["patternWeight0"];
+        public ValueData patternWeight1Value => this["patternWeight1"];
+        public ValueData patternWeight2Value => this["patternWeight2"];
+        public ValueData patternWeight3Value => this["patternWeight3"];
+        public ValueData patternWeight4Value => this["patternWeight4"];
+        public ValueData patternWeight5Value => this["patternWeight5"];
+        public ValueData patternWeight6Value => this["patternWeight6"];
+        public ValueData patternWeight7Value => this["patternWeight7"];
+        public ValueData patternWeight8Value => this["patternWeight8"];
+        public ValueData patternWeight9Value => this["patternWeight9"];
         public ValueData randomSeedValue => this["randomSeed"];
 
         public CustomValueInfo sizeXInfo => CustomValueInfoMap["sizeX"];
@@ -228,6 +348,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public CustomValueInfo barCountWeight3Info => CustomValueInfoMap["barCountWeight3"];
         public CustomValueInfo colorWeight1Info => CustomValueInfoMap["colorWeight1"];
         public CustomValueInfo colorWeight2Info => CustomValueInfoMap["colorWeight2"];
+        public CustomValueInfo patternWeight0Info => CustomValueInfoMap["patternWeight0"];
+        public CustomValueInfo patternWeight1Info => CustomValueInfoMap["patternWeight1"];
+        public CustomValueInfo patternWeight2Info => CustomValueInfoMap["patternWeight2"];
+        public CustomValueInfo patternWeight3Info => CustomValueInfoMap["patternWeight3"];
+        public CustomValueInfo patternWeight4Info => CustomValueInfoMap["patternWeight4"];
+        public CustomValueInfo patternWeight5Info => CustomValueInfoMap["patternWeight5"];
+        public CustomValueInfo patternWeight6Info => CustomValueInfoMap["patternWeight6"];
+        public CustomValueInfo patternWeight7Info => CustomValueInfoMap["patternWeight7"];
+        public CustomValueInfo patternWeight8Info => CustomValueInfoMap["patternWeight8"];
+        public CustomValueInfo patternWeight9Info => CustomValueInfoMap["patternWeight9"];
         public CustomValueInfo randomSeedInfo => CustomValueInfoMap["randomSeed"];
 
         public Vector2 size
@@ -275,6 +405,56 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get => colorWeight2Value.value;
             set => colorWeight2Value.value = value;
         }
+        public float patternWeight0
+        {
+            get => patternWeight0Value.value;
+            set => patternWeight0Value.value = value;
+        }
+        public float patternWeight1
+        {
+            get => patternWeight1Value.value;
+            set => patternWeight1Value.value = value;
+        }
+        public float patternWeight2
+        {
+            get => patternWeight2Value.value;
+            set => patternWeight2Value.value = value;
+        }
+        public float patternWeight3
+        {
+            get => patternWeight3Value.value;
+            set => patternWeight3Value.value = value;
+        }
+        public float patternWeight4
+        {
+            get => patternWeight4Value.value;
+            set => patternWeight4Value.value = value;
+        }
+        public float patternWeight5
+        {
+            get => patternWeight5Value.value;
+            set => patternWeight5Value.value = value;
+        }
+        public float patternWeight6
+        {
+            get => patternWeight6Value.value;
+            set => patternWeight6Value.value = value;
+        }
+        public float patternWeight7
+        {
+            get => patternWeight7Value.value;
+            set => patternWeight7Value.value = value;
+        }
+        public float patternWeight8
+        {
+            get => patternWeight8Value.value;
+            set => patternWeight8Value.value = value;
+        }
+        public float patternWeight9
+        {
+            get => patternWeight9Value.value;
+            set => patternWeight9Value.value = value;
+        }
         public int randomSeed
         {
             get => randomSeedValue.intValue;
@@ -293,6 +473,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             barCountWeight3 = config.barCountWeight3;
             colorWeight1 = config.colorWeight1;
             colorWeight2 = config.colorWeight2;
+            patternWeight0 = config.patternWeight0;
+            patternWeight1 = config.patternWeight1;
+            patternWeight2 = config.patternWeight2;
+            patternWeight3 = config.patternWeight3;
+            patternWeight4 = config.patternWeight4;
+            patternWeight5 = config.patternWeight5;
+            patternWeight6 = config.patternWeight6;
+            patternWeight7 = config.patternWeight7;
+            patternWeight8 = config.patternWeight8;
+            patternWeight9 = config.patternWeight9;
             randomSeed = config.randomSeed;
         }
 
@@ -310,6 +500,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _config.barCountWeight3 = barCountWeight3;
             _config.colorWeight1 = colorWeight1;
             _config.colorWeight2 = colorWeight2;
+            _config.patternWeight0 = patternWeight0;
+            _config.patternWeight1 = patternWeight1;
+            _config.patternWeight2 = patternWeight2;
+            _config.patternWeight3 = patternWeight3;
+            _config.patternWeight4 = patternWeight4;
+            _config.patternWeight5 = patternWeight5;
+            _config.patternWeight6 = patternWeight6;
+            _config.patternWeight7 = patternWeight7;
+            _config.patternWeight8 = patternWeight8;
+            _config.patternWeight9 = patternWeight9;
             _config.randomSeed = randomSeed;
             return _config;
         }

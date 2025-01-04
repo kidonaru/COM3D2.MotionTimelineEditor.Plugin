@@ -398,7 +398,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             lightManager.SetupLights(timeline.lights);
             stageLaserManager.SetupLasers(timeline.stageLaserCountList);
             stageLightManager.SetupLights(timeline.stageLightCountList);
-            psylliumManager.SetupAreas(timeline.psylliumAreaCountList);
+            psylliumManager.Setup(timeline.psylliums);
 
             CreateAndApplyAnmAll();
             SeekCurrentFrame(0);
@@ -462,7 +462,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             lightManager.SetupLights(timeline.lights);
             stageLaserManager.SetupLasers(timeline.stageLaserCountList);
             stageLightManager.SetupLights(timeline.stageLightCountList);
-            psylliumManager.SetupAreas(timeline.psylliumAreaCountList);
+            psylliumManager.Setup(timeline.psylliums);
 
             CreateAndApplyAnmAll();
             Refresh();
@@ -1681,7 +1681,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 lightManager.SetupLights(timeline.lights);
                 stageLaserManager.SetupLasers(timeline.stageLaserCountList);
                 stageLightManager.SetupLights(timeline.stageLightCountList);
-                psylliumManager.SetupAreas(timeline.psylliumAreaCountList);
+                psylliumManager.Setup(timeline.psylliums);
             }
         }
 
@@ -1706,8 +1706,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 initialEditPosition = maid.transform.position;
                 initialEditRotation = maid.transform.rotation;
 
-                PluginUtils.LogDebug("Save Maid Position name={0} initialEditPosition={1} initialEditRotation={2}",
-                    maid.name, initialEditPosition, initialEditRotation);
+                //PluginUtils.LogDebug("Save Maid Position name={0} initialEditPosition={1} initialEditRotation={2}",
+                //    maid.name, initialEditPosition, initialEditRotation);
             }
 
             if (onEditPoseUpdated != null)
@@ -1730,8 +1730,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 maid.transform.position = initialEditPosition;
                 maid.transform.rotation = initialEditRotation;
 
-                PluginUtils.LogDebug("Restore Maid Position name={0} initialEditPosition={1} initialEditRotation={2}",
-                    maid.name, initialEditPosition, initialEditRotation);
+                //PluginUtils.LogDebug("Restore Maid Position name={0} initialEditPosition={1} initialEditRotation={2}",
+                //    maid.name, initialEditPosition, initialEditRotation);
             }
 
             foreach (var layer in layers)

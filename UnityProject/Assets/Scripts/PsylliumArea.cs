@@ -94,12 +94,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void Initialize()
         {
             hands = GetComponentsInChildren<PsylliumHand>().ToList();
-
-            if (areaConfig.randomSeed == 0)
-            {
-                areaConfig.randomSeed = Random.Range(1, int.MaxValue);
-            }
-
             UpdateName();
         }
 
@@ -113,6 +107,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void Setup(PsylliumController controller)
         {
             this.controller = controller;
+            areaConfig.randomSeed = Random.Range(1, int.MaxValue);
             Refresh();
         }
 
@@ -127,7 +122,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             UpdateTime();
         }
 
-        private void UpdateName()
+        public void UpdateName()
         {
             var suffix = " (" + groupIndex + ", " + index + ")";
             name = "PsylliumArea" + suffix;
@@ -216,7 +211,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 for (float z = -halfAreaSize.y; z < halfAreaSize.y; z += seatDistance.y)
                 {
-                    var randomValues = new PsylliumRandomValues(areaConfig);
+                    var randomValues = new PsylliumRandomValues(controller, areaConfig);
 
                     // 基準位置を計算
                     var basePosition = new Vector3(x, 0, z) + randomValues.basePosition * barConfig.baseScale;
@@ -233,6 +228,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         hand.UpdatePsylliums(
                             leftHandPos,
                             randomValues.leftCount,
+                            randomValues.patternIndex,
                             randomValues.timeIndex,
                             randomValues.timeShiftParam,
                             randomValues.leftColorIndexes,
@@ -243,12 +239,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     if (randomValues.rightCount > 0)
                     {
-                        var rightHand = GetOrCreateHand();
-                        if (rightHand == null) return;
+                        var hand = GetOrCreateHand();
+                        if (hand == null) return;
 
-                        rightHand.UpdatePsylliums(
+                        hand.UpdatePsylliums(
                             rightHandPos,
                             randomValues.rightCount,
+                            randomValues.patternIndex,
                             randomValues.timeIndex,
                             randomValues.timeShiftParam,
                             randomValues.rightColorIndexes,

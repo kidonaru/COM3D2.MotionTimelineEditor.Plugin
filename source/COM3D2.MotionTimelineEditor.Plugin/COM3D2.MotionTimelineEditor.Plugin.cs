@@ -5,6 +5,8 @@ using UnityInjector;
 using UnityInjector.Attributes;
 using System.Collections;
 using System.Diagnostics;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -418,6 +420,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     TransformType.BGColor, TimelineManager.CreateTransform<TransformDataBGColor>
                 );
                 timelineManager.RegisterTransform(
+                    TransformType.BGGroundColor, TimelineManager.CreateTransform<TransformDataBGGroundColor>
+                );
+                timelineManager.RegisterTransform(
                     TransformType.BGModel, TimelineManager.CreateTransform<TransformDataBGModel>
                 );
                 timelineManager.RegisterTransform(
@@ -463,10 +468,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     TransformType.Paraffin, TimelineManager.CreateTransform<TransformDataParaffin>
                 );
                 timelineManager.RegisterTransform(
-                    TransformType.PsylliumAnimation, TimelineManager.CreateTransform<TransformDataPsylliumAnimation>
+                    TransformType.PsylliumPattern, TimelineManager.CreateTransform<TransformDataPsylliumPattern>
                 );
                 timelineManager.RegisterTransform(
-                    TransformType.PsylliumAnimationHand, TimelineManager.CreateTransform<TransformDataPsylliumAnimationHand>
+                    TransformType.PsylliumTransform, TimelineManager.CreateTransform<TransformDataPsylliumTransform>
                 );
                 timelineManager.RegisterTransform(
                     TransformType.PsylliumArea, TimelineManager.CreateTransform<TransformDataPsylliumArea>
@@ -607,6 +612,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             DumpAllCameraInfo();
             DumpLayerInfo();
             DumpBGObject();
+            DumpAllShaders();
 
             studioHackManager.Update();
             modelHackManager.Update();
@@ -771,6 +777,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        [Conditional("DEBUG")]
         private void DumpGameObject(GameObject obj, int depth)
         {
             string indent = new string(' ', depth * 2);
@@ -779,6 +786,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             foreach (Transform child in obj.transform)
             {
                 DumpGameObject(child.gameObject, depth + 1);
+            }
+        }
+
+        [Conditional("DEBUG")]
+        private void DumpAllShaders()
+        {
+            PluginUtils.LogDebug("使用中のシェーダー一覧:");
+
+            // シーン内のすべてのRendererを取得
+            foreach (Renderer renderer in GameObject.FindObjectsOfType<Renderer>())
+            {
+                foreach (Material material in renderer.materials)
+                {
+                    if (material != null && material.shader != null)
+                    {
+                        PluginUtils.LogDebug($"  - {material.shader.name} ({renderer.name})");
+                    }
+                }
             }
         }
     }

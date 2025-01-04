@@ -123,6 +123,7 @@
     <Compile Include="PostEffectManager.cs" />
     <Compile Include="PostEffectUtils.cs" />
     <Compile Include="ScriptLoader.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\BGGround.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\EasingFunctions.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\MoveEasingType.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\Psyllium.cs" />
@@ -130,6 +131,7 @@
     <Compile Include="..\..\UnityProject\Assets\Scripts\PsylliumConfig.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PsylliumController.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PsylliumHand.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PsylliumPattern.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PsylliumRandomValues.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\StageLaser.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\StageLaserController.cs" />
@@ -208,6 +210,7 @@
     <Compile Include="TransformData\TransformDataBase.cs" />
     <Compile Include="TransformData\TransformDataBG.cs" />
     <Compile Include="TransformData\TransformDataBGColor.cs" />
+    <Compile Include="TransformData\TransformDataBGGroundColor.cs" />
     <Compile Include="TransformData\TransformDataBGModel.cs" />
     <Compile Include="TransformData\TransformDataCamera.cs" />
     <Compile Include="TransformData\TransformDataDepthOfField.cs" />
@@ -223,12 +226,12 @@
     <Compile Include="TransformData\TransformDataModelBone.cs" />
     <Compile Include="TransformData\TransformDataMove.cs" />
     <Compile Include="TransformData\TransformDataParaffin.cs" />
-    <Compile Include="TransformData\TransformDataPsylliumAnimation.cs" />
-    <Compile Include="TransformData\TransformDataPsylliumAnimationHand.cs" />
     <Compile Include="TransformData\TransformDataPsylliumArea.cs" />
     <Compile Include="TransformData\TransformDataPsylliumBar.cs" />
     <Compile Include="TransformData\TransformDataPsylliumController.cs" />
     <Compile Include="TransformData\TransformDataPsylliumHand.cs" />
+    <Compile Include="TransformData\TransformDataPsylliumPattern.cs" />
+    <Compile Include="TransformData\TransformDataPsylliumTransform.cs" />
     <Compile Include="TransformData\TransformDataRimlight.cs" />
     <Compile Include="TransformData\TransformDataRoot.cs" />
     <Compile Include="TransformData\TransformDataRotation.cs" />
