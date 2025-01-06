@@ -205,7 +205,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static Texture2D texDummy = new Texture2D(1, 1);
         public static Texture2D texWhite = CreateColorTexture(Color.white);
 
-        private static Config config => ConfigManager.config;
+        private static Config config => ConfigManager.instance.config;
 
         private static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
 

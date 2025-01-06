@@ -19,7 +19,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (_allBoneNames == null)
                 {
-                    _allBoneNames = new List<string>(1 + timeline.paraffinCount);
+                    _allBoneNames = new List<string>(
+                        1 + timeline.paraffinCount + timeline.distanceFogCount + timeline.rimlightCount);
                     _allBoneNames.Add("DepthOfField");
                     _allBoneNames.AddRange(paraffinNames);
                     _allBoneNames.AddRange(distanceFogNames);
@@ -79,6 +80,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 + timeline.rimlightCount;
             if (allBoneNames.Count != boneCount)
             {
+                PluginUtils.LogDebug($"PostEffetTimelineLayer.Update: boneCount={boneCount}");
                 _allBoneNames = null;
                 InitParrifinEffect();
                 InitDistanceFogEffect();
@@ -100,13 +102,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected override void ApplyPlayData()
         {
+            var maid = this.maid;
+            if (maid == null || maid.body0 == null || !maid.body0.isLoadedBody)
+            {
+                return;
+            }
+
             if (!isCurrent && !config.isPostEffectSync)
             {
                 postEffectManager.DisableAllEffects();
                 return;
             }
 
-            base.ApplyPlayData();
+            var stopwatch = new StopwatchDebug();
+            ApplyPlayDataByType(TransformType.DepthOfField);
+            //stopwatch.ProcessEnd("  DepthOfField");
+
+            ApplyPlayDataByType(TransformType.Paraffin);
+            //stopwatch.ProcessEnd("  Paraffin");
+
+            ApplyPlayDataByType(TransformType.DistanceFog);
+            //stopwatch.ProcessEnd("  DistanceFog");
+
+            ApplyPlayDataByType(TransformType.Rimlight);
+            //stopwatch.ProcessEnd("  Rimlight");
         }
 
         protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)

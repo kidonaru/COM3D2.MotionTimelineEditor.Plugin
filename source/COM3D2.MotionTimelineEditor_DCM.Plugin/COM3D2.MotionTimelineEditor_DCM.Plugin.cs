@@ -8,6 +8,7 @@ using UnityInjector.Attributes;
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
     using TransformType = MotionTimelineEditor.Plugin.TransformType;
+    using MTE = MotionTimelineEditor.Plugin.MotionTimelineEditor;
 
     [
         PluginFilter("COM3D2x64"),
@@ -16,6 +17,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
     ]
     public class MotionTimelineEditor_DCM : PluginBase
     {
+        protected static MTE mte => MTE.instance;
         private static TimelineManager timelineManager => TimelineManager.instance;
 
         public void Awake()
@@ -56,6 +58,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             timelineManager.RegisterTransform(
                 TransformType.Text, TimelineManager.CreateTransform<TransformDataText>
             );
+
+            mte.RegisterManager(MTETextManager.instance);
         }
 
         public static float CalcEasingValue(float t, int easing)

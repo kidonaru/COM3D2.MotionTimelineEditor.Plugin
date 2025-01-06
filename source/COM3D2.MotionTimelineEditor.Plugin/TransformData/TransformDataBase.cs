@@ -252,7 +252,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static readonly string[] RotationNames = new string[] { "RX", "RY", "RZ", "RW" };
         public static readonly string[] ScaleNames = new string[] { "SX", "SY", "SZ" };
 
-        protected static Config config => ConfigManager.config;
+        protected static Config config => ConfigManager.instance.config;
 
         protected static TimelineManager timelineManager => TimelineManager.instance;
 

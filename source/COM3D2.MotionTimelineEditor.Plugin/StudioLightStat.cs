@@ -33,7 +33,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
+        private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
 
         public bool isFollow
         {
@@ -62,10 +62,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private LightType _type = LightType.Directional;
         public LightType type
         {
-            get
-            {
-                return _type;
-            }
+            get => _type;
             set
             {
                 if (_type == value)
@@ -85,10 +82,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private int _index = 0;
         public int index
         {
-            get
-            {
-                return _index;
-            }
+            get => _index;
             set
             {
                 if (_index == value)
@@ -165,14 +159,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public Vector3 eulerAngles
         {
-            get
-            {
-                return transform.localEulerAngles;
-            }
-            set
-            {
-                transform.localEulerAngles = value;
-            }
+            get => transform.localEulerAngles;
+            set => transform.localEulerAngles = value;
         }
 
         public static readonly Vector3 DefaultPosition = new Vector3(0f, 1.9f, 0.4f);
@@ -201,10 +189,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.obj = obj;
         }
 
-        public StudioLightStat(LightType type, bool visible, int index)
+        public StudioLightStat(LightType type, int index)
         {
             this.type = type;
-            this.visible = visible;
             this.index = index;
         }
 

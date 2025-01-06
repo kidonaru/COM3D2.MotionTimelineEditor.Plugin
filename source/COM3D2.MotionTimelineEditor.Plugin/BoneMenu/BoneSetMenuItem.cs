@@ -55,7 +55,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected static ITimelineLayer currentLayer => timelineManager.currentLayer;
 
-        private static Config config => ConfigManager.config;
+        private static Config config => ConfigManager.instance.config;
 
         public BoneSetMenuItem(string name, string displayName)
         {

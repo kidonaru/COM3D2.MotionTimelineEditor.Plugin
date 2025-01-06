@@ -376,7 +376,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static TimelineData timeline => timelineManager.timeline;
 
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
+        private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
 
         private static PartsEditHackManager partsEditHackManager
         {
@@ -1050,10 +1050,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 extendBoneCache.Init(maid, anmRoot);
             }
 
-            if (onMaidChanged != null)
-            {
-                onMaidChanged(slotNo, maid);
-            }
+            onMaidChanged?.Invoke(slotNo, maid);
         }
 
         private void OnAnmChanged(string anmName)
@@ -1071,10 +1068,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             animationState = animation[annName.ToLower()];
             long.TryParse(annName, out anmId);
 
-            if (onAnmChanged != null)
-            {
-                onAnmChanged(slotNo, anmName);
-            }
+            onAnmChanged?.Invoke(slotNo, anmName);
         }
 
         public void OnEditPoseUpdated()

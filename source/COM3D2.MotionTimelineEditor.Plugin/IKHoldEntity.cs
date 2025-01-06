@@ -130,7 +130,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static TimelineData timeline => TimelineManager.instance.timeline;
 
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
+        private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
 
         public IKHoldEntity(IKHoldType holdType, MaidCache maidCache)
         {

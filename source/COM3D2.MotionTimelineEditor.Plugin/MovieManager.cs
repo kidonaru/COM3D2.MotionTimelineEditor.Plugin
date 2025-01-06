@@ -10,7 +10,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Frontmost,
     }
 
-    public class MovieManager
+    public class MovieManager : ManagerBase
     {
         private MoviePlayerImpl _moviePlayerImpl = null;
 
@@ -30,16 +30,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static TimelineManager timelineManager => TimelineManager.instance;
-
-        private static TimelineData timeline => timelineManager.timeline;
-
         private string videoPath
         {
-            get
-            {
-                return timeline != null ? timeline.videoPath : "";
-            }
+            get => timeline != null ? timeline.videoPath : "";
         }
 
         public bool isValidPath
@@ -57,44 +50,31 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool isEnabled
         {
-            get
-            {
-                return isValidPath && timeline.videoEnabled;
-            }
+            get => isValidPath && timeline.videoEnabled;
         }
 
         public float currentTime
         {
-            get
-            {
-                return _moviePlayerImpl != null ? _moviePlayerImpl.currentTime : 0f;
-            }
+            get => _moviePlayerImpl != null ? _moviePlayerImpl.currentTime : 0f;
         }
 
         public float duration
         {
-            get
-            {
-                return _moviePlayerImpl != null ? _moviePlayerImpl.duration : 0f;
-            }
+            get => _moviePlayerImpl != null ? _moviePlayerImpl.duration : 0f;
         }
 
         public float frameRate
         {
-            get
-            {
-                return _moviePlayerImpl != null ? _moviePlayerImpl.frameRate : 0f;
-            }
+            get => _moviePlayerImpl != null ? _moviePlayerImpl.frameRate : 0f;
         }
 
         private MovieManager()
         {
         }
 
-        public void Init()
+        public override void Init()
         {
             TimelineManager.onStop += UpdateSeekTime;
-            TimelineManager.onRefresh += ReloadMovie;
             TimelineManager.onAnmSpeedChanged += UpdateSpeed;
             TimelineManager.onSeekCurrentFrame += UpdateSeekTime;
         }
@@ -213,14 +193,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void OnPluginDisable()
-        {
-            UnloadMovie();
-        }
-
-        public void OnPluginEnable()
+        public override void OnLoad()
         {
             LoadMovie();
+        }
+
+        public override void OnPluginDisable()
+        {
+            UnloadMovie();
         }
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class TimelineBundleManager
+    public class TimelineBundleManager : ManagerBase
     {
         private static readonly string AssetBundleName = "mte_bundle";
         private static readonly string ShaderBasePath = "Assets/Shaders/";
@@ -144,8 +144,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (_assetBundle != null)
             {
-                _assetBundle.Unload(true);
-                _assetBundle = null;
+                return;
             }
 
             var assembly = Assembly.GetExecutingAssembly();

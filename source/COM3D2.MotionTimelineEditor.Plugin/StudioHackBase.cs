@@ -122,14 +122,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public virtual void OnSceneActive()
         {
-            MaidCache.onMaidChanged += OnMaidChanged;
-            MaidCache.onAnmChanged += OnAnmChanged;
         }
 
         public virtual void OnSceneDeactive()
         {
-            MaidCache.onMaidChanged -= OnMaidChanged;
-            MaidCache.onAnmChanged -= OnAnmChanged;
             MTE.instance.isEnable = false;
         }
 
@@ -218,6 +214,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // do nothing
         }
 
+        public virtual void ChangeLight(StudioLightStat stat)
+        {
+            // do nothing
+        }
+
         public virtual void ApplyLight(StudioLightStat stat)
         {
             // do nothing
@@ -280,16 +281,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return null;
             }
             return maids[slotNo];
-        }
-
-        protected virtual void OnMaidChanged(int maidSlotNo, Maid maid)
-        {
-            // do nothing
-        }
-
-        protected virtual void OnAnmChanged(int maidSlotNo, string anmName)
-        {
-            // do nothing
         }
 
         public virtual void OnMotionUpdated(Maid maid)

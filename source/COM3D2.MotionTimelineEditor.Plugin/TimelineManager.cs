@@ -22,9 +22,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool isWhite;
     }
 
-    public partial class TimelineManager
+    public partial class TimelineManager : ManagerBase
     {
-        public TimelineData timeline = null;
+        private TimelineData _timeline = null;
+        public override TimelineData timeline => _timeline;
         public HashSet<BoneData> selectedBones = new HashSet<BoneData>();
         private int prevPlayingFrameNo = -1;
         public string errorMessage = "";
@@ -43,10 +44,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private int _currentFrameNo = 0;
         public int currentFrameNo
         {
-            get
-            {
-                return _currentFrameNo;
-            }
+            get => _currentFrameNo;
             set
             {
                 _currentFrameNo = Mathf.Clamp(value, 0, timeline.maxFrameNo);
@@ -55,32 +53,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public float currentTime
         {
-            get
-            {
-                return currentFrameNo * timeline.frameDuration;
-            }
+            get => currentFrameNo * timeline.frameDuration;
         }
 
         private float _anmSpeed = 1.0f;
-        public float anmSpeed
-        {
-            get
-            {
-                return _anmSpeed;
-            }
-        }
+        public float anmSpeed => _anmSpeed;
 
         public List<ITimelineLayer> layers
         {
-            get
-            {
-                return timeline != null ? timeline.layers : new List<ITimelineLayer>();
-            }
+            get => timeline != null ? timeline.layers : new List<ITimelineLayer>();
         }
 
         public int currentLayerIndex = 0;
 
-        public ITimelineLayer currentLayer
+        public override ITimelineLayer currentLayer
         {
             get
             {
@@ -92,28 +78,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public ITimelineLayer defaultLayer
+        public override ITimelineLayer defaultLayer
         {
-            get
-            {
-                return timeline.defaultLayer;
-            }
+            get => timeline.defaultLayer;
         }
 
         public bool HasCameraLayer
         {
-            get
-            {
-                return layers.Any(layer => layer.isCameraLayer);
-            }
+            get => layers.Any(layer => layer.isCameraLayer);
         }
 
         public bool HasPostEffectLayer
         {
-            get
-            {
-                return layers.Any(layer => layer.isPostEffectLayer);
-            }
+            get => layers.Any(layer => layer.isPostEffectLayer);
         }
 
         private static TimelineManager _instance;
@@ -129,38 +106,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
-        private static MaidManager maidManager => MaidManager.instance;
-        private static StudioModelManager modelManager => StudioModelManager.instance;
-        private static BGModelManager bgModelManager => BGModelManager.instance;
-        private static StudioLightManager lightManager => StudioLightManager.instance;
-        private static StageLaserManager stageLaserManager => StageLaserManager.instance;
-        private static StageLightManager stageLightManager => StageLightManager.instance;
-        private static PsylliumManager psylliumManager => PsylliumManager.instance;
-        private static IPartsEditHack partsEditHack => PartsEditHackManager.instance.partsEditHack;
-        private static Maid maid => maidManager.maid;
-        private static MaidCache maidCache => maidManager.maidCache;
-        private static Config config => ConfigManager.config;
-        private static BoneMenuManager boneMenuManager => BoneMenuManager.Instance;
-        private static TimelineHistoryManager historyManager => TimelineHistoryManager.instance;
-        protected static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
-
         private TimelineManager()
         {
-            SceneManager.sceneLoaded += OnChangedSceneLevel;
             MaidManager.onMaidSlotNoChanged += OnMaidSlotNoChanged;
             MaidCache.onMaidChanged += OnMaidChanged;
-            StudioModelManager.onModelAdded += OnModelAdded;
-            StudioModelManager.onModelRemoved += OnModelRemoved;
-            StudioModelManager.onModelUpdated += OnModelUpdated;
-            BGModelManager.onModelAdded += OnBGModelAdded;
-            BGModelManager.onModelRemoved += OnBGModelRemoved;
-            StudioLightManager.onLightAdded += OnLightAdded;
-            StudioLightManager.onLightRemoved += OnLightRemoved;
-            StudioLightManager.onLightUpdated += OnLightUpdated;
         }
 
-        public void Update()
+        public override void Update()
         {
             if (defaultLayer.isAnmSyncing)
             {
@@ -239,7 +191,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void LateUpdate()
+        public override void LateUpdate()
         {
             foreach (var layer in layers)
             {
@@ -314,8 +266,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (timeline != null)
             {
-                timeline.Dispose();
-                timeline = null;
+                _timeline.Dispose();
+                _timeline = null;
             }
         }
 
@@ -335,13 +287,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ClearTimeline();
             currentLayerIndex = 0;
 
-            timeline = new TimelineData
+            _timeline = new TimelineData
             {
                 anmName = "テスト",
                 version = TimelineData.CurrentVersion
             };
-            timeline.Initialize();
-            currentLayer.OnActive();
+            _timeline.Initialize();
+            mte.OnLoad();
+            _timeline.LayerInit();
 
             CreateAndApplyAnmAll();
             Refresh();
@@ -382,23 +335,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var xml = (TimelineXml)serializer.Deserialize(stream);
                 xml.Initialize();
 
-                timeline = new TimelineData();
-                timeline.FromXml(xml);
-                timeline.anmName = anmName;
-                timeline.directoryName = directoryName;
-                timeline.Initialize();
-                timeline.OnLoad();
+                _timeline = new TimelineData();
+                _timeline.FromXml(xml);
+                _timeline.anmName = anmName;
+                _timeline.directoryName = directoryName;
+                _timeline.Initialize();
+                mte.OnLoad();
+                _timeline.LayerInit();
             }
-
-            currentLayer.OnActive();
-
-            maidManager.ChangeMaid(currentLayer.maid);
-            modelManager.SetupModels(timeline.models);
-            bgModelManager.SetupModels(timeline.bgModels);
-            lightManager.SetupLights(timeline.lights);
-            stageLaserManager.SetupLasers(timeline.stageLaserCountList);
-            stageLightManager.SetupLights(timeline.stageLightCountList);
-            psylliumManager.Setup(timeline.psylliums);
 
             CreateAndApplyAnmAll();
             SeekCurrentFrame(0);
@@ -415,8 +359,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 PluginUtils.ShowDialog(errorMessage);
                 return;
             }
-
-            timeline.OnSave();
 
             var path = timeline.timelinePath;
 
@@ -446,23 +388,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             ClearTimeline();
 
-            timeline = new TimelineData();
-            timeline.FromXml(xml);
-            timeline.Initialize();
-            timeline.OnLoad();
+            _timeline = new TimelineData();
+            _timeline.FromXml(xml);
+            _timeline.Initialize();
 
             if (currentLayerIndex >= layers.Count)
             {
                 currentLayerIndex = 0;
             }
-            currentLayer.OnActive();
 
-            modelManager.SetupModels(timeline.models);
-            bgModelManager.SetupModels(timeline.bgModels);
-            lightManager.SetupLights(timeline.lights);
-            stageLaserManager.SetupLasers(timeline.stageLaserCountList);
-            stageLightManager.SetupLights(timeline.stageLightCountList);
-            psylliumManager.Setup(timeline.psylliums);
+            mte.OnLoad();
+            _timeline.LayerInit();
 
             CreateAndApplyAnmAll();
             Refresh();
@@ -880,9 +816,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Refresh()
         {
-            UpdateTimelineModels();
-            UpdateTimelineLights();
-
             if (onRefresh != null)
             {
                 onRefresh();
@@ -1454,8 +1387,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             currentLayerIndex = layers.IndexOf(layer);
             //Refresh();
 
-            layer.OnActive();
-
             if (isPoseEditing)
             {
                 OnStartPoseEdit();
@@ -1671,21 +1602,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             modelManager.CreateModel(newModel);
         }
 
-        public void OnPluginEnable()
-        {
-            if (timeline != null)
-            {
-                timeline.OnPluginEnable();
-                modelManager.SetupModels(timeline.models);
-                bgModelManager.SetupModels(timeline.bgModels);
-                lightManager.SetupLights(timeline.lights);
-                stageLaserManager.SetupLasers(timeline.stageLaserCountList);
-                stageLightManager.SetupLights(timeline.stageLightCountList);
-                psylliumManager.Setup(timeline.psylliums);
-            }
-        }
-
-        public void OnPluginDisable()
+        public override void OnPluginDisable()
         {
             if (timeline != null)
             {
@@ -1762,186 +1679,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void UpdateTimelineModels()
-        {
-            if (timeline == null)
-            {
-                return;
-            }
-
-            var models = modelManager.models;
-            var timelineModels = timeline.models;
-
-            if (models.Count != timelineModels.Count)
-            {
-                timelineModels.Clear();
-                foreach (var model in models)
-                {
-                    var timelineModel = new TimelineModelData(model);
-                    timelineModels.Add(timelineModel);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < models.Count; i++)
-                {
-                    var model = models[i];
-                    var timelineModel = timelineModels[i];
-                    timelineModel.FromModel(model);
-                }
-            }
-        }
-
-        private void OnModelAdded(StudioModelStat model)
-        {
-            if (IsValidData())
-            {
-                UpdateTimelineModels();
-
-                foreach (var layer in layers)
-                {
-                    layer.OnModelAdded(model);
-                }
-            }
-        }
-
-        private void OnModelRemoved(StudioModelStat model)
-        {
-            if (IsValidData())
-            {
-                UpdateTimelineModels();
-
-                foreach (var layer in layers)
-                {
-                    layer.OnModelRemoved(model);
-                }
-            }
-        }
-
-        private void OnModelUpdated(StudioModelStat model)
-        {
-            if (IsValidData())
-            {
-                UpdateTimelineModels();
-            }
-        }
-
-        private void UpdateTimelineBGModels()
-        {
-            if (timeline == null)
-            {
-                return;
-            }
-
-            var models = bgModelManager.models;
-            var timelineModels = timeline.bgModels;
-
-            if (models.Count != timelineModels.Count)
-            {
-                timelineModels.Clear();
-                foreach (var model in models)
-                {
-                    var timelineModel = new TimelineBGModelData(model);
-                    timelineModels.Add(timelineModel);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < models.Count; i++)
-                {
-                    var model = models[i];
-                    var timelineModel = timelineModels[i];
-                    timelineModel.FromModel(model);
-                }
-            }
-        }
-
-        private void OnBGModelAdded(BGModelStat model)
-        {
-            if (IsValidData())
-            {
-                UpdateTimelineBGModels();
-            }
-        }
-
-        private void OnBGModelRemoved(BGModelStat model)
-        {
-            if (IsValidData())
-            {
-                UpdateTimelineBGModels();
-            }
-        }
-
-        private void UpdateTimelineLights()
-        {
-            if (timeline == null)
-            {
-                return;
-            }
-
-            var lights = lightManager.lights;
-            var timelineLights = timeline.lights;
-
-            if (lights.Count != timelineLights.Count)
-            {
-                timelineLights.Clear();
-                foreach (var light in lights)
-                {
-                    var timelineLight = new TimelineLightData(light);
-                    timelineLights.Add(timelineLight);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < lights.Count; i++)
-                {
-                    var light = lights[i];
-                    var timelineModel = timelineLights[i];
-                    timelineModel.FromStat(light);
-                }
-            }
-        }
-
-        private void OnLightAdded(StudioLightStat light)
-        {
-            if (IsValidData())
-            {
-                UpdateTimelineLights();
-
-                foreach (var layer in layers)
-                {
-                    layer.OnLightAdded(light);
-                }
-            }
-        }
-
-        private void OnLightRemoved(StudioLightStat light)
-        {
-            if (IsValidData())
-            {
-                UpdateTimelineLights();
-
-                foreach (var layer in layers)
-                {
-                    layer.OnLightRemoved(light);
-                }
-            }
-        }
-
-        private void OnLightUpdated(StudioLightStat light)
-        {
-            if (IsValidData())
-            {
-                UpdateTimelineLights();
-
-                foreach (var layer in layers)
-                {
-                    layer.OnLightUpdated(light);
-                }
-            }
-        }
-
-        private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
+        public override void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
             if (timeline != null)
             {

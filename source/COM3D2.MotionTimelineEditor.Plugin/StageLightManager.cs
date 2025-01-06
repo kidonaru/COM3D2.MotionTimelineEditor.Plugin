@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class StageLightManager : MonoBehaviour
+    public class StageLightManager : MonoBehaviour, IManager
     {
         public List<StageLightController> controllers = new List<StageLightController>();
         public Dictionary<string, StageLightController> controllerMap = new Dictionary<string, StageLightController>();
@@ -16,7 +16,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Dictionary<string, StageLight> lightMap = new Dictionary<string, StageLight>();
         public List<string> lightNames = new List<string>();
 
-        public static event UnityAction onSetup;
         public static event UnityAction<string> onControllerAdded;
         public static event UnityAction<string> onControllerRemoved;
         public static event UnityAction<string> onLightAdded;
@@ -37,9 +36,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
+        private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
 
         private static TimelineData timeline => TimelineManager.instance.timeline;
+
+        public void Init()
+        {
+        }
+
+        public void PreUpdate()
+        {
+        }
+
+        public void Update()
+        {
+        }
+
+        public void LateUpdate()
+        {
+        }
 
         private void Awake()
         {
@@ -48,14 +63,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _instance = this;
                 DontDestroyOnLoad(gameObject);
             }
-
-            SceneManager.sceneLoaded += OnChangedSceneLevel;
         }
 
         private void OnDestroy()
         {
-            SceneManager.sceneLoaded -= OnChangedSceneLevel;
-
             if (_instance == this)
             {
                 _instance = null;
@@ -80,14 +91,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return light;
             }
             return null;
-        }
-
-        public void Update()
-        {
-            if (studioHack == null || !studioHack.IsValid())
-            {
-                return;
-            }
         }
 
         public void UpdateLights()
@@ -173,21 +176,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             UpdateLights();
+        }
 
-            if (onSetup != null)
-            {
-                onSetup.Invoke();
-            }
+        public void OnLoad()
+        {
+            SetupLights(timeline.stageLightCountList);
         }
 
         public void OnPluginDisable()
         {
             Reset();
-        }
-
-        public void OnPluginEnable()
-        {
-            // SetupLightsが呼ばれるので不要
         }
 
         public void Reset()
@@ -197,8 +195,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 GameObject.Destroy(controller.gameObject);
             }
             controllers.Clear();
-
-            UpdateLights();
+            controllerMap.Clear();
+            controllerNames.Clear();
+            lights.Clear();
+            lightMap.Clear();
+            lightNames.Clear();
         }
 
         public void AddController(bool notify)
@@ -283,7 +284,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)
+        public void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
             Reset();
         }

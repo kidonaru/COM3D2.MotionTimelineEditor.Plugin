@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class GridViewManager
+    public class GridViewManager : ManagerBase
     {
         private static GridViewManager _instance;
         public static GridViewManager instance
@@ -24,19 +24,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
         }
 
-        public void Init()
+        public override void Init()
         {
-            TimelineManager.onRefresh += CreateGrid;
         }
 
-        public void OnPluginDisable()
-        {
-            RemoveGrid();
-        }
-
-        public void OnPluginEnable()
+        public override void OnLoad()
         {
             CreateGrid();
+        }
+
+        public override void OnPluginDisable()
+        {
+            RemoveGrid();
         }
 
         public void CreateGrid()

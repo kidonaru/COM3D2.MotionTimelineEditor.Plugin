@@ -70,6 +70,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
                 return default(T);
             }
+            set
+            {
+                currentIndex = items.IndexOf(value);
+            }
         }
 
         private GUIView _buttonSubView = new GUIView(Rect.zero)

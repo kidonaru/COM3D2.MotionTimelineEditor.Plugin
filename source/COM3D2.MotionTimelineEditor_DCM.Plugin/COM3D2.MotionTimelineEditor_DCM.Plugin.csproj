@@ -69,6 +69,7 @@
     <Compile Include="DCMUtils.cs" />
     <Compile Include="MorphTimelineLayer.cs" />
     <Compile Include="MorphUtils.cs" />
+    <Compile Include="MTETextManager.cs" />
     <Compile Include="PluginInfo.cs" />
     <Compile Include="SeTimelineLayer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

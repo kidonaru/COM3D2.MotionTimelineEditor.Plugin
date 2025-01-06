@@ -24,6 +24,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return new ModelBoneTimelineLayer(0);
         }
 
+        public override void Init()
+        {
+            base.Init();
+
+            StudioModelManager.onModelAdded += OnModelAdded;
+            StudioModelManager.onModelRemoved += OnModelRemoved;
+        }
+
         protected override void InitMenuItems()
         {
             allMenuItems.Clear();
@@ -44,6 +52,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     setMenuItem.AddChild(menuItem);
                 }
             }
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            StudioModelManager.onModelAdded -= OnModelAdded;
+            StudioModelManager.onModelRemoved -= OnModelRemoved;
         }
 
         public override bool IsValidData()
@@ -90,7 +106,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             transform.localScale = Vector3.Lerp(start.scale, end.scale, easingTime);
         }
 
-        public override void OnModelAdded(StudioModelStat model)
+        public void OnModelAdded(StudioModelStat model)
         {
             InitMenuItems();
 
@@ -99,7 +115,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyCurrentFrame(true);
         }
 
-        public override void OnModelRemoved(StudioModelStat model)
+        public void OnModelRemoved(StudioModelStat model)
         {
             InitMenuItems();
 

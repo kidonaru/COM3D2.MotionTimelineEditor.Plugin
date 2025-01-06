@@ -27,8 +27,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string name;
         [XmlElement("Type")]
         public LightType type;
-        [XmlElement("Visible")]
-        public bool visible = true;
     }
 
     public class TimelineMaidShapeKeyXml
@@ -53,6 +51,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string sourceName;
         [XmlElement("Group")]
         public int group;
+    }
+
+    public class TimelinePngObjectXml
+    {
+        [XmlElement("ImageName")]
+        public string imageName;
+        [XmlElement("Group")]
+        public int group;
+        [XmlElement("Primitive")]
+        public int primitive;
+        [XmlElement("ShaderDisplay")]
+        public string shaderDisplay;
     }
 
     public class TimelinePsylliumXml
@@ -94,6 +104,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlArray("Psylliums")]
         [XmlArrayItem("Psyllium")]
         public List<TimelinePsylliumXml> psylliums = new List<TimelinePsylliumXml>();
+
+        [XmlArray("PngObjects")]
+        [XmlArrayItem("PngObject")]
+        public List<TimelinePngObjectXml> pngObjects = new List<TimelinePngObjectXml>();
 
         [XmlArray("MaidShapeKeys")]
         [XmlArrayItem("MaidShapeKey")]
@@ -828,6 +842,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                     PluginUtils.LogDebug("Add scale to MoveTimelineLayer name={0}", transform.name);
                                     values.Add(1f);
                                     values.Add(1f);
+                                    values.Add(1f);
+                                }
+                                transform.values = values.ToArray();
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (version < 25)
+            {
+                // LightTimelineLayerにvisibleを追加
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "LightTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+                                var values = new List<float>(transform.values);
+                                if (values.Count == 16)
+                                {
+                                    PluginUtils.LogDebug("Add visible to LightTimelineLayer name={0}", transform.name);
                                     values.Add(1f);
                                 }
                                 transform.values = values.ToArray();

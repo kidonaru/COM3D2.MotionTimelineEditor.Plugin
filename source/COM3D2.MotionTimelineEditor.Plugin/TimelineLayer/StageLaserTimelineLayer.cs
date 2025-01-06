@@ -44,7 +44,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Init();
 
-            StageLaserManager.onSetup += OnLaserSetup;
             StageLaserManager.onControllerAdded += OnControllerAdded;
             StageLaserManager.onControllerRemoved += OnControllerRemoved;
             StageLaserManager.onLaserAdded += OnLaserAdded;
@@ -82,7 +81,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Dispose();
 
-            StageLaserManager.onSetup -= OnLaserSetup;
             StageLaserManager.onControllerAdded -= OnControllerAdded;
             StageLaserManager.onControllerRemoved -= OnControllerRemoved;
             StageLaserManager.onLaserAdded -= OnLaserAdded;
@@ -379,13 +377,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     end.laserWidthValue,
                     t);
             }
-        }
-
-        public void OnLaserSetup()
-        {
-            InitMenuItems();
-            AddFirstBones(allBoneNames);
-            ApplyCurrentFrame(true);
         }
 
         public void OnControllerAdded(string controllerName)

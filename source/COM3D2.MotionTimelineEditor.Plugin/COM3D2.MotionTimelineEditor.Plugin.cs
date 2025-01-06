@@ -52,58 +52,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool isVisible;
 
+        private List<IManager> _managers = new List<IManager>();
+
         public static MotionTimelineEditor instance { get; private set; }
 
         private static MaidManager maidManager => MaidManager.instance;
-
         private static Maid maid => maidManager.maid;
-
         private static TimelineManager timelineManager => TimelineManager.instance;
-
-        private static TimelineLoadManager timelineLoadManager => TimelineLoadManager.instance;
-
-        private static StudioModelManager modelManager => StudioModelManager.instance;
-
-        private static BGModelManager bgModelManager => BGModelManager.instance;
-
-        private static StudioLightManager lightManager => StudioLightManager.instance;
-
-        private static StageLaserManager stageLaserManager => StageLaserManager.instance;
-
-        private static StageLightManager stageLightManager => StageLightManager.instance;
-
-        private static PsylliumManager psylliumManager => PsylliumManager.instance;
-
+        private static TimelineData timeline => TimelineManager.instance.timeline;
         private static TimelineHistoryManager historyManager => TimelineHistoryManager.instance;
-
-        private static BoneMenuManager boneMenuManager => BoneMenuManager.Instance;
-
-        private static BGMManager bgmManager => BGMManager.instance;
-
-        private static MovieManager movieManager => MovieManager.instance;
-
         private static StudioHackManager studioHackManager => StudioHackManager.instance;
-
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
-
-        private static ModelHackManager modelHackManager => ModelHackManager.instance;
-
+        private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
         private static WindowManager windowManager => WindowManager.instance;
-
         private static ConfigManager configManager => ConfigManager.instance;
-
-        private static CameraManager cameraManager =>  CameraManager.instance;
-
-        private static Config config => ConfigManager.config;
-
+        private static Config config => ConfigManager.instance.config;
         private static ITimelineLayer currentLayer => timelineManager.currentLayer;
-
         private static MainWindow mainWindow => windowManager.mainWindow;
-
-        private static GridViewManager gridViewManager => GridViewManager.instance;
-
-        private static PostEffectManager postEffectManager => PostEffectManager.instance;
-
         private static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
 
         public MotionTimelineEditor()
@@ -137,9 +101,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     return;
                 }
 
-                studioHackManager.Update();
-                modelHackManager.Update();
-                windowManager.Update();
+                studioHackManager.PreUpdate();
 
                 if (studioHack == null)
                 {
@@ -163,7 +125,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         return;
                     }
 
-                    maidManager.Update();
+                    maidManager.PreUpdate();
 
                     if (maid == null)
                     {
@@ -260,11 +222,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     mainWindow.isMultiSelect = config.GetKey(KeyBindType.MultiSelect);
 
-                    studioHack.Update();
-                    timelineManager.Update();
-                    bgmManager.Update();
-                    configManager.Update();
-                    cameraManager.Update();
+                    foreach (var manager in _managers)
+                    {
+                        manager.Update();
+                    }
                 }
             }
             catch (Exception e)
@@ -297,11 +258,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         return;
                     }
 
-                    maidManager.LateUpdate();
-                    modelManager.LateUpdate(false);
-                    bgModelManager.LateUpdate();
-                    lightManager.LateUpdate(false);
-                    timelineManager.LateUpdate();
+                    foreach (var manager in _managers)
+                    {
+                        manager.LateUpdate();
+                    }
                 }
             }
             catch (Exception e)
@@ -310,7 +270,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
+        public void RegisterManager(IManager manager)
+        {
+            manager.Init();
+            _managers.Add(manager);
+        }
+
+        public void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
             try
             {
@@ -319,7 +285,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     return;
                 }
 
-                if (sceneName.name == "SceneTitle")
+                if (scene.name == "SceneTitle")
                 {
                     this.isEnable = false;
                 }
@@ -327,6 +293,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 BinaryLoader.ClearCache();
                 BlendShapeLoader.ClearCache();
                 ModMenuLoader.ClearCache();
+
+                foreach (var manager in _managers)
+                {
+                    manager.OnChangedSceneLevel(scene, sceneMode);
+                }
             }
             catch (Exception e)
             {
@@ -516,14 +487,34 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     TransformType.Voice, TimelineManager.CreateTransform<TransformDataVoice>
                 );
 
-                windowManager.Init();
-                boneMenuManager.Init();
-                bgmManager.Init();
-                movieManager.Init();
-                timelineLoadManager.Init();
-                gridViewManager.Init();
-                postEffectManager.Init();
-                cameraManager.Init();
+                RegisterManager(StudioHackManager.instance);
+                RegisterManager(MaidManager.instance);
+                RegisterManager(ModelHackManager.instance);
+                RegisterManager(PartsEditHackManager.instance);
+                RegisterManager(LightHackManager.instance);
+
+                RegisterManager(StudioModelManager.instance);
+                RegisterManager(BGModelManager.instance);
+                RegisterManager(StudioLightManager.instance);
+                RegisterManager(StageLaserManager.instance);
+                RegisterManager(StageLightManager.instance);
+                RegisterManager(PsylliumManager.instance);
+                RegisterManager(MovieManager.instance);
+                RegisterManager(GridViewManager.instance);
+                RegisterManager(PostEffectManager.instance);
+
+                RegisterManager(TimelineManager.instance);
+                RegisterManager(TimelineLoadManager.instance);
+                RegisterManager(TimelineHistoryManager.instance);
+
+                RegisterManager(TimelineBundleManager.instance);
+                RegisterManager(BoneMenuManager.Instance);
+                RegisterManager(WindowManager.instance);
+                RegisterManager(PhotoBGManager.instance);
+
+                RegisterManager(ConfigManager.instance);
+                RegisterManager(BGMManager.instance);
+                RegisterManager(CameraManager.instance);
 
                 AddGearMenu();
             }
@@ -607,56 +598,52 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public void OnLoad()
+        {
+            PluginUtils.LogDebug("MotionTimelineEditor.OnLoad");
+
+            foreach (var manager in _managers)
+            {
+                manager.OnLoad();
+            }
+        }
+
         private void OnPluginEnable()
         {
+            PluginUtils.Log("プラグインが有効になりました");
+
             DumpAllCameraInfo();
             DumpLayerInfo();
             DumpBGObject();
             DumpAllShaders();
 
-            studioHackManager.Update();
-            modelHackManager.Update();
+            studioHackManager.PreUpdate();
 
             if (studioHack == null || !studioHack.IsValid())
             {
                 return;
             }
 
-            DumpDoFInfo();
+            studioHack.SetBackgroundVisible(timeline.isBackgroundVisible);
 
-            maidManager.OnPluginEnable();
-            modelManager.OnPluginEnable();
-            bgModelManager.OnPluginEnable();
-            lightManager.OnPluginEnable();
-            stageLaserManager.OnPluginEnable();
-            stageLightManager.OnPluginEnable();
-            psylliumManager.OnPluginEnable();
-            movieManager.OnPluginEnable();
-            timelineManager.OnPluginEnable();
-            gridViewManager.OnPluginEnable();
-            postEffectManager.OnPluginEnable();
-            cameraManager.OnPluginEnable();
+            OnLoad();
+
+            DumpDoFInfo();
         }
 
         private void OnPluginDisable()
         {
+            PluginUtils.Log("プラグインが無効になりました");
+
             if (studioHack == null || !studioHack.IsValid())
             {
                 return;
             }
 
-            maidManager.OnPluginDisable();
-            modelManager.OnPluginDisable();
-            bgModelManager.OnPluginDisable();
-            lightManager.OnPluginDisable();
-            stageLaserManager.OnPluginDisable();
-            stageLightManager.OnPluginDisable();
-            psylliumManager.OnPluginDisable();
-            movieManager.OnPluginDisable();
-            timelineManager.OnPluginDisable();
-            gridViewManager.OnPluginDisable();
-            postEffectManager.OnPluginDisable();
-            cameraManager.OnPluginDisable();
+            foreach (var manager in _managers)
+            {
+                manager.OnPluginDisable();
+            }
         }
 
         [Conditional("DEBUG")]

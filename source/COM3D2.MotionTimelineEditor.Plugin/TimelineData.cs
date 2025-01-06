@@ -67,7 +67,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public string name;
         public LightType type;
-        public bool visible;
 
         public TimelineLightData()
         {
@@ -82,14 +81,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             name = light.name;
             type = light.type;
-            visible = light.visible;
         }
 
         public void FromXml(TimelineLightXml xml)
         {
             name = xml.name;
             type = xml.type;
-            visible = xml.visible;
         }
 
         public TimelineLightXml ToXml()
@@ -98,7 +95,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 name = name,
                 type = type,
-                visible = visible,
             };
             return xml;
         }
@@ -187,9 +183,50 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
     }
 
+    public class TimelinePngObjectData
+    {
+        public string imageName;
+        public int group;
+        public int primitive;
+        public string shaderDisplay;
+
+        public string name
+        {
+            get
+            {
+                var groupSuffix = PluginUtils.GetGroupSuffix(group);
+                return imageName + groupSuffix;
+            }
+        }
+
+        public TimelinePngObjectData()
+        {
+        }
+
+        public void FromXml(TimelinePngObjectXml xml)
+        {
+            imageName = xml.imageName;
+            group = xml.group;
+            primitive = xml.primitive;
+            shaderDisplay = xml.shaderDisplay;
+        }
+
+        public TimelinePngObjectXml ToXml()
+        {
+            var xml = new TimelinePngObjectXml
+            {
+                imageName = imageName,
+                group = group,
+                primitive = primitive,
+                shaderDisplay = shaderDisplay,
+            };
+            return xml;
+        }
+    }
+
     public class TimelineData
     {
-        public static readonly int CurrentVersion = 24;
+        public static readonly int CurrentVersion = 25;
         public static readonly TimelineData DefaultTimeline = new TimelineData();
 
         public int version = 0;
@@ -201,6 +238,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public List<TimelineLightData> lights = new List<TimelineLightData>();
         public List<TimelineBGModelData> bgModels = new List<TimelineBGModelData>();
         public List<TimelinePsylliumData> psylliums = new List<TimelinePsylliumData>();
+        public List<TimelinePngObjectData> pngObjects = new List<TimelinePngObjectData>();
 
         // maidSlotNo -> shapeKeys
         public Dictionary<int, HashSet<string>> maidShapeKeysMap = new Dictionary<int, HashSet<string>>();
@@ -432,7 +470,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static MaidManager maidManager => MaidManager.instance;
 
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
+        private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
 
         public TrackData activeTrack
         {
@@ -581,12 +619,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var layer = timelineManager.CreateLayer(typeof(MotionTimelineLayer).Name, 0);
                 layers.Add(layer);
-                layer.Init();
             }
 
             defaultLayer = layers[0];
 
             version = CurrentVersion;
+        }
+
+        public void LayerInit()
+        {
+            PluginUtils.LogDebug("TimelineData.LayerInit");
+            foreach (var layer in layers)
+            {
+                layer.Init();
+            }
         }
 
         public void ResetSettings()
@@ -606,32 +652,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string GetDcmSongFilePath(string fileName)
         {
             return PluginUtils.GetDcmSongFilePath(dcmSongName, fileName);
-        }
-
-        public void OnSave()
-        {
-            foreach (var layer in layers)
-            {
-                layer.OnSave();
-            }
-        }
-
-        public void OnLoad()
-        {
-            foreach (var layer in layers)
-            {
-                layer.OnLoad();
-            }
-        }
-
-        public void OnPluginEnable()
-        {
-            foreach (var layer in layers)
-            {
-                layer.OnPluginEnable();
-            }
-
-            studioHack.SetBackgroundVisible(isBackgroundVisible);
         }
 
         public void OnPluginDisable()
@@ -792,6 +812,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 psylliums.Add(psyllium);
             }
 
+            pngObjects = new List<TimelinePngObjectData>(xml.pngObjects.Count);
+            foreach (var pngObjectXml in xml.pngObjects)
+            {
+                var pngObject = new TimelinePngObjectData();
+                pngObject.FromXml(pngObjectXml);
+                pngObjects.Add(pngObject);
+            }
+
             maidShapeKeysMap.Clear();
             foreach (var shapeKeyml in xml.maidShapeKeys)
             {
@@ -872,7 +900,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     layers.Add(layer);
                     layer.FromXml(layerXml);
-                    layer.Init();
                 }
             }
         }
@@ -924,6 +951,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var psylliumXml = psyllium.ToXml();
                 xml.psylliums.Add(psylliumXml);
+            }
+
+            xml.pngObjects = new List<TimelinePngObjectXml>(pngObjects.Count);
+            foreach (var pngObject in pngObjects)
+            {
+                var pngObjectXml = pngObject.ToXml();
+                xml.pngObjects.Add(pngObjectXml);
             }
 
             xml.maidShapeKeys = new List<TimelineMaidShapeKeyXml>();

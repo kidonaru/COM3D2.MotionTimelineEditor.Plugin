@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class MaidManager
+    public class MaidManager : ManagerBase
     {
         public List<MaidCache> maidCaches = new List<MaidCache>();
         public int maidSlotNo { get; private set; }
@@ -26,7 +26,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public MaidCache maidCache
+        public override MaidCache maidCache
         {
             get
             {
@@ -38,7 +38,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public Maid maid
+        public override Maid maid
         {
             get
             {
@@ -130,11 +130,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
-
         private MaidManager()
         {
-            SceneManager.sceneLoaded += OnChangedSceneLevel;
             TimelineManager.onRefresh += OnRefresh;
             TimelineManager.onEditPoseUpdated += OnEditPoseUpdated;
         }
@@ -202,7 +199,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void Update()
+        public override void PreUpdate()
         {
             if (!IsValid())
             {
@@ -231,15 +228,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (selectedMaidSlotNo != maidSlotNo)
             {
                 maidSlotNo = selectedMaidSlotNo;
-
-                if (onMaidSlotNoChanged != null)
-                {
-                    onMaidSlotNoChanged(maidSlotNo);
-                }
+                onMaidSlotNoChanged?.Invoke(maidSlotNo);
             }
         }
 
-        public void LateUpdate()
+        public override void LateUpdate()
         {
             if (!IsValid())
             {
@@ -252,7 +245,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void OnPluginDisable()
+        public override void OnLoad()
+        {
+            ChangeMaid(currentLayer.maid);
+        }
+
+        public override void OnPluginDisable()
         {
             foreach (var cache in maidCaches)
             {
@@ -260,10 +258,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             Reset();
-        }
-
-        public void OnPluginEnable()
-        {
         }
 
         public Vector3 GetIkPosition(IKHoldType holdType)
@@ -366,7 +360,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)
+        public override void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
             Reset();
             MaidInfo.Reset();
@@ -375,7 +369,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private void OnRefresh()
         {
             ResetAnm();
-            Update();
+            PreUpdate();
         }
 
         private void OnEditPoseUpdated()

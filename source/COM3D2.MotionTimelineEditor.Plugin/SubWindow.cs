@@ -143,9 +143,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static Config config => ConfigManager.config;
+        public static Config config => ConfigManager.instance.config;
 
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
+        private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
 
         private static MaidManager maidManager => MaidManager.instance;
 

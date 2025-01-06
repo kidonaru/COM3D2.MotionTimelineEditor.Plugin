@@ -195,7 +195,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected static ITimelineLayer defaultLayer => timeline.defaultLayer;
 
-        protected static Config config => ConfigManager.config;
+        protected static Config config => ConfigManager.instance.config;
 
         protected static int maxFrameNo => timeline.maxFrameNo;
 
@@ -213,7 +213,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         protected static StageLaserManager stageLaserManager => StageLaserManager.instance;
         protected static StageLightManager stageLightManager => StageLightManager.instance;
         protected static PsylliumManager psylliumManager => PsylliumManager.instance;
-        protected static StudioHackBase studioHack => StudioHackManager.studioHack;
+        protected static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
         protected static PhotoBGManager photoBGManager => PhotoBGManager.instance;
         protected static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
 
@@ -232,6 +232,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             if (_dummyLastFrame == null)
             {
+                PluginUtils.LogDebug("CreateDummyLastFrame " + className);
                 _dummyLastFrame = CreateFrame(0);
             }
 
@@ -258,27 +259,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // do nothing
         }
 
-        public virtual void OnActive()
-        {
-            // do nothing
-        }
-
-        public virtual void OnSave()
-        {
-            // do nothing
-        }
-
-        public virtual void OnLoad()
-        {
-            // do nothing
-        }
-
         public virtual void OnEndPoseEdit()
-        {
-            // do nothing
-        }
-
-        public virtual void OnPluginEnable()
         {
             // do nothing
         }
@@ -293,32 +274,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // do nothing
         }
 
-        public virtual void OnModelAdded(StudioModelStat model)
-        {
-            // do nothing
-        }
-
-        public virtual void OnModelRemoved(StudioModelStat model)
-        {
-            // do nothing
-        }
-
         public virtual void OnCopyModel(StudioModelStat sourceModel, StudioModelStat newModel)
-        {
-            // do nothing
-        }
-
-        public virtual void OnLightAdded(StudioLightStat light)
-        {
-            // do nothing
-        }
-
-        public virtual void OnLightRemoved(StudioLightStat light)
-        {
-            // do nothing
-        }
-
-        public virtual void OnLightUpdated(StudioLightStat light)
         {
             // do nothing
         }
@@ -352,7 +308,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public virtual void ApplyAnm(long id, byte[] anmData)
         {
+            var stopwatch = new StopwatchDebug();
             ApplyPlayData();
+            stopwatch.ProcessEnd("  ApplyPlayData: " + className);
         }
 
         public virtual void ApplyCurrentFrame(bool motionUpdate)
@@ -363,7 +321,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             else
             {
+                var stopwatch = new StopwatchDebug();
                 ApplyPlayData();
+                stopwatch.ProcessEnd("  ApplyPlayData: " + className);
             }
         }
 

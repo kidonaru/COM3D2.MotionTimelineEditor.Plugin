@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class PhotoBGManager
+    public class PhotoBGManager : ManagerBase
     {
         private Dictionary<string, PhotoBGData> _bgDataMap = null;
         public Dictionary<string, PhotoBGData> bgDataMap

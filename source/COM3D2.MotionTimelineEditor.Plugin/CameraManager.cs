@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class CameraManager
+    public class CameraManager : ManagerBase
     {
         private static CameraManager _instance;
         public static CameraManager instance
@@ -34,23 +34,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
         }
 
-        public void Init()
+        public override void Init()
         {
-            TimelineManager.onRefresh += CreateCamera;
         }
 
-        public void OnPluginDisable()
-        {
-            DestroyCamera();
-        }
-
-        public void OnPluginEnable()
+        public override void OnLoad()
         {
             CreateCamera();
         }
 
-        public void Update()
+        public override void OnPluginDisable()
         {
+            DestroyCamera();
         }
 
         public void ResetCache()

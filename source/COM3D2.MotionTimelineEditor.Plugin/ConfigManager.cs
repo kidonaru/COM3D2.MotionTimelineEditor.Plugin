@@ -5,9 +5,10 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class ConfigManager
+    public class ConfigManager : ManagerBase
     {
-        public static Config config = new Config();
+        private Config _config = new Config();
+        public override Config config => _config;
 
         private static ConfigManager _instance = null;
         public static ConfigManager instance
@@ -22,19 +23,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static WindowManager windowManager => WindowManager.instance;
+        private bool _isLoaded = false;
 
         private ConfigManager()
         {
         }
 
-        public void Init()
+        public override void Init()
         {
-            LoadConfigXml();
-            SaveConfigXml();
+            if (!_isLoaded)
+            {
+                LoadConfigXml();
+                SaveConfigXml();
+            }
         }
 
-        public void Update()
+        public override void Update()
         {
             if (config.dirty && Input.GetMouseButtonUp(0))
             {
@@ -55,9 +59,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var serializer = new XmlSerializer(typeof(Config));
                 using (var stream = new FileStream(path, FileMode.Open))
                 {
-                    config = (Config)serializer.Deserialize(stream);
-                    config.ConvertVersion();
+                    _config = (Config)serializer.Deserialize(stream);
+                    _config.ConvertVersion();
                 }
+
+                _isLoaded = true;
             }
             catch (Exception e)
             {
@@ -89,7 +95,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void ResetConfig()
         {
-            config = new Config();
+            _config = new Config();
             SaveConfigXml();
         }
     }

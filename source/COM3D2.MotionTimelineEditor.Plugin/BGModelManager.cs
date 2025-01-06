@@ -35,7 +35,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
     }
 
-    public class BGModelManager
+    public class BGModelManager : ManagerBase
     {
         public List<BGModelStat> models = new List<BGModelStat>();
         public List<string> modelNames = new List<string>();
@@ -44,29 +44,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private GameObject _prevBgObject = null;
 
-        private Dictionary<string, BGModelInfo> _modelInfoMap = new Dictionary<string, BGModelInfo>(64);
-        public Dictionary<string, BGModelInfo> modelInfoMap
-        {
-            get
-            {
-                SetupModelInfo();
-                return _modelInfoMap;
-            }
-        }
-
-        private List<BGModelInfo> _modelInfoList = new List<BGModelInfo>(64);
-        public List<BGModelInfo> modelInfoList
-        {
-            get
-            {
-                SetupModelInfo();
-                return _modelInfoList;
-            }
-        }
+        public Dictionary<string, BGModelInfo> modelInfoMap = new Dictionary<string, BGModelInfo>(64);
+        public List<BGModelInfo> modelInfoList = new List<BGModelInfo>(64);
 
         private GameObject bgObject => GameMain.Instance.BgMgr?.BgObject;
 
-        public static event UnityAction onModelSetup;
+        public static event UnityAction onSetup;
         public static event UnityAction<BGModelStat> onModelAdded;
         public static event UnityAction<BGModelStat> onModelRemoved;
 
@@ -83,12 +66,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static TimelineManager timelineManager => TimelineManager.instance;
-        private static TimelineData timeline => timelineManager.timeline;
-
         private BGModelManager()
         {
-            SceneManager.sceneLoaded += OnChangedSceneLevel;
         }
 
         public BGModelStat GetModel(string name)
@@ -120,16 +99,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return new List<BGModelStat>();
         }
 
-        public void LateUpdate()
+        public override void LateUpdate()
         {
             var bgObject = this.bgObject;
 
             if (bgObject != _prevBgObject)
             {
-                _prevBgObject = bgObject;
-                _modelInfoMap.Clear();
-                _modelInfoList.Clear();
                 Reset();
+                SetupModelInfo();
                 SetupModels(timeline.bgModels);
             }
         }
@@ -157,17 +134,50 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             _prevBgObject = bgObject;
 
-            onModelSetup?.Invoke();
+            UpdateTimelineBGModels();
+
+            onSetup?.Invoke();
         }
 
-        public void OnPluginDisable()
+        private void UpdateTimelineBGModels()
+        {
+            if (timeline == null)
+            {
+                return;
+            }
+
+            var models = this.models;
+            var timelineModels = timeline.bgModels;
+
+            if (models.Count != timelineModels.Count)
+            {
+                timelineModels.Clear();
+                foreach (var model in models)
+                {
+                    var timelineModel = new TimelineBGModelData(model);
+                    timelineModels.Add(timelineModel);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < models.Count; i++)
+                {
+                    var model = models[i];
+                    var timelineModel = timelineModels[i];
+                    timelineModel.FromModel(model);
+                }
+            }
+        }
+
+        public override void OnLoad()
+        {
+            SetupModelInfo();
+            SetupModels(timeline.bgModels);
+        }
+
+        public override void OnPluginDisable()
         {
             Reset();
-        }
-
-        public void OnPluginEnable()
-        {
-            // SetupModelsが呼ばれるので不要
         }
 
         public void Reset()
@@ -181,6 +191,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             modelNames.Clear();
             _modelMap.Clear();
             _modelsMap.Clear();
+            modelInfoMap.Clear();
+            modelInfoList.Clear();
+
+            _prevBgObject = null;
         }
 
         public BGModelInfo GetModelInfo(string sourceName)
@@ -212,6 +226,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (notify)
             {
+                UpdateTimelineBGModels();
                 onModelAdded?.Invoke(model);
                 timelineManager.RequestHistory("背景モデルの追加: " + model.displayName);
             }
@@ -244,6 +259,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (notify)
             {
+                UpdateTimelineBGModels();
                 onModelRemoved?.Invoke(model);
                 timelineManager.RequestHistory("背景モデルの削除: " + model.displayName);
             }
@@ -270,7 +286,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void SetupModelInfo()
         {
-            if (_modelInfoMap.Count > 0)
+            if (modelInfoMap.Count > 0)
             {
                 return;
             }
@@ -295,8 +311,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var name = parentName == "" ? go.name : parentName + "/" + go.name;
             var info = new BGModelInfo(name, depth, go);
-            _modelInfoMap[name] = info;
-            _modelInfoList.Add(info);
+            modelInfoMap[name] = info;
+            modelInfoList.Add(info);
 
             foreach (Transform child in go.transform)
             {
@@ -320,8 +336,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var name = parentName == "" ? go.name : parentName + "/" + go.name;
             var info = new BGModelInfo(sourceName, depth, go, group);
-            _modelInfoMap[name] = info;
-            _modelInfoList.Add(info);
+            modelInfoMap[name] = info;
+            modelInfoList.Add(info);
 
             foreach (Transform child in go.transform)
             {
@@ -333,14 +349,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void DeleteModelInfo(string name)
         {
-            var info = _modelInfoMap.GetOrNull(name);
+            var info = modelInfoMap.GetOrNull(name);
             if (info == null)
             {
                 return;
             }
 
-            _modelInfoMap.Remove(name);
-            _modelInfoList.Remove(info);
+            modelInfoMap.Remove(name);
+            modelInfoList.Remove(info);
 
             foreach (Transform child in info.gameObject.transform)
             {
@@ -397,7 +413,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void SortModelInfoList()
         {
-            _modelInfoList.Sort((a, b) => ComparePathNames(a.name, b.name));
+            modelInfoList.Sort((a, b) => ComparePathNames(a.name, b.name));
         }
 
         private void SortModels()
@@ -411,7 +427,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)
+        public override void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
             Reset();
         }

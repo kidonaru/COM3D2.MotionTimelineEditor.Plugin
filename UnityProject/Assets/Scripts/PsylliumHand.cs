@@ -86,7 +86,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.area = area;
         }
 
-        public void UpdateTime()
+        private Vector3 _calculatedPosition;
+        private Quaternion _calculatedRotation;
+
+        public void PreUpdateTransform()
         {
             if (controller == null || area == null || pattern == null)
             {
@@ -105,8 +108,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             position += basePosition + randomPosition;
             rotation *= randomRotation;
 
-            transform.localPosition = position;
-            transform.localRotation = rotation;
+            _calculatedPosition = position;
+            _calculatedRotation = rotation;
+        }
+
+        public void UpdateTransform()
+        {
+            transform.localPosition = _calculatedPosition;
+            transform.localRotation = _calculatedRotation;
         }
 
         public void UpdatePsylliums(

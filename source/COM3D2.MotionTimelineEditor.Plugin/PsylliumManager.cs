@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class PsylliumManager : MonoBehaviour
+    public class PsylliumManager : MonoBehaviour, IManager
     {
         public List<PsylliumController> controllers = new List<PsylliumController>();
         public Dictionary<string, PsylliumController> controllerMap = new Dictionary<string, PsylliumController>();
@@ -31,7 +31,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Dictionary<string, PsylliumHandConfig> handConfigMap = new Dictionary<string, PsylliumHandConfig>();
         public List<string> handConfigNames = new List<string>();
 
-        public static event UnityAction onSetup;
         public static event UnityAction<string> onControllerAdded;
         public static event UnityAction<string> onControllerRemoved;
         public static event UnityAction<string> onAreaAdded;
@@ -54,9 +53,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
+        private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
         private static TimelineData timeline => TimelineManager.instance.timeline;
-        private static Config config => ConfigManager.config;
+
+        public void Init()
+        {
+        }
+
+        public void PreUpdate()
+        {
+        }
+
+        public void Update()
+        {
+        }
+
+        public void LateUpdate()
+        {
+        }
 
         private void Awake()
         {
@@ -65,14 +79,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _instance = this;
                 DontDestroyOnLoad(gameObject);
             }
-
-            SceneManager.sceneLoaded += OnChangedSceneLevel;
         }
 
         private void OnDestroy()
         {
-            SceneManager.sceneLoaded -= OnChangedSceneLevel;
-
             if (_instance == this)
             {
                 _instance = null;
@@ -131,10 +141,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public PsylliumHandConfig GetHandConfig(string name)
         {
             return handConfigMap.GetOrNull(name);
-        }
-
-        public void Update()
-        {
         }
 
         public void ClearCache()
@@ -280,21 +286,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             UpdateCache();
+        }
 
-            if (onSetup != null)
-            {
-                onSetup.Invoke();
-            }
+        public void OnLoad()
+        {
+            Setup(timeline.psylliums);
         }
 
         public void OnPluginDisable()
         {
             Reset();
-        }
-
-        public void OnPluginEnable()
-        {
-            // SetupAreasが呼ばれるので不要
         }
 
         public void Reset()
@@ -305,7 +306,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             controllers.Clear();
 
-            UpdateCache();
+            ClearCache();
         }
 
         public void AddController(bool notify)
@@ -323,11 +324,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (notify)
             {
                 UpdateCache();
-
-                if (onControllerAdded != null)
-                {
-                    onControllerAdded.Invoke(controller.name);
-                }
+                onControllerAdded?.Invoke(controller.name);
             }
 
             AddArea(groupIndex, notify);
@@ -349,11 +346,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (notify)
             {
                 UpdateCache();
-
-                if (onControllerRemoved != null)
-                {
-                    onControllerRemoved.Invoke(controllerName);
-                }
+                onControllerRemoved?.Invoke(controllerName);
             }
         }
 
@@ -365,11 +358,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (notify)
             {
                 UpdateCache();
-
-                if (onAreaAdded != null)
-                {
-                    onAreaAdded.Invoke(area.name);
-                }
+                onAreaAdded?.Invoke(area.name);
             }
         }
 
@@ -386,11 +375,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (notify)
             {
                 UpdateCache();
-
-                if (onAreaRemoved != null)
-                {
-                    onAreaRemoved.Invoke(areaName);
-                }
+                onAreaRemoved?.Invoke(areaName);
             }
         }
 
@@ -402,11 +387,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (notify)
             {
                 UpdateCache();
-
-                if (onPatternAdded != null)
-                {
-                    onPatternAdded.Invoke(pattern.patternConfig.name);
-                }
+                onPatternAdded?.Invoke(pattern.patternConfig.name);
             }
         }
 
@@ -423,15 +404,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (notify)
             {
                 UpdateCache();
-
-                if (onPatternRemoved != null)
-                {
-                    onPatternRemoved.Invoke(patternName);
-                }
+                onPatternRemoved?.Invoke(patternName);
             }
         }
 
-        private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)
+        public void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
             Reset();
         }

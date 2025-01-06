@@ -6,11 +6,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public override TransformType type => TransformType.Light;
 
-        public override int valueCount => 16;
+        public override int valueCount => 17;
 
         public override bool hasPosition => true;
         public override bool hasEulerAngles => true;
         public override bool hasColor => true;
+        public override bool hasVisible => true;
         public override bool hasEasing => !timeline.isTangentLight;
         public override bool hasTangent => timeline.isTangentLight;
 
@@ -28,6 +29,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get => new ValueData[] { values[6], values[7], values[8] };
         }
+
+        public override ValueData visibleValue => values[16];
 
         public override ValueData easingValue => values[9];
 

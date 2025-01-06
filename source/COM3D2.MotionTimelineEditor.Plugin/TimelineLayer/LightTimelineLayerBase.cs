@@ -41,32 +41,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             StudioLightStat light,
             int lightIndex)
         {
-            if (light == null)
+            if (light == null || lightIndex < 0)
             {
                 return;
             }
-            if (lightIndex < 0)
-            {
-                return;
-            }
-
-            var width = view.viewRect.width;
-            var height = view.viewRect.height;
 
             view.currentPos.x = 5;
             view.currentPos.y = 5;
 
-            view.BeginHorizontal();
-            {
-                view.DrawToggle(light.visible, 20, 20, newValue =>
-                {
-                    light.visible = newValue;
-                    lightManager.ApplyLight(light);
-                });
-
-                view.DrawLabel(light.displayName, -1, 20);
-            }
-            view.EndLayout();
+            view.DrawLabel(light.displayName, -1, 20);
 
             view.SetEnabled(light.index > 0 && lightManager.CanCreateLight());
 

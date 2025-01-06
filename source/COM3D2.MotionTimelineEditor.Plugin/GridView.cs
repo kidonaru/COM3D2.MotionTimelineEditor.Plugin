@@ -11,9 +11,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private LineRenderer[] _gridLinesInWorld;
         private LineRenderer[] _axisLines;
 
-        private static Config config => ConfigManager.config;
+        private static Config config => ConfigManager.instance.config;
 
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
+        private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
 
         public void Awake()
         {

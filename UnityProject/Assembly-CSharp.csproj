@@ -117,6 +117,7 @@
      <Compile Include="Assets\Scripts\StageLaserController.cs" />
      <Compile Include="Assets\Scripts\StageLight.cs" />
      <Compile Include="Assets\Scripts\StageLightController.cs" />
+     <Compile Include="Assets\Scripts\StopwatchDebug.cs" />
      <None Include="Assets\PostProcessing\Resources\Shaders\DepthOfField.shader" />
      <None Include="Assets\PostProcessing\Resources\Shaders\MotionBlur.cginc" />
      <None Include="Assets\PostProcessing\Resources\Shaders\Fog.shader" />

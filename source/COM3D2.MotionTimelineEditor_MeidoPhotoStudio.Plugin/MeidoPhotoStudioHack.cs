@@ -338,10 +338,10 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             mps.meidoManager.ChangeMaid(targetMaidSlotNo);
         }
 
-        public override void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
+        public override void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
-            base.OnChangedSceneLevel(sceneName, sceneMode);
-            isSceneActive = sceneName.name == "SceneEdit" || sceneName.name == "SceneDaily";
+            base.OnChangedSceneLevel(scene, sceneMode);
+            isSceneActive = scene.name == "SceneEdit" || scene.name == "SceneDaily";
         }
 
         public override bool IsValid()
@@ -491,7 +491,25 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             stat.light = dragPointLight.GetLight();
             stat.transform = stat.light.transform;
             stat.obj = dragPointLight;
+
+            ChangeLight(stat);
             ApplyLight(stat);
+        }
+
+        public override void ChangeLight(StudioLightStat stat)
+        {
+            var dragPointLight = stat.obj as DragPointLight;
+            if (dragPointLight == null || stat.light == null || stat.transform == null)
+            {
+                PluginUtils.LogError("ChangeLight: ライトが見つかりません" + stat.name);
+                return;
+            }
+
+            var lightType = ConvertLightType(stat.type);
+            if (lightType != dragPointLight.SelectedLightType)
+            {
+                dragPointLight.SetLightType(lightType);
+            }
         }
 
         public override void ApplyLight(StudioLightStat stat)
@@ -501,12 +519,6 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             {
                 PluginUtils.LogError("ApplyLight: ライトが見つかりません" + stat.name);
                 return;
-            }
-
-            var lightType = ConvertLightType(stat.type);
-            if (lightType != dragPointLight.SelectedLightType)
-            {
-                dragPointLight.SetLightType(lightType);
             }
 
             var light = stat.light;
@@ -530,16 +542,6 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
 
             mps.maidDressingPane.UpdatePane();
-        }
-
-        protected override void OnMaidChanged(int maidSlotNo, Maid maid)
-        {
-            base.OnMaidChanged(maidSlotNo, maid);
-        }
-
-        protected override void OnAnmChanged(int maidSlotNo, string anmName)
-        {
-            base.OnAnmChanged(maidSlotNo, anmName);
         }
 
         public override void Update()

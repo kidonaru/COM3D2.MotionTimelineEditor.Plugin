@@ -3,9 +3,10 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class WindowManager
+    public class WindowManager : ManagerBase
     {
-        public MainWindow mainWindow = null;
+        private MainWindow _mainWindow = null;
+        public override MainWindow mainWindow => _mainWindow;
         public List<SubWindow> subWindows = new List<SubWindow>();
         private int _screenWidth = 0;
         private int _screenHeight = 0;
@@ -23,22 +24,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static Config config => ConfigManager.config;
-
-        private static Maid maid => MaidManager.instance.maid;
-
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
-
         private WindowManager()
         {
         }
 
-        public void Init()
+        public override void Init()
         {
             TimelineManager.onRefresh += OnRefreshTimeline;
 
-            mainWindow = new MainWindow();
-            mainWindow.Init();
+            _mainWindow = new MainWindow();
+            _mainWindow.Init();
 
             subWindows.Clear();
             var subWindowCount = Mathf.Max(config.subWindowCount, 1);
@@ -48,10 +43,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             };
         }
 
-        public void Update()
+        public override void Update()
         {
-            mainWindow.Update();
-
             var removeWindows = new List<SubWindow>();
 
             foreach (var subWindow in subWindows)

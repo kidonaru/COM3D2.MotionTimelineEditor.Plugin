@@ -31,10 +31,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override ValueData visibleValue => values[10];
 
-        public override ValueData[] tangentValues
-        {
-            get => baseValues;
-        }
+        public override ValueData[] tangentValues => baseValues;
 
         public TransformDataBGModel()
         {

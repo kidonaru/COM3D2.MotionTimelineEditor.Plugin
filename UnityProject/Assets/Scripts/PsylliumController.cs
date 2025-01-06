@@ -109,7 +109,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 #if COM3D2
         private static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
 
-        private Config config => ConfigManager.config;
+        private Config config => ConfigManager.instance.config;
 #endif
 
         void OnEnable()
@@ -409,15 +409,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             this.time = time;
 
+            var stopwatch = new StopwatchDebug();
+
             foreach (var pattern in patterns)
             {
                 pattern.ManualUpdate();
             }
+            //stopwatch.ProcessEnd("  Pattern Update");
 
             foreach (var area in areas)
             {
                 area.ManualUpdate();
             }
+            //stopwatch.ProcessEnd("  Area Update");
         }
 
         public void CopyFrom(PsylliumController src)

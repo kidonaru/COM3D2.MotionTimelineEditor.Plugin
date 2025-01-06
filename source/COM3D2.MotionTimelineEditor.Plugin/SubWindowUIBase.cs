@@ -32,7 +32,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected static StudioModelManager modelManager => StudioModelManager.instance;
 
-        protected static StudioHackBase studioHack => StudioHackManager.studioHack;
+        protected static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
         
         protected static ModelHackManager modelHackManager => ModelHackManager.instance;
 
@@ -50,7 +50,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected static ITimelineLayer currentLayer => timelineManager.currentLayer;
 
-        protected static Config config => ConfigManager.config;
+        protected static Config config => ConfigManager.instance.config;
 
         protected Rect windowRect
         {

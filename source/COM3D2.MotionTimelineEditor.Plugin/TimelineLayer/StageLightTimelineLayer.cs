@@ -44,7 +44,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Init();
 
-            StageLightManager.onSetup += OnLightSetup;
             StageLightManager.onControllerAdded += OnControllerAdded;
             StageLightManager.onControllerRemoved += OnControllerRemoved;
             StageLightManager.onLightAdded += OnLightAdded;
@@ -82,7 +81,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Dispose();
 
-            StageLightManager.onSetup -= OnLightSetup;
             StageLightManager.onControllerAdded -= OnControllerAdded;
             StageLightManager.onControllerRemoved -= OnControllerRemoved;
             StageLightManager.onLightAdded -= OnLightAdded;
@@ -388,13 +386,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     end.spotRangeValue,
                     t);
             }
-        }
-
-        public void OnLightSetup()
-        {
-            InitMenuItems();
-            AddFirstBones(allBoneNames);
-            ApplyCurrentFrame(true);
         }
 
         public void OnControllerAdded(string controllerName)

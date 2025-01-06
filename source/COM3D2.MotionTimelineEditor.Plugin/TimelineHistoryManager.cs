@@ -10,7 +10,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public long timestamp;
     }
 
-    public class TimelineHistoryManager
+    public class TimelineHistoryManager : ManagerBase
     {
         public List<TimelineHistoryData> historyList = new List<TimelineHistoryData>();
         public int historyIndex = -1;
@@ -43,15 +43,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static Config config => ConfigManager.config;
-
-        private static int historyLimit
-        {
-            get
-            {
-                return config.historyLimit;
-            }
-        }
+        private int historyLimit => config.historyLimit;
 
         private TimelineHistoryManager()
         {

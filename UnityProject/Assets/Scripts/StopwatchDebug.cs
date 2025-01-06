@@ -7,7 +7,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         private readonly Stopwatch stopwatch;
 
-        private static Config config => ConfigManager.config;
+#if COM3D2
+        private static Config config => ConfigManager.instance.config;
 
         private bool isEnabled
         {
@@ -16,6 +17,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return config.outputElapsedTime;
             }
         }
+#else
+        private bool isEnabled = true;
+#endif
 
         public StopwatchDebug()
         {
@@ -40,7 +44,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (isEnabled)
             {
                 TimeSpan elapsed = stopwatch.Elapsed;
+#if COM3D2
                 PluginUtils.Log(string.Format("{0}: {1:F3}ms", processName, elapsed.TotalMilliseconds));
+#else
+                UnityEngine.Debug.Log(string.Format("{0}: {1:F3}ms", processName, elapsed.TotalMilliseconds));
+#endif
 
                 stopwatch.Reset();
                 stopwatch.Start();

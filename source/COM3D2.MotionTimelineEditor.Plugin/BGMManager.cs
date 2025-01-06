@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class BGMManager
+    public class BGMManager : ManagerBase
     {
         private static BGMManager _instance = null;
 
@@ -22,12 +22,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return _instance;
             }
         }
-
-        private static TimelineManager timelineManager => TimelineManager.instance;
-
-        private static TimelineData timeline => timelineManager.timeline;
-
-        private static ITimelineLayer defaultLayer => timeline.defaultLayer;
 
         private static SoundMgr soundMgr => GameMain.Instance.SoundMgr;
 
@@ -51,9 +45,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
         }
 
-        public void Init()
+        public override void Init()
         {
-            SceneManager.sceneLoaded += OnChangedSceneLevel;
             TimelineManager.onPlay += OnPlay;
             TimelineManager.onRefresh += OnRefresh;
             TimelineManager.onAnmSpeedChanged += OnAnmSpeedChanged;
@@ -136,7 +129,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Load();
         }
 
-        public void Update()
+        public override void Update()
         {
             if (!IsLoaded())
             {
@@ -241,7 +234,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)
+        public override void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
             Stop();
         }

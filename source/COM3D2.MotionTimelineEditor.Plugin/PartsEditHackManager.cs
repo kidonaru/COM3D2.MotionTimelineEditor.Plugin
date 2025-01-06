@@ -3,9 +3,10 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class PartsEditHackManager
+    public class PartsEditHackManager : ManagerBase
     {
-        public IPartsEditHack partsEditHack = null;
+        private IPartsEditHack _partsEditHack = null;
+        public override IPartsEditHack partsEditHack => _partsEditHack;
 
         private static PartsEditHackManager _instance;
         public static PartsEditHackManager instance
@@ -23,7 +24,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private PartsEditHackManager()
         {
-            SceneManager.sceneLoaded += OnChangedSceneLevel;
             StudioHackManager.onPoseEditingChanged += OnPoseEditingChanged;
         }
 
@@ -34,7 +34,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            this.partsEditHack = partsEditHack;
+            _partsEditHack = partsEditHack;
         }
 
         private int GetSlotNo(Maid maid, string slotName)
@@ -128,7 +128,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
+        public override void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
             if (partsEditHack == null)
             {

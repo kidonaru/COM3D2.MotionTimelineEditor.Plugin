@@ -144,9 +144,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static ITimelineLayer currentLayer => timelineManager.currentLayer;
 
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
+        private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
 
-        private static Config config => ConfigManager.config;
+        private static Config config => ConfigManager.instance.config;
 
         private static CameraManager cameraManager =>  CameraManager.instance;
 

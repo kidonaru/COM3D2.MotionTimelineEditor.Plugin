@@ -55,7 +55,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public static class DressUtils
     {
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
+        private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
 
         public static readonly List<DressSlotID> ClothingSlotIds = new List<DressSlotID>
         {

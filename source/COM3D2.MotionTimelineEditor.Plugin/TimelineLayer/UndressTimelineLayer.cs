@@ -82,7 +82,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var start = motion.start as TransformDataUndress;
 
-            maidCache.SetSlotVisible(start.slotId, start.isVisible);
+            if (indexUpdated)
+            {
+                maidCache.SetSlotVisible(start.slotId, start.isVisible);
+            }
         }
 
         public override void UpdateFrame(FrameData frame)

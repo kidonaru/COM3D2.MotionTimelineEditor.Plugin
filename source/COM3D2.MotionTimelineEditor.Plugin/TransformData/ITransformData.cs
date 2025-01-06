@@ -45,6 +45,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Morph = 1000,
         Se,
         Text,
+
+        // PNG
+        PngObject = 2000,
     }
 
     public enum CustomValueType

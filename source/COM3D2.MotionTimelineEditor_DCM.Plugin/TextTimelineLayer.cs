@@ -4,14 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using COM3D2.DanceCameraMotion.Plugin;
 using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
-    using TransformType = MotionTimelineEditor.Plugin.TransformType;
-
     [TimelineLayerDesc("テキスト", 53)]
     public partial class TextTimelineLayer : TimelineLayerBase
     {
@@ -19,7 +16,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public static string TextBoneName = "Text";
         public static string TextDisplayName = "テキスト";
-        public static string DefaultFontName = "Yu Gothic Bold";
 
         private List<string> _allBoneNames = new List<string>();
         public override List<string> allBoneNames
@@ -38,19 +34,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        private TextManager _textManager = null;
-
-        private TextManager textManager
-        {
-            get
-            {
-                if (_textManager == null)
-                {
-                    _textManager = new TextManager(0);
-                }
-                return _textManager;
-            }
-        }
+        private static MTETextManager _textManager = MTETextManager.instance;
 
         private TextTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -59,13 +43,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public static TextTimelineLayer Create(int slotNo)
         {
             return new TextTimelineLayer(0);
-        }
-
-        public override void Init()
-        {
-            InitTextManager();
-
-            base.Init();
         }
 
         protected override void InitMenuItems()
@@ -77,12 +54,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 var menuItem = new BoneMenuItem(boneName, boneName);
                 allMenuItems.Add(menuItem);
             }
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-            ReleaseTextManager();
         }
 
         public override bool IsValidData()
@@ -100,9 +71,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             base.LateUpdate();
 
-            if (textManager.TextData.Length != timeline.textCount)
+            if (_textManager.TextData.Length != timeline.textCount)
             {
-                InitTextManager();
+                _textManager.InitTextManager();
                 InitMenuItems();
                 AddFirstBones(allBoneNames);
             }
@@ -111,16 +82,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 ApplyPlayData();
             }
-        }
-
-        public override void OnPluginEnable()
-        {
-            InitTextManager();
-        }
-
-        public override void OnPluginDisable()
-        {
-            ReleaseTextManager();
         }
 
         protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
@@ -137,12 +98,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 		{
             var start = motion.start as TransformDataText;
 
-            if (!IsValidIndex(start.index))
+            if (!_textManager.IsValidIndex(start.index))
             {
                 return;
             }
 
-			var freeTextSet = GetFreeTextSet(start.index);
+			var freeTextSet = _textManager.GetFreeTextSet(start.index);
 
             var text = freeTextSet.text;
             var rect = freeTextSet.rect;
@@ -155,7 +116,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
             if (!string.IsNullOrEmpty(start.text) && (flag || (text.font != null && text.font.name != start.font)))
             {
-                text.font = textManager.GetFont(start.font);
+                text.font = _textManager.GetFont(start.font);
             }
             text.fontSize = start.fontSize;
             rect.localPosition = start.position;
@@ -166,7 +127,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             text.alignment = start.alignment;
             rect.sizeDelta = start.sizeDelta;
 
-			UpdateFreeTextSet(start.index, freeTextSet);
+			_textManager.UpdateFreeTextSet(start.index, freeTextSet);
 		}
 
         private void ApplyMotionUpdate(MotionData motion, float t)
@@ -174,12 +135,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var start = motion.start as TransformDataText;
             var end = motion.end as TransformDataText;
 
-            if (!IsValidIndex(start.index))
+            if (!_textManager.IsValidIndex(start.index))
             {
                 return;
             }
 
-			var freeTextSet = GetFreeTextSet(start.index);
+			var freeTextSet = _textManager.GetFreeTextSet(start.index);
 
 			if (start.position != end.position)
             {
@@ -197,79 +158,20 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             {
                 freeTextSet.text.color = Color.Lerp(start.color, end.color, t);
             }
-			UpdateFreeTextSet(start.index, freeTextSet);
+			_textManager.UpdateFreeTextSet(start.index, freeTextSet);
 		}
-
-        private void ReleaseTextManager()
-        {
-            if (_textManager != null)
-            {
-                _textManager.ReleaseDanceText();
-                _textManager = null;
-            }
-        }
-
-        private void InitTextManager()
-        {
-            if (_textManager != null && _textManager.TextData.Length == timeline.textCount)
-            {
-                return;
-            }
-
-            ReleaseTextManager();
-
-            _textManager = new TextManager(timeline.textCount);
-
-            for (var i = 0; i < timeline.textCount; i++)
-            {
-                _textManager.InitializeText(i);
-
-                var freeTextSet = GetFreeTextSet(i);
-                var text = freeTextSet.text;
-                var rect = freeTextSet.rect;
-
-                text.font = _textManager.GetFont(DefaultFontName);
-                text.fontSize = 50;
-                text.lineSpacing = 50f;
-                text.alignment = TextAnchor.MiddleCenter;
-                rect.localPosition = Vector3.zero;
-                rect.localScale = Vector3.one;
-                rect.sizeDelta = new Vector2(1000, 1000);
-            }
-
-            if (_fontNames.Count == 0)
-            {
-                _textManager.GetFontNames();
-                _fontNames = _textManager.FontNames;
-            }
-        }
-
-        private bool IsValidIndex(int index)
-        {
-            return index >= 0 && index < textManager.TextData.Length;
-        }
-
-        private FreeTextSet GetFreeTextSet(int index)
-        {
-            return textManager.TextData[index];
-        }
-
-        private void UpdateFreeTextSet(int index, FreeTextSet freeTextSet)
-        {
-            textManager.TextData[index] = freeTextSet;
-        }
 
         public override void UpdateFrame(FrameData frame)
         {
             for (var index = 0; index < timeline.textCount; index++)
             {
-                if (!IsValidIndex(index))
+                if (!_textManager.IsValidIndex(index))
                 {
                     continue;
                 }
 
                 var boneName = TextBoneName + index;
-                var freeTextSet = GetFreeTextSet(index);
+                var freeTextSet = _textManager.GetFreeTextSet(index);
                 var text = freeTextSet.text;
                 var rect = freeTextSet.rect;
 
@@ -402,10 +304,6 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private ColorFieldCache _colorFieldValue = new ColorFieldCache("Color", true);
 
-        private static List<string> _fontNames = new List<string>
-        {
-        };
-
         public override void DrawWindow(GUIView view)
         {
             view.SetEnabled(!view.IsComboBoxFocused());
@@ -448,12 +346,12 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             var boneName = _boneNameComboBox.currentItem;
             var index = _boneNameComboBox.currentIndex;
 
-            if (!IsValidIndex(index))
+            if (!_textManager.IsValidIndex(index))
             {
                 return;
             }
 
-            var freeTextSet = GetFreeTextSet(index);
+            var freeTextSet = _textManager.GetFreeTextSet(index);
             var text = freeTextSet.text;
             var rect = freeTextSet.rect;
 
@@ -472,11 +370,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 maxLines = 3,
             });
 
-            _fontNameComboBox.items = _fontNames;
-            _fontNameComboBox.currentIndex = _fontNames.IndexOf(text.font != null ? text.font.name : "");
+            _fontNameComboBox.items = MTETextManager.fontNames;
+            _fontNameComboBox.currentIndex = MTETextManager.fontNames.IndexOf(text.font != null ? text.font.name : "");
             _fontNameComboBox.onSelected = (fontName, _) =>
             {
-                text.font = textManager.GetFont(fontName);
+                text.font = _textManager.GetFont(fontName);
             };
 
             _fontNameComboBox.DrawButton("フォント", view);

@@ -38,7 +38,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public TimelineLoadItem parent;
     }
 
-    public class TimelineLoadManager
+    public class TimelineLoadManager : ManagerBase
     {
         private static TimelineLoadManager _instance;
         public static TimelineLoadManager instance
@@ -60,7 +60,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
         }
 
-        public void Init()
+        public override void Init()
         {
             UpdateItems(false);
         }

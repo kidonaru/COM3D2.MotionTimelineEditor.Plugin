@@ -402,10 +402,10 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             multipleMaids.selectMaidIndex = allMaids.IndexOf(maid);
         }
 
-        public override void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
+        public override void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
-            base.OnChangedSceneLevel(sceneName, sceneMode);
-            isSceneActive = sceneName.name == "SceneEdit" || sceneName.name == "SceneDaily";
+            base.OnChangedSceneLevel(scene, sceneMode);
+            isSceneActive = scene.name == "SceneEdit" || scene.name == "SceneDaily";
         }
 
         public override bool IsValid()
@@ -840,6 +840,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             stat.light = light;
             stat.transform = gameObject.transform;
             stat.obj = gameObject;
+            ChangeLight(stat);
             ApplyLight(stat);
 
             var gLight = multipleMaids.gLight;
@@ -866,6 +867,27 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
         }
 
+        public override void ChangeLight(StudioLightStat stat)
+        {
+            var lightObj = stat.obj as GameObject;
+            if (lightObj == null || stat.light == null || stat.transform == null)
+            {
+                PluginUtils.LogError("ChangeLight: ライトが見つかりません" + stat.name);
+                return;
+            }
+
+            var lightList = multipleMaids.lightList;
+            var lightIndex = lightList.FindIndex(d => d == lightObj);
+            if (lightIndex < 0)
+            {
+                PluginUtils.LogError("ChangeLight: ライトが見つかりません" + stat.name);
+                return;
+            }
+
+            var light = stat.light;
+            light.type = stat.type;
+        }
+
         public override void ApplyLight(StudioLightStat stat)
         {
             var lightObj = stat.obj as GameObject;
@@ -886,7 +908,6 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             var light = stat.light;
             var transform = stat.transform;
 
-            light.type = stat.type;
             multipleMaids.lightColorR[lightIndex] = light.color.r;
             multipleMaids.lightColorG[lightIndex] = light.color.g;
             multipleMaids.lightColorB[lightIndex] = light.color.b;
@@ -1147,16 +1168,6 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                     multipleMaids.isAccSenaka = isVisible;
                     break;
             }
-        }
-
-        protected override void OnMaidChanged(int maidSlotNo, Maid maid)
-        {
-            base.OnMaidChanged(maidSlotNo, maid);
-        }
-
-        protected override void OnAnmChanged(int maidSlotNo, string anmName)
-        {
-            base.OnAnmChanged(maidSlotNo, anmName);
         }
 
         public override void Update()

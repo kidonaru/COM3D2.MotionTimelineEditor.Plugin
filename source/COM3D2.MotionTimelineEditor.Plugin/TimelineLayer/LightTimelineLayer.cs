@@ -24,6 +24,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return new LightTimelineLayer(0);
         }
 
+        public override void Init()
+        {
+            base.Init();
+
+            StudioLightManager.onLightAdded += OnLightAdded;
+            StudioLightManager.onLightRemoved += OnLightRemoved;
+            StudioLightManager.onLightUpdated += OnLightUpdated;
+        }
+
         protected override void InitMenuItems()
         {
             allMenuItems.Clear();
@@ -33,6 +42,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var menuItem = new BoneMenuItem(light.name, light.displayName);
                 allMenuItems.Add(menuItem);
             }
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            StudioLightManager.onLightAdded -= OnLightAdded;
+            StudioLightManager.onLightRemoved -= OnLightRemoved;
+            StudioLightManager.onLightUpdated -= OnLightUpdated;
         }
 
         public override bool IsValidData()
@@ -103,6 +121,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             stat.position = start.position;
             stat.eulerAngles = start.eulerAngles;
+            stat.visible = start.visible;
 
             light.color = start.color;
             light.range = start.range;
@@ -122,15 +141,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var end = motion.end as TransformDataLight;
 
             float easingTime = CalcEasingValue(t, start.easing);
+            var updated = false;
 
             if (start.position != end.position)
             {
                 stat.position = Vector3.Lerp(start.position, end.position, easingTime);
+                updated = true;
             }
 
             if (start.eulerAngles != end.eulerAngles)
             {
                 stat.eulerAngles = Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime);
+                updated = true;
             }
 
             if (timeline.isLightColorEasing)
@@ -138,6 +160,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (start.color != end.color)
                 {
                     light.color = Color.Lerp(start.color, end.color, easingTime);
+                    updated = true;
                 }
             }
 
@@ -146,26 +169,34 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (start.range != end.range)
                 {
                     light.range = Mathf.Lerp(start.range, end.range, easingTime);
+                    updated = true;
                 }
                 if (start.intensity != end.intensity)
                 {
                     light.intensity = Mathf.Lerp(start.intensity, end.intensity, easingTime);
+                    updated = true;
                 }
                 if (start.spotAngle != end.spotAngle)
                 {
                     light.spotAngle = Mathf.Lerp(start.spotAngle, end.spotAngle, easingTime);
+                    updated = true;
                 }
                 if (start.shadowStrength != end.shadowStrength)
                 {
                     light.shadowStrength = Mathf.Lerp(start.shadowStrength, end.shadowStrength, easingTime);
+                    updated = true;
                 }
                 if (start.shadowBias != end.shadowBias)
                 {
                     light.shadowBias = Mathf.Lerp(start.shadowBias, end.shadowBias, easingTime);
+                    updated = true;
                 }
             }
 
-            lightManager.ApplyLight(stat);
+            if (updated)
+            {
+                lightManager.ApplyLight(stat);
+            }
         }
 
         private void ApplyMotionUpdateTangent(MotionData motion, float t, StudioLightStat stat)
@@ -178,6 +209,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var t0 = motion.stFrame * timeline.frameDuration;
             var t1 = motion.edFrame * timeline.frameDuration;
 
+            var updated = false;
+
             if (start.position != end.position)
             {
                 stat.position = PluginUtils.HermiteVector3(
@@ -186,6 +219,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     start.positionValues,
                     end.positionValues,
                     t);
+                updated = true;
             }
 
             if (start.eulerAngles != end.eulerAngles)
@@ -196,6 +230,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     start.eulerAnglesValues,
                     end.eulerAnglesValues,
                     t);
+                updated = true;
             }
 
             if (timeline.isLightColorEasing)
@@ -203,6 +238,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (start.color != end.color)
                 {
                     light.color = Color.Lerp(start.color, end.color, t);
+                    updated = true;
                 }
             }
 
@@ -216,6 +252,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         start.rangeValue,
                         end.rangeValue,
                         t);
+                    updated = true;
                 }
                 if (start.intensity != end.intensity)
                 {
@@ -225,6 +262,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         start.intensityValue,
                         end.intensityValue,
                         t);
+                    updated = true;
                 }
                 if (start.spotAngle != end.spotAngle)
                 {
@@ -234,6 +272,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         start.spotAngleValue,
                         end.spotAngleValue,
                         t);
+                    updated = true;
                 }
                 if (start.shadowStrength != end.shadowStrength)
                 {
@@ -243,6 +282,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         start.shadowStrengthValue,
                         end.shadowStrengthValue,
                         t);
+                    updated = true;
                 }
                 if (start.shadowBias != end.shadowBias)
                 {
@@ -252,27 +292,31 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         start.shadowBiasValue,
                         end.shadowBiasValue,
                         t);
+                    updated = true;
                 }
             }
 
-            lightManager.ApplyLight(stat);
+            if (updated)
+            {
+                lightManager.ApplyLight(stat);
+            }
         }
 
-        public override void OnLightAdded(StudioLightStat light)
+        public void OnLightAdded(StudioLightStat light)
         {
             InitMenuItems();
             AddFirstBones(new List<string> { light.name });
             ApplyCurrentFrame(true);
         }
 
-        public override void OnLightRemoved(StudioLightStat light)
+        public void OnLightRemoved(StudioLightStat light)
         {
             InitMenuItems();
             RemoveAllBones(new List<string> { light.name });
             ApplyCurrentFrame(true);
         }
 
-        public override void OnLightUpdated(StudioLightStat light)
+        public void OnLightUpdated(StudioLightStat light)
         {
             InitMenuItems();
             ApplyCurrentFrame(true);
@@ -311,6 +355,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var trans = CreateTransformData<TransformDataLight>(lightName);
                 trans.position = stat.position;
                 trans.eulerAngles = stat.eulerAngles;
+                trans.visible = stat.visible;
                 trans.color = light.color;
                 trans.range = light.range;
                 trans.intensity = light.intensity;
@@ -504,8 +549,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
             {
-                view.DrawLabel(stat.displayName, 200, 20);
-
                 var light = stat.light;
                 var followLight = stat.followLight;
                 var transform = stat.transform;
@@ -515,6 +558,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var initialScale = Vector3.one;
                 var updateTransform = false;
                 var editType = TransformEditType.全て;
+
+                updateTransform |= view.DrawToggle(stat.displayName, stat.visible, 200, 20, newValue =>
+                {
+                    stat.visible = newValue;
+                });
 
                 int drawMask;
                 switch (stat.type)

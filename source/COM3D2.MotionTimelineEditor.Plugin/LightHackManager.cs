@@ -11,10 +11,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         void DeleteAllLights();
         void DeleteLight(StudioLightStat stat);
         void CreateLight(StudioLightStat stat);
+        void ChangeLight(StudioLightStat stat);
         void ApplyLight(StudioLightStat stat);
     }
 
-    public class LightHackManager
+    public class LightHackManager : ManagerBase
     {
         private List<StudioLightStat> _lightList = new List<StudioLightStat>();
         public List<StudioLightStat> lightList
@@ -40,8 +41,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return _instance;
             }
         }
-
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
 
         private LightHackManager()
         {
@@ -85,6 +84,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public void ChangeLight(StudioLightStat stat)
+        {
+            if (IsValid())
+            {
+                studioHack.ChangeLight(stat);
+            }
+        }
+
         public void ApplyLight(StudioLightStat stat)
         {
             if (IsValid())
@@ -93,7 +100,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void Update()
+        public override void Update()
         {
         }
     }

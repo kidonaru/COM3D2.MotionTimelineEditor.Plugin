@@ -216,6 +216,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        protected override void ApplyPlayData()
+        {
+            var maid = this.maid;
+            if (maid == null || maid.body0 == null || !maid.body0.isLoadedBody)
+            {
+                return;
+            }
+
+            ApplyPlayDataByType(TransformType.ExtendBone);
+            ApplyPlayDataByType(TransformType.IKHold);
+            ApplyPlayDataByType(TransformType.Grounding);
+            ApplyPlayDataByType(TransformType.FingerBlend);
+        }
+
         protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
             switch (motion.start.type)
@@ -572,7 +586,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
+            var stopwatch = new StopwatchDebug();
             ApplyPlayData();
+            stopwatch.ProcessEnd("  ApplyPlayData: " + className);
         }
 
         public override void ApplyCurrentFrame(bool motionUpdate)
@@ -584,7 +600,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             else
             {
                 maidCache.playingFrameNo = timelineManager.currentFrameNo;
+                var stopwatch = new StopwatchDebug();
                 ApplyPlayData();
+                stopwatch.ProcessEnd("  ApplyPlayData: " + className);
             }
         }
 

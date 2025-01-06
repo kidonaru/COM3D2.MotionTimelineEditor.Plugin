@@ -11,7 +11,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         string errorMessage { get; }
 
         bool Init();
-        void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode);
+        void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode);
         bool IsValid();
 
         void DeleteAllModels();
@@ -73,7 +73,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return true;
         }
 
-        public virtual void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)
+        public virtual void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
             // do nothing
         }

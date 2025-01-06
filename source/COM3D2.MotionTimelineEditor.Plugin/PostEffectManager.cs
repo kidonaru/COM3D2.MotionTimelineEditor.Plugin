@@ -29,7 +29,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
     }
 
-    public class PostEffectManager
+    public class PostEffectManager : ManagerBase
     {
         private static PostEffectManager _instance;
         public static PostEffectManager instance
@@ -78,39 +78,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public DistanceFogEffectSettings distanceFog => controller.context.fogSettings;
         public RimlightEffectSettings rimlight => controller.context.rimlightSettings;
 
-        private static MaidManager maidManager => MaidManager.instance;
-
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
-
-        private static Config config => ConfigManager.config;
-
-        private static CameraMain mainCamera
-        {
-            get
-            {
-                return GameMain.Instance.MainCamera;
-            }
-        }
-
-        private static TimelineData timeline => TimelineManager.instance.timeline;
+        private static CameraMain mainCamera => GameMain.Instance.MainCamera;
 
         private PostEffectManager()
         {
         }
 
-        public void Init()
+        public override void Init()
         {
         }
 
-        public void OnPluginDisable()
+        public override void OnLoad()
+        {
+            DisableAllEffects();
+        }
+
+        public override void OnPluginDisable()
         {
             DisableAllEffects();
             ResetCache();
             ReleaseController();
-        }
-
-        public void OnPluginEnable()
-        {
         }
 
         private void ResetCache()

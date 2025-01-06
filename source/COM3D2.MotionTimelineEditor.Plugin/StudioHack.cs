@@ -503,11 +503,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 stat.light = targetObj.obj.GetComponentInChildren<Light>(false);
                 stat.transform = targetObj.obj.transform;
                 stat.obj = targetObj;
+                ChangeLight(stat);
                 ApplyLight(stat);
             }
         }
 
-        public override void ApplyLight(StudioLightStat stat)
+        public override void ChangeLight(StudioLightStat stat)
         {
             var targetObj = stat.obj as PhotoTransTargetObject;
             if (targetObj == null || stat.light == null)
@@ -530,6 +531,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
                 stat.light = targetObj.obj.GetComponentInChildren<Light>(false);
                 stat.transform = targetObj.obj.transform;
+            }
+        }
+
+        public override void ApplyLight(StudioLightStat stat)
+        {
+            var targetObj = stat.obj as PhotoTransTargetObject;
+            if (targetObj == null || stat.light == null)
+            {
+                PluginUtils.LogError("ライトが見つかりません: " + stat.name);
+                return;
             }
 
             if (stat.type == LightType.Directional)

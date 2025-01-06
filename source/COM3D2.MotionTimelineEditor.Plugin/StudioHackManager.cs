@@ -4,12 +4,13 @@ using UnityEngine.Events;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class StudioHackManager
+    public class StudioHackManager : ManagerBase
     {
         private List<StudioHackBase> studioHacks = new List<StudioHackBase>();
         private List<StudioHackBase> activeStudioHacks = new List<StudioHackBase>();
 
-        public static StudioHackBase studioHack { get; private set; }
+        private StudioHackBase _studioHack = null;
+        public override StudioHackBase studioHack => _studioHack;
 
         public static event UnityAction<bool> onPoseEditingChanged;
 
@@ -27,11 +28,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static Config config => ConfigManager.config;
-
         private StudioHackManager()
         {
-            SceneManager.sceneLoaded += OnChangedSceneLevel;
         }
 
         public void Register(StudioHackBase studioHack)
@@ -47,14 +45,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private bool _isPoseEditing = false;
 
-        public void Update()
+        public override void PreUpdate()
         {
             if (studioHacks.Count == 0)
             {
                 return;
             }
 
-            studioHack = null;
+            _studioHack = null;
             activeStudioHacks.Clear();
 
             foreach (var hack in studioHacks)
@@ -69,40 +67,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (hack.IsValid())
                 {
-                    studioHack = hack;
+                    _studioHack = hack;
                     break;
                 }
             }
 
-            if (studioHack == null && activeStudioHacks.Count > 0)
+            if (_studioHack == null && activeStudioHacks.Count > 0)
             {
-                studioHack = activeStudioHacks[0];
+                _studioHack = activeStudioHacks[0];
             }
 
-            if (studioHack != null)
+            if (_studioHack != null)
             {
-                if (studioHack.isPoseEditing != _isPoseEditing)
+                if (_studioHack.isPoseEditing != _isPoseEditing)
                 {
-                    _isPoseEditing = studioHack.isPoseEditing;
+                    _isPoseEditing = _studioHack.isPoseEditing;
 
-                    if (onPoseEditingChanged != null)
-                    {
-                        onPoseEditingChanged(_isPoseEditing);
-                    }
+                    onPoseEditingChanged?.Invoke(_isPoseEditing);
                 }
             }
         }
 
-        public void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
+        public override void Update()
         {
-            if (!config.pluginEnabled)
+            if (_studioHack != null)
             {
-                return;
+                _studioHack.Update();
             }
+        }
 
+        public override void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
+        {
             foreach (var studioHack in studioHacks)
             {
-                studioHack.OnChangedSceneLevel(sceneName, sceneMode);
+                studioHack.OnChangedSceneLevel(scene, sceneMode);
             }
         }
     }

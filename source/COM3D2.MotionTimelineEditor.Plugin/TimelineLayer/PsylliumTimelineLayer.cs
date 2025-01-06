@@ -54,7 +54,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Init();
 
-            PsylliumManager.onSetup += OnAreaSetup;
             PsylliumManager.onControllerAdded += OnControllerAdded;
             PsylliumManager.onControllerRemoved += OnControllerRemoved;
             PsylliumManager.onAreaAdded += OnAreaAdded;
@@ -122,7 +121,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Dispose();
 
-            PsylliumManager.onSetup -= OnAreaSetup;
             PsylliumManager.onControllerAdded -= OnControllerAdded;
             PsylliumManager.onControllerRemoved -= OnControllerRemoved;
             PsylliumManager.onAreaAdded -= OnAreaAdded;
@@ -620,13 +618,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             pattern.ApplyTransformData(transformConfig);
-        }
-
-        public void OnAreaSetup()
-        {
-            InitMenuItems();
-            AddFirstBones(allBoneNames);
-            ApplyCurrentFrame(true);
         }
 
         public void OnControllerAdded(string controllerName)

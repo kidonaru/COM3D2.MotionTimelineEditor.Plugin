@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class StudioLightManager
+    public class StudioLightManager : ManagerBase
     {
         private Dictionary<string, StudioLightStat> lightMap = new Dictionary<string, StudioLightStat>();
 
@@ -31,21 +31,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static LightHackManager lightHackManager
-        {
-            get
-            {
-                return LightHackManager.instance;
-            }
-        }
-
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
-
-        private static TimelineManager timelineManager => TimelineManager.instance;
-
         private StudioLightManager()
         {
-            SceneManager.sceneLoaded += OnChangedSceneLevel;
         }
 
         public StudioLightStat GetLight(string name)
@@ -69,11 +56,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private int _prevUpdateFrame = -1;
 
+        public override void LateUpdate()
+        {
+            LateUpdate(false);
+        }
+
         public void LateUpdate(bool force)
         {
-            if (!force && _prevUpdateFrame > Time.frameCount - 60)
+            if (!force)
             {
-                return;
+                if (Time.frameCount < _prevUpdateFrame + 60 ||
+                    currentLayer.isAnmPlaying)
+                {
+                    return;
+                }
             }
             _prevUpdateFrame = Time.frameCount;
 
@@ -108,8 +104,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (cachedLight.light != stat.light ||
                     cachedLight.transform != stat.transform ||
                     cachedLight.obj != stat.obj ||
-                    cachedLight.type != stat.type ||
-                    cachedLight.visible != stat.visible)
+                    cachedLight.type != stat.type)
                 {
                     cachedLight.FromStat(stat);
                     updatedLights.Add(cachedLight);
@@ -144,29 +139,52 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     PluginUtils.LogDebug("light: type={0} displayName={1} name={2}",
                         light.type, light.displayName, light.name);
                 }
+
+                UpdateTimelineLights();
             }
 
             foreach (var light in addedLights)
             {
-                if (onLightAdded != null)
-                {
-                    onLightAdded.Invoke(light);
-                }
+                onLightAdded?.Invoke(light);
             }
 
             foreach (var light in removedLights)
             {
-                if (onLightRemoved != null)
-                {
-                    onLightRemoved.Invoke(light);
-                }
+                onLightRemoved?.Invoke(light);
             }
 
              foreach (var light in updatedLights)
             {
-                if (onLightUpdated != null)
+                onLightUpdated?.Invoke(light);
+            }
+        }
+
+        private void UpdateTimelineLights()
+        {
+            if (timeline == null)
+            {
+                return;
+            }
+
+            var lights = this.lights;
+            var timelineLights = timeline.lights;
+
+            if (lights.Count != timelineLights.Count)
+            {
+                timelineLights.Clear();
+                foreach (var light in lights)
                 {
-                    onLightUpdated.Invoke(light);
+                    var timelineLight = new TimelineLightData(light);
+                    timelineLights.Add(timelineLight);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < lights.Count; i++)
+                {
+                    var light = lights[i];
+                    var timelineModel = timelineLights[i];
+                    timelineModel.FromStat(light);
                 }
             }
         }
@@ -185,7 +203,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     stat = CreateLightStat(
                         lightData.type,
-                        lightData.visible,
                         index++);
                     lightHackManager.CreateLight(stat);
 
@@ -196,9 +213,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var newStat = stat.Clone();
                     newStat.type = lightData.type;
-                    newStat.visible = lightData.visible;
                     newStat.index = index++;
-                    lightHackManager.ApplyLight(newStat);
+                    lightHackManager.ChangeLight(newStat);
                 }
             }
 
@@ -221,14 +237,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return lightHackManager.CanCreateLight();
         }
 
-        public void OnPluginDisable()
+        public override void OnLoad()
         {
-            Reset();
+            SetupLights(timeline.lights);
         }
 
-        public void OnPluginEnable()
+        public override void OnPluginDisable()
         {
-            // SetupLightsが呼ばれるので不要
+            Reset();
         }
 
         public void Reset()
@@ -243,10 +259,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public StudioLightStat CreateLightStat(
             LightType lightType,
-            bool visible,
             int index)
         {
-            return new StudioLightStat(lightType, visible, index);
+            return new StudioLightStat(lightType, index);
         }
 
         public void DeleteLight(StudioLightStat stat)
@@ -265,6 +280,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             timelineManager.RequestHistory("ライトの追加: " + stat.displayName);
         }
 
+        public void ChangeLight(StudioLightStat stat)
+        {
+            lightHackManager.ChangeLight(stat);
+            //LateUpdate(true);
+        }
+
         public void ApplyLight(StudioLightStat stat)
         {
             lightHackManager.ApplyLight(stat);
@@ -273,7 +294,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private Dictionary<LightType, int> _lightGroupMap = new Dictionary<LightType, int>();
 
-        private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)
+        public override void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
             Reset();
         }

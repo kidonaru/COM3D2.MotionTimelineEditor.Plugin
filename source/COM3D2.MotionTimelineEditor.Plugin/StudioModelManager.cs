@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using MyRoomCustom;
 using UnityEngine;
 using UnityEngine.Events;
@@ -32,7 +33,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
     }
 
-    public class StudioModelManager
+    public class StudioModelManager : ManagerBase
     {
         private Dictionary<string, StudioModelStat> modelMap = new Dictionary<string, StudioModelStat>();
         public Dictionary<string, ModelBone> boneMap = new Dictionary<string, ModelBone>();
@@ -59,10 +60,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return _instance;
             }
         }
-
-        private static ModelHackManager modelHackManager => ModelHackManager.instance;
-
-        private static TimelineManager timelineManager => TimelineManager.instance;
 
         private Dictionary<string, OfficialObjectInfo> _officialObjectLabelMap = null;
         private Dictionary<string, OfficialObjectInfo> _bgObjectFileNameMap = null;
@@ -107,7 +104,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private StudioModelManager()
         {
-            SceneManager.sceneLoaded += OnChangedSceneLevel;
         }
 
         public StudioModelStat GetModel(string name)
@@ -170,11 +166,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private Dictionary<string, int> _modelGroupMap = new Dictionary<string, int>();
         private int _prevUpdateFrame = -1;
 
+        public override void LateUpdate()
+        {
+            LateUpdate(false);
+        }
+
         public void LateUpdate(bool force)
         {
-            if (!force && _prevUpdateFrame > Time.frameCount - 60)
+            if (!force)
             {
-                return;
+                if (Time.frameCount < _prevUpdateFrame + 60 ||
+                    currentLayer.isAnmPlaying)
+                {
+                    return;
+                }
             }
             _prevUpdateFrame = Time.frameCount;
 
@@ -295,35 +300,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         PluginUtils.LogDebug("  blendShape: name={0}", blendShape.name);
                     }
                 }
+
+                UpdateTimelineModels();
             }
 
             foreach (var model in addedModels)
             {
-                if (onModelAdded != null)
-                {
-                    onModelAdded.Invoke(model);
-                }
+                onModelAdded?.Invoke(model);
             }
 
             foreach (var model in removedModels)
             {
-                if (onModelRemoved != null)
-                {
-                    onModelRemoved.Invoke(model);
-                }
+                onModelRemoved?.Invoke(model);
             }
 
              foreach (var model in updatedModels)
             {
-                if (onModelUpdated != null)
-                {
-                    onModelUpdated.Invoke(model);
-                }
+                onModelUpdated?.Invoke(model);
             }
         }
 
         public void SetupModels(List<TimelineModelData> modelDataList)
         {
+            modelDataList = modelDataList.ToList(); // 更新される可能性があるので複製
             LateUpdate(true);
 
             foreach (var modelData in modelDataList)
@@ -375,14 +374,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             LateUpdate(true);
         }
 
-        public void OnPluginDisable()
+        public override void OnLoad()
         {
-            Reset();
+            SetupModels(timeline.models);
         }
 
-        public void OnPluginEnable()
+        public override void OnPluginDisable()
         {
-            // SetupModelsが呼ばれるので不要
+            Reset();
         }
 
         public void Reset()
@@ -727,7 +726,37 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)
+        private void UpdateTimelineModels()
+        {
+            if (timeline == null)
+            {
+                return;
+            }
+
+            var models = this.models;
+            var timelineModels = timeline.models;
+
+            if (models.Count != timelineModels.Count)
+            {
+                timelineModels.Clear();
+                foreach (var model in models)
+                {
+                    var timelineModel = new TimelineModelData(model);
+                    timelineModels.Add(timelineModel);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < models.Count; i++)
+                {
+                    var model = models[i];
+                    var timelineModel = timelineModels[i];
+                    timelineModel.FromModel(model);
+                }
+            }
+        }
+
+        public override void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
             Reset();
         }

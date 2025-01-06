@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class BoneMenuManager
+    public class BoneMenuManager : ManagerBase
     {
         private List<IBoneMenuItem> easyMenuItems = null;
 
@@ -19,19 +19,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static Config config => ConfigManager.config;
-
-        private static TimelineManager timelineManager => TimelineManager.instance;
-
-        private static ITimelineLayer currentLayer => timelineManager.currentLayer;
-
         private List<IBoneMenuItem> allMenuItems => currentLayer.allMenuItems;
 
         private BoneMenuManager()
         {
         }
 
-        public void Init()
+        public override void Init()
         {
             if (easyMenuItems == null)
             {

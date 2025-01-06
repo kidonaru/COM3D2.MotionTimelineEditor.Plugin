@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class StageLaserManager : MonoBehaviour
+    public class StageLaserManager : MonoBehaviour, IManager
     {
         public List<StageLaserController> controllers = new List<StageLaserController>();
         public Dictionary<string, StageLaserController> controllerMap = new Dictionary<string, StageLaserController>();
@@ -16,7 +16,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Dictionary<string, StageLaser> laserMap = new Dictionary<string, StageLaser>();
         public List<string> laserNames = new List<string>();
 
-        public static event UnityAction onSetup;
         public static event UnityAction<string> onControllerAdded;
         public static event UnityAction<string> onControllerRemoved;
         public static event UnityAction<string> onLaserAdded;
@@ -37,8 +36,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
+        private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
         private static TimelineData timeline => TimelineManager.instance.timeline;
+
+        public void Init()
+        {
+        }
+
+        public void PreUpdate()
+        {
+        }
+
+        public void Update()
+        {
+        }
+
+        public void LateUpdate()
+        {
+        }
 
         private void Awake()
         {
@@ -47,14 +62,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _instance = this;
                 DontDestroyOnLoad(gameObject);
             }
-
-            SceneManager.sceneLoaded += OnChangedSceneLevel;
         }
 
         private void OnDestroy()
         {
-            SceneManager.sceneLoaded -= OnChangedSceneLevel;
-
             if (_instance == this)
             {
                 _instance = null;
@@ -79,14 +90,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return laser;
             }
             return null;
-        }
-
-        public void Update()
-        {
-            if (studioHack == null || !studioHack.IsValid())
-            {
-                return;
-            }
         }
 
         public void UpdateLasers()
@@ -118,10 +121,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     laser.displayName, laser.name);
             }
 
-            UpdateLaserCount();
+            UpdateTimelineLaser();
         }
 
-        private void UpdateLaserCount()
+        private void UpdateTimelineLaser()
         {
             if (timeline == null)
             {
@@ -172,21 +175,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             UpdateLasers();
+        }
 
-            if (onSetup != null)
-            {
-                onSetup.Invoke();
-            }
+        public void OnLoad()
+        {
+            SetupLasers(timeline.stageLaserCountList);
         }
 
         public void OnPluginDisable()
         {
             Reset();
-        }
-
-        public void OnPluginEnable()
-        {
-            // SetupLasersが呼ばれるので不要
         }
 
         public void Reset()
@@ -196,8 +194,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 GameObject.Destroy(controller.gameObject);
             }
             controllers.Clear();
-
-            UpdateLasers();
+            controllerMap.Clear();
+            controllerNames.Clear();
+            lasers.Clear();
+            laserMap.Clear();
+            laserNames.Clear();
         }
 
         public void AddController(bool notify)
@@ -214,13 +215,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (notify)
             {
                 UpdateLasers();
-
-                if (onControllerAdded != null)
-                {
-                    onControllerAdded.Invoke(controller.name);
-                }
+                onControllerAdded?.Invoke(controller.name);
             }
-            
         }
 
         public void RemoveController(bool notify)
@@ -238,11 +234,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (notify)
             {
                 UpdateLasers();
-
-                if (onControllerRemoved != null)
-                {
-                    onControllerRemoved.Invoke(controllerName);
-                }
+                onControllerRemoved?.Invoke(controllerName);
             }
         }
 
@@ -254,11 +246,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (notify)
             {
                 UpdateLasers();
-
-                if (onLaserAdded != null)
-                {
-                    onLaserAdded.Invoke(laserName);
-                }
+                onLaserAdded?.Invoke(laserName);
             }
         }
 
@@ -275,15 +263,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (notify)
             {
                 UpdateLasers();
-
-                if (onLaserRemoved != null)
-                {
-                    onLaserRemoved.Invoke(laserName);
-                }
+                onLaserRemoved?.Invoke(laserName);
             }
         }
 
-        private void OnChangedSceneLevel(Scene sceneName, LoadSceneMode SceneMode)
+        public void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
             Reset();
         }

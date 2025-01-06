@@ -25,7 +25,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Init();
 
-            BGModelManager.onModelSetup += OnBGModelSetup;
+            BGModelManager.onSetup += OnBGModelSetup;
             BGModelManager.onModelAdded += OnBGModelAdded;
             BGModelManager.onModelRemoved += OnBGModelRemoved;
         }
@@ -45,7 +45,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Dispose();
 
-            BGModelManager.onModelSetup -= OnBGModelSetup;
+            BGModelManager.onSetup -= OnBGModelSetup;
             BGModelManager.onModelAdded -= OnBGModelAdded;
             BGModelManager.onModelRemoved -= OnBGModelRemoved;
         }

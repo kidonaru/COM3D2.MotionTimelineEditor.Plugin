@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class ModelHackManager
+    public class ModelHackManager : ManagerBase
     {
         private Dictionary<string, IModelHack> modelHackMap = new Dictionary<string, IModelHack>();
 
@@ -63,13 +63,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private static Config config => ConfigManager.config;
-
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
-
         private ModelHackManager()
         {
-            SceneManager.sceneLoaded += OnChangedSceneLevel;
         }
 
         public void Register(IModelHack modelHack)
@@ -162,20 +157,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void Update()
+        public override void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
-        }
-
-        public void OnChangedSceneLevel(Scene sceneName, LoadSceneMode sceneMode)
-        {
-            if (!config.pluginEnabled)
-            {
-                return;
-            }
-
             foreach (var modelHack in modelHackMap.Values)
             {
-                modelHack.OnChangedSceneLevel(sceneName, sceneMode);
+                modelHack.OnChangedSceneLevel(scene, sceneMode);
             }
         }
     }

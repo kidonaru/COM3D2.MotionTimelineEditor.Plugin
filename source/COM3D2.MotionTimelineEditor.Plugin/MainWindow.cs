@@ -26,7 +26,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public readonly static int HEADER_HEIGHT = 200;
         public readonly static int EASY_EDIT_WINDOW_HEIGHT = 260;
 
-        private static StudioHackBase studioHack => StudioHackManager.studioHack;
+        private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
 
         private static MaidManager maidManager => MaidManager.instance;
 
@@ -36,7 +36,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private static ITimelineLayer currentLayer => timelineManager.currentLayer;
 
-        private static Config config => ConfigManager.config;
+        private static Config config => ConfigManager.instance.config;
 
         private static string anmName
         {
@@ -231,10 +231,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void Init()
         {
             texWhite = GUIView.CreateColorTexture(Color.white);
-        }
-
-        public void Update()
-        {
         }
 
         public void UpdateTexture()
