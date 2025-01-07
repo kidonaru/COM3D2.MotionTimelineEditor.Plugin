@@ -621,17 +621,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private Camera GetCurrentCamera()
         {
-#if UNITY_EDITOR
+#if COM3D2
+            return PluginUtils.MainCamera;
+#else
             // EditMode時はSceneViewのカメラを使用
             if (!Application.isPlaying)
             {
                 SceneView sceneView = SceneView.lastActiveSceneView;
                 return sceneView != null ? sceneView.camera : null;
             }
-#endif
-
-            // PlayMode時はメインカメラを使用
             return Camera.main;
+#endif
         }
     }
 }

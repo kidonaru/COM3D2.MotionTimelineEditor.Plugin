@@ -570,7 +570,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             dictionary["position"] = Vector3.zero.ToString("G9");
             dictionary["rotation"] = Quaternion.identity.ToString("G9");
             dictionary["scale"] = Vector3.one.ToString("G9");
-            dictionary["背景色"] = GameMain.Instance.MainCamera.camera.backgroundColor.ToString("G9");
+            dictionary["背景色"] = PluginUtils.MainCamera.backgroundColor.ToString("G9");
 
             studio.bgWindow.OnDeserializeEvent();
         }

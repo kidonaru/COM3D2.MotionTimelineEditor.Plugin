@@ -28,10 +28,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         };
         public override List<string> allBoneNames => _allBoneNames;
 
-        private static Camera camera
-        {
-            get => GameMain.Instance.MainCamera.camera;
-        }
+        private static Camera camera => PluginUtils.MainCamera;
 
         private BGColorTimelineLayer(int slotNo) : base(slotNo)
         {

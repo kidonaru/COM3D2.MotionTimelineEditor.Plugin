@@ -65,7 +65,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             get
             {
-                return GameMain.Instance.MainCamera.gameObject.GetComponent<DepthOfFieldScatter>();
+                return PluginUtils.MainCamera.gameObject.GetComponent<DepthOfFieldScatter>();
             }
         }
 

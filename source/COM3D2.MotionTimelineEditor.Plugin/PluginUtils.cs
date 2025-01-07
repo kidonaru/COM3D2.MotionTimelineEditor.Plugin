@@ -9,7 +9,6 @@ using System.Text.RegularExpressions;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-
     public static class PluginUtils
     {
         public static readonly string UserDataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Config");
@@ -18,10 +17,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static string ConfigPath
         {
-            get
-            {
-                return CombinePaths(UserDataPath, PluginInfo.PluginName + ".xml");
-            }
+            get => CombinePaths(UserDataPath, PluginInfo.PluginName + ".xml");
         }
         
         public static string TimelineDirPath
@@ -40,18 +36,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static string DCMConfigPath
         {
-            get
-            {
-                return CombinePaths(UserDataPath, "DanceCameraMotion");
-            }
+            get => CombinePaths(UserDataPath, "DanceCameraMotion");
         }
 
         public static string ExtraModelCsvPath
         {
-            get
-            {
-                return CombinePaths(UserDataPath, PluginInfo.PluginName + "_ExtraModel.csv");
-            }
+            get => CombinePaths(UserDataPath, PluginInfo.PluginName + "_ExtraModel.csv");
         }
 
         public static string PluginConfigDirPath
@@ -68,12 +58,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public static CameraMain MainCamera
+        public static Camera MainCamera
         {
-            get
-            {
-                return GameMain.Instance.MainCamera;
-            }
+            get => GameMain.Instance.MainCamera.camera;
         }
 
         [Conditional("DEBUG")]
@@ -194,13 +181,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static void UIHide()
         {
             var methodInfo = typeof(CameraMain).GetMethod("UIHide", BindingFlags.NonPublic | BindingFlags.Instance);
-            methodInfo.Invoke(MainCamera, null);
+            methodInfo.Invoke(GameMain.Instance.MainCamera, null);
         }
 
         public static void UIResume()
         {
             var methodInfo = typeof(CameraMain).GetMethod("UIResume", BindingFlags.NonPublic | BindingFlags.Instance);
-            methodInfo.Invoke(MainCamera, null);
+            methodInfo.Invoke(GameMain.Instance.MainCamera, null);
         }
 
         public static string GetDcmSongDirPath(string songName)

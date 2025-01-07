@@ -64,7 +64,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (_audioMgr == null)
             {
-                var components = GameMain.Instance.MainCamera.gameObject.GetComponentsInChildren<AudioSourceMgr>();
+                var components = PluginUtils.MainCamera.gameObject.GetComponentsInChildren<AudioSourceMgr>();
                 _audioMgr = components.FirstOrDefault(a => a.SoundType == AudioSourceMgr.Type.Bgm);
             }
             if (_audioMgr == null)

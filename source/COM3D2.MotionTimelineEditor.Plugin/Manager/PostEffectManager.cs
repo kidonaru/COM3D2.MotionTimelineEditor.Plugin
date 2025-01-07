@@ -78,7 +78,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public DistanceFogEffectSettings distanceFog => controller.context.fogSettings;
         public RimlightEffectSettings rimlight => controller.context.rimlightSettings;
 
-        private static CameraMain mainCamera => GameMain.Instance.MainCamera;
+        private static Camera mainCamera => PluginUtils.MainCamera;
 
         private PostEffectManager()
         {

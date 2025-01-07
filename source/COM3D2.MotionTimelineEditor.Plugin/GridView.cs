@@ -196,7 +196,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 width = height * cam.aspect;
 
                 // カメラからの距離に基づいてwidthMultiplierを計算
-                float distanceToCamera = Vector3.Distance(center, Camera.main.transform.position);
+                float distanceToCamera = Vector3.Distance(center, PluginUtils.MainCamera.transform.position);
                 widthMultiplier = distanceToCamera * 0.001f;
             }
 
@@ -249,7 +249,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var centerIndex = (gridCount % 2 == 0) ? gridCount / 2 : -1;
 
             // カメラからの距離に基づいてwidthMultiplierを計算
-            float distanceToCamera = Vector3.Distance(transform.position, Camera.main.transform.position);
+            float distanceToCamera = Vector3.Distance(transform.position, PluginUtils.MainCamera.transform.position);
             float widthMultiplier = distanceToCamera * 0.001f;
 
             // 縦線を更新

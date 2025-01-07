@@ -15,6 +15,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override bool isCameraLayer => true;
 
+        private static Camera camera => PluginUtils.MainCamera;
         private static Camera subCamera => studioHack.subCamera;
 
         public static string CameraBoneName = "camera";
@@ -131,8 +132,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             uoCamera.SetTargetPos(position);
             uoCamera.SetDistance(distance);
             uoCamera.SetAroundAngle(new Vector2(eulerAngles.y, eulerAngles.x));
-            Camera.main.SetRotationZ(eulerAngles.z);
-            Camera.main.fieldOfView = viewAngle;
+            camera.SetRotationZ(eulerAngles.z);
+            camera.fieldOfView = viewAngle;
 
             if (subCamera != null)
             {
@@ -144,7 +145,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static UltimateOrbitCamera GetUOCamera()
         {
-            return Camera.main.GetComponent<UltimateOrbitCamera>();
+            return camera.GetComponent<UltimateOrbitCamera>();
         }
 
         public override void UpdateFrame(FrameData frame)
@@ -152,13 +153,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var uoCamera = GetUOCamera();
             var target = uoCamera.target;
             var angle = uoCamera.GetAroundAngle();
-            var rotZ = Camera.main.GetRotationZ();
+            var rotZ = camera.GetRotationZ();
 
             var trans = CreateTransformData<TransformDataCamera>(CameraBoneName);
             trans.position = target.position;
             trans.eulerAngles = new Vector3(angle.y, angle.x, rotZ);
             trans.easing = GetEasing(frame.frameNo, CameraBoneName);
-            trans.scale = new Vector3(uoCamera.distance, Camera.main.fieldOfView, 0);
+            trans.scale = new Vector3(uoCamera.distance, camera.fieldOfView, 0);
 
             var bone = frame.CreateBone(trans);
             frame.UpdateBone(bone);
@@ -342,7 +343,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var target = uoCamera.target;
             var position = target.position;
             var aroundAngle = uoCamera.GetAroundAngle();
-            var rotZ = Camera.main.GetRotationZ();
+            var rotZ = camera.GetRotationZ();
             var angles = new Vector3(aroundAngle.y, aroundAngle.x, rotZ);
             var distance = uoCamera.distance;
             var prevBone = GetPrevBone(timelineManager.currentFrameNo, CameraBoneName);
@@ -455,8 +456,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     max = 179,
                     step = 0.1f,
                     defaultValue = 35,
-                    value = Camera.main.fieldOfView,
-                    onChanged = a => Camera.main.fieldOfView = a,
+                    value = camera.fieldOfView,
+                    onChanged = a => camera.fieldOfView = a,
                 });
 
             view.DrawHorizontalLine(Color.gray);
@@ -468,7 +469,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 uoCamera.SetTargetPos(position);
                 uoCamera.SetDistance(distance);
                 uoCamera.SetAroundAngle(new Vector2(angles.y, angles.x));
-                Camera.main.SetRotationZ(angles.z);
+                camera.SetRotationZ(angles.z);
             };
 
             Action focusToMaid = () =>

@@ -86,7 +86,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     return cameraManager.frontCamera;
                 }
-                return Camera.main;
+                return PluginUtils.MainCamera;
             }
         }
 

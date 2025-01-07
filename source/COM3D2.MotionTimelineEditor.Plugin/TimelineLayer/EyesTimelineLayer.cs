@@ -195,7 +195,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             switch (targetType)
             {
                 case LookAtTargetType.Camera:
-                    return GameMain.Instance.MainCamera.transform;
+                    return PluginUtils.MainCamera.transform;
                 case LookAtTargetType.Maid:
                 {
                     var maidCache = maidManager.GetMaidCache(targetIndex);

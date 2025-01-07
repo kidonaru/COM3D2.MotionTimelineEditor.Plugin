@@ -190,7 +190,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             set
             {
-                maid.body0.trsLookTarget = value ? null : GameMain.Instance.MainCamera.transform;
+                maid.body0.trsLookTarget = value ? null : PluginUtils.MainCamera.transform;
             }
         }
         
@@ -912,7 +912,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             switch (lookAtTargetType)
             {
                 case LookAtTargetType.Camera:
-                    return GameMain.Instance.MainCamera.transform;
+                    return PluginUtils.MainCamera.transform;
                 case LookAtTargetType.Maid:
                 {
                     var maidCache = maidManager.GetMaidCache(lookAtTargetIndex);
