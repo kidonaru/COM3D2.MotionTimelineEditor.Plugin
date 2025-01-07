@@ -96,5 +96,10 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
         {
             manager.pngPlacement.SetStopRotationVector(pngObj, v);
         }
+
+        public static void SetFixedPos(this PngObjectDataWrapper pngObj, Vector3 v)
+        {
+            manager.pngPlacement.SetFixedPos(pngObj, v);
+        }
     }
 }

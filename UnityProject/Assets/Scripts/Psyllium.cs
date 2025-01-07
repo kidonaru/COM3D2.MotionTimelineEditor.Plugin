@@ -36,7 +36,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.colorIndex = colorIndex;
 
             _filter.sharedMesh = controller.meshes[colorIndex];
-            _renderer.materials = controller.materials;
+            _renderer.sharedMaterials = controller.materials;
         }
 
         public T GetOrAddComponent<T>() where T : Component

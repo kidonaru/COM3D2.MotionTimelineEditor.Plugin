@@ -100,11 +100,13 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             pngObject.SetScale(start.scalex);
             pngObject.SetScaleMag(start.scalemag);
             pngObject.SetScaleZ(start.scalez);
-            pngObject.SetFixedCamera(start.fixcamera);
             pngObject.SetInversion(start.inversion);
             pngObject.SetBrightness(start.brightness);
             pngObject.SetColor(start.color);
             pngObject.SetRenderQueue(start.rq);
+
+            pngObject.SetFixedCamera(start.fixcamera);
+            pngObject.SetFixedPos(start.fixedpos);
 
             pngObject.SetAttachPoint(start.attach, start.maid);
             pngObject.SetAttachRotation(start.attachrotation);
@@ -213,6 +215,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                 trans.scalemag = pngObject.scaleMag;
                 trans.rq = pngObject.renderQueue;
                 trans.fixcamera = pngObject.fixedCamera;
+                trans.fixedpos = pngObject.fixedPos;
                 trans.attach = pngObject.attach;
                 trans.attachrotation = pngObject.attachRotation;
                 trans.brightness = pngObject.brightness;
@@ -325,14 +328,13 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 var initialEulerAngles = defaultTrans.initialEulerAngles;
                 var transformCache = view.GetTransformCache(null);
-                var prevEulerAngles = Vector3.zero;
                 transformCache.eulerAngles = pngObject.rotation;
 
                 updateTransform |= DrawEulerAngles(
                     view,
                     transformCache,
                     TransformEditType.全て,
-                    prevEulerAngles,
+                    pngObject.displayName,
                     initialEulerAngles);
 
                 if (updateTransform)
@@ -394,6 +396,25 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                 defaultTrans.fixcameraInfo,
                 pngObject.fixedCamera,
                 y => pngObject.SetFixedCamera(y));
+
+            view.DrawLabel("固定位置", 200, 20);
+
+            {
+                var initialPosition = defaultTrans.initialPosition;
+                var transformCache = view.GetTransformCache(null);
+                transformCache.position = pngObject.fixedPos;
+
+                updateTransform |= DrawPosition(
+                    view,
+                    transformCache,
+                    TransformEditType.全て,
+                    initialPosition);
+
+                if (updateTransform)
+                {
+                    pngObject.SetFixedPos(transformCache.position);
+                }
+            }
 
             updateTransform |= view.DrawCustomValueBool(
                 defaultTrans.inversionInfo,

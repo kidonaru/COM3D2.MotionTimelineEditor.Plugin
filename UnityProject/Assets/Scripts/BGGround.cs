@@ -75,8 +75,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static Vector3 DefaultScale = new Vector3(100f, 100f, 100f);
         public static Color DefaultColor = new Color(0f, 0f, 0f, 1f);
 
-        private Mesh _mesh;
-        private Material _material;
         private MeshFilter _meshFilter;
         private MeshRenderer _meshRenderer;
 
@@ -90,26 +88,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Initialize();
         }
 
-        void OnDestroy()
-        {
-            Refresh();
-        }
-
-        void Refresh()
-        {
-            if (_material != null)
-            {
-                DestroyImmediate(_material);
-                _material = null;
-            }
-
-            if (_mesh != null)
-            {
-                DestroyImmediate(_mesh);
-                _mesh = null;
-            }
-        }
-
         void OnValidate()
         {
             UpdateMaterial();
@@ -117,8 +95,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Initialize()
         {
-            Refresh();
-
             _meshFilter = gameObject.GetComponent<MeshFilter>();
             if (_meshFilter == null)
             {
@@ -130,22 +106,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 _meshRenderer = gameObject.AddComponent<MeshRenderer>();
                 _meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            }
 
-            if (_material == null)
-            {
 #if COM3D2
-                _material = new Material(Shader.Find("CM3D2/Lighted"));
+                var material = new Material(Shader.Find("CM3D2/Lighted"));
 #else
-                _material = new Material(Shader.Find("Standard"));
+                var material = new Material(Shader.Find("Standard"));
 #endif
-                _meshRenderer.sharedMaterial = _material;
-            }
-
-            if (_mesh == null)
-            {
-                _mesh = new Mesh();
-                _meshFilter.sharedMesh = _mesh;
+                _meshRenderer.material = material;
             }
 
             transform.localPosition = _position;
@@ -157,7 +124,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         void UpdateMesh()
         {
-            _mesh.Clear();
+            var mesh = _meshFilter.mesh;
+            mesh.Clear();
 
             // 頂点の計算
             var size = 0.5f;
@@ -176,15 +144,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 0, 2, 3,
             };
 
-            _mesh.vertices = vertices;
-            _mesh.triangles = triangles;
+            mesh.vertices = vertices;
+            mesh.triangles = triangles;
         }
 
         private void UpdateMaterial()
         {
-            if (_material != null)
+            var material = _meshRenderer.material;
+            if (material != null)
             {
-                _material.SetColor(Uniforms._Color, color);
+                material.SetColor(Uniforms._Color, color);
             }
         }
 

@@ -13,7 +13,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public GameObject sourceObj => info?.gameObject;
         public GameObject obj => sourceObj;
-        public Transform transform => obj?.transform;
+        public Transform transform => (obj != null) ? obj.transform : null;
 
         public bool visible
         {

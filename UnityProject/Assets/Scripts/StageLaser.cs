@@ -335,22 +335,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Initialize();
         }
 
-        void OnDestroy()
-        {
-            if (_meshRenderer.sharedMaterial != null)
-            {
-                DestroyImmediate(_meshRenderer.sharedMaterial);
-            }
-            if (_meshFilter != null && _meshFilter.sharedMesh != null)
-            {
-                DestroyImmediate(_meshFilter.sharedMesh);
-            }
-            if (_meshObject != null)
-            {
-                DestroyImmediate(_meshObject);
-            }
-        }
-
         void OnValidate()
         {
             if (_meshFilter != null)
@@ -370,6 +354,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         void LateUpdate()
         {
+            if (!visible)
+            {
+                return;
+            }
+
             if (_requestedMeshUpdate)
             {
                 UpdateMesh();
@@ -422,31 +411,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _meshFilter = _meshObject.AddComponent<MeshFilter>();
             }
 
-            if (_meshFilter.sharedMesh != null)
-            {
-                DestroyImmediate(_meshFilter.sharedMesh);
-            }
-
             _meshRenderer = _meshObject.GetComponent<MeshRenderer>();
             if (_meshRenderer == null)
             {
                 _meshRenderer = _meshObject.AddComponent<MeshRenderer>();
                 _meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            }
 
-            if (_meshRenderer.sharedMaterial != null)
-            {
-                DestroyImmediate(_meshRenderer.sharedMaterial);
-            }
-
-            {
 #if COM3D2
                 var material = bundleManager.LoadMaterial("StageLaser");
 #else
                 var material = new Material(Shader.Find("MTE/StageLaser"));
                 material.SetTexture("_MainTex", Resources.Load<Texture2D>("noise_texture"));
 #endif
-                _meshRenderer.sharedMaterial = material;
+                _meshRenderer.material = material;
             }
 
             transform.localPosition = DefaultPosition;
@@ -458,16 +435,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             UpdateTransform();
         }
 
+        private Vector3[] _vertices = null;
+        private Color[] _colors = null;
+        private int[] _triangles = null;
+
         void UpdateMesh()
         {
-            Mesh mesh = _meshFilter.sharedMesh;
-            if (mesh == null)
-            {
-                mesh = new Mesh();
-                _meshFilter.sharedMesh = mesh;
-                mesh.name = "StageLaser Mesh";
-            }
-
+            var mesh = _meshFilter.mesh;
             mesh.Clear();
 
             float range = laserRange;
@@ -478,9 +452,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             // 頂点の計算
             int verticesCount = 6 * (segmentRange + 1);
-            Vector3[] vertices = new Vector3[verticesCount];
-            Color[] colors = new Color[verticesCount];
             int vertexIndex = 0;
+
+            if (_vertices == null || _vertices.Length != verticesCount)
+            {
+                _vertices = new Vector3[verticesCount];
+            }
+
+            if (_colors == null || _colors.Length != verticesCount)
+            {
+                _colors = new Color[verticesCount];
+            }
 
             float coreWidth = width * coreRadius;
             var zeroColor = new Color(0, 0, 0, 0);
@@ -498,87 +480,92 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var currentColor2 = Color.Lerp(zeroColor, color2, distanceFalloff);
 
                 // 散乱光の左端（完全に透明）
-                vertices[vertexIndex] = new Vector3(-(currentGlowWidth + width), 0, z);
-                colors[vertexIndex++] = zeroColor;
+                _vertices[vertexIndex] = new Vector3(-(currentGlowWidth + width), 0, z);
+                _colors[vertexIndex++] = zeroColor;
 
                 // レーザーの左端（color2）
-                vertices[vertexIndex] = new Vector3(-width, 0, z);
-                colors[vertexIndex++] = currentColor2;
+                _vertices[vertexIndex] = new Vector3(-width, 0, z);
+                _colors[vertexIndex++] = currentColor2;
 
                 // レーザーのコア部分の左端（color1）
-                vertices[vertexIndex] = new Vector3(-coreWidth, 0, z);
-                colors[vertexIndex++] = Color.Lerp(zeroColor, color1, distanceFalloff);
+                _vertices[vertexIndex] = new Vector3(-coreWidth, 0, z);
+                _colors[vertexIndex++] = Color.Lerp(zeroColor, color1, distanceFalloff);
 
                 // レーザーのコア部分の右端（color1）
-                vertices[vertexIndex] = new Vector3(coreWidth, 0, z);
-                colors[vertexIndex++] = Color.Lerp(zeroColor, color1, distanceFalloff);
+                _vertices[vertexIndex] = new Vector3(coreWidth, 0, z);
+                _colors[vertexIndex++] = Color.Lerp(zeroColor, color1, distanceFalloff);
 
                 // レーザーの右端（color2）
-                vertices[vertexIndex] = new Vector3(width, 0, z);
-                colors[vertexIndex++] = currentColor2;
+                _vertices[vertexIndex] = new Vector3(width, 0, z);
+                _colors[vertexIndex++] = currentColor2;
 
                 // 散乱光の右端（完全に透明）
-                vertices[vertexIndex] = new Vector3(currentGlowWidth + width, 0, z);
-                colors[vertexIndex++] = zeroColor;
+                _vertices[vertexIndex] = new Vector3(currentGlowWidth + width, 0, z);
+                _colors[vertexIndex++] = zeroColor;
             }
 
             // インデックスの計算
-            int[] triangles = new int[segmentRange * 30]; // 5つの領域×2三角形×3頂点
+            int triangleCount = segmentRange * 30; // 5つの領域×2三角形×3頂点
             int triangleIndex = 0;
+
+            if (_triangles == null || _triangles.Length != triangleCount)
+            {
+                _triangles = new int[triangleCount];
+            }
 
             for (int r = 0; r < segmentRange; r++)
             {
                 int baseIndex = r * 6; // 断面は6つの頂点で構成される
 
                 // 散乱光の左側
-                triangles[triangleIndex++] = baseIndex;
-                triangles[triangleIndex++] = baseIndex + 6;
-                triangles[triangleIndex++] = baseIndex + 1;
+                _triangles[triangleIndex++] = baseIndex;
+                _triangles[triangleIndex++] = baseIndex + 6;
+                _triangles[triangleIndex++] = baseIndex + 1;
                 
-                triangles[triangleIndex++] = baseIndex + 1;
-                triangles[triangleIndex++] = baseIndex + 6;
-                triangles[triangleIndex++] = baseIndex + 7;
+                _triangles[triangleIndex++] = baseIndex + 1;
+                _triangles[triangleIndex++] = baseIndex + 6;
+                _triangles[triangleIndex++] = baseIndex + 7;
 
                 // レーザーの外側左
-                triangles[triangleIndex++] = baseIndex + 1;
-                triangles[triangleIndex++] = baseIndex + 7;
-                triangles[triangleIndex++] = baseIndex + 2;
+                _triangles[triangleIndex++] = baseIndex + 1;
+                _triangles[triangleIndex++] = baseIndex + 7;
+                _triangles[triangleIndex++] = baseIndex + 2;
                 
-                triangles[triangleIndex++] = baseIndex + 2;
-                triangles[triangleIndex++] = baseIndex + 7;
-                triangles[triangleIndex++] = baseIndex + 8;
+                _triangles[triangleIndex++] = baseIndex + 2;
+                _triangles[triangleIndex++] = baseIndex + 7;
+                _triangles[triangleIndex++] = baseIndex + 8;
 
                 // レーザーのコア部分
-                triangles[triangleIndex++] = baseIndex + 2;
-                triangles[triangleIndex++] = baseIndex + 8;
-                triangles[triangleIndex++] = baseIndex + 3;
+                _triangles[triangleIndex++] = baseIndex + 2;
+                _triangles[triangleIndex++] = baseIndex + 8;
+                _triangles[triangleIndex++] = baseIndex + 3;
                 
-                triangles[triangleIndex++] = baseIndex + 3;
-                triangles[triangleIndex++] = baseIndex + 8;
-                triangles[triangleIndex++] = baseIndex + 9;
+                _triangles[triangleIndex++] = baseIndex + 3;
+                _triangles[triangleIndex++] = baseIndex + 8;
+                _triangles[triangleIndex++] = baseIndex + 9;
 
                 // レーザーの外側右
-                triangles[triangleIndex++] = baseIndex + 3;
-                triangles[triangleIndex++] = baseIndex + 9;
-                triangles[triangleIndex++] = baseIndex + 4;
+                _triangles[triangleIndex++] = baseIndex + 3;
+                _triangles[triangleIndex++] = baseIndex + 9;
+                _triangles[triangleIndex++] = baseIndex + 4;
                 
-                triangles[triangleIndex++] = baseIndex + 4;
-                triangles[triangleIndex++] = baseIndex + 9;
-                triangles[triangleIndex++] = baseIndex + 10;
+                _triangles[triangleIndex++] = baseIndex + 4;
+                _triangles[triangleIndex++] = baseIndex + 9;
+                _triangles[triangleIndex++] = baseIndex + 10;
 
                 // 散乱光の右側
-                triangles[triangleIndex++] = baseIndex + 4;
-                triangles[triangleIndex++] = baseIndex + 10;
-                triangles[triangleIndex++] = baseIndex + 5;
+                _triangles[triangleIndex++] = baseIndex + 4;
+                _triangles[triangleIndex++] = baseIndex + 10;
+                _triangles[triangleIndex++] = baseIndex + 5;
                 
-                triangles[triangleIndex++] = baseIndex + 5;
-                triangles[triangleIndex++] = baseIndex + 10;
-                triangles[triangleIndex++] = baseIndex + 11;
+                _triangles[triangleIndex++] = baseIndex + 5;
+                _triangles[triangleIndex++] = baseIndex + 10;
+                _triangles[triangleIndex++] = baseIndex + 11;
             }
 
-            mesh.vertices = vertices;
-            mesh.colors = colors;
-            mesh.triangles = triangles;
+            mesh.vertices = _vertices;
+            mesh.colors = _colors;
+            mesh.triangles = _triangles;
             mesh.RecalculateBounds();
         }
 
@@ -609,9 +596,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void UpdateMaterial()
         {
-            if (_meshRenderer != null && _meshRenderer.sharedMaterial != null)
+            if (_meshRenderer != null && _meshRenderer.material != null)
             {
-                var material = _meshRenderer.sharedMaterial;
+                var material = _meshRenderer.material;
                 material.SetFloat(Uniforms._NoiseStrength, noiseStrength);
                 material.SetFloat(Uniforms._NoiseScaleInv, 1f / noiseScale);
                 material.SetInt(Uniforms._zTest, (int) (zTest ? CompareFunction.LessEqual : CompareFunction.Always));

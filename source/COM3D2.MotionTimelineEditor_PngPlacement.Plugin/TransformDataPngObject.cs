@@ -10,7 +10,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
 
         public override TransformType type => TransformType.PngObject;
 
-        public override int valueCount => 29;
+        public override int valueCount => 32;
 
         public override bool hasPosition => true;
         public override bool hasEulerAngles => true;
@@ -254,6 +254,39 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                     defaultValue = 0,
                 }
             },
+            {
+                "fixedposx", new CustomValueInfo
+                {
+                    index = 29,
+                    name = "FX",
+                    min = -100f,
+                    max = 100f,
+                    step = 0.01f,
+                    defaultValue = 0,
+                }
+            },
+            {
+                "fixedposy", new CustomValueInfo
+                {
+                    index = 30,
+                    name = "FY",
+                    min = -100f,
+                    max = 100f,
+                    step = 0.01f,
+                    defaultValue = 0,
+                }
+            },
+            {
+                "fixedposz", new CustomValueInfo
+                {
+                    index = 31,
+                    name = "FZ",
+                    min = -100f,
+                    max = 100f,
+                    step = 0.01f,
+                    defaultValue = 0,
+                }
+            },
         };
 
         public override Dictionary<string, CustomValueInfo> GetCustomValueInfoMap()
@@ -279,6 +312,10 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
         public ValueData[] stoprotationvValues
         {
             get => new ValueData[] { this["stoprotationvx"], this["stoprotationvy"], this["stoprotationvz"] };
+        }
+        public ValueData[] fixedposValues
+        {
+            get => new ValueData[] { this["fixedposx"], this["fixedposy"], this["fixedposz"] };
         }
 
         public CustomValueInfo inversionInfo => CustomValueInfoMap["inversion"];
@@ -376,6 +413,11 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
         {
             get => stoprotationvValues.ToVector3();
             set => stoprotationvValues.FromVector3(value);
+        }
+        public Vector3 fixedpos
+        {
+            get => fixedposValues.ToVector3();
+            set => fixedposValues.FromVector3(value);
         }
     }
 }

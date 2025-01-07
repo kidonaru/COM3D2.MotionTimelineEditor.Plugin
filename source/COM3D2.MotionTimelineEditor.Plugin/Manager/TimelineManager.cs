@@ -157,7 +157,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             foreach (var layer in layers)
             {
-                layer.Update();
+                try
+                {
+                    layer.Update();
+                }
+                catch (Exception e)
+                {
+                    PluginUtils.LogException(e);
+                }
             }
 
             var isPoseEditing = studioHack.isPoseEditing;
@@ -195,7 +202,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             foreach (var layer in layers)
             {
-                layer.LateUpdate();
+                try
+                {
+                    layer.LateUpdate();
+                }
+                catch (Exception e)
+                {
+                    PluginUtils.LogException(e);
+                }
             }
         }
 

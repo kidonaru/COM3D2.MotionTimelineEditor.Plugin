@@ -356,6 +356,13 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             pngObjectDataField.stopRotationVector.SetValue(pngObj.original, v, null);
         }
 
+        public void SetFixedPos(PngObjectDataWrapper pngObj, Vector3 v)
+        {
+            //if (pngObj.fixedPos == v) return;
+            pngObj.fixedPos = v;
+            pngObjectDataField.fixedPos.SetValue(pngObj.original, v, null);
+        }
+
         public LoadDataWrapper ConvertToLoadData(PngObjectDataWrapper pngObj)
         {
             var loadData = new LoadDataWrapper();

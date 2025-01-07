@@ -341,22 +341,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             Initialize();
         }
 
-        void OnDestroy()
-        {
-            if (_meshRenderer.sharedMaterial != null)
-            {
-                DestroyImmediate(_meshRenderer.sharedMaterial);
-            }
-            if (_meshFilter != null && _meshFilter.sharedMesh != null)
-            {
-                DestroyImmediate(_meshFilter.sharedMesh);
-            }
-            if (_meshObject != null)
-            {
-                DestroyImmediate(_meshObject);
-            }
-        }
-
         void OnValidate()
         {
             if (_meshFilter != null)
@@ -376,6 +360,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         void LateUpdate()
         {
+            if (!visible)
+            {
+                return;
+            }
+
             if (spotLight != null)
             {
                 if (spotLight.color != color)
@@ -448,31 +437,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _meshFilter = _meshObject.AddComponent<MeshFilter>();
             }
 
-            if (_meshFilter.sharedMesh != null)
-            {
-                DestroyImmediate(_meshFilter.sharedMesh);
-            }
-
             _meshRenderer = _meshObject.GetComponent<MeshRenderer>();
             if (_meshRenderer == null)
             {
                 _meshRenderer = _meshObject.AddComponent<MeshRenderer>();
                 _meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            }
 
-            if (_meshRenderer.sharedMaterial != null)
-            {
-                DestroyImmediate(_meshRenderer.sharedMaterial);
-            }
-
-            {
 #if COM3D2
                 var material = bundleManager.LoadMaterial("StageLight");
 #else
                 var material = new Material(Shader.Find("MTE/StageLight"));
                 material.SetTexture("_MainTex", Resources.Load<Texture2D>("noise_texture"));
 #endif
-                _meshRenderer.sharedMaterial = material;
+                _meshRenderer.material = material;
             }
 
             transform.localPosition = _position;
@@ -484,16 +461,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             UpdateTransform();
         }
 
+        private Vector3[] _vertices = null;
+        private int[] _triangles = null;
+
         void UpdateMesh()
         {
-            Mesh mesh = _meshFilter.sharedMesh;
-            if (mesh == null)
-            {
-                mesh = new Mesh();
-                _meshFilter.sharedMesh = mesh;
-                mesh.name = "StageLight Mesh";
-            }
-
+            Mesh mesh = _meshFilter.mesh;
             mesh.Clear();
 
             float angle = spotAngle * 0.5f * Mathf.Deg2Rad;
@@ -510,8 +483,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             // 頂点の計算
             int verticesCount = (segmentAngle + 1) * (segmentRange + 1);
-            Vector3[] vertices = new Vector3[verticesCount];
             int vertexIndex = 0;
+
+            if (_vertices == null || _vertices.Length != verticesCount)
+            {
+                _vertices = new Vector3[verticesCount];
+            }
 
             for (int r = 0; r <= segmentRange; r++)
             {
@@ -521,13 +498,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 for (int a = 0; a <= segmentAngle; a++)
                 {
                     float x = (-radius + radiusStep * a) * radiusRate;
-                    vertices[vertexIndex++] = new Vector3(x, 0, z);
+                    _vertices[vertexIndex++] = new Vector3(x, 0, z);
                 }
             }
 
             // インデックスの計算
-            int[] triangles = new int[segmentAngle * segmentRange * 6];
+            int trianglesCount = segmentAngle * segmentRange * 6;
             int triangleIndex = 0;
+
+            if (_triangles == null || _triangles.Length != trianglesCount)
+            {
+                _triangles = new int[trianglesCount];
+            }
 
             for (int r = 0; r < segmentRange; r++)
             {
@@ -537,19 +519,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     int next = current + (segmentAngle + 1);
 
                     // 1つ目の三角形
-                    triangles[triangleIndex++] = current;
-                    triangles[triangleIndex++] = current + 1;
-                    triangles[triangleIndex++] = next + 1;
+                    _triangles[triangleIndex++] = current;
+                    _triangles[triangleIndex++] = current + 1;
+                    _triangles[triangleIndex++] = next + 1;
 
                     // 2つ目の三角形
-                    triangles[triangleIndex++] = current;
-                    triangles[triangleIndex++] = next + 1;
-                    triangles[triangleIndex++] = next;
+                    _triangles[triangleIndex++] = current;
+                    _triangles[triangleIndex++] = next + 1;
+                    _triangles[triangleIndex++] = next;
                 }
             }
 
-            mesh.vertices = vertices;
-            mesh.triangles = triangles;
+            mesh.vertices = _vertices;
+            mesh.triangles = _triangles;
             mesh.RecalculateBounds();
         }
 
@@ -586,9 +568,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void UpdateMaterial()
         {
-            if (_meshRenderer != null && _meshRenderer.sharedMaterial != null)
+            if (_meshRenderer != null && _meshRenderer.material != null)
             {
-                var material = _meshRenderer.sharedMaterial;
+                var material = _meshRenderer.material;
                 material.SetFloat(Uniforms._SpotRange, CalculateEffectiveRange());
                 material.SetFloat(Uniforms._SpotAngle, spotAngle);
                 material.SetColor(Uniforms._Color, color);

@@ -901,6 +901,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var defaultTrans = TransformDataPsylliumController.defaultTrans;
             var transformCache = view.GetTransformCache(null);
 
+            updateTransform |= view.DrawToggle(controller.displayName, controller.visible, 200, 20, newValue =>
+            {
+                controller.visible = newValue;
+            });
+
             {
                 var initialPosition = defaultTrans.initialPosition;
                 transformCache.position = controller.position;
@@ -933,11 +938,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     controller.eulerAngles = transformCache.eulerAngles;
                 }
             }
-
-            updateTransform |= view.DrawToggle("表示", controller.visible, 200, 20, newValue =>
-            {
-                controller.visible = newValue;
-            });
 
             if (updateTransform)
             {
@@ -1555,8 +1555,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
 
-            view.DrawLabel(area.displayName, 200, 20);
-
             var areaConfig = area.areaConfig;
             var transformCache = view.GetTransformCache();
             var defaultTrans = TransformDataPsylliumArea.defaultTrans;
@@ -1568,7 +1566,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var updateTransform = false;
             var editType = TransformEditType.全て;
 
-            updateTransform |= view.DrawToggle("表示", areaConfig.visible, 120, 20, newValue =>
+            updateTransform |= view.DrawToggle(area.displayName, areaConfig.visible, 200, 20, newValue =>
             {
                 areaConfig.visible = newValue;
             });
