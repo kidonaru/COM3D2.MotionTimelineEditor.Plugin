@@ -43,12 +43,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void Init()
         {
-            InitParrifinEffect();
-            InitDistanceFogEffect();
-            InitRimlightEffect();
-
             base.Init();
-
             AddFirstBones(allBoneNames);
         }
 
@@ -82,9 +77,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 PluginUtils.LogDebug($"PostEffetTimelineLayer.Update: boneCount={boneCount}");
                 _allBoneNames = null;
-                InitParrifinEffect();
-                InitDistanceFogEffect();
-                InitRimlightEffect();
+                postEffectManager.InitPostEffects();
                 InitMenuItems();
                 AddFirstBones(allBoneNames);
             }

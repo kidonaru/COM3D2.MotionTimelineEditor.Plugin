@@ -7,18 +7,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public partial class PostEffectTimelineLayer : TimelineLayerBase
     {
-        private void InitDistanceFogEffect()
-        {
-            while (postEffectManager.GetDistanceFogCount() < timeline.distanceFogCount)
-            {
-                postEffectManager.AddDistanceFogData();
-            }
-            while (postEffectManager.GetDistanceFogCount() > timeline.distanceFogCount)
-            {
-                postEffectManager.RemoveDistanceFogData();
-            }
-        }
-
         private void ApplyDistanceFog(MotionData motion, float t)
         {
             var start = motion.start as TransformDataDistanceFog;

@@ -7,18 +7,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public partial class PostEffectTimelineLayer : TimelineLayerBase
     {
-        private void InitRimlightEffect()
-        {
-            while (postEffectManager.GetRimlightCount() < timeline.rimlightCount)
-            {
-                postEffectManager.AddRimlightData();
-            }
-            while (postEffectManager.GetRimlightCount() > timeline.rimlightCount)
-            {
-                postEffectManager.RemoveRimlightData();
-            }
-        }
-
         private void ApplyRimlight(MotionData motion, float t)
         {
             var start = motion.start as TransformDataRimlight;

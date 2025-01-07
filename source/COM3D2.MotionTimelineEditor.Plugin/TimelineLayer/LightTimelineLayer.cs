@@ -209,97 +209,64 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var t0 = motion.stFrame * timeline.frameDuration;
             var t1 = motion.edFrame * timeline.frameDuration;
 
-            var updated = false;
+            stat.position = PluginUtils.HermiteVector3(
+                t0,
+                t1,
+                start.positionValues,
+                end.positionValues,
+                t);
 
-            if (start.position != end.position)
-            {
-                stat.position = PluginUtils.HermiteVector3(
-                    t0,
-                    t1,
-                    start.positionValues,
-                    end.positionValues,
-                    t);
-                updated = true;
-            }
-
-            if (start.eulerAngles != end.eulerAngles)
-            {
-                stat.eulerAngles = PluginUtils.HermiteVector3(
-                    t0,
-                    t1,
-                    start.eulerAnglesValues,
-                    end.eulerAnglesValues,
-                    t);
-                updated = true;
-            }
+            stat.eulerAngles = PluginUtils.HermiteVector3(
+                t0,
+                t1,
+                start.eulerAnglesValues,
+                end.eulerAnglesValues,
+                t);
 
             if (timeline.isLightColorEasing)
             {
-                if (start.color != end.color)
-                {
-                    light.color = Color.Lerp(start.color, end.color, t);
-                    updated = true;
-                }
+                light.color = Color.Lerp(start.color, end.color, t);
             }
 
             if (timeline.isLightExtraEasing)
             {
-                if (start.range != end.range)
-                {
-                    light.range = PluginUtils.HermiteValue(
-                        t0,
-                        t1,
-                        start.rangeValue,
-                        end.rangeValue,
-                        t);
-                    updated = true;
-                }
-                if (start.intensity != end.intensity)
-                {
-                    light.intensity = PluginUtils.HermiteValue(
-                        t0,
-                        t1,
-                        start.intensityValue,
-                        end.intensityValue,
-                        t);
-                    updated = true;
-                }
-                if (start.spotAngle != end.spotAngle)
-                {
-                    light.spotAngle = PluginUtils.HermiteValue(
-                        t0,
-                        t1,
-                        start.spotAngleValue,
-                        end.spotAngleValue,
-                        t);
-                    updated = true;
-                }
-                if (start.shadowStrength != end.shadowStrength)
-                {
-                    light.shadowStrength = PluginUtils.HermiteValue(
-                        t0,
-                        t1,
-                        start.shadowStrengthValue,
-                        end.shadowStrengthValue,
-                        t);
-                    updated = true;
-                }
-                if (start.shadowBias != end.shadowBias)
-                {
-                    light.shadowBias = PluginUtils.HermiteValue(
-                        t0,
-                        t1,
-                        start.shadowBiasValue,
-                        end.shadowBiasValue,
-                        t);
-                    updated = true;
-                }
+                light.range = PluginUtils.HermiteValue(
+                    t0,
+                    t1,
+                    start.rangeValue,
+                    end.rangeValue,
+                    t);
+
+                light.intensity = PluginUtils.HermiteValue(
+                    t0,
+                    t1,
+                    start.intensityValue,
+                    end.intensityValue,
+                    t);
+
+                light.spotAngle = PluginUtils.HermiteValue(
+                    t0,
+                    t1,
+                    start.spotAngleValue,
+                    end.spotAngleValue,
+                    t);
+
+                light.shadowStrength = PluginUtils.HermiteValue(
+                    t0,
+                    t1,
+                    start.shadowStrengthValue,
+                    end.shadowStrengthValue,
+                    t);
+
+                light.shadowBias = PluginUtils.HermiteValue(
+                    t0,
+                    t1,
+                    start.shadowBiasValue,
+                    end.shadowBiasValue,
+                    t);
             }
 
-            if (updated)
-            {
-                lightManager.ApplyLight(stat);
-            }
+            lightManager.ApplyLight(stat);
         }
 
         public void OnLightAdded(StudioLightStat light)
@@ -386,6 +353,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var start = motion.start as TransformDataLight;
                 var end = motion.end as TransformDataLight;
+                var stColor = (Color32) start.color;
+                var edColor = (Color32) end.color;
 
                 var light = lightManager.GetLight(start.name);
                 if (light == null || light.light == null)
@@ -407,6 +376,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     edTime += offsetTime;
                 }
 
+                var option = light.type == LightType.Directional ? "mainlightoff" : "";
+
                 builder.Append(light.type + ",");
                 builder.Append(light.index + ",");
                 builder.Append(stTime.ToString("0.000") + ",");
@@ -416,9 +387,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 builder.Append(start.eulerAngles.x.ToString("0.000") + ",");
                 builder.Append(start.eulerAngles.y.ToString("0.000") + ",");
                 builder.Append(start.eulerAngles.z.ToString("0.000") + ",");
-                builder.Append(start.color.r.ToString("0.000") + ",");
-                builder.Append(start.color.g.ToString("0.000") + ",");
-                builder.Append(start.color.b.ToString("0.000") + ",");
+                builder.Append(stColor.r + ",");
+                builder.Append(stColor.g + ",");
+                builder.Append(stColor.b + ",");
                 builder.Append(edTime.ToString("0.000") + ",");
                 builder.Append(end.position.x.ToString("0.000") + ",");
                 builder.Append(end.position.y.ToString("0.000") + ",");
@@ -426,10 +397,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 builder.Append(end.eulerAngles.x.ToString("0.000") + ",");
                 builder.Append(end.eulerAngles.y.ToString("0.000") + ",");
                 builder.Append(end.eulerAngles.z.ToString("0.000") + ",");
-                builder.Append(end.color.r.ToString("0.000") + ",");
-                builder.Append(end.color.g.ToString("0.000") + ",");
-                builder.Append(end.color.b.ToString("0.000") + ",");
-                builder.Append("" + ","); // option
+                builder.Append(edColor.r + ",");
+                builder.Append(edColor.g + ",");
+                builder.Append(edColor.b + ",");
+                builder.Append(option+ ","); // option
                 builder.Append(start.range.ToString("0.000") + ","); // range
                 builder.Append(start.intensity.ToString("0.000") + ","); // intensity
                 builder.Append(start.spotAngle.ToString("0.000") + ","); // spotAngle

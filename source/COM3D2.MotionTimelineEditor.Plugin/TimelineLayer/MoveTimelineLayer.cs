@@ -121,36 +121,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var t0 = motion.stFrame * timeline.frameDuration;
             var t1 = motion.edFrame * timeline.frameDuration;
 
-            if (start.position != end.position)
-            {
-                transform.localPosition = PluginUtils.HermiteVector3(
-                    t0,
-                    t1,
-                    start.positionValues,
-                    end.positionValues,
-                    t);
-            }
+            transform.localPosition = PluginUtils.HermiteVector3(
+                t0,
+                t1,
+                start.positionValues,
+                end.positionValues,
+                t);
 
-            if (start.eulerAngles != end.eulerAngles)
-            {
-                var eulerAngles = PluginUtils.HermiteVector3(
-                    t0,
-                    t1,
-                    start.eulerAnglesValues,
-                    end.eulerAnglesValues,
-                    t);
-                transform.localRotation = Quaternion.Euler(eulerAngles);
-            }
+            transform.localEulerAngles = PluginUtils.HermiteVector3(
+                t0,
+                t1,
+                start.eulerAnglesValues,
+                end.eulerAnglesValues,
+                t);
 
-            if (start.scale != end.scale)
-            {
-                transform.localScale = PluginUtils.HermiteVector3(
-                    t0,
-                    t1,
-                    start.scaleValues,
-                    end.scaleValues,
-                    t);
-            }
+            transform.localScale = PluginUtils.HermiteVector3(
+                t0,
+                t1,
+                start.scaleValues,
+                end.scaleValues,
+                t);
         }
 
         public override void OnEndPoseEdit()

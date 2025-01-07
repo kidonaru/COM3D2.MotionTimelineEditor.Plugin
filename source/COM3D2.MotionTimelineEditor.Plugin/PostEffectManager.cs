@@ -91,6 +91,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override void OnLoad()
         {
             DisableAllEffects();
+            InitPostEffects();
         }
 
         public override void OnPluginDisable()
@@ -98,6 +99,49 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             DisableAllEffects();
             ResetCache();
             ReleaseController();
+        }
+
+        public void InitPostEffects()
+        {
+            InitParrifinEffect();
+            InitDistanceFogEffect();
+            InitRimlightEffect();
+        }
+
+        private void InitParrifinEffect()
+        {
+            while (postEffectManager.GetParaffinCount() < timeline.paraffinCount)
+            {
+                postEffectManager.AddParaffinData();
+            }
+            while (postEffectManager.GetParaffinCount() > timeline.paraffinCount)
+            {
+                postEffectManager.RemoveParaffinData();
+            }
+        }
+
+        private void InitDistanceFogEffect()
+        {
+            while (postEffectManager.GetDistanceFogCount() < timeline.distanceFogCount)
+            {
+                postEffectManager.AddDistanceFogData();
+            }
+            while (postEffectManager.GetDistanceFogCount() > timeline.distanceFogCount)
+            {
+                postEffectManager.RemoveDistanceFogData();
+            }
+        }
+
+        private void InitRimlightEffect()
+        {
+            while (postEffectManager.GetRimlightCount() < timeline.rimlightCount)
+            {
+                postEffectManager.AddRimlightData();
+            }
+            while (postEffectManager.GetRimlightCount() > timeline.rimlightCount)
+            {
+                postEffectManager.RemoveRimlightData();
+            }
         }
 
         private void ResetCache()
