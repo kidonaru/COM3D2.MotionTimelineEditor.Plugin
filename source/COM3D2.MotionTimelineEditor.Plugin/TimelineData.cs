@@ -231,14 +231,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public int version = 0;
 
-        public List<ITimelineLayer> layers = new List<ITimelineLayer>();
+        public List<ITimelineLayer> layers = new List<ITimelineLayer>(16);
+        public Dictionary<Type, List<ITimelineLayer>> layersMap = new Dictionary<Type, List<ITimelineLayer>>(16);
 
-        public List<TrackData> tracks = new List<TrackData>();
-        public List<TimelineModelData> models = new List<TimelineModelData>();
-        public List<TimelineLightData> lights = new List<TimelineLightData>();
-        public List<TimelineBGModelData> bgModels = new List<TimelineBGModelData>();
-        public List<TimelinePsylliumData> psylliums = new List<TimelinePsylliumData>();
-        public List<TimelinePngObjectData> pngObjects = new List<TimelinePngObjectData>();
+        public List<TrackData> tracks = new List<TrackData>(16);
+        public List<TimelineModelData> models = new List<TimelineModelData>(16);
+        public List<TimelineLightData> lights = new List<TimelineLightData>(16);
+        public List<TimelineBGModelData> bgModels = new List<TimelineBGModelData>(16);
+        public List<TimelinePsylliumData> psylliums = new List<TimelinePsylliumData>(16);
+        public List<TimelinePngObjectData> pngObjects = new List<TimelinePngObjectData>(16);
 
         // maidSlotNo -> shapeKeys
         public Dictionary<int, HashSet<string>> maidShapeKeysMap = new Dictionary<int, HashSet<string>>();
@@ -249,10 +250,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private int _maxFrameNo = 30;
         public int maxFrameNo
         {
-            get
-            {
-                return _maxFrameNo;
-            }
+            get => _maxFrameNo;
             set
             {
                 if (_maxFrameNo == value)
@@ -270,10 +268,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public float frameRate
         {
-            get
-            {
-                return _frameRate;
-            }
+            get => _frameRate;
             set
             {
                 if (_frameRate == value)
@@ -285,13 +280,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public float frameDuration
-        {
-            get
-            {
-                return _frameDuration;
-            }
-        }
+        public float frameDuration => _frameDuration;
 
         public string anmName = "";
 
@@ -300,10 +289,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private bool _useMuneKeyL = false;
         public bool useMuneKeyL
         {
-            get
-            {
-                return _useMuneKeyL;
-            }
+            get => _useMuneKeyL;
             set
             {
                 if (_useMuneKeyL == value)
@@ -320,10 +306,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private bool _useMuneKeyR = false;
         public bool useMuneKeyR
         {
-            get
-            {
-                return _useMuneKeyR;
-            }
+            get => _useMuneKeyR;
             set
             {
                 if (_useMuneKeyR == value)
@@ -340,10 +323,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private bool _useHeadKey = false;
         public bool useHeadKey
         {
-            get
-            {
-                return _useHeadKey;
-            }
+            get => _useHeadKey;
             set
             {
                 if (_useHeadKey == value)
@@ -374,10 +354,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private bool _isBackgroundVisible = true;
         public bool isBackgroundVisible
         {
-            get
-            {
-                return _isBackgroundVisible;
-            }
+            get => _isBackgroundVisible;
             set
             {
                 if (_isBackgroundVisible == value)
@@ -398,10 +375,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private Maid.EyeMoveType _eyeMoveType = Maid.EyeMoveType.無し;
         public Maid.EyeMoveType eyeMoveType
         {
-            get
-            {
-                return _eyeMoveType;
-            }
+            get => _eyeMoveType;
             set
             {
                 if (_eyeMoveType == value)
@@ -514,6 +488,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 layer.Dispose();
             }
             layers.Clear();
+            layersMap.Clear();
         }
 
         public float GetFrameTimeSeconds(int frameNo)
@@ -617,7 +592,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (layers.Count() == 0)
             {
-                var layer = timelineManager.CreateLayer(typeof(MotionTimelineLayer).Name, 0);
+                var layer = timelineManager.CreateLayer(typeof(MotionTimelineLayer), 0);
                 layers.Add(layer);
             }
 
@@ -633,6 +608,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 layer.Init();
             }
+        }
+
+        public void AddLayer(ITimelineLayer layer)
+        {
+            layers.Add(layer);
+            layersMap.GetOrCreate(layer.layerType).Add(layer);
+        }
+
+        public void RemoveLayer(ITimelineLayer layer)
+        {
+            layers.Remove(layer);
+            layersMap.GetOrCreate(layer.layerType).Remove(layer);
+        }
+
+        public List<ITimelineLayer> FindLayers(Type type)
+        {
+            return layersMap.GetOrCreate(type);
         }
 
         public void ResetSettings()
@@ -898,7 +890,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var layer = timelineManager.CreateLayer(layerXml.className, layerXml.slotNo);
                 if (layer != null)
                 {
-                    layers.Add(layer);
+                    AddLayer(layer);
                     layer.FromXml(layerXml);
                 }
             }

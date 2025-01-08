@@ -11,7 +11,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("メイドボイス", 14)]
     public partial class VoiceTimelineLayer : TimelineLayerBase
     {
-        public override string className => typeof(VoiceTimelineLayer).Name;
+        public override Type layerType => typeof(VoiceTimelineLayer);
+        public override string layerName => nameof(VoiceTimelineLayer);
 
         public override bool hasSlotNo => true;
 
@@ -147,7 +148,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             try
             {
                 var motions = new List<MotionData>(64);
-                foreach (var layer in timelineManager.FindLayers<VoiceTimelineLayer>(className))
+                foreach (VoiceTimelineLayer layer in timelineManager.FindLayers(typeof(VoiceTimelineLayer)))
                 {
                     motions.AddRange(layer.GetVoiceMotionData());
                 }

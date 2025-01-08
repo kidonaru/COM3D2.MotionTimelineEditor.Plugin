@@ -21,7 +21,7 @@ using COM3D2.MotionTimelineEditor_SceneCapture.Plugin;
 [assembly: ComVisible(false)]
 
 // このプロジェクトが COM に公開される場合、次の GUID が typelib の ID になります
-[assembly: Guid("2974B0EA-2F51-4FC0-B9BD-DFE091F9CDE9")]
+[assembly: Guid("3766ABA0-DAAF-476C-BA45-3AFBF70AF7BA")]
 
 // アセンブリのバージョン情報は、以下の 4 つの値で構成されています:
 //

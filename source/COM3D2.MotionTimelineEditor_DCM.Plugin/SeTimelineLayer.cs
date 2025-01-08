@@ -15,7 +15,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
     [TimelineLayerDesc("効果音", 51)]
     public partial class SeTimelineLayer : TimelineLayerBase
     {
-        public override string className => typeof(SeTimelineLayer).Name;
+        public override Type layerType => typeof(SeTimelineLayer);
+        public override string layerName => nameof(SeTimelineLayer);
 
         public static string SeBoneName = "SE";
         public static string SeDisplayName = "効果音";

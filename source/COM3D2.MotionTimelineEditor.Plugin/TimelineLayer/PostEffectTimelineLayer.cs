@@ -8,7 +8,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("ポストエフェクト", 52)]
     public partial class PostEffectTimelineLayer : TimelineLayerBase
     {
-        public override string className => typeof(PostEffectTimelineLayer).Name;
+        public override Type layerType => typeof(PostEffectTimelineLayer);
+        public override string layerName => nameof(PostEffectTimelineLayer);
 
         public override bool isPostEffectLayer => true;
 

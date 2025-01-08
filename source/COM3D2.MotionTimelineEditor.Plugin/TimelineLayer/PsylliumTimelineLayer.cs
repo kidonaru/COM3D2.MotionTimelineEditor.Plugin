@@ -7,7 +7,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("サイリウム", 44)]
     public class PsylliumTimelineLayer : TimelineLayerBase
     {
-        public override string className => typeof(PsylliumTimelineLayer).Name;
+        public override Type layerType => typeof(PsylliumTimelineLayer);
+        public override string layerName => nameof(PsylliumTimelineLayer);
 
         private List<string> _allBoneNames = null;
 

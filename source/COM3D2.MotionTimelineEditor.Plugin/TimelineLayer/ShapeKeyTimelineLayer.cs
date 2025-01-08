@@ -11,7 +11,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("メイドシェイプ", 13)]
     public partial class ShapeKeyTimelineLayer : TimelineLayerBase
     {
-        public override string className => typeof(ShapeKeyTimelineLayer).Name;
+        public override Type layerType => typeof(ShapeKeyTimelineLayer);
+        public override string layerName => nameof(ShapeKeyTimelineLayer);
 
         public override bool hasSlotNo => true;
 
@@ -228,8 +229,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             try
             {
-                var motions = new List<MotionData>();
-                foreach (var layer in timelineManager.FindLayers<ShapeKeyTimelineLayer>(className))
+                var motions = new List<MotionData>(64);
+                foreach (ShapeKeyTimelineLayer layer in timelineManager.FindLayers(typeof(ShapeKeyTimelineLayer)))
                 {
                     motions.AddRange(layer.BuildDcmMotions());
                 }

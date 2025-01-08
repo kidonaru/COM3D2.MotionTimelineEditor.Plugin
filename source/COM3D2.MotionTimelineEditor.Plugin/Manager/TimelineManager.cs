@@ -45,10 +45,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int currentFrameNo
         {
             get => _currentFrameNo;
-            set
-            {
-                _currentFrameNo = Mathf.Clamp(value, 0, timeline.maxFrameNo);
-            }
+            set => _currentFrameNo = Mathf.Clamp(value, 0, timeline.maxFrameNo);
         }
 
         public float currentTime
@@ -83,14 +80,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get => timeline.defaultLayer;
         }
 
-        public bool HasCameraLayer
+        public bool hasCameraLayer
         {
-            get => layers.Any(layer => layer.isCameraLayer);
+            get => FindLayers(typeof(CameraTimelineLayer)).Count > 0;
         }
 
-        public bool HasPostEffectLayer
+        public bool hasPostEffectLayer
         {
-            get => layers.Any(layer => layer.isPostEffectLayer);
+            get => FindLayers(typeof(PostEffectTimelineLayer)).Count > 0;
         }
 
         private static TimelineManager _instance;
@@ -282,6 +279,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 _timeline.Dispose();
                 _timeline = null;
+                _usingLayerInfoList = null;
+                _unusingLayerInfoList = null;
             }
         }
 
@@ -306,6 +305,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 anmName = "テスト",
                 version = TimelineData.CurrentVersion
             };
+            _usingLayerInfoList = null;
+            _unusingLayerInfoList = null;
+
             _timeline.Initialize();
             mte.OnLoad();
             _timeline.LayerInit();
@@ -356,6 +358,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _timeline.Initialize();
                 mte.OnLoad();
                 _timeline.LayerInit();
+
+                _usingLayerInfoList = null;
+                _unusingLayerInfoList = null;
             }
 
             CreateAndApplyAnmAll();
@@ -405,6 +410,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _timeline = new TimelineData();
             _timeline.FromXml(xml);
             _timeline.Initialize();
+
+            _usingLayerInfoList = null;
+            _unusingLayerInfoList = null;
 
             if (currentLayerIndex >= layers.Count)
             {
@@ -1124,7 +1132,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var copyFrameData = new CopyLayerData
             {
-                className = currentLayer.className
+                className = currentLayer.layerName
             };
 
             var tmpFrames = new Dictionary<int, FrameData>();
@@ -1175,7 +1183,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var copyFrameData = new CopyLayerData
             {
-                className = currentLayer.className,
+                className = currentLayer.layerName,
                 frames = new List<FrameXml> { tmpFrame.ToXml() }
             };
 
@@ -1208,7 +1216,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var copyFrameData = (CopyLayerData) serializer.Deserialize(reader);
 
-                    if (copyFrameData.className != currentLayer.className)
+                    if (copyFrameData.className != currentLayer.layerName)
                     {
                         PluginUtils.ShowDialog("ペーストするレイヤーが一致しません");
                         return;
@@ -1279,7 +1287,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     var copyFrameData = (CopyLayerData) serializer.Deserialize(reader);
 
-                    if (copyFrameData.className != currentLayer.className)
+                    if (copyFrameData.className != currentLayer.layerName)
                     {
                         PluginUtils.ShowDialog("ペーストするレイヤーが一致しません");
                         return;
@@ -1322,15 +1330,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public ITimelineLayer GetLayer(string className, int slotNo)
+        public ITimelineLayer GetLayer(Type layerType, int slotNo = 0)
         {
-            foreach (var layer in layers)
+            foreach (var layer in FindLayers(layerType))
             {
-                if (layer.className != className)
-                {
-                    continue;
-                }
-
                 if (layer.hasSlotNo && layer.slotNo != slotNo)
                 {
                     continue;
@@ -1341,22 +1344,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return null;
         }
 
-        public List<ITimelineLayer> GetLayers(string className)
+        public void ChangeActiveLayer(Type layerType, int slotNo = 0)
         {
-            var list = new List<ITimelineLayer>();
-            foreach (var layer in layers)
-            {
-                if (layer.className == className)
-                {
-                    list.Add(layer);
-                }
-            }
-            return list;
-        } 
-
-        public void ChangeActiveLayer(string className, int slotNo)
-        {
-            var layer = GetLayer(className, slotNo);
+            var layer = GetLayer(layerType, slotNo);
 
             if (layer == currentLayer)
             {
@@ -1368,13 +1358,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var newLayer = CreateLayer(className, slotNo);
+            var newLayer = CreateLayer(layerType, slotNo);
             if (newLayer == null)
             {
                 return;
             }
 
-            layers.Add(newLayer);
+            timeline.AddLayer(newLayer);
+            _usingLayerInfoList = null;
+            _unusingLayerInfoList = null;
+
             SetActiveLayer(newLayer);
             newLayer.Init();
             newLayer.CreateAndApplyAnm();
@@ -1384,8 +1377,46 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 partsEditHack.SetBone(null);
             }
 
-            var info = GetLayerInfo(className);
+            var info = GetLayerInfo(layerType);
             RequestHistory("「" + info.displayName + "」レイヤー新規作成");
+        }
+
+        public void RemoveLayers(Type layerType)
+        {
+            foreach (var layer in FindLayers(layerType))
+            {
+                RemoveLayer(layer);
+            }
+        }
+
+        public void RemoveLayer(ITimelineLayer layer)
+        {
+            if (layer.layerType == typeof(MotionTimelineLayer))
+            {
+                PluginUtils.LogWarning("アニメレイヤーは削除できません");
+                return;
+            }
+
+            if (layer == null)
+            {
+                return;
+            }
+
+            if (currentLayer == layer)
+            {
+                SetActiveLayer(GetLayer(typeof(MotionTimelineLayer)));
+            }
+
+            var current = currentLayer;
+
+            layer.Dispose();
+            timeline.RemoveLayer(layer);
+            _usingLayerInfoList = null;
+            _unusingLayerInfoList = null;
+
+            currentLayerIndex = layers.IndexOf(current);
+
+            RequestHistory("「" + layer.layerName + "」レイヤー削除");
         }
 
         public void SetActiveLayer(ITimelineLayer layer)
@@ -1482,19 +1513,66 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             requestedHistoryDesc = description;
         }
 
-        private List<TimelineLayerInfo> layerInfoList
-            = new List<TimelineLayerInfo>();
+        private List<TimelineLayerInfo> _layerInfoList = new List<TimelineLayerInfo>();
+        public List<TimelineLayerInfo> layerInfoList => _layerInfoList;
 
-        public List<TimelineLayerInfo> GetLayerInfoList()
+        public List<TimelineLayerInfo> _usingLayerInfoList = null;
+        public List<TimelineLayerInfo> usingLayerInfoList
         {
-            return layerInfoList;
+            get
+            {
+                if (_usingLayerInfoList == null)
+                {
+                    _usingLayerInfoList = new List<TimelineLayerInfo>();
+                    foreach (var layerInfo in _layerInfoList)
+                    {
+                        if (timeline?.FindLayers(layerInfo.layerType).Count > 0)
+                        {
+                            _usingLayerInfoList.Add(layerInfo);
+                        }
+                    }
+                }
+                return _usingLayerInfoList;
+            }
         }
 
-        public TimelineLayerInfo GetLayerInfo(string className)
+        public List<TimelineLayerInfo> _unusingLayerInfoList = null;
+        public List<TimelineLayerInfo> unusingLayerInfoList
         {
-            foreach (var layerInfo in layerInfoList)
+            get
             {
-                if (layerInfo.className == className)
+                if (_unusingLayerInfoList == null)
+                {
+                    _unusingLayerInfoList = new List<TimelineLayerInfo>();
+                    foreach (var layerInfo in _layerInfoList)
+                    {
+                        if (timeline?.FindLayers(layerInfo.layerType).Count == 0)
+                        {
+                            _unusingLayerInfoList.Add(layerInfo);
+                        }
+                    }
+                }
+                return _unusingLayerInfoList;
+            }
+        }
+
+        public TimelineLayerInfo GetLayerInfo(Type layerType)
+        {
+            foreach (var layerInfo in _layerInfoList)
+            {
+                if (layerInfo.layerType == layerType)
+                {
+                    return layerInfo;
+                }
+            }
+            return null;
+        }
+
+        public TimelineLayerInfo GetLayerInfo(string layerName)
+        {
+            foreach (var layerInfo in _layerInfoList)
+            {
+                if (layerInfo.className == layerName)
                 {
                     return layerInfo;
                 }
@@ -1517,42 +1595,43 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            layerInfoList.Add(info);
+            _layerInfoList.Add(info);
 
-            layerInfoList.Sort((a, b) => a.priority - b.priority);
+            _layerInfoList.Sort((a, b) => a.priority - b.priority);
 
-            for (var i = 0; i < layerInfoList.Count; i++)
+            for (var i = 0; i < _layerInfoList.Count; i++)
             {
-                layerInfoList[i].index = i;
+                _layerInfoList[i].index = i;
             }
         }
 
-        public ITimelineLayer CreateLayer(string className, int slotNo)
+        public ITimelineLayer CreateLayer(Type layerType, int slotNo)
         {
-            var layerInfo = GetLayerInfo(className);
+            var layerInfo = GetLayerInfo(layerType);
             if (layerInfo != null)
             {
                 return layerInfo.createLayer(slotNo);
             }
 
-            PluginUtils.LogError("未登録のレイヤークラス: " + className);
+            PluginUtils.LogError("未登録のレイヤークラス: " + layerType.Name);
             return null;
         }
 
-        public List<T> FindLayers<T>(string className)
-            where T : class
+        public ITimelineLayer CreateLayer(string layerName, int slotNo)
         {
-            var layers = new List<T>();
-
-            foreach (var layer in this.layers)
+            var layerInfo = GetLayerInfo(layerName);
+            if (layerInfo != null)
             {
-                if (layer.className == className)
-                {
-                    layers.Add(layer as T);
-                }
+                return layerInfo.createLayer(slotNo);
             }
 
-            return layers;
+            PluginUtils.LogError("未登録のレイヤークラス: " + layerName);
+            return null;
+        }
+
+        public List<ITimelineLayer> FindLayers(Type type)
+        {
+            return timeline.FindLayers(type);
         }
 
         private Dictionary<TransformType, TransformInfo> transformInfoMap
@@ -1675,7 +1754,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (IsValidData())
             {
-                ChangeActiveLayer(currentLayer.className, maidSlotNo);
+                ChangeActiveLayer(currentLayer.layerType, maidSlotNo);
             }
         }
 

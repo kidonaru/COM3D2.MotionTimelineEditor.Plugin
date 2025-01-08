@@ -11,7 +11,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("背景色", 32)]
     public partial class BGColorTimelineLayer : TimelineLayerBase
     {
-        public override string className => typeof(BGColorTimelineLayer).Name;
+        public override Type layerType => typeof(BGColorTimelineLayer);
+        public override string layerName => nameof(BGColorTimelineLayer);
 
         public BGGround bgGround = null;
 

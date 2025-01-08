@@ -11,7 +11,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("カメラ", 20)]
     public class CameraTimelineLayer : TimelineLayerBase
     {
-        public override string className => typeof(CameraTimelineLayer).Name;
+        public override Type layerType => typeof(CameraTimelineLayer);
+        public override string layerName => nameof(CameraTimelineLayer);
 
         public override bool isCameraLayer => true;
 

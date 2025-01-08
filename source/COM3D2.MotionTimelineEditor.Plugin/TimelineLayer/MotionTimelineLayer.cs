@@ -24,7 +24,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("メイドアニメ", 0)]
     public class MotionTimelineLayer : TimelineLayerBase
     {
-        public override string className => typeof(MotionTimelineLayer).Name;
+        public override Type layerType => typeof(MotionTimelineLayer);
+        public override string layerName => nameof(MotionTimelineLayer);
 
         public override bool hasSlotNo => true;
 
@@ -588,7 +589,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var stopwatch = new StopwatchDebug();
             ApplyPlayData();
-            stopwatch.ProcessEnd("  ApplyPlayData: " + className);
+            stopwatch.ProcessEnd("  ApplyPlayData: " + layerName);
         }
 
         public override void ApplyCurrentFrame(bool motionUpdate)
@@ -602,7 +603,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 maidCache.playingFrameNo = timelineManager.currentFrameNo;
                 var stopwatch = new StopwatchDebug();
                 ApplyPlayData();
-                stopwatch.ProcessEnd("  ApplyPlayData: " + className);
+                stopwatch.ProcessEnd("  ApplyPlayData: " + layerName);
             }
         }
 

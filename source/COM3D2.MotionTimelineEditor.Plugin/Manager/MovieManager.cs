@@ -195,7 +195,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void OnLoad()
         {
-            LoadMovie();
+            ReloadMovie();
         }
 
         public override void OnPluginDisable()

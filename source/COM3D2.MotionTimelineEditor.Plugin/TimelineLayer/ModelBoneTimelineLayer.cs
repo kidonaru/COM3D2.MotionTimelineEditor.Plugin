@@ -11,7 +11,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("モデルボーン", 22)]
     public partial class ModelBoneTimelineLayer : ModelTimelineLayerBase
     {
-        public override string className => typeof(ModelBoneTimelineLayer).Name;
+        public override Type layerType => typeof(ModelBoneTimelineLayer);
+        public override string layerName => nameof(ModelBoneTimelineLayer);
 
         public override List<string> allBoneNames => modelManager.boneNames;
 

@@ -8,7 +8,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("背景モデル", 33)]
     public class BGModelTimelineLayer : BGModelTimelineLayerBase
     {
-        public override string className => typeof(BGModelTimelineLayer).Name;
+        public override Type layerType => typeof(BGModelTimelineLayer);
+        public override string layerName => nameof(BGModelTimelineLayer);
 
         public override List<string> allBoneNames => bgModelManager.modelNames;
 

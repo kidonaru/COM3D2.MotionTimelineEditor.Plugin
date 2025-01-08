@@ -13,7 +13,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     return "レイヤー情報";
                 }
 
-                var layerInfo = timelineManager.GetLayerInfo(currentLayer.className);
+                var layerInfo = timelineManager.GetLayerInfo(currentLayer.layerType);
                 return layerInfo.displayName + "情報";
             }
         }

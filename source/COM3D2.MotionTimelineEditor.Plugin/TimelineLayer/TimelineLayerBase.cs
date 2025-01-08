@@ -11,7 +11,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public static readonly long TimelineAnmId = 26925014;
 
-        public abstract string className { get; }
+        public abstract Type layerType { get; }
+        public abstract string layerName { get; }
         public int slotNo { get; protected set; }
         public virtual bool hasSlotNo => false;
         public virtual bool isCameraLayer => false;
@@ -219,7 +220,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected TimelineLayerBase(int slotNo)
         {
-            PluginUtils.LogDebug("{0}.Create slotNo={1}", className, slotNo);
+            PluginUtils.LogDebug("{0}.Create slotNo={1}", layerName, slotNo);
             this.slotNo = slotNo;
         }
 
@@ -232,7 +233,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             if (_dummyLastFrame == null)
             {
-                PluginUtils.LogDebug("CreateDummyLastFrame " + className);
+                PluginUtils.LogDebug("CreateDummyLastFrame " + layerName);
                 _dummyLastFrame = CreateFrame(0);
             }
 
@@ -310,7 +311,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var stopwatch = new StopwatchDebug();
             ApplyPlayData();
-            stopwatch.ProcessEnd("  ApplyPlayData: " + className);
+            stopwatch.ProcessEnd("  ApplyPlayData: " + layerName);
         }
 
         public virtual void ApplyCurrentFrame(bool motionUpdate)
@@ -323,7 +324,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var stopwatch = new StopwatchDebug();
                 ApplyPlayData();
-                stopwatch.ProcessEnd("  ApplyPlayData: " + className);
+                stopwatch.ProcessEnd("  ApplyPlayData: " + layerName);
             }
         }
 
@@ -424,7 +425,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public virtual void OutputDCM(XElement songElement)
         {
-            PluginUtils.LogWarning("{0}はDCMに対応していません", className);
+            PluginUtils.LogWarning("{0}はDCMに対応していません", layerName);
         }
 
         protected virtual void AppendTimelineRow(FrameData frame)
@@ -730,7 +731,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return null;
             }
 
-            PluginUtils.LogDebug(className);
+            PluginUtils.LogDebug(layerName);
 
             var stopwatch = new StopwatchDebug();
 
@@ -1360,7 +1361,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var xml = new TimelineLayerXml();
 
-            xml.className = className;
+            xml.className = layerName;
             xml.slotNo = slotNo;
 
             xml.keyFrames = new List<FrameXml>(_keyFrames.Count);

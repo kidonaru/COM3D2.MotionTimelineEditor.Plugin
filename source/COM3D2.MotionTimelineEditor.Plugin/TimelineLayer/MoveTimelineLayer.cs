@@ -11,7 +11,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("メイド移動", 11)]
     public partial class MoveTimelineLayer : TimelineLayerBase
     {
-        public override string className => typeof(MoveTimelineLayer).Name;
+        public override Type layerType => typeof(MoveTimelineLayer);
+        public override string layerName => nameof(MoveTimelineLayer);
 
         public override bool hasSlotNo => true;
 

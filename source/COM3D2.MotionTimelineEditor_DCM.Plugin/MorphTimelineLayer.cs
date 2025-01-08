@@ -15,13 +15,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
     [TimelineLayerDesc("メイド表情", 10)]
     public class MorphTimelineLayer : TimelineLayerBase
     {
-        public override string className
-        {
-            get
-            {
-                return typeof(MorphTimelineLayer).Name;
-            }
-        }
+        public override Type layerType => typeof(MorphTimelineLayer);
+        public override string layerName => nameof(MorphTimelineLayer);
 
         public override bool hasSlotNo => true;
 

@@ -21,7 +21,7 @@ using COM3D2.MotionTimelineEditor_PartsEdit.Plugin;
 [assembly: ComVisible(false)]
 
 // このプロジェクトが COM に公開される場合、次の GUID が typelib の ID になります
-[assembly: Guid("1088FC7E-D9BA-4E61-8895-CD4D7298EA4B")]
+[assembly: Guid("22C15C7B-5EE4-4A1C-A004-A884A5398F42")]
 
 // アセンブリのバージョン情報は、以下の 4 つの値で構成されています:
 //

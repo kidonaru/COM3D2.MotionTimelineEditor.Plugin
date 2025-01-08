@@ -6,10 +6,11 @@ using System.Linq;
 
 namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
 {
-    [TimelineLayerDesc("PNG", 34)]
+    [TimelineLayerDesc("PNG配置", 34)]
     public class PngPlacementTimelineLayer : TimelineLayerBase
     {
-        public override string className => typeof(PngPlacementTimelineLayer).Name;
+        public override Type layerType => typeof(PngPlacementTimelineLayer);
+        public override string layerName => nameof(PngPlacementTimelineLayer);
 
         public override List<string> allBoneNames => pngPlacementManager.pngObjectNames;
 

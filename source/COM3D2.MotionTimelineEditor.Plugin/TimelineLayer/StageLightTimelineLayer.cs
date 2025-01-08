@@ -8,7 +8,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("ステージライト", 42)]
     public class StageLightTimelineLayer : TimelineLayerBase
     {
-        public override string className => typeof(StageLightTimelineLayer).Name;
+        public override Type layerType => typeof(StageLightTimelineLayer);
+        public override string layerName => nameof(StageLightTimelineLayer);
 
         private List<string> _allBoneNames = null;
 

@@ -11,7 +11,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("メイド脱衣", 15)]
     public class UndressTimelineLayer : TimelineLayerBase
     {
-        public override string className => typeof(UndressTimelineLayer).Name;
+        public override Type layerType => typeof(UndressTimelineLayer);
+        public override string layerName => nameof(UndressTimelineLayer);
 
         public override bool hasSlotNo => true;
 
@@ -160,7 +161,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var outputRows = new List<BoneData>(64);
 
-                foreach (var layer in timelineManager.FindLayers<UndressTimelineLayer>(className))
+                foreach (UndressTimelineLayer layer in timelineManager.FindLayers(typeof(UndressTimelineLayer)))
                 {
                     foreach (var rows in layer.timelineRowsMap.Values)
                     {

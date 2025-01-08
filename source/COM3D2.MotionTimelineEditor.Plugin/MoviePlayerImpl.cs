@@ -32,51 +32,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool isDisplayOnGUI
         {
-            get
-            {
-                return timeline.videoDisplayType == VideoDisplayType.GUI;
-            }
+            get => timeline.videoDisplayType == VideoDisplayType.GUI;
         }
 
         public bool isDisplayBackmost
         {
-            get
-            {
-                return timeline.videoDisplayType == VideoDisplayType.Backmost;
-            }
+            get => timeline.videoDisplayType == VideoDisplayType.Backmost;
         }
 
         public bool isDisplayFrontmost
         {
-            get
-            {
-                return timeline.videoDisplayType == VideoDisplayType.Frontmost;
-            }
+            get => timeline.videoDisplayType == VideoDisplayType.Frontmost;
         }
 
         public float currentTime
         {
-            get
-            {
-                return timelineManager.currentTime;
-            }
+            get => timelineManager.currentTime;
         }
 
-        public float duration
-        {
-            get
-            {
-                return _duration;
-            }
-        }
+        public float duration => _duration;
 
-        public float frameRate
-        {
-            get
-            {
-                return _frameRate;
-            }
-        }
+        public float frameRate => _frameRate;
 
         public Camera targetCamera
         {
@@ -104,18 +80,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public IMediaControl mediaControl
         {
-            get
-            {
-                return _mediaPlayer != null ? _mediaPlayer.Control : null;
-            }
+            get => _mediaPlayer != null ? _mediaPlayer.Control : null;
         }
 
         public float targetSeekTimeMs
         {
-            get
-            {
-                return (currentTime + timeline.startOffsetTime + timeline.videoStartTime) * 1000f;
-            }
+            get => (currentTime + timeline.startOffsetTime + timeline.videoStartTime) * 1000f;
         }
 
         public float playingTimeMs
@@ -130,13 +100,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public bool isSeeking
-        {
-            get
-            {
-                return _seekState != SeekState.None;
-            }
-        }
+        public bool isSeeking => _seekState != SeekState.None;
 
         private static TimelineManager timelineManager => TimelineManager.instance;
 

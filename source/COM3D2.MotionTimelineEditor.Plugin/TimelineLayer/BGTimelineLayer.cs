@@ -11,7 +11,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("背景", 31)]
     public partial class BGTimelineLayer : TimelineLayerBase
     {
-        public override string className => typeof(BGTimelineLayer).Name;
+        public override Type layerType => typeof(BGTimelineLayer);
+        public override string layerName => nameof(BGTimelineLayer);
 
         private List<string> _allBoneNames = new List<string>();
         public override List<string> allBoneNames => _allBoneNames;

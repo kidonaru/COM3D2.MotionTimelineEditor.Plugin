@@ -21,7 +21,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     [TimelineLayerDesc("メイド瞳", 12)]
     public class EyesTimelineLayer : TimelineLayerBase
     {
-        public override string className => typeof(EyesTimelineLayer).Name;
+        public override Type layerType => typeof(EyesTimelineLayer);
+        public override string layerName => nameof(EyesTimelineLayer);
 
         public override bool hasSlotNo => true;
 

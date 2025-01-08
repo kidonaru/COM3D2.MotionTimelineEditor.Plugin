@@ -7,7 +7,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public interface ITimelineLayer
     {
-        string className { get; }
+        Type layerType { get; }
+        string layerName { get; }
         int slotNo { get; }
         bool hasSlotNo { get; }
         bool isCameraLayer { get; }

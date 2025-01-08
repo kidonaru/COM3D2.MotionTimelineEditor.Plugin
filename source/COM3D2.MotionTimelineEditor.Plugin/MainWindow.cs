@@ -174,16 +174,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private GUIComboBox<TimelineLayerInfo> _layerComboBox = new GUIComboBox<TimelineLayerInfo>
         {
-            getName = (layerInfo, index) =>
-            {
-                return layerInfo.displayName;
-            },
+            getName = (layerInfo, index) => layerInfo.displayName,
             onSelected = (layerInfo, index) =>
             {
-                var className = layerInfo.className;
-                timelineManager.ChangeActiveLayer(className, maidManager.maidSlotNo);
+                timelineManager.ChangeActiveLayer(layerInfo.layerType, maidManager.maidSlotNo);
                 subWindow.SetSubWindowType(SubWindowType.TimelineLayer);
             },
+        };
+
+        private GUIComboBox<TimelineLayerInfo> _addLayerComboBox = new GUIComboBox<TimelineLayerInfo>
+        {
+            getName = (layerInfo, index) => layerInfo.displayName,
+            onSelected = (layerInfo, index) =>
+            {
+                timelineManager.ChangeActiveLayer(layerInfo.layerType, maidManager.maidSlotNo);
+                subWindow.SetSubWindowType(SubWindowType.TimelineLayer);
+            },
+            defaultName = "+",
+            buttonSize = new Vector2(20, 20),
+            showArrow = false,
         };
 
         private GUIComboBox<MaidCache> _maidComboBox = new GUIComboBox<MaidCache>
@@ -746,11 +755,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.EndLayout();
 
             view.BeginHorizontal();
+            view.margin = 0;
             {
-                var layerInfo = timelineManager.GetLayerInfo(currentLayer.className);
-                _layerComboBox.currentIndex = layerInfo.index;
-                _layerComboBox.items = timelineManager.GetLayerInfoList();
+                var layerType = currentLayer.layerType;
+                var layerInfo = timelineManager.GetLayerInfo(layerType);
+                _layerComboBox.currentItem = layerInfo;
+                _layerComboBox.items = timelineManager.usingLayerInfoList;
                 _layerComboBox.DrawButton("レイヤー", view);
+
+                if (view.DrawButton("-", 20, 20, layerType != typeof(MotionTimelineLayer)))
+                {
+                    timelineManager.RemoveLayers(layerType);
+                }
+
+                _addLayerComboBox.currentIndex = -1;
+                _addLayerComboBox.items = timelineManager.unusingLayerInfoList;
+                _addLayerComboBox.DrawButton(null, view);
 
                 view.AddSpace(10);
 
@@ -763,6 +783,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _maidComboBox.DrawButton(view);
                 }
             }
+            view.margin = GUIView.defaultMargin;
             view.EndLayout();
 
             view.BeginHorizontal();
@@ -790,7 +811,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     timeline.isBackgroundVisible = newValue;
                 });
 
-                if (timelineManager.HasCameraLayer)
+                if (timelineManager.hasCameraLayer)
                 {
                     var cameraUpdated = false;
                     cameraUpdated |= view.DrawToggle("カメラ同期", config.isCameraSync, 80, 20, !currentLayer.isCameraLayer, newValue =>
@@ -807,7 +828,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     if (cameraUpdated)
                     {
-                        var cameraLayer = timelineManager.GetLayer("CameraTimelineLayer", 0);
+                        var cameraLayer = timelineManager.GetLayer(typeof(CameraTimelineLayer));
                         if (cameraLayer != null)
                         {
                             cameraLayer.ApplyCurrentFrame(false);
@@ -815,7 +836,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
-                if (timelineManager.HasPostEffectLayer)
+                if (timelineManager.hasPostEffectLayer)
                 {
                     view.DrawToggle("ポスプロ同期", config.isPostEffectSync, 100, 20, !currentLayer.isPostEffectLayer, newValue =>
                     {

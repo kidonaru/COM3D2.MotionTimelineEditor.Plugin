@@ -194,7 +194,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 timeline.isTangentCamera = newValue;
 
-                var targetLayer = timelineManager.GetLayer("CameraTimelineLayer", 0);
+                var targetLayer = timelineManager.GetLayer(typeof(CameraTimelineLayer));
                 if (targetLayer != null)
                 {
                     targetLayer.InitTangent();
@@ -206,7 +206,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 timeline.isTangentMove = newValue;
 
-                var targetLayers = timelineManager.GetLayers("MoveTimelineLayer");
+                var targetLayers = timelineManager.FindLayers(typeof(MoveTimelineLayer));
                 foreach (var targetLayer in targetLayers)
                 {
                     targetLayer.InitTangent();
@@ -218,7 +218,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 timeline.isTangentLight = newValue;
 
-                var targetLayer = timelineManager.GetLayer("LightTimelineLayer", 0);
+                var targetLayer = timelineManager.GetLayer(typeof(LightTimelineLayer));
                 if (targetLayer != null)
                 {
                     targetLayer.InitTangent();
