@@ -1383,7 +1383,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void RemoveLayers(Type layerType)
         {
-            foreach (var layer in FindLayers(layerType))
+            var targetLayers = FindLayers(layerType).ToList();
+            foreach (var layer in targetLayers)
             {
                 RemoveLayer(layer);
             }

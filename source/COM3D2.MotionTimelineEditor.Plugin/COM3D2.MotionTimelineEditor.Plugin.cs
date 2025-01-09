@@ -604,7 +604,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             foreach (var manager in _managers)
             {
-                manager.OnLoad();
+                try
+                {
+                    manager.OnLoad();
+                }
+                catch (Exception e)
+                {
+                    PluginUtils.LogException(e);
+                }
             }
         }
 

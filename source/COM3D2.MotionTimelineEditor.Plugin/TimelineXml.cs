@@ -61,8 +61,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int group;
         [XmlElement("Primitive")]
         public int primitive;
+        [XmlElement("SquareUV")]
+        public bool squareUV;
         [XmlElement("ShaderDisplay")]
         public string shaderDisplay;
+        [XmlElement("RenderQueue")]
+        public int renderQueue;
     }
 
     public class TimelinePsylliumXml

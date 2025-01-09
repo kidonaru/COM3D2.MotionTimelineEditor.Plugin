@@ -17,6 +17,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
         public PropertyInfo iCurrentObject;
         public PropertyInfo listObjectData;
         public PropertyInfo iPrimitive;
+        public PropertyInfo bSquareUV;
         public PropertyInfo sShaderDispName;
 
         public MethodInfo Create;

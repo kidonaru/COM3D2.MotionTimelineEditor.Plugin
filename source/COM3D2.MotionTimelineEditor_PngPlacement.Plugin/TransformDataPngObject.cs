@@ -10,7 +10,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
 
         public override TransformType type => TransformType.PngObject;
 
-        public override int valueCount => 32;
+        public override int valueCount => 31;
 
         public override bool hasPosition => true;
         public override bool hasEulerAngles => true;
@@ -101,20 +101,9 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                 }
             },
             {
-                "rq", new CustomValueInfo
-                {
-                    index = 15,
-                    name = "RQ",
-                    min = 0,
-                    max = 10000,
-                    step = 1,
-                    defaultValue = 3200,
-                }
-            },
-            {
                 "fixcamera", new CustomValueInfo
                 {
-                    index = 16,
+                    index = 15,
                     name = "カメラ相対位置固定",
                     min = 0,
                     max = 1,
@@ -125,7 +114,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 "attach", new CustomValueInfo
                 {
-                    index = 17,
+                    index = 16,
                     name = "アタッチ",
                     min = 0,
                     max = (int) PngAttachPoint.leg2R,
@@ -136,7 +125,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 "attachrotation", new CustomValueInfo
                 {
-                    index = 18,
+                    index = 17,
                     name = "カメラ追従回転",
                     min = 0,
                     max = 1,
@@ -147,7 +136,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 "brightness", new CustomValueInfo
                 {
-                    index = 19,
+                    index = 18,
                     name = "明度",
                     min = 0,
                     max = 255,
@@ -158,7 +147,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 "scalez", new CustomValueInfo
                 {
-                    index = 20,
+                    index = 19,
                     name = "SZ",
                     min = 0,
                     max = 10f,
@@ -169,7 +158,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 "primitivereferencex", new CustomValueInfo
                 {
-                    index = 21,
+                    index = 20,
                     name = "primitivereferencex",
                     min = 0,
                     max = 1,
@@ -180,7 +169,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 "squareuv", new CustomValueInfo
                 {
-                    index = 22,
+                    index = 21,
                     name = "squareuv",
                     min = 0,
                     max = 1,
@@ -191,7 +180,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 "maid", new CustomValueInfo
                 {
-                    index = 23,
+                    index = 22,
                     name = "maid",
                     min = -1,
                     max = 10,
@@ -202,7 +191,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 "apngspeed", new CustomValueInfo
                 {
-                    index = 24,
+                    index = 23,
                     name = "ASpeed",
                     min = 0,
                     max = 5f,
@@ -213,7 +202,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 "apngisfixedspeed", new CustomValueInfo
                 {
-                    index = 25,
+                    index = 24,
                     name = "固定速度",
                     min = 0,
                     max = 1,
@@ -224,7 +213,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 "stoprotationvx", new CustomValueInfo
                 {
-                    index = 26,
+                    index = 25,
                     name = "SRX",
                     min = -180f,
                     max = 180f,
@@ -235,7 +224,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 "stoprotationvy", new CustomValueInfo
                 {
-                    index = 27,
+                    index = 26,
                     name = "SRY",
                     min = -180f,
                     max = 180f,
@@ -246,7 +235,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 "stoprotationvz", new CustomValueInfo
                 {
-                    index = 28,
+                    index = 27,
                     name = "SRZ",
                     min = -180f,
                     max = 180f,
@@ -257,7 +246,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 "fixedposx", new CustomValueInfo
                 {
-                    index = 29,
+                    index = 28,
                     name = "FX",
                     min = -100f,
                     max = 100f,
@@ -268,7 +257,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 "fixedposy", new CustomValueInfo
                 {
-                    index = 30,
+                    index = 29,
                     name = "FY",
                     min = -100f,
                     max = 100f,
@@ -279,7 +268,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 "fixedposz", new CustomValueInfo
                 {
-                    index = 31,
+                    index = 30,
                     name = "FZ",
                     min = -100f,
                     max = 100f,
@@ -298,7 +287,6 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
         public ValueData stoprotationValue => this["stoprotation"];
         public ValueData scalexValue => this["scalex"];
         public ValueData scalemagValue => this["scalemag"];
-        public ValueData rqValue => this["rq"];
         public ValueData fixcameraValue => this["fixcamera"];
         public ValueData attachValue => this["attach"];
         public ValueData attachrotationValue => this["attachrotation"];
@@ -322,7 +310,6 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
         public CustomValueInfo stoprotationInfo => CustomValueInfoMap["stoprotation"];
         public CustomValueInfo scalexInfo => CustomValueInfoMap["scalex"];
         public CustomValueInfo scalemagInfo => CustomValueInfoMap["scalemag"];
-        public CustomValueInfo rqInfo => CustomValueInfoMap["rq"];
         public CustomValueInfo fixcameraInfo => CustomValueInfoMap["fixcamera"];
         public CustomValueInfo attachInfo => CustomValueInfoMap["attach"];
         public CustomValueInfo attachrotationInfo => CustomValueInfoMap["attachrotation"];
@@ -353,11 +340,6 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
         {
             get => scalemagValue.intValue;
             set => scalemagValue.intValue = value;
-        }
-        public int rq
-        {
-            get => rqValue.intValue;
-            set => rqValue.intValue = value;
         }
         public bool fixcamera
         {

@@ -104,7 +104,6 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             pngObject.SetInversion(start.inversion);
             pngObject.SetBrightness(start.brightness);
             pngObject.SetColor(start.color);
-            pngObject.SetRenderQueue(start.rq);
 
             pngObject.SetFixedCamera(start.fixcamera);
             pngObject.SetFixedPos(start.fixedpos);
@@ -214,7 +213,6 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                 trans.stoprotationv = pngObject.stopRotationVector;
                 trans.scalex = pngObject.scale;
                 trans.scalemag = pngObject.scaleMag;
-                trans.rq = pngObject.renderQueue;
                 trans.fixcamera = pngObject.fixedCamera;
                 trans.fixedpos = pngObject.fixedPos;
                 trans.attach = pngObject.attach;
@@ -235,10 +233,14 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
 
         private GUIComboBox<PngObjectDataWrapper> _pngObjectComboBox = new GUIComboBox<PngObjectDataWrapper>
         {
-            getName = (area, index) => area.displayName,
+            getName = (obj, index) => obj.displayName,
             labelWidth = 70,
             buttonSize = new Vector2(150, 20),
             contentSize = new Vector2(150, 300),
+            onSelected = (obj, index) =>
+            {
+                pngPlacementManager.pngPlacement.iCurrentObject = index;
+            },
         };
 
         private ColorFieldCache _colorFieldValue = new ColorFieldCache("", true);
@@ -280,6 +282,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             view.SetEnabled(!view.IsComboBoxFocused());
 
             _pngObjectComboBox.items = pngObjects;
+            _pngObjectComboBox.currentIndex = pngPlacementManager.pngPlacement.iCurrentObject;
             _pngObjectComboBox.DrawButton("対象", view);
 
             var pngObject = _pngObjectComboBox.currentItem;
@@ -426,11 +429,6 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                 defaultTrans.scalezInfo,
                 pngObject.scaleZ,
                 y => pngObject.SetScaleZ(y));
-
-            updateTransform |= view.DrawCustomValueInt(
-                defaultTrans.rqInfo,
-                pngObject.renderQueue,
-                y => pngObject.SetRenderQueue(y));
 
             _attachPointComboBox.currentIndex = (int) pngObject.attach;
             _attachPointComboBox.onSelected = (attachPoint, _) =>

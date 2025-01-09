@@ -167,7 +167,9 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                     var data = pngObjectDatas[i];
                     if (sourceObjList[i].imageName != data.imageName ||
                         sourceObjList[i].primitive != data.primitive ||
-                        sourceObjList[i].shaderDisplay != data.shaderDisplay)
+                        sourceObjList[i].squareUV != data.squareUV ||
+                        sourceObjList[i].shaderDisplay != data.shaderDisplay ||
+                        sourceObjList[i].renderQueue != data.renderQueue)
                     {
                         updated = true;
                         break;
@@ -182,7 +184,20 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                 for (int i = 0; i < pngObjectDatas.Count; i++)
                 {
                     var data = pngObjectDatas[i];
-                    pngPlacement.CreateObject(data.imageName, data.primitive, data.shaderDisplay);
+                    pngPlacement.CreateObject(data.imageName, data.primitive, data.squareUV, data.shaderDisplay);
+                }
+
+                var newSourceObjList = pngPlacement.listObjectDataWrapper;
+
+                for (int i = 0; i < pngObjectDatas.Count; i++)
+                {
+                    var data = pngObjectDatas[i];
+                    var obj = newSourceObjList.Find(x =>
+                            x.imageName == data.imageName && x.group == data.group);
+                    if (obj != null)
+                    {
+                        obj.SetRenderQueue(data.renderQueue);
+                    }
                 }
             }
 
@@ -245,7 +260,9 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                 data.imageName = obj.imageName;
                 data.group = obj.group;
                 data.primitive = obj.primitive;
+                data.squareUV = obj.squareUV;
                 data.shaderDisplay = obj.shaderDisplay;
+                data.renderQueue = obj.renderQueue;
                 timeline.pngObjects.Add(data);
             }
         }

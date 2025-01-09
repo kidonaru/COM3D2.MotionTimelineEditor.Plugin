@@ -188,7 +188,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string imageName;
         public int group;
         public int primitive;
+        public bool squareUV;
         public string shaderDisplay;
+        public int renderQueue;
 
         public string name
         {
@@ -208,7 +210,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             imageName = xml.imageName;
             group = xml.group;
             primitive = xml.primitive;
+            squareUV = xml.squareUV;
             shaderDisplay = xml.shaderDisplay;
+            renderQueue = xml.renderQueue;
         }
 
         public TimelinePngObjectXml ToXml()
@@ -218,7 +222,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 imageName = imageName,
                 group = group,
                 primitive = primitive,
+                squareUV = squareUV,
                 shaderDisplay = shaderDisplay,
+                renderQueue = renderQueue,
             };
             return xml;
         }

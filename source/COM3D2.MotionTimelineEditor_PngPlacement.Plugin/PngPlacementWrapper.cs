@@ -79,6 +79,12 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             set => placementMgrField.iPrimitive.SetValue(placementMgr, value, null);
         }
 
+        public bool bSquareUV
+        {
+            get => (bool)placementMgrField.bSquareUV.GetValue(placementMgr, null);
+            set => placementMgrField.bSquareUV.SetValue(placementMgr, value, null);
+        }
+
         public string sShaderDispName
         {
             get => (string)placementMgrField.sShaderDispName.GetValue(placementMgr, null);
@@ -162,11 +168,19 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             return (bool)placementMgrField.CreateByLoadData.Invoke(placementMgr, new object[] { obj });
         }
 
-        public void CreateObject(string imageName, int primitive, string shaderDisplay)
+        public void CreateObject(string imageName, int primitive, bool squareUV, string shaderDisplay)
         {
-            PluginUtils.Log("Create PngObject: {0}, {1}, {2}", imageName, primitive, shaderDisplay);
-            this.iPngSel = listImageFilename.IndexOf(imageName);
+            var imageIndex = listImageFilename.IndexOf(imageName);
+            if (imageIndex == -1)
+            {
+                PluginUtils.LogError("Image not found: {0}", imageName);
+                return;
+            }
+
+            PluginUtils.Log("Create PngObject: {0}, {1}, {2}, {3}", imageName, primitive, squareUV, shaderDisplay);
+            this.iPngSel = imageIndex;
             this.iPrimitive = primitive;
+            this.bSquareUV = squareUV;
             this.sShaderDispName = shaderDisplay;
             placementMgrField.Create.Invoke(placementMgr, null);
         }
