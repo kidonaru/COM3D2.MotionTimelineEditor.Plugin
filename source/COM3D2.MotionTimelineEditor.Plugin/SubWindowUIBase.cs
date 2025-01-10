@@ -8,57 +8,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public SubWindow subWindow { get; private set; }
         public abstract string title { get; }
 
-        public static int WINDOW_WIDTH
-        {
-            get
-            {
-                return SubWindow.WINDOW_WIDTH;
-            }
-        }
-
-        public static int WINDOW_HEIGHT
-        {
-            get
-            {
-                return SubWindow.WINDOW_HEIGHT;
-            }
-        }
-
+        public static int WINDOW_WIDTH => SubWindow.WINDOW_WIDTH;
+        public static int WINDOW_HEIGHT => SubWindow.WINDOW_HEIGHT;
         protected static TimelineManager timelineManager => TimelineManager.instance;
-
         protected static TimelineData timeline => timelineManager.timeline;
-
         protected static MaidManager maidManager => MaidManager.instance;
-
         protected static StudioModelManager modelManager => StudioModelManager.instance;
-
+        protected static StudioHackManager studioHackManager => StudioHackManager.instance;
         protected static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
-        
         protected static ModelHackManager modelHackManager => ModelHackManager.instance;
-
         protected static WindowManager windowManager => WindowManager.instance;
-
         protected static MovieManager movieManager => MovieManager.instance;
-
         protected static BGMManager bgmManager => BGMManager.instance;
-
         protected static GridViewManager gridViewManager => GridViewManager.instance;
-
         protected static CameraManager cameraManager =>  CameraManager.instance;
-
         protected static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
-
         protected static ITimelineLayer currentLayer => timelineManager.currentLayer;
-
         protected static Config config => ConfigManager.instance.config;
 
-        protected Rect windowRect
-        {
-            get
-            {
-                return subWindow.windowRect;
-            }
-        }
+        protected Rect windowRect => subWindow.windowRect;
 
         public SubWindowUIBase(SubWindow subWindow)
         {

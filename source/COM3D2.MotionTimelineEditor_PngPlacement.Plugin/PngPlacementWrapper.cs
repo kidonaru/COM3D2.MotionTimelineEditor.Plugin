@@ -91,6 +91,12 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             set => placementMgrField.sShaderDispName.SetValue(placementMgr, value, null);
         }
 
+        public bool enableDrag
+        {
+            get => (bool)placementMgrField.enableDrag.GetValue(placementMgr, null);
+            set => placementMgrField.enableDrag.SetValue(placementMgr, value, null);
+        }
+
         public bool bChangeState
         {
             get => (bool)maidMgrField.bChangeState.GetValue(maidMgr, null);
@@ -351,6 +357,11 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
         public void LoadAllSetsPlacement()
         {
             placementMgrField.LoadAllSets.Invoke(placementMgr, null);
+        }
+
+        public void ChangeDragState()
+        {
+            placementMgrField.ChangeDragState.Invoke(placementMgr, null);
         }
 
         public void LoadAllSetsEffect()

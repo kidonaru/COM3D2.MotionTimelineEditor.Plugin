@@ -103,15 +103,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool isSeeking => _seekState != SeekState.None;
 
         private static TimelineManager timelineManager => TimelineManager.instance;
-
         private static TimelineData timeline => timelineManager.timeline;
-
         private static ITimelineLayer currentLayer => timelineManager.currentLayer;
-
+        private static StudioHackManager studioHackManager => StudioHackManager.instance;
         private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
-
         private static Config config => ConfigManager.instance.config;
-
         private static CameraManager cameraManager =>  CameraManager.instance;
 
         public void Awake()
@@ -483,7 +479,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return false;
             }
-            if (config.isGridVisibleOnlyEdit && !studioHack.isPoseEditing)
+            if (config.isGridVisibleOnlyEdit && !studioHackManager.isPoseEditing)
             {
                 return false;
             }

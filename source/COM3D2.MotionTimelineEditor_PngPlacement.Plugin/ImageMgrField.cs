@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using System.Reflection;
 using CM3D2.PngPlacement.Plugin;
+using COM3D2.MotionTimelineEditor.Plugin;
 using System;
 
 namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
 {
     public class ImageMgrField : CustomFieldBase
     {
-        public override Type assemblyType { get; } = typeof(PngPlacement);
+        public override Type assemblyType { get; set; } = typeof(PngPlacement);
 
         public Type imageMgrType;
 
@@ -19,12 +20,6 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
         public override Dictionary<string, string> typeNames { get; } = new Dictionary<string, string>
         {
             { "imageMgrType", "CM3D2.PngPlacement.Plugin.PngPlacement+ImageMgr" },
-        };
-
-        public override Type defaultParentType { get; set; } = null;
-
-        public override Dictionary<string, Type> parentTypes { get; } = new Dictionary<string, System.Type>
-        {
         };
 
         public override Dictionary<string, string> overrideFieldName { get; } = new Dictionary<string, string>

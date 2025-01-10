@@ -27,36 +27,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private MaidCache maidCache;
         private LimbControl limbControl;
 
-        public IKManager.BoneType boneType
-        {
-            get
-            {
-                return holdType.ConvertBoneType();
-            }
-        }
-
-        public GameObject bone
-        {
-            get
-            {
-                return ikManager.GetBone(boneType);
-            }
-        }
-
-        public IKManager ikManager
-        {
-            get
-            {
-                return maidCache.ikManager;
-            }
-        }
+        public IKManager.BoneType boneType => holdType.ConvertBoneType();
+        public GameObject bone => ikManager.GetBone(boneType);
+        public IKManager ikManager => maidCache.ikManager;
 
         public FABRIK fabrik
         {
-            get
-            {
-                return limbControl != null ? limbControl.GetIkFabrik() : null;
-            }
+            get => limbControl != null ? limbControl.GetIkFabrik() : null;
         }
 
         public IKDragPoint dragPoint
@@ -106,13 +83,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public bool isDragging
-        {
-            get
-            {
-                return studioHack.IsIKDragging(holdType);
-            }
-        }
+        public bool isDragging => studioHack.IsIKDragging(holdType);
 
         private readonly static string[] IKHoldTypeNames = new string[(int) IKHoldType.Max]
         {
@@ -126,10 +97,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             "足首(左)",
         };
 
-        private static MaidManager maidManager => MaidManager.instance;
-
-        private static TimelineData timeline => TimelineManager.instance.timeline;
-
+        private static StudioHackManager studioHackManager => StudioHackManager.instance;
         private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
 
         public IKHoldEntity(IKHoldType holdType, MaidCache maidCache)
@@ -161,7 +129,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (isHold)
             {
-                if (!isAnime && !studioHack.isPoseEditing)
+                if (!isAnime && !studioHackManager.isPoseEditing)
                 {
                     return;
                 }

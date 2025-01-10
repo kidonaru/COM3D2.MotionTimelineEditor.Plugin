@@ -248,10 +248,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         public override int selectedMaidSlotNo
         {
-            get
-            {
-                return multipleMaids.selectMaidIndex;
-            }
+            get => multipleMaids.selectMaidIndex;
         }
 
         public override string outputAnmPath
@@ -267,44 +264,23 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
         }
 
-        public override bool hasIkBoxVisible
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public override bool hasIkBoxVisible => false;
 
         public override bool isIkBoxVisibleRoot
         {
-            get
-            {
-                return false;
-            }
-            set
-            {
-                // do nothing
-            }
+            get => false;
+            set { } // do nothing
         }
 
         public override bool isIkBoxVisibleBody
         {
-            get
-            {
-                return false;
-            }
-            set
-            {
-                // do nothing
-            }
+            get => false;
+            set { } // do nothing
         }
 
         public override bool isPoseEditing
         {
-            get
-            {
-                return isLock;
-            }
+            get => isLock;
             set
             {
                 if (value && isMotionPlaying)
@@ -321,10 +297,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         public override bool isMotionPlaying
         {
-            get
-            {
-                return !isStop;
-            }
+            get => !isStop;
             set
             {
                 if (value && isPoseEditing)
@@ -338,42 +311,24 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         public override float motionSliderRate
         {
-            set
-            {
-                // do nothing
-            }
+            set { } // do nothing
         }
 
         public override bool useMuneKeyL
         {
-            set
-            {
-                // do nothing
-            }
+            set { } // do nothing
         }
 
         public override bool useMuneKeyR
         {
-            set
-            {
-                // do nothing
-            }
+            set { } // do nothing
         }
 
-        public override Camera subCamera
-        {
-            get
-            {
-                return multipleMaids.subcamera;
-            }
-        }
+        public override Camera subCamera => multipleMaids.subcamera;
 
         public override DepthOfFieldScatter depthOfField
         {
-            get
-            {
-                return multipleMaids.depth_field_;
-            }
+            get => multipleMaids.depth_field_;
         }
 
         public MultipleMaidsHack()

@@ -23,27 +23,12 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                 }
                 return false;
             }
-            set
-            {
-                maidManager.SetMotionPlayingAll(!value);
-            }
+            set => maidManager.SetMotionPlayingAll(!value);
         }
 
-        public override string pluginName
-        {
-            get
-            {
-                return "MeidoPhotoStudio";
-            }
-        }
+        public override string pluginName => "MeidoPhotoStudio";
 
-        public override int priority
-        {
-            get
-            {
-                return 50;
-            }
-        }
+        public override int priority => 50;
 
         public override Maid selectedMaid
         {
@@ -141,13 +126,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
         }
 
-        public override int selectedMaidSlotNo
-        {
-            get
-            {
-                return allMaids.IndexOf(selectedMaid);
-            }
-        }
+        public override int selectedMaidSlotNo => allMaids.IndexOf(selectedMaid);
 
         public override string outputAnmPath
         {
@@ -162,44 +141,23 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
         }
 
-        public override bool hasIkBoxVisible
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public override bool hasIkBoxVisible => false;
 
         public override bool isIkBoxVisibleRoot
         {
-            get
-            {
-                return false;
-            }
-            set
-            {
-                // do nothing
-            }
+            get => false;
+            set { } // do nothing
         }
 
         public override bool isIkBoxVisibleBody
         {
-            get
-            {
-                return false;
-            }
-            set
-            {
-                // do nothing
-            }
+            get => false;
+            set { } // do nothing
         }
 
         public override bool isPoseEditing
         {
-            get
-            {
-                return mps.isReleaseIK;
-            }
+            get => mps.isReleaseIK;
             set
             {
                 if (value && isMotionPlaying)
@@ -215,10 +173,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 
         public override bool isMotionPlaying
         {
-            get
-            {
-                return !isStop;
-            }
+            get => !isStop;
             set
             {
                 if (value && isPoseEditing)
@@ -232,35 +187,22 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 
         public override float motionSliderRate
         {
-            set
-            {
-                // do nothing
-            }
+            set { } // do nothing
         }
 
         public override bool useMuneKeyL
         {
-            set
-            {
-                // do nothing
-            }
+            set { } // do nothing
         }
 
         public override bool useMuneKeyR
         {
-           
-            set
-            {
-                // do nothing
-            }
+            set { } // do nothing
         }
 
         public override Camera subCamera
         {
-            get
-            {
-                return mps.subCamera;
-            }
+            get => mps.subCamera;
         }
 
         public MeidoPhotoStudioHack()

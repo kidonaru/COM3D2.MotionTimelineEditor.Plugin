@@ -189,7 +189,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                     if (config.GetKeyDown(KeyBindType.EditMode))
                     {
-                        studioHack.isPoseEditing = !studioHack.isPoseEditing;
+                        studioHackManager.isPoseEditing = !studioHackManager.isPoseEditing;
                     }
                     if (config.GetKeyDown(KeyBindType.Copy))
                     {

@@ -110,58 +110,37 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 
         public bool active
         {
-            get
-            {
-                return (bool)field.active.GetValue(meidoPhotoStudio);
-            }
+            get => (bool)field.active.GetValue(meidoPhotoStudio);
         }
 
         public MeidoManager meidoManager
         {
-            get
-            {
-                return (MeidoManager)field.meidoManager.GetValue(meidoPhotoStudio);
-            }
+            get => (MeidoManager)field.meidoManager.GetValue(meidoPhotoStudio);
         }
 
         public MPSWindowManager windowManager
         {
-            get
-            {
-                return (MPSWindowManager) field.windowManager.GetValue(meidoPhotoStudio);
-            }
+            get => (MPSWindowManager) field.windowManager.GetValue(meidoPhotoStudio);
         }
 
         public PropManager propManager
         {
-            get
-            {
-                return (PropManager)field.propManager.GetValue(meidoPhotoStudio);
-            }
+            get => (PropManager)field.propManager.GetValue(meidoPhotoStudio);
         }
 
         public LightManager lightManager
         {
-            get
-            {
-                return (LightManager)field.lightManager.GetValue(meidoPhotoStudio);
-            }
+            get => (LightManager)field.lightManager.GetValue(meidoPhotoStudio);
         }
 
         public CameraManager cameraManager
         {
-            get
-            {
-                return (CameraManager)field.cameraManager.GetValue(meidoPhotoStudio);
-            }
+            get => (CameraManager)field.cameraManager.GetValue(meidoPhotoStudio);
         }
 
         public EffectManager effectManager
         {
-            get
-            {
-                return (EffectManager)field.effectManager.GetValue(meidoPhotoStudio);
-            }
+            get => (EffectManager)field.effectManager.GetValue(meidoPhotoStudio);
         }
 
         public DepthOfFieldEffectManager depthOfFieldEffectManager

@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using System.Reflection;
 using CM3D2.PngPlacement.Plugin;
+using COM3D2.MotionTimelineEditor.Plugin;
 using System;
 
 namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
 {
     public class PlacementMgrField : CustomFieldBase
     {
-        public override Type assemblyType { get; } = typeof(PngPlacement);
+        public override Type assemblyType { get; set; } = typeof(PngPlacement);
 
         public Type placementMgrType;
         public Type loadDataType;
@@ -19,11 +20,13 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
         public PropertyInfo iPrimitive;
         public PropertyInfo bSquareUV;
         public PropertyInfo sShaderDispName;
+        public PropertyInfo enableDrag;
 
         public MethodInfo Create;
         public MethodInfo CreateByLoadData;
         public MethodInfo DeleteAll;
         public MethodInfo LoadAllSets;
+        public MethodInfo ChangeDragState;
 
         public MethodInfo SetEnable;
         public MethodInfo SetAPNGSpeed;
@@ -48,12 +51,6 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             { "loadDataType", "CM3D2.PngPlacement.Plugin.PngPlacement+PlacementMgr+LoadData" },
             { "pngObjectDataType", "CM3D2.PngPlacement.Plugin.PngPlacement+PlacementMgr+PngObjectData" },
             { "attachPointType", "CM3D2.PngPlacement.Plugin.PngPlacement+AttachPoint" },
-        };
-
-        public override Type defaultParentType { get; set; } = null;
-
-        public override Dictionary<string, Type> parentTypes { get; } = new Dictionary<string, System.Type>
-        {
         };
 
         public override Dictionary<string, string> overrideFieldName { get; } = new Dictionary<string, string>

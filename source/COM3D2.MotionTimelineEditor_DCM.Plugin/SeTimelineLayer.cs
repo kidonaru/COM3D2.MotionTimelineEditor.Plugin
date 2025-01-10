@@ -58,7 +58,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             base.LateUpdate();
 
-            if (!studioHack.isPoseEditing)
+            if (!studioHackManager.isPoseEditing)
             {
                 ApplyPlayData();
             }
@@ -193,7 +193,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public override void DrawWindow(GUIView view)
         {
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             bool updated = false;
 

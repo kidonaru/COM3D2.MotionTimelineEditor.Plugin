@@ -54,7 +54,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.LateUpdate();
 
-            if (!studioHack.isPoseEditing)
+            if (!studioHackManager.isPoseEditing)
             {
                 ApplyPlayData();
             }
@@ -268,7 +268,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var initialEulerAngles = Vector3.zero;
             var initialScale = Vector3.one;
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             DrawTransform(
                 view,

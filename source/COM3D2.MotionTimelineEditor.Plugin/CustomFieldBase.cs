@@ -1,19 +1,31 @@
 using System.Collections.Generic;
 using System.Reflection;
-using COM3D2.MotionTimelineEditor.Plugin;
 using System;
 
-namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
+namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public abstract class CustomFieldBase
     {
         public Assembly assembly;
-        public abstract Type assemblyType { get; }
-        public abstract Dictionary<string, string> typeNames { get; }
-        public abstract Type defaultParentType { get; set; }
-        public abstract Dictionary<string, Type> parentTypes { get; }
-        public abstract Dictionary<string, string> overrideFieldName { get; }
-        public abstract Dictionary<string, Type[]> methodParameters { get; }
+        public abstract Type assemblyType { get; set; }
+
+        public virtual Dictionary<string, string> typeNames { get; } = new Dictionary<string, string>
+        {
+        };
+
+        public virtual Type defaultParentType { get; set; } = null;
+
+        public virtual Dictionary<string, Type> parentTypes { get; } = new Dictionary<string, System.Type>
+        {
+        };
+
+        public virtual Dictionary<string, string> overrideFieldName { get; } = new Dictionary<string, string>
+        {
+        };
+
+        public virtual Dictionary<string, Type[]> methodParameters { get; } = new Dictionary<string, System.Type[]>
+        {
+        };
 
         public virtual bool Init()
         {
@@ -49,13 +61,20 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
 
         public virtual bool LoadTypes()
         {
-            foreach (var typeName in typeNames)
+            foreach (var pair in typeNames)
             {
-                var type = assembly.GetType(typeName.Value);
-                PluginUtils.AssertNull(type != null, typeName.Key + " is null");
+                var fieldName = pair.Key;
+                var typeName = pair.Value;
 
-                var targetField = this.GetType().GetField(typeName.Key);
-                PluginUtils.AssertNull(targetField != null, typeName.Key + " field is null");
+                var type = assembly.GetType(typeName);
+                if (type == null && typeName.Contains("CM3D2"))
+                {
+                    type = assembly.GetType(typeName.Replace("CM3D2", "COM3D2"));
+                }
+                PluginUtils.AssertNull(type != null, fieldName + " is null");
+
+                var targetField = this.GetType().GetField(fieldName);
+                PluginUtils.AssertNull(targetField != null, fieldName + " field is null");
 
                 if (type == null || targetField == null)
                 {

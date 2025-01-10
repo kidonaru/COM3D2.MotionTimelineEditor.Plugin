@@ -12,8 +12,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private LineRenderer[] _axisLines;
 
         private static Config config => ConfigManager.instance.config;
-
-        private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
+        private static StudioHackManager studioHackManager => StudioHackManager.instance;
 
         public void Awake()
         {
@@ -134,7 +133,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 return false;
             }
-            if (config.isGridVisibleOnlyEdit && !studioHack.isPoseEditing)
+            if (config.isGridVisibleOnlyEdit && !studioHackManager.isPoseEditing)
             {
                 return false;
             }

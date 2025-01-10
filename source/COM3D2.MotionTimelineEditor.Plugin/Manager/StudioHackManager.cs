@@ -12,6 +12,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private StudioHackBase _studioHack = null;
         public override StudioHackBase studioHack => _studioHack;
 
+        private bool _isPoseEditing = false;
+        public bool isPoseEditing
+        {
+            get => _isPoseEditing;
+            set
+            {
+                if (_studioHack != null)
+                {
+                    _studioHack.isPoseEditing = value;
+                }
+            }
+        }
+
         public static event UnityAction<bool> onPoseEditingChanged;
 
         private static StudioHackManager _instance;
@@ -42,8 +55,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             studioHacks.Add(studioHack);
             studioHacks.Sort((a, b) => b.priority - a.priority);
         }
-
-        private bool _isPoseEditing = false;
 
         public override void PreUpdate()
         {
@@ -77,14 +88,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _studioHack = activeStudioHacks[0];
             }
 
-            if (_studioHack != null)
+            var isPoseEditingNow = _studioHack?.isPoseEditing ?? false;
+            if (isPoseEditingNow != _isPoseEditing)
             {
-                if (_studioHack.isPoseEditing != _isPoseEditing)
-                {
-                    _isPoseEditing = _studioHack.isPoseEditing;
-
-                    onPoseEditingChanged?.Invoke(_isPoseEditing);
-                }
+                _isPoseEditing = isPoseEditingNow;
+                onPoseEditingChanged?.Invoke(isPoseEditingNow);
             }
         }
 

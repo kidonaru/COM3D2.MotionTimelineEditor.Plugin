@@ -65,8 +65,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!force)
             {
-                if (Time.frameCount < _prevUpdateFrame + 60 ||
-                    currentLayer.isAnmPlaying)
+                if (Time.frameCount < _prevUpdateFrame + 30 || currentLayer.isAnmPlaying)
                 {
                     return;
                 }

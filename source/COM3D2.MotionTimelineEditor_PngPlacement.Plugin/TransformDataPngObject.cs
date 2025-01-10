@@ -82,7 +82,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                 "scalex", new CustomValueInfo
                 {
                     index = 13,
-                    name = "Scale",
+                    name = "拡縮",
                     min = 0,
                     max = 10f,
                     step = 0.01f,
@@ -93,7 +93,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                 "scalemag", new CustomValueInfo
                 {
                     index = 14,
-                    name = "S倍率",
+                    name = "拡縮率",
                     min = 1,
                     max = 100,
                     step = 1,

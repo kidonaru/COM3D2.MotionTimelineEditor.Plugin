@@ -57,7 +57,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Update();
 
-            if (!studioHack.isPoseEditing)
+            if (!studioHackManager.isPoseEditing)
             {
                 ApplyPlayData();
             }
@@ -124,7 +124,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 viewAngle = Mathf.Lerp(start.scale.y, end.scale.y, easing);
             }
 
-            if (config.isFixedFoV && !isCurrent && studioHack.isPoseEditing)
+            if (config.isFixedFoV && !isCurrent && studioHackManager.isPoseEditing)
             {
                 viewAngle = 35;
             }
@@ -355,7 +355,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var initialPosition = Vector3.zero;
             var initialEulerAngles = Vector3.zero;
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             updateTransform |= view.DrawSliderValue(
                 new GUIView.SliderOption

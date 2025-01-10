@@ -98,7 +98,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Update();
 
-            if (!studioHack.isPoseEditing)
+            if (!studioHackManager.isPoseEditing)
             {
                 ApplyPlayData();
             }
@@ -582,7 +582,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginScrollView();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             var updateTransform = false;
             var defaultTrans = TransformDataStageLightController.defaultTrans;
@@ -828,7 +828,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginScrollView();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             view.DrawLabel(light.displayName, 200, 20);
 

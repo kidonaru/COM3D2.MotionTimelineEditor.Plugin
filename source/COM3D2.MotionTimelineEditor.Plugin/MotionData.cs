@@ -17,22 +17,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int stFrameInEdit { get; set; }
         public int edFrameInEdit { get; set; }
 
-        private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
+        private static StudioHackManager studioHackManager => StudioHackManager.instance;
 
         public int stFrameActive
         {
-            get
-            {
-                return studioHack.isPoseEditing ? stFrameInEdit : stFrame;
-            }
+            get => studioHackManager.isPoseEditing ? stFrameInEdit : stFrame;
         }
 
         public int edFrameActive
         {
-            get
-            {
-                return studioHack.isPoseEditing ? edFrameInEdit : edFrame;
-            }
+            get => studioHackManager.isPoseEditing ? edFrameInEdit : edFrame;
         }
     }
 
@@ -41,21 +35,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public ITransformData start;
         public ITransformData end;
 
-        public string name
-        {
-            get
-            {
-                return start.name;
-            }
-        }
-
-        public int frameNo
-        {
-            get
-            {
-                return stFrame;
-            }
-        }
+        public string name => start.name;
+        public int frameNo => stFrame;
 
         public MotionData(BoneData start, BoneData end)
         {

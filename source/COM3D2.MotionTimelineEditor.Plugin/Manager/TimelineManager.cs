@@ -164,7 +164,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            var isPoseEditing = studioHack.isPoseEditing;
+            var isPoseEditing = studioHackManager.isPoseEditing;
             if (isPrevPoseEditing != isPoseEditing)
             {
                 if (isPoseEditing)
@@ -866,7 +866,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             this.currentFrameNo = frameNo;
 
-            bool isPoseEditing = studioHack.isPoseEditing;
+            bool isPoseEditing = studioHackManager.isPoseEditing;
             if (isPoseEditing)
             {
                 OnEndPoseEdit();
@@ -1267,7 +1267,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             try
             {
-                if (!studioHack.isPoseEditing)
+                if (!studioHackManager.isPoseEditing)
                 {
                     PluginUtils.LogWarning("編集モード中のみペーストできます");
                     return;
@@ -1424,7 +1424,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             UnselectAll();
 
-            bool isPoseEditing = studioHack.isPoseEditing;
+            bool isPoseEditing = studioHackManager.isPoseEditing;
             if (isPoseEditing)
             {
                 OnEndPoseEdit();
@@ -1481,7 +1481,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Play()
         {
-            studioHack.isPoseEditing = false;
+            studioHackManager.isPoseEditing = false;
 
             if (this.currentFrameNo >= timeline.maxFrameNo)
             {
@@ -1721,10 +1721,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 //    maid.name, initialEditPosition, initialEditRotation);
             }
 
-            if (onEditPoseUpdated != null)
-            {
-                onEditPoseUpdated();
-            }
+            onEditPoseUpdated?.Invoke();
         }
 
         private void OnStartPoseEdit()

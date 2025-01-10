@@ -79,7 +79,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 AddFirstBones(allBoneNames);
             }
 
-            if (!studioHack.isPoseEditing)
+            if (!studioHackManager.isPoseEditing)
             {
                 ApplyPlayData();
             }
@@ -360,7 +360,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             view.AddSpace(5);
             view.BeginScrollView();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             view.DrawLabel("テキスト", -1, 20);
 

@@ -78,7 +78,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.LateUpdate();
 
-            if (!studioHack.isPoseEditing)
+            if (!studioHackManager.isPoseEditing)
             {
                 ApplyPlayData();
             }
@@ -234,7 +234,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginScrollView();
             {
-                view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+                view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
                 for (var i = 0; i < blendShapes.Count; i++)
                 {

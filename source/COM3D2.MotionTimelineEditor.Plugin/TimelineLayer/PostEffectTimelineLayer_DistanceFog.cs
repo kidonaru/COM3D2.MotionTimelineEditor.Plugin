@@ -123,7 +123,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.AddSpace(5);
             view.BeginScrollView();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             var updateTransform = false;
             var defaultTrans = TransformDataDistanceFog.defaultTrans;

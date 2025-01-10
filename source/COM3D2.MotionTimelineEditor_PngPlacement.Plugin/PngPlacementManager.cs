@@ -33,6 +33,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
 
         private PngPlacementManager()
         {
+            StudioHackManager.onPoseEditingChanged += OnPoseEditingChanged;
         }
 
         public override void Init()
@@ -73,8 +74,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
 
             if (!force)
             {
-                if (Time.frameCount < _prevUpdateFrame + 60 ||
-                    currentLayer.isAnmPlaying)
+                if (Time.frameCount < _prevUpdateFrame + 30 || currentLayer.isAnmPlaying)
                 {
                     return;
                 }
@@ -98,7 +98,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                 }
 
                 var existingObj = pngObjects[obj.index];
-                if (existingObj.displayName != obj.displayName)
+                if (existingObj.original != obj.original)
                 {
                     refresh = true;
                 }
@@ -131,6 +131,8 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                 {
                     PluginUtils.LogDebug("  {0}: {1}", obj.index, obj.displayName);
                 }
+
+                UpdateDragState();
             }
 
             foreach (var obj in addedObjects)
@@ -264,6 +266,24 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                 data.shaderDisplay = obj.shaderDisplay;
                 data.renderQueue = obj.renderQueue;
                 timeline.pngObjects.Add(data);
+            }
+        }
+
+        private void OnPoseEditingChanged(bool isPoseEditing)
+        {
+            UpdateDragState();
+        }
+
+        private void UpdateDragState()
+        {
+            if (!IsValid())
+            {
+                return;
+            }
+
+            if (studioHackManager.isPoseEditing != pngPlacement.enableDrag)
+            {
+                pngPlacement.ChangeDragState();
             }
         }
     }

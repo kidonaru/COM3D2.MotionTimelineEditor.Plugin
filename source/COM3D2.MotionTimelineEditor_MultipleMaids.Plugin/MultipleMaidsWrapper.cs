@@ -12,270 +12,162 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         public Maid[] maidArray
         {
-            get
-            {
-                return (Maid[])field.maidArray.GetValue(multipleMaids);
-            }
+            get => (Maid[])field.maidArray.GetValue(multipleMaids);
         }
 
         public int selectMaidIndex
         {
-            get
-            {
-                return (int)field.selectMaidIndex.GetValue(multipleMaids);
-            }
-            set
-            {
-                field.selectMaidIndex.SetValue(multipleMaids, value);
-            }
+            get => (int)field.selectMaidIndex.GetValue(multipleMaids);
+            set => field.selectMaidIndex.SetValue(multipleMaids, value);
         }
 
         public bool[] isIK
         {
-            get
-            {
-                return (bool[])field.isIK.GetValue(multipleMaids);
-            }
+            get => (bool[])field.isIK.GetValue(multipleMaids);
         }
 
         public bool[] isLock
         {
-            get
-            {
-                return (bool[])field.isLock.GetValue(multipleMaids);
-            }
+            get => (bool[])field.isLock.GetValue(multipleMaids);
         }
 
         public bool unLockFlg
         {
-            get
-            {
-                return (bool)field.unLockFlg.GetValue(multipleMaids);
-            }
-            set
-            {
-                field.unLockFlg.SetValue(multipleMaids, value);
-            }
+            get => (bool)field.unLockFlg.GetValue(multipleMaids);
+            set => field.unLockFlg.SetValue(multipleMaids, value);
         }
 
         public bool[] isStop
         {
-            get
-            {
-                return (bool[])field.isStop.GetValue(multipleMaids);
-            }
+            get => (bool[])field.isStop.GetValue(multipleMaids);
         }
 
         public bool[] isBone
         {
-            get
-            {
-                return (bool[])field.isBone.GetValue(multipleMaids);
-            }
+            get => (bool[])field.isBone.GetValue(multipleMaids);
         }
 
         public bool okFlg
         {
-            get
-            {
-                return (bool)field.okFlg.GetValue(multipleMaids);
-            }
+            get => (bool)field.okFlg.GetValue(multipleMaids);
         }
 
         public List<GameObject> doguBObject
         {
-            get
-            {
-                return (List<GameObject>)field.doguBObject.GetValue(multipleMaids);
-            }
+            get => (List<GameObject>)field.doguBObject.GetValue(multipleMaids);
         }
 
         public int doguCnt
         {
-            get
-            {
-                return (int)field.doguCnt.GetValue(multipleMaids);
-            }
-            set
-            {
-                field.doguCnt.SetValue(multipleMaids, value);
-            }
+            get => (int)field.doguCnt.GetValue(multipleMaids);
+            set => field.doguCnt.SetValue(multipleMaids, value);
         }
 
         public MouseDrag6[] mDogu
         {
-            get
-            {
-                return (MouseDrag6[])field.mDogu.GetValue(multipleMaids);
-            }
+            get => (MouseDrag6[])field.mDogu.GetValue(multipleMaids);
         }
 
         public GameObject[] gDogu
         {
-            get
-            {
-                return (GameObject[])field.gDogu.GetValue(multipleMaids);
-            }
+            get => (GameObject[])field.gDogu.GetValue(multipleMaids);
         }
 
         public Material m_material
         {
-            get
-            {
-                return (Material)field.m_material.GetValue(multipleMaids);
-            }
+            get => (Material)field.m_material.GetValue(multipleMaids);
         }
 
         public float cubeSize
         {
-            get
-            {
-                return (float)field.cubeSize.GetValue(multipleMaids);
-            }
+            get => (float)field.cubeSize.GetValue(multipleMaids);
         }
 
         public List<GameObject> lightList
         {
-            get
-            {
-                return (List<GameObject>)field.lightList.GetValue(multipleMaids);
-            }
+            get => (List<GameObject>)field.lightList.GetValue(multipleMaids);
         }
 
         public List<int> lightIndex
         {
-            get
-            {
-                return (List<int>)field.lightIndex.GetValue(multipleMaids);
-            }
+            get => (List<int>)field.lightIndex.GetValue(multipleMaids);
         }
 
         public List<float> lightColorR
         {
-            get
-            {
-                return (List<float>)field.lightColorR.GetValue(multipleMaids);
-            }
+            get => (List<float>)field.lightColorR.GetValue(multipleMaids);
         }
 
         public List<float> lightColorG
         {
-            get
-            {
-                return (List<float>)field.lightColorG.GetValue(multipleMaids);
-            }
+            get => (List<float>)field.lightColorG.GetValue(multipleMaids);
         }
 
         public List<float> lightColorB
         {
-            get
-            {
-                return (List<float>)field.lightColorB.GetValue(multipleMaids);
-            }
+            get => (List<float>)field.lightColorB.GetValue(multipleMaids);
         }
 
         public List<float> lightX
         {
-            get
-            {
-                return (List<float>)field.lightX.GetValue(multipleMaids);
-            }
+            get => (List<float>)field.lightX.GetValue(multipleMaids);
         }
 
         public List<float> lightY
         {
-            get
-            {
-                return (List<float>)field.lightY.GetValue(multipleMaids);
-            }
+            get => (List<float>)field.lightY.GetValue(multipleMaids);
         }
 
         public List<float> lightAkarusa
         {
-            get
-            {
-                return (List<float>)field.lightAkarusa.GetValue(multipleMaids);
-            }
+            get => (List<float>)field.lightAkarusa.GetValue(multipleMaids);
         }
 
         public List<float> lightKage
         {
-            get
-            {
-                return (List<float>)field.lightKage.GetValue(multipleMaids);
-            }
+            get => (List<float>)field.lightKage.GetValue(multipleMaids);
         }
 
         public List<float> lightRange
         {
-            get
-            {
-                return (List<float>)field.lightRange.GetValue(multipleMaids);
-            }
+            get => (List<float>)field.lightRange.GetValue(multipleMaids);
         }
 
         public int selectLightIndex
         {
-            get
-            {
-                return (int)field.selectLightIndex.GetValue(multipleMaids);
-            }
-            set
-            {
-                field.selectLightIndex.SetValue(multipleMaids, value);
-            }
+            get => (int)field.selectLightIndex.GetValue(multipleMaids);
+            set => field.selectLightIndex.SetValue(multipleMaids, value);
         }
 
         public MouseDrag6[] mLight
         {
-            get
-            {
-                return (MouseDrag6[])field.mLight.GetValue(multipleMaids);
-            }
+            get => (MouseDrag6[])field.mLight.GetValue(multipleMaids);
         }
 
         public GameObject[] gLight
         {
-            get
-            {
-                return (GameObject[])field.gLight.GetValue(multipleMaids);
-            }
+            get => (GameObject[])field.gLight.GetValue(multipleMaids);
         }
 
         public ComboBox2 lightCombo
         {
-            get
-            {
-                return (ComboBox2)field.lightCombo.GetValue(multipleMaids);
-            }
+            get => (ComboBox2)field.lightCombo.GetValue(multipleMaids);
         }
 
         public GUIContent[] lightComboList
         {
-            get
-            {
-                return (GUIContent[])field.lightComboList.GetValue(multipleMaids);
-            }
-            set
-            {
-                field.lightComboList.SetValue(multipleMaids, value);
-            }
+            get => (GUIContent[])field.lightComboList.GetValue(multipleMaids);
+            set => field.lightComboList.SetValue(multipleMaids, value);
         }
 
         public Camera subcamera
         {
-            get
-            {
-                return (Camera)field.subcamera.GetValue(multipleMaids);
-            }
+            get => (Camera)field.subcamera.GetValue(multipleMaids);
         }
 
         public DepthOfFieldScatter depth_field_
         {
-            get
-            {
-                return (DepthOfFieldScatter)field.depth_field_.GetValue(multipleMaids);
-            }
+            get => (DepthOfFieldScatter)field.depth_field_.GetValue(multipleMaids);
         }
 
         public bool isWear

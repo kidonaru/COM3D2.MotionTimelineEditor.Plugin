@@ -26,28 +26,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public readonly static int HEADER_HEIGHT = 200;
         public readonly static int EASY_EDIT_WINDOW_HEIGHT = 260;
 
+
+        private static StudioHackManager studioHackManager => StudioHackManager.instance;
         private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
-
         private static MaidManager maidManager => MaidManager.instance;
-
         private static TimelineManager timelineManager => TimelineManager.instance;
-
         private static TimelineData timeline => timelineManager.timeline;
-
         private static ITimelineLayer currentLayer => timelineManager.currentLayer;
-
         private static Config config => ConfigManager.instance.config;
 
         private static string anmName
         {
-            get
-            {
-                return timeline.anmName;
-            }
-            set
-            {
-                timeline.anmName = value;
-            }
+            get => timeline.anmName;
+            set => timeline.anmName = value;
         }
 
         public static Color timelineLabelBgColor
@@ -61,24 +52,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public static WindowManager windowManager => WindowManager.instance;
-
-        private static SubWindow subWindow
-        {
-            get
-            {
-                return windowManager.subWindows[0];
-            }
-        }
-
+        private static SubWindow subWindow => windowManager.subWindows[0];
         private static BoneMenuManager boneMenuManager => BoneMenuManager.Instance;
-
-        private static int timelineViewHeight
-        {
-            get
-            {
-                return GetWindowHeight() - HEADER_HEIGHT - 20;
-            }
-        }
+        private static int timelineViewHeight => GetWindowHeight() - HEADER_HEIGHT - 20;
 
         public int windowIndex { get; set; }
         public bool isShowWnd { get; set; }
@@ -86,14 +62,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private Rect _windowRect;
         public Rect windowRect
         {
-            get
-            {
-                return _windowRect;
-            }
-            set
-            {
-                _windowRect = value;
-            }
+            get => _windowRect;
+            set => _windowRect = value;
         }
 
         public int windowWidth = 640;
@@ -433,7 +403,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 // TIPSを表示したい
                 var message = "";
-                if (!studioHack.isPoseEditing)
+                if (!studioHackManager.isPoseEditing)
                 {
                     var keyName = config.GetKeyName(KeyBindType.EditMode);
                     message = "[" + keyName + "]キーで編集モードに切り替えます";
@@ -655,7 +625,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.DrawLabel("キーフレーム", 100, 20);
 
-                if (view.DrawButton("登録", 50, 20, studioHack.isPoseEditing))
+                if (view.DrawButton("登録", 50, 20, studioHackManager.isPoseEditing))
                 {
                     currentLayer.AddKeyFrameDiff();
                 }
@@ -690,7 +660,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     timelineManager.CopyPoseToClipboard();
                 }
 
-                if (view.DrawButton("ポーズP", 60, 20, studioHack.isPoseEditing))
+                if (view.DrawButton("ポーズP", 60, 20, studioHackManager.isPoseEditing))
                 {
                     timelineManager.PastePoseFromClipboard();
                 }
@@ -795,9 +765,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     timelineManager.Refresh();
                 });
 
-                view.DrawToggle("編集モード", studioHack.isPoseEditing, 80, 20, newValue =>
+                view.DrawToggle("編集モード", studioHackManager.isPoseEditing, 80, 20, newValue =>
                 {
-                    studioHack.isPoseEditing = newValue;
+                    studioHackManager.isPoseEditing = newValue;
                 });
 
                 var isMaidVidible = maidManager.maid.Visible;
@@ -820,7 +790,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         config.dirty = true;
                     });
 
-                    cameraUpdated |= view.DrawToggle("視野角固定", config.isFixedFoV, 80, 20, !currentLayer.isCameraLayer && studioHack.isPoseEditing, newValue =>
+                    cameraUpdated |= view.DrawToggle("視野角固定", config.isFixedFoV, 80, 20, !currentLayer.isCameraLayer && studioHackManager.isPoseEditing, newValue =>
                     {
                         config.isFixedFoV = newValue;
                         config.dirty = true;
@@ -1302,7 +1272,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         menuItem.SelectMenu(isMultiSelect);
                     });
 
-                if (studioHack.isPoseEditing)
+                if (studioHackManager.isPoseEditing)
                 {
                     view.InvokeActionOnMouse(
                         config.menuWidth - 20,

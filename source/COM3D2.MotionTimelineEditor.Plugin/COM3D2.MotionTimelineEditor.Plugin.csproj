@@ -81,6 +81,7 @@
     <Compile Include="COM3D2.GUIExt.cs" />
     <Compile Include="COM3D2.MotionTimelineEditor.Plugin.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="CustomFieldBase.cs" />
     <Compile Include="DressUtils.cs" />
     <Compile Include="ExtendBoneCache.cs" />
     <Compile Include="Extensions.cs" />

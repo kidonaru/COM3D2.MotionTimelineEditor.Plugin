@@ -92,7 +92,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         {
             base.LateUpdate();
 
-            if (!studioHack.isPoseEditing)
+            if (!studioHackManager.isPoseEditing)
             {
                 ApplyPlayData();
             }
@@ -305,7 +305,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             view.DrawHorizontalLine(Color.gray);
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             DrawMorph(view);
         }
@@ -342,7 +342,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                     break;
             }
 
-            if (studioHack.isPoseEditing && _isForceUpdate)
+            if (studioHackManager.isPoseEditing && _isForceUpdate)
             {
                 _faceManager.SetMorphValue(maid, _applyMorphMap);
             }

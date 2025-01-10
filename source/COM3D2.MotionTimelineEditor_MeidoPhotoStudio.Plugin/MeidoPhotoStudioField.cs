@@ -8,8 +8,10 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
     using MPS = MeidoPhotoStudio.Plugin.MeidoPhotoStudio;
     using CameraManager = MeidoPhotoStudio.Plugin.CameraManager;
 
-    public class MeidoPhotoStudioField
+    public class MeidoPhotoStudioField : CustomFieldBase
     {
+        public override System.Type assemblyType { get; set; } = typeof(MPS);
+
         public FieldInfo active;
         public FieldInfo meidoManager;
         public FieldInfo windowManager;
@@ -27,7 +29,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
         public FieldInfo subCamera;
         public FieldInfo dragPoints;
 
-        private Dictionary<string, System.Type> _ownerTypes = new Dictionary<string, System.Type>
+        public override Dictionary<string, System.Type> parentTypes { get; } = new Dictionary<string, System.Type>
         {
             { "active", typeof(MPS) },
             { "meidoManager", typeof(MPS) },
@@ -46,26 +48,5 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             { "subCamera", typeof(CameraManager) },
             { "dragPoints", typeof(MeidoDragPointManager) },
         };
-
-        public bool Init()
-        {
-            var bindingAttr = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.InvokeMethod;
-
-            foreach (var fieldInfo in typeof(MeidoPhotoStudioField).GetFields())
-            {
-                var fieldName = fieldInfo.Name;
-                var parentType = _ownerTypes[fieldName];
-                var targetField = parentType.GetField(fieldName, bindingAttr);
-                PluginUtils.AssertNull(targetField != null, "field " + fieldName + " is null");
-                fieldInfo.SetValue(this, targetField);
-
-                if (targetField == null)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
     }
 }

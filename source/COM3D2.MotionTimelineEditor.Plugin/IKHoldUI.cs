@@ -24,7 +24,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.DrawHorizontalLine(Color.gray);
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             var typesList = new List<IKHoldType[]>
             {
@@ -143,7 +143,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing && (maidCache.isGroundingFootL || maidCache.isGroundingFootR));
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing && (maidCache.isGroundingFootL || maidCache.isGroundingFootR));
 
             paramUpdated |= view.DrawSliderValue(
                 new GUIView.SliderOption

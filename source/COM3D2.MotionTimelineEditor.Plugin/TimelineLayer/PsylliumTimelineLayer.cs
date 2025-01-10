@@ -140,7 +140,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Update();
 
-            if (!studioHack.isPoseEditing)
+            if (!studioHackManager.isPoseEditing)
             {
                 ApplyPlayData();
             }
@@ -896,7 +896,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginScrollView();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             var updateTransform = false;
             var defaultTrans = TransformDataPsylliumController.defaultTrans;
@@ -993,7 +993,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginScrollView();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             var barConfig = controller.barConfig;
             var updateTransform = false;
@@ -1117,7 +1117,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginScrollView();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             var handConfig = controller.handConfig;
             var updateTransform = false;
@@ -1248,7 +1248,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginScrollView();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             var patternConfig = pattern.patternConfig;
             var updateTransform = false;
@@ -1554,7 +1554,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginScrollView();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             var areaConfig = area.areaConfig;
             var transformCache = view.GetTransformCache();

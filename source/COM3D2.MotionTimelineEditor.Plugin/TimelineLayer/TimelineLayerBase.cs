@@ -189,23 +189,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         protected Dictionary<string, MotionPlayData> _playDataMap = new Dictionary<string, MotionPlayData>(32);
 
         protected static TimelineManager timelineManager => TimelineManager.instance;
-
         protected static TimelineData timeline => timelineManager.timeline;
-
         protected static ITimelineLayer currentLayer => timelineManager.currentLayer;
-
         protected static ITimelineLayer defaultLayer => timeline.defaultLayer;
-
         protected static Config config => ConfigManager.instance.config;
-
         protected static int maxFrameNo => timeline.maxFrameNo;
-
         protected static bool useMuneKeyL => timeline.useMuneKeyL;
-
         protected static bool useMuneKeyR => timeline.useMuneKeyR;
-
         protected static bool isLoopAnm => timeline.isLoopAnm;
-
         protected static MaidManager maidManager => MaidManager.instance;
         protected static StudioModelManager modelManager => StudioModelManager.instance;
         protected static BGModelManager bgModelManager => BGModelManager.instance;
@@ -214,6 +205,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         protected static StageLaserManager stageLaserManager => StageLaserManager.instance;
         protected static StageLightManager stageLightManager => StageLightManager.instance;
         protected static PsylliumManager psylliumManager => PsylliumManager.instance;
+        protected static StudioHackManager studioHackManager => StudioHackManager.instance;
         protected static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
         protected static PhotoBGManager photoBGManager => PhotoBGManager.instance;
         protected static TimelineBundleManager bundleManager => TimelineBundleManager.instance;

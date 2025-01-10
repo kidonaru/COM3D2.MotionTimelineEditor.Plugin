@@ -109,7 +109,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.LateUpdate();
 
-            if (!studioHack.isPoseEditing)
+            if (!studioHackManager.isPoseEditing)
             {
                 ApplyPlayData();
             }
@@ -495,7 +495,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             InitTexture();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             _targetTypeComboBox.currentIndex = (int) maidCache.lookAtTargetType;
             _targetTypeComboBox.onSelected = (type, index) => maidCache.lookAtTargetType = type;
@@ -530,7 +530,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             var basePos = view.currentPos;
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing && targetType == LookAtTargetType.None);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing && targetType == LookAtTargetType.None);
 
             DrawEyesImage(view, basePos, new MotionEyesType[]
             {
@@ -575,7 +575,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginScrollView();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             var basePos = view.currentPos;
 
@@ -682,7 +682,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _eyesPositionTex,
                 150,
                 150,
-                studioHack.isPoseEditing ? Color.white : Color.gray,
+                studioHackManager.isPoseEditing ? Color.white : Color.gray,
                 EventType.MouseDrag,
                 pos =>
                 {

@@ -211,7 +211,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.LateUpdate();
 
-            if (!studioHack.isPoseEditing)
+            if (!studioHackManager.isPoseEditing)
             {
                 ApplyPlayData();
             }
@@ -343,7 +343,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private void ApplyFingerBlendMotion(MotionData motion)
         {
             // 指ブレンドはポーズ編集中のみ反映
-            if (!studioHack.isPoseEditing)
+            if (!studioHackManager.isPoseEditing)
             {
                 return;
             }
@@ -982,7 +982,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginScrollView();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             if (menuItem.name == "IK")
             {
@@ -1205,7 +1205,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var baseFinger = GetBaseFinger(blendType);
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing && timeline.fingerBlendEnabled);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing && timeline.fingerBlendEnabled);
 
             view.BeginHorizontal();
             {

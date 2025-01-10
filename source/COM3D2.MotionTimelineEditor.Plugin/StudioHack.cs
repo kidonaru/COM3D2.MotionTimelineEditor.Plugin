@@ -135,10 +135,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override int selectedMaidSlotNo
         {
-            get
-            {
-                return allMaids.IndexOf(selectedMaid);
-            }
+            get => allMaids.IndexOf(selectedMaid);
         }
 
         public override string outputAnmPath
@@ -154,20 +151,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override bool hasIkBoxVisible
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool hasIkBoxVisible => true;
 
         public override bool isIkBoxVisibleRoot
         {
-            get
-            {
-                return studio.ikBoxVisibleRoot.check;
-            }
+            get => studio.ikBoxVisibleRoot.check;
             set
             {
                 studio.ikBoxVisibleRoot.check = value;
@@ -179,10 +167,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override bool isIkBoxVisibleBody
         {
-            get
-            {
-                return studio.ikBoxVisibleBody.check;
-            }
+            get => studio.ikBoxVisibleBody.check;
             set
             {
                 studio.ikBoxVisibleBody.check = value;
@@ -194,10 +179,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override bool isPoseEditing
         {
-            get
-            {
-                return studio.poseEditWindow.CheckbtnUse.check;
-            }
+            get => studio.poseEditWindow.CheckbtnUse.check;
             set
             {
                 if (value && isMotionPlaying)
@@ -213,10 +195,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override bool isMotionPlaying
         {
-            get
-            {
-                return !studio.motionWindow.CheckbtnStop.check;
-            }
+            get => !studio.motionWindow.CheckbtnStop.check;
             set
             {
                 if (value && isPoseEditing)
@@ -234,10 +213,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private Dictionary<string, string> maidStoreData
         {
-            get
-            {
-                return studio.poseEditWindow.GetMaidStoreData(selectedMaid);
-            }
+            get => studio.poseEditWindow.GetMaidStoreData(selectedMaid);
         }
 
         public override float motionSliderRate
@@ -278,13 +254,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override Camera subCamera
-        {
-            get
-            {
-                return null;
-            }
-        }
+        public override Camera subCamera => null;
 
         public override bool Init()
         {

@@ -67,7 +67,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
         {
             base.LateUpdate();
 
-            if (!studioHack.isPoseEditing)
+            if (!studioHackManager.isPoseEditing)
             {
                 ApplyPlayData();
             }
@@ -298,7 +298,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
 
             view.BeginScrollView();
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             var defaultTrans = TransformDataPngObject.defaultTrans;
             var updateTransform = false;

@@ -79,7 +79,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Update();
 
-            if (!studioHack.isPoseEditing)
+            if (!studioHackManager.isPoseEditing)
             {
                 ApplyPlayData();
             }
@@ -234,7 +234,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var color = camera.backgroundColor;
             var updateTransform = false;
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             view.DrawLabel("背景色", 70, 20);
 

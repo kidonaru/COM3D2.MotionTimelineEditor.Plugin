@@ -4,8 +4,11 @@ using COM3D2.MotionTimelineEditor.Plugin;
 
 namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 {
-    public class MultipleMaidsField
+    public class MultipleMaidsField : CustomFieldBase
     {
+        public override System.Type assemblyType { get; set; } = typeof(MultipleMaids);
+        public override System.Type defaultParentType { get; set; } = typeof(MultipleMaids);
+
         public FieldInfo maidArray;
         public FieldInfo selectMaidIndex;
         public FieldInfo isIK;
@@ -74,26 +77,5 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         public FieldInfo mFootR;
         public FieldInfo mHizaL;
         public FieldInfo mHizaR;
-
-        public bool Init()
-        {
-            var bindingAttr = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.InvokeMethod;
-            var multipleMaidsType = typeof(MultipleMaids);
-
-            foreach (var fieldInfo in typeof(MultipleMaidsField).GetFields())
-            {
-                string fieldName = fieldInfo.Name;
-                var targetField = multipleMaidsType.GetField(fieldName, bindingAttr);
-                PluginUtils.AssertNull(targetField != null, "field " + fieldName + " is null");
-                fieldInfo.SetValue(this, targetField);
-
-                if (targetField == null)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
     }
 }

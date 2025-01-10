@@ -24,7 +24,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.DrawHorizontalLine(Color.gray);
             view.AddSpace(5);
 
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHack.isPoseEditing);
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             var depthOfField = postEffectManager.GetDepthOfFieldData();
             var updateTransform = false;
