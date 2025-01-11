@@ -602,6 +602,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             PluginUtils.LogDebug("MotionTimelineEditor.OnLoad");
 
+            if (studioHack == null || !studioHack.IsValid())
+            {
+                return;
+            }
+            if (timeline == null)
+            {
+                return;
+            }
+
             foreach (var manager in _managers)
             {
                 try
@@ -631,7 +640,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            studioHack.SetBackgroundVisible(timeline.isBackgroundVisible);
+            if (timeline != null)
+            {
+                studioHack.SetBackgroundVisible(timeline.isBackgroundVisible);
+            }
 
             OnLoad();
 
@@ -649,7 +661,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             foreach (var manager in _managers)
             {
-                manager.OnPluginDisable();
+                try
+                {
+                    manager.OnPluginDisable();
+                }
+                catch (Exception e)
+                {
+                    PluginUtils.LogException(e);
+                }
             }
         }
 

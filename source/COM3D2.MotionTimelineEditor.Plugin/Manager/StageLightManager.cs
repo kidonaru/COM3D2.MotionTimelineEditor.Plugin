@@ -114,7 +114,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            PluginUtils.Log("StageLightManager: Light list updated");
+            PluginUtils.LogDebug("StageLightManager: Light list updated");
 
             foreach (var light in lights)
             {

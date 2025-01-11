@@ -26,14 +26,41 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.AddSpace(5);
 
-            view.padding = Vector2.zero;
+            view.BeginScrollView();
 
-            view.DrawContentListView(
-                lights,
-                DrawLightContent,
-                -1,
-                -1,
-                80);
+            foreach (var light in lights)
+            {
+                DrawLightContent(view, light, light.index);
+            }
+
+            view.SetEnabled(!view.IsComboBoxFocused());
+
+            view.DrawHorizontalLine(Color.gray);
+
+            view.DrawToggle("ライトのタンジェント補間を有効化", timeline.isTangentLight, -1, 20, newValue =>
+            {
+                timeline.isTangentLight = newValue;
+                InitTangent();
+                ApplyCurrentFrame(true);
+            });
+
+            view.DrawToggle("ライトで色補間を有効化", timeline.isLightColorEasing, -1, 20, newValue =>
+            {
+                timeline.isLightColorEasing = newValue;
+            });
+
+            view.DrawToggle("ライトで拡張補間を有効化", timeline.isLightExtraEasing, -1, 20, newValue =>
+            {
+                timeline.isLightExtraEasing = newValue;
+            });
+
+            view.DrawToggle("ライトの互換性モードを有効化", timeline.isLightCompatibilityMode, -1, 20, newValue =>
+            {
+                timeline.isLightCompatibilityMode = newValue;
+                studioHack.SetLightCompatibilityMode(newValue);
+            });
+
+            view.EndScrollView();
         }
 
         protected void DrawLightContent(
@@ -46,19 +73,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            view.currentPos.x = 5;
-            view.currentPos.y = 5;
-
-            view.DrawLabel(light.displayName, -1, 20);
-
-            view.SetEnabled(light.index > 0 && lightManager.CanCreateLight());
-
             view.BeginHorizontal();
             {
-                if (view.DrawButton("複製", 45, 20))
+                view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
+
+                view.DrawToggle(light.displayName, light.visible, 200, 20, newValue =>
                 {
-                    //timelineManager.CopyLight(light);
-                }
+                    light.visible = newValue;
+                    lightManager.ApplyLight(light);
+                });
+
+                view.SetEnabled(!view.IsComboBoxFocused() && light.index > 0 && lightManager.CanCreateLight());
 
                 if (view.DrawButton("削除", 45, 20))
                 {
@@ -66,10 +91,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
             view.EndLayout();
-
-            view.SetEnabled(true);
-
-            view.DrawHorizontalLine(Color.gray);
         }
     }
 }

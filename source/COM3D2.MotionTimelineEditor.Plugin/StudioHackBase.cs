@@ -224,6 +224,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // do nothing
         }
 
+        public virtual void SetLightCompatibilityMode(bool isLightCompatibilityMode)
+        {
+            // do nothing
+        }
+
         private void DeleteBGObject()
         {
             BgMgr bgMgr = GameMain.Instance.BgMgr;

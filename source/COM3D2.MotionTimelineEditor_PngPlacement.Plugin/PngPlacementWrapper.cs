@@ -193,7 +193,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
 
         public void DeleteAllObjects()
         {
-            PluginUtils.Log("DeleteAll PngObjects");
+            PluginUtils.LogDebug("DeleteAll PngObjects");
             placementMgrField.DeleteAll.Invoke(placementMgr, null);
         }
 

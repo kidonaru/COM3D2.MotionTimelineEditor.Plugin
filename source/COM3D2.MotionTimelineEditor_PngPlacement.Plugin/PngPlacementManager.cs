@@ -125,7 +125,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                     pngObjectNames.Add(obj.displayName);
                 }
 
-                PluginUtils.Log("PngPlacementManager: obj list updated");
+                PluginUtils.LogDebug("PngPlacementManager: obj list updated");
 
                 foreach (var obj in pngObjects)
                 {

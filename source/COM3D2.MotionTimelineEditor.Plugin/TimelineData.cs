@@ -20,7 +20,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public AttachPoint attachPoint;
         public int attachMaidSlotNo = -1;
         public string pluginName;
-        public bool visible = true;
 
         public TimelineModelData()
         {
@@ -37,7 +36,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             attachPoint = model.attachPoint;
             attachMaidSlotNo = model.attachMaidSlotNo;
             pluginName = model.pluginName;
-            visible = model.visible;
         }
 
         public void FromXml(TimelineModelXml xml)
@@ -46,7 +44,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             attachPoint = xml.attachPoint;
             attachMaidSlotNo = xml.attachMaidSlotNo;
             pluginName = xml.pluginName;
-            visible = xml.visible;
         }
 
         public TimelineModelXml ToXml()
@@ -57,7 +54,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 attachPoint = attachPoint,
                 attachMaidSlotNo = attachMaidSlotNo,
                 pluginName = pluginName,
-                visible = visible,
             };
             return xml;
         }
@@ -232,7 +228,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class TimelineData
     {
-        public static readonly int CurrentVersion = 25;
+        public static readonly int CurrentVersion = 26;
         public static readonly TimelineData DefaultTimeline = new TimelineData();
 
         public int version = 0;
@@ -402,6 +398,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool isLightColorEasing = true;
         public bool isLightExtraEasing = false;
+        public bool isLightCompatibilityMode = true;
 
         public List<int> stageLaserCountList = new List<int>();
         public List<int> stageLightCountList = new List<int>();
@@ -599,7 +596,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (layers.Count() == 0)
             {
                 var layer = timelineManager.CreateLayer(typeof(MotionTimelineLayer), 0);
-                layers.Add(layer);
+                AddLayer(layer);
             }
 
             defaultLayer = layers[0];
@@ -659,7 +656,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 layer.OnPluginDisable();
             }
 
-            studioHack.SetBackgroundVisible(true);
+            studioHack?.SetBackgroundVisible(true);
         }
 
         public void OnCopyModel(StudioModelStat sourceModel, StudioModelStat newModel)
@@ -854,6 +851,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             isTangentMove = xml.isTangentMove;
             isLightColorEasing = xml.isLightColorEasing;
             isLightExtraEasing = xml.isLightExtraEasing;
+            isLightCompatibilityMode = xml.isLightCompatibilityMode;
             stageLaserCountList = xml.stageLaserCountList.ToList();
             stageLightCountList = xml.stageLightCountList.ToList();
             activeTrackIndex = xml.activeTrackIndex;
@@ -1004,6 +1002,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.isTangentMove = isTangentMove;
             xml.isLightColorEasing = isLightColorEasing;
             xml.isLightExtraEasing = isLightExtraEasing;
+            xml.isLightCompatibilityMode = isLightCompatibilityMode;
             xml.stageLaserCountList = stageLaserCountList.ToList();
             xml.stageLightCountList = stageLightCountList.ToList();
             xml.activeTrackIndex = activeTrackIndex;

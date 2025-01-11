@@ -113,7 +113,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            PluginUtils.Log("StageLaserManager: Laser list updated");
+            PluginUtils.LogDebug("StageLaserManager: Laser list updated");
 
             foreach (var laser in lasers)
             {

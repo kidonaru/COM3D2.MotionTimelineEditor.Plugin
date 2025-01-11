@@ -6,6 +6,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public class ModelHackManager : ManagerBase
     {
         private Dictionary<string, IModelHack> modelHackMap = new Dictionary<string, IModelHack>();
+        private Dictionary<string, int> _modelGroupMap = new Dictionary<string, int>();
 
         private List<StudioModelStat> _modelList = new List<StudioModelStat>();
         public List<StudioModelStat> modelList
@@ -23,6 +24,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         _modelList.AddRange(modelHack.modelList);
                     }
                 }
+
+                FixGroup(_modelList);
 
                 return _modelList;
             }
@@ -154,6 +157,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 prevModelHack.DeleteModel(model);
                 nextModelHack.CreateModel(model);
+            }
+        }
+
+        /// <summary>
+        /// groupの修正
+        /// </summary>
+        /// <param name="models"></param>
+        private void FixGroup(List<StudioModelStat> models)
+        {
+            _modelGroupMap.Clear();
+
+            foreach (var model in models)
+            {
+                int group = 0;
+
+                if (_modelGroupMap.TryGetValue(model.info.fileName, out group))
+                {
+                    group++;
+                    if (group == 1) group++; // 1は使わない
+                }
+
+                model.SetGroup(group);
+                _modelGroupMap[model.info.fileName] = group;
             }
         }
 

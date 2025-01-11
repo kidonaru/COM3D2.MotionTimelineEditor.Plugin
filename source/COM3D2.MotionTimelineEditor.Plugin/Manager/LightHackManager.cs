@@ -100,6 +100,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public void SetLightCompatibilityMode(bool isLightCompatibilityMode)
+        {
+            if (IsValid())
+            {
+                studioHack.SetLightCompatibilityMode(isLightCompatibilityMode);
+            }
+        }
+
         public override void Update()
         {
         }

@@ -17,8 +17,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public int attachMaidSlotNo = -1;
         [XmlElement("PluginName")]
         public string pluginName;
-        [XmlElement("Visible")]
-        public bool visible = true;
     }
 
     public class TimelineLightXml
@@ -183,6 +181,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         [XmlElement("IsLightExtraEasing")]
         public bool isLightExtraEasing = false;
+
+        [XmlElement("IsLightCompatibilityMode")]
+        public bool isLightCompatibilityMode = true;
 
         [XmlElement("StageLaserCountList")]
         public List<int> stageLaserCountList = new List<int>();
@@ -880,6 +881,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         break;
                     }
                 }
+            }
+
+            if (version < 26)
+            {
+                // 旧バージョンではライト互換モード無効
+                isLightCompatibilityMode = false;
             }
         }
     }

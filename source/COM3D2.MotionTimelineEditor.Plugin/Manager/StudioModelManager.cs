@@ -163,7 +163,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return GetBlendShape(blendShapeNames[index]);
         }
 
-        private Dictionary<string, int> _modelGroupMap = new Dictionary<string, int>();
         private int _prevUpdateFrame = -1;
 
         public override void LateUpdate()
@@ -183,7 +182,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _prevUpdateFrame = Time.frameCount;
 
             var modelList = modelHackManager.modelList;
-            FixGroup(modelList);
 
             var addedModels = new List<StudioModelStat>();
             var removedModels = new List<StudioModelStat>();
@@ -282,7 +280,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
-                PluginUtils.Log("StudioModelManager: Model list updated");
+                PluginUtils.LogDebug("StudioModelManager: Model list updated");
 
                 foreach (var model in models)
                 {
@@ -321,12 +319,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void SetupModels(List<TimelineModelData> modelDataList)
         {
-            modelDataList = modelDataList.ToList(); // 更新される可能性があるので複製
-            LateUpdate(true);
+            PluginUtils.LogDebug("SetupModels: count={0}", modelDataList.Count);
+
+            var modelList = modelHackManager.modelList.ToList();
 
             foreach (var modelData in modelDataList)
             {
-                var model = GetModel(modelData.name);
+                var model = modelList.Find(m => m.name == modelData.name);
                 if (model == null)
                 {
                     model = CreateModelStat(
@@ -336,7 +335,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         modelData.attachMaidSlotNo,
                         null,
                         modelData.pluginName,
-                        modelData.visible);
+                        true);
                     modelHackManager.CreateModel(model);
 
                     PluginUtils.Log("Create model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
@@ -354,12 +353,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     else
                     {
                         modelHackManager.UpdateAttachPoint(model);
-                        modelHackManager.SetModelVisible(model, modelData.visible);
                     }
                 }
             }
 
-            foreach (var model in models)
+            foreach (var model in modelList)
             {
                 if (modelDataList.FindIndex(data => data.name == model.name) < 0)
                 {
@@ -558,31 +556,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             OfficialObjectLabelMap[label] = info;
 
             return info;
-        }
-
-        /// <summary>
-        /// groupの修正
-        /// </summary>
-        /// <param name="models"></param>
-        private void FixGroup(List<StudioModelStat> models)
-        {
-            _modelGroupMap.Clear();
-
-            foreach (var model in models)
-            {
-                //PluginUtils.Log("FixGroup: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
-                //        model.info.type, model.displayName, model.name, model.info.label, model.info.fileName, model.info.myRoomId, model.info.bgObjectId);
-                int group = 0;
-
-                if (_modelGroupMap.TryGetValue(model.info.fileName, out group))
-                {
-                    group++;
-                    if (group == 1) group++; // 1は使わない
-                }
-
-                model.SetGroup(group);
-                _modelGroupMap[model.info.fileName] = group;
-            }
         }
 
         private void InitOfficialObjectMap()

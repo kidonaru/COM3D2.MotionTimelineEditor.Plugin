@@ -13,29 +13,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         private StudioWrapper studio = new StudioWrapper();
 
-        public override string pluginName
-        {
-            get
-            {
-                return "StudioMode";
-            }
-        }
-
-        public override int priority
-        {
-            get
-            {
-                return 0;
-            }
-        }
-
-        public override Maid selectedMaid
-        {
-            get
-            {
-                return studio.photoManager.select_maid;
-            }
-        }
+        public override string pluginName => "StudioMode";
+        public override int priority => 0;
+        public override Maid selectedMaid => studio.photoManager.select_maid;
 
         private List<Maid> _allMaids = new List<Maid>();
         public override List<Maid> allMaids
@@ -464,6 +444,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var targetList = studio.lightWindow.GetTargetList();
             if (stat.index >= targetList.Count)
             {
+                PluginUtils.LogError("ライト数が足りません: " + stat.index);
                 return;
             }
 
@@ -487,6 +468,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
+            PluginUtils.LogDebug("ChangeLight: {0} {1} -> {2}",
+                stat.name, stat.light.type, stat.type);
             if (stat.light.type != stat.type)
             {
                 if (stat.type == LightType.Spot)
@@ -522,6 +505,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             stat.light.enabled = stat.visible;
+        }
+
+        public override void SetLightCompatibilityMode(bool isLightCompatibilityMode)
+        {
+            var targetList = studio.lightWindow.GetTargetList();
+            foreach (var targetObj in targetList)
+            {
+                if (targetObj.obj == null)
+                {
+                    continue;
+                }
+
+                var lightSpot = UTY.GetChildObject(targetObj.obj, "LightSpot", false);
+                if (lightSpot == null)
+                {
+                    continue;
+                }
+
+                lightSpot.transform.localEulerAngles =
+                        isLightCompatibilityMode ? Vector3.zero : new Vector3(90f, 0f, 0f);
+            }
         }
 
         public override void ChangeBackground(string bgName)

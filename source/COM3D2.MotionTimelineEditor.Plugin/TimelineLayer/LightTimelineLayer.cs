@@ -29,6 +29,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Init();
 
+            AddFirstBones(allBoneNames);
+
             StudioLightManager.onLightAdded += OnLightAdded;
             StudioLightManager.onLightRemoved += OnLightRemoved;
             StudioLightManager.onLightUpdated += OnLightUpdated;

@@ -214,28 +214,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             });
 
-            view.DrawToggle("ライトのタンジェント補間を有効化", timeline.isTangentLight, -1, 20, newValue =>
-            {
-                timeline.isTangentLight = newValue;
-
-                var targetLayer = timelineManager.GetLayer(typeof(LightTimelineLayer));
-                if (targetLayer != null)
-                {
-                    targetLayer.InitTangent();
-                    targetLayer.ApplyCurrentFrame(true);
-                }
-            });
-
-            view.DrawToggle("ライトで色補間を有効化", timeline.isLightColorEasing, -1, 20, newValue =>
-            {
-                timeline.isLightColorEasing = newValue;
-            });
-
-            view.DrawToggle("ライトで拡張補間を有効化", timeline.isLightExtraEasing, -1, 20, newValue =>
-            {
-                timeline.isLightExtraEasing = newValue;
-            });
-
             view.DrawToggle("ポストエフェクトの色拡張", timeline.usePostEffectExtraColor, -1, 20, newValue =>
             {
                 timeline.usePostEffectExtraColor = newValue;

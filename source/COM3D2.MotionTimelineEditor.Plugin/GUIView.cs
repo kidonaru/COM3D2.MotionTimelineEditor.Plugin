@@ -1165,26 +1165,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             BeginLayout(LayoutDirection.Vertical);
 
             var itemRect = new Rect(0, 0, itemWidth, itemHeight);
-            var itemView = new GUIView(itemRect)
-            {
-                parent = this,
-                scrollViewRect = scrollViewRect,
-                scrollPosition = scrollPosition
-            };
+            BeginSubView(itemRect, LayoutDirection.Vertical);
+            subView.scrollViewRect = scrollViewRect;
+            subView.scrollPosition = scrollPosition;
 
             for (int i = 0; i < items.Count; i++)
             {
                 var drawRect = GetDrawRect(itemWidth, itemHeight);
-                itemView.Init(drawRect);
+                subView.Init(drawRect);
 
                 var item = items[i];
-                drawContent(itemView, item, i);
+                drawContent(subView, item, i);
 
                 NextElement(drawRect);
             }
 
+            EndSubView();
             EndLayout();
-
             EndScrollView();
         }
 

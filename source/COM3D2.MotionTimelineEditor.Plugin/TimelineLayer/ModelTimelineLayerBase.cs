@@ -103,19 +103,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var width = view.viewRect.width;
             var height = view.viewRect.height;
 
-            view.currentPos.x = 5;
-            view.currentPos.y = 5;
+            view.margin = GUIView.defaultMargin;
+            view.padding = GUIView.defaultPadding;
 
-            view.BeginHorizontal();
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
+
+            view.DrawToggle(model.displayName, model.visible, -1, 20, newValue =>
             {
-                view.DrawToggle(model.visible, 20, 20, newValue =>
-                {
-                    modelManager.SetModelVisible(model, newValue);
-                });
-
-                view.DrawLabel(model.displayName, -1, 20);
-            }
-            view.EndLayout();
+                modelManager.SetModelVisible(model, newValue);
+            });
 
             view.BeginHorizontal();
             {

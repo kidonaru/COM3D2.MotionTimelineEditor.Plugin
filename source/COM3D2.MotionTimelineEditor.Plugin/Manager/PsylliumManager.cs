@@ -171,7 +171,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             ClearCache();
 
-            PluginUtils.Log("PsylliumManager: List updated");
+            PluginUtils.LogDebug("PsylliumManager: List updated");
 
             foreach (var controller in controllers)
             {
