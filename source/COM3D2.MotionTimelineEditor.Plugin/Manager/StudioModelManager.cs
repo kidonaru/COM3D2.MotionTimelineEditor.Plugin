@@ -197,7 +197,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (model.transform == null)
                 {
-                    PluginUtils.LogWarning("StudioModelManager: transformがありません: name={0}", model.name);
+                    MTEUtils.LogWarning("StudioModelManager: transformがありません: name={0}", model.name);
                     continue;
                 }
 
@@ -280,21 +280,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
-                PluginUtils.LogDebug("StudioModelManager: Model list updated");
+                MTEUtils.LogDebug("StudioModelManager: Model list updated");
 
                 foreach (var model in models)
                 {
-                    PluginUtils.LogDebug("model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6} pluginName={7}",
+                    MTEUtils.LogDebug("model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6} pluginName={7}",
                         model.info.type, model.displayName, model.name, model.info.label, model.info.fileName, model.info.myRoomId, model.info.bgObjectId, model.pluginName);
 
                     foreach (var bone in model.bones)
                     {
-                        PluginUtils.LogDebug("  bone: name={0}", bone.name);
+                        MTEUtils.LogDebug("  bone: name={0}", bone.name);
                     }
 
                     foreach (var blendShape in model.blendShapes)
                     {
-                        PluginUtils.LogDebug("  blendShape: name={0}", blendShape.name);
+                        MTEUtils.LogDebug("  blendShape: name={0}", blendShape.name);
                     }
                 }
 
@@ -319,7 +319,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void SetupModels(List<TimelineModelData> modelDataList)
         {
-            PluginUtils.LogDebug("SetupModels: count={0}", modelDataList.Count);
+            MTEUtils.LogDebug("SetupModels: count={0}", modelDataList.Count);
 
             var modelList = modelHackManager.modelList.ToList();
 
@@ -338,7 +338,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         true);
                     modelHackManager.CreateModel(model);
 
-                    PluginUtils.Log("Create model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
+                    MTEUtils.Log("Create model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
                         model.info.type, model.displayName, model.name, model.info.label, model.info.fileName, model.info.myRoomId, model.info.bgObjectId);
                 }
                 else
@@ -363,7 +363,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     modelHackManager.DeleteModel(model);
 
-                    PluginUtils.Log("Remove model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
+                    MTEUtils.Log("Remove model: type={0} displayName={1} name={2} label={3} fileName={4} myRoomId={5} bgObjectId={6}",
                         model.info.type, model.displayName, model.name, model.info.label, model.info.fileName, model.info.myRoomId, model.info.bgObjectId);
                 }
             }
@@ -594,7 +594,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     info.type = StudioModelType.Mod;
                 }
 
-                //PluginUtils.LogDebug("PhotoBGObjectData: label={0} bgObjectId={1} fileName={2} type={3}",
+                //MTEUtils.LogDebug("PhotoBGObjectData: label={0} bgObjectId={1} fileName={2} type={3}",
                 //    info.label, info.bgObjectId, info.fileName, info.type);
 
                 _officialObjectLabelMap[info.label] = info;
@@ -623,7 +623,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     type = StudioModelType.MyRoom,
                 };
 
-                //PluginUtils.LogDebug("PlacementData: label={0} myRoomId={1} prefabName={2} fileName={3}",
+                //MTEUtils.LogDebug("PlacementData: label={0} myRoomId={1} prefabName={2} fileName={3}",
                 //    info.label, info.myRoomId, info.prefabName, info.fileName);
 
                 _officialObjectLabelMap[info.label] = info;
@@ -637,7 +637,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!File.Exists(path))
             {
-                PluginUtils.LogWarning("CSVファイルが見つかりません path={0}", path);
+                MTEUtils.LogWarning("CSVファイルが見つかりません path={0}", path);
                 return;
             }
 
@@ -665,7 +665,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         string[] values = line.Split(',');
                         if (values.Length < 4)
                         {
-                            PluginUtils.LogWarning("CSVファイルの形式が不正です line={0}", line);
+                            MTEUtils.LogWarning("CSVファイルの形式が不正です line={0}", line);
                             continue;
                         }
 
@@ -683,7 +683,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                         if (_bgObjectFileNameMap.ContainsKey(info.fileName))
                         {
-                            PluginUtils.LogWarning("ファイル名が重複していたのでスキップ fileName={0}", info.fileName);
+                            MTEUtils.LogWarning("ファイル名が重複していたのでスキップ fileName={0}", info.fileName);
                             continue;
                         }
 
@@ -694,7 +694,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
             }
         }
 

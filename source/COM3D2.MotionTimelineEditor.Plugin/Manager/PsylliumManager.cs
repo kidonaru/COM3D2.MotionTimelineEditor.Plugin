@@ -91,7 +91,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public PsylliumController GetController(string name)
         {
-            return controllerMap.GetOrNull(name);
+            return controllerMap.GetOrDefault(name);
         }
 
         public PsylliumController GetController(int groupIndex)
@@ -109,7 +109,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public PsylliumArea GetArea(string name)
         {
-            return areaMap.GetOrNull(name);
+            return areaMap.GetOrDefault(name);
         }
 
         public PsylliumPattern GetPattern(int groupIndex, int patternIndex)
@@ -125,22 +125,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public PsylliumPatternConfig GetPatternConfig(string name)
         {
-            return patternConfigMap.GetOrNull(name);
+            return patternConfigMap.GetOrDefault(name);
         }
 
         public PsylliumTransformConfig GetTransformConfig(string name)
         {
-            return transformConfigMap.GetOrNull(name);
+            return transformConfigMap.GetOrDefault(name);
         }
 
         public PsylliumBarConfig GetBarConfig(string name)
         {
-            return barConfigMap.GetOrNull(name);
+            return barConfigMap.GetOrDefault(name);
         }
 
         public PsylliumHandConfig GetHandConfig(string name)
         {
-            return handConfigMap.GetOrNull(name);
+            return handConfigMap.GetOrDefault(name);
         }
 
         public void ClearCache()
@@ -171,11 +171,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             ClearCache();
 
-            PluginUtils.LogDebug("PsylliumManager: List updated");
+            MTEUtils.LogDebug("PsylliumManager: List updated");
 
             foreach (var controller in controllers)
             {
-                PluginUtils.LogDebug("  Controller: displayName={0} name={1}",
+                MTEUtils.LogDebug("  Controller: displayName={0} name={1}",
                     controller.displayName, controller.name);
 
                 controllerMap.Add(controller.name, controller);
@@ -210,13 +210,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             foreach (var area in areas)
             {
-                PluginUtils.LogDebug(" Area: displayName={0} name={1}",
+                MTEUtils.LogDebug(" Area: displayName={0} name={1}",
                     area.displayName, area.name);
             }
 
             foreach (var pattern in patterns)
             {
-                PluginUtils.LogDebug(" Pattern: displayName={0} name={1}",
+                MTEUtils.LogDebug(" Pattern: displayName={0} name={1}",
                     pattern.patternConfig.displayName, pattern.patternConfig.name);
             }
 
@@ -245,7 +245,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             for (var i = 0; i < psylliumDatas.Count; i++)
             {
-                PluginUtils.LogDebug("Psyllium.Setup: [{0}] areaCount={1} patternCount={2}",
+                MTEUtils.LogDebug("Psyllium.Setup: [{0}] areaCount={1} patternCount={2}",
                         i, psylliumDatas[i].areaCount, psylliumDatas[i].patternCount);
             }
 

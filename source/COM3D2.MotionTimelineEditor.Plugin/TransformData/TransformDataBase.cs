@@ -400,7 +400,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (prevTransform == null || nextTransform == null)
             {
-                PluginUtils.LogError("UpdateTangent：前後のTransformが見つかりません。");
+                MTEUtils.LogError("UpdateTangent：前後のTransformが見つかりません。");
                 return;
             }
 
@@ -413,7 +413,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (dt0 <= 0f || dt1 <= 0f)
             {
-                PluginUtils.LogError("UpdateTangent：フレーム時間が不正です。");
+                MTEUtils.LogError("UpdateTangent：フレーム時間が不正です。");
                 return;
             }
 
@@ -742,7 +742,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return info;
             }
 
-            PluginUtils.LogError("CustomValueが見つかりません customKey={0}", customKey);
+            MTEUtils.LogError("CustomValueが見つかりません customKey={0}", customKey);
             return null;
         }
 
@@ -794,7 +794,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return info;
             }
 
-            PluginUtils.LogError("StrValueが見つかりません keyName={0}", keyName);
+            MTEUtils.LogError("StrValueが見つかりません keyName={0}", keyName);
             return null;
         }
 

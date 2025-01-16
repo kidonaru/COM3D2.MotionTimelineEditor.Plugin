@@ -1,4 +1,5 @@
 using System;
+using COM3D2.MotionTimelineEditor;
 using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 using UnityInjector;
@@ -34,7 +35,7 @@ namespace COM3D2.MotionTimelineEditor_PartsEdit.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
             }
         }
 

@@ -95,7 +95,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             material = _assetBundle.LoadAsset<Material>(path);
             if (material == null)
             {
-                PluginUtils.LogError("マテリアルが見つかりません: {0}", path);
+                MTEUtils.LogError("マテリアルが見つかりません: {0}", path);
                 return null;
             }
 
@@ -115,7 +115,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var texture = _assetBundle.LoadAsset<Texture2D>(path);
             if (texture == null)
             {
-                PluginUtils.LogError("テクスチャが見つかりません: {0}", path);
+                MTEUtils.LogError("テクスチャが見つかりません: {0}", path);
                 return null;
             }
 
@@ -133,7 +133,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var bytes = _assetBundle.LoadAsset<TextAsset>(path).bytes;
             if (bytes == null)
             {
-                PluginUtils.LogError("バイナリが見つかりません: {0}", path);
+                MTEUtils.LogError("バイナリが見つかりません: {0}", path);
                 return null;
             }
 
@@ -152,7 +152,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (stream == null)
                 {
-                    PluginUtils.LogError("アセットバンドルが見つかりません: {0}", AssetBundleName);
+                    MTEUtils.LogError("アセットバンドルが見つかりません: {0}", AssetBundleName);
                     return;
                 }
 
@@ -163,7 +163,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (_assetBundle == null)
             {
-                PluginUtils.LogError("アセットバンドルのロードに失敗しました: {0}", AssetBundleName);
+                MTEUtils.LogError("アセットバンドルのロードに失敗しました: {0}", AssetBundleName);
                 return;
             }
         }

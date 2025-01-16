@@ -323,7 +323,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (view.DrawButton("DCM出力先を開く", 150, 20, enabled))
                 {
                     var dirPath = PluginUtils.GetDcmSongDirPath(timeline.dcmSongName);
-                    PluginUtils.OpenDirectory(dirPath);
+                    MTEUtils.OpenDirectory(dirPath);
                 }
             }
             view.EndLayout();
@@ -332,7 +332,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (view.DrawButton("初期化", 100, 20))
                 {
-                    PluginUtils.ShowConfirmDialog("個別設定を初期化しますか？", () =>
+                    MTEUtils.ShowConfirmDialog("個別設定を初期化しますか？", () =>
                     {
                         GameMain.Instance.SysDlg.Close();
                         timeline.ResetSettings();
@@ -556,7 +556,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (view.DrawButton("初期化", 100, 20))
             {
-                PluginUtils.ShowConfirmDialog("共通設定を初期化しますか？", () =>
+                MTEUtils.ShowConfirmDialog("共通設定を初期化しますか？", () =>
                 {
                     GameMain.Instance.SysDlg.Close();
                     ConfigManager.instance.ResetConfig();

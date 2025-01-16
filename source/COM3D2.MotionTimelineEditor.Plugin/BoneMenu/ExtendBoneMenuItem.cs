@@ -26,7 +26,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     partsEditHack.SetMaid(maidCache.maid);
                     partsEditHack.SetSlot(boneEntity.slotNo);
 
-                    PluginUtils.ExecuteNextFrame(() =>
+                    MTEUtils.ExecuteNextFrame(() =>
                     {
                         partsEditHack.SetBone(boneEntity.transform);
                     });

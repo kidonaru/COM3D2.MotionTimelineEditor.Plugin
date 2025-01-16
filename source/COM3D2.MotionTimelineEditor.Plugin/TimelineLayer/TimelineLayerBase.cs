@@ -212,7 +212,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected TimelineLayerBase(int slotNo)
         {
-            PluginUtils.LogDebug("{0}.Create slotNo={1}", layerName, slotNo);
+            MTEUtils.LogDebug("{0}.Create slotNo={1}", layerName, slotNo);
             this.slotNo = slotNo;
         }
 
@@ -225,7 +225,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             if (_dummyLastFrame == null)
             {
-                PluginUtils.LogDebug("CreateDummyLastFrame " + layerName);
+                MTEUtils.LogDebug("CreateDummyLastFrame " + layerName);
                 _dummyLastFrame = CreateFrame(0);
             }
 
@@ -417,7 +417,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public virtual void OutputDCM(XElement songElement)
         {
-            PluginUtils.LogWarning("{0}はDCMに対応していません", layerName);
+            MTEUtils.LogWarning("{0}はDCMに対応していません", layerName);
         }
 
         protected virtual void AppendTimelineRow(FrameData frame)
@@ -485,14 +485,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (timelineManager.initialEditFrame == null)
             {
-                PluginUtils.Log("編集モード中のみキーフレームの登録ができます");
+                MTEUtils.Log("編集モード中のみキーフレームの登録ができます");
                 return;
             }
 
             var maid = this.maid;
             if (maid == null)
             {
-                PluginUtils.LogError("メイドが配置されていません");
+                MTEUtils.LogError("メイドが配置されていません");
                 return;
             }
 
@@ -502,7 +502,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var diffBones = tmpFrame.GetDiffBones(timelineManager.initialEditFrame);
             if (diffBones.Count == 0)
             {
-                PluginUtils.Log("変更がないのでキーフレームの登録をスキップしました");
+                MTEUtils.Log("変更がないのでキーフレームの登録をスキップしました");
                 return;
             }
 
@@ -517,14 +517,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (timelineManager.initialEditFrame == null)
             {
-                PluginUtils.Log("編集モード中のみキーフレームの登録ができます");
+                MTEUtils.Log("編集モード中のみキーフレームの登録ができます");
                 return;
             }
 
             var maid = this.maid;
             if (maid == null)
             {
-                PluginUtils.LogError("メイドが配置されていません");
+                MTEUtils.LogError("メイドが配置されていません");
                 return;
             }
 
@@ -534,7 +534,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var filterBones = tmpFrame.GetFilterBones(boneNames);
             if (filterBones.Count == 0)
             {
-                PluginUtils.Log("対象のキーフレームがありません");
+                MTEUtils.Log("対象のキーフレームがありません");
                 return;
             }
 
@@ -550,14 +550,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var frame = GetFrame(timelineManager.currentFrameNo);
             if (frame == null)
             {
-                PluginUtils.LogWarning("削除するフレームがありません");
+                MTEUtils.LogWarning("削除するフレームがありません");
                 return;
             }
 
             var filterBones = frame.GetFilterBones(boneNames);
             if (filterBones.Count == 0)
             {
-                PluginUtils.LogWarning("対象のキーフレームがありません");
+                MTEUtils.LogWarning("対象のキーフレームがありません");
                 return;
             }
 
@@ -723,7 +723,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return null;
             }
 
-            PluginUtils.LogDebug(layerName);
+            MTEUtils.LogDebug(layerName);
 
             var stopwatch = new StopwatchDebug();
 
@@ -741,7 +741,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (config.outputElapsedTime)
                 {
-                    PluginUtils.Log("  slotNo={0} startFrameNo={1}, endFrameNo={2} ",
+                    MTEUtils.Log("  slotNo={0} startFrameNo={1}, endFrameNo={2} ",
                             slotNo, startFrameNo, endFrameNo);
                 }
             }

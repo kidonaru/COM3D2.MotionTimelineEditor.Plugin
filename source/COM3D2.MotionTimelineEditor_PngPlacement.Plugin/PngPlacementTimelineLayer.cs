@@ -3,6 +3,7 @@ using COM3D2.MotionTimelineEditor.Plugin;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using COM3D2.MotionTimelineEditor;
 
 namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
 {

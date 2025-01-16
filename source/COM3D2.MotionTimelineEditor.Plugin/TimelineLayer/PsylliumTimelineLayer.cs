@@ -507,7 +507,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             string name,
             float playingFrameNoFloat)
         {
-            var playData = _tempPlayDataMap.GetOrNull(name);
+            var playData = _tempPlayDataMap.GetOrDefault(name);
             if (playData == null || playData.motions.Count == 0)
             {
                 return;
@@ -568,7 +568,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var pattern = psylliumManager.GetPattern(transformConfig.groupIndex, transformConfig.patternIndex);
             if (pattern == null)
             {
-                PluginUtils.LogDebug("ApplyTransformTempMotionUpdate: pattern is null");
+                MTEUtils.LogDebug("ApplyTransformTempMotionUpdate: pattern is null");
                 return;
             }
 

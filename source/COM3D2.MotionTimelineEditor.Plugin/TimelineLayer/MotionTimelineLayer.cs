@@ -85,7 +85,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var transform = bone.transform;
                     if (transform.position.x == float.MinValue)
                     {
-                        PluginUtils.LogDebug("ボーンの初期位置を設定 boneName={0}", extendBoneName);
+                        MTEUtils.LogDebug("ボーンの初期位置を設定 boneName={0}", extendBoneName);
                         transform.position = maidCache.GetInitialPosition(extendBoneName);
                     }
                 }
@@ -352,7 +352,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var blendType = ConvertToFingerBlendType(boneName);
             var trans = motion.start as TransformDataFingerBlend;
 
-            //PluginUtils.LogDebug("ApplyFingerBlendMotion: type={0} stFrame={1}", motion.row.type, motion.stFrame);
+            //MTEUtils.LogDebug("ApplyFingerBlendMotion: type={0} stFrame={1}", motion.row.type, motion.stFrame);
 
             switch (blendType)
             {
@@ -395,14 +395,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var cacheBoneData = maidManager.cacheBoneData;
             if (cacheBoneData == null)
             {
-                PluginUtils.LogError("ボーンデータが取得できませんでした");
+                MTEUtils.LogError("ボーンデータが取得できませんでした");
                 return;
             }
 
             var rootBone = cacheBoneData.GetBoneData("Bip01");
             if (rootBone == null)
             {
-                PluginUtils.LogError("中心ボーンが取得できませんでした");
+                MTEUtils.LogError("中心ボーンが取得できませんでした");
                 return;
             }
 
@@ -426,7 +426,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var transform = maidCache.GetBoneTransform(name);
                 if (transform == null)
                 {
-                    PluginUtils.LogDebug("UpdateFrame: ボーンがないのでスキップしました name={0}", name);
+                    MTEUtils.LogDebug("UpdateFrame: ボーンがないのでスキップしました name={0}", name);
                     continue;
                 }
 
@@ -462,7 +462,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var transform = maidCache.GetBoneTransform(name);
                 if (transform == null)
                 {
-                    PluginUtils.LogDebug("UpdateFrame: ボーンがないのでスキップしました name={0}", name);
+                    MTEUtils.LogDebug("UpdateFrame: ボーンがないのでスキップしました name={0}", name);
                     continue;
                 }
 
@@ -546,7 +546,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void ApplyAnm(long id, byte[] anmData)
         {
-            PluginUtils.LogDebug("ApplyAnm: id={0}", id);
+            MTEUtils.LogDebug("ApplyAnm: id={0}", id);
             if (anmData == null)
             {
                 return;
@@ -555,7 +555,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var maid = this.maid;
             if (maid == null)
             {
-                PluginUtils.LogError("メイドが配置されていません");
+                MTEUtils.LogError("メイドが配置されていません");
                 return;
             }
 
@@ -566,7 +566,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 playingFrameNoFloat += 0.01f; // モーション再生中は再生位置に差分がないと反映されない
             }
 
-            PluginUtils.LogDebug("playingFrameNoFloat={0}", playingFrameNoFloat);
+            MTEUtils.LogDebug("playingFrameNoFloat={0}", playingFrameNoFloat);
 
             maidCache.PlayAnm(id, anmData);
             studioHack.OnMotionUpdated(maid);
@@ -614,7 +614,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var anmData = GetAnmBinary(true);
                 if (anmData == null)
                 {
-                    PluginUtils.LogError("モーションの出力に失敗しました");
+                    MTEUtils.LogError("モーションの出力に失敗しました");
                     return;
                 }
                 var anmPath = this.anmPath;
@@ -627,8 +627,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("モーションの出力に失敗しました");
+                MTEUtils.LogException(e);
+                MTEUtils.ShowDialog("モーションの出力に失敗しました");
             }
         }
 
@@ -661,7 +661,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var path = maidCache.GetBonePath(name);
                 if (string.IsNullOrEmpty(path))
                 {
-                    PluginUtils.LogWarning("ボーンがないのでスキップしました boneName={0}", name);
+                    MTEUtils.LogWarning("ボーンがないのでスキップしました boneName={0}", name);
                     return;
                 }
 
@@ -817,7 +817,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var anmData = GetAnmBinary(true);
                     if (anmData == null)
                     {
-                        PluginUtils.LogError("モーションの出力に失敗しました");
+                        MTEUtils.LogError("モーションの出力に失敗しました");
                         return;
                     }
 
@@ -857,8 +857,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
-                PluginUtils.LogError("モーションの出力に失敗しました");
+                MTEUtils.LogException(e);
+                MTEUtils.LogError("モーションの出力に失敗しました");
             }
         }
 
@@ -1149,7 +1149,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return type;
             }
 
-            PluginUtils.LogError("ConvertToFingerBlendType: 不明なボーン名です boneName={0}", boneName);
+            MTEUtils.LogError("ConvertToFingerBlendType: 不明なボーン名です boneName={0}", boneName);
             return WindowPartsFingerBlend.Type.RightArm;
         }
 

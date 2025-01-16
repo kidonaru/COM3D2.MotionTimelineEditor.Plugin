@@ -1,4 +1,5 @@
 using System;
+using COM3D2.MotionTimelineEditor;
 using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 using UnityInjector;
@@ -15,7 +16,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
     ]
     public class MotionTimelineEditor_PngPlacement : PluginBase
     {
-        private static MTE mte => MTE.instance;
+        private static ManagerRegistry managerRegistry => ManagerRegistry.instance;
         private static TimelineManager timelineManager => TimelineManager.instance;
         PngPlacementWrapper wrapper = new PngPlacementWrapper();
 
@@ -32,7 +33,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
             }
         }
 
@@ -50,7 +51,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                 TransformType.PngObject, TimelineManager.CreateTransform<TransformDataPngObject>
             );
 
-            mte.RegisterManager(PngPlacementManager.instance);
+            managerRegistry.RegisterManager(PngPlacementManager.instance);
         }
     }
 }

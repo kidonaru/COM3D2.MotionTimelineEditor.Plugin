@@ -1,10 +1,34 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+    public enum KeyBindType
+    {
+        PluginToggle,
+        Visible,
+        AddKeyFrame,
+        AddKeyFrameAll,
+        RemoveKeyFrame,
+        Play,
+        EditMode,
+        Copy,
+        Paste,
+        FlipPaste,
+        PoseCopy,
+        PosePaste,
+        PrevFrame,
+        NextFrame,
+        PrevKeyFrame,
+        NextKeyFrame,
+        MultiSelect,
+        Undo,
+        Redo,
+    }
+
     public class Config
     {
         public static readonly int CurrentVersion = 2;

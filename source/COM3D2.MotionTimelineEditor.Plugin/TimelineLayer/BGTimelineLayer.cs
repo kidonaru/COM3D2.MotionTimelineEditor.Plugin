@@ -101,7 +101,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            //PluginUtils.LogDebug("ApplyMotion: bgName={0} stFrame={1}, stPos={2}, stRot={3}",
+            //MTEUtils.LogDebug("ApplyMotion: bgName={0} stFrame={1}, stPos={2}, stRot={3}",
             //    motion.name, motion.stFrame, motion.myTm.stPos, motion.myTm.stRot);
 
             try
@@ -124,8 +124,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
-                PluginUtils.LogError("選択された背景が導入されていません: " + motion.name);
+                MTEUtils.LogException(e);
+                MTEUtils.LogError("選択された背景が導入されていません: " + motion.name);
             }
         }
 
@@ -220,8 +220,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
-                PluginUtils.LogError("背景チェンジの出力に失敗しました");
+                MTEUtils.LogException(e);
+                MTEUtils.LogError("背景チェンジの出力に失敗しました");
             }
         }
 

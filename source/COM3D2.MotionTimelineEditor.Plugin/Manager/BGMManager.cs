@@ -69,7 +69,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             if (_audioMgr == null)
             {
-                PluginUtils.LogError("AudioSourceMgrが見つかりません。");
+                MTEUtils.LogError("AudioSourceMgrが見つかりません。");
                 return false;
             }
 
@@ -89,7 +89,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             string extension = Path.GetExtension(bgmPath);
             if (!File.Exists(bgmPath) || (extension != ".ogg" && extension != ".wav"))
             {
-                PluginUtils.LogError(string.Format("{0}または{1}ファイルを指定してください。{2}", ".ogg", ".wav", bgmPath));
+                MTEUtils.LogError(string.Format("{0}または{1}ファイルを指定してください。{2}", ".ogg", ".wav", bgmPath));
                 return false;
             }
 
@@ -102,7 +102,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     num += 100;
                     if (10000 < num)
                     {
-                        PluginUtils.LogError("音声読込タイムアウトのため処理を中止します。");
+                        MTEUtils.LogError("音声読込タイムアウトのため処理を中止します。");
                         return false;
                     }
                 }
@@ -115,7 +115,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _audioMgr.audiosource.pitch = timelineManager.anmSpeed;
                     _audioClip = audioClip;
                     _loadedBgmPath = bgmPath;
-                    PluginUtils.LogDebug("{0}を読み込みました。", Path.GetFileName(_loadedBgmPath));
+                    MTEUtils.LogDebug("{0}を読み込みました。", Path.GetFileName(_loadedBgmPath));
                     return true;
                 }
             }
@@ -193,7 +193,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (IsLoaded())
             {
-                PluginUtils.LogDebug("{0}を再生します。", Path.GetFileName(_loadedBgmPath));
+                MTEUtils.LogDebug("{0}を再生します。", Path.GetFileName(_loadedBgmPath));
                 GameMain.Instance.SoundMgr.StopBGM(0f);
                 _audioMgr.audiosource.Play();
                 SeekPlayingTime();

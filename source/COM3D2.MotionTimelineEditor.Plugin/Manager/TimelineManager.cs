@@ -160,7 +160,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
                 catch (Exception e)
                 {
-                    PluginUtils.LogException(e);
+                    MTEUtils.LogException(e);
                 }
             }
 
@@ -205,7 +205,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
                 catch (Exception e)
                 {
-                    PluginUtils.LogException(e);
+                    MTEUtils.LogException(e);
                 }
             }
         }
@@ -288,12 +288,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!studioHack.IsValid())
             {
-                PluginUtils.ShowDialog(studioHack.errorMessage);
+                MTEUtils.ShowDialog(studioHack.errorMessage);
                 return;
             }
             if (maid == null)
             {
-                PluginUtils.ShowDialog("メイドが配置されていません");
+                MTEUtils.ShowDialog("メイドが配置されていません");
                 return;
             }
 
@@ -322,17 +322,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!studioHack.IsValid())
             {
-                PluginUtils.ShowDialog(studioHack.errorMessage);
+                MTEUtils.ShowDialog(studioHack.errorMessage);
                 return;
             }
             if (maid == null)
             {
-                PluginUtils.ShowDialog("メイドが配置されていません");
+                MTEUtils.ShowDialog("メイドが配置されていません");
                 return;
             }
             if (!IsValidFileName(anmName) || !IsValidDirName(directoryName))
             {
-                PluginUtils.ShowDialog(errorMessage);
+                MTEUtils.ShowDialog(errorMessage);
                 return;
             }
 
@@ -375,7 +375,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!IsValidData())
             {
-                PluginUtils.ShowDialog(errorMessage);
+                MTEUtils.ShowDialog(errorMessage);
                 return;
             }
 
@@ -400,7 +400,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 MTE.instance.SaveScreenShot(thumPath, config.thumWidth, config.thumHeight);
             }
 
-            PluginUtils.ShowDialog("タイムライン「" + timeline.anmName + "」を保存しました");
+            MTEUtils.ShowDialog("タイムライン「" + timeline.anmName + "」を保存しました");
         }
 
         public void UpdateTimeline(TimelineXml xml)
@@ -430,27 +430,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!IsValidData())
             {
-                PluginUtils.ShowDialog(errorMessage);
+                MTEUtils.ShowDialog(errorMessage);
                 return;
             }
 
             MTE.instance.SaveScreenShot(timeline.thumPath, config.thumWidth, config.thumHeight);
 
-            PluginUtils.ShowDialog("サムネイルを更新しました");
+            MTEUtils.ShowDialog("サムネイルを更新しました");
         }
 
         public CacheBoneDataArray GetCacheBoneDataArray()
         {
             if (maid == null)
             {
-                PluginUtils.LogError("メイドが配置されていません");
+                MTEUtils.LogError("メイドが配置されていません");
                 return null;
             }
 
             var cacheBoneData = maidManager.cacheBoneData;
             if (cacheBoneData == null)
             {
-                PluginUtils.LogError("ボーンデータが取得できませんでした");
+                MTEUtils.LogError("ボーンデータが取得できませんでした");
                 return null;
             }
 
@@ -533,7 +533,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!IsValidFrameRnage(startFrameNo, endFrameNo))
             {
-                PluginUtils.LogWarning("範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
+                MTEUtils.LogWarning("範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
                 return;
             }
 
@@ -556,7 +556,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!IsValidFrameRnage(startFrameNo, endFrameNo))
             {
-                PluginUtils.LogWarning("範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
+                MTEUtils.LogWarning("範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
                 return;
             }
 
@@ -579,7 +579,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!IsValidFrameRnage(startFrameNo, endFrameNo))
             {
-                PluginUtils.LogWarning("範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
+                MTEUtils.LogWarning("範囲が不正です start={0} end={1}", startFrameNo, endFrameNo);
                 return;
             }
 
@@ -587,7 +587,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (timeline.maxFrameNo - length <= 1)
             {
-                PluginUtils.LogWarning("最低1フレームは残す必要があります");
+                MTEUtils.LogWarning("最低1フレームは残す必要があります");
                 return;
             }
 
@@ -748,7 +748,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (selectedBones.Count == 0)
             {
-                PluginUtils.LogWarning("削除するキーフレームが選択されていません");
+                MTEUtils.LogWarning("削除するキーフレームが選択されていません");
                 return;
             }
 
@@ -771,7 +771,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (selectedBones.Count == 0)
             {
-                PluginUtils.LogWarning("移動するキーフレームが選択されていません");
+                MTEUtils.LogWarning("移動するキーフレームが選択されていません");
                 return;
             }
 
@@ -910,7 +910,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!IsValidData())
             {
-                PluginUtils.ShowDialog(errorMessage);
+                MTEUtils.ShowDialog(errorMessage);
                 return;
             }
 
@@ -919,7 +919,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 layer.OutputAnm();
             }
 
-            PluginUtils.ShowDialog("モーション「" + timeline.anmName + "」を生成しました");
+            MTEUtils.ShowDialog("モーション「" + timeline.anmName + "」を生成しました");
         }
 
         public void SaveFadeTimeLine(
@@ -948,7 +948,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!IsValidData())
             {
-                PluginUtils.ShowDialog(errorMessage);
+                MTEUtils.ShowDialog(errorMessage);
                 return;
             }
 
@@ -1032,7 +1032,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             doc.Save(timeline.dcmSongListPath);
 
-            PluginUtils.ShowDialog("「" + songName + "」を生成しました");
+            MTEUtils.ShowDialog("「" + songName + "」を生成しました");
         }
 
         public void AddTrack()
@@ -1126,7 +1126,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (selectedBones.Count == 0)
             {
-                PluginUtils.LogWarning("コピーするキーフレームが選択されていません");
+                MTEUtils.LogWarning("コピーするキーフレームが選択されていません");
                 return;
             }
 
@@ -1161,12 +1161,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     GUIUtility.systemCopyBuffer = framesXml;
                 }
 
-                PluginUtils.Log("クリップボードにコピーしました");
+                MTEUtils.Log("クリップボードにコピーしました");
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("コピーに失敗しました");
+                MTEUtils.LogException(e);
+                MTEUtils.ShowDialog("コピーに失敗しました");
             }
         }
 
@@ -1197,12 +1197,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     GUIUtility.systemCopyBuffer = framesXml;
                 }
 
-                PluginUtils.Log("クリップボードにコピーしました");
+                MTEUtils.Log("クリップボードにコピーしました");
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("コピーに失敗しました");
+                MTEUtils.LogException(e);
+                MTEUtils.ShowDialog("コピーに失敗しました");
             }
         }
 
@@ -1218,13 +1218,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     if (copyFrameData.className != currentLayer.layerName)
                     {
-                        PluginUtils.ShowDialog("ペーストするレイヤーが一致しません");
+                        MTEUtils.ShowDialog("ペーストするレイヤーが一致しません");
                         return;
                     }
 
                     if (copyFrameData.frames.Count == 0)
                     {
-                        PluginUtils.LogWarning("ペーストするキーフレームがありません");
+                        MTEUtils.LogWarning("ペーストするキーフレームがありません");
                         return;
                     }
 
@@ -1258,8 +1258,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("ペーストに失敗しました");
+                MTEUtils.LogException(e);
+                MTEUtils.ShowDialog("ペーストに失敗しました");
             }
         }
 
@@ -1269,7 +1269,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (!studioHackManager.isPoseEditing)
                 {
-                    PluginUtils.LogWarning("編集モード中のみペーストできます");
+                    MTEUtils.LogWarning("編集モード中のみペーストできます");
                     return;
                 }
 
@@ -1289,13 +1289,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     if (copyFrameData.className != currentLayer.layerName)
                     {
-                        PluginUtils.ShowDialog("ペーストするレイヤーが一致しません");
+                        MTEUtils.ShowDialog("ペーストするレイヤーが一致しません");
                         return;
                     }
 
                     if (copyFrameData.frames.Count == 0)
                     {
-                        PluginUtils.LogWarning("ペーストするキーフレームがありません");
+                        MTEUtils.LogWarning("ペーストするキーフレームがありません");
                         return;
                     }
 
@@ -1325,8 +1325,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
-                PluginUtils.ShowDialog("ペーストに失敗しました");
+                MTEUtils.LogException(e);
+                MTEUtils.ShowDialog("ペーストに失敗しました");
             }
         }
 
@@ -1394,7 +1394,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (layer.layerType == typeof(MotionTimelineLayer))
             {
-                PluginUtils.LogWarning("アニメレイヤーは削除できません");
+                MTEUtils.LogWarning("アニメレイヤーは削除できません");
                 return;
             }
 
@@ -1592,7 +1592,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (!info.ValidateLayer())
             {
-                PluginUtils.LogError("レイヤークラスの登録に失敗しました: {0}", layerType.Name);
+                MTEUtils.LogError("レイヤークラスの登録に失敗しました: {0}", layerType.Name);
                 return;
             }
 
@@ -1614,7 +1614,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return layerInfo.createLayer(slotNo);
             }
 
-            PluginUtils.LogError("未登録のレイヤークラス: " + layerType.Name);
+            MTEUtils.LogError("未登録のレイヤークラス: " + layerType.Name);
             return null;
         }
 
@@ -1626,7 +1626,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return layerInfo.createLayer(slotNo);
             }
 
-            PluginUtils.LogError("未登録のレイヤークラス: " + layerName);
+            MTEUtils.LogError("未登録のレイヤークラス: " + layerName);
             return null;
         }
 
@@ -1659,7 +1659,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var info = GetTransformInfo(type);
             if (info == null)
             {
-                PluginUtils.LogError("未登録のトランスフォーム type:{0} name:{1}", type, name);
+                MTEUtils.LogError("未登録のトランスフォーム type:{0} name:{1}", type, name);
                 return null;
             }
 
@@ -1717,7 +1717,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 initialEditPosition = maid.transform.position;
                 initialEditRotation = maid.transform.rotation;
 
-                //PluginUtils.LogDebug("Save Maid Position name={0} initialEditPosition={1} initialEditRotation={2}",
+                //MTEUtils.LogDebug("Save Maid Position name={0} initialEditPosition={1} initialEditRotation={2}",
                 //    maid.name, initialEditPosition, initialEditRotation);
             }
 
@@ -1738,7 +1738,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 maid.transform.position = initialEditPosition;
                 maid.transform.rotation = initialEditRotation;
 
-                //PluginUtils.LogDebug("Restore Maid Position name={0} initialEditPosition={1} initialEditRotation={2}",
+                //MTEUtils.LogDebug("Restore Maid Position name={0} initialEditPosition={1} initialEditRotation={2}",
                 //    maid.name, initialEditPosition, initialEditRotation);
             }
 

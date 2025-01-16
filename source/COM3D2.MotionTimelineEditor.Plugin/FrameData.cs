@@ -232,7 +232,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             initializedBoneTypes = true;
 
-            PluginUtils.LogDebug("ボーンタイプの初期化");
+            MTEUtils.LogDebug("ボーンタイプの初期化");
 
             notFlipTypes = new HashSet<IKManager.BoneType>
             {
@@ -360,7 +360,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         newEulerAngles.y = -eulerAngles.y;
                     }
 
-                    PluginUtils.LogDebug("Flip Bone：" + boneType + " " + eulerAngles + " -> " + newEulerAngles);
+                    MTEUtils.LogDebug("Flip Bone：" + boneType + " " + eulerAngles + " -> " + newEulerAngles);
 
                     var newTransform = timelineManager.CreateTransform(transform.type, BoneUtils.GetBoneName(boneType));
                     newTransform.eulerAngles = newEulerAngles;

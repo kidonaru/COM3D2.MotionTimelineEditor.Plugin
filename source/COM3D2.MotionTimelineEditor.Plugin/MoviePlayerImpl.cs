@@ -195,7 +195,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (_seekState == SeekState.Adjusting)
             {
                 var overTime = playingTimeMs - targetSeekTimeMs;
-                //PluginUtils.LogDebug("MoviePlayerImpl: overTime={0}", overTime);
+                //MTEUtils.LogDebug("MoviePlayerImpl: overTime={0}", overTime);
                 if (overTime < 10f)
                 {
                     _seekState = SeekState.None;
@@ -455,7 +455,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var shader = Shader.Find(config.videoShaderName);
             if (shader == null)
             {
-                PluginUtils.LogError("MoviePlayerImpl：シェーダーが見つかりませんでした：" + name);
+                MTEUtils.LogError("MoviePlayerImpl：シェーダーが見つかりませんでした：" + name);
                 return;
             }
 
@@ -560,11 +560,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             MediaPlayerEvent.EventType et,
             ErrorCode errorCode)
         {
-            //PluginUtils.LogDebug("MoviePlayer：EventType：" + et.ToString());
+            //MTEUtils.LogDebug("MoviePlayer：EventType：" + et.ToString());
 
             if (errorCode != ErrorCode.None)
             {
-                PluginUtils.LogError("MoviePlayer：エラー EventType：" + et.ToString() + "  ErrorCode：" + errorCode.ToString());
+                MTEUtils.LogError("MoviePlayer：エラー EventType：" + et.ToString() + "  ErrorCode：" + errorCode.ToString());
                 return;
             }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using COM3D2.MotionTimelineEditor;
 using COM3D2.MotionTimelineEditor.Plugin;
 using MeidoPhotoStudio.Plugin;
 using UnityEngine;
@@ -22,7 +23,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             if (fieldToggleValue == null)
             {
                 fieldToggleValue = typeof(Toggle).GetField("value", BindingFlags.NonPublic | BindingFlags.Instance);
-                PluginUtils.AssertNull(fieldToggleValue != null, "fieldToggleValue is null");
+                MTEUtils.AssertNull(fieldToggleValue != null, "fieldToggleValue is null");
             }
             fieldToggleValue.SetValue(toggle, value);
         }
@@ -35,7 +36,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             if (fieldLight == null)
             {
                 fieldLight = typeof(DragPointLight).GetField("light", BindingFlags.NonPublic | BindingFlags.Instance);
-                PluginUtils.AssertNull(fieldLight != null, "fieldLight is null");
+                MTEUtils.AssertNull(fieldLight != null, "fieldLight is null");
             }
             return (Light) fieldLight.GetValue(dragPointLight);
         }
@@ -47,13 +48,13 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             void OnMouseDown()
             {
                 isDragging = true;
-                PluginUtils.Log("OnMouseDown");
+                MTEUtils.Log("OnMouseDown");
             }
 
             void OnMouseUp()
             {
                 isDragging = false;
-                PluginUtils.Log("OnMouseUp");
+                MTEUtils.Log("OnMouseUp");
             }
         }
 
@@ -62,7 +63,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             var detector = dragPoint.GetOrAddComponent<DragDetector>();
             if (detector == null)
             {
-                PluginUtils.LogError("Detector is null");
+                MTEUtils.LogError("Detector is null");
                 return false;
             }
 

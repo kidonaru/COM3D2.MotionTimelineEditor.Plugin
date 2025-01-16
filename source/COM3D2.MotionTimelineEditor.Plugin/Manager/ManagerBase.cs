@@ -2,17 +2,6 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public interface IManager
-    {
-        void Init();
-        void PreUpdate();
-        void Update();
-        void LateUpdate();
-        void OnLoad();
-        void OnPluginDisable();
-        void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode);
-    }
-
     public class ManagerBase : IManager
     {
         public virtual Maid maid => maidManager.maid;

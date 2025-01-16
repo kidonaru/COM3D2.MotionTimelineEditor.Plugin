@@ -141,7 +141,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 subCamera.fieldOfView = viewAngle;
             }
 
-            //PluginUtils.LogDebug("ApplyMotion: position={0}, rotation={1}, distance={2}, viewAngle={3}", position, rotation, distance, viewAngle);
+            //MTEUtils.LogDebug("ApplyMotion: position={0}, rotation={1}, distance={2}, viewAngle={3}", position, rotation, distance, viewAngle);
         }
 
         public static UltimateOrbitCamera GetUOCamera()
@@ -165,7 +165,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var bone = frame.CreateBone(trans);
             frame.UpdateBone(bone);
 
-            //PluginUtils.LogDebug("UpdateFromCurrentPose: position={0}, rotation={1}", _cameraManager.CurrentPosition,_cameraManager.CurrentRotation);
+            //MTEUtils.LogDebug("UpdateFromCurrentPose: position={0}, rotation={1}", _cameraManager.CurrentPosition,_cameraManager.CurrentRotation);
         }
 
         public void OutputBones(List<BoneData> rows, string filePath)
@@ -312,8 +312,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
-                PluginUtils.LogError("カメラモーションの出力に失敗しました");
+                MTEUtils.LogException(e);
+                MTEUtils.LogError("カメラモーションの出力に失敗しました");
             }
         }
 

@@ -155,7 +155,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var maid = this.maid;
             if (maid == null)
             {
-                PluginUtils.LogError("メイドが配置されていません");
+                MTEUtils.LogError("メイドが配置されていません");
                 return;
             }
 
@@ -250,8 +250,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
-                PluginUtils.LogError("メイド移動の出力に失敗しました");
+                MTEUtils.LogException(e);
+                MTEUtils.LogError("メイド移動の出力に失敗しました");
             }
         }
 

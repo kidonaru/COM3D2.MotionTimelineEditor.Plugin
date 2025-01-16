@@ -59,7 +59,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             blendShapes.Add(blendShape);
 
-            PluginUtils.LogDebug("Loaded BlendShapeData: {0} count: {1}", blendShape.name, blendShape.vertexCount);
+            MTEUtils.LogDebug("Loaded BlendShapeData: {0} count: {1}", blendShape.name, blendShape.vertexCount);
         }
 
         public void SaveBinary(BinaryWriter writer)

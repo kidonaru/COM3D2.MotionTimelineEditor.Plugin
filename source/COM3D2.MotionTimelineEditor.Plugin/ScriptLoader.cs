@@ -245,7 +245,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
                 catch (Exception e)
                 {
-                    PluginUtils.LogError("Failed to parse. {0}: {1}", i, line);
+                    MTEUtils.LogError("Failed to parse. {0}: {1}", i, line);
                     throw e;
                 }
             }
@@ -456,7 +456,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         var averageTime = totalElapsed.TotalSeconds / i;
                         var remainingTime = TimeSpan.FromSeconds(averageTime * (length - i));
 
-                        PluginUtils.Log("スクリプト解析中... {0}/{1} - 経過時間: {2:hh\\:mm\\:ss} - 残り時間: {3:hh\\:mm\\:ss}",
+                        MTEUtils.Log("スクリプト解析中... {0}/{1} - 経過時間: {2:hh\\:mm\\:ss} - 残り時間: {3:hh\\:mm\\:ss}",
                             i, length, totalElapsed, remainingTime);
 
                         stopwatch.Reset();
@@ -473,8 +473,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
                 catch (Exception e)
                 {
-                    PluginUtils.LogException(e);
-                    PluginUtils.LogError("Failed to process script: {0}", scriptName);
+                    MTEUtils.LogException(e);
+                    MTEUtils.LogError("Failed to process script: {0}", scriptName);
                 }
             }
 

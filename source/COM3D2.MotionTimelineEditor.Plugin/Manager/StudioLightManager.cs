@@ -83,7 +83,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (stat.light == null)
                 {
-                    PluginUtils.LogWarning("StudioLightManager: lightがありません: name={0}", stat.name);
+                    MTEUtils.LogWarning("StudioLightManager: lightがありません: name={0}", stat.name);
                     continue;
                 }
 
@@ -131,11 +131,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     lightNames.Add(light.name);
                 }
 
-                PluginUtils.LogDebug("StudioLightManager: Light list updated");
+                MTEUtils.LogDebug("StudioLightManager: Light list updated");
 
                 foreach (var light in lights)
                 {
-                    PluginUtils.LogDebug("light: type={0} displayName={1} name={2}",
+                    MTEUtils.LogDebug("light: type={0} displayName={1} name={2}",
                         light.type, light.displayName, light.name);
                 }
 
@@ -190,7 +190,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void SetupLights(List<TimelineLightData> lightDataList)
         {
-            PluginUtils.LogDebug("SetupLights: count={0}", lightDataList.Count);
+            MTEUtils.LogDebug("SetupLights: count={0}", lightDataList.Count);
 
             var lightList = lightHackManager.lightList.ToList();
 
@@ -202,7 +202,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var stat = CreateLightStat(lightData.type, i);
                     lightHackManager.CreateLight(stat);
 
-                    PluginUtils.Log("Create light: type={0} displayName={1} name={2}",
+                    MTEUtils.Log("Create light: type={0} displayName={1} name={2}",
                         stat.type, stat.displayName, stat.name);
                 }
                 else
@@ -221,7 +221,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     lightHackManager.DeleteLight(stat);
 
-                    PluginUtils.Log("Remove light: type={0} displayName={1} name={2}",
+                    MTEUtils.Log("Remove light: type={0} displayName={1} name={2}",
                         stat.type, stat.displayName, stat.name);
                 }
             }

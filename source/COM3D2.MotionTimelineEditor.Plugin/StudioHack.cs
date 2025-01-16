@@ -238,7 +238,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override bool Init()
         {
-            PluginUtils.Log("StudioHack初期化中...");
+            MTEUtils.Log("StudioHack初期化中...");
 
             if (!base.Init())
             {
@@ -444,7 +444,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var targetList = studio.lightWindow.GetTargetList();
             if (stat.index >= targetList.Count)
             {
-                PluginUtils.LogError("ライト数が足りません: " + stat.index);
+                MTEUtils.LogError("ライト数が足りません: " + stat.index);
                 return;
             }
 
@@ -464,11 +464,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var targetObj = stat.obj as PhotoTransTargetObject;
             if (targetObj == null || stat.light == null)
             {
-                PluginUtils.LogError("ライトが見つかりません: " + stat.name);
+                MTEUtils.LogError("ライトが見つかりません: " + stat.name);
                 return;
             }
 
-            PluginUtils.LogDebug("ChangeLight: {0} {1} -> {2}",
+            MTEUtils.LogDebug("ChangeLight: {0} {1} -> {2}",
                 stat.name, stat.light.type, stat.type);
             if (stat.light.type != stat.type)
             {
@@ -492,7 +492,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var targetObj = stat.obj as PhotoTransTargetObject;
             if (targetObj == null || stat.light == null)
             {
-                PluginUtils.LogError("ライトが見つかりません: " + stat.name);
+                MTEUtils.LogError("ライトが見つかりません: " + stat.name);
                 return;
             }
 
@@ -533,7 +533,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var bgData = photoBGManager.GetPhotoBGData(bgName);
             if (bgData == null)
             {
-                PluginUtils.LogError("背景が見つかりません: " + bgName);
+                MTEUtils.LogError("背景が見つかりません: " + bgName);
                 return;
             }
 

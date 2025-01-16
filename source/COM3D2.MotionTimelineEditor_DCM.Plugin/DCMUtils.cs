@@ -20,7 +20,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     GameObject gameObject = GameObject.Find("UnityInjector");
                     _danceCameraMotion = gameObject.GetComponent<DCM>();
-                    PluginUtils.AssertNull(_danceCameraMotion != null, "_danceCameraMotion is null");
+                    MTEUtils.AssertNull(_danceCameraMotion != null, "_danceCameraMotion is null");
                 }
                 return _danceCameraMotion;
             }
@@ -35,7 +35,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (_stageMgrField == null)
                 {
                     _stageMgrField = typeof(DCM).GetField("stageMgr", BindingFlags.NonPublic | BindingFlags.Instance);
-                    PluginUtils.AssertNull(_stageMgrField != null, "_stageMgrField is null");
+                    MTEUtils.AssertNull(_stageMgrField != null, "_stageMgrField is null");
                 }
 
                 return (SatgeObjectManager)_stageMgrField.GetValue(danceCameraMotion);

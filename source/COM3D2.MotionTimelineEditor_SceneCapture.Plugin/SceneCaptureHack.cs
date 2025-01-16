@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using CM3D2.SceneCapture.Plugin;
+using COM3D2.MotionTimelineEditor;
 using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -41,7 +42,7 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
                 if (_modelViewField == null)
                 {
                     _modelViewField = typeof(SceneCapture).GetField("modelView", BindingFlags.NonPublic | BindingFlags.Instance);
-                    PluginUtils.AssertNull(_modelViewField != null, "_modelViewField is null");
+                    MTEUtils.AssertNull(_modelViewField != null, "_modelViewField is null");
                 }
 
                 return _modelViewField.GetValue(sceneCapture);
@@ -57,7 +58,7 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
                 if (_orgModelPanes == null)
                 {
                     _orgModelPanes = modelWindow.GetType().GetField("modelPanes", BindingFlags.NonPublic | BindingFlags.Instance);
-                    PluginUtils.AssertNull(_orgModelPanes != null, "_modelPanes is null");
+                    MTEUtils.AssertNull(_orgModelPanes != null, "_modelPanes is null");
                 }
 
                 return (IList)_orgModelPanes.GetValue(modelWindow);
@@ -96,7 +97,7 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
                 if (_initializedField == null)
                 {
                     _initializedField = typeof(SceneCapture).GetField("initialized", BindingFlags.NonPublic | BindingFlags.Instance);
-                    PluginUtils.AssertNull(_initializedField != null, "_initializedField is null");
+                    MTEUtils.AssertNull(_initializedField != null, "_initializedField is null");
                 }
 
                 return (bool)_initializedField.GetValue(sceneCapture);
@@ -189,7 +190,7 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
 
         public override bool Init()
         {
-            PluginUtils.Log("SceneCaptureHack: 初期化中...");
+            MTEUtils.Log("SceneCaptureHack: 初期化中...");
 
             if (!base.Init())
             {
@@ -199,12 +200,12 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
             {
                 GameObject gameObject = GameObject.Find("UnityInjector");
                 sceneCapture = gameObject.GetComponent<SceneCapture>();
-                PluginUtils.AssertNull(sceneCapture != null, "sceneCapture is null");
+                MTEUtils.AssertNull(sceneCapture != null, "sceneCapture is null");
             }
 
             if (sceneCapture == null)
             {
-                PluginUtils.LogError("SceneCaptureプラグインが見つかりませんでした");
+                MTEUtils.LogError("SceneCaptureプラグインが見つかりませんでした");
                 return false;
             }
 
@@ -234,7 +235,7 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
             if (_clearModelsInfo == null)
             {
                 _clearModelsInfo = modelWindow.GetType().GetMethod("ClearModels", BindingFlags.Public | BindingFlags.Instance);
-                PluginUtils.AssertNull(_clearModelsInfo != null, "_clearModelsInfo is null");
+                MTEUtils.AssertNull(_clearModelsInfo != null, "_clearModelsInfo is null");
             }
 
             _clearModelsInfo.Invoke(modelWindow, null);
@@ -247,7 +248,7 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
             if (_checkForModelUpdates == null)
             {
                 _checkForModelUpdates = modelWindow.GetType().GetMethod("CheckForModelUpdates", BindingFlags.Public | BindingFlags.Instance);
-                PluginUtils.AssertNull(_checkForModelUpdates != null, "_checkForModelUpdates is null");
+                MTEUtils.AssertNull(_checkForModelUpdates != null, "_checkForModelUpdates is null");
             }
 
             _checkForModelUpdates.Invoke(modelWindow, null);
@@ -260,7 +261,7 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
             if (_deleteModelInfo == null)
             {
                 _deleteModelInfo = modelPane.orgPane.GetType().GetMethod("DeleteModel", BindingFlags.NonPublic | BindingFlags.Instance);
-                PluginUtils.AssertNull(_deleteModelInfo != null, "_deleteModelInfo is null");
+                MTEUtils.AssertNull(_deleteModelInfo != null, "_deleteModelInfo is null");
             }
 
             _deleteModelInfo.Invoke(modelPane.orgPane, new object[] { null, null });
@@ -288,7 +289,7 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
             if (_addModelInfo == null)
             {
                 _addModelInfo = modelWindow.GetType().GetMethod("AddModel", BindingFlags.NonPublic | BindingFlags.Instance);
-                PluginUtils.AssertNull(_addModelInfo != null, "_addModelInfo is null");
+                MTEUtils.AssertNull(_addModelInfo != null, "_addModelInfo is null");
             }
 
             _addModelInfo.Invoke(modelWindow, new object[] { menu });
@@ -329,7 +330,7 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
 
                 if (model.obj == null)
                 {
-                    PluginUtils.LogError("CreateModel: モデルの追加に失敗しました" + model.name);
+                    MTEUtils.LogError("CreateModel: モデルの追加に失敗しました" + model.name);
                     return;
                 }
 
@@ -337,7 +338,7 @@ namespace COM3D2.MotionTimelineEditor_SceneCapture.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
             }
         }
 

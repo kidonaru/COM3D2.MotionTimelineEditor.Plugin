@@ -196,7 +196,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
                 return DressSlotID.wear;
             }
         }
@@ -222,7 +222,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
                 return TBody.SlotID.body;
             }
         }

@@ -342,7 +342,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            PluginUtils.LogDebug("ChangeMaid: " + maid.name);
+            MTEUtils.LogDebug("ChangeMaid: " + maid.name);
 
             var isMotionPlaying = studioHack.isMotionPlaying;
             studioHackManager.isPoseEditing = false;

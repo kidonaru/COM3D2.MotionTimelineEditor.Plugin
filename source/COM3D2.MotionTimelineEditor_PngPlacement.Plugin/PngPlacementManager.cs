@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using COM3D2.MotionTimelineEditor;
 using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 using UnityEngine.Events;
@@ -125,11 +126,11 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
                     pngObjectNames.Add(obj.displayName);
                 }
 
-                PluginUtils.LogDebug("PngPlacementManager: obj list updated");
+                MTEUtils.LogDebug("PngPlacementManager: obj list updated");
 
                 foreach (var obj in pngObjects)
                 {
-                    PluginUtils.LogDebug("  {0}: {1}", obj.index, obj.displayName);
+                    MTEUtils.LogDebug("  {0}: {1}", obj.index, obj.displayName);
                 }
 
                 UpdateDragState();
@@ -244,7 +245,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
 
         public PngObjectDataWrapper GetPngObject(string name)
         {
-            return pngObjectMap.GetOrNull(name);
+            return pngObjectMap.GetOrDefault(name);
         }
 
         private void UpdateTimelineData()

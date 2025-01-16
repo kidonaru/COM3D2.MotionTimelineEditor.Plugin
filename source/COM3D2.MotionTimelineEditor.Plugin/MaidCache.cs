@@ -60,18 +60,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public Animation animation
         {
-            get
-            {
-                return maid != null ? maid.GetAnimation() : null;
-            }
+            get => maid != null ? maid.GetAnimation() : null;
         }
 
         public float anmSpeed
         {
-            get
-            {
-                return animationState != null ? animationState.speed : 0;
-            }
+            get => animationState != null ? animationState.speed : 0;
             set
             {
                 if (animationState != null)
@@ -103,13 +97,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float _motionSliderRate = 0f;
         public float motionSliderRate
         {
-            get
-            {
-                return _motionSliderRate;
-            }
+            get => _motionSliderRate;
             set
             {
-                //PluginUtils.LogDebug("Update motionSliderRate slot={0} rate={1}", slotNo, value);
+                //MTEUtils.LogDebug("Update motionSliderRate slot={0} rate={1}", slotNo, value);
                 _motionSliderRate = value;
 
                 if (animationState != null)
@@ -130,14 +121,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public int playingFrameNo
         {
-            get
-            {
-                return (int) Mathf.Round(playingFrameNoFloat);
-            }
-            set
-            {
-                playingFrameNoFloat = value;
-            }
+            get => (int) Mathf.Round(playingFrameNoFloat);
+            set => playingFrameNoFloat = value;
         }
 
         public float playingFrameNoFloat
@@ -167,47 +152,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         // アニメーションと同期しているか
         public bool isAnmSyncing
         {
-            get
-            {
-                return timelineManager.IsValidData() && anmId == TimelineLayerBase.TimelineAnmId;
-            }
+            get => timelineManager.IsValidData() && anmId == TimelineLayerBase.TimelineAnmId;
         }
 
         // タイムラインアニメーションを再生中か
         public bool isAnmPlaying
         {
-            get
-            {
-                return studioHack.isMotionPlaying && isAnmSyncing;
-            }
+            get => studioHack.isMotionPlaying && isAnmSyncing;
         }
 
         public bool useHeadKey
         {
-            get
-            {
-                return maid.body0.trsLookTarget == null;
-            }
-            set
-            {
-                maid.body0.trsLookTarget = value ? null : PluginUtils.MainCamera.transform;
-            }
+            get => maid.body0.trsLookTarget == null;
+            set => maid.body0.trsLookTarget = value ? null : PluginUtils.MainCamera.transform;
         }
         
         public Transform trsEyeL
         {
-            get
-            {
-                return maid != null ? maid.body0.trsEyeL : null;
-            }
+            get => maid != null ? maid.body0.trsEyeL : null;
         }
 
         public Transform trsEyeR
         {
-            get
-            {
-                return maid != null ? maid.body0.trsEyeR : null;
-            }
+            get => maid != null ? maid.body0.trsEyeR : null;
         }
 
         public Vector3 eyesPosL
@@ -297,10 +264,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private LookAtTargetType _lookAtTargetType;
         public LookAtTargetType lookAtTargetType
         {
-            get
-            {
-                return _lookAtTargetType;
-            }
+            get => _lookAtTargetType;
             set
             {
                 _lookAtTargetType = value;
@@ -311,10 +275,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private int _lookAtTargetIndex;
         public int lookAtTargetIndex
         {
-            get
-            {
-                return _lookAtTargetIndex;
-            }
+            get => _lookAtTargetIndex;
             set
             {
                 _lookAtTargetIndex = value;
@@ -325,10 +286,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private MaidPointType _lookAtMaidPointType;
         public MaidPointType lookAtMaidPointType
         {
-            get
-            {
-                return _lookAtMaidPointType;
-            }
+            get => _lookAtMaidPointType;
             set
             {
                 _lookAtMaidPointType = value;
@@ -358,7 +316,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (fieldLimbControlList == null)
                 {
                     fieldLimbControlList = typeof(IKManager).GetField("limb_control_list_", BindingFlags.NonPublic | BindingFlags.Instance);
-                    PluginUtils.AssertNull(fieldLimbControlList != null, "fieldLimbControlList is null");
+                    MTEUtils.AssertNull(fieldLimbControlList != null, "fieldLimbControlList is null");
                 }
                 return (List<LimbControl>) fieldLimbControlList.GetValue(ikManager);
             }
@@ -366,28 +324,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public string fullName
         {
-            get
-            {
-                return maid != null ? maid.status.fullNameJpStyle : "";
-            }
+            get => maid != null ? maid.status.fullNameJpStyle : "";
         }
 
         private static TimelineManager timelineManager => TimelineManager.instance;
-
         private static TimelineData timeline => timelineManager.timeline;
-
         private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
-
-        private static PartsEditHackManager partsEditHackManager
-        {
-            get
-            {
-                return PartsEditHackManager.instance;
-            }
-        }
-
+        private static PartsEditHackManager partsEditHackManager => PartsEditHackManager.instance;
         private static MaidManager maidManager => MaidManager.instance;
-
         private static StudioModelManager modelManager => StudioModelManager.instance;
 
         public MaidCache(int slotNo)
@@ -1022,7 +966,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void OnMaidChanged(Maid maid)
         {
-            PluginUtils.LogDebug("Maid changed: " + (maid != null ? maid.name : "null"));
+            MTEUtils.LogDebug("Maid changed: " + (maid != null ? maid.name : "null"));
 
             Reset();
 
@@ -1055,7 +999,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void OnAnmChanged(string anmName)
         {
-            PluginUtils.LogDebug("Animation changed: " + anmName);
+            MTEUtils.LogDebug("Animation changed: " + anmName);
 
             ResetAnm();
 

@@ -113,11 +113,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            PluginUtils.LogDebug("StageLaserManager: Laser list updated");
+            MTEUtils.LogDebug("StageLaserManager: Laser list updated");
 
             foreach (var laser in lasers)
             {
-                PluginUtils.LogDebug("laser: displayName={0} name={1}",
+                MTEUtils.LogDebug("laser: displayName={0} name={1}",
                     laser.displayName, laser.name);
             }
 
@@ -145,7 +145,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             for (var i = 0; i < laserCounts.Count; i++)
             {
-                PluginUtils.LogDebug("StageLaser.SetupLasers: [{0}]={1}", i, laserCounts[i]);
+                MTEUtils.LogDebug("StageLaser.SetupLasers: [{0}]={1}", i, laserCounts[i]);
             }
 
             while (controllers.Count < laserCounts.Count)

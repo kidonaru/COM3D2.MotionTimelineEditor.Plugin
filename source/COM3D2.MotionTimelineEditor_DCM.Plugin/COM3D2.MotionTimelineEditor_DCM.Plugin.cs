@@ -1,5 +1,6 @@
 using System;
 using COM3D2.DanceCameraMotion.Plugin;
+using COM3D2.MotionTimelineEditor;
 using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 using UnityInjector;
@@ -17,7 +18,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
     ]
     public class MotionTimelineEditor_DCM : PluginBase
     {
-        protected static MTE mte => MTE.instance;
+        private static ManagerRegistry managerRegistry => ManagerRegistry.instance;
         private static TimelineManager timelineManager => TimelineManager.instance;
 
         public void Awake()
@@ -33,7 +34,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
             }
         }
 
@@ -59,7 +60,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 TransformType.Text, TimelineManager.CreateTransform<TransformDataText>
             );
 
-            mte.RegisterManager(MTETextManager.instance);
+            managerRegistry.RegisterManager(MTETextManager.instance);
         }
 
         public static float CalcEasingValue(float t, int easing)

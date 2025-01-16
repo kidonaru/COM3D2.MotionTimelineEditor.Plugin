@@ -8,6 +8,7 @@ using COM3D2.MotionTimelineEditor.Plugin;
 using System.Collections.Generic;
 using UnityEngine.Rendering;
 using MyRoomCustom;
+using COM3D2.MotionTimelineEditor;
 
 namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 {
@@ -17,21 +18,9 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
     {
         private MultipleMaidsWrapper multipleMaids = new MultipleMaidsWrapper();
 
-        public override string pluginName
-        {
-            get
-            {
-                return "MultipleMaids";
-            }
-        }
+        public override string pluginName => "MultipleMaids";
 
-        public override int priority
-        {
-            get
-            {
-                return 100;
-            }
-        }
+        public override int priority => 100;
 
         private bool isIK
         {
@@ -337,7 +326,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         public override bool Init()
         {
-            PluginUtils.Log("MultipleMaidsHack: 初期化中...");
+            MTEUtils.Log("MultipleMaidsHack: 初期化中...");
 
             if (!base.Init())
             {
@@ -404,7 +393,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
             if (!sourceObj)
             {
-                PluginUtils.LogError("Could not load game model '" + assetName + "'");
+                MTEUtils.LogError("Could not load game model '" + assetName + "'");
                 return null;
             }
 
@@ -495,7 +484,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             if (methodProcScriptBin == null)
             {
                 methodProcScriptBin = typeof(MultipleMaids).GetMethod("ProcScriptBin", BindingFlags.Static | BindingFlags.InvokeMethod | BindingFlags.NonPublic);
-                PluginUtils.AssertNull(methodProcScriptBin != null, "methodProcScriptBin is null");
+                MTEUtils.AssertNull(methodProcScriptBin != null, "methodProcScriptBin is null");
             }
 
             return (string[]) methodProcScriptBin.Invoke(null, new object[] { maid, cd, filename, f_bTemp });
@@ -505,7 +494,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         {
             if (!assetName.EndsWith(".menu", StringComparison.Ordinal))
             {
-                PluginUtils.LogWarning("未対応のファイルです。 :" + assetName);
+                MTEUtils.LogWarning("未対応のファイルです。 :" + assetName);
                 return null;
             }
 
@@ -514,7 +503,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             {
                 if (!file.IsValid())
                 {
-                    PluginUtils.LogError("メニューファイルが存在しません。 :" + assetName);
+                    MTEUtils.LogError("メニューファイルが存在しません。 :" + assetName);
                     return null;
                 }
                 menuBytes = new byte[file.GetSize()];
@@ -524,7 +513,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             var maid = selectedMaid;
             if (maid == null)
             {
-                PluginUtils.LogError("LoadModObject: maid is null");
+                MTEUtils.LogError("LoadModObject: maid is null");
                 return null;
             }
 
@@ -647,7 +636,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
                 if (obj == null)
                 {
-                    PluginUtils.LogError("CreateModel: モデルの追加に失敗しました" + model.name);
+                    MTEUtils.LogError("CreateModel: モデルの追加に失敗しました" + model.name);
                     return;
                 }
 
@@ -658,7 +647,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
             }
         }
 
@@ -827,7 +816,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             var lightObj = stat.obj as GameObject;
             if (lightObj == null || stat.light == null || stat.transform == null)
             {
-                PluginUtils.LogError("ChangeLight: ライトが見つかりません" + stat.name);
+                MTEUtils.LogError("ChangeLight: ライトが見つかりません" + stat.name);
                 return;
             }
 
@@ -835,7 +824,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             var lightIndex = lightList.FindIndex(d => d == lightObj);
             if (lightIndex < 0)
             {
-                PluginUtils.LogError("ChangeLight: ライトが見つかりません" + stat.name);
+                MTEUtils.LogError("ChangeLight: ライトが見つかりません" + stat.name);
                 return;
             }
 
@@ -848,7 +837,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             var lightObj = stat.obj as GameObject;
             if (lightObj == null || stat.light == null || stat.transform == null)
             {
-                PluginUtils.LogError("ApplyLight: ライトが見つかりません" + stat.name);
+                MTEUtils.LogError("ApplyLight: ライトが見つかりません" + stat.name);
                 return;
             }
 
@@ -856,7 +845,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             var lightIndex = lightList.FindIndex(d => d == lightObj);
             if (lightIndex < 0)
             {
-                PluginUtils.LogError("ApplyLight: ライトが見つかりません" + stat.name);
+                MTEUtils.LogError("ApplyLight: ライトが見つかりません" + stat.name);
                 return;
             }
 
@@ -1128,6 +1117,30 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         public override void Update()
         {
             base.Update();
+
+            // ドラッグしたままになるバグがあるので、リセットする
+            if (Input.GetMouseButtonUp(0))
+            {
+                var dragArray = new MouseDrag[]
+                {
+                    mHandL,
+                    mHandR,
+                    mArmL,
+                    mArmR,
+                    mFootL,
+                    mFootR,
+                    mHizaL,
+                    mHizaR,
+                };
+
+                foreach (var drag in dragArray)
+                {
+                    if (drag != null)
+                    {
+                        drag.OnMouseUp();
+                    }
+                }
+            }
         }
 
         public override void OnUpdateDepthOfField()

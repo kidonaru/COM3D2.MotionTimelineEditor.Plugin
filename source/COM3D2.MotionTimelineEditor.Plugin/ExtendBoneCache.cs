@@ -108,7 +108,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             };
             entities[extendBoneName] = entity;
 
-            //PluginUtils.LogDebug("AddEntity slotNo:{0} slotName:{1} boneName:{2} extendBoneName:{3} bonePath:{4}",
+            //MTEUtils.LogDebug("AddEntity slotNo:{0} slotName:{1} boneName:{2} extendBoneName:{3} bonePath:{4}",
             //    slotNo, slotName, boneName, extendBoneName, entity.bonePath);
         }
 

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using COM3D2.DanceCameraMotion.Plugin;
+using COM3D2.MotionTimelineEditor;
 using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
@@ -113,7 +114,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             _faceManager.SetMabatakiOff(maid);
             _faceManager.SetMorphValue(maid, _applyMorphMap);
 
-            //PluginUtils.LogDebug("ApplyCamera: lerpFrame={0}, listIndex={1}", playData.lerpFrame, playData.listIndex);
+            //MTEUtils.LogDebug("ApplyCamera: lerpFrame={0}, listIndex={1}", playData.lerpFrame, playData.listIndex);
         }
 
         protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
@@ -274,8 +275,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
-                PluginUtils.LogError("表情モーションの出力に失敗しました");
+                MTEUtils.LogException(e);
+                MTEUtils.LogError("表情モーションの出力に失敗しました");
             }
         }
 

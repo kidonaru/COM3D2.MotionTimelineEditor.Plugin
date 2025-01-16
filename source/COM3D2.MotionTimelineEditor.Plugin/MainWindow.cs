@@ -1,7 +1,8 @@
+using System.Collections.Generic;
+using UnityEngine;
+
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    using System.Collections.Generic;
-    using UnityEngine;
     using MTE = MotionTimelineEditor;
 
     public enum FileMenuType
@@ -187,7 +188,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             alignment = TextAnchor.MiddleCenter
         };
 
-        private Texture2D texWhite = null;
+        private Texture2D texWhite => GUIView.texWhite;
         private Texture2D texTimelineBG = null;
         private Texture2D texKeyFrame = null;
 
@@ -209,12 +210,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Init()
         {
-            texWhite = GUIView.CreateColorTexture(Color.white);
         }
 
         public void UpdateTexture()
         {
-            PluginUtils.LogDebug("テクスチャ作成中...");
+            MTEUtils.LogDebug("テクスチャ作成中...");
             if (texTimelineBG != null)
             {
                 UnityEngine.Object.Destroy(texTimelineBG);
@@ -314,20 +314,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (windowHeight != GetWindowHeight())
             {
-                PluginUtils.AdjustWindowPosition(ref _windowRect);
+                MTEUtils.AdjustWindowPosition(ref _windowRect);
                 windowHeight = GetWindowHeight();
                 _windowRect.height = windowHeight;
             }
 
             if (windowWidth != GetWindowWidth())
             {
-                PluginUtils.AdjustWindowPosition(ref _windowRect);
+                MTEUtils.AdjustWindowPosition(ref _windowRect);
                 windowWidth = GetWindowWidth();
                 _windowRect.width = windowWidth;
             }
 
             windowRect = GUI.Window(WINDOW_ID, windowRect, DrawWindow, PluginInfo.WindowName, gsWin);
-            PluginUtils.ResetInputOnScroll(windowRect);
+            MTEUtils.ResetInputOnScroll(windowRect);
 
             if (config.windowPosX != (int)windowRect.x ||
                 config.windowPosY != (int)windowRect.y)
@@ -440,12 +440,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     if (!studioHack.IsValid())
                     {
-                        PluginUtils.ShowDialog(studioHack.errorMessage);
+                        MTEUtils.ShowDialog(studioHack.errorMessage);
                         return;
                     }
                     if (!timelineManager.IsValidData())
                     {
-                        PluginUtils.ShowDialog(timelineManager.errorMessage);
+                        MTEUtils.ShowDialog(timelineManager.errorMessage);
                         return;
                     }
                     timelineManager.SaveTimeline();
@@ -455,7 +455,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     if (!studioHack.IsValid())
                     {
-                        PluginUtils.ShowDialog(studioHack.errorMessage);
+                        MTEUtils.ShowDialog(studioHack.errorMessage);
                         return;
                     }
                     subWindow.SetSubWindowType(SubWindowType.TimelineLoad);
@@ -1307,7 +1307,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void OnScreenSizeChanged()
         {
-            PluginUtils.AdjustWindowPosition(ref _windowRect);
+            MTEUtils.AdjustWindowPosition(ref _windowRect);
         }
 
         public static int GetWindowWidth()

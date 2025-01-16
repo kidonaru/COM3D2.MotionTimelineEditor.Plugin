@@ -1,4 +1,5 @@
 using System;
+using COM3D2.MotionTimelineEditor;
 using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
 
@@ -33,7 +34,7 @@ namespace COM3D2.MotionTimelineEditor_PartsEdit.Plugin
 
         public override bool Init()
         {
-            PluginUtils.Log("PartsEditHack: 初期化中...");
+            MTEUtils.Log("PartsEditHack: 初期化中...");
 
             try
             {
@@ -49,7 +50,7 @@ namespace COM3D2.MotionTimelineEditor_PartsEdit.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
                 return false;
             }
         }

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using CM3D2.PngPlacement.Plugin;
-using COM3D2.MotionTimelineEditor.Plugin;
+using COM3D2.MotionTimelineEditor;
 using UnityEngine;
 using System.IO;
 using System;

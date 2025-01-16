@@ -199,7 +199,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public BGModelInfo GetModelInfo(string sourceName)
         {
-            return modelInfoMap.GetOrNull(sourceName);
+            return modelInfoMap.GetOrDefault(sourceName);
         }
 
         public BGModelStat AddModel(string sourceName, int group, bool notify = true)
@@ -231,7 +231,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timelineManager.RequestHistory("背景モデルの追加: " + model.displayName);
             }
 
-            PluginUtils.LogDebug("背景モデルを追加しました: " + model.displayName);
+            MTEUtils.LogDebug("背景モデルを追加しました: " + model.displayName);
 
             return model;
         }
@@ -255,7 +255,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             models.Remove(model);
             modelNames.Remove(model.name);
             _modelMap.Remove(model.name);
-            _modelsMap.GetOrNull(model.sourceName)?.Remove(model);
+            _modelsMap.GetOrDefault(model.sourceName)?.Remove(model);
 
             if (notify)
             {
@@ -272,7 +272,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 DeleteModelInfo(info.name);
             }
 
-            PluginUtils.LogDebug("背景モデルを削除しました: " + model.displayName);
+            MTEUtils.LogDebug("背景モデルを削除しました: " + model.displayName);
         }
 
         public void DeleteModelBySourceName(string sourceName, bool notify = true)
@@ -349,7 +349,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void DeleteModelInfo(string name)
         {
-            var info = modelInfoMap.GetOrNull(name);
+            var info = modelInfoMap.GetOrDefault(name);
             if (info == null)
             {
                 return;

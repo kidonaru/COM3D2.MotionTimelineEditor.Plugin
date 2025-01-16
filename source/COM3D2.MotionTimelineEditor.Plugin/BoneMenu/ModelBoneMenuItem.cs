@@ -25,7 +25,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     partsEditHack.targetSelectMode = 1;
                     partsEditHack.SetObject(bone.model.transform.gameObject);
-                    PluginUtils.ExecuteNextFrame(() =>
+                    MTEUtils.ExecuteNextFrame(() =>
                     {
                         partsEditHack.SetBone(bone.transform);
                     });

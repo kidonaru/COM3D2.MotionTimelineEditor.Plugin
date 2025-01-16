@@ -345,7 +345,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
 #if COM3D2
-            PluginUtils.LogDebug("CalcRandomAnimationParams");
+            MTEUtils.LogDebug("CalcRandomAnimationParams");
 #endif
 
             _randomAnimationSeed = randomSeed;

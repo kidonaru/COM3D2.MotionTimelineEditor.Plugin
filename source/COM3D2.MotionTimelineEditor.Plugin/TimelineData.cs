@@ -606,7 +606,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void LayerInit()
         {
-            PluginUtils.LogDebug("TimelineData.LayerInit");
+            MTEUtils.LogDebug("TimelineData.LayerInit");
             foreach (var layer in layers)
             {
                 layer.Init();

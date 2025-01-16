@@ -38,7 +38,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (tangentPresetTextures == null)
             {
-                PluginUtils.LogDebug("補間曲線プリセット画像を生成します");
+                MTEUtils.LogDebug("補間曲線プリセット画像を生成します");
 
                 tangentPresetTextures = new Texture2D[(int) TangentType.Smooth];
 
@@ -104,7 +104,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         selectedBone.transform.Reset();
                     }
 
-                    PluginUtils.LogDebug("初期化します");
+                    MTEUtils.LogDebug("初期化します");
                     currentLayer.ApplyCurrentFrame(true);
                 }
 
@@ -292,7 +292,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
-                PluginUtils.LogDebug("リセットします");
+                MTEUtils.LogDebug("リセットします");
                 currentLayer.ApplyCurrentFrame(true);
             }
 
@@ -316,7 +316,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
-                PluginUtils.LogDebug("差分を適用します：" + diffValue);
+                MTEUtils.LogDebug("差分を適用します：" + diffValue);
                 currentLayer.ApplyCurrentFrame(true);
             }
 
@@ -340,7 +340,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
-                PluginUtils.LogDebug("新値を適用します：" + newValue);
+                MTEUtils.LogDebug("新値を適用します：" + newValue);
                 currentLayer.ApplyCurrentFrame(true);
             }
         }
@@ -418,7 +418,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
-                PluginUtils.LogDebug("リセットします");
+                MTEUtils.LogDebug("リセットします");
                 currentLayer.ApplyCurrentFrame(true);
             }
 
@@ -436,7 +436,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
-                PluginUtils.LogDebug("差分を適用します：" + diffValue);
+                MTEUtils.LogDebug("差分を適用します：" + diffValue);
                 currentLayer.ApplyCurrentFrame(true);
             }
 
@@ -452,7 +452,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
-                PluginUtils.LogDebug("新値を適用します：" + newValue);
+                MTEUtils.LogDebug("新値を適用します：" + newValue);
                 currentLayer.ApplyCurrentFrame(true);
             }
         }
@@ -522,7 +522,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
-                PluginUtils.LogDebug("新値を適用します：" + newValue);
+                MTEUtils.LogDebug("新値を適用します：" + newValue);
                 currentLayer.ApplyCurrentFrame(true);
             }
         }
@@ -593,7 +593,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                 }
 
-                PluginUtils.LogDebug("新値を適用します：" + newValue);
+                MTEUtils.LogDebug("新値を適用します：" + newValue);
                 currentLayer.ApplyCurrentFrame(true);
             }
         }
@@ -677,7 +677,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (isUpdated)
             {
-                PluginUtils.LogDebug("補間曲線画像を更新します：" + tangents.Count);
+                MTEUtils.LogDebug("補間曲線画像を更新します：" + tangents.Count);
 
                 cachedTangents = tangents;
 
@@ -813,7 +813,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         outTangentData.isSmooth = false;
                     });
 
-                    PluginUtils.LogDebug("OutTangentを適用します：" + newOutTangent);
+                    MTEUtils.LogDebug("OutTangentを適用します：" + newOutTangent);
                     currentLayer.ApplyCurrentFrame(true);
                 }
 
@@ -825,7 +825,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         inTangentData.isSmooth = false;
                     });
 
-                    PluginUtils.LogDebug("InTangentを適用します：" + newInTangent);
+                    MTEUtils.LogDebug("InTangentを適用します：" + newInTangent);
                     currentLayer.ApplyCurrentFrame(true);
                 }
 
@@ -840,7 +840,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         outTangentData.isSmooth = false;
                     });
 
-                    PluginUtils.LogDebug("OutTangentの差分を適用します：" + diffOutTangent);
+                    MTEUtils.LogDebug("OutTangentの差分を適用します：" + diffOutTangent);
                     currentLayer.ApplyCurrentFrame(true);
                 }
 
@@ -854,7 +854,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         inTangentData.isSmooth = false;
                     });
 
-                    PluginUtils.LogDebug("InTangentの差分を適用します：" + diffInTangent);
+                    MTEUtils.LogDebug("InTangentの差分を適用します：" + diffInTangent);
                     currentLayer.ApplyCurrentFrame(true);
                 }
 
@@ -871,7 +871,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         inTangentData.isSmooth = newIsSmooth;
                     });
 
-                    PluginUtils.LogDebug("自動補間を適用します：" + newIsSmooth);
+                    MTEUtils.LogDebug("自動補間を適用します：" + newIsSmooth);
                     currentLayer.ApplyCurrentFrame(true);
                 });
             }
@@ -914,7 +914,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         inTangentData.isSmooth = tangentPair.isSmooth;
                     });
 
-                    PluginUtils.LogDebug("プリセットを適用します：" + tangentType);
+                    MTEUtils.LogDebug("プリセットを適用します：" + tangentType);
                     currentLayer.ApplyCurrentFrame(true);
                 });
             }
@@ -957,7 +957,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (isUpdated)
             {
-                PluginUtils.LogDebug("補間曲線画像を更新します：" + easings.Count);
+                MTEUtils.LogDebug("補間曲線画像を更新します：" + easings.Count);
 
                 cachedEasings = easings;
 
@@ -992,7 +992,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     bone.transform.easing = easing;
                 }
 
-                PluginUtils.LogDebug("Easingを適用します: " + easing);
+                MTEUtils.LogDebug("Easingを適用します: " + easing);
                 currentLayer.ApplyCurrentFrame(true);
             };
 

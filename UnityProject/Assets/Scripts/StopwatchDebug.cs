@@ -45,7 +45,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 TimeSpan elapsed = stopwatch.Elapsed;
 #if COM3D2
-                PluginUtils.Log(string.Format("{0}: {1:F3}ms", processName, elapsed.TotalMilliseconds));
+                MTEUtils.Log(string.Format("{0}: {1:F3}ms", processName, elapsed.TotalMilliseconds));
 #else
                 UnityEngine.Debug.Log(string.Format("{0}: {1:F3}ms", processName, elapsed.TotalMilliseconds));
 #endif

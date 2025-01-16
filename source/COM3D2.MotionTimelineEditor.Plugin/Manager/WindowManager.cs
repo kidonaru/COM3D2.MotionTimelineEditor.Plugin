@@ -102,7 +102,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void AddSubWindow()
         {
-            PluginUtils.LogDebug("AddSubWindow");
+            MTEUtils.LogDebug("AddSubWindow");
             var subWindow = new SubWindow(subWindows.Count + 1);
             subWindows.Add(subWindow);
 

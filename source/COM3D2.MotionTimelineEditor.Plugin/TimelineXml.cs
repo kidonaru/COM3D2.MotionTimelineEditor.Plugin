@@ -365,7 +365,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                 var values = new List<float>(transform.values);
                                 if (values.Count == 7)
                                 {
-                                    PluginUtils.LogDebug("Add SY/SZ to BGTimelineLayer name={0}", transform.name);
+                                    MTEUtils.LogDebug("Add SY/SZ to BGTimelineLayer name={0}", transform.name);
                                     values.Add(values[6]);
                                     values.Add(values[6]);
                                 }
@@ -440,7 +440,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                 var values = new List<float>(transform.values);
                                 if (values.Count == 4)
                                 {
-                                    PluginUtils.LogDebug("Add Position/Scale to MotionTimelineLayer name={0}", transform.name);
+                                    MTEUtils.LogDebug("Add Position/Scale to MotionTimelineLayer name={0}", transform.name);
                                     values.Add(float.MinValue);
                                     values.Add(float.MinValue);
                                     values.Add(float.MinValue);
@@ -486,7 +486,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                 var values = new List<float>(transform.values);
                                 if (values.Count == 15)
                                 {
-                                    PluginUtils.LogDebug("Add maidSlotId to LightTimelineLayer name={0}", transform.name);
+                                    MTEUtils.LogDebug("Add maidSlotId to LightTimelineLayer name={0}", transform.name);
                                     values.Add(-1f);
                                 }
                                 transform.values = values.ToArray();
@@ -515,7 +515,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                 var values = new List<float>(transform.values);
                                 if (values.Count == 6)
                                 {
-                                    PluginUtils.LogDebug("Add isGroundingFootR to MotionTimelineLayer name={0}", transform.name);
+                                    MTEUtils.LogDebug("Add isGroundingFootR to MotionTimelineLayer name={0}", transform.name);
                                     values.Add(values[0]);
                                 }
                                 transform.values = values.ToArray();
@@ -549,7 +549,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                 var values = new List<float>(transform.values);
                                 if (values.Count == 4)
                                 {
-                                    PluginUtils.LogDebug("Add isAnime to MotionTimelineLayer name={0}", transform.name);
+                                    MTEUtils.LogDebug("Add isAnime to MotionTimelineLayer name={0}", transform.name);
                                     values.Add(isIKAnime ? 1f : 0f);
                                 }
                                 transform.values = values.ToArray();
@@ -582,7 +582,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                     {
                                         transform = transform,
                                     });
-                                    PluginUtils.LogDebug("Add FingerBlend to MotionTimelineLayer name={0}", name);
+                                    MTEUtils.LogDebug("Add FingerBlend to MotionTimelineLayer name={0}", name);
                                 }
                                 break;
                             }
@@ -608,7 +608,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                 var values = new List<float>(transform.values);
                                 if (values.Count == 10)
                                 {
-                                    PluginUtils.LogDebug("Add visible to ModelTimelineLayer name={0}", transform.name);
+                                    MTEUtils.LogDebug("Add visible to ModelTimelineLayer name={0}", transform.name);
                                     values.Add(1f);
                                 }
                                 transform.values = values.ToArray();
@@ -640,7 +640,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                 var values = new List<float>(transform.values);
                                 if (values.Count > 6)
                                 {
-                                    PluginUtils.LogDebug("Change rotation to eulerAngles in StageLightTimelineLayer name={0}", transform.name);
+                                    MTEUtils.LogDebug("Change rotation to eulerAngles in StageLightTimelineLayer name={0}", transform.name);
                                     var rotation = new Quaternion(values[3], values[4], values[5], values[6]);
                                     var eulerAngles = rotation.eulerAngles;
                                     values[3] = eulerAngles.x;
@@ -673,7 +673,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                     var values = new List<float>(transform.values);
                                     if (values.Count == 36)
                                     {
-                                        PluginUtils.LogDebug("Add zTest to StageLightTimelineLayer name={0}", transform.name);
+                                        MTEUtils.LogDebug("Add zTest to StageLightTimelineLayer name={0}", transform.name);
                                         values.Add(1f);
                                     }
                                     transform.values = values.ToArray();
@@ -683,7 +683,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                     var values = new List<float>(transform.values);
                                     if (values.Count == 22)
                                     {
-                                        PluginUtils.LogDebug("Add zTest to StageLightTimelineLayer name={0}", transform.name);
+                                        MTEUtils.LogDebug("Add zTest to StageLightTimelineLayer name={0}", transform.name);
                                         values.Add(1f);
                                     }
                                     transform.values = values.ToArray();
@@ -712,7 +712,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                     var values = new List<float>(transform.values);
                                     if (values.Count > 20)
                                     {
-                                        PluginUtils.LogDebug("Overwrite segmentAngle in StageLightTimelineLayer name={0}", transform.name);
+                                        MTEUtils.LogDebug("Overwrite segmentAngle in StageLightTimelineLayer name={0}", transform.name);
                                         values[20] = 10f;
                                     }
                                     transform.values = values.ToArray();
@@ -722,7 +722,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                     var values = new List<float>(transform.values);
                                     if (values.Count > 29)
                                     {
-                                        PluginUtils.LogDebug("Overwrite segmentAngle in StageLightTimelineLayer name={0}", transform.name);
+                                        MTEUtils.LogDebug("Overwrite segmentAngle in StageLightTimelineLayer name={0}", transform.name);
                                         values[29] = 10f;
                                     }
                                     transform.values = values.ToArray();
@@ -751,7 +751,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                     var values = new List<float>(transform.values);
                                     if (values.Count > 26)
                                     {
-                                        PluginUtils.LogDebug("Change intensity index in StageLaserTimelineLayer name={0}", transform.name);
+                                        MTEUtils.LogDebug("Change intensity index in StageLaserTimelineLayer name={0}", transform.name);
                                         values.Insert(16, values[26]);
                                         values.RemoveAt(27);
                                     }
@@ -762,7 +762,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                     var values = new List<float>(transform.values);
                                     if (values.Count > 33)
                                     {
-                                        PluginUtils.LogDebug("Change intensity index in StageLaserTimelineLayer name={0}", transform.name);
+                                        MTEUtils.LogDebug("Change intensity index in StageLaserTimelineLayer name={0}", transform.name);
                                         values.Insert(18, values[33]);
                                         values.RemoveAt(34);
                                     }
@@ -792,7 +792,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                     var values = new List<float>(transform.values);
                                     if (values.Count > 3)
                                     {
-                                        PluginUtils.LogDebug("Remove position in StageLaserTimelineLayer name={0}", transform.name);
+                                        MTEUtils.LogDebug("Remove position in StageLaserTimelineLayer name={0}", transform.name);
                                         values.RemoveRange(0, 3);
                                     }
                                     transform.values = values.ToArray();
@@ -802,7 +802,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                     var values = new List<float>(transform.values);
                                     if (values.Count > 33)
                                     {
-                                        PluginUtils.LogDebug("Fix rotation in StageLaserTimelineLayer name={0}", transform.name);
+                                        MTEUtils.LogDebug("Fix rotation in StageLaserTimelineLayer name={0}", transform.name);
                                         var eulerAngles = new float[] {0, 0, 0};
                                         var rotationMin = new float[] {values[3], values[4], values[5]};
                                         var rotationMax = new float[] {values[6], values[7], values[8]};
@@ -844,7 +844,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                 var values = new List<float>(transform.values);
                                 if (values.Count == 7)
                                 {
-                                    PluginUtils.LogDebug("Add scale to MoveTimelineLayer name={0}", transform.name);
+                                    MTEUtils.LogDebug("Add scale to MoveTimelineLayer name={0}", transform.name);
                                     values.Add(1f);
                                     values.Add(1f);
                                     values.Add(1f);
@@ -872,7 +872,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                                 var values = new List<float>(transform.values);
                                 if (values.Count == 16)
                                 {
-                                    PluginUtils.LogDebug("Add visible to LightTimelineLayer name={0}", transform.name);
+                                    MTEUtils.LogDebug("Add visible to LightTimelineLayer name={0}", transform.name);
                                     values.Add(1f);
                                 }
                                 transform.values = values.ToArray();

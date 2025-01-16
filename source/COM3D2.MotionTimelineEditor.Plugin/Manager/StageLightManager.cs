@@ -114,11 +114,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            PluginUtils.LogDebug("StageLightManager: Light list updated");
+            MTEUtils.LogDebug("StageLightManager: Light list updated");
 
             foreach (var light in lights)
             {
-                PluginUtils.LogDebug("light: displayName={0} name={1}",
+                MTEUtils.LogDebug("light: displayName={0} name={1}",
                     light.displayName, light.name);
             }
 
@@ -146,7 +146,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             for (var i = 0; i < lightCounts.Count; i++)
             {
-                PluginUtils.LogDebug("StageLight.SetupLights: [{0}]={1}", i, lightCounts[i]);
+                MTEUtils.LogDebug("StageLight.SetupLights: [{0}]={1}", i, lightCounts[i]);
             }
 
             while (controllers.Count < lightCounts.Count)

@@ -152,8 +152,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     targetPosition.y = maidCache.floorHeight + maidCache.footBaseOffset;
                 }
 
-                //PluginUtils.LogDebug("UpdateIKPosition: " + holdType);
-                //PluginUtils.LogDebug("  target: " + targetPosition);
+                //MTEUtils.LogDebug("UpdateIKPosition: " + holdType);
+                //MTEUtils.LogDebug("  target: " + targetPosition);
                 UpdateIKPosition(targetPosition);
 
                 if (isFootGroundingEnabled)

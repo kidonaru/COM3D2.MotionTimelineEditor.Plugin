@@ -1,6 +1,6 @@
 using CM3D2.MultipleMaids.Plugin;
 using UnityEngine;
-using COM3D2.MotionTimelineEditor.Plugin;
+using COM3D2.MotionTimelineEditor;
 using System.Collections.Generic;
 
 namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
@@ -385,12 +385,12 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             {
                 GameObject gameObject = GameObject.Find("UnityInjector");
                 multipleMaids = gameObject.GetComponent<MultipleMaids>();
-                PluginUtils.AssertNull(multipleMaids != null, "multipleMaids is null");
+                MTEUtils.AssertNull(multipleMaids != null, "multipleMaids is null");
             }
 
             if (multipleMaids == null)
             {
-                PluginUtils.LogError("複数メイドプラグインが見つかりませんでした");
+                MTEUtils.LogError("複数メイドプラグインが見つかりませんでした");
                 return false;
             }
 

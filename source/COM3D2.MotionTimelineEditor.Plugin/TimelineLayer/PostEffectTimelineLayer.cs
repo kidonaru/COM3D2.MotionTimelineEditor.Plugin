@@ -76,7 +76,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 + timeline.rimlightCount;
             if (allBoneNames.Count != boneCount)
             {
-                PluginUtils.LogDebug($"PostEffetTimelineLayer.Update: boneCount={boneCount}");
+                MTEUtils.LogDebug($"PostEffetTimelineLayer.Update: boneCount={boneCount}");
                 _allBoneNames = null;
                 postEffectManager.InitPostEffects();
                 InitMenuItems();

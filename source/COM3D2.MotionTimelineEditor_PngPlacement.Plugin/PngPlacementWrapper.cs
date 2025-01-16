@@ -4,6 +4,7 @@ using CM3D2.PngPlacement.Plugin;
 using System;
 using System.Collections.Generic;
 using System.Collections;
+using COM3D2.MotionTimelineEditor;
 
 namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
 {
@@ -179,11 +180,11 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             var imageIndex = listImageFilename.IndexOf(imageName);
             if (imageIndex == -1)
             {
-                PluginUtils.LogError("Image not found: {0}", imageName);
+                MTEUtils.LogError("Image not found: {0}", imageName);
                 return;
             }
 
-            PluginUtils.Log("Create PngObject: {0}, {1}, {2}, {3}", imageName, primitive, squareUV, shaderDisplay);
+            MTEUtils.Log("Create PngObject: {0}, {1}, {2}, {3}", imageName, primitive, squareUV, shaderDisplay);
             this.iPngSel = imageIndex;
             this.iPrimitive = primitive;
             this.bSquareUV = squareUV;
@@ -193,7 +194,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
 
         public void DeleteAllObjects()
         {
-            PluginUtils.LogDebug("DeleteAll PngObjects");
+            MTEUtils.LogDebug("DeleteAll PngObjects");
             placementMgrField.DeleteAll.Invoke(placementMgr, null);
         }
 
@@ -448,12 +449,12 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             {
                 GameObject gameObject = GameObject.Find("UnityInjector");
                 pngPlacement = gameObject.GetComponent<PngPlacement>();
-                PluginUtils.AssertNull(pngPlacement != null, "pngPlacement is null");
+                MTEUtils.AssertNull(pngPlacement != null, "pngPlacement is null");
             }
 
             if (pngPlacement == null)
             {
-                PluginUtils.LogError("PngPlacementが見つかりませんでした");
+                MTEUtils.LogError("PngPlacementが見つかりませんでした");
                 return false;
             }
 

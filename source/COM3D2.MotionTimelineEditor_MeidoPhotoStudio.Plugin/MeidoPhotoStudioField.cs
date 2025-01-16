@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Reflection;
-using COM3D2.MotionTimelineEditor.Plugin;
+using COM3D2.MotionTimelineEditor;
 using MeidoPhotoStudio.Plugin;
 
 namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin

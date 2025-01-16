@@ -30,13 +30,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class SubWindow : IWindow
     {
-        public int WINDOW_ID
-        {
-            get
-            {
-                return 485087 + windowIndex;
-            }
-        }
+        public int WINDOW_ID => 485087 + windowIndex;
 
         public readonly static int WINDOW_WIDTH = 280;
         public readonly static int WINDOW_HEIGHT = 480;
@@ -58,30 +52,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         );
         public Rect windowRect
         {
-            get
-            {
-                return _windowRect;
-            }
-            set
-            {
-                _windowRect = value;
-            }
+            get => _windowRect;
+            set => _windowRect = value;
         }
 
         private bool _isShowWnd;
         public bool isShowWnd
         {
-            get
-            {
-                return _isShowWnd;
-            }
+            get => _isShowWnd;
             set
             {
-                if (value == _isShowWnd)
-                {
-                    return;
-                }
-
+                if (value == _isShowWnd) return;
                 _isShowWnd = value;
                 dirty = true;
             }
@@ -90,17 +71,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private SubWindowType _subWindowType;
         public SubWindowType subWindowType
         {
-            get
-            {
-                return _subWindowType;
-            }
+            get => _subWindowType;
             set
             {
-                if (value == _subWindowType)
-                {
-                    return;
-                }
-
+                if (value == _subWindowType) return;
                 _subWindowType = value;
                 dirty = true;
             }
@@ -109,17 +83,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private bool _isPositionLocked;
         public bool isPositionLocked
         {
-            get
-            {
-                return _isPositionLocked;
-            }
+            get => _isPositionLocked;
             set
             {
-                if (value == _isPositionLocked)
-                {
-                    return;
-                }
-
+                if (value == _isPositionLocked) return;
                 _isPositionLocked = value;
                 dirty = true;
             }
@@ -127,30 +94,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool dirty;
 
-        public SubWindowUIBase ui
-        {
-            get
-            {
-                return GetSubWindowUI(subWindowType);
-            }
-        }
-
-        public SubWindowInfo info
-        {
-            get
-            {
-                return config.GetSubWindowInfo(windowIndex);
-            }
-        }
+        public SubWindowUIBase ui => GetSubWindowUI(subWindowType);
+        public SubWindowInfo info => config.GetSubWindowInfo(windowIndex);
 
         public static Config config => ConfigManager.instance.config;
-
         private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
-
         private static MaidManager maidManager => MaidManager.instance;
-
         private static Maid maid => maidManager.maid;
-
         private static WindowManager windowManager => WindowManager.instance;
 
         public SubWindow(int windowIndex)
@@ -197,7 +147,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var gsWin = windowManager.mainWindow.gsWin;
                 _windowRect = GUI.Window(WINDOW_ID, windowRect, DrawWindow, ui.title, gsWin);
-                PluginUtils.ResetInputOnScroll(_windowRect);
+                MTEUtils.ResetInputOnScroll(_windowRect);
             }
         }
 
@@ -243,7 +193,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void OnScreenSizeChanged()
         {
-            PluginUtils.AdjustWindowPosition(ref _windowRect);
+            MTEUtils.AdjustWindowPosition(ref _windowRect);
         }
     }
 }

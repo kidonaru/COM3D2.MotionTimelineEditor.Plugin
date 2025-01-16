@@ -6,6 +6,7 @@ using MeidoPhotoStudio.Plugin;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using COM3D2.MotionTimelineEditor;
 
 namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 {
@@ -79,7 +80,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                     var attachMaidSlotNo = GetMaidSlotNo(prop.AttachPointInfo.MaidGuid);
                     var visible = prop.Visible;
 
-                    //PluginUtils.LogDebug("modelList name:{0} attachPoint:{1} attachMaidSlotNo:{2}", displayName, attachPoint, attachMaidSlotNo);
+                    //MTEUtils.LogDebug("modelList name:{0} attachPoint:{1} attachMaidSlotNo:{2}", displayName, attachPoint, attachMaidSlotNo);
 
                     var model = modelManager.CreateModelStat(
                         displayName,
@@ -258,7 +259,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 
         public override bool Init()
         {
-            PluginUtils.Log("MeidoPhotoStudioHack: 初期化中...");
+            MTEUtils.Log("MeidoPhotoStudioHack: 初期化中...");
 
             if (!base.Init())
             {
@@ -276,7 +277,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
         public override void ChangeMaid(Maid maid)
         {
             var targetMaidSlotNo = allMaids.IndexOf(maid);
-            PluginUtils.LogDebug("ChangeMaid: " + targetMaidSlotNo);
+            MTEUtils.LogDebug("ChangeMaid: " + targetMaidSlotNo);
             mps.meidoManager.ChangeMaid(targetMaidSlotNo);
         }
 
@@ -337,7 +338,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 
             if (!mps.propManager.AddFromPropInfo(propInfo))
             {
-                PluginUtils.LogError("CreateModel: モデルの追加に失敗しました" + model.name);
+                MTEUtils.LogError("CreateModel: モデルの追加に失敗しました" + model.name);
                 return;
             }
 
@@ -355,7 +356,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             var prop = model.obj as DragPointProp;
             if (prop == null)
             {
-                PluginUtils.LogError("UpdateAttachPoint: モデルが見つかりません" + model.name);
+                MTEUtils.LogError("UpdateAttachPoint: モデルが見つかりません" + model.name);
                 return;
             }
 
@@ -370,7 +371,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             var prop = model.obj as DragPointProp;
             if (prop == null)
             {
-                PluginUtils.LogError("SetModelVisible: モデルが見つかりません" + model.name);
+                MTEUtils.LogError("SetModelVisible: モデルが見つかりません" + model.name);
                 return;
             }
 
@@ -395,7 +396,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             var dragPointLight = light.obj as DragPointLight;
             if (dragPointLight == null)
             {
-                PluginUtils.LogError("DeleteLight: ライトが見つかりません" + light.name);
+                MTEUtils.LogError("DeleteLight: ライトが見つかりません" + light.name);
                 return;
             }
 
@@ -443,7 +444,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             var dragPointLight = stat.obj as DragPointLight;
             if (dragPointLight == null || stat.light == null || stat.transform == null)
             {
-                PluginUtils.LogError("ChangeLight: ライトが見つかりません" + stat.name);
+                MTEUtils.LogError("ChangeLight: ライトが見つかりません" + stat.name);
                 return;
             }
 
@@ -459,7 +460,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             var dragPointLight = stat.obj as DragPointLight;
             if (dragPointLight == null || stat.light == null || stat.transform == null)
             {
-                PluginUtils.LogError("ApplyLight: ライトが見つかりません" + stat.name);
+                MTEUtils.LogError("ApplyLight: ライトが見つかりません" + stat.name);
                 return;
             }
 
@@ -522,7 +523,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             var dragPoint = mps.GetDragPoint(activeMeido, ConvertMeidoBoneType(iKHoldType));
             if (dragPoint == null)
             {
-                PluginUtils.LogError("dragPoint is null");
+                MTEUtils.LogError("dragPoint is null");
                 return false;
             }
 

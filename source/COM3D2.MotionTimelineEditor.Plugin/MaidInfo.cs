@@ -17,7 +17,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (maid == null || maid.body0 == null || maid.body0.trsEyeL == null || maid.body0.trsEyeR == null || ikManager == null)
             {
-                PluginUtils.LogError("MaidInfo: MaidInfoの初期化に失敗しました。");
+                MTEUtils.LogError("MaidInfo: MaidInfoの初期化に失敗しました。");
                 return;
             }
 

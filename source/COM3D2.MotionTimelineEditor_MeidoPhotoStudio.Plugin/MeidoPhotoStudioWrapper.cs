@@ -4,6 +4,7 @@ using MeidoPhotoStudio.Plugin;
 using System.Collections.Generic;
 using System.Reflection;
 using System;
+using COM3D2.MotionTimelineEditor;
 
 namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 {
@@ -413,7 +414,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             var dragPoints = GetDragPoints(meido);
             if (dragPoints == null)
             {
-                PluginUtils.LogError("dragPoints is null");
+                MTEUtils.LogError("dragPoints is null");
                 return null;
             }
 
@@ -426,12 +427,12 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             {
                 GameObject gameObject = GameObject.Find("BepInEx_Manager");
                 meidoPhotoStudio = gameObject.GetComponentInChildren<MPS>(true);
-                PluginUtils.AssertNull(meidoPhotoStudio != null, "meidoPhotoStudio is null");
+                MTEUtils.AssertNull(meidoPhotoStudio != null, "meidoPhotoStudio is null");
             }
 
             if (meidoPhotoStudio == null)
             {
-                PluginUtils.LogError("MeidoPhotoStudioが見つかりませんでした");
+                MTEUtils.LogError("MeidoPhotoStudioが見つかりませんでした");
                 return false;
             }
 

@@ -48,7 +48,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (_methodSelectMaid == null)
             {
                 _methodSelectMaid = typeof(PlacementWindow).GetMethod("SetSelectMaid", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.NonPublic);
-                PluginUtils.AssertNull(_methodSelectMaid != null, "methodSelectMaid is null");
+                MTEUtils.AssertNull(_methodSelectMaid != null, "methodSelectMaid is null");
             }
 
             _methodSelectMaid.Invoke(placementWindow, new object[] { maid });
@@ -60,7 +60,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (_methodAddObject == null)
             {
                 _methodAddObject = typeof(CreateBGObjectSubWindow).GetMethod("AddObject", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.NonPublic);
-                PluginUtils.AssertNull(_methodAddObject != null, "methodAddObject is null");
+                MTEUtils.AssertNull(_methodAddObject != null, "methodAddObject is null");
             }
 
             _methodAddObject.Invoke(createBgObjectWindow, new object[] { add_bg_data, create_time });
@@ -72,7 +72,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (_methodInstantiateLight == null)
             {
                 _methodInstantiateLight = typeof(LightWindow).GetMethod("InstantiateLight", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.NonPublic);
-                PluginUtils.AssertNull(_methodInstantiateLight != null, "methodInstantiateLight is null");
+                MTEUtils.AssertNull(_methodInstantiateLight != null, "methodInstantiateLight is null");
             }
 
             return (GameObject) _methodInstantiateLight.Invoke(lightWindow, null);
@@ -83,15 +83,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.InvokeMethod;
 
             _fieldDataDic = typeof(WindowPartsBoneCheckBox).GetField("data_dic_", bindingAttr);
-            PluginUtils.AssertNull(_fieldDataDic != null, "fieldDataDic is null");
+            MTEUtils.AssertNull(_fieldDataDic != null, "fieldDataDic is null");
             if (_fieldDataDic == null) return false;
 
             _fieldBoneDic = typeof(IKManager).GetField("bone_dic_", bindingAttr);
-            PluginUtils.AssertNull(_fieldBoneDic != null, "fieldBoneDic is null");
+            MTEUtils.AssertNull(_fieldBoneDic != null, "fieldBoneDic is null");
             if (_fieldBoneDic == null) return false;
 
             _fieldIkboxVisibleDic = typeof(PoseEditWindow).GetField("ikbox_visible_dic_", bindingAttr);
-            PluginUtils.AssertNull(_fieldIkboxVisibleDic != null, "fieldIkboxVisibleDic is null");
+            MTEUtils.AssertNull(_fieldIkboxVisibleDic != null, "fieldIkboxVisibleDic is null");
             if (_fieldIkboxVisibleDic == null) return false;
 
             return true;
@@ -104,47 +104,47 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 var gameObject = GameObject.Find("PoseEditWindow");
                 poseEditWindow = gameObject.GetComponent<PoseEditWindow>();
-                PluginUtils.AssertNull(poseEditWindow != null, "poseEditWindow is null");
+                MTEUtils.AssertNull(poseEditWindow != null, "poseEditWindow is null");
                 if (poseEditWindow == null) return;
             }
 
             {
                 var gameObject = GameObject.Find("PlacementWindow");
                 placementWindow = gameObject.GetComponent<PlacementWindow>();
-                PluginUtils.AssertNull(placementWindow != null, "placementWindow is null");
+                MTEUtils.AssertNull(placementWindow != null, "placementWindow is null");
                 if (placementWindow == null) return;
             }
 
             {
                 var gameObject = GameObject.Find("MotionWindow");
                 motionWindow = gameObject.GetComponent<MotionWindow>();
-                PluginUtils.AssertNull(motionWindow != null, "motionWindow is null");
+                MTEUtils.AssertNull(motionWindow != null, "motionWindow is null");
                 if (motionWindow == null) return;
             }
             
             {
                 var gameObject = GameObject.Find("ObjectManagerWindow");
                 objectManagerWindow = gameObject.GetComponent<ObjectManagerWindow>();
-                PluginUtils.AssertNull(objectManagerWindow != null, "objectManagerWindow is null");
+                MTEUtils.AssertNull(objectManagerWindow != null, "objectManagerWindow is null");
                 if (objectManagerWindow == null) return;
             }
 
             {
                 var gameObject = GameObject.Find("LightWindow");
                 lightWindow = gameObject.GetComponent<LightWindow>();
-                PluginUtils.AssertNull(lightWindow != null, "lightWindow is null");
+                MTEUtils.AssertNull(lightWindow != null, "lightWindow is null");
                 if (lightWindow == null) return;
             }
 
             {
                 var gameObject = GameObject.Find("BGWindow");
                 bgWindow = gameObject.GetComponent<BGWindow>();
-                PluginUtils.AssertNull(bgWindow != null, "bgWindow is null");
+                MTEUtils.AssertNull(bgWindow != null, "bgWindow is null");
                 if (bgWindow == null) return;
             }
 
             photoManager = poseEditWindow.mgr;
-            PluginUtils.AssertNull(photoManager != null, "photoManager is null");
+            MTEUtils.AssertNull(photoManager != null, "photoManager is null");
             if (photoManager == null) return;
 
             foreach (var boneCheckBox in poseEditWindow.RotateCheckBoxArray)
@@ -166,20 +166,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            PluginUtils.AssertNull(bodyBoneCheckBox != null, "bodyBoneCheckBox is null");
+            MTEUtils.AssertNull(bodyBoneCheckBox != null, "bodyBoneCheckBox is null");
             if (bodyBoneCheckBox == null) return;
 
             {
                 var ikboxVisibleDic = (Dictionary<string, WFCheckBox>) _fieldIkboxVisibleDic.GetValue(poseEditWindow);
-                PluginUtils.AssertNull(ikboxVisibleDic != null, "ikboxVisibleDic is null");
+                MTEUtils.AssertNull(ikboxVisibleDic != null, "ikboxVisibleDic is null");
                 if (ikboxVisibleDic == null) return;
 
                 ikBoxVisibleRoot = ikboxVisibleDic["ik_box_visible_Root"];
-                PluginUtils.AssertNull(ikBoxVisibleRoot != null, "ikBoxVisibleRoot is null");
+                MTEUtils.AssertNull(ikBoxVisibleRoot != null, "ikBoxVisibleRoot is null");
                 if (ikBoxVisibleRoot == null) return;
 
                 ikBoxVisibleBody = ikboxVisibleDic["ik_box_visible_Body"];
-                PluginUtils.AssertNull(ikBoxVisibleBody != null, "ikBoxVisibleBody is null");
+                MTEUtils.AssertNull(ikBoxVisibleBody != null, "ikBoxVisibleBody is null");
                 if (ikBoxVisibleBody == null) return;
             }
 

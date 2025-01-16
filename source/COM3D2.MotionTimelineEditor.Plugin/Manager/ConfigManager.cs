@@ -67,13 +67,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
             }
         }
 
         public void SaveConfigXml()
         {
-            PluginUtils.Log("設定保存中...");
+            MTEUtils.Log("設定保存中...");
             try
             {
                 // サブウィンドウの情報を更新
@@ -89,7 +89,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
             }
         }
 

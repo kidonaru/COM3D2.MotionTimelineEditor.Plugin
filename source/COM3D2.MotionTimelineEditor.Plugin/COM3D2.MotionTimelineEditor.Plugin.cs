@@ -10,6 +10,25 @@ using System.Linq;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+    public class GUIOption : GUIOptionBase
+    {
+        public override float keyRepeatTimeFirst => config.keyRepeatTimeFirst;
+        public override float keyRepeatTime => config.keyRepeatTime;
+        public override bool useHSVColor
+        {
+            get => config.useHSVColor;
+            set
+            {
+                config.useHSVColor = value;
+                config.dirty = true;
+            }
+        }
+        public override Texture2D changeIcon => bundleManager.changeIcon;
+
+        private static Config config => ConfigManager.instance.config;
+        private static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
+    }
+
     [
         PluginFilter("COM3D2x64"),
         PluginName(PluginInfo.PluginFullName),
@@ -52,10 +71,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool isVisible;
 
-        private List<IManager> _managers = new List<IManager>();
-
         public static MotionTimelineEditor instance { get; private set; }
 
+        private static ManagerRegistry managerRegistry => ManagerRegistry.instance;
         private static MaidManager maidManager => MaidManager.instance;
         private static Maid maid => maidManager.maid;
         private static TimelineManager timelineManager => TimelineManager.instance;
@@ -88,7 +106,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
             }
         }
 
@@ -222,15 +240,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     mainWindow.isMultiSelect = config.GetKey(KeyBindType.MultiSelect);
 
-                    foreach (var manager in _managers)
-                    {
-                        manager.Update();
-                    }
+                    managerRegistry.Update();
                 }
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
             }
         }
 
@@ -258,22 +273,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         return;
                     }
 
-                    foreach (var manager in _managers)
-                    {
-                        manager.LateUpdate();
-                    }
+                    managerRegistry.LateUpdate();
                 }
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
             }
-        }
-
-        public void RegisterManager(IManager manager)
-        {
-            manager.Init();
-            _managers.Add(manager);
         }
 
         public void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
@@ -293,15 +299,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 BinaryLoader.ClearCache();
                 BlendShapeLoader.ClearCache();
                 ModMenuLoader.ClearCache();
+                TextureLoader.ClearCache();
 
-                foreach (var manager in _managers)
-                {
-                    manager.OnChangedSceneLevel(scene, sceneMode);
-                }
+                managerRegistry.OnChangedSceneLevel(scene, sceneMode);
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
             }
         }
 
@@ -314,14 +318,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             try
             {
-                PluginUtils.Log("初期化中...");
-                PluginUtils.LogDebug("Unity Version: " + Application.unityVersion);
+                MTEUtils.Log("初期化中...");
+                MTEUtils.LogDebug("Unity Version: " + Application.unityVersion);
 
                 configManager.Init();
 
+                GUIView.option = new GUIOption();
+
                 if (!config.pluginEnabled)
                 {
-                    PluginUtils.Log("プラグインが無効になっています");
+                    MTEUtils.Log("プラグインが無効になっています");
                     return;
                 }
 
@@ -487,40 +493,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     TransformType.Voice, TimelineManager.CreateTransform<TransformDataVoice>
                 );
 
-                RegisterManager(StudioHackManager.instance);
-                RegisterManager(MaidManager.instance);
-                RegisterManager(ModelHackManager.instance);
-                RegisterManager(PartsEditHackManager.instance);
-                RegisterManager(LightHackManager.instance);
+                managerRegistry.RegisterManager(StudioHackManager.instance);
+                managerRegistry.RegisterManager(MaidManager.instance);
+                managerRegistry.RegisterManager(ModelHackManager.instance);
+                managerRegistry.RegisterManager(PartsEditHackManager.instance);
+                managerRegistry.RegisterManager(LightHackManager.instance);
 
-                RegisterManager(StudioModelManager.instance);
-                RegisterManager(BGModelManager.instance);
-                RegisterManager(StudioLightManager.instance);
-                RegisterManager(StageLaserManager.instance);
-                RegisterManager(StageLightManager.instance);
-                RegisterManager(PsylliumManager.instance);
-                RegisterManager(MovieManager.instance);
-                RegisterManager(GridViewManager.instance);
-                RegisterManager(PostEffectManager.instance);
+                managerRegistry.RegisterManager(StudioModelManager.instance);
+                managerRegistry.RegisterManager(BGModelManager.instance);
+                managerRegistry.RegisterManager(StudioLightManager.instance);
+                managerRegistry.RegisterManager(StageLaserManager.instance);
+                managerRegistry.RegisterManager(StageLightManager.instance);
+                managerRegistry.RegisterManager(PsylliumManager.instance);
+                managerRegistry.RegisterManager(MovieManager.instance);
+                managerRegistry.RegisterManager(GridViewManager.instance);
+                managerRegistry.RegisterManager(PostEffectManager.instance);
 
-                RegisterManager(TimelineManager.instance);
-                RegisterManager(TimelineLoadManager.instance);
-                RegisterManager(TimelineHistoryManager.instance);
+                managerRegistry.RegisterManager(TimelineManager.instance);
+                managerRegistry.RegisterManager(TimelineLoadManager.instance);
+                managerRegistry.RegisterManager(TimelineHistoryManager.instance);
 
-                RegisterManager(TimelineBundleManager.instance);
-                RegisterManager(BoneMenuManager.Instance);
-                RegisterManager(WindowManager.instance);
-                RegisterManager(PhotoBGManager.instance);
+                managerRegistry.RegisterManager(TimelineBundleManager.instance);
+                managerRegistry.RegisterManager(BoneMenuManager.Instance);
+                managerRegistry.RegisterManager(WindowManager.instance);
+                managerRegistry.RegisterManager(PhotoBGManager.instance);
 
-                RegisterManager(ConfigManager.instance);
-                RegisterManager(BGMManager.instance);
-                RegisterManager(CameraManager.instance);
+                managerRegistry.RegisterManager(ConfigManager.instance);
+                managerRegistry.RegisterManager(BGMManager.instance);
+                managerRegistry.RegisterManager(CameraManager.instance);
 
                 AddGearMenu();
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
             }
         }
 
@@ -566,14 +572,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private IEnumerator SaveScreenShotInternal(string filePath, int width, int height)
         {
-            PluginUtils.UIHide();
+            MTEUtils.UIHide();
             isVisible = false;
             yield return new WaitForEndOfFrame();
             var texture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
             texture.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
             yield return new WaitForEndOfFrame();
             isVisible = true;
-            PluginUtils.UIResume();
+            MTEUtils.UIResume();
 
             texture.ResizeTexture(width, height);
             UTY.SaveImage(texture, filePath);
@@ -594,13 +600,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
+                MTEUtils.LogException(e);
             }
         }
 
         public void OnLoad()
         {
-            PluginUtils.LogDebug("MotionTimelineEditor.OnLoad");
+            MTEUtils.LogDebug("MotionTimelineEditor.OnLoad");
 
             if (studioHack == null || !studioHack.IsValid())
             {
@@ -611,22 +617,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            foreach (var manager in _managers)
-            {
-                try
-                {
-                    manager.OnLoad();
-                }
-                catch (Exception e)
-                {
-                    PluginUtils.LogException(e);
-                }
-            }
+            managerRegistry.OnLoad();
         }
 
         private void OnPluginEnable()
         {
-            PluginUtils.Log("プラグインが有効になりました");
+            MTEUtils.Log("プラグインが有効になりました");
 
             DumpAllCameraInfo();
             DumpLayerInfo();
@@ -652,51 +648,41 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private void OnPluginDisable()
         {
-            PluginUtils.Log("プラグインが無効になりました");
+            MTEUtils.Log("プラグインが無効になりました");
 
             if (studioHack == null || !studioHack.IsValid())
             {
                 return;
             }
 
-            foreach (var manager in _managers)
-            {
-                try
-                {
-                    manager.OnPluginDisable();
-                }
-                catch (Exception e)
-                {
-                    PluginUtils.LogException(e);
-                }
-            }
+            managerRegistry.OnPluginDisable();
         }
 
         [Conditional("DEBUG")]
         private void DumpAllCameraInfo()
         {
             Camera[] allCameras = Camera.allCameras;
-            PluginUtils.LogDebug("カメラの総数: " + allCameras.Length);
+            MTEUtils.LogDebug("カメラの総数: " + allCameras.Length);
 
             for (int i = 0; i < allCameras.Length; i++)
             {
                 Camera cam = allCameras[i];
-                PluginUtils.LogDebug("カメラ " + (i + 1) + ":");
-                PluginUtils.LogDebug("  名前: " + cam.name);
-                PluginUtils.LogDebug("  有効: " + cam.enabled);
-                PluginUtils.LogDebug("  平行投影: " + cam.orthographic);
-                PluginUtils.LogDebug("  平行投影サイズ: " + cam.orthographicSize);
-                PluginUtils.LogDebug("  位置: " + cam.transform.position);
-                PluginUtils.LogDebug("  回転: " + cam.transform.rotation.eulerAngles);
-                PluginUtils.LogDebug("  視野角: " + cam.fieldOfView);
-                PluginUtils.LogDebug("  ニアクリップ: " + cam.nearClipPlane);
-                PluginUtils.LogDebug("  ファークリップ: " + cam.farClipPlane);
-                PluginUtils.LogDebug("  深度: " + cam.depth);
-                PluginUtils.LogDebug("  カリングマスク: " + cam.cullingMask);
-                PluginUtils.LogDebug("  レンダリングパス: " + cam.renderingPath);
-                PluginUtils.LogDebug("  クリアフラグ: " + cam.clearFlags);
-                PluginUtils.LogDebug("  描画レイヤー: " + GetLayerNames(cam.cullingMask));
-                PluginUtils.LogDebug("  ---");
+                MTEUtils.LogDebug("カメラ " + (i + 1) + ":");
+                MTEUtils.LogDebug("  名前: " + cam.name);
+                MTEUtils.LogDebug("  有効: " + cam.enabled);
+                MTEUtils.LogDebug("  平行投影: " + cam.orthographic);
+                MTEUtils.LogDebug("  平行投影サイズ: " + cam.orthographicSize);
+                MTEUtils.LogDebug("  位置: " + cam.transform.position);
+                MTEUtils.LogDebug("  回転: " + cam.transform.rotation.eulerAngles);
+                MTEUtils.LogDebug("  視野角: " + cam.fieldOfView);
+                MTEUtils.LogDebug("  ニアクリップ: " + cam.nearClipPlane);
+                MTEUtils.LogDebug("  ファークリップ: " + cam.farClipPlane);
+                MTEUtils.LogDebug("  深度: " + cam.depth);
+                MTEUtils.LogDebug("  カリングマスク: " + cam.cullingMask);
+                MTEUtils.LogDebug("  レンダリングパス: " + cam.renderingPath);
+                MTEUtils.LogDebug("  クリアフラグ: " + cam.clearFlags);
+                MTEUtils.LogDebug("  描画レイヤー: " + GetLayerNames(cam.cullingMask));
+                MTEUtils.LogDebug("  ---");
             }
         }
 
@@ -718,22 +704,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [Conditional("DEBUG")]
         private void DumpLayerInfo()
         {
-            PluginUtils.LogDebug("レイヤー情報:");
+            MTEUtils.LogDebug("レイヤー情報:");
 
             for (int i = 0; i < 32; i++)
             {
                 string layerName = LayerMask.LayerToName(i);
                 if (!string.IsNullOrEmpty(layerName))
                 {
-                    PluginUtils.LogDebug("レイヤー " + i + ":");
-                    PluginUtils.LogDebug("  名前: " + layerName);
-                    PluginUtils.LogDebug("  ビットマスク: " + (1 << i));
+                    MTEUtils.LogDebug("レイヤー " + i + ":");
+                    MTEUtils.LogDebug("  名前: " + layerName);
+                    MTEUtils.LogDebug("  ビットマスク: " + (1 << i));
 
                     // レイヤーの衝突マトリックス情報を取得
                     string collisions = GetLayerCollisions(i);
-                    PluginUtils.LogDebug("  衝突するレイヤー: " + collisions);
+                    MTEUtils.LogDebug("  衝突するレイヤー: " + collisions);
 
-                    PluginUtils.LogDebug("  ---");
+                    MTEUtils.LogDebug("  ---");
                 }
             }
         }
@@ -756,7 +742,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [Conditional("DEBUG")]
         private void DumpDoFInfo()
         {
-            PluginUtils.LogDebug("DoF情報:");
+            MTEUtils.LogDebug("DoF情報:");
 
             if (studioHack == null || !studioHack.IsValid())
             {
@@ -766,21 +752,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var dof = studioHack.depthOfField;
             if (dof != null)
             {
-                PluginUtils.LogDebug("  有効: " + dof.enabled);
-                PluginUtils.LogDebug("  焦点距離: " + dof.focalLength);
-                PluginUtils.LogDebug("  焦点サイズ: " + dof.focalSize);
-                PluginUtils.LogDebug("  絞り値: " + dof.aperture);
-                PluginUtils.LogDebug("  ブラーサイズ: " + dof.maxBlurSize);
-                PluginUtils.LogDebug("  高解像度: " + dof.highResolution);
-                PluginUtils.LogDebug("  サンプル数: " + dof.blurSampleCount);
-                PluginUtils.LogDebug("  近距離: " + dof.nearBlur);
+                MTEUtils.LogDebug("  有効: " + dof.enabled);
+                MTEUtils.LogDebug("  焦点距離: " + dof.focalLength);
+                MTEUtils.LogDebug("  焦点サイズ: " + dof.focalSize);
+                MTEUtils.LogDebug("  絞り値: " + dof.aperture);
+                MTEUtils.LogDebug("  ブラーサイズ: " + dof.maxBlurSize);
+                MTEUtils.LogDebug("  高解像度: " + dof.highResolution);
+                MTEUtils.LogDebug("  サンプル数: " + dof.blurSampleCount);
+                MTEUtils.LogDebug("  近距離: " + dof.nearBlur);
             }
         }
 
         [Conditional("DEBUG")]
         private void DumpBGObject()
         {
-            PluginUtils.LogDebug("背景階層構造:");
+            MTEUtils.LogDebug("背景階層構造:");
             BgMgr bgMgr = GameMain.Instance.BgMgr;
             GameObject bgObject = bgMgr.BgObject;
 
@@ -794,7 +780,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private void DumpGameObject(GameObject obj, int depth)
         {
             string indent = new string(' ', depth * 2);
-            PluginUtils.LogDebug($"{indent}└─ {obj.name}");
+            MTEUtils.LogDebug($"{indent}└─ {obj.name}");
             
             foreach (Transform child in obj.transform)
             {
@@ -805,7 +791,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [Conditional("DEBUG")]
         private void DumpAllShaders()
         {
-            PluginUtils.LogDebug("使用中のシェーダー一覧:");
+            MTEUtils.LogDebug("使用中のシェーダー一覧:");
 
             // シーン内のすべてのRendererを取得
             foreach (Renderer renderer in GameObject.FindObjectsOfType<Renderer>())
@@ -814,7 +800,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     if (material != null && material.shader != null)
                     {
-                        PluginUtils.LogDebug($"  - {material.shader.name} ({renderer.name})");
+                        MTEUtils.LogDebug($"  - {material.shader.name} ({renderer.name})");
                     }
                 }
             }

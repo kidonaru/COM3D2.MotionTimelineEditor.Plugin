@@ -1,6 +1,6 @@
 using System.Reflection;
 using CM3D2.MultipleMaids.Plugin;
-using COM3D2.MotionTimelineEditor.Plugin;
+using COM3D2.MotionTimelineEditor;
 
 namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 {

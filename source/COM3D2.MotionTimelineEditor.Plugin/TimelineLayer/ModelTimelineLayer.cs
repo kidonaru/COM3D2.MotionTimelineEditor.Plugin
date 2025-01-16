@@ -279,8 +279,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
-                PluginUtils.LogError("モデルチェンジの出力に失敗しました");
+                MTEUtils.LogException(e);
+                MTEUtils.LogError("モデルチェンジの出力に失敗しました");
             }
         }
 

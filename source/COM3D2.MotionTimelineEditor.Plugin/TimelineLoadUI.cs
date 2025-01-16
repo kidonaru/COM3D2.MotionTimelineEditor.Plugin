@@ -8,16 +8,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public override string title => "タイムライン ロード";
 
-        private TimelineLoadItem selectedItem
+        private TimelineLoadItem currentDirItem
         {
-            get
-            {
-                return timelineLoadManager.selectedItem;
-            }
-            set
-            {
-                timelineLoadManager.selectedItem = value;
-            }
+            get => timelineLoadManager.selectedItem;
+            set => timelineLoadManager.selectedItem = value;
         }
 
         private static TimelineLoadManager timelineLoadManager => TimelineLoadManager.instance;
@@ -28,7 +22,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void DrawContent(GUIView view)
         {
-            var directoryName = selectedItem.path.Replace(PluginUtils.TimelineDirPath, "");
+            var directoryName = currentDirItem.path.Replace(PluginUtils.TimelineDirPath, "");
             if (directoryName.Length > 0 && directoryName[0] == Path.DirectorySeparatorChar)
             {
                 directoryName = directoryName.Substring(1);
@@ -36,18 +30,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginHorizontal();
             {
-                if (view.DrawButton("<", 20, 20, selectedItem.parent != null))
+                if (view.DrawButton("<", 20, 20, currentDirItem.parent != null))
                 {
-                    selectedItem = selectedItem.parent;
+                    currentDirItem = currentDirItem.parent as TimelineLoadItem;
                 }
 
-                view.DrawLabel(selectedItem.name, -1, 20);
+                view.DrawLabel(currentDirItem.name, -1, 20);
 
                 view.currentPos.x = WINDOW_WIDTH - 60 - 60;
 
                 if (view.DrawButton("開く", 50, 20))
                 {
-                    PluginUtils.OpenDirectory(selectedItem.path);
+                    MTEUtils.OpenDirectory(currentDirItem.path);
                 }
 
                 if (view.DrawButton("更新", 50, 20))
@@ -61,8 +55,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.AddSpace(5);
 
-            var itemList = selectedItem.children;
-            if (itemList.Count == 0)
+            if (currentDirItem.children.Count == 0)
             {
                 view.DrawLabel("タイムラインがありません", -1, 20);
             }
@@ -70,29 +63,34 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.padding = Vector2.zero;
 
-                ITileViewContent mouseOverItem = null;
+                TimelineLoadItem selectedItem = null;
+                TimelineLoadItem mouseOverItem = null;
 
-                var index = view.DrawTileView(
-                    itemList,
+                view.DrawTileView(
+                    currentDirItem,
                     -1,
                     WINDOW_HEIGHT - 20 - 20 - 10 - 20 - 10,
                     120,
                     120 * config.thumHeight / config.thumWidth + 20,
-                    2,
+                    false,
                     item =>
                     {
-                        mouseOverItem = item;
-                    });
-                if (index != -1)
-                {
-                    var item = itemList[index] as TimelineLoadItem;
-                    if (item.isDir)
+                        selectedItem = item as TimelineLoadItem;
+                    },
+                    item =>
                     {
-                        selectedItem = item;
+                        mouseOverItem = item as TimelineLoadItem;
+                    });
+
+                if (selectedItem != null)
+                {
+                    if (selectedItem.isDir)
+                    {
+                        currentDirItem = selectedItem;
                     }
                     else
                     {
-                        timelineManager.LoadTimeline(item.name, directoryName);
+                        timelineManager.LoadTimeline(selectedItem.name, directoryName);
                         timelineManager.Play();
                     }
                 }

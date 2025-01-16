@@ -130,39 +130,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             displayName = "エリア" + suffix;
         }
 
-        public static class ParallelHelper
-        {
-            public static void ForEach<T>(List<T> items, System.Action<T> body)
-            {
-                int processorCount = System.Environment.ProcessorCount;
-                var resetEvent = new ManualResetEvent(false);
-                int remaining = processorCount;
-                int itemCount = items.Count;
-
-                for (int i = 0; i < processorCount; i++)
-                {
-                    int index = i;
-                    ThreadPool.QueueUserWorkItem(state =>
-                    {
-                        for (int j = index; j < itemCount; j += processorCount)
-                        {
-                            body(items[j]);
-                        }
-
-                        if (Interlocked.Decrement(ref remaining) == 0)
-                        {
-                            resetEvent.Set();
-                        }
-                    });
-                }
-
-                resetEvent.WaitOne();
-            }
-        }
-
         public void UpdateTransform()
         {
+#if COM3D2
             ParallelHelper.ForEach(hands, hand =>
+#else
+            foreach (var hand in hands)
+#endif
             {
                 hand.PreUpdateTransform();
             });

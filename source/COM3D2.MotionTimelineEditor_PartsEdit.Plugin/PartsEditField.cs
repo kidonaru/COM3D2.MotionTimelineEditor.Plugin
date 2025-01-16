@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using COM3D2.MotionTimelineEditor;
 using COM3D2.MotionTimelineEditor.Plugin;
 
 namespace COM3D2.MotionTimelineEditor_PartsEdit.Plugin
@@ -43,7 +44,7 @@ namespace COM3D2.MotionTimelineEditor_PartsEdit.Plugin
         {
             foreach (var fileName in _assemblyFileNames)
             {
-                var assemblyPath = Path.GetFullPath(PluginUtils.CombinePaths(
+                var assemblyPath = Path.GetFullPath(MTEUtils.CombinePaths(
                     "Sybaris", "UnityInjector", fileName));
                 if (File.Exists(assemblyPath))
                 {
@@ -52,7 +53,7 @@ namespace COM3D2.MotionTimelineEditor_PartsEdit.Plugin
                 }
             }
 
-            PluginUtils.AssertNull(assembly != null, "PartsEdit.Plugin" + " not found");
+            MTEUtils.AssertNull(assembly != null, "PartsEdit.Plugin" + " not found");
             return assembly != null;
         }
 

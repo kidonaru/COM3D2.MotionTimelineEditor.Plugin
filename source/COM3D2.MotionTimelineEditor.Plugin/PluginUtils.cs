@@ -17,7 +17,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static string ConfigPath
         {
-            get => CombinePaths(UserDataPath, PluginInfo.PluginName + ".xml");
+            get => MTEUtils.CombinePaths(UserDataPath, PluginInfo.PluginName + ".xml");
         }
         
         public static string TimelineDirPath
@@ -36,19 +36,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static string DCMConfigPath
         {
-            get => CombinePaths(UserDataPath, "DanceCameraMotion");
+            get => MTEUtils.CombinePaths(UserDataPath, "DanceCameraMotion");
         }
 
         public static string ExtraModelCsvPath
         {
-            get => CombinePaths(UserDataPath, PluginInfo.PluginName + "_ExtraModel.csv");
+            get => MTEUtils.CombinePaths(UserDataPath, PluginInfo.PluginName + "_ExtraModel.csv");
+        }
+
+        public static string OfficialNameCsvPath
+        {
+            get => MTEUtils.CombinePaths(UserDataPath, PluginInfo.PluginName + "_OfficialName.csv");
+        }
+
+        public static string ModMenuCachePath
+        {
+            get => MTEUtils.CombinePaths(PluginConfigDirPath, "ModMenuCache.dat");
         }
 
         public static string PluginConfigDirPath
         {
             get
             {
-                var path = CombinePaths(UserDataPath, PluginInfo.PluginName);
+                var path = MTEUtils.CombinePaths(UserDataPath, PluginInfo.PluginName);
                 if (!Directory.Exists(path))
                 {
                     Directory.CreateDirectory(path);
@@ -63,72 +73,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get => GameMain.Instance.MainCamera.camera;
         }
 
-        [Conditional("DEBUG")]
-        public static void LogDebug(string format, params object[] args)
-        {
-            string message = string.Format(format, args);
-            UnityEngine.Debug.Log("[Debug] " + PluginInfo.PluginName + ": " + message);
-        }
-
-        public static void Log(string format, params object[] args)
-        {
-            string message = string.Format(format, args);
-            UnityEngine.Debug.Log(PluginInfo.PluginName + ": " + message);
-        }
-
-        public static void LogWarning(string format, params object[] args)
-        {
-            string message = string.Format(format, args);
-            UnityEngine.Debug.LogWarning(PluginInfo.PluginName + ": " + message);
-        }
-        
-        public static void LogError(string format, params object[] args)
-        {
-            string message = string.Format(format, args);
-#if DEBUG
-            UnityEngine.Debug.LogError(PluginInfo.PluginName + ": " + message + "\n" + Environment.StackTrace);
-#else
-            UnityEngine.Debug.LogError(PluginInfo.PluginName + ": " + message);
-#endif
-        }
-
-        public static void AssertNull(bool condition, string message)
-        {
-            if (!condition)
-            {
-                StackFrame stackFrame = new StackFrame(1, true);
-                string fileName = stackFrame.GetFileName();
-                int fileLineNumber = stackFrame.GetFileLineNumber();
-                string f_strMsg = fileName + "(" + fileLineNumber + ") \nNullPointerException：" + message;
-                LogError(f_strMsg);
-            }
-        }
-
-        public static void LogException(Exception e)
-        {
-            UnityEngine.Debug.LogException(e);
-        }
-
-        public static string CombinePaths(params string[] parts)
-        {
-            return parts.Aggregate(Path.Combine);
-        }
-
-        public static void ShowDialog(string message)
-        {
-            GameMain.Instance.SysDlg.Show(
-                message, SystemDialog.TYPE.OK, null, null);
-        }
-
-        public static void ShowConfirmDialog(string message, SystemDialog.OnClick onYes, SystemDialog.OnClick onNo)
-        {
-            GameMain.Instance.SysDlg.Show(
-                message, SystemDialog.TYPE.YES_NO, onYes, onNo);
-        }
-
         public static string GetTimelinePath(string anmName, string directoryName)
         {
-            return CombinePaths(TimelineDirPath, directoryName, anmName + ".xml");
+            return MTEUtils.CombinePaths(TimelineDirPath, directoryName, anmName + ".xml");
         }
 
         public static string ConvertThumPath(string path)
@@ -136,63 +83,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return Path.ChangeExtension(path, ".png");
         }
 
-        public static void AdjustWindowPosition(ref Rect rect)
-        {
-            if (rect.x < 0) rect.x = 0;
-            if (rect.y < 0) rect.y = 0;
-
-            if (rect.x + rect.width > Screen.width)
-            {
-                rect.x = Screen.width - rect.width;
-            }
-            if (rect.y + rect.height > Screen.height)
-            {
-                rect.y = Screen.height - rect.height;
-            }
-        }
-
-        public static void ResetInputOnScroll(Rect windowRect)
-        {
-            var mousePosition = Input.mousePosition;
-            if (mousePosition.x > windowRect.x &&
-                mousePosition.x < windowRect.x + windowRect.width &&
-                Screen.height - mousePosition.y > windowRect.y &&
-                Screen.height - mousePosition.y < windowRect.y + windowRect.height &&
-                Input.GetAxis("Mouse ScrollWheel") != 0f)
-            {
-                Input.ResetInputAxes();
-            }
-        }
-
-        public static string GetKeyName(this KeyCode key)
-        {
-            if (key == KeyCode.Return)
-            {
-                return "Enter";
-            }
-            if (key >= KeyCode.Alpha0 && key <= KeyCode.Alpha9)
-            {
-                return key.ToString().Substring(5);
-            }
-
-            return key.ToString();
-        }
-
-        public static void UIHide()
-        {
-            var methodInfo = typeof(CameraMain).GetMethod("UIHide", BindingFlags.NonPublic | BindingFlags.Instance);
-            methodInfo.Invoke(GameMain.Instance.MainCamera, null);
-        }
-
-        public static void UIResume()
-        {
-            var methodInfo = typeof(CameraMain).GetMethod("UIResume", BindingFlags.NonPublic | BindingFlags.Instance);
-            methodInfo.Invoke(GameMain.Instance.MainCamera, null);
-        }
-
         public static string GetDcmSongDirPath(string songName)
         {
-            var path = CombinePaths(DCMConfigPath, "song", songName);
+            var path = MTEUtils.CombinePaths(DCMConfigPath, "song", songName);
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
@@ -202,13 +95,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static bool IsExistsDcmSongDirPath(string songName)
         {
-            var path = CombinePaths(DCMConfigPath, "song", songName);
+            var path = MTEUtils.CombinePaths(DCMConfigPath, "song", songName);
             return Directory.Exists(path);
         }
 
         public static string GetDcmSongListDirPath()
         {
-            var path = CombinePaths(DCMConfigPath, "songList");
+            var path = MTEUtils.CombinePaths(DCMConfigPath, "songList");
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
@@ -218,50 +111,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static string GetDcmSongFilePath(string songName, string fileName)
         {
-            return CombinePaths(GetDcmSongDirPath(songName), fileName);
+            return MTEUtils.CombinePaths(GetDcmSongDirPath(songName), fileName);
         }
         
         public static string GetDcmSongListFilePath(string songName)
         {
-            return CombinePaths(GetDcmSongListDirPath(), songName + ".xml");
-        }
-
-        public static void ExecuteNextFrame(Action action)
-        {
-            GameMain.Instance.StartCoroutine(ExecuteNextFrameInternal(action));
-        }
-
-        public static IEnumerator ExecuteNextFrameInternal(Action action)
-        {
-            yield return null;
-            if (action != null)
-            {
-                action();
-            }
+            return MTEUtils.CombinePaths(GetDcmSongListDirPath(), songName + ".xml");
         }
 
         public static string GetVoiceInfoCsvPath(Personality personality)
         {
-            return CombinePaths(PluginConfigDirPath, "Voice_" + personality.ToString() + ".csv");
-        }
-
-        public static void OpenDirectory(string path)
-        {
-            path = Path.GetFullPath(path);
-
-            LogDebug("OpenDirectory: {0}", path);
-
-            if (!string.IsNullOrEmpty(path))
-            {
-                if (Directory.Exists(path))
-                {
-                    Process.Start("explorer.exe", path);
-                }
-                else
-                {
-                    LogWarning("指定されたディレクトリが存在しません: {0}", path);
-                }
-            }
+            return MTEUtils.CombinePaths(PluginConfigDirPath, "Voice_" + personality.ToString() + ".csv");
         }
 
         private static readonly Regex _regexGroup = new Regex(@"\(\d+\)$", RegexOptions.Compiled);

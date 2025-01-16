@@ -28,7 +28,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var menu = ModMenuLoader.Load(model.info.fileName);
-            if (menu == null)
+            if (menu == null || string.IsNullOrEmpty(menu.modelFileName))
             {
                 return null;
             }
@@ -88,7 +88,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (!(reader.ReadString() == "CM3D2_MESH"))
                 {
-                    PluginUtils.LogError(modelFileName + " is not a model file");
+                    MTEUtils.LogError(modelFileName + " is not a model file");
                 }
                 else
                 {
@@ -179,7 +179,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     }
                     catch (Exception ex)
                     {
-                        PluginUtils.LogError(string.Concat(new string[]
+                        MTEUtils.LogError(string.Concat(new string[]
                         {
                             "Could not load mesh for '",
                             modelFileName,

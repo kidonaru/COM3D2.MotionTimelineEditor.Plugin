@@ -78,7 +78,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var maid = this.maid;
             if (maid == null)
             {
-                PluginUtils.LogError("メイドが配置されていません");
+                MTEUtils.LogError("メイドが配置されていません");
                 return;
             }
 
@@ -161,8 +161,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             catch (Exception e)
             {
-                PluginUtils.LogException(e);
-                PluginUtils.LogError("メイドボイスの出力に失敗しました");
+                MTEUtils.LogException(e);
+                MTEUtils.LogError("メイドボイスの出力に失敗しました");
             }
         }
 
@@ -253,23 +253,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (view.DrawButton("ボイス一覧出力", 120, 20))
                 {
-                    PluginUtils.ShowConfirmDialog("ボイス一覧を出力しますか？\n※出力に数時間かかることがあります", () =>
+                    MTEUtils.ShowConfirmDialog("ボイス一覧を出力しますか？\n※出力に数時間かかることがあります", () =>
                     {
                         GameMain.Instance.SysDlg.Close();
 
-                        PluginUtils.Log("スクリプト一覧取得中...");
+                        MTEUtils.Log("スクリプト一覧取得中...");
                         string[] array = GetFileListAtExtension(".ks");
                         //string[] array = new string[] { "yotogi\\24220_【カラオケ】ハーレム後背位\\a1\\a1_sya_07620a.ks" };
                         ScriptLoader.OutputVoiceInfo(array);
 
-                        PluginUtils.ShowDialog("ボイス一覧の出力が完了しました");
+                        MTEUtils.ShowDialog("ボイス一覧の出力が完了しました");
                     }, null);
                 }
 
                 var enabled = Directory.Exists(PluginUtils.PluginConfigDirPath);
                 if (view.DrawButton("出力先を開く", 120, 20, enabled))
                 {
-                    PluginUtils.OpenDirectory(PluginUtils.PluginConfigDirPath);
+                    MTEUtils.OpenDirectory(PluginUtils.PluginConfigDirPath);
                 }
             }
             view.EndLayout();

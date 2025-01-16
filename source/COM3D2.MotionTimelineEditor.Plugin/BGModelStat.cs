@@ -49,7 +49,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (sourceObj == null)
             {
-                PluginUtils.LogDebug($"背景モデルが見つかりません: {sourceName}");
+                MTEUtils.LogDebug($"背景モデルが見つかりません: {sourceName}");
                 return;
             }
         }
