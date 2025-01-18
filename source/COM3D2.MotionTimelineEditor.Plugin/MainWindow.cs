@@ -12,13 +12,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         OutputDCM,
     }
 
-    public interface IWindow
-    {
-        int windowIndex { get; set; }
-        bool isShowWnd { get; set; }
-        Rect windowRect { get; set; }
-    }
-
     public class MainWindow : IWindow
     {
         public readonly static int WINDOW_ID = 615814;

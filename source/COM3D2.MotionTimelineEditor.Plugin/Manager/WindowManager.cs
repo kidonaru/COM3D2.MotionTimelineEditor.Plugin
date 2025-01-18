@@ -3,6 +3,13 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+    public interface IWindow
+    {
+        int windowIndex { get; set; }
+        bool isShowWnd { get; set; }
+        Rect windowRect { get; set; }
+    }
+
     public class WindowManager : ManagerBase
     {
         private MainWindow _mainWindow = null;
