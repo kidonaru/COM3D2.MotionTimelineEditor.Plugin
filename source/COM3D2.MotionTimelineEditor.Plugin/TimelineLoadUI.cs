@@ -72,7 +72,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     WINDOW_HEIGHT - 20 - 20 - 10 - 20 - 10,
                     120,
                     120 * config.thumHeight / config.thumWidth + 20,
-                    false,
                     item =>
                     {
                         selectedItem = item as TimelineLoadItem;

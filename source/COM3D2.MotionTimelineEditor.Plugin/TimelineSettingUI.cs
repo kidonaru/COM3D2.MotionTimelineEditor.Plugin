@@ -507,7 +507,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 onChanged = value =>
                 {
                     config.menuWidth = (int) value;
-                    mainWindow.UpdateTexture();
+                    mainWindow.requestUpdateTexture = true;
                     config.dirty = true;
                 },
             });
@@ -525,7 +525,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 onChanged = value =>
                 {
                     config.windowWidth = (int) value;
-                    mainWindow.UpdateTexture();
+                    mainWindow.requestUpdateTexture = true;
                     config.dirty = true;
                 },
             });
@@ -543,7 +543,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 onChanged = value =>
                 {
                     config.windowHeight = (int) value;
-                    mainWindow.UpdateTexture();
+                    mainWindow.requestUpdateTexture = true;
                     config.dirty = true;
                 },
             });

@@ -52,6 +52,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void Update()
         {
+            mainWindow.Update();
+
             var removeWindows = new List<SubWindow>();
 
             foreach (var subWindow in subWindows)
@@ -90,6 +92,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _screenWidth = Screen.width;
                 _screenHeight = Screen.height;
             }
+        }
+
+        public override void OnLoad()
+        {
+            mainWindow.OnLoad();
         }
 
         public void OnGUI()

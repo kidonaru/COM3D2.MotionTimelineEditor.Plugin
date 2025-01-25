@@ -103,6 +103,8 @@
     <Compile Include="MTEUtils\GUIComboBox.cs" />
     <Compile Include="MTEUtils\GUIView.cs" />
     <Compile Include="MTEUtils\KeyBind.cs" />
+    <Compile Include="MTEUtils\MaidPartType.cs" />
+    <Compile Include="MTEUtils\MaidPartUtils.cs" />
     <Compile Include="MTEUtils\MainThreadDispatcher.cs" />
     <Compile Include="MTEUtils\ManagerRegistry.cs" />
     <Compile Include="MTEUtils\ModMenuLoader.cs" />
