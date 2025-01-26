@@ -39,7 +39,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         void Update();
         void LateUpdate();
         bool IsValidData();
-        void OnEndPoseEdit();
+        void OnPoseEditEnd();
         void OnPluginDisable();
         void OnMaidChanged(Maid maid);
         void OnCopyModel(StudioModelStat sourceModel, StudioModelStat newModel);

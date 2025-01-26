@@ -144,9 +144,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 t);
         }
 
-        public override void OnEndPoseEdit()
+        public override void OnPoseEditEnd()
         {
-            base.OnEndPoseEdit();
+            base.OnPoseEditEnd();
             ApplyPlayData();
         }
 

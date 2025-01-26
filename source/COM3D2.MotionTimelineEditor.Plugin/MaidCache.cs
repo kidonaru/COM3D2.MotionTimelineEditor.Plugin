@@ -1015,7 +1015,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             onAnmChanged?.Invoke(slotNo, anmName);
         }
 
-        public void OnEditPoseUpdated()
+        public void OnPoseEditUpdated()
         {
             foreach (var ikHoldEntity in ikHoldEntities.Values)
             {

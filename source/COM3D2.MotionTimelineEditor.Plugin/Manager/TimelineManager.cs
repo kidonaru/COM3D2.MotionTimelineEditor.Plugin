@@ -37,7 +37,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static event UnityAction onPlay;
         public static event UnityAction onStop;
         public static event UnityAction onRefresh;
-        public static event UnityAction onEditPoseUpdated;
+        public static event UnityAction onPoseEditUpdated;
         public static event UnityAction onAnmSpeedChanged;
         public static event UnityAction onSeekCurrentFrame;
 
@@ -169,11 +169,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 if (isPoseEditing)
                 {
-                    OnStartPoseEdit();
+                    OnPoseEditStart();
                 }
                 else
                 {
-                    OnEndPoseEdit();
+                    OnPoseEditEnd();
                 }
                 isPrevPoseEditing = isPoseEditing;
             }
@@ -185,7 +185,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (initialEditFrame != null && initialEditFrame.frameNo != currentFrameNo)
             {
-                OnEditPoseUpdated();
+                OnPoseEditUpdated();
             }
 
             if (requestedHistoryDesc.Length > 0 && !Input.GetMouseButton(0))
@@ -869,14 +869,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             bool isPoseEditing = studioHackManager.isPoseEditing;
             if (isPoseEditing)
             {
-                OnEndPoseEdit();
+                OnPoseEditEnd();
             }
 
             ApplyCurrentFrame(false);
 
             if (isPoseEditing)
             {
-                OnEditPoseUpdated();
+                OnPoseEditUpdated();
             }
 
             if (onSeekCurrentFrame != null)
@@ -902,7 +902,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (initialEditFrame != null)
             {
-                OnEditPoseUpdated();
+                OnPoseEditUpdated();
             }
         }
 
@@ -1427,7 +1427,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             bool isPoseEditing = studioHackManager.isPoseEditing;
             if (isPoseEditing)
             {
-                OnEndPoseEdit();
+                OnPoseEditEnd();
             }
 
             currentLayerIndex = layers.IndexOf(layer);
@@ -1435,7 +1435,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (isPoseEditing)
             {
-                OnStartPoseEdit();
+                OnPoseEditStart();
             }
         }
         
@@ -1491,20 +1491,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyCurrentFrame(false);
             studioHack.isMotionPlaying = true;
 
-            if (onPlay != null)
-            {
-                onPlay();
-            }
+            onPlay?.Invoke();
         }
 
         public void Stop()
         {
             studioHack.isMotionPlaying = false;
 
-            if (onStop != null)
-            {
-                onStop();
-            }
+            onStop?.Invoke();
         }
 
         private string requestedHistoryDesc = "";
@@ -1704,9 +1698,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public void OnEditPoseUpdated()
+        public void OnPoseEditUpdated()
         {
-            OnEndPoseEdit();
+            OnPoseEditEnd();
 
             var frame = currentLayer.CreateFrame(currentFrameNo);
             currentLayer.UpdateFrame(frame);
@@ -1721,16 +1715,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 //    maid.name, initialEditPosition, initialEditRotation);
             }
 
-            onEditPoseUpdated?.Invoke();
+            onPoseEditUpdated?.Invoke();
         }
 
-        private void OnStartPoseEdit()
+        private void OnPoseEditStart()
         {
             ApplyCurrentFrame(false);
-            OnEditPoseUpdated();
+            OnPoseEditUpdated();
         }
 
-        private void OnEndPoseEdit()
+        private void OnPoseEditEnd()
         {
             if (initialEditFrame != null)
             {
@@ -1744,7 +1738,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             foreach (var layer in layers)
             {
-                layer.OnEndPoseEdit();
+                layer.OnPoseEditEnd();
             }
         }
 

@@ -167,9 +167,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     isMotionPlaying = false;
                 }
 
+                var savedUseMuneKeyL = _useMuneKeyL;
+                var savedUseMuneKeyR = _useMuneKeyR;
+
                 studio.poseEditWindow.CheckbtnUse.check = value;
                 studio.poseEditWindow.OnClickUseCheckRun(value);
                 maidStoreData["use"] = value.ToString();
+
+                useMuneKeyL = savedUseMuneKeyL;
+                useMuneKeyR = savedUseMuneKeyR;
             }
         }
 
@@ -231,6 +237,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     studio.bodyBoneCheckBox.CheckBoxMuneRPhysics.check = value;
                     studio.bodyBoneCheckBox.OnClickCheckBoxMunePhysics(studio.bodyBoneCheckBox.CheckBoxMuneRPhysics);
                 }
+            }
+        }
+
+        private bool _useMuneKeyL
+        {
+            get
+            {
+                if (selectedMaid != null)
+                {
+                    return !selectedMaid.body0.jbMuneL.enabled;
+                }
+                return false;
+            }
+        }
+
+        private bool _useMuneKeyR
+        {
+            get
+            {
+                if (selectedMaid != null)
+                {
+                    return !selectedMaid.body0.jbMuneR.enabled;
+                }
+                return false;
             }
         }
 

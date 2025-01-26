@@ -133,7 +133,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private MaidManager()
         {
             TimelineManager.onRefresh += OnRefresh;
-            TimelineManager.onEditPoseUpdated += OnEditPoseUpdated;
+            TimelineManager.onPoseEditUpdated += OnPoseEditUpdated;
         }
 
         public Maid GetMaid(int slotNo)
@@ -372,11 +372,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             PreUpdate();
         }
 
-        private void OnEditPoseUpdated()
+        private void OnPoseEditUpdated()
         {
             foreach (var cache in maidCaches)
             {
-                cache.OnEditPoseUpdated();
+                cache.OnPoseEditUpdated();
             }
         }
     }
