@@ -134,12 +134,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
 #if COM3D2
             ParallelHelper.ForEach(hands, hand =>
-#else
-            foreach (var hand in hands)
-#endif
             {
                 hand.PreUpdateTransform();
             });
+#else
+            foreach (var hand in hands)
+            {
+                hand.PreUpdateTransform();
+            }
+#endif
 
             foreach (var hand in hands)
             {
