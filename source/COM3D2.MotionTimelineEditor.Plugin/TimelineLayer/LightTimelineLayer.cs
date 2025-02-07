@@ -143,7 +143,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start as TransformDataLight;
             var end = motion.end as TransformDataLight;
 
-            float easingTime = CalcEasingValue(t, start.easing);
+            float easingTime = CalcEasingValue(t, motion.easing);
             var updated = false;
 
             if (start.position != end.position)

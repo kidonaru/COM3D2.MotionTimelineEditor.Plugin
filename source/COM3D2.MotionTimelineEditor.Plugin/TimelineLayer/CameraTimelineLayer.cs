@@ -117,7 +117,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             else
             {
-                float easing = CalcEasingValue(t, start.easing);
+                float easing = CalcEasingValue(t, motion.easing);
                 position = Vector3.Lerp(start.position, end.position, easing);
                 eulerAngles = Vector3.Lerp(start.eulerAngles, end.eulerAngles, easing);
                 distance = Mathf.Lerp(start.scale.x, end.scale.x, easing);

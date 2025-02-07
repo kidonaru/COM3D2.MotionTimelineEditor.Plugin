@@ -50,7 +50,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             };
         }
 
-        public override void Update()
+        public override void PreUpdate()
         {
             mainWindow.Update();
 
@@ -94,9 +94,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public override void Update()
+        {
+        }
+
         public override void OnLoad()
         {
             mainWindow.OnLoad();
+
+            foreach (var subWindow in subWindows)
+            {
+                subWindow.OnLoad();
+            }
         }
 
         public void OnGUI()

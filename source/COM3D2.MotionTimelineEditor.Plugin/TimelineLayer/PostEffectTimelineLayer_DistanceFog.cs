@@ -12,7 +12,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start as TransformDataDistanceFog;
             var end = motion.end as TransformDataDistanceFog;
 
-            float easingTime = CalcEasingValue(t, start.easing);
+            float easingTime = CalcEasingValue(t, motion.easing);
             var distanceFog = DistanceFogData.Lerp(start.distanceFog, end.distanceFog, easingTime);
 
             var index = start.index;

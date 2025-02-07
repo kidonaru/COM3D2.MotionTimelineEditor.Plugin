@@ -28,18 +28,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public CreateBGObjectSubWindow createBgObjectWindow
         {
-            get
-            {
-                return objectManagerWindow.createBgObjectWindow;
-            }
+            get => objectManagerWindow.createBgObjectWindow;
         }
 
         public WindowPartsDirectionalLight directionalLightWindow
         {
-            get
-            {
-                return lightWindow.DirectionalLightWindow;
-            }
+            get => lightWindow.DirectionalLightWindow;
         }
 
         private MethodInfo _methodSelectMaid = null;

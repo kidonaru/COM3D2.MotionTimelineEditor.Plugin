@@ -12,7 +12,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start as TransformDataDepthOfField;
             var end = motion.end as TransformDataDepthOfField;
 
-            float easingTime = CalcEasingValue(t, start.easing);
+            float easingTime = CalcEasingValue(t, motion.easing);
             var depthOfField = DepthOfFieldData.Lerp(start.depthOfField, end.depthOfField, easingTime);
 
             postEffectManager.ApplyDepthOfField(depthOfField);

@@ -12,7 +12,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start as TransformDataRimlight;
             var end = motion.end as TransformDataRimlight;
 
-            float easingTime = CalcEasingValue(t, start.easing);
+            float easingTime = CalcEasingValue(t, motion.easing);
             var rimlight = RimlightData.Lerp(start.rimlight, end.rimlight, easingTime);
 
             var index = start.index;

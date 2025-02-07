@@ -12,7 +12,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start as TransformDataParaffin;
             var end = motion.end as TransformDataParaffin;
 
-            float easingTime = CalcEasingValue(t, start.easing);
+            float easingTime = CalcEasingValue(t, motion.easing);
             var paraffin = ColorParaffinData.Lerp(start.paraffin, end.paraffin, easingTime);
 
             var index = start.index;

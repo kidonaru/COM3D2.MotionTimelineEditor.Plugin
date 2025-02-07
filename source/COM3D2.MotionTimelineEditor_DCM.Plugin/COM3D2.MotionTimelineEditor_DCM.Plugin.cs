@@ -62,10 +62,5 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             managerRegistry.RegisterManager(MTETextManager.instance);
         }
-
-        public static float CalcEasingValue(float t, int easing)
-        {
-            return TimelineMotionEasing.MotionEasing(t, (EasingType) easing);
-        }
     }
 }

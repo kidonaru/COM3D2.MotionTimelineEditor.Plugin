@@ -167,6 +167,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("SingleFrameType")]
         public SingleFrameType singleFrameType = SingleFrameType.Delay;
 
+        [XmlElement("IsEasingAfterFrame")]
+        public bool isEasingAppliedToNextKeyframe = false;
+
         [XmlElement("IsTangentCamera")]
         public bool isTangentCamera = false;
 

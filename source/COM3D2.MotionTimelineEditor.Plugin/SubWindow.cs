@@ -130,6 +130,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             UpdatePosition();
         }
 
+        public void OnLoad()
+        {
+            MTEUtils.AdjustWindowPosition(ref _windowRect);
+        }
+
         public void SetSubWindowType(SubWindowType type)
         {
             subWindowType = type;

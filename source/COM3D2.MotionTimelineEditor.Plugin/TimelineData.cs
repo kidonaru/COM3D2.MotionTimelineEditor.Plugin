@@ -391,6 +391,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public SingleFrameType singleFrameType = SingleFrameType.Delay;
+        public bool isEasingAppliedToNextKeyframe = false;
 
         public bool isTangentCamera = false;
         public bool isTangentLight = false;
@@ -846,6 +847,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             startFadeTime = xml.startFadeTime;
             endFadeTime = xml.endFadeTime;
             singleFrameType = xml.singleFrameType;
+            isEasingAppliedToNextKeyframe = xml.isEasingAppliedToNextKeyframe;
             isTangentCamera = xml.isTangentCamera;
             isTangentLight = xml.isTangentLight;
             isTangentMove = xml.isTangentMove;
@@ -997,6 +999,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.startFadeTime = startFadeTime;
             xml.endFadeTime = endFadeTime;
             xml.singleFrameType = singleFrameType;
+            xml.isEasingAppliedToNextKeyframe = isEasingAppliedToNextKeyframe;
             xml.isTangentCamera = isTangentCamera;
             xml.isTangentLight = isTangentLight;
             xml.isTangentMove = isTangentMove;

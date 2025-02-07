@@ -70,6 +70,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public bool isVisible;
+        public bool isScenePhotoMode;
 
         public static MotionTimelineEditor instance { get; private set; }
 
@@ -120,6 +121,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 studioHackManager.PreUpdate();
+                windowManager.PreUpdate();
 
                 if (studioHack == null)
                 {
@@ -295,6 +297,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     this.isEnable = false;
                 }
+
+                isScenePhotoMode = scene.name == "ScenePhotoMode";
 
                 BinaryLoader.ClearCache();
                 BlendShapeLoader.ClearCache();

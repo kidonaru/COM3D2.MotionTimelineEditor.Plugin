@@ -132,7 +132,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var start = motion.start as TransformDataEyes;
                 var end = motion.end as TransformDataEyes;
 
-                float easingValue = CalcEasingValue(t, start.easing);
+                float easingValue = CalcEasingValue(t, motion.easing);
                 float horizon = Mathf.Lerp(start.horizon, end.horizon, easingValue);
                 float vertical = Mathf.Lerp(start.vertical, end.vertical, easingValue);
 

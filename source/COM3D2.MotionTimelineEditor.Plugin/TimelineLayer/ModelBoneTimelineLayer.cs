@@ -101,7 +101,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start;
             var end = motion.end;
 
-            float easingTime = CalcEasingValue(t, start.easing);
+            float easingTime = CalcEasingValue(t, motion.easing);
             transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
             transform.localRotation = Quaternion.Euler(Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime));
             transform.localScale = Vector3.Lerp(start.scale, end.scale, easingTime);

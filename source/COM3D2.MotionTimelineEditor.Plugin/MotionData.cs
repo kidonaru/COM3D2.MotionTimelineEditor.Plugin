@@ -37,6 +37,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public string name => start.name;
         public int frameNo => stFrame;
+        public int easing
+        {
+            get
+            {
+                if (timeline?.isEasingAppliedToNextKeyframe ?? false)
+                {
+                    return start.easing;
+                }
+
+                return end.easing;
+            }
+        }
+
+        private static TimelineData timeline => TimelineManager.instance.timeline;
 
         public MotionData(BoneData start, BoneData end)
         {

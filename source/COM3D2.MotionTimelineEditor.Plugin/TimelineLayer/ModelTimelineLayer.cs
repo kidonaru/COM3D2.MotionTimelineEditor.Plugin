@@ -106,7 +106,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start;
             var end = motion.end;
 
-            float easingTime = CalcEasingValue(t, start.easing);
+            float easingTime = CalcEasingValue(t, motion.easing);
 
             if (start.position != end.position)
             {

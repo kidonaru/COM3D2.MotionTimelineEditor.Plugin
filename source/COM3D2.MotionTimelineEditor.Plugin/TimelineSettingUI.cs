@@ -184,9 +184,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
-            view.DrawToggle("ループアニメーション", timeline.isLoopAnm, 200, 20, newValue =>
+            view.DrawToggle("ループアニメーション", timeline.isLoopAnm, -1, 20, newValue =>
             {
                 timeline.isLoopAnm = newValue;
+                timelineManager.ApplyCurrentFrame(true);
+            });
+
+            view.DrawToggle("イージングを次のキーフレームに適用", timeline.isEasingAppliedToNextKeyframe, -1, 20, newValue =>
+            {
+                timeline.isEasingAppliedToNextKeyframe = newValue;
                 timelineManager.ApplyCurrentFrame(true);
             });
 

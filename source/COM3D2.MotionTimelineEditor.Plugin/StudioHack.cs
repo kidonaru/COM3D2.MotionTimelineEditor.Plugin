@@ -581,8 +581,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void SetBackgroundVisible(bool visible)
         {
-            studio.bgWindow.CheckSolidColor.check = !visible;
-            studio.bgWindow.OnClickCheckSolidColorCheckBox(studio.bgWindow.CheckSolidColor);
+            var bgWindow = studio.bgWindow;
+            if (bgWindow != null)
+            {
+                bgWindow.CheckSolidColor.check = !visible;
+                bgWindow.OnClickCheckSolidColorCheckBox(bgWindow.CheckSolidColor);
+            }
         }
 
         public override void OnMotionUpdated(Maid maid)
