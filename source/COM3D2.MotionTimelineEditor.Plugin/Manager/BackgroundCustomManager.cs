@@ -68,6 +68,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         private BackgroundCustomWrapper _wrapper = null;
+        private StudioExBackgroundCorrectorManagerWrapper _backgroundCorrectorWrapper = null;
         private Dictionary<string, PartsData> _partsDataMap = null;
         private Dictionary<string, ManageObjectData> _manageObjectDataMap = null;
         private ObjectManagerWindow _objectManagerWindow = null;
@@ -96,6 +97,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             _wrapper = new BackgroundCustomWrapper();
             _wrapper.Init();
+
+            _backgroundCorrectorWrapper = new StudioExBackgroundCorrectorManagerWrapper();
+            _backgroundCorrectorWrapper.Init();
         }
 
         public override void OnLoad()
@@ -109,6 +113,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
             _objectManagerWindow = null;
+
+            if (scene.name == "ScenePhotoMode")
+            {
+                _backgroundCorrectorWrapper.flgDoUpdateObjectIndexTable = true;
+            }
         }
 
         public bool IsValid()
@@ -299,7 +308,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _objectManagerWindow.createBgObjectWindow.Initizalize(_objectManagerWindow);
         }
 
-        public static void AddManageObjectData(string category_, string menu_, string name_, long id_)
+        public void AddManageObjectData(string category_, string menu_, string name_, long id_)
         {
             if (!PhotoBGObjectData.category_list.ContainsKey(category_))
             {
@@ -321,6 +330,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             data.name = name_;
             PhotoBGObjectData.category_list[category_].Add(data);
             PhotoBGObjectData.data.Add(data);
+
+            _backgroundCorrectorWrapper.flgDoUpdateObjectIndexTable = true;
 
             modelManager.RegisterPhotoBGObject(data);
         }
