@@ -198,6 +198,12 @@ PngPlacementプラグインでPNG画像のアニメ制御が可能です。
   - https://ux.getuploader.com/com3d2_mod_kyouyu/download/123
 
 
+BackgroundCustomプラグインでスタジオモードでのMod配置が可能になります。
+
+- **BackgroundCustom1.1.1**
+  - https://ux.getuploader.com/galleBlizzg/download/37
+
+
 ## タイムライン制作の流れ
 
 
@@ -1179,7 +1185,7 @@ DCMで再生するときは処理が干渉することがあるので、MTEを�
 
 - スタジオモードでモデルを配置するときに、BackgroundCustomに自動で登録する機能追加
   - 主にModItemExplorerで配置するときに自動で登録されます
-  - カテゴリは"MotionTimelineEditor"で作成されます
+  - カテゴリは"MotionTimelineEditor"で登録されます
 - スタジオモードで作成したタイムラインを複数メイド/MeidoPhotoStudioでロードしたときのライト/モデルの表示不具合修正
   - 複数メイドでライトを反映する場合は、一度環境タブを開く必要があります
 - モデルのアタッチ設定が保存されないことがあるバグの修正
