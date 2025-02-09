@@ -642,8 +642,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             OnLoad();
-
-            DumpDebugInfo();
         }
 
         private void OnPluginDisable()
@@ -658,41 +656,41 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             managerRegistry.OnPluginDisable();
         }
 
-        [Conditional("DEBUG")]
-        private void DumpDebugInfo()
+        public void DumpDebugInfo()
         {
-            //DumpAllCameraInfo();
-            //DumpLayerInfo();
-            //DumpBGObject();
-            //DumpAllShaders();
-            //DumpDoFInfo();
+            DumpAllCameraInfo();
+            DumpLayerInfo();
+            DumpBGObject();
+            DumpSceneObject();
+            DumpAllShaders();
+            DumpDoFInfo();
+            DumpLightInfo();
         }
 
-        [Conditional("DEBUG")]
         private void DumpAllCameraInfo()
         {
             Camera[] allCameras = Camera.allCameras;
-            MTEUtils.LogDebug("カメラの総数: " + allCameras.Length);
+            MTEUtils.Log($"カメラ情報 ({allCameras.Length}):");
 
             for (int i = 0; i < allCameras.Length; i++)
             {
                 Camera cam = allCameras[i];
-                MTEUtils.LogDebug("カメラ " + (i + 1) + ":");
-                MTEUtils.LogDebug("  名前: " + cam.name);
-                MTEUtils.LogDebug("  有効: " + cam.enabled);
-                MTEUtils.LogDebug("  平行投影: " + cam.orthographic);
-                MTEUtils.LogDebug("  平行投影サイズ: " + cam.orthographicSize);
-                MTEUtils.LogDebug("  位置: " + cam.transform.position);
-                MTEUtils.LogDebug("  回転: " + cam.transform.rotation.eulerAngles);
-                MTEUtils.LogDebug("  視野角: " + cam.fieldOfView);
-                MTEUtils.LogDebug("  ニアクリップ: " + cam.nearClipPlane);
-                MTEUtils.LogDebug("  ファークリップ: " + cam.farClipPlane);
-                MTEUtils.LogDebug("  深度: " + cam.depth);
-                MTEUtils.LogDebug("  カリングマスク: " + cam.cullingMask);
-                MTEUtils.LogDebug("  レンダリングパス: " + cam.renderingPath);
-                MTEUtils.LogDebug("  クリアフラグ: " + cam.clearFlags);
-                MTEUtils.LogDebug("  描画レイヤー: " + GetLayerNames(cam.cullingMask));
-                MTEUtils.LogDebug("  ---");
+                MTEUtils.Log("カメラ " + (i + 1) + ":");
+                MTEUtils.Log("  名前: " + cam.name);
+                MTEUtils.Log("  有効: " + cam.enabled);
+                MTEUtils.Log("  平行投影: " + cam.orthographic);
+                MTEUtils.Log("  平行投影サイズ: " + cam.orthographicSize);
+                MTEUtils.Log("  位置: " + cam.transform.position);
+                MTEUtils.Log("  回転: " + cam.transform.rotation.eulerAngles);
+                MTEUtils.Log("  視野角: " + cam.fieldOfView);
+                MTEUtils.Log("  ニアクリップ: " + cam.nearClipPlane);
+                MTEUtils.Log("  ファークリップ: " + cam.farClipPlane);
+                MTEUtils.Log("  深度: " + cam.depth);
+                MTEUtils.Log("  カリングマスク: " + cam.cullingMask);
+                MTEUtils.Log("  レンダリングパス: " + cam.renderingPath);
+                MTEUtils.Log("  クリアフラグ: " + cam.clearFlags);
+                MTEUtils.Log("  描画レイヤー: " + GetLayerNames(cam.cullingMask));
+                MTEUtils.Log("  ---");
             }
         }
 
@@ -711,25 +709,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return sb.ToString();
         }
 
-        [Conditional("DEBUG")]
         private void DumpLayerInfo()
         {
-            MTEUtils.LogDebug("レイヤー情報:");
+            MTEUtils.Log("レイヤー情報:");
 
             for (int i = 0; i < 32; i++)
             {
                 string layerName = LayerMask.LayerToName(i);
                 if (!string.IsNullOrEmpty(layerName))
                 {
-                    MTEUtils.LogDebug("レイヤー " + i + ":");
-                    MTEUtils.LogDebug("  名前: " + layerName);
-                    MTEUtils.LogDebug("  ビットマスク: " + (1 << i));
+                    MTEUtils.Log("レイヤー " + i + ":");
+                    MTEUtils.Log("  名前: " + layerName);
+                    MTEUtils.Log("  ビットマスク: " + (1 << i));
 
                     // レイヤーの衝突マトリックス情報を取得
                     string collisions = GetLayerCollisions(i);
-                    MTEUtils.LogDebug("  衝突するレイヤー: " + collisions);
+                    MTEUtils.Log("  衝突するレイヤー: " + collisions);
 
-                    MTEUtils.LogDebug("  ---");
+                    MTEUtils.Log("  ---");
                 }
             }
         }
@@ -749,10 +746,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return sb.ToString();
         }
 
-        [Conditional("DEBUG")]
         private void DumpDoFInfo()
         {
-            MTEUtils.LogDebug("DoF情報:");
+            MTEUtils.Log("DoF情報:");
 
             if (studioHack == null || !studioHack.IsValid())
             {
@@ -762,21 +758,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var dof = studioHack.depthOfField;
             if (dof != null)
             {
-                MTEUtils.LogDebug("  有効: " + dof.enabled);
-                MTEUtils.LogDebug("  焦点距離: " + dof.focalLength);
-                MTEUtils.LogDebug("  焦点サイズ: " + dof.focalSize);
-                MTEUtils.LogDebug("  絞り値: " + dof.aperture);
-                MTEUtils.LogDebug("  ブラーサイズ: " + dof.maxBlurSize);
-                MTEUtils.LogDebug("  高解像度: " + dof.highResolution);
-                MTEUtils.LogDebug("  サンプル数: " + dof.blurSampleCount);
-                MTEUtils.LogDebug("  近距離: " + dof.nearBlur);
+                MTEUtils.Log("  有効: " + dof.enabled);
+                MTEUtils.Log("  焦点距離: " + dof.focalLength);
+                MTEUtils.Log("  焦点サイズ: " + dof.focalSize);
+                MTEUtils.Log("  絞り値: " + dof.aperture);
+                MTEUtils.Log("  ブラーサイズ: " + dof.maxBlurSize);
+                MTEUtils.Log("  高解像度: " + dof.highResolution);
+                MTEUtils.Log("  サンプル数: " + dof.blurSampleCount);
+                MTEUtils.Log("  近距離: " + dof.nearBlur);
+                MTEUtils.Log("  ---");
             }
         }
 
-        [Conditional("DEBUG")]
         private void DumpBGObject()
         {
-            MTEUtils.LogDebug("背景階層構造:");
+            MTEUtils.Log("背景階層構造:");
             BgMgr bgMgr = GameMain.Instance.BgMgr;
             GameObject bgObject = bgMgr.BgObject;
 
@@ -786,33 +782,92 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        [Conditional("DEBUG")]
+        private void DumpSceneObject()
+        {
+            MTEUtils.Log("シーン階層構造:");
+
+            Scene activeScene = SceneManager.GetActiveScene();
+            GameObject[] rootObjects = activeScene.GetRootGameObjects();
+            
+            MTEUtils.Log($"シーン名: {activeScene.name}");
+            MTEUtils.Log($"ルートオブジェクト数: {rootObjects.Length}");
+            
+            foreach (GameObject root in rootObjects)
+            {
+                DumpGameObject(root, 0);
+            }
+        }
+
         private void DumpGameObject(GameObject obj, int depth)
         {
             string indent = new string(' ', depth * 2);
-            MTEUtils.LogDebug($"{indent}└─ {obj.name}");
-            
+            var componentNames = obj.GetComponents<Component>().Select(c => c.GetType().Name);
+            string components = string.Join(", ", componentNames.ToArray());
+
+            MTEUtils.Log($"{indent}└─ {obj.name} [{components}]");
+
             foreach (Transform child in obj.transform)
             {
                 DumpGameObject(child.gameObject, depth + 1);
             }
         }
 
-        [Conditional("DEBUG")]
         private void DumpAllShaders()
         {
-            MTEUtils.LogDebug("使用中のシェーダー一覧:");
+            MTEUtils.Log("シェーダー情報:");
 
-            // シーン内のすべてのRendererを取得
+            Dictionary<string, int> shaderInfo = new Dictionary<string, int>(128);
+
             foreach (Renderer renderer in GameObject.FindObjectsOfType<Renderer>())
             {
                 foreach (Material material in renderer.materials)
                 {
                     if (material != null && material.shader != null)
                     {
-                        MTEUtils.LogDebug($"  - {material.shader.name} ({renderer.name})");
+                        string info = $"{material.shader.name} ({renderer.name})";
+                        if (shaderInfo.TryGetValue(info, out int count))
+                        {
+                            shaderInfo[info] = count + 1;
+                        }
+                        else
+                        {
+                            shaderInfo[info] = 1;
+                        }
                     }
                 }
+            }
+
+            foreach (var pair in shaderInfo)
+            {
+                MTEUtils.Log(  $"{pair.Key}: {pair.Value}");
+            }
+
+            MTEUtils.Log("  ---");
+        }
+
+        private void DumpLightInfo()
+        {
+            Light[] allLights = GameObject.FindObjectsOfType<Light>();
+            MTEUtils.Log($"ライト情報 ({allLights.Length}):");
+
+            foreach (Light light in allLights)
+            {
+                MTEUtils.Log($"ライト {light.gameObject.name}:");
+                MTEUtils.Log($"  有効状態: {light.enabled}");
+                MTEUtils.Log($"  種類: {light.type}");
+                MTEUtils.Log($"  色: R:{light.color.r:F2} G:{light.color.g:F2} B:{light.color.b:F2} A:{light.color.a:F2}");
+                MTEUtils.Log($"  強度: {light.intensity:F2}");
+                MTEUtils.Log($"  範囲: {light.range:F2}");
+                MTEUtils.Log($"  レイヤー: {light.gameObject.layer}");
+                MTEUtils.Log($"  位置: X:{light.transform.position.x:F2} Y:{light.transform.position.y:F2} Z:{light.transform.position.z:F2}");
+                MTEUtils.Log($"  回転: X:{light.transform.eulerAngles.x:F2} Y:{light.transform.eulerAngles.y:F2} Z:{light.transform.eulerAngles.z:F2}");
+
+                if (light.type == LightType.Spot)
+                {
+                    MTEUtils.Log($"  スポットライト角度: {light.spotAngle:F2}");
+                }
+
+                MTEUtils.Log("  ---");
             }
         }
     }

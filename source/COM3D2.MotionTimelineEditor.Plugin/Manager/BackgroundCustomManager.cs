@@ -10,9 +10,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public class BackgroundCustomManager : ManagerBase
     {
         public class PartsData
-		{
-			public string Name { get; private set; }
-			public string Menu { get; private set; } = "";
+        {
+            public string Name { get; private set; }
+            public string Menu { get; private set; } = "";
 
             public PartsData(string menu_, string name_)
             {
@@ -20,25 +20,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 this.Name = name_;
             }
 
-			public PartsData(string text_)
-			{
-				string[] array = text_.Split(new char[]
-				{
-					','
-				});
-				this.Menu = array[0];
-				this.Name = this.Menu;
-				if (array.Length > 1)
-				{
-					this.Name = array[1];
-				}
-			}
-		}
+            public PartsData(string text_)
+            {
+                string[] array = text_.Split(new char[]
+                {
+                    ','
+                });
+                this.Menu = array[0];
+                this.Name = this.Menu;
+                if (array.Length > 1)
+                {
+                    this.Name = array[1];
+                }
+            }
+        }
 
         public class ManageObjectData
-		{
-			public string Name { get; private set; }
-			public long ID { get; private set; }
+        {
+            public string Name { get; private set; }
+            public long ID { get; private set; }
             public string Menu { get; private set; } = "";
 
             public ManageObjectData(string menu_, long id_, string name_)
@@ -48,24 +48,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 this.Name = name_;
             }
 
-			public ManageObjectData(string text_)
-			{
-				string[] array = text_.Split(new char[]
-				{
-					','
-				});
-				this.Menu = array[0];
+            public ManageObjectData(string text_)
+            {
+                string[] array = text_.Split(new char[]
+                {
+                    ','
+                });
+                this.Menu = array[0];
                 this.Name = this.Menu;
-				if (array.Length > 1)
-				{
-					this.ID = (long)int.Parse(array[1]);
-				}
-				if (array.Length > 2)
-				{
-					this.Name = array[2];
-				}
-			}
-		}
+                if (array.Length > 1)
+                {
+                    this.ID = (long)int.Parse(array[1]);
+                }
+                if (array.Length > 2)
+                {
+                    this.Name = array[2];
+                }
+            }
+        }
 
         private BackgroundCustomWrapper _wrapper = null;
         private Dictionary<string, PartsData> _partsDataMap = null;
@@ -163,7 +163,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public void LoadPartsData()
-		{
+        {
             if (_partsDataMap != null)
             {
                 return;
@@ -194,7 +194,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 MTEUtils.LogException(e);
             }
-		}
+        }
 
         public void SavePartsData()
         {
@@ -300,30 +300,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public static void AddManageObjectData(string category_, string menu_, string name_, long id_)
-		{
-			if (!PhotoBGObjectData.category_list.ContainsKey(category_))
-			{
-				PhotoBGObjectData.category_list.Add(category_, new List<PhotoBGObjectData>());
-				PhotoBGObjectData.popup_category_list.Add(new KeyValuePair<string, UnityEngine.Object>(category_, null));
-				PhotoBGObjectData.popup_category_term_list.Add("ScenePhotoMode/背景オブジェクト/カテゴリー/" + category_);
-			}
+        {
+            if (!PhotoBGObjectData.category_list.ContainsKey(category_))
+            {
+                PhotoBGObjectData.category_list.Add(category_, new List<PhotoBGObjectData>());
+                PhotoBGObjectData.popup_category_list.Add(new KeyValuePair<string, UnityEngine.Object>(category_, null));
+                PhotoBGObjectData.popup_category_term_list.Add("ScenePhotoMode/背景オブジェクト/カテゴリー/" + category_);
+            }
 
             if (PhotoBGObjectData.category_list[category_].Any(x => x.id == id_))
             {
                 return;
             }
 
-			var data = Activator.CreateInstance(typeof(PhotoBGObjectData), true) as PhotoBGObjectData;
-			data.category = category_;
-			data.create_asset_bundle_name = "";
-			data.create_prefab_name = menu_;
-			data.id = id_;
-			data.name = name_;
-			PhotoBGObjectData.category_list[category_].Add(data);
-			PhotoBGObjectData.data.Add(data);
+            var data = Activator.CreateInstance(typeof(PhotoBGObjectData), true) as PhotoBGObjectData;
+            data.category = category_;
+            data.create_asset_bundle_name = "";
+            data.create_prefab_name = menu_;
+            data.id = id_;
+            data.name = name_;
+            PhotoBGObjectData.category_list[category_].Add(data);
+            PhotoBGObjectData.data.Add(data);
 
             modelManager.RegisterPhotoBGObject(data);
-		}
+        }
 
     }
 }

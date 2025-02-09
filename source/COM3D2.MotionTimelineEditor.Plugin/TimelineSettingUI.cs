@@ -356,6 +356,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
             view.EndLayout();
+
+            if (view.DrawButton("デバッグ情報表示", 120, 20))
+            {
+                MotionTimelineEditor.instance.DumpDebugInfo();
+            }
         }
 
         private void DrawCommonSetting(GUIView view)

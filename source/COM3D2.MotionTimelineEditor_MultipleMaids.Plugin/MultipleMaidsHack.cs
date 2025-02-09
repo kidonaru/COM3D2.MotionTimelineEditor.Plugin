@@ -761,6 +761,8 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         public override void CreateLight(StudioLightStat stat)
         {
+            MTEUtils.Log("CreateLight: ライトを追加します");
+
             var gameObject = new GameObject("Light");
 			var light = gameObject.AddComponent<Light>();
             var lightList = multipleMaids.lightList;
@@ -777,6 +779,12 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             gameObject.transform.position = GameMain.Instance.MainLight.transform.position;
             multipleMaids.selectLightIndex = 0;
             UpdateLightCombo();
+
+            light.intensity = 0.95f;
+            light.spotAngle = 50f;
+            light.range = 10f;
+            light.type = LightType.Directional;
+            light.color = new Color(0.5f, 1f, 0f);
 
             stat.light = light;
             stat.transform = gameObject.transform;

@@ -87,7 +87,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (view.DrawButton("削除", 45, 20))
                 {
-                    lightManager.DeleteLight(light);
+                    MTEUtils.EnqueueAction(() =>
+                    {
+                        lightManager.DeleteLight(light);
+                    });
                 }
             }
             view.EndLayout();
