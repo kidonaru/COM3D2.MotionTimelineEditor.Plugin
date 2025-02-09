@@ -6,7 +6,7 @@ v4.4.0.0
 - [COM3D2.MotionTimelineEditor.Plugin](#com3d2motiontimelineeditorplugin)
   - [概要](#概要)
   - [インストール方法](#インストール方法)
-  - [推奨MOD](#推奨mod)
+  - [推奨プラグイン](#推奨プラグイン)
   - [タイムライン制作の流れ](#タイムライン制作の流れ)
   - [キーボード操作](#キーボード操作)
   - [メインウィンドウ](#メインウィンドウ)
@@ -162,7 +162,7 @@ zip解凍後、`UnityInjector`フォルダの中身を、`Sybaris\UnityInjector`
 COM3D2 Ver.2.33.1で動作確認済みです。
 
 
-## 推奨MOD
+## 推奨プラグイン
 
 複数メイドプラグインかMeidoPhotoStudioのどちらかが入っていれば、エディット画面で動作するようになります。
 
