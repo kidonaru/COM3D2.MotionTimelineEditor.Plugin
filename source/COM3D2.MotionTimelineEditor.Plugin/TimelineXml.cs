@@ -891,6 +891,91 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 // 旧バージョンではライト互換モード無効
                 isLightCompatibilityMode = false;
             }
+
+            ConvertPlugin();
+        }
+
+        private static readonly HashSet<string> _replacePluginNameSet = new HashSet<string>
+        {
+            "StudioMode",
+            "MeidoPhotoStudio",
+            "MultipleMaids",
+        };
+
+        private static readonly HashSet<string> _modelLayerNameSet = new HashSet<string>
+        {
+            "ModelTimelineLayer",
+            "ModelBoneTimelineLayer",
+            "ModelShapeKeyTimelineLayer",
+        };
+
+        private static Dictionary<string, string> _convertModelNames = new Dictionary<string, string>(8);
+
+        private void ConvertPlugin()
+        {
+            var studioHack = StudioHackManager.instance.studioHack;
+            if (studioHack == null)
+            {
+                return;
+            }
+
+            var currentPluginName = studioHack.pluginName;
+            bool isConvertToStudioMode = currentPluginName == "StudioMode";
+            _convertModelNames.Clear();
+
+            foreach (var model in models)
+            {
+                if (model.pluginName == currentPluginName)
+                {
+                    continue;
+                }
+
+                if (!_replacePluginNameSet.Contains(model.pluginName))
+                {
+                    continue;
+                }
+
+                model.pluginName = currentPluginName;
+
+                if (isConvertToStudioMode)
+                {
+                    if (model.name.Contains(".menu"))
+                    {
+                        var newName = model.name.Replace(".menu", "");
+                        _convertModelNames[model.name] = newName;
+                        model.name = newName;
+                    }
+                }
+                else
+                {
+                    var menuName = PluginUtils.RemoveGroupSuffix(model.name) + ".menu";
+                    if (GameUty.IsExistFile(menuName))
+                    {
+                        _convertModelNames[model.name] = menuName;
+                        model.name = menuName;
+                    }
+                }
+            }
+
+            foreach (var layer in layers)
+            {
+                if (!_modelLayerNameSet.Contains(layer.className))
+                {
+                    continue;
+                }
+
+                foreach (var keyFrame in layer.keyFrames)
+                {
+                    foreach (var bone in keyFrame.bones)
+                    {
+                        var transform = bone.transform;
+                        if (_convertModelNames.TryGetValue(transform.name, out var newName))
+                        {
+                            transform.name = newName;
+                        }
+                    }
+                }
+            }
         }
     }
 }

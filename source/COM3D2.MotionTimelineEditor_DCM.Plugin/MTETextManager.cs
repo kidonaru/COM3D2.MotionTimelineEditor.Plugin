@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using COM3D2.DanceCameraMotion.Plugin;
 using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
@@ -56,6 +57,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         }
 
         public override void OnPluginDisable()
+        {
+            ReleaseTextManager();
+        }
+
+        public override void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
         {
             ReleaseTextManager();
         }
@@ -120,12 +126,19 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         public FreeTextSet GetFreeTextSet(int index)
         {
+            if (!IsValidIndex(index))
+            {
+                return new FreeTextSet();
+            }
             return textManager.TextData[index];
         }
 
         public void UpdateFreeTextSet(int index, FreeTextSet freeTextSet)
         {
-            textManager.TextData[index] = freeTextSet;
+            if (IsValidIndex(index))
+            {
+                textManager.TextData[index] = freeTextSet;
+            }
         }
     }
 }

@@ -292,5 +292,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             return view.DrawToggle(info.name, value, -1, 20, onChanged);
         }
+
+        public static void GetFileNameAndType(
+            this PhotoBGObjectData data,
+            out string fileName,
+            out StudioModelType type)
+        {
+            if (!string.IsNullOrEmpty(data.create_prefab_name))
+            {
+                fileName = data.create_prefab_name;
+                type = StudioModelType.Prefab;
+            }
+            else if (!string.IsNullOrEmpty(data.create_asset_bundle_name))
+            {
+                fileName = data.create_asset_bundle_name;
+                type = StudioModelType.Asset;
+            }
+            else
+            {
+                fileName = data.name;
+                type = StudioModelType.Mod;
+            }
+        }
     }
 }

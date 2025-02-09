@@ -609,7 +609,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var boneType = BoneUtils.GetBoneType(point);
-            return ikManager.GetBone(boneType).transform;
+            var bone = ikManager.GetBone(boneType);
+            return bone != null ? bone.transform : null;
         }
 
         private Dictionary<string, MaidBlendShape> _blendShapeCache =

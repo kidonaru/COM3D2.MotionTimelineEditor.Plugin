@@ -39,6 +39,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get => MTEUtils.CombinePaths(UserDataPath, "DanceCameraMotion");
         }
 
+        public static string BackgroundCustomPartsCsvPath
+        {
+            get => MTEUtils.CombinePaths(UserDataPath, "BackgroundCustom", "Parts", PluginInfo.PluginName + ".txt");
+        }
+
+        public static string BackgroundCustomManageObjectCsvPath
+        {
+            get => MTEUtils.CombinePaths(UserDataPath, "BackgroundCustom", "ManageObject", PluginInfo.PluginName + ".txt");
+        }
+
         public static string ExtraModelCsvPath
         {
             get => MTEUtils.CombinePaths(UserDataPath, PluginInfo.PluginName + "_ExtraModel.csv");

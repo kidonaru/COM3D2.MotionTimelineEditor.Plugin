@@ -1,12 +1,16 @@
+using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
+
     public class StudioWrapper
     {
         public bool active = false;
+
+        private StudioField _field = new StudioField();
+        private BgObjectField _bgObjectfield = new BgObjectField();
 
         public PoseEditWindow poseEditWindow = null;
         public PlacementWindow placementWindow = null;
@@ -18,10 +22,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public PhotoWindowManager photoManager = null;
         public WindowPartsBoneCheckBox bodyBoneCheckBox = null;
         public Dictionary<IKManager.BoneType, WFCheckBox> boneCheckBoxMap = new Dictionary<IKManager.BoneType, WFCheckBox>(78);
-
-        private FieldInfo _fieldDataDic = null;
-        private FieldInfo _fieldBoneDic = null;
-        private FieldInfo _fieldIkboxVisibleDic = null;
 
         public WFCheckBox ikBoxVisibleRoot = null;
         public WFCheckBox ikBoxVisibleBody = null;
@@ -36,57 +36,50 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get => lightWindow.DirectionalLightWindow;
         }
 
-        private MethodInfo _methodSelectMaid = null;
         public void SetSelectMaid(Maid maid)
         {
-            if (_methodSelectMaid == null)
-            {
-                _methodSelectMaid = typeof(PlacementWindow).GetMethod("SetSelectMaid", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.NonPublic);
-                MTEUtils.AssertNull(_methodSelectMaid != null, "methodSelectMaid is null");
-            }
-
-            _methodSelectMaid.Invoke(placementWindow, new object[] { maid });
+            _field.SetSelectMaid.Invoke(placementWindow, new object[] { maid });
         }
 
-        private MethodInfo _methodAddObject = null;
-        public void AddObject(PhotoBGObjectData add_bg_data, string create_time)
+        public BgObjectWrapper AddObject(PhotoBGObjectData add_bg_data, string create_time)
         {
-            if (_methodAddObject == null)
-            {
-                _methodAddObject = typeof(CreateBGObjectSubWindow).GetMethod("AddObject", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.NonPublic);
-                MTEUtils.AssertNull(_methodAddObject != null, "methodAddObject is null");
-            }
-
-            _methodAddObject.Invoke(createBgObjectWindow, new object[] { add_bg_data, create_time });
+            var obj = _field.AddObject.Invoke(createBgObjectWindow, new object[] { add_bg_data, create_time });
+            var wrapper = _bgObjectfield.ConvertToWrapper(obj);
+            return wrapper;
         }
 
-        private MethodInfo _methodInstantiateLight = null;
         public GameObject InstantiateLight()
         {
-            if (_methodInstantiateLight == null)
+            return (GameObject) _field.InstantiateLight.Invoke(lightWindow, null);
+        }
+
+        private Dictionary<string, BgObjectWrapper> _bgObjectMap = new Dictionary<string, BgObjectWrapper>(16);
+
+        public Dictionary<string, BgObjectWrapper> GetBgObjectMap()
+        {
+            _bgObjectMap.Clear();
+
+            var objList = (IList) _field.create_obj_list_.GetValue(createBgObjectWindow);
+            foreach (var obj in objList)
             {
-                _methodInstantiateLight = typeof(LightWindow).GetMethod("InstantiateLight", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.NonPublic);
-                MTEUtils.AssertNull(_methodInstantiateLight != null, "methodInstantiateLight is null");
+                var wrapper = _bgObjectfield.ConvertToWrapper(obj);
+                _bgObjectMap[wrapper.create_time] = wrapper;
             }
 
-            return (GameObject) _methodInstantiateLight.Invoke(lightWindow, null);
+            return _bgObjectMap;
         }
 
         public bool Init()
         {
-            BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.InvokeMethod;
+            if (!_field.Init())
+            {
+                return false;
+            }
 
-            _fieldDataDic = typeof(WindowPartsBoneCheckBox).GetField("data_dic_", bindingAttr);
-            MTEUtils.AssertNull(_fieldDataDic != null, "fieldDataDic is null");
-            if (_fieldDataDic == null) return false;
-
-            _fieldBoneDic = typeof(IKManager).GetField("bone_dic_", bindingAttr);
-            MTEUtils.AssertNull(_fieldBoneDic != null, "fieldBoneDic is null");
-            if (_fieldBoneDic == null) return false;
-
-            _fieldIkboxVisibleDic = typeof(PoseEditWindow).GetField("ikbox_visible_dic_", bindingAttr);
-            MTEUtils.AssertNull(_fieldIkboxVisibleDic != null, "fieldIkboxVisibleDic is null");
-            if (_fieldIkboxVisibleDic == null) return false;
+            if (!_bgObjectfield.Init())
+            {
+                return false;
+            }
 
             return true;
         }
@@ -153,7 +146,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     bodyBoneCheckBox = boneCheckBox;
                 }
 
-                var dataDic = (Dictionary<IKManager.BoneType, WFCheckBox>) _fieldDataDic.GetValue(boneCheckBox);
+                var dataDic = (Dictionary<IKManager.BoneType, WFCheckBox>) _field.data_dic_.GetValue(boneCheckBox);
                 foreach (var pair in dataDic)
                 {
                     boneCheckBoxMap[pair.Key] = pair.Value;
@@ -164,7 +157,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (bodyBoneCheckBox == null) return;
 
             {
-                var ikboxVisibleDic = (Dictionary<string, WFCheckBox>) _fieldIkboxVisibleDic.GetValue(poseEditWindow);
+                var ikboxVisibleDic = (Dictionary<string, WFCheckBox>) _field.ikbox_visible_dic_.GetValue(poseEditWindow);
                 MTEUtils.AssertNull(ikboxVisibleDic != null, "ikboxVisibleDic is null");
                 if (ikboxVisibleDic == null) return;
 

@@ -61,6 +61,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Hack\BackgroundCustomField.cs" />
+    <Compile Include="Hack\BackgroundCustomWrapper.cs" />
+    <Compile Include="Hack\BgObjectField.cs" />
+    <Compile Include="Hack\StudioField.cs" />
+    <Compile Include="Hack\StudioHack.cs" />
+    <Compile Include="Hack\StudioHackBase.cs" />
+    <Compile Include="Hack\StudioWrapper.cs" />
+    <Compile Include="Hack\ModelHackBase.cs" />
+    <Compile Include="Hack\PartsEditHackBase.cs" />
     <Compile Include="BoneMenu\BoneMenuItem.cs" />
     <Compile Include="BoneMenu\BoneMenuManager.cs" />
     <Compile Include="BoneMenu\BoneSetMenuItem.cs" />
@@ -69,6 +78,7 @@
     <Compile Include="BoneMenu\IBoneMenuItem.cs" />
     <Compile Include="BoneMenu\MaidBoneMenuItem.cs" />
     <Compile Include="BoneMenu\ModelBoneMenuItem.cs" />
+    <Compile Include="Manager\BackgroundCustomManager.cs" />
     <Compile Include="Manager\BGMManager.cs" />
     <Compile Include="Manager\BGModelManager.cs" />
     <Compile Include="Manager\CameraManager.cs" />
@@ -226,21 +236,16 @@
     <Compile Include="MaidInfo.cs" />
     <Compile Include="MainWindow.cs" />
     <Compile Include="ModelBoneController.cs" />
-    <Compile Include="ModelHackBase.cs" />
     <Compile Include="MotionData.cs" />
     <Compile Include="MotionPlayData.cs" />
     <Compile Include="MoviePlayerImpl.cs" />
-    <Compile Include="PartsEditHackBase.cs" />
     <Compile Include="PhotoBGManager.cs" />
     <Compile Include="PluginInfo.cs" />
     <Compile Include="PluginUtils.cs" />
     <Compile Include="PostEffectUtils.cs" />
     <Compile Include="ScriptLoader.cs" />
-    <Compile Include="StudioHack.cs" />
-    <Compile Include="StudioHackBase.cs" />
     <Compile Include="StudioLightStat.cs" />
     <Compile Include="StudioModelStat.cs" />
-    <Compile Include="StudioWrapper.cs" />
     <Compile Include="SubWindow.cs" />
     <Compile Include="SubWindowUIBase.cs" />
     <Compile Include="TangentData.cs" />

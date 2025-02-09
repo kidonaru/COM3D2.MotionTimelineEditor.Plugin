@@ -97,7 +97,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             transform.localPosition = start.position;
             transform.localRotation = Quaternion.Euler(start.eulerAngles);
             transform.localScale = start.scale;
+
             modelManager.SetModelVisible(model, start.visible);
+            model.visible = start.visible;
         }
 
         private void ApplyMotionUpdate(MotionData motion, float t, StudioModelStat model)
@@ -348,6 +350,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.DrawToggle(model.displayName, model.visible, 200, 20, (visible) =>
                 {
                     modelManager.SetModelVisible(model, visible);
+                    model.visible = visible;
                 });
 
                 var initialPosition = Vector3.zero;

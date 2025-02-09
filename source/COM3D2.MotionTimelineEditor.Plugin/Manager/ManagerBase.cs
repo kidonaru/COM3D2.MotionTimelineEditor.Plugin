@@ -42,6 +42,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         protected static WindowManager windowManager => WindowManager.instance;
         protected static BoneMenuManager boneMenuManager => BoneMenuManager.Instance;
         protected static PhotoBGManager photoBGManager => PhotoBGManager.instance;
+        protected static BackgroundCustomManager backgroundCustomManager => BackgroundCustomManager.instance;
 
         public virtual void Init()
         {

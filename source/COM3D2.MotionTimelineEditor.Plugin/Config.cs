@@ -66,6 +66,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float videoPrebufferTime = 0.5f;
         public bool outputElapsedTime = false;
         public bool useHSVColor = false;
+        public bool autoResisterBackgroundCustom = true;
+        public string backgroundCustomCategoryName = "MotionTimelineEditor";
 
         // 表示設定
         public int frameWidth = 11;

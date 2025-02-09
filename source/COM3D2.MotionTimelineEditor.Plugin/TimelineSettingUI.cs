@@ -554,6 +554,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 },
             });
 
+            view.DrawToggle("自動でBackgroundCustomに登録", config.autoResisterBackgroundCustom, -1, 20, newValue =>
+            {
+                config.autoResisterBackgroundCustom = newValue;
+                config.dirty = true;
+            });
+
             view.DrawToggle("処理時間出力", config.outputElapsedTime, 120, 20, newValue =>
             {
                 config.outputElapsedTime = newValue;

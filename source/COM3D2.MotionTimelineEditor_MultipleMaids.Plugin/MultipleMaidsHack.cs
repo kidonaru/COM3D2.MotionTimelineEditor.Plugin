@@ -393,8 +393,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
             if (!sourceObj)
             {
-                MTEUtils.LogError("Could not load game model '" + assetName + "'");
-                return null;
+                return LoadModObject(assetName);
             }
 
             var obj = UnityEngine.Object.Instantiate(sourceObj);
@@ -494,8 +493,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         {
             if (!assetName.EndsWith(".menu", StringComparison.Ordinal))
             {
-                MTEUtils.LogWarning("未対応のファイルです。 :" + assetName);
-                return null;
+                assetName += ".menu";
             }
 
             byte[] menuBytes = null;
@@ -661,7 +659,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         public void AttachItem(MaidCache maidCache, Transform item, AttachPoint point, bool keepWorldPosition)
         {
-            Transform parent = maidCache != null ? maidCache.GetAttachPointTransform(point) : null;
+            Transform parent = maidCache?.GetAttachPointTransform(point);
             Quaternion quaternion = item.rotation;
             Vector3 localScale = item.localScale;
 
@@ -777,7 +775,6 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             multipleMaids.lightKage.Add(0.098f);
             multipleMaids.lightRange.Add(50f);
             gameObject.transform.position = GameMain.Instance.MainLight.transform.position;
-            //multipleMaids.selectLightIndex = lightList.Count - 1;
             multipleMaids.selectLightIndex = 0;
             UpdateLightCombo();
 
@@ -789,25 +786,24 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
             var gLight = multipleMaids.gLight;
             var mLight = multipleMaids.mLight;
-            var selectLightIndex = multipleMaids.selectLightIndex;
 
-            if (gLight[selectLightIndex] == null)
+            if (gLight[0] == null)
             {
-                gLight[selectLightIndex] = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                gLight[0] = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 Material material = new Material(Shader.Find("Transparent/Diffuse"));
                 material.color = new Color(0.5f, 0.5f, 1f, 0.8f);
-                gLight[selectLightIndex].GetComponent<Renderer>().material = material;
-                gLight[selectLightIndex].layer = 8;
-                gLight[selectLightIndex].GetComponent<Renderer>().enabled = false;
-                gLight[selectLightIndex].SetActive(false);
-                gLight[selectLightIndex].transform.position = gameObject.transform.position;
-                mLight[selectLightIndex] = gLight[selectLightIndex].AddComponent<MouseDrag6>();
-                mLight[selectLightIndex].obj = gLight[selectLightIndex];
-                mLight[selectLightIndex].maid = gameObject.gameObject;
-                mLight[selectLightIndex].angles = gameObject.gameObject.transform.eulerAngles;
-                gLight[selectLightIndex].transform.localScale = new Vector3(0.12f, 0.12f, 0.12f);
-                mLight[selectLightIndex].ido = 1;
-                mLight[selectLightIndex].isScale = false;
+                gLight[0].GetComponent<Renderer>().material = material;
+                gLight[0].layer = 8;
+                gLight[0].GetComponent<Renderer>().enabled = false;
+                gLight[0].SetActive(false);
+                gLight[0].transform.position = GameMain.Instance.MainLight.transform.position;
+                mLight[0] = gLight[0].AddComponent<MouseDrag6>();
+                mLight[0].obj = gLight[0];
+                mLight[0].maid = GameMain.Instance.MainLight.gameObject;
+                mLight[0].angles = GameMain.Instance.MainLight.gameObject.transform.eulerAngles;
+                gLight[0].transform.localScale = new Vector3(0.12f, 0.12f, 0.12f);
+                mLight[0].ido = 1;
+                mLight[0].isScale = false;
             }
         }
 

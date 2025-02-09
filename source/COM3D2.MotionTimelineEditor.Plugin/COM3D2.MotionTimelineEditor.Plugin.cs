@@ -521,6 +521,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 managerRegistry.RegisterManager(BoneMenuManager.Instance);
                 managerRegistry.RegisterManager(WindowManager.instance);
                 managerRegistry.RegisterManager(PhotoBGManager.instance);
+                managerRegistry.RegisterManager(BackgroundCustomManager.instance);
 
                 managerRegistry.RegisterManager(ConfigManager.instance);
                 managerRegistry.RegisterManager(BGMManager.instance);
@@ -628,11 +629,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             MTEUtils.Log("プラグインが有効になりました");
 
-            DumpAllCameraInfo();
-            DumpLayerInfo();
-            DumpBGObject();
-            DumpAllShaders();
-
             studioHackManager.PreUpdate();
 
             if (studioHack == null || !studioHack.IsValid())
@@ -647,7 +643,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             OnLoad();
 
-            DumpDoFInfo();
+            DumpDebugInfo();
         }
 
         private void OnPluginDisable()
@@ -660,6 +656,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             managerRegistry.OnPluginDisable();
+        }
+
+        [Conditional("DEBUG")]
+        private void DumpDebugInfo()
+        {
+            //DumpAllCameraInfo();
+            //DumpLayerInfo();
+            //DumpBGObject();
+            //DumpAllShaders();
+            //DumpDoFInfo();
         }
 
         [Conditional("DEBUG")]

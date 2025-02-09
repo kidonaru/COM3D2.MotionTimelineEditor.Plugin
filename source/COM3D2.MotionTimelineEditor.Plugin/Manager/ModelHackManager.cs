@@ -38,6 +38,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 _pluginNames.Clear();
 
+                if (studioHack == null)
+                {
+                    return _pluginNames;
+                }
+
                 _pluginNames.Add(studioHack.pluginName);
 
                 foreach (var modelHack in modelHackMap.Values)

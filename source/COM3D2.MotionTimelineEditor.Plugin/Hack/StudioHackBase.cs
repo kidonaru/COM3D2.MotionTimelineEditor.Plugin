@@ -63,43 +63,31 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public virtual DepthOfFieldScatter depthOfField
         {
-            get
-            {
-                return PluginUtils.MainCamera.gameObject.GetComponent<DepthOfFieldScatter>();
-            }
+            get => PluginUtils.MainCamera.gameObject.GetComponent<DepthOfFieldScatter>();
         }
 
         protected static MaidManager maidManager => MaidManager.instance;
 
         protected static CacheBoneDataArray cacheBoneData
         {
-            get
-            {
-                return maidManager.cacheBoneData;
-            }
+            get => maidManager.cacheBoneData;
         }
 
         protected static Animation animation
         {
-            get
-            {
-                return maidManager.animation;
-            }
+            get => maidManager.animation;
         }
 
         protected static AnimationState animationState
         {
-            get
-            {
-                return maidManager.animationState;
-            }
+            get => maidManager.animationState;
         }
 
         protected static StudioModelManager modelManager => StudioModelManager.instance;
-
         protected static StudioLightManager lightManager => StudioLightManager.instance;
-
         protected static PhotoBGManager photoBGManager => PhotoBGManager.instance;
+        protected static BackgroundCustomManager backgroundCustomManager => BackgroundCustomManager.instance;
+        protected static Config config => ConfigManager.instance.config;
 
         protected StudioHackBase()
         {

@@ -176,5 +176,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             return modelBoneController.GetBone(index);
         }
+
+        public void ReplaceInfo(OfficialObjectInfo info)
+        {
+            this.info = info;
+            InitName();
+        }
     }
 }

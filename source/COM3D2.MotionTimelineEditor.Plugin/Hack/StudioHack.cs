@@ -42,6 +42,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get
             {
                 _modelList.Clear();
+                var bgObjectMap = studio.GetBgObjectMap();
 
                 foreach (var targetObj in studio.objectManagerWindow.GetTargetList())
                 {
@@ -50,10 +51,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         continue;
                     }
 
-                    var displayName = targetObj.draw_name;
-                    var modelName = targetObj.draw_name;
+                    var bgObject = bgObjectMap.GetOrDefault(targetObj.obj.name);
+                    if (bgObject == null)
+                    {
+                        continue;
+                    }
+
+                    var bgObjectData = bgObject.data;
+                    bgObjectData.GetFileNameAndType(out var modelName, out var _);
+
+                    var displayName = bgObjectData.name;
                     int myRoomId = 0;
-                    long bgObjectId = 0;
+                    long bgObjectId = bgObjectData.id;
                     var transform = targetObj.obj.transform;
                     var attachMaidSlotNo = GetMaidSlotNo(targetObj.attach_maid_guid);
 
@@ -401,14 +410,36 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void CreateModel(StudioModelStat model)
         {
+            model.info.Dump();
+
             if (model.info.type == StudioModelType.MyRoom)
             {
                 return;
             }
 
+            if (model.info.type == StudioModelType.Mod &&
+                config.autoResisterBackgroundCustom &&
+                backgroundCustomManager.IsValid())
+            {
+                var fileName = Path.GetFileNameWithoutExtension(model.info.fileName);
+                var menu = ModMenuLoader.Load(fileName);
+                if (menu == null)
+                {
+                    return;
+                }
+
+                backgroundCustomManager.RegisterObject(menu.name, fileName);
+                var info = modelManager.FindOfficialObject(menu.name, fileName, 0, 0);
+                if (info != null)
+                {
+                    model.ReplaceInfo(info);
+                }
+            }
+
             var bgObject = PhotoBGObjectData.Get(model.info.bgObjectId);
             if (bgObject == null)
             {
+                MTEUtils.LogWarning("背景オブジェクトが見つかりません: " + model.name);
                 return;
             }
 

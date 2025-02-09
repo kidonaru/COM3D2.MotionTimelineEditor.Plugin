@@ -31,6 +31,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return fileName;
             }
         }
+
+        public void Dump()
+        {
+            MTEUtils.LogDebug("OfficialObjectInfo: type={0} label={1} fileName={2} prefabName={3} myRoomId={4} bgObjectId={5}",
+                type, label, fileName, prefabName, myRoomId, bgObjectId);
+        }
     }
 
     public class StudioModelManager : ManagerBase
@@ -297,7 +303,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         MTEUtils.LogDebug("  blendShape: name={0}", blendShape.name);
                     }
                 }
+            }
 
+            if (addedModels.Count > 0 || removedModels.Count > 0 || updatedModels.Count > 0)
+            {
                 UpdateTimelineModels();
             }
 
@@ -311,7 +320,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 onModelRemoved?.Invoke(model);
             }
 
-             foreach (var model in updatedModels)
+            foreach (var model in updatedModels)
             {
                 onModelUpdated?.Invoke(model);
             }
@@ -478,7 +487,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public void SetModelVisible(StudioModelStat model, bool visible)
         {
             modelHackManager.SetModelVisible(model, visible);
-            LateUpdate(true);
         }
 
         public void ChangePluginName(StudioModelStat model, string pluginName)
@@ -489,13 +497,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             timelineManager.RequestHistory("プラグイン変更: " + model.displayName);
         }
 
-        private OfficialObjectInfo FindOfficialObject(
+        public OfficialObjectInfo FindOfficialObject(
             string label,
             string fileName,
             int myRoomId,
             long bgObjectId)
         {
             OfficialObjectInfo objectInfo;
+
+            MTEUtils.LogDebug("FindOfficialObject: label={0} fileName={1} myRoomId={2} bgObjectId={3}",
+                label, fileName, myRoomId, bgObjectId);
 
             if (!string.IsNullOrEmpty(fileName))
             {
@@ -534,14 +545,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 label = Path.GetFileName(label);
             }
 
-            if (!string.IsNullOrEmpty(fileName) && fileName.EndsWith(".menu", System.StringComparison.Ordinal))
+            if (!string.IsNullOrEmpty(fileName))
             {
                 fileName = Path.GetFileName(fileName);
 
-                var menu = ModMenuLoader.Load(fileName);
-                if (menu != null)
+                if (GameUty.IsExistFile(fileName))
                 {
-                    label = menu.name;
+                    var menu = ModMenuLoader.Load(fileName);
+                    if (menu != null)
+                    {
+                        label = menu.name;
+                    }
                 }
             }
 
@@ -553,9 +567,34 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 myRoomId = myRoomId,
                 bgObjectId = bgObjectId,
             };
-            OfficialObjectLabelMap[label] = info;
+            _officialObjectLabelMap[label] = info;
 
             return info;
+        }
+
+        public void RegisterPhotoBGObject(PhotoBGObjectData data)
+        {
+            var info = new OfficialObjectInfo
+            {
+                label = data.name,
+                bgObjectId = data.id,
+            };
+
+            data.GetFileNameAndType(out info.fileName, out info.type);
+
+            //MTEUtils.LogDebug("PhotoBGObjectData: label={0} bgObjectId={1} fileName={2} type={3}",
+            //    info.label, info.bgObjectId, info.fileName, info.type);
+
+            _officialObjectLabelMap[info.label] = info;
+
+            if (!string.IsNullOrEmpty(info.fileName))
+            {
+                _bgObjectFileNameMap[info.fileName] = info;
+            }
+            if (info.bgObjectId != 0)
+            {
+                _bgObjectIdMap[info.bgObjectId] = info;
+            }
         }
 
         private void InitOfficialObjectMap()
@@ -573,40 +612,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             foreach (var data in PhotoBGObjectData.data)
             {
-                var info = new OfficialObjectInfo
-                {
-                    label = data.name,
-                    bgObjectId = data.id,
-                };
-                if (!string.IsNullOrEmpty(data.create_prefab_name))
-                {
-                    info.fileName = data.create_prefab_name;
-                    info.type = StudioModelType.Prefab;
-                }
-                else if (!string.IsNullOrEmpty(data.create_asset_bundle_name))
-                {
-                    info.fileName = data.create_asset_bundle_name;
-                    info.type = StudioModelType.Asset;
-                }
-                else
-                {
-                    info.fileName = data.name;
-                    info.type = StudioModelType.Mod;
-                }
-
-                //MTEUtils.LogDebug("PhotoBGObjectData: label={0} bgObjectId={1} fileName={2} type={3}",
-                //    info.label, info.bgObjectId, info.fileName, info.type);
-
-                _officialObjectLabelMap[info.label] = info;
-
-                if (!string.IsNullOrEmpty(info.fileName))
-                {
-                    _bgObjectFileNameMap[info.fileName] = info;
-                }
-                if (info.bgObjectId != 0)
-                {
-                    _bgObjectIdMap[info.bgObjectId] = info;
-                }
+                RegisterPhotoBGObject(data);
             }
 
             foreach (var data in PlacementData.GetDatas(_ => true))
@@ -705,8 +711,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
+            MTEUtils.LogDebug("UpdateTimelineModels");
+
             var models = this.models;
             var timelineModels = timeline.models;
+
+            foreach (var model in models)
+            {
+                model.info.Dump();
+            }
 
             if (models.Count != timelineModels.Count)
             {

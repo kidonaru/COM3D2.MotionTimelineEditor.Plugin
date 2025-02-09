@@ -111,6 +111,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.DrawToggle(model.displayName, model.visible, -1, 20, newValue =>
             {
                 modelManager.SetModelVisible(model, newValue);
+                model.visible = newValue;
             });
 
             view.BeginHorizontal();

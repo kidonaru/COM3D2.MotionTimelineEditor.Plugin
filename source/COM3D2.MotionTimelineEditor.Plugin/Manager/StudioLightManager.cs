@@ -238,7 +238,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void OnLoad()
         {
-            SetupLights(timeline.lights);
+            var lightLayer = timelineManager.GetLayer(typeof(LightTimelineLayer));
+            if (lightLayer != null)
+            {
+                SetupLights(timeline.lights);
+            }
         }
 
         public override void OnPluginDisable()
