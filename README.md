@@ -173,7 +173,7 @@ COM3D2 Ver.2.33.1で動作確認済みです。
   - https://github.com/habeebweeb/MeidoPhotoStudio/releases
 
 
-DCMが導入済みの場合、表情/カメラなどの制御が可能になります。
+DCMが導入済みの場合、表情や効果音、テキストなどの制御が可能になります。
 
 - **COM3D2.DanceCameraMotion.Plugin7.5.1**
   - https://ux.getuploader.com/com3d2_mod_kyouyu_g/download/98
