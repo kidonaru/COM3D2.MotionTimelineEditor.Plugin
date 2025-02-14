@@ -101,10 +101,39 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start;
             var end = motion.end;
 
-            float easingTime = CalcEasingValue(t, motion.easing);
-            transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
-            transform.localRotation = Quaternion.Euler(Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime));
-            transform.localScale = Vector3.Lerp(start.scale, end.scale, easingTime);
+            if (timeline.isTangentModelBone)
+            {
+                var t0 = motion.stFrame * timeline.frameDuration;
+                var t1 = motion.edFrame * timeline.frameDuration;
+
+                transform.localPosition = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    start.positionValues,
+                    end.positionValues,
+                    t);
+
+                transform.localEulerAngles = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    start.eulerAnglesValues,
+                    end.eulerAnglesValues,
+                    t);
+
+                transform.localScale = PluginUtils.HermiteVector3(
+                    t0,
+                    t1,
+                    start.scaleValues,
+                    end.scaleValues,
+                    t);
+            }
+            else
+            {
+                float easingTime = CalcEasingValue(t, motion.easing);
+                transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
+                transform.localRotation = Quaternion.Euler(Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime));
+                transform.localScale = Vector3.Lerp(start.scale, end.scale, easingTime);
+            }
         }
 
         public void OnModelAdded(StudioModelStat model)

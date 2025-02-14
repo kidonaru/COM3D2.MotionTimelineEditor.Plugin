@@ -78,12 +78,56 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.padding = Vector2.zero;
 
-            view.DrawContentListView(
-                models,
-                DrawModelContent,
-                -1,
-                -1,
-                80);
+            view.BeginScrollView();
+
+            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
+
+            for (var i = 0; i < models.Count; i++)
+            {
+                DrawModelContent(view, models[i], i);
+            }
+
+            view.SetEnabled(!view.IsComboBoxFocused());
+
+            view.DrawHorizontalLine(Color.gray);
+
+            view.DrawToggle("モデルのタンジェント補間を有効化", timeline.isTangentModel, -1, 20, newValue =>
+            {
+                timeline.isTangentModel = newValue;
+
+                var layer = timelineManager.GetLayer<ModelTimelineLayer>();
+                if (layer != null)
+                {
+                    layer.InitTangent();
+                    layer.ApplyCurrentFrame(true);
+                }
+            });
+
+            view.DrawToggle("モデルボーンのタンジェント補間を有効化", timeline.isTangentModelBone, -1, 20, newValue =>
+            {
+                timeline.isTangentModelBone = newValue;
+
+                var layer = timelineManager.GetLayer<ModelBoneTimelineLayer>();
+                if (layer != null)
+                {
+                    layer.InitTangent();
+                    layer.ApplyCurrentFrame(true);
+                }
+            });
+
+            view.DrawToggle("モデルシェイプのタンジェント補間を有効化", timeline.isTangentModelShapeKey, -1, 20, newValue =>
+            {
+                timeline.isTangentModelShapeKey = newValue;
+
+                var layer = timelineManager.GetLayer<ModelShapeKeyTimelineLayer>();
+                if (layer != null)
+                {
+                    layer.InitTangent();
+                    layer.ApplyCurrentFrame(true);
+                }
+            });
+
+            view.EndScrollView();
         }
 
         protected void DrawModelContent(
@@ -100,13 +144,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var width = view.viewRect.width;
-            var height = view.viewRect.height;
-
             view.margin = GUIView.defaultMargin;
             view.padding = GUIView.defaultPadding;
-
-            view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             view.DrawToggle(model.displayName, model.visible, -1, 20, newValue =>
             {

@@ -13,7 +13,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override bool hasEulerAngles => true;
         public override bool hasScale => true;
         public override bool hasVisible => true;
-        public override bool hasEasing => true;
+        public override bool hasEasing => !timeline.isTangentModel;
+        public override bool hasTangent => timeline.isTangentModel;
 
         public override ValueData[] positionValues
         {
@@ -31,8 +32,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public override ValueData visibleValue => values[10];
-
         public override ValueData easingValue => values[9];
+        public override ValueData[] tangentValues => baseValues;
 
         public TransformDataModel()
         {

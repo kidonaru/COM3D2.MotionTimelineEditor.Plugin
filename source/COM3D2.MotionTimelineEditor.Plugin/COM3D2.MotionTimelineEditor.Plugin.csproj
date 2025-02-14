@@ -171,6 +171,7 @@
     <Compile Include="TransformData\TransformDataLookAtTarget.cs" />
     <Compile Include="TransformData\TransformDataModel.cs" />
     <Compile Include="TransformData\TransformDataModelBone.cs" />
+    <Compile Include="TransformData\TransformDataModelShapeKey.cs" />
     <Compile Include="TransformData\TransformDataMove.cs" />
     <Compile Include="TransformData\TransformDataParaffin.cs" />
     <Compile Include="TransformData\TransformDataPsylliumArea.cs" />

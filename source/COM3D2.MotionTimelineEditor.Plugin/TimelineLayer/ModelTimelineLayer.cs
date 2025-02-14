@@ -86,7 +86,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 ApplyMotionInit(motion, t, model);
             }
 
-            ApplyMotionUpdate(motion, t, model);
+            if (timeline.isTangentModel)
+            {
+                ApplyMotionUpdateTangent(motion, t, model);
+            }
+            else
+            {
+                ApplyMotionUpdateEasing(motion, t, model);
+            }
         }
 
         private void ApplyMotionInit(MotionData motion, float t, StudioModelStat model)
@@ -102,7 +109,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             model.visible = start.visible;
         }
 
-        private void ApplyMotionUpdate(MotionData motion, float t, StudioModelStat model)
+        private void ApplyMotionUpdateEasing(MotionData motion, float t, StudioModelStat model)
         {
             var transform = model.transform;
             var start = motion.start;
@@ -124,6 +131,36 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 transform.localScale = Vector3.Lerp(start.scale, end.scale, easingTime);
             }
+        }
+
+        private void ApplyMotionUpdateTangent(MotionData motion, float t, StudioModelStat model)
+        {
+            var transform = model.transform;
+            var start = motion.start;
+            var end = motion.end;
+            var t0 = motion.stFrame * timeline.frameDuration;
+            var t1 = motion.edFrame * timeline.frameDuration;
+
+            transform.localPosition = PluginUtils.HermiteVector3(
+                t0,
+                t1,
+                start.positionValues,
+                end.positionValues,
+                t);
+
+            transform.localEulerAngles = PluginUtils.HermiteVector3(
+                t0,
+                t1,
+                start.eulerAnglesValues,
+                end.eulerAnglesValues,
+                t);
+
+            transform.localScale = PluginUtils.HermiteVector3(
+                t0,
+                t1,
+                start.scaleValues,
+                end.scaleValues,
+                t);
         }
 
         public void OnModelAdded(StudioModelStat model)

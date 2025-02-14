@@ -179,6 +179,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("IsTangentMove")]
         public bool isTangentMove = false;
 
+        [XmlElement("IsTangentModel")]
+        public bool isTangentModel = false;
+
+        [XmlElement("IsTangentModelBone")]
+        public bool isTangentModelBone = false;
+
+        [XmlElement("IsTangentModelShapeKey")]
+        public bool isTangentModelShapeKey = false;
+
         [XmlElement("IsLightColorEasing")]
         public bool isLightColorEasing = true;
 
@@ -890,6 +899,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 // 旧バージョンではライト互換モード無効
                 isLightCompatibilityMode = false;
+            }
+
+            if (version < 27)
+            {
+                // ModelShapeKeyTimelineLayerのTransformType変更
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "ModelShapeKeyTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+                                if (transform.type == TransformType.ShapeKey)
+                                {
+                                    MTEUtils.LogDebug("Change TransformType -> ModelShapeKey name={0}", transform.name);
+                                    transform.type = TransformType.ModelShapeKey;
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
             }
 
             ConvertPlugin();

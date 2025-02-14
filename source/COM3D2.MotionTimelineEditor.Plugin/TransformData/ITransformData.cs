@@ -22,6 +22,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         LookAtTarget,
         Model,
         ModelBone,
+        ModelShapeKey,
         Move,
         Paraffin,
         PsylliumArea,

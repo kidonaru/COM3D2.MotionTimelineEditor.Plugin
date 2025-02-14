@@ -1344,6 +1344,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return null;
         }
 
+        public T GetLayer<T>(int slotNo = 0)
+        {
+            return (T) GetLayer(typeof(T), slotNo);
+        }
+
         public void ChangeActiveLayer(Type layerType, int slotNo = 0)
         {
             var layer = GetLayer(layerType, slotNo);

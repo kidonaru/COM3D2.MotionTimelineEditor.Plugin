@@ -228,7 +228,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class TimelineData
     {
-        public static readonly int CurrentVersion = 26;
+        public static readonly int CurrentVersion = 27;
         public static readonly TimelineData DefaultTimeline = new TimelineData();
 
         public int version = 0;
@@ -396,6 +396,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool isTangentCamera = false;
         public bool isTangentLight = false;
         public bool isTangentMove = false;
+        public bool isTangentModel = false;
+        public bool isTangentModelBone = false;
+        public bool isTangentModelShapeKey = false;
 
         public bool isLightColorEasing = true;
         public bool isLightExtraEasing = false;
@@ -851,6 +854,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             isTangentCamera = xml.isTangentCamera;
             isTangentLight = xml.isTangentLight;
             isTangentMove = xml.isTangentMove;
+            isTangentModel = xml.isTangentModel;
+            isTangentModelBone = xml.isTangentModelBone;
+            isTangentModelShapeKey = xml.isTangentModelShapeKey;
             isLightColorEasing = xml.isLightColorEasing;
             isLightExtraEasing = xml.isLightExtraEasing;
             isLightCompatibilityMode = xml.isLightCompatibilityMode;
@@ -1003,6 +1009,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.isTangentCamera = isTangentCamera;
             xml.isTangentLight = isTangentLight;
             xml.isTangentMove = isTangentMove;
+            xml.isTangentModel = isTangentModel;
+            xml.isTangentModelBone = isTangentModelBone;
+            xml.isTangentModelShapeKey = isTangentModelShapeKey;
             xml.isLightColorEasing = isLightColorEasing;
             xml.isLightExtraEasing = isLightExtraEasing;
             xml.isLightCompatibilityMode = isLightCompatibilityMode;

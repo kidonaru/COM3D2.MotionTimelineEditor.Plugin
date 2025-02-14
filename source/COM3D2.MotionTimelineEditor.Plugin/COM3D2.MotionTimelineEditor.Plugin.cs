@@ -443,6 +443,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     TransformType.ModelBone, TimelineManager.CreateTransform<TransformDataModelBone>
                 );
                 timelineManager.RegisterTransform(
+                    TransformType.ModelShapeKey, TimelineManager.CreateTransform<TransformDataModelShapeKey>
+                );
+                timelineManager.RegisterTransform(
                     TransformType.Move, TimelineManager.CreateTransform<TransformDataMove>
                 );
                 timelineManager.RegisterTransform(
