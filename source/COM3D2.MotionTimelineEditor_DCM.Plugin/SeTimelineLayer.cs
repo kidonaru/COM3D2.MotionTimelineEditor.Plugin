@@ -26,6 +26,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public override List<string> allBoneNames => _allBoneNames;
 
         private static SoundManager soundManager = new SoundManager(false);
+        private List<string> _seNames = new List<string>();
 
         private SeTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -34,6 +35,20 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public static SeTimelineLayer Create(int slotNo)
         {
             return new SeTimelineLayer(0);
+        }
+
+        public override void Init()
+        {
+            base.Init();
+
+            UpdateSeNames();
+        }
+
+        private void UpdateSeNames()
+        {
+            _seNames.Clear();
+            _seNames.AddRange(soundManager.SEData.data);
+            _seNames.AddRange(config.additionalSeNames);
         }
 
         protected override void InitMenuItems()
@@ -185,19 +200,44 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private GUIComboBox<string> _seNameComboBox = new GUIComboBox<string>
         {
-            items = soundManager.SEData.data,
             getName = (seName, index) =>
             {
                 return seName;
             },
         };
 
+        private enum TabType
+        {
+            操作,
+            管理,
+        }
+
+        private TabType _tabType = TabType.操作;
+
         public override void DrawWindow(GUIView view)
+        {
+            view.SetEnabled(!view.IsComboBoxFocused());
+
+            _tabType = view.DrawTabs(_tabType, 50, 20);
+
+            switch (_tabType)
+            {
+                case TabType.操作:
+                    DrawSeControl(view);
+                    break;
+                case TabType.管理:
+                    DrawSeManage(view);
+                    break;
+            }
+        }
+
+        public void DrawSeControl(GUIView view)
         {
             view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             bool updated = false;
 
+            _seNameComboBox.items = _seNames;
             if (_seNameComboBox.currentItem != _currentSeName)
             {
                 _seNameComboBox.currentIndex = _seNameComboBox.items.IndexOf(_currentSeName);
@@ -248,6 +288,58 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 soundManager.StopSe();
                 PlaySe(_currentSeName, _currentInterval, _currentIsLoop);
             }
+        }
+
+        private string _additionalSeName = "";
+
+        public void DrawSeManage(GUIView view)
+        {
+            view.SetEnabled(!view.IsComboBoxFocused());
+
+            view.DrawTextField(new GUIView.TextFieldOption
+            {
+                label = "SE名",
+                labelWidth = 50,
+                value = _additionalSeName,
+                onChanged = value => _additionalSeName = value,
+            });
+
+            if (view.DrawButton("追加", 100, 20))
+            {
+                if (_additionalSeName != "" && !config.additionalSeNames.Contains(_additionalSeName))
+                {
+                    config.additionalSeNames.Add(_additionalSeName);
+                    config.dirty = true;
+                    _additionalSeName = "";
+
+                    UpdateSeNames();
+                }
+            }
+
+            view.DrawHorizontalLine(Color.gray);
+
+            view.BeginScrollView();
+            {
+                for (var i = 0; i < config.additionalSeNames.Count; i++)
+                {
+                    var seName = config.additionalSeNames[i];
+
+                    view.BeginHorizontal();
+                    {
+                        view.DrawLabel(seName, view.viewRect.width - 50 - 10, 20);
+
+                        if (view.DrawButton("削除", 50, 20))
+                        {
+                            config.additionalSeNames.Remove(seName);
+                            config.dirty = true;
+                            UpdateSeNames();
+                            break;
+                        }
+                    }
+                    view.EndLayout();
+                }
+            }
+            view.EndScrollView();
         }
 
         public override SingleFrameType GetSingleFrameType(TransformType transformType)

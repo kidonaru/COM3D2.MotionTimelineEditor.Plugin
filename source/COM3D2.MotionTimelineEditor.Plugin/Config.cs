@@ -230,16 +230,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        [XmlIgnore]
+        public List<string> additionalSeNames = new List<string>();
+
+        [XmlElement("additionalSeName")]
+        public string[] additionalSeNamesXml
+        {
+            get => additionalSeNames.ToArray();
+            set
+            {
+                if (value == null)
+                {
+                    return;
+                }
+                additionalSeNames = new List<string>(value);
+            }
+        }
 
         [XmlIgnore]
         public bool dirty = false;
 
         public TangentPair defaultTangentPair
         {
-            get
-            {
-                return TangentPair.GetDefault(defaultTangentType);
-            }
+            get => TangentPair.GetDefault(defaultTangentType);
         }
 
         public void ConvertVersion()
