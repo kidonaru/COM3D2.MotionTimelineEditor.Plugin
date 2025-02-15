@@ -47,8 +47,8 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         private void UpdateSeNames()
         {
             _seNames.Clear();
+            _seNames.AddRange(timeline.additionalSeNames);
             _seNames.AddRange(soundManager.SEData.data);
-            _seNames.AddRange(config.additionalSeNames);
         }
 
         protected override void InitMenuItems()
@@ -316,9 +316,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             view.BeginScrollView();
             {
-                for (var i = 0; i < config.additionalSeNames.Count; i++)
+                for (var i = 0; i < timeline.additionalSeNames.Count; i++)
                 {
-                    var seName = config.additionalSeNames[i];
+                    var seName = timeline.additionalSeNames[i];
 
                     view.BeginHorizontal();
                     {
@@ -326,8 +326,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
                         if (view.DrawButton("削除", 50, 20))
                         {
-                            config.additionalSeNames.Remove(seName);
-                            config.dirty = true;
+                            timeline.additionalSeNames.Remove(seName);
                             UpdateSeNames();
                             break;
                         }
@@ -356,10 +355,9 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 return;
             }
 
-            if (!config.additionalSeNames.Contains(_additionalSeName))
+            if (!timeline.additionalSeNames.Contains(_additionalSeName))
             {
-                config.additionalSeNames.Add(_additionalSeName);
-                config.dirty = true;
+                timeline.additionalSeNames.Add(_additionalSeName);
                 UpdateSeNames();
             }
 
