@@ -279,7 +279,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override TransformType GetTransformType(string name)
         {
-            return TransformType.ShapeKey;
+            return TransformType.ModelShapeKey;
         }
     }
 }
