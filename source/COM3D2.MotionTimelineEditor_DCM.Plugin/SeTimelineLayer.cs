@@ -84,12 +84,15 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
-            var start = motion.start as TransformDataSe;
+            if (indexUpdated)
+            {
+                var start = motion.start as TransformDataSe;
 
-            var fileName = start.fileName;
-            var interval = start.interval;
-            var isLoop = start.isLoop;
-            PlaySe(fileName, interval, isLoop);
+                var fileName = start.fileName;
+                var interval = start.interval;
+                var isLoop = start.isLoop;
+                PlaySe(fileName, interval, isLoop);
+            }
         }
 
         private string _currentSeName = "";
@@ -306,13 +309,21 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             if (view.DrawButton("追加", 100, 20))
             {
-                if (_additionalSeName != "" && !config.additionalSeNames.Contains(_additionalSeName))
+                if (_additionalSeName != "")
                 {
-                    config.additionalSeNames.Add(_additionalSeName);
-                    config.dirty = true;
-                    _additionalSeName = "";
+                    if (!_additionalSeName.EndsWith(".ogg"))
+                    {
+                        _additionalSeName += ".ogg";
+                    }
 
-                    UpdateSeNames();
+                    if (!config.additionalSeNames.Contains(_additionalSeName))
+                    {
+                        config.additionalSeNames.Add(_additionalSeName);
+                        config.dirty = true;
+                        UpdateSeNames();
+                    }
+
+                    _additionalSeName = "";
                 }
             }
 
