@@ -62,15 +62,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
-            var start = motion.start as TransformDataVoice;
+            if (indexUpdated)
+            {
+                var start = motion.start as TransformDataVoice;
 
-            maidCache.oneShotVoiceName = start.voiceName;
-            maidCache.oneShotVoiceStartTime = start.startTime;
-            maidCache.oneShotVoiceLength = start.length;
-            maidCache.voiceFadeTime = start.fadeTime;
-            maidCache.voicePitch = start.pitch;
-            maidCache.loopVoiceName = start.loopVoiceName;
-            maidCache.PlayOneShotVoice();
+                maidCache.oneShotVoiceName = start.voiceName;
+                maidCache.oneShotVoiceStartTime = start.startTime;
+                maidCache.oneShotVoiceLength = start.length;
+                maidCache.voiceFadeTime = start.fadeTime;
+                maidCache.voicePitch = start.pitch;
+                maidCache.loopVoiceName = start.loopVoiceName;
+                maidCache.PlayOneShotVoice();
+            }
         }
 
         public override void UpdateFrame(FrameData frame)

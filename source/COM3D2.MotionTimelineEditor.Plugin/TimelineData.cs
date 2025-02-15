@@ -407,6 +407,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public List<int> stageLaserCountList = new List<int>();
         public List<int> stageLightCountList = new List<int>();
 
+        public List<string> additionalSeNames = new List<string>();
+
         public int activeTrackIndex = -1;
 
         public string bgmPath = "";
@@ -862,6 +864,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             isLightCompatibilityMode = xml.isLightCompatibilityMode;
             stageLaserCountList = xml.stageLaserCountList.ToList();
             stageLightCountList = xml.stageLightCountList.ToList();
+            additionalSeNames = xml.additionalSeNames.ToList();
             activeTrackIndex = xml.activeTrackIndex;
             bgmPath = xml.bgmPath;
             bpm = xml.bpm;
@@ -1017,6 +1020,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.isLightCompatibilityMode = isLightCompatibilityMode;
             xml.stageLaserCountList = stageLaserCountList.ToList();
             xml.stageLightCountList = stageLightCountList.ToList();
+            xml.additionalSeNames = additionalSeNames.ToList();
             xml.activeTrackIndex = activeTrackIndex;
             xml.bgmPath = bgmPath;
             xml.bpm = bpm;

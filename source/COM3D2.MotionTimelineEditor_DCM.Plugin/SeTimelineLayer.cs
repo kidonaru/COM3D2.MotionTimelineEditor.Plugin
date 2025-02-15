@@ -26,6 +26,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public override List<string> allBoneNames => _allBoneNames;
 
         private static SoundManager soundManager = new SoundManager(false);
+        private List<string> _seNames = new List<string>();
 
         private SeTimelineLayer(int slotNo) : base(slotNo)
         {
@@ -34,6 +35,20 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
         public static SeTimelineLayer Create(int slotNo)
         {
             return new SeTimelineLayer(0);
+        }
+
+        public override void Init()
+        {
+            base.Init();
+
+            UpdateSeNames();
+        }
+
+        private void UpdateSeNames()
+        {
+            _seNames.Clear();
+            _seNames.AddRange(timeline.additionalSeNames);
+            _seNames.AddRange(soundManager.SEData.data);
         }
 
         protected override void InitMenuItems()
@@ -69,12 +84,15 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
-            var start = motion.start as TransformDataSe;
+            if (indexUpdated)
+            {
+                var start = motion.start as TransformDataSe;
 
-            var fileName = start.fileName;
-            var interval = start.interval;
-            var isLoop = start.isLoop;
-            PlaySe(fileName, interval, isLoop);
+                var fileName = start.fileName;
+                var interval = start.interval;
+                var isLoop = start.isLoop;
+                PlaySe(fileName, interval, isLoop);
+            }
         }
 
         private string _currentSeName = "";
@@ -185,19 +203,44 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
         private GUIComboBox<string> _seNameComboBox = new GUIComboBox<string>
         {
-            items = soundManager.SEData.data,
             getName = (seName, index) =>
             {
                 return seName;
             },
         };
 
+        private enum TabType
+        {
+            操作,
+            管理,
+        }
+
+        private TabType _tabType = TabType.操作;
+
         public override void DrawWindow(GUIView view)
+        {
+            view.SetEnabled(!view.IsComboBoxFocused());
+
+            _tabType = view.DrawTabs(_tabType, 50, 20);
+
+            switch (_tabType)
+            {
+                case TabType.操作:
+                    DrawSeControl(view);
+                    break;
+                case TabType.管理:
+                    DrawSeManage(view);
+                    break;
+            }
+        }
+
+        public void DrawSeControl(GUIView view)
         {
             view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
             bool updated = false;
 
+            _seNameComboBox.items = _seNames;
             if (_seNameComboBox.currentItem != _currentSeName)
             {
                 _seNameComboBox.currentIndex = _seNameComboBox.items.IndexOf(_currentSeName);
@@ -248,6 +291,77 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 soundManager.StopSe();
                 PlaySe(_currentSeName, _currentInterval, _currentIsLoop);
             }
+        }
+
+        private string _additionalSeName = "";
+
+        public void DrawSeManage(GUIView view)
+        {
+            view.SetEnabled(!view.IsComboBoxFocused());
+
+            view.DrawTextField(new GUIView.TextFieldOption
+            {
+                label = "SE名",
+                labelWidth = 50,
+                value = _additionalSeName,
+                onChanged = value => _additionalSeName = value,
+            });
+
+            if (view.DrawButton("追加", 100, 20))
+            {
+                AddSe();
+            }
+
+            view.DrawHorizontalLine(Color.gray);
+
+            view.BeginScrollView();
+            {
+                for (var i = 0; i < timeline.additionalSeNames.Count; i++)
+                {
+                    var seName = timeline.additionalSeNames[i];
+
+                    view.BeginHorizontal();
+                    {
+                        view.DrawLabel(seName, view.viewRect.width - 50 - 10, 20);
+
+                        if (view.DrawButton("削除", 50, 20))
+                        {
+                            timeline.additionalSeNames.Remove(seName);
+                            UpdateSeNames();
+                            break;
+                        }
+                    }
+                    view.EndLayout();
+                }
+            }
+            view.EndScrollView();
+        }
+
+        private void AddSe()
+        {
+            if (_additionalSeName == "")
+            {
+                return;
+            }
+
+            if (!_additionalSeName.EndsWith(".ogg"))
+            {
+                _additionalSeName += ".ogg";
+            }
+
+            if (!GameUty.FileSystem.IsExistentFile(_additionalSeName))
+            {
+                MTEUtils.ShowDialog($"ファイルが存在しません\n{_additionalSeName}");
+                return;
+            }
+
+            if (!timeline.additionalSeNames.Contains(_additionalSeName))
+            {
+                timeline.additionalSeNames.Add(_additionalSeName);
+                UpdateSeNames();
+            }
+
+            _additionalSeName = "";
         }
 
         public override SingleFrameType GetSingleFrameType(TransformType transformType)

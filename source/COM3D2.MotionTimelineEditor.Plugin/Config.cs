@@ -230,16 +230,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-
         [XmlIgnore]
         public bool dirty = false;
 
         public TangentPair defaultTangentPair
         {
-            get
-            {
-                return TangentPair.GetDefault(defaultTangentType);
-            }
+            get => TangentPair.GetDefault(defaultTangentType);
         }
 
         public void ConvertVersion()
