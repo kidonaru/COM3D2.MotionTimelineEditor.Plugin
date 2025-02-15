@@ -309,22 +309,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 
             if (view.DrawButton("追加", 100, 20))
             {
-                if (_additionalSeName != "")
-                {
-                    if (!_additionalSeName.EndsWith(".ogg"))
-                    {
-                        _additionalSeName += ".ogg";
-                    }
-
-                    if (!config.additionalSeNames.Contains(_additionalSeName))
-                    {
-                        config.additionalSeNames.Add(_additionalSeName);
-                        config.dirty = true;
-                        UpdateSeNames();
-                    }
-
-                    _additionalSeName = "";
-                }
+                AddSe();
             }
 
             view.DrawHorizontalLine(Color.gray);
@@ -351,6 +336,34 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 }
             }
             view.EndScrollView();
+        }
+
+        private void AddSe()
+        {
+            if (_additionalSeName == "")
+            {
+                return;
+            }
+
+            if (!_additionalSeName.EndsWith(".ogg"))
+            {
+                _additionalSeName += ".ogg";
+            }
+
+            if (!GameUty.FileSystem.IsExistentFile(_additionalSeName))
+            {
+                MTEUtils.ShowDialog($"ファイルが存在しません\n{_additionalSeName}");
+                return;
+            }
+
+            if (!config.additionalSeNames.Contains(_additionalSeName))
+            {
+                config.additionalSeNames.Add(_additionalSeName);
+                config.dirty = true;
+                UpdateSeNames();
+            }
+
+            _additionalSeName = "";
         }
 
         public override SingleFrameType GetSingleFrameType(TransformType transformType)
