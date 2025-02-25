@@ -9,23 +9,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public ModelBoneController controller;
         public Transform transform;
         public Vector3 initialPosition;
-        public Vector3 initialEulerAngles;
+        public Quaternion initialRotation;
         public Vector3 initialScale;
 
-        public StudioModelStat model
-        {
-            get
-            {
-                return controller.model;
-            }
-        }
+        public StudioModelStat model => controller.model;
 
         public string name
         {
-            get
-            {
-                return string.Format("{0}/{1}", model.name, transform != null ? transform.name : "");
-            }
+            get => string.Format("{0}/{1}", model.name, transform != null ? transform.name : "");
+        }
+
+        public Vector3 initialEulerAngles
+        {
+            get => initialRotation.eulerAngles;
         }
     }
 
@@ -80,7 +76,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     controller = this,
                     transform = bone,
                     initialPosition = bone.localPosition,
-                    initialEulerAngles = bone.localEulerAngles,
+                    initialRotation = bone.localRotation,
                     initialScale = bone.localScale,
                 });
             }

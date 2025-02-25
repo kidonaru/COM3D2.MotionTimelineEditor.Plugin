@@ -202,7 +202,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var trans = CreateTransformData<TransformDataModel>(modelName);
                 trans.position = model.transform.localPosition;
-                trans.eulerAngles = model.transform.localEulerAngles;
+                trans.rotation = model.transform.localRotation;
                 trans.scale = model.transform.localScale;
                 trans.easing = GetEasing(frame.frameNo, modelName);
                 trans.visible = model.visible;

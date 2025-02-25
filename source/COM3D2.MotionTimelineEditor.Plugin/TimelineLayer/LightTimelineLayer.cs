@@ -123,7 +123,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             followLight.maidSlotNo = start.maidSlotNo;
 
             stat.position = start.position;
-            stat.eulerAngles = start.eulerAngles;
+            stat.rotation = start.rotation;
             stat.visible = start.visible;
 
             light.color = start.color;
@@ -152,9 +152,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 updated = true;
             }
 
-            if (start.eulerAngles != end.eulerAngles)
+            if (start.rotation != end.rotation)
             {
-                stat.eulerAngles = Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime);
+                stat.rotation = Quaternion.Lerp(start.rotation, end.rotation, easingTime);
                 updated = true;
             }
 
@@ -219,11 +219,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 end.positionValues,
                 t);
 
-            stat.eulerAngles = PluginUtils.HermiteVector3(
+            stat.rotation = PluginUtils.HermiteQuaternion(
                 t0,
                 t1,
-                start.eulerAnglesValues,
-                end.eulerAnglesValues,
+                start.rotationValues,
+                end.rotationValues,
                 t);
 
             if (timeline.isLightColorEasing)
@@ -324,7 +324,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var trans = CreateTransformData<TransformDataLight>(lightName);
                 trans.position = stat.position;
-                trans.eulerAngles = stat.eulerAngles;
+                trans.rotation = stat.rotation;
                 trans.visible = stat.visible;
                 trans.color = light.color;
                 trans.range = light.range;
@@ -528,7 +528,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var transform = stat.transform;
                 var position = transform.localPosition;
                 var initialPosition = StudioLightStat.DefaultPosition;
-                var initialEulerAngles = StudioLightStat.DefaultRotation;
+                var initialEulerAngles = StudioLightStat.DefaultEulerAngles;
                 var initialScale = Vector3.one;
                 var updateTransform = false;
                 var editType = TransformEditType.全て;

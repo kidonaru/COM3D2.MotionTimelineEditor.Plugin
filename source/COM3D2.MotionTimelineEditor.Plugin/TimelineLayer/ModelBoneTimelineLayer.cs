@@ -113,11 +113,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     end.positionValues,
                     t);
 
-                transform.localEulerAngles = PluginUtils.HermiteVector3(
+                transform.localRotation = PluginUtils.HermiteQuaternion(
                     t0,
                     t1,
-                    start.eulerAnglesValues,
-                    end.eulerAnglesValues,
+                    start.rotationValues,
+                    end.rotationValues,
                     t);
 
                 transform.localScale = PluginUtils.HermiteVector3(
@@ -131,7 +131,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 float easingTime = CalcEasingValue(t, motion.easing);
                 transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
-                transform.localRotation = Quaternion.Euler(Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime));
+                transform.localRotation = Quaternion.Lerp(start.rotation, end.rotation, easingTime);
                 transform.localScale = Vector3.Lerp(start.scale, end.scale, easingTime);
             }
         }
@@ -185,7 +185,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 var trans = CreateTransformData<TransformDataModelBone>(boneName);
                 trans.position = sourceBone.transform.localPosition;
-                trans.eulerAngles = sourceBone.transform.localEulerAngles;
+                trans.rotation = sourceBone.transform.localRotation;
                 trans.scale = sourceBone.transform.localScale;
                 trans.easing = GetEasing(frame.frameNo, boneName);
 

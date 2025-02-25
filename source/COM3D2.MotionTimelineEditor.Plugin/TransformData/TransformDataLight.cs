@@ -6,10 +6,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public override TransformType type => TransformType.Light;
 
-        public override int valueCount => 17;
+        public override int valueCount => 18;
 
         public override bool hasPosition => true;
-        public override bool hasEulerAngles => true;
+        public override bool hasRotation => true;
         public override bool hasColor => true;
         public override bool hasVisible => true;
         public override bool hasEasing => !timeline.isTangentLight;
@@ -20,19 +20,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get => new ValueData[] { values[0], values[1], values[2] };
         }
 
-        public override ValueData[] eulerAnglesValues
+        public override ValueData[] rotationValues
         {
-            get => new ValueData[] { values[3], values[4], values[5] };
+            get => new ValueData[] { values[3], values[4], values[5], values[6] };
         }
 
         public override ValueData[] colorValues
         {
-            get => new ValueData[] { values[6], values[7], values[8] };
+            get => new ValueData[] { values[7], values[8], values[9] };
         }
 
-        public override ValueData visibleValue => values[16];
+        public override ValueData visibleValue => values[17];
 
-        public override ValueData easingValue => values[9];
+        public override ValueData easingValue => values[10];
 
         public override ValueData[] tangentValues => values;
 
@@ -45,7 +45,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "range", new CustomValueInfo
                 {
-                    index = 10,
+                    index = 11,
                     name = "範囲",
                     defaultValue = 3f,
                 }
@@ -53,7 +53,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "intensity", new CustomValueInfo
                 {
-                    index = 11,
+                    index = 12,
                     name = "強度",
                     defaultValue = 0.95f,
                 }
@@ -61,7 +61,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "spotAngle", new CustomValueInfo
                 {
-                    index = 12,
+                    index = 13,
                     name = "角度",
                     defaultValue = 50f,
                 }
@@ -69,7 +69,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "shadowStrength", new CustomValueInfo
                 {
-                    index = 13,
+                    index = 14,
                     name = "影濃",
                     defaultValue = 0.1f,
                 }
@@ -77,7 +77,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "shadowBias", new CustomValueInfo
                 {
-                    index = 14,
+                    index = 15,
                     name = "影距",
                     defaultValue = 0.01f,
                 }
@@ -85,7 +85,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "maidSlotNo", new CustomValueInfo
                 {
-                    index = 15,
+                    index = 16,
                     name = "追従",
                     defaultValue = -1f,
                 }
