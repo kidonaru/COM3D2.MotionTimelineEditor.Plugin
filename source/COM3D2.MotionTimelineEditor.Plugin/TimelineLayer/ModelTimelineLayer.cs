@@ -102,7 +102,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var start = motion.start;
 
             transform.localPosition = start.position;
-            transform.localRotation = Quaternion.Euler(start.eulerAngles);
+            transform.localRotation = start.rotation;
             transform.localScale = start.scale;
 
             modelManager.SetModelVisible(model, start.visible);
@@ -122,9 +122,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
             }
 
-            if (start.eulerAngles != end.eulerAngles)
+            if (start.rotation != end.rotation)
             {
-                transform.localRotation = Quaternion.Euler(Vector3.Lerp(start.eulerAngles, end.eulerAngles, easingTime));
+                transform.localRotation = Quaternion.Lerp(start.rotation, end.rotation, easingTime);
             }
 
             if (start.scale != end.scale)
@@ -148,11 +148,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 end.positionValues,
                 t);
 
-            transform.localEulerAngles = PluginUtils.HermiteVector3(
+            transform.localRotation = PluginUtils.HermiteQuaternion(
                 t0,
                 t1,
-                start.eulerAnglesValues,
-                end.eulerAnglesValues,
+                start.rotationValues,
+                end.rotationValues,
                 t);
 
             transform.localScale = PluginUtils.HermiteVector3(

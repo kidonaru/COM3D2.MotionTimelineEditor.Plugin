@@ -103,65 +103,107 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void DeleteAllModels()
         {
-            if (studioHack != null && studioHack.IsValid())
+            try
             {
-                studioHack.DeleteAllModels();
-            }
-
-            foreach (var modelHack in modelHackMap.Values)
-            {
-                if (modelHack.IsValid())
+                if (studioHack != null && studioHack.IsValid())
                 {
-                    modelHack.DeleteAllModels();
+                    studioHack.DeleteAllModels();
                 }
+
+                foreach (var modelHack in modelHackMap.Values)
+                {
+                    if (modelHack.IsValid())
+                    {
+                        modelHack.DeleteAllModels();
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                MTEUtils.LogException(e);
             }
         }
 
         public void DeleteModel(StudioModelStat model)
         {
-            var modelHack = GetOrDefault(model.pluginName);
-            if (modelHack != null)
+            try
             {
-                modelHack.DeleteModel(model);
+                var modelHack = GetOrDefault(model.pluginName);
+                if (modelHack != null)
+                {
+                    modelHack.DeleteModel(model);
+                }
+            }
+            catch (System.Exception e)
+            {
+                MTEUtils.LogException(e);
             }
         }
 
         public void CreateModel(StudioModelStat model)
         {
-            var modelHack = GetOrDefault(model.pluginName);
-            if (modelHack != null)
+            try
             {
-                modelHack.CreateModel(model);
+                var modelHack = GetOrDefault(model.pluginName);
+                if (modelHack != null)
+                {
+                    modelHack.CreateModel(model);
+                }
+            }
+            catch (System.Exception e)
+            {
+                MTEUtils.LogException(e);
             }
         }
 
         public void UpdateAttachPoint(StudioModelStat model)
         {
-            var modelHack = GetOrDefault(model.pluginName);
-            if (modelHack != null)
+            try
             {
-                modelHack.UpdateAttachPoint(model);
+                var modelHack = GetOrDefault(model.pluginName);
+                if (modelHack != null)
+                {
+                    modelHack.UpdateAttachPoint(model);
+                }
+            }
+            catch (System.Exception e)
+            {
+                MTEUtils.LogException(e);
             }
         }
 
         public void SetModelVisible(StudioModelStat model, bool visible)
         {
-            var modelHack = GetOrDefault(model.pluginName);
-            if (modelHack != null)
+            try
             {
-                modelHack.SetModelVisible(model, visible);
+                var modelHack = GetOrDefault(model.pluginName);
+                if (modelHack != null)
+                {
+                    modelHack.SetModelVisible(model, visible);
+                }
+            }
+            catch (System.Exception e)
+            {
+                MTEUtils.LogException(e);
             }
         }
 
         public void ChangePluginName(StudioModelStat model, string pluginName)
         {
-            var prevModelHack = GetOrDefault(model.pluginName);
-            var nextModelHack = GetOrDefault(pluginName);
-
-            if (nextModelHack != prevModelHack)
+            try
             {
-                prevModelHack.DeleteModel(model);
-                nextModelHack.CreateModel(model);
+                var prevModelHack = GetOrDefault(model.pluginName);
+                var nextModelHack = GetOrDefault(pluginName);
+
+                if (nextModelHack != prevModelHack)
+                {
+                    prevModelHack.DeleteModel(model);
+                    nextModelHack.CreateModel(model);
+                }
+            }
+            catch (System.Exception e)
+            {
+                MTEUtils.LogException(e);
             }
         }
 

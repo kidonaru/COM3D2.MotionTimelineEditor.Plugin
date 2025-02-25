@@ -929,7 +929,84 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
+            if (version < 28)
+            {
+                // ModelTimelineLayerのeulerAnglesをrotationを追加
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "ModelTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+
+                                var values = new List<float>(transform.values);
+                                if (values.Count > 5)
+                                {
+                                    MTEUtils.LogDebug("Convert eulerAngles to rotation in ModelTimelineLayer name={0}", transform.name);
+                                    var eulerAngles = new Vector3(values[3], values[4], values[5]);
+                                    var rotation = Quaternion.Euler(eulerAngles);
+                                    values[3] = rotation.x;
+                                    values[4] = rotation.y;
+                                    values[5] = rotation.z;
+                                    values.Insert(6, rotation.w);
+                                    transform.values = values.ToArray();
+                                }
+
+                                var inTangents = transform.inTangents != null
+                                    ? new List<float>(transform.inTangents)
+                                    : new List<float>();
+                                if (inTangents.Count > 5)
+                                {
+                                    inTangents.Insert(6, inTangents[3]);
+                                    transform.inTangents = inTangents.ToArray();
+                                }
+
+                                var outTangents = transform.outTangents != null
+                                    ? new List<float>(transform.outTangents)
+                                    : new List<float>();
+                                if (outTangents.Count > 5)
+                                {
+                                    outTangents.Insert(6, outTangents[3]);
+                                    transform.outTangents = outTangents.ToArray();
+                                }
+
+                                {
+                                    var inSmoothBit = transform.inSmoothBit;
+                                    var value = ((inSmoothBit >> 3) & 1) != 0;
+                                    inSmoothBit = InsertBit(inSmoothBit, 6, value);
+                                    transform.inSmoothBit = inSmoothBit;
+                                }
+
+                                {
+                                    var outSmoothBit = transform.outSmoothBit;
+                                    var value = ((outSmoothBit >> 3) & 1) != 0;
+                                    outSmoothBit = InsertBit(outSmoothBit, 6, value);
+                                    transform.outSmoothBit = outSmoothBit;
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
             ConvertPlugin();
+        }
+
+        public static long InsertBit(long bitValues, int index, bool value)
+        {
+            if (index < 0 || index >= 64) // longは64ビット
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), "インデックスは0から63の間である必要があります。");
+            }
+
+            long upperBits = (bitValues >> index) << (index + 1);
+            long lowerBits = bitValues & ((1L << index) - 1);
+            long insertBit = value ? (1L << index) : 0;
+            return upperBits | insertBit | lowerBits;
         }
 
         private static readonly HashSet<string> _replacePluginNameSet = new HashSet<string>
