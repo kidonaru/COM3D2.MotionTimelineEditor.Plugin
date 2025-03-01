@@ -450,6 +450,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         // 画像出力
         public float imageOutputFrameRate = 30f;
         public string imageOutputFormat = "image_{frame:D6}";
+        public Vector2 imageOutputSize = new Vector2(1920, 1080);
 
         public int maxFrameCount => maxFrameNo + 1;
 
@@ -904,6 +905,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             videoFrontmostAlpha = xml.videoFrontmostAlpha;
             imageOutputFrameRate = xml.imageOutputFrameRate;
             imageOutputFormat = xml.imageOutputFormat;
+            imageOutputSize = xml.imageOutputSize;
 
             layers = new List<ITimelineLayer>(xml.layers.Count);
             foreach (var layerXml in xml.layers)
@@ -1062,6 +1064,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.videoFrontmostAlpha = videoFrontmostAlpha;
             xml.imageOutputFrameRate = imageOutputFrameRate;
             xml.imageOutputFormat = imageOutputFormat;
+            xml.imageOutputSize = imageOutputSize;
 
             stopwatch.ProcessEnd("TimelineData.ToXml");
 

@@ -1053,6 +1053,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var anmName = timeline.anmName;
             var outputDir = PluginUtils.GetImageOutputDirPath(anmName);
             var frameRate = timeline.imageOutputFrameRate;
+            var imageSize = timeline.imageOutputSize;
             var frameDuration = 1f / frameRate;
             var fileNameFormat = timeline.imageOutputFormat + ".png";
 
@@ -1062,7 +1063,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             Directory.CreateDirectory(outputDir);
 
-            var texture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
+            var screenTexture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
+            var resizedTexture = new Texture2D((int) imageSize.x, (int) imageSize.y, TextureFormat.RGB24, false);
+
+            var screenAspect = (float) Screen.width / Screen.height;
+            var imageAspect = imageSize.x / imageSize.y;
+            var renderTextureSize = imageSize;
+            if (screenAspect > imageAspect)
+            {
+                // 画面が出力画像より横長の場合、高さを基準に幅を調整
+                renderTextureSize.x = imageSize.y * screenAspect;
+            }
+            else
+            {
+                // 画面が出力画像より縦長の場合、幅を基準に高さを調整
+                renderTextureSize.y = imageSize.x / screenAspect;
+            }
+            var resizedRT = RenderTexture.GetTemporary((int) renderTextureSize.x, (int) renderTextureSize.y, 0);
 
             var formatParams = new Dictionary<string, object>
             {
@@ -1088,6 +1105,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             MTEUtils.UIHide();
             mte.isVisible = false;
             studioHack.isUIVisible = false;
+            config.isKeyInputEnabled = false;
 
             SetPlayingTimeAll((float) frameTime);
             onSeekCurrentFrame?.Invoke();
@@ -1105,15 +1123,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 try
                 {
-                    texture.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
-
                     formatParams["frame"] = frameNo;
 
                     var fileName = MTEUtils.FormatWithNamedParameters(fileNameFormat, formatParams);
                     var filePath = Path.Combine(outputDir, fileName);
 
-                    var bytes = texture.EncodeToPNG();
-                    File.WriteAllBytes(filePath, bytes);
+                    SaveScreenShot(screenTexture, resizedTexture, resizedRT, filePath);
 
                     if (Input.GetKeyDown(KeyCode.Escape))
                     {
@@ -1135,8 +1150,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             MTEUtils.UIResume();
             mte.isVisible = true;
             studioHack.isUIVisible = true;
+            config.isKeyInputEnabled = true;
 
-            UnityEngine.Object.Destroy(texture);
+            UnityEngine.Object.Destroy(screenTexture);
+            UnityEngine.Object.Destroy(resizedTexture);
+            RenderTexture.ReleaseTemporary(resizedRT);
 
             if (frameTime <= maxFrameTime)
             {
@@ -1146,6 +1164,48 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 MTEUtils.ShowDialog($"連番画像出力が完了しました\n{outputDir}");
             }
+        }
+
+        private void SaveScreenShot(
+            Texture2D screenTexture,
+            Texture2D resizedTexture,
+            RenderTexture resizedRT,
+            string filePath)
+        {
+            screenTexture.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
+            screenTexture.Apply();
+
+            RenderTexture active = RenderTexture.active;
+            RenderTexture.active = resizedRT;
+
+            Graphics.Blit(screenTexture, resizedRT);
+
+            float screenAspect = (float)Screen.width / Screen.height;
+            float targetAspect = (float)resizedTexture.width / resizedTexture.height;
+
+            Rect readRect;
+            if (screenAspect > targetAspect)
+            {
+                // 画面が出力画像より横長の場合、中央部分を切り取る
+                float width = resizedRT.height * targetAspect;
+                float x = (resizedRT.width - width) * 0.5f;
+                readRect = new Rect(x, 0, width, resizedRT.height);
+            }
+            else
+            {
+                // 画面が出力画像より縦長の場合、中央部分を切り取る
+                float height = resizedRT.width / targetAspect;
+                float y = (resizedRT.height - height) * 0.5f;
+                readRect = new Rect(0, y, resizedRT.width, height);
+            }
+
+            resizedTexture.ReadPixels(readRect, 0, 0);
+            resizedTexture.Apply();
+
+            RenderTexture.active = active;
+
+            var bytes = resizedTexture.EncodeToPNG();
+            File.WriteAllBytes(filePath, bytes);
         }
 
         public void AddTrack()

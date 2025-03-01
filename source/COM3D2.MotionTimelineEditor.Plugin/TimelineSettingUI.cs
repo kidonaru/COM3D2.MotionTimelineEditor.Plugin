@@ -366,6 +366,34 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 hiddenButton = true,
             });
 
+            view.BeginHorizontal();
+            {
+                view.DrawLabel("画像サイズ", 70, 20);
+
+                view.DrawFloatField(new GUIView.FloatFieldOption
+                {
+                    label = "幅",
+                    labelWidth = 30,
+                    fieldType = FloatFieldType.Int,
+                    value = timeline.imageOutputSize.x,
+                    width = 80,
+                    height = 20,
+                    onChanged = x => timeline.imageOutputSize.x = x,
+                });
+
+                view.DrawFloatField(new GUIView.FloatFieldOption
+                {
+                    label = "高さ",
+                    labelWidth = 30,
+                    fieldType = FloatFieldType.Int,
+                    value = timeline.imageOutputSize.y,
+                    width = 80,
+                    height = 20,
+                    onChanged = x => timeline.imageOutputSize.y = x,
+                });
+            }
+            view.EndLayout();
+
             view.DrawHorizontalLine(Color.gray);
 
             view.BeginHorizontal();

@@ -315,6 +315,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("ImageOutputFormat")]
         public string imageOutputFormat = "image_{frame:D6}";
 
+        [XmlElement("ImageOutputSize")]
+        public Vector2 imageOutputSize = new Vector2(1920, 1080);
+
         public TimelineXml()
         {
         }
