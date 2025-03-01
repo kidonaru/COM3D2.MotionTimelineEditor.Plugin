@@ -323,12 +323,64 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 },
             });
 
+            view.DrawHorizontalLine(Color.gray);
+
+            view.DrawLabel("連番画像出力設定", 100, 20);
+
+            view.BeginHorizontal();
+            {
+                var newFrameRate = timeline.imageOutputFrameRate;
+
+                view.DrawFloatField(new GUIView.FloatFieldOption
+                {
+                    label = "フレームレート",
+                    value = timeline.imageOutputFrameRate,
+                    width = 150,
+                    height = 20,
+                    onChanged = x => newFrameRate = x,
+                });
+
+                if (view.DrawButton("30", 30, 20))
+                {
+                    newFrameRate = 30;
+                }
+
+                if (view.DrawButton("60", 30, 20))
+                {
+                    newFrameRate = 60;
+                }
+
+                if (newFrameRate != timeline.imageOutputFrameRate)
+                {
+                    timeline.imageOutputFrameRate = newFrameRate;
+                }
+            }
+            view.EndLayout();
+
+            view.DrawTextField(new GUIView.TextFieldOption
+            {
+                label = "出力名",
+                labelWidth = 50,
+                value = timeline.imageOutputFormat,
+                onChanged = value => timeline.imageOutputFormat = value,
+                hiddenButton = true,
+            });
+
+            view.DrawHorizontalLine(Color.gray);
+
             view.BeginHorizontal();
             {
                 var enabled = PluginUtils.IsExistsDcmSongDirPath(timeline.dcmSongName);
-                if (view.DrawButton("DCM出力先を開く", 150, 20, enabled))
+                if (view.DrawButton("DCM出力先を開く", 120, 20, enabled))
                 {
                     var dirPath = PluginUtils.GetDcmSongDirPath(timeline.dcmSongName);
+                    MTEUtils.OpenDirectory(dirPath);
+                }
+
+                enabled = PluginUtils.IsExistsImageOutputDirPath(timeline.anmName);
+                if (view.DrawButton("画像出力先を開く", 120, 20, enabled))
+                {
+                    var dirPath = PluginUtils.GetImageOutputDirPath(timeline.anmName);
                     MTEUtils.OpenDirectory(dirPath);
                 }
             }

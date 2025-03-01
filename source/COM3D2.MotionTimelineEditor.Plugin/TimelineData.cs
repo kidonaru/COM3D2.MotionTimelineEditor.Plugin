@@ -447,6 +447,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float videoFrontmostScale = 0.38f;
         public float videoFrontmostAlpha = 1f;
 
+        // 画像出力
+        public float imageOutputFrameRate = 30f;
+        public string imageOutputFormat = "image_{frame:D6}";
+
         public int maxFrameCount => maxFrameNo + 1;
 
         private static TimelineManager timelineManager => TimelineManager.instance;
@@ -898,6 +902,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             videoFrontmostPosition = xml.videoFrontmostPosition;
             videoFrontmostScale = xml.videoFrontmostScale;
             videoFrontmostAlpha = xml.videoFrontmostAlpha;
+            imageOutputFrameRate = xml.imageOutputFrameRate;
+            imageOutputFormat = xml.imageOutputFormat;
 
             layers = new List<ITimelineLayer>(xml.layers.Count);
             foreach (var layerXml in xml.layers)
@@ -1054,6 +1060,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.videoFrontmostPosition = videoFrontmostPosition;
             xml.videoFrontmostScale = videoFrontmostScale;
             xml.videoFrontmostAlpha = videoFrontmostAlpha;
+            xml.imageOutputFrameRate = imageOutputFrameRate;
+            xml.imageOutputFormat = imageOutputFormat;
 
             stopwatch.ProcessEnd("TimelineData.ToXml");
 

@@ -311,6 +311,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public void SetPlayingFrameNoFloatAll(float frameNo)
+        {
+            foreach (var cache in maidCaches)
+            {
+                cache.playingFrameNoFloat = frameNo;
+            }
+        }
+
         public void SetAnmSpeedAll(float speed)
         {
             foreach (var cache in maidCaches)

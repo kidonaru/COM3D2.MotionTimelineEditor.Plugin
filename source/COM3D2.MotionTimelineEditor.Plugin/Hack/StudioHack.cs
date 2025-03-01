@@ -275,6 +275,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override Camera subCamera => null;
 
+        public override bool isUIVisible
+        {
+            get => true;
+            set {}
+        }
+
         public override bool Init()
         {
             MTEUtils.Log("StudioHack初期化中...");

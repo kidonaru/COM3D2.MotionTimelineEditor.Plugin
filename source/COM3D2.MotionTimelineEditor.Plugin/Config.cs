@@ -243,23 +243,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             version = CurrentVersion;
         }
 
+        [XmlIgnore]
+        public bool isKeyInputEnabled = true;
+
         public bool GetKey(KeyBindType keyBindType)
         {
+            if (!isKeyInputEnabled) return false;
             return keyBinds[keyBindType].GetKey();
         }
 
         public bool GetKeyDown(KeyBindType keyBindType)
         {
+            if (!isKeyInputEnabled) return false;
             return keyBinds[keyBindType].GetKeyDown();
         }
 
         public bool GetKeyDownRepeat(KeyBindType keyBindType)
         {
+            if (!isKeyInputEnabled) return false;
             return keyBinds[keyBindType].GetKeyDownRepeat(keyRepeatTimeFirst, keyRepeatTime);
         }
 
         public bool GetKeyUp(KeyBindType keyBindType)
         {
+            if (!isKeyInputEnabled) return false;
             return keyBinds[keyBindType].GetKeyUp();
         }
 

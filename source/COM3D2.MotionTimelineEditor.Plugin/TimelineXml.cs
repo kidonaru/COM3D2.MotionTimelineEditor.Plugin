@@ -309,6 +309,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("VideoFrontmostAlpha")]
         public float videoFrontmostAlpha = 1f;
 
+        [XmlElement("ImageOutputFrameRate")]
+        public float imageOutputFrameRate = 30f;
+
+        [XmlElement("ImageOutputFormat")]
+        public string imageOutputFormat = "image_{frame:D6}";
+
         public TimelineXml()
         {
         }

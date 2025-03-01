@@ -8,6 +8,7 @@ using UnityEngine.Events;
 using System.Xml.Linq;
 using System.Text;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -879,10 +880,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 OnPoseEditUpdated();
             }
 
-            if (onSeekCurrentFrame != null)
-            {
-                onSeekCurrentFrame();
-            }
+            onSeekCurrentFrame?.Invoke();
         }
 
         public void ApplyCurrentFrame(bool motionUpdate)
@@ -1033,6 +1031,121 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             doc.Save(timeline.dcmSongListPath);
 
             MTEUtils.ShowDialog("「" + songName + "」を生成しました");
+        }
+
+        public void OutputImage()
+        {
+            MTEUtils.ShowConfirmDialog("連番画像出力を開始しますか？\n出力中は[Esc]キーで停止できます", () =>
+            {
+                MTEUtils.Log("連番画像出力を開始しました");
+                GameMain.Instance.StartCoroutine(OutputImageInternal());
+            });
+        }
+
+        private IEnumerator OutputImageInternal()
+        {
+            if (!IsValidData())
+            {
+                MTEUtils.ShowDialog(errorMessage);
+                yield break;
+            }
+
+            var anmName = timeline.anmName;
+            var outputDir = PluginUtils.GetImageOutputDirPath(anmName);
+            var frameRate = timeline.imageOutputFrameRate;
+            var frameDuration = 1f / frameRate;
+            var fileNameFormat = timeline.imageOutputFormat + ".png";
+
+            if (Directory.Exists(outputDir))
+            {
+                Directory.Delete(outputDir, true);
+            }
+            Directory.CreateDirectory(outputDir);
+
+            var texture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
+
+            var formatParams = new Dictionary<string, object>
+            {
+                { "name", anmName },
+            };
+
+            var minFrameTime = 0f;
+            var maxFrameTime = timeline.maxFrameNo * timeline.frameDuration;
+
+            if (timeline.activeTrackIndex >= 0)
+            {
+                var activeTrack = timeline.activeTrack;
+                minFrameTime = activeTrack.startFrameNo * timeline.frameDuration;
+                maxFrameTime = activeTrack.endFrameNo * timeline.frameDuration;
+            }
+
+            var frameNo = 0;
+            var frameTime = minFrameTime;
+
+            Stop();
+            studioHackManager.isPoseEditing = false;
+
+            MTEUtils.UIHide();
+            mte.isVisible = false;
+            studioHack.isUIVisible = false;
+
+            SetPlayingTimeAll((float) frameTime);
+            onSeekCurrentFrame?.Invoke();
+
+            ApplyCurrentFrame(false);
+
+            yield return new WaitForSeconds(0.5f);
+
+            while (frameTime <= maxFrameTime)
+            {
+                SetPlayingTimeAll((float) frameTime);
+                onSeekCurrentFrame?.Invoke();
+
+                yield return new WaitForEndOfFrame();
+
+                try
+                {
+                    texture.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
+
+                    formatParams["frame"] = frameNo;
+
+                    var fileName = MTEUtils.FormatWithNamedParameters(fileNameFormat, formatParams);
+                    var filePath = Path.Combine(outputDir, fileName);
+
+                    var bytes = texture.EncodeToPNG();
+                    File.WriteAllBytes(filePath, bytes);
+
+                    if (Input.GetKeyDown(KeyCode.Escape))
+                    {
+                        break;
+                    }
+
+                    frameNo++;
+                    frameTime = minFrameTime + frameNo * frameDuration;
+                }
+                catch (Exception e)
+                {
+                    MTEUtils.LogException(e);
+                    break;
+                }
+            }
+
+            yield return new WaitForEndOfFrame();
+
+            MTEUtils.UIResume();
+            mte.isVisible = true;
+            studioHack.isUIVisible = true;
+
+            UnityEngine.Object.Destroy(texture);
+
+            if (frameTime <= maxFrameTime)
+            {
+                MTEUtils.ShowDialog($"連番画像出力を中断しました\n{outputDir}");
+            }
+            else
+            {
+                MTEUtils.ShowDialog($"連番画像出力が完了しました\n{outputDir}");
+            }
         }
 
         public void AddTrack()
@@ -1449,6 +1562,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             prevPlayingFrameNo = frameNo;
             currentFrameNo = frameNo;
             maidManager.SetPlayingFrameNoAll(frameNo);
+        }
+
+        public void SetPlayingFrameNoFloatAll(float frameNoFloat)
+        {
+            int frameNo = (int) Mathf.Round(frameNoFloat);
+            prevPlayingFrameNo = frameNo;
+            currentFrameNo = frameNo;
+            maidManager.SetPlayingFrameNoFloatAll(frameNoFloat);
+        }
+
+        public void SetPlayingTimeAll(float time)
+        {
+            var frameNo = time / timeline.frameDuration;
+            SetPlayingFrameNoFloatAll(frameNo);
         }
 
         public void SetAnmSpeedAll(float speed)

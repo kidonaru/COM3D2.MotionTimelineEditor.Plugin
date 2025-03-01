@@ -10,6 +10,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         New,
         OutputAnm,
         OutputDCM,
+        OutputImage,
     }
 
     public class MainWindow : IWindow
@@ -94,6 +95,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 FileMenuType.New,
                 FileMenuType.OutputAnm,
                 FileMenuType.OutputDCM,
+                FileMenuType.OutputImage,
             },
             getName = (type, index) =>
             {
@@ -105,6 +107,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         return "アニメ出力";
                     case FileMenuType.OutputDCM:
                         return "DCM出力";
+                    case FileMenuType.OutputImage:
+                        return "連番画像出力";
                     default:
                         return "";
                 }
@@ -115,6 +119,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     case FileMenuType.OutputAnm:
                     case FileMenuType.OutputDCM:
+                    case FileMenuType.OutputImage:
                         return timelineManager.IsValidData();
                     default:
                         return true;
@@ -132,6 +137,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         break;
                     case FileMenuType.OutputDCM:
                         timelineManager.OutputDCM();
+                        break;
+                    case FileMenuType.OutputImage:
+                        timelineManager.OutputImage();
                         break;
                 }
             },

@@ -11,6 +11,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         public FieldInfo maidArray;
         public FieldInfo selectMaidIndex;
+        public FieldInfo bGui;
         public FieldInfo isIK;
         public FieldInfo isLock;
         public FieldInfo unLockFlg;

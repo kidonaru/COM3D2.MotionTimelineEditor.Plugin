@@ -206,6 +206,18 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             get => mps.subCamera;
         }
 
+        public override bool isUIVisible
+        {
+            get => mps.mainWindow?.Visible ?? false;
+            set
+            {
+                if (mps.mainWindow != null)
+                {
+                    mps.mainWindow.Visible = value;
+                }
+            }
+        }
+
         public MeidoPhotoStudioHack()
         {
         }

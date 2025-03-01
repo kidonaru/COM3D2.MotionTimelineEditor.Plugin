@@ -21,6 +21,12 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             set => field.selectMaidIndex.SetValue(multipleMaids, value);
         }
 
+        public bool bGui
+        {
+            get => (bool)field.bGui.GetValue(multipleMaids);
+            set => field.bGui.SetValue(multipleMaids, value);
+        }
+
         public bool[] isIK
         {
             get => (bool[])field.isIK.GetValue(multipleMaids);

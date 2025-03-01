@@ -25,6 +25,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public abstract bool useMuneKeyL { set; }
         public abstract bool useMuneKeyR { set; }
         public abstract Camera subCamera { get; }
+        public abstract bool isUIVisible { get; set; }
 
         protected string _errorMessage = "";
         public string errorMessage

@@ -315,6 +315,12 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
         public override Camera subCamera => multipleMaids.subcamera;
 
+        public override bool isUIVisible
+        {
+            get => multipleMaids.bGui;
+            set => multipleMaids.bGui = value;
+        }
+
         public override DepthOfFieldScatter depthOfField
         {
             get => multipleMaids.depth_field_;

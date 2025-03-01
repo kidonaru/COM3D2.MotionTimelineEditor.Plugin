@@ -34,6 +34,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public static string ImageOutputDirPath
+        {
+            get
+            {
+                string path = PhotoWindowManager.path_photo_folder + "_Image";
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+
+                return path;
+            }
+        }
+
         public static string DCMConfigPath
         {
             get => MTEUtils.CombinePaths(UserDataPath, "DanceCameraMotion");
@@ -132,6 +146,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static string GetVoiceInfoCsvPath(Personality personality)
         {
             return MTEUtils.CombinePaths(PluginConfigDirPath, "Voice_" + personality.ToString() + ".csv");
+        }
+
+        public static string GetImageOutputDirPath(string anmName)
+        {
+            var path = MTEUtils.CombinePaths(ImageOutputDirPath, anmName);
+            return path;
+        }
+
+        public static bool IsExistsImageOutputDirPath(string anmName)
+        {
+            var path = MTEUtils.CombinePaths(ImageOutputDirPath, anmName);
+            return Directory.Exists(path);
         }
 
         private static readonly Regex _regexGroup = new Regex(@"\(\d+\)$", RegexOptions.Compiled);
