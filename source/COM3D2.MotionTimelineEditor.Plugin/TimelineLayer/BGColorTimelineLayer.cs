@@ -130,7 +130,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (bgGround != null)
                 {
-                    bgGround.visible = start.visible;
+                    var visible = start.visible;
+                    if (!isCurrent && !timeline.isBackgroundVisible)
+                    {
+                        visible = false;
+                    }
+
+                    bgGround.visible = visible;
                     bgGround.position = start.position;
                     bgGround.scale = start.scale;
                     bgGround.color = start.color;

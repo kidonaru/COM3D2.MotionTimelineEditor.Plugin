@@ -366,6 +366,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 _isBackgroundVisible = value;
                 studioHack.SetBackgroundVisible(value);
+
+                var bgColorLayer = timelineManager.GetLayer<BGColorTimelineLayer>();
+                if (bgColorLayer != null)
+                {
+                    bgColorLayer.ApplyCurrentFrame(true);
+                }
             }
         }
 

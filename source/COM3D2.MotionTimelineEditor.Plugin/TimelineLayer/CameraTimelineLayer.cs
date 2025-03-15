@@ -141,6 +141,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 subCamera.fieldOfView = viewAngle;
             }
 
+            if (config.isFixedFocus && !isCurrent && studioHackManager.isPoseEditing)
+            {
+                var currentMaidCache = maidManager.maidCache;
+                if (currentMaidCache != null)
+                {
+                    var target = currentMaidCache.GetPointTransform(MaidPointType.Head);
+                    uoCamera.MoveTarget(target.position);
+                }
+            }
+
             //MTEUtils.LogDebug("ApplyMotion: position={0}, rotation={1}, distance={2}, viewAngle={3}", position, rotation, distance, viewAngle);
         }
 

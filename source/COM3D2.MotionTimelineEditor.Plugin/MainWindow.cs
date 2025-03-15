@@ -817,6 +817,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         config.dirty = true;
                     });
 
+                    cameraUpdated |= view.DrawToggle("フォーカス固定", config.isFixedFocus, 100, 20, !currentLayer.isCameraLayer && studioHackManager.isPoseEditing, newValue =>
+                    {
+                        config.isFixedFocus = newValue;
+                        config.dirty = true;
+                    });
+
                     if (cameraUpdated)
                     {
                         var cameraLayer = timelineManager.GetLayer(typeof(CameraTimelineLayer));

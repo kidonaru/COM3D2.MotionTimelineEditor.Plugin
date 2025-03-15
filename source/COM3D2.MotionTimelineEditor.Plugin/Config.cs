@@ -41,6 +41,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool isEasyEdit = false;
         public bool isCameraSync = true;
         public bool isFixedFoV = false;
+        public bool isFixedFocus = false;
         public bool isPostEffectSync = true;
         public bool isAutoScroll = false;
         public TangentType defaultTangentType = TangentType.Smooth;
