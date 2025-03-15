@@ -88,11 +88,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _studioHack = activeStudioHacks[0];
             }
 
-            var isPoseEditingNow = _studioHack?.isPoseEditing ?? false;
-            if (isPoseEditingNow != _isPoseEditing)
+            if (mte.isEnable)
             {
-                _isPoseEditing = isPoseEditingNow;
-                onPoseEditingChanged?.Invoke(isPoseEditingNow);
+                var isPoseEditingNow = _studioHack?.isPoseEditing ?? false;
+                if (isPoseEditingNow != _isPoseEditing)
+                {
+                    _isPoseEditing = isPoseEditingNow;
+                    onPoseEditingChanged?.Invoke(isPoseEditingNow);
+                }
             }
         }
 
