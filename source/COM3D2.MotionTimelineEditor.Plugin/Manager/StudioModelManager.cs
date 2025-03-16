@@ -44,11 +44,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private Dictionary<string, StudioModelStat> modelMap = new Dictionary<string, StudioModelStat>();
         public Dictionary<string, ModelBone> boneMap = new Dictionary<string, ModelBone>();
         public Dictionary<string, ModelBlendShape> blendShapeMap = new Dictionary<string, ModelBlendShape>();
+        public Dictionary<string, ModelMaterial> materialMap = new Dictionary<string, ModelMaterial>(); 
 
         public List<StudioModelStat> models = new List<StudioModelStat>();
         public List<string> modelNames = new List<string>();
         public List<string> boneNames = new List<string>();
         public List<string> blendShapeNames = new List<string>();
+        public List<string> materialNames = new List<string>();
 
         public static event UnityAction<StudioModelStat> onModelAdded;
         public static event UnityAction<StudioModelStat> onModelRemoved;
@@ -169,6 +171,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return GetBlendShape(blendShapeNames[index]);
         }
 
+        public ModelMaterial GetMaterial(string name)
+        {
+            ModelMaterial material;
+            if (materialMap.TryGetValue(name, out material))
+            {
+                return material;
+            }
+            return null;
+        }
+
+        public ModelMaterial GetMaterial(int index)
+        {
+            if (index < 0 || index >= materialNames.Count)
+            {
+                return null;
+            }
+            return GetMaterial(materialNames[index]);
+        }
+
         private int _prevUpdateFrame = -1;
 
         public override void LateUpdate()
@@ -254,8 +275,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 modelNames.Clear();
                 boneMap.Clear();
                 blendShapeMap.Clear();
+                materialMap.Clear();
                 boneNames.Clear();
                 blendShapeNames.Clear();
+                materialNames.Clear();
 
                 models.AddRange(modelMap.Values);
 
@@ -284,6 +307,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         blendShapeMap[blendShape.name] = blendShape;
                         blendShapeNames.Add(blendShape.name);
                     }
+
+                    foreach (var material in model.materials)
+                    {
+                        materialMap[material.name] = material;
+                        materialNames.Add(material.name);
+                    }
                 }
 
                 MTEUtils.LogDebug("StudioModelManager: Model list updated");
@@ -301,6 +330,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     foreach (var blendShape in model.blendShapes)
                     {
                         MTEUtils.LogDebug("  blendShape: name={0}", blendShape.name);
+                    }
+
+                    foreach (var material in model.materials)
+                    {
+                        MTEUtils.LogDebug("  material: name={0}", material.name);
                     }
                 }
             }
@@ -396,9 +430,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             models.Clear();
             boneMap.Clear();
             blendShapeMap.Clear();
+            materialMap.Clear();
             modelNames.Clear();
             boneNames.Clear();
             blendShapeNames.Clear();
+            materialNames.Clear();
             _prevUpdateFrame = -1;
 
             modelHackManager.DeleteAllModels();

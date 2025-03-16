@@ -136,6 +136,7 @@
     <Compile Include="TimelineLayer\LightTimelineLayer.cs" />
     <Compile Include="TimelineLayer\LightTimelineLayerBase.cs" />
     <Compile Include="TimelineLayer\ModelBoneTimelineLayer.cs" />
+    <Compile Include="TimelineLayer\ModelMaterialTimelineLayer.cs" />
     <Compile Include="TimelineLayer\ModelShapeKeyTimelineLayer.cs" />
     <Compile Include="TimelineLayer\ModelTimelineLayer.cs" />
     <Compile Include="TimelineLayer\ModelTimelineLayerBase.cs" />
@@ -171,6 +172,7 @@
     <Compile Include="TransformData\TransformDataLookAtTarget.cs" />
     <Compile Include="TransformData\TransformDataModel.cs" />
     <Compile Include="TransformData\TransformDataModelBone.cs" />
+    <Compile Include="TransformData\TransformDataModelMaterial.cs" />
     <Compile Include="TransformData\TransformDataModelShapeKey.cs" />
     <Compile Include="TransformData\TransformDataMove.cs" />
     <Compile Include="TransformData\TransformDataParaffin.cs" />
@@ -238,6 +240,7 @@
     <Compile Include="MaidInfo.cs" />
     <Compile Include="MainWindow.cs" />
     <Compile Include="ModelBoneController.cs" />
+    <Compile Include="ModelMaterialController.cs" />
     <Compile Include="MotionData.cs" />
     <Compile Include="MotionPlayData.cs" />
     <Compile Include="MoviePlayerImpl.cs" />

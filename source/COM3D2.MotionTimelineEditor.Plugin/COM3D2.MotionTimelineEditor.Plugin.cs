@@ -364,6 +364,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     typeof(ModelShapeKeyTimelineLayer), ModelShapeKeyTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
+                    typeof(ModelMaterialTimelineLayer), ModelMaterialTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
                     typeof(ModelTimelineLayer), ModelTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
@@ -444,6 +447,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 );
                 timelineManager.RegisterTransform(
                     TransformType.ModelShapeKey, TimelineManager.CreateTransform<TransformDataModelShapeKey>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.ModelMaterial, TimelineManager.CreateTransform<TransformDataModelMaterial>
                 );
                 timelineManager.RegisterTransform(
                     TransformType.Move, TimelineManager.CreateTransform<TransformDataMove>

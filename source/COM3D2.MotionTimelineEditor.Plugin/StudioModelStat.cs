@@ -28,6 +28,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public BlendShapeController blendShapeController { get; private set; }
         public ModelBoneController modelBoneController { get; private set; }
+        public ModelMaterialController modelMaterialController { get; private set; }
 
         public List<ModelBone> bones
         {
@@ -53,6 +54,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public List<ModelMaterial> materials
+        {
+            get
+            {
+                if (modelMaterialController != null)
+                {
+                    return modelMaterialController.materials;
+                }
+                return new List<ModelMaterial>();
+            }
+        }
+
         private Transform _transform;
         public Transform transform
         {
@@ -68,7 +81,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 _transform = value;
-                BuildBonesAndBlendShapes();
+                CreateControllers();
             }
         }
 
@@ -161,7 +174,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private void BuildBonesAndBlendShapes()
+        private void CreateControllers()
         {
             if (transform == null)
             {
@@ -170,11 +183,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             modelBoneController = ModelBoneController.GetOrCreate(this);
             blendShapeController = BlendShapeLoader.LoadController(this);
+            modelMaterialController = ModelMaterialController.GetOrCreate(this);
         }
 
         public ModelBone GetBone(int index)
         {
             return modelBoneController.GetBone(index);
+        }
+
+        public ModelMaterial GetMaterial(int index)
+        {
+            return modelMaterialController.GetMaterial(index);
         }
 
         public void ReplaceInfo(OfficialObjectInfo info)

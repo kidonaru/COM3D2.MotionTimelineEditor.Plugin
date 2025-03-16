@@ -23,6 +23,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Model,
         ModelBone,
         ModelShapeKey,
+        ModelMaterial,
         Move,
         Paraffin,
         PsylliumArea,
