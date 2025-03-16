@@ -127,6 +127,7 @@
     <Compile Include="MTEUtils\TransformCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimelineLayer\BGColorTimelineLayer.cs" />
+    <Compile Include="TimelineLayer\BGModelMaterialTimelineLayer.cs" />
     <Compile Include="TimelineLayer\BGModelTimelineLayer.cs" />
     <Compile Include="TimelineLayer\BGModelTimelineLayerBase.cs" />
     <Compile Include="TimelineLayer\BGTimelineLayer.cs" />

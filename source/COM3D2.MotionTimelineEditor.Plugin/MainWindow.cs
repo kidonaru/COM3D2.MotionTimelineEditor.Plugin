@@ -155,6 +155,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timelineManager.ChangeActiveLayer(layerInfo.layerType, maidManager.maidSlotNo);
                 subWindow.SetSubWindowType(SubWindowType.TimelineLayer);
             },
+            contentSize = new Vector2(150, 300),
         };
 
         private GUIComboBox<TimelineLayerInfo> _addLayerComboBox = new GUIComboBox<TimelineLayerInfo>
@@ -167,6 +168,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             },
             defaultName = "+",
             buttonSize = new Vector2(20, 20),
+            contentSize = new Vector2(150, 300),
             showArrow = false,
         };
 

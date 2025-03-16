@@ -343,6 +343,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     typeof(BGColorTimelineLayer), BGColorTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
+                    typeof(BGModelMaterialTimelineLayer), BGModelMaterialTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
                     typeof(BGModelTimelineLayer), BGModelTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(

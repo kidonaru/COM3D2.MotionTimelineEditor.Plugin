@@ -14,7 +14,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         MyRoom,
     }
 
-    public class StudioModelStat
+    public interface IModelStat
+    {
+        string name { get; }
+        string displayName { get; }
+        bool visible { get; }
+        Transform transform { get; set; }
+    }
+
+    public class StudioModelStat : IModelStat
     {
         public OfficialObjectInfo info { get; private set; }
         public int group { get; private set; }

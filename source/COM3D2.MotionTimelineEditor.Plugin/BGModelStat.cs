@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    public class BGModelStat
+    public class BGModelStat : IModelStat
     {
         public string sourceName { get; private set; }
         public int group { get; private set; }
@@ -13,7 +14,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public GameObject sourceObj => info?.gameObject;
         public GameObject obj => sourceObj;
-        public Transform transform => (obj != null) ? obj.transform : null;
+
+        public Transform transform
+        {
+            get => (obj != null) ? obj.transform : null;
+            set {}
+        }
 
         public bool visible
         {
@@ -28,6 +34,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     obj.SetActive(value);
                 }
+            }
+        }
+
+        public ModelMaterialController modelMaterialController { get; private set; }
+
+        public List<ModelMaterial> materials
+        {
+            get
+            {
+                if (modelMaterialController != null)
+                {
+                    return modelMaterialController.materials;
+                }
+                return new List<ModelMaterial>();
             }
         }
 
@@ -46,6 +66,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.group = group;
             this.info = info;
             InitName();
+            CreateControllers();
 
             if (sourceObj == null)
             {
@@ -61,6 +82,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             this.displayName = BoneUtils.ConvertToBoneName(name);
         }
 
+        private void CreateControllers()
+        {
+            if (transform == null)
+            {
+                return;
+            }
+
+            modelMaterialController = ModelMaterialController.GetOrCreate(this);
+        }
+
         public void Destroy()
         {
             if (obj != null)
@@ -70,6 +101,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 obj.transform.localRotation = info.initialRotation;
                 obj.transform.localScale = info.initialScale; 
             }
+        }
+
+        public ModelMaterial GetMaterial(int index)
+        {
+            return modelMaterialController.GetMaterial(index);
         }
     }
 }

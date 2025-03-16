@@ -14,16 +14,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _OutlineColor,
         }
 
+        public enum ValuePropertyType
+        {
+            _Shininess,
+            _OutlineWidth,
+            _RimPower,
+            _RimShift,
+        }
+
         public static readonly List<ColorPropertyType> ColorPropertyTypes =
             MTEUtils.GetEnumValues<ColorPropertyType>().ToList();
 
         public static readonly List<int> ColorPropertyNameIds =
             ColorPropertyTypes.Select(x => Shader.PropertyToID(x.ToString())).ToList();
 
+        public static readonly List<ValuePropertyType> ValuePropertyTypes =
+            MTEUtils.GetEnumValues<ValuePropertyType>().ToList();
+
+        public static readonly List<int> ValuePropertyNameIds =
+            ValuePropertyTypes.Select(x => Shader.PropertyToID(x.ToString())).ToList();
+
         public ModelMaterialController controller;
         public Material material;
 
-        public StudioModelStat model => controller.model;
+        public IModelStat model => controller.model;
 
         public string name
         {
@@ -37,6 +51,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         private HashSet<ColorPropertyType> hasColorProperties = new HashSet<ColorPropertyType>();
         private List<Color> initialColors = new List<Color>();
+
+        private HashSet<ValuePropertyType> hasValueProperties = new HashSet<ValuePropertyType>();
+        private List<float> initialValues = new List<float>();
 
         public ModelMaterial(ModelMaterialController controller, Material material)
         {
@@ -55,6 +72,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             hasColorProperties.Clear();
             initialColors.Clear();
+            hasValueProperties.Clear();
+            initialValues.Clear();
 
             for (int i = 0; i < ColorPropertyNameIds.Count; i++)
             {
@@ -67,6 +86,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 else
                 {
                     initialColors.Add(Color.black);
+                }
+            }
+
+            for (int i = 0; i < ValuePropertyNameIds.Count; i++)
+            {
+                var nameId = ValuePropertyNameIds[i];
+                if (material.HasProperty(nameId))
+                {
+                    hasValueProperties.Add((ValuePropertyType)i);
+                    initialValues.Add(material.GetFloat(nameId));
+                }
+                else
+                {
+                    initialValues.Add(0f);
                 }
             }
         }
@@ -100,28 +133,58 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             return initialColors[(int)type];
         }
+
+        public bool HasValue(ValuePropertyType type)
+        {
+            return hasValueProperties.Contains(type);
+        }
+
+        public float GetValue(ValuePropertyType type)
+        {
+            if (!hasValueProperties.Contains(type))
+            {
+                return 0f;
+            }
+
+            return material.GetFloat(ValuePropertyNameIds[(int)type]);
+        }
+
+        public void SetValue(ValuePropertyType type, float value)
+        {
+            if (!hasValueProperties.Contains(type))
+            {
+                return;
+            }
+
+            material.SetFloat(ValuePropertyNameIds[(int)type], value);
+        }
+
+        public float GetInitialValue(ValuePropertyType type)
+        {
+            return initialValues[(int)type];
+        }
     }
 
     public class ModelMaterialController : MonoBehaviour
     {
-        public StudioModelStat model;
+        public IModelStat model;
 
-        private SkinnedMeshRenderer _meshRenderer = null;
-        public SkinnedMeshRenderer meshRenderer
+        private Renderer _renderer = null;
+        public Renderer renderer
         {
             get
             {
-                if (_meshRenderer == null)
+                if (_renderer == null)
                 {
-                    _meshRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
+                    _renderer = GetComponentInChildren<Renderer>();
                 }
-                return _meshRenderer;
+                return _renderer;
             }
         }
 
         public List<ModelMaterial> materials = new List<ModelMaterial>();
 
-        public static ModelMaterialController GetOrCreate(StudioModelStat model)
+        public static ModelMaterialController GetOrCreate(IModelStat model)
         {
             var transform = model.transform;
             var go = transform.gameObject;
@@ -141,12 +204,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             materials.Clear();
 
-            if (meshRenderer == null || meshRenderer.materials == null)
+            if (renderer == null || renderer.materials == null)
             {
                 return;
             }
 
-            foreach (var material in meshRenderer.materials)
+            foreach (var material in renderer.sharedMaterials)
             {
                 materials.Add(new ModelMaterial(this, material));
             }

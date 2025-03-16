@@ -12,7 +12,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Quaternion initialRotation;
         public Vector3 initialScale;
 
-        public StudioModelStat model => controller.model;
+        public IModelStat model => controller.model;
 
         public string name
         {
@@ -27,7 +27,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class ModelBoneController : MonoBehaviour
     {
-        public StudioModelStat model;
+        public IModelStat model;
 
         private SkinnedMeshRenderer _meshRenderer = null;
         public SkinnedMeshRenderer meshRenderer
@@ -44,7 +44,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public List<ModelBone> bones = new List<ModelBone>();
 
-        public static ModelBoneController GetOrCreate(StudioModelStat model)
+        public static ModelBoneController GetOrCreate(IModelStat model)
         {
             var transform = model.transform;
             var go = transform.gameObject;

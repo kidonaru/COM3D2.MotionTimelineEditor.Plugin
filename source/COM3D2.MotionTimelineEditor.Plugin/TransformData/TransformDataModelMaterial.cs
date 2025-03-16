@@ -7,9 +7,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataModelMaterial : TransformDataBase
     {
+        public static TransformDataModelMaterial defaultTrans = new TransformDataModelMaterial();
+
         public override TransformType type => TransformType.ModelMaterial;
 
-        public override int valueCount => 13;
+        public override int valueCount => 17;
 
         public override bool hasColor => true;
         public override bool hasEasing => true;
@@ -113,6 +115,50 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     defaultValue = 0f,
                 }
             },
+            {
+                "_Shininess",
+                new CustomValueInfo
+                {
+                    index = 13,
+                    name = "_Shininess",
+                    min = 0f,
+                    max = 10f,
+                    step = 0.01f,
+                }
+            },
+            {
+                "_OutlineWidth",
+                new CustomValueInfo
+                {
+                    index = 14,
+                    name = "_OutlineWidth",
+                    min = 0f,
+                    max = 1f,
+                    step = 0.0001f,
+                }
+            },
+            {
+                "_RimPower",
+                new CustomValueInfo
+                {
+                    index = 15,
+                    name = "_RimPower",
+                    min = 0f,
+                    max = 100f,
+                    step = 0.01f,
+                }
+            },
+            {
+                "_RimShift",
+                new CustomValueInfo
+                {
+                    index = 16,
+                    name = "_RimShift",
+                    min = 0f,
+                    max = 10f,
+                    step = 0.01f,
+                }
+            },
         };
 
         public override Dictionary<string, CustomValueInfo> GetCustomValueInfoMap()
@@ -128,6 +174,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public ValueData[] OutlineColorValues => new ValueData[] {
             this["OutlineColor.r"], this["OutlineColor.g"], this["OutlineColor.b"] };
+
+        public ValueData ShininessValue => this["_Shininess"];
+        public ValueData OutlineWidthValue => this["_OutlineWidth"];
+        public ValueData RimPowerValue => this["_RimPower"];
+        public ValueData RimShiftValue => this["_RimShift"];
+
+        public CustomValueInfo ShininessInfo => CustomValueInfoMap["_Shininess"];
+        public CustomValueInfo OutlineWidthInfo => CustomValueInfoMap["_OutlineWidth"];
+        public CustomValueInfo RimPowerInfo => CustomValueInfoMap["_RimPower"];
+        public CustomValueInfo RimShiftInfo => CustomValueInfoMap["_RimShift"];
 
         public Color ShadowColor
         {
@@ -147,13 +203,44 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => OutlineColorValues.FromColor(value);
         }
 
-        public override void FromXml(TransformXml xml)
+        public float Shininess
         {
-            base.FromXml(xml);
+            get => ShininessValue.value;
+            set => ShininessValue.value = value;
+        }
 
-            if (name.EndsWith(".menu", System.StringComparison.Ordinal))
+        public float OutlineWidth
+        {
+            get => OutlineWidthValue.value;
+            set => OutlineWidthValue.value = value;
+        }
+
+        public float RimPower
+        {
+            get => RimPowerValue.value;
+            set => RimPowerValue.value = value;
+        }
+
+        public float RimShift
+        {
+            get => RimShiftValue.value;
+            set => RimShiftValue.value = value;
+        }
+
+        public CustomValueInfo GetCustomValueInfo(ModelMaterial.ValuePropertyType propertyType)
+        {
+            switch (propertyType)
             {
-                name = Path.GetFileName(name);
+                case ModelMaterial.ValuePropertyType._Shininess:
+                    return ShininessInfo;
+                case ModelMaterial.ValuePropertyType._OutlineWidth:
+                    return OutlineWidthInfo;
+                case ModelMaterial.ValuePropertyType._RimPower:
+                    return RimPowerInfo;
+                case ModelMaterial.ValuePropertyType._RimShift:
+                    return RimShiftInfo;
+                default:
+                    return null;
             }
         }
     }

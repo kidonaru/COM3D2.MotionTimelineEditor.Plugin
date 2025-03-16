@@ -42,6 +42,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private Dictionary<string, BGModelStat> _modelMap = new Dictionary<string, BGModelStat>();
         private Dictionary<string, List<BGModelStat>> _modelsMap = new Dictionary<string, List<BGModelStat>>();
 
+        public Dictionary<string, ModelMaterial> materialMap = new Dictionary<string, ModelMaterial>(); 
+        public List<string> materialNames = new List<string>();
+
+
         private GameObject _prevBgObject = null;
 
         public Dictionary<string, BGModelInfo> modelInfoMap = new Dictionary<string, BGModelInfo>(64);
@@ -97,6 +101,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return models;
             }
             return new List<BGModelStat>();
+        }
+
+        public ModelMaterial GetMaterial(string name)
+        {
+            ModelMaterial material;
+            if (materialMap.TryGetValue(name, out material))
+            {
+                return material;
+            }
+            return null;
+        }
+
+        public ModelMaterial GetMaterial(int index)
+        {
+            if (index < 0 || index >= materialNames.Count)
+            {
+                return null;
+            }
+            return GetMaterial(materialNames[index]);
         }
 
         public override void LateUpdate()
@@ -194,6 +217,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             modelInfoMap.Clear();
             modelInfoList.Clear();
 
+            materialMap.Clear();
+            materialNames.Clear();
+
             _prevBgObject = null;
         }
 
@@ -221,6 +247,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             modelNames.Add(model.name);
             _modelMap[model.name] = model;
             _modelsMap.GetOrCreate(sourceName).Add(model);
+
+            foreach (var material in model.materials)
+            {
+                materialMap[material.name] = material;
+                materialNames.Add(material.name);
+            }
 
             SortModels();
 
@@ -256,6 +288,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             modelNames.Remove(model.name);
             _modelMap.Remove(model.name);
             _modelsMap.GetOrDefault(model.sourceName)?.Remove(model);
+
+            foreach (var material in model.materials)
+            {
+                materialMap.Remove(material.name);
+                materialNames.Remove(material.name);
+            }
 
             if (notify)
             {
@@ -421,9 +459,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             models.Sort((a, b) => ComparePathNames(a.name, b.name));
 
             modelNames.Clear();
+            materialNames.Clear();
+
             foreach (var model in models)
             {
                 modelNames.Add(model.name);
+
+                foreach (var material in model.materials)
+                {
+                    materialNames.Add(material.name);
+                }
             }
         }
 

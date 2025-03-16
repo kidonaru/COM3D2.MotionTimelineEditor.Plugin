@@ -7,7 +7,7 @@ using COM3D2.MotionTimelineEditor;
 
 namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
 {
-    [TimelineLayerDesc("PNG配置", 34)]
+    [TimelineLayerDesc("PNG配置", 35)]
     public class PngPlacementTimelineLayer : TimelineLayerBase
     {
         public override Type layerType => typeof(PngPlacementTimelineLayer);

@@ -1,44 +1,42 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Xml.Linq;
 using UnityEngine;
 using static COM3D2.MotionTimelineEditor.Plugin.ModelMaterial;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    [TimelineLayerDesc("モデルマテリアル", 24)]
-    public partial class ModelMaterialTimelineLayer : ModelTimelineLayerBase
+    [TimelineLayerDesc("背景モデルマテリアル", 34)]
+    public class BGModelMaterialTimelineLayer : BGModelTimelineLayerBase
     {
-        public override Type layerType => typeof(ModelMaterialTimelineLayer);
-        public override string layerName => nameof(ModelMaterialTimelineLayer);
+        public override Type layerType => typeof(BGModelMaterialTimelineLayer);
+        public override string layerName => nameof(BGModelMaterialTimelineLayer);
 
-        public override List<string> allBoneNames => modelManager.materialNames;
+        public override List<string> allBoneNames => bgModelManager.materialNames;
 
-        private ModelMaterialTimelineLayer(int slotNo) : base(slotNo)
+        private BGModelMaterialTimelineLayer(int slotNo) : base(slotNo)
         {
         }
 
-        public static ModelMaterialTimelineLayer Create(int slotNo)
+        public static BGModelMaterialTimelineLayer Create(int slotNo)
         {
-            return new ModelMaterialTimelineLayer(0);
+            return new BGModelMaterialTimelineLayer(0);
         }
 
         public override void Init()
         {
             base.Init();
 
-            StudioModelManager.onModelAdded += OnModelAdded;
-            StudioModelManager.onModelRemoved += OnModelRemoved;
+            BGModelManager.onSetup += OnBGModelSetup;
+            BGModelManager.onModelAdded += OnBGModelAdded;
+            BGModelManager.onModelRemoved += OnBGModelRemoved;
         }
 
         protected override void InitMenuItems()
         {
             allMenuItems.Clear();
 
-            foreach (var model in modelManager.models)
+            foreach (var model in bgModelManager.models)
             {
                 if (model.materials.Count == 0)
                 {
@@ -60,8 +58,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Dispose();
 
-            StudioModelManager.onModelAdded -= OnModelAdded;
-            StudioModelManager.onModelRemoved -= OnModelRemoved;
+            BGModelManager.onModelAdded -= OnBGModelAdded;
+            BGModelManager.onModelRemoved -= OnBGModelRemoved;
         }
 
         public override bool IsValidData()
@@ -87,7 +85,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
-            var material = modelManager.GetMaterial(motion.name);
+            var material = bgModelManager.GetMaterial(motion.name);
             if (material == null)
             {
                 return;
@@ -102,10 +100,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 material.SetColor(ColorPropertyType._ShadowColor, start.ShadowColor);
                 material.SetColor(ColorPropertyType._RimColor, start.RimColor);
                 material.SetColor(ColorPropertyType._OutlineColor, start.OutlineColor);
-                material.SetValue(ValuePropertyType._Shininess, start.Shininess);
-                material.SetValue(ValuePropertyType._OutlineWidth, start.OutlineWidth);
-                material.SetValue(ValuePropertyType._RimPower, start.RimPower);
-                material.SetValue(ValuePropertyType._RimShift, start.RimShift);
             }
 
             float easingTime = CalcEasingValue(t, motion.easing);
@@ -129,29 +123,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 material.SetColor(ColorPropertyType._OutlineColor, Color.Lerp(start.OutlineColor, end.OutlineColor, easingTime));
             }
-
-            if (start.Shininess != end.Shininess)
-            {
-                material.SetValue(ValuePropertyType._Shininess, Mathf.Lerp(start.Shininess, end.Shininess, easingTime));
-            }
-
-            if (start.OutlineWidth != end.OutlineWidth)
-            {
-                material.SetValue(ValuePropertyType._OutlineWidth, Mathf.Lerp(start.OutlineWidth, end.OutlineWidth, easingTime));
-            }
-
-            if (start.RimPower != end.RimPower)
-            {
-                material.SetValue(ValuePropertyType._RimPower, Mathf.Lerp(start.RimPower, end.RimPower, easingTime));
-            }
-
-            if (start.RimShift != end.RimShift)
-            {
-                material.SetValue(ValuePropertyType._RimShift, Mathf.Lerp(start.RimShift, end.RimShift, easingTime));
-            }
         }
 
-        public void OnModelAdded(StudioModelStat model)
+        public void OnBGModelSetup()
+        {
+            InitMenuItems();
+
+            var materialNames = bgModelManager.materialNames;
+            AddFirstBones(materialNames);
+            ApplyCurrentFrame(true);
+        }
+
+        public void OnBGModelAdded(BGModelStat model)
         {
             InitMenuItems();
 
@@ -160,7 +143,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyCurrentFrame(true);
         }
 
-        public void OnModelRemoved(StudioModelStat model)
+        public void OnBGModelRemoved(BGModelStat model)
         {
             InitMenuItems();
 
@@ -169,32 +152,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyCurrentFrame(true);
         }
 
-        public override void OnCopyModel(StudioModelStat sourceModel, StudioModelStat newModel)
-        {
-            var sourceModelMaterials = sourceModel.materials;
-            var newModelName = newModel.name;
-            foreach (var keyFrame in keyFrames)
-            {
-                foreach (var sourceModelMaterial in sourceModelMaterials)
-                {
-                    var sourceMaterial = keyFrame.GetBone(sourceModelMaterial.name);
-                    if (sourceMaterial == null)
-                    {
-                        continue;
-                    }
-
-                    var baseName = sourceModelMaterial.name;
-                    var newMaterialName = string.Format("{0}/{1}", newModelName, baseName);
-
-                    var newMaterial = keyFrame.GetOrCreateBone(sourceMaterial.transform.type, newMaterialName);
-                    newMaterial.transform.FromTransformData(sourceMaterial.transform);
-                }
-            }
-        }
-
         public override void UpdateFrame(FrameData frame)
         {
-            foreach (var sourceMaterial in modelManager.materialMap.Values)
+            foreach (var sourceMaterial in bgModelManager.materialMap.Values)
             {
                 var materialName = sourceMaterial.name;
 
@@ -203,17 +163,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 trans.ShadowColor = sourceMaterial.GetColor(ColorPropertyType._ShadowColor);
                 trans.RimColor = sourceMaterial.GetColor(ColorPropertyType._RimColor);
                 trans.OutlineColor = sourceMaterial.GetColor(ColorPropertyType._OutlineColor);
-
-                trans.Shininess = sourceMaterial.GetValue(ValuePropertyType._Shininess);
-                trans.OutlineWidth = sourceMaterial.GetValue(ValuePropertyType._OutlineWidth);
-                trans.RimPower = sourceMaterial.GetValue(ValuePropertyType._RimPower);
-                trans.RimShift = sourceMaterial.GetValue(ValuePropertyType._RimShift);
-
                 trans.easing = GetEasing(frame.frameNo, materialName);
             }
         }
 
-        private GUIComboBox<StudioModelStat> _modelComboBox = new GUIComboBox<StudioModelStat>
+        private GUIComboBox<BGModelStat> _modelComboBox = new GUIComboBox<BGModelStat>
         {
             getName = (model, index) => model.displayName,
             buttonSize = new Vector2(200, 20),
@@ -254,7 +208,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void DrawMaterial(GUIView view)
         {
-            _modelComboBox.items = modelManager.models;
+            _modelComboBox.items = bgModelManager.models;
 
             if (_modelComboBox.items.Count == 0)
             {
@@ -291,8 +245,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var defaultTrans = TransformDataModelMaterial.defaultTrans;
-
             view.DrawHorizontalLine(Color.gray);
 
             view.AddSpace(5);
@@ -316,33 +268,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     view.DrawColor(cache, color, initialColor, newColor =>
                     {
                         material.SetColor(propertyType, newColor);
-                    });
-                }
-
-                foreach (var propertyType in ModelMaterial.ValuePropertyTypes)
-                {
-                    if (!material.HasValue(propertyType)) continue;
-
-                    var value = material.GetValue(propertyType);
-                    var initialValue = material.GetInitialValue(propertyType);
-                    var info = defaultTrans.GetCustomValueInfo(propertyType);
-                    var fieldType = propertyType == ValuePropertyType._OutlineWidth ?
-                        FloatFieldType.F4 : FloatFieldType.Float;
-
-                    view.DrawSliderValue(new GUIView.SliderOption
-                    {
-                        label = info.name,
-                        labelWidth = 60,
-                        fieldType = fieldType,
-                        min = info.min,
-                        max = info.max,
-                        step = info.step,
-                        defaultValue = initialValue,
-                        value = value,
-                        onChanged = newValue =>
-                        {
-                            material.SetValue(propertyType, newValue);
-                        },
                     });
                 }
 
