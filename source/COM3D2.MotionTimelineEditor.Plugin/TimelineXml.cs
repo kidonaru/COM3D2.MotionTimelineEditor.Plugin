@@ -1096,6 +1096,52 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
+            if (version < 31)
+            {
+                // BGModelMaterialTimelineLayer/ModelMaterialTimelineLayerの特定の色にアルファ値を追加
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "BGModelMaterialTimelineLayer" || 
+                        layer.className == "ModelMaterialTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+                                if (transform.type == TransformType.ModelMaterial)
+                                {
+                                    var values = new List<float>(transform.values);
+                                    
+                                    // ShadowColor (RGB) の後にアルファ値を追加
+                                    if (values.Count >= 8)
+                                    {
+                                        MTEUtils.LogDebug("Add alpha to ShadowColor in {0} name={1}", layer.className, transform.name);
+                                        values.Insert(8, 1f);
+                                    }
+                                    
+                                    // RimColor (RGB) の後にアルファ値を追加
+                                    if (values.Count >= 12)
+                                    {
+                                        MTEUtils.LogDebug("Add alpha to RimColor in {0} name={1}", layer.className, transform.name);
+                                        values.Insert(12, 1f);
+                                    }
+                                    
+                                    // OutlineColor (RGB) の後にアルファ値を追加
+                                    if (values.Count >= 16)
+                                    {
+                                        MTEUtils.LogDebug("Add alpha to OutlineColor in {0} name={1}", layer.className, transform.name);
+                                        values.Insert(16, 1f);
+                                    }
+                                    
+                                    transform.values = values.ToArray();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             ConvertPlugin();
         }
 

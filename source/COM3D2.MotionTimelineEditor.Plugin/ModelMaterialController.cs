@@ -16,7 +16,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // NPR
             _EmissionColor,
             _MatcapColor,
-            _ReflectionColor,
+            _MatcapMaskColor,
+            _RimLightColor,
         }
 
         public enum ValuePropertyType
@@ -181,6 +182,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public float GetInitialValue(ValuePropertyType type)
         {
             return initialValues[(int)type];
+        }
+
+        public void Reset()
+        {
+            foreach (var type in hasColorProperties)
+            {
+                if (HasColor(type))
+                {
+                    SetColor(type, GetInitialColor(type));
+                }
+            }
+
+            foreach (var type in hasValueProperties)
+            {
+                if (HasValue(type))
+                {
+                    SetValue(type, GetInitialValue(type));
+                }
+            }
         }
     }
 

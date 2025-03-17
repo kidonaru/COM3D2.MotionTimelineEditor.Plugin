@@ -110,7 +110,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 // NPR用プロパティ
                 material.SetColor(ColorPropertyType._EmissionColor, start.EmissionColor);
                 material.SetColor(ColorPropertyType._MatcapColor, start.MatcapColor);
-                material.SetColor(ColorPropertyType._ReflectionColor, start.ReflectionColor);
+                material.SetColor(ColorPropertyType._MatcapMaskColor, start.MatcapMaskColor);
+                material.SetColor(ColorPropertyType._RimLightColor, start.RimLightColor);
                 material.SetValue(ValuePropertyType._NormalValue, start.NormalValue);
                 material.SetValue(ValuePropertyType._ParallaxValue, start.ParallaxValue);
                 material.SetValue(ValuePropertyType._MatcapValue, start.MatcapValue);
@@ -178,9 +179,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 material.SetColor(ColorPropertyType._MatcapColor, Color.Lerp(start.MatcapColor, end.MatcapColor, easingTime));
             }
 
-            if (start.ReflectionColor != end.ReflectionColor)
+            if (start.MatcapMaskColor != end.MatcapMaskColor)
             {
-                material.SetColor(ColorPropertyType._ReflectionColor, Color.Lerp(start.ReflectionColor, end.ReflectionColor, easingTime));
+                material.SetColor(ColorPropertyType._MatcapMaskColor, Color.Lerp(start.MatcapMaskColor, end.MatcapMaskColor, easingTime));
+            }
+
+            if (start.RimLightColor != end.RimLightColor)
+            {
+                material.SetColor(ColorPropertyType._RimLightColor, Color.Lerp(start.RimLightColor, end.RimLightColor, easingTime));
             }
 
             if (start.NormalValue != end.NormalValue)
@@ -305,7 +311,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 // NPR用プロパティの追加
                 trans.EmissionColor = sourceMaterial.GetColor(ColorPropertyType._EmissionColor);
                 trans.MatcapColor = sourceMaterial.GetColor(ColorPropertyType._MatcapColor);
-                trans.ReflectionColor = sourceMaterial.GetColor(ColorPropertyType._ReflectionColor);
+                trans.MatcapMaskColor = sourceMaterial.GetColor(ColorPropertyType._MatcapMaskColor);
+                trans.RimLightColor = sourceMaterial.GetColor(ColorPropertyType._RimLightColor);
 
                 trans.NormalValue = sourceMaterial.GetValue(ValuePropertyType._NormalValue);
                 trans.ParallaxValue = sourceMaterial.GetValue(ValuePropertyType._ParallaxValue);
@@ -412,7 +419,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
-                view.DrawLabel(material.displayName, 200, 20);
+                view.BeginHorizontal();
+                {
+                    view.DrawLabel(material.displayName, 200, 20);
+
+                    if (view.DrawButton("初期化", 60, 20))
+                    {
+                       material.Reset();
+                    }
+                }
+                view.EndLayout();
 
                 foreach (var propertyType in ModelMaterial.ColorPropertyTypes)
                 {
@@ -420,7 +436,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     var color = material.GetColor(propertyType);
                     var initialColor = material.GetInitialColor(propertyType);
-                    var cache = view.GetColorFieldCache("", false);
+                    var cache = view.GetColorFieldCache("", true);
 
                     view.DrawLabel(propertyType.ToString(), 200, 20);
 
@@ -440,7 +456,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var fieldType = propertyType == ValuePropertyType._OutlineWidth ?
                         FloatFieldType.F4 : FloatFieldType.Float;
 
-                    view.DrawLabel(info.name, 200, 20);
+                    view.DrawLabel($"{propertyType} ({info.name})", -1, 20);
 
                     view.DrawSliderValue(new GUIView.SliderOption
                     {

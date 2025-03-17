@@ -13,47 +13,58 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ColorR = 1,
             ColorG = 2,
             ColorB = 3,
-            ShadowColorR = 4,
-            ShadowColorG = 5,
-            ShadowColorB = 6,
-            RimColorR = 7,
-            RimColorG = 8,
-            RimColorB = 9,
-            OutlineColorR = 10,
-            OutlineColorG = 11,
-            OutlineColorB = 12,
-            Shininess = 13,
-            OutlineWidth = 14,
-            RimPower = 15,
-            RimShift = 16,
-            EmissionColorR = 17,
-            EmissionColorG = 18,
-            EmissionColorB = 19,
-            MatcapColorR = 20,
-            MatcapColorG = 21,
-            MatcapColorB = 22,
-            ReflectionColorR = 23,
-            ReflectionColorG = 24,
-            ReflectionColorB = 25,
-            NormalValue = 26,
-            ParallaxValue = 27,
-            MatcapValue = 28,
-            MatcapMaskValue = 29,
-            EmissionValue = 30,
-            EmissionHDRExposure = 31,
-            EmissionPower = 32,
-            RimLightValue = 33,
-            RimLightPower = 34,
-            MetallicValue = 35,
-            SmoothnessValue = 36,
-            OcclusionValue = 37,
+            ColorA = 4,
+            ShadowColorR = 5,
+            ShadowColorG = 6,
+            ShadowColorB = 7,
+            ShadowColorA = 8,
+            RimColorR = 9,
+            RimColorG = 10,
+            RimColorB = 11,
+            RimColorA = 12,
+            OutlineColorR = 13,
+            OutlineColorG = 14,
+            OutlineColorB = 15,
+            OutlineColorA = 16,
+            Shininess = 17,
+            OutlineWidth = 18,
+            RimPower = 19,
+            RimShift = 20,
+            EmissionColorR = 21,
+            EmissionColorG = 22,
+            EmissionColorB = 23,
+            EmissionColorA = 24,
+            MatcapColorR = 25,
+            MatcapColorG = 26,
+            MatcapColorB = 27,
+            MatcapColorA = 28,
+            MatcapMaskColorR = 29,
+            MatcapMaskColorG = 30,
+            MatcapMaskColorB = 31,
+            MatcapMaskColorA = 32,
+            RimLightColorR = 33,
+            RimLightColorG = 34,
+            RimLightColorB = 35,
+            RimLightColorA = 36,
+            NormalValue = 37,
+            ParallaxValue = 38,
+            MatcapValue = 39,
+            MatcapMaskValue = 40,
+            EmissionValue = 41,
+            EmissionHDRExposure = 42,
+            EmissionPower = 43,
+            RimLightValue = 44,
+            RimLightPower = 45,
+            MetallicValue = 46,
+            SmoothnessValue = 47,
+            OcclusionValue = 48,
         }
 
         public static TransformDataModelMaterial defaultTrans = new TransformDataModelMaterial();
 
         public override TransformType type => TransformType.ModelMaterial;
 
-        public override int valueCount => 38;
+        public override int valueCount => 49;
 
         public override bool hasColor => true;
         public override bool hasEasing => true;
@@ -63,6 +74,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             values[(int)Index.ColorR],
             values[(int)Index.ColorG],
             values[(int)Index.ColorB],
+            values[(int)Index.ColorA],
         };
 
         public override ValueData easingValue => values[(int)Index.Easing];
@@ -106,11 +118,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             },
             {
+                "ShadowColor.a",
+                new CustomValueInfo
+                {
+                    index = (int)Index.ShadowColorA,
+                    name = "影色 A",
+                    defaultValue = 1f,
+                }
+            },
+            {
                 "RimColor.r",
                 new CustomValueInfo
                 {
                     index = (int)Index.RimColorR,
-                    name = "リムライト R",
+                    name = "リム色 R",
                     defaultValue = 0f,
                 }
             },
@@ -119,7 +140,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 new CustomValueInfo
                 {
                     index = (int)Index.RimColorG,
-                    name = "リムライト G",
+                    name = "リム色 G",
                     defaultValue = 0f,
                 }
             },
@@ -128,8 +149,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 new CustomValueInfo
                 {
                     index = (int)Index.RimColorB,
-                    name = "リムライト B",
+                    name = "リム色 B",
                     defaultValue = 0f,
+                }
+            },
+            {
+                "RimColor.a",
+                new CustomValueInfo
+                {
+                    index = (int)Index.RimColorA,
+                    name = "リム色 A",
+                    defaultValue = 1f,
                 }
             },
             {
@@ -160,11 +190,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             },
             {
+                "OutlineColor.a",
+                new CustomValueInfo
+                {
+                    index = (int)Index.OutlineColorA,
+                    name = "アウトライン A",
+                    defaultValue = 1f,
+                }
+            },
+            {
                 "_Shininess",
                 new CustomValueInfo
                 {
                     index = (int)Index.Shininess,
-                    name = "_Shininess",
+                    name = "光沢度",
                     min = 0f,
                     max = 10f,
                     step = 0.01f,
@@ -175,7 +214,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 new CustomValueInfo
                 {
                     index = (int)Index.OutlineWidth,
-                    name = "_OutlineWidth",
+                    name = "アウトライン幅",
                     min = 0f,
                     max = 1f,
                     step = 0.0001f,
@@ -186,9 +225,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 new CustomValueInfo
                 {
                     index = (int)Index.RimPower,
-                    name = "_RimPower",
-                    min = 0f,
-                    max = 100f,
+                    name = "リムパワー",
+                    min = -30f,
+                    max = 30f,
                     step = 0.01f,
                 }
             },
@@ -197,9 +236,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 new CustomValueInfo
                 {
                     index = (int)Index.RimShift,
-                    name = "_RimShift",
+                    name = "リムシフト",
                     min = 0f,
-                    max = 10f,
+                    max = 1f,
                     step = 0.01f,
                 }
             },
@@ -232,6 +271,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             },
             {
+                "EmissionColor.a",
+                new CustomValueInfo
+                {
+                    index = (int)Index.EmissionColorA,
+                    name = "発光色 A",
+                    defaultValue = 1f,
+                }
+            },
+            {
                 "MatcapColor.r",
                 new CustomValueInfo
                 {
@@ -259,29 +307,83 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             },
             {
-                "ReflectionColor.r",
+                "MatcapColor.a",
                 new CustomValueInfo
                 {
-                    index = (int)Index.ReflectionColorR,
-                    name = "反射色 R",
+                    index = (int)Index.MatcapColorA,
+                    name = "マットキャップ色 A",
                     defaultValue = 1f,
                 }
             },
             {
-                "ReflectionColor.g",
+                "MatcapMaskColor.r",
                 new CustomValueInfo
                 {
-                    index = (int)Index.ReflectionColorG,
-                    name = "反射色 G",
+                    index = (int)Index.MatcapMaskColorR,
+                    name = "マットキャップマスク色 R",
                     defaultValue = 1f,
                 }
             },
             {
-                "ReflectionColor.b",
+                "MatcapMaskColor.g",
                 new CustomValueInfo
                 {
-                    index = (int)Index.ReflectionColorB,
-                    name = "反射色 B",
+                    index = (int)Index.MatcapMaskColorG,
+                    name = "マットキャップマスク色 G",
+                    defaultValue = 1f,
+                }
+            },
+            {
+                "MatcapMaskColor.b",
+                new CustomValueInfo
+                {
+                    index = (int)Index.MatcapMaskColorB,
+                    name = "マットキャップマスク色 B",
+                    defaultValue = 1f,
+                }
+            },
+            {
+                "MatcapMaskColor.a",
+                new CustomValueInfo
+                {
+                    index = (int)Index.MatcapMaskColorA,
+                    name = "マットキャップマスク色 A",
+                    defaultValue = 1f,
+                }
+            },
+            {
+                "RimLightColor.r",
+                new CustomValueInfo
+                {
+                    index = (int)Index.RimLightColorR,
+                    name = "リムライト色 R",
+                    defaultValue = 1f,
+                }
+            },
+            {
+                "RimLightColor.g",
+                new CustomValueInfo
+                {
+                    index = (int)Index.RimLightColorG,
+                    name = "リムライト色 G",
+                    defaultValue = 1f,
+                }
+            },
+            {
+                "RimLightColor.b",
+                new CustomValueInfo
+                {
+                    index = (int)Index.RimLightColorB,
+                    name = "リムライト色 B",
+                    defaultValue = 1f,
+                }
+            },
+            {
+                "RimLightColor.a",
+                new CustomValueInfo
+                {
+                    index = (int)Index.RimLightColorA,
+                    name = "リムライト色 A",
                     defaultValue = 1f,
                 }
             },
@@ -440,21 +542,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             values[(int)Index.ShadowColorR],
             values[(int)Index.ShadowColorG],
-            values[(int)Index.ShadowColorB]
+            values[(int)Index.ShadowColorB],
+            values[(int)Index.ShadowColorA],
         };
 
         public ValueData[] RimColorValues => new ValueData[]
         {
             values[(int)Index.RimColorR], 
             values[(int)Index.RimColorG], 
-            values[(int)Index.RimColorB] 
+            values[(int)Index.RimColorB],
+            values[(int)Index.RimColorA],
         };
 
         public ValueData[] OutlineColorValues => new ValueData[]
         {
             values[(int)Index.OutlineColorR], 
             values[(int)Index.OutlineColorG], 
-            values[(int)Index.OutlineColorB] 
+            values[(int)Index.OutlineColorB],
+            values[(int)Index.OutlineColorA],
         };
 
         public ValueData ShininessValue => values[(int)Index.Shininess];
@@ -466,21 +571,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             values[(int)Index.EmissionColorR], 
             values[(int)Index.EmissionColorG], 
-            values[(int)Index.EmissionColorB] 
+            values[(int)Index.EmissionColorB],
+            values[(int)Index.EmissionColorA],
         };
 
         public ValueData[] MatcapColorValues => new ValueData[]
         {
             values[(int)Index.MatcapColorR], 
             values[(int)Index.MatcapColorG], 
-            values[(int)Index.MatcapColorB] 
+            values[(int)Index.MatcapColorB],
+            values[(int)Index.MatcapColorA],
         };
 
-        public ValueData[] ReflectionColorValues => new ValueData[]
+        public ValueData[] MatcapMaskColorValues => new ValueData[]
         {
-            values[(int)Index.ReflectionColorR], 
-            values[(int)Index.ReflectionColorG], 
-            values[(int)Index.ReflectionColorB] 
+            values[(int)Index.MatcapMaskColorR], 
+            values[(int)Index.MatcapMaskColorG], 
+            values[(int)Index.MatcapMaskColorB],
+            values[(int)Index.MatcapMaskColorA],
+        };
+
+        public ValueData[] RimLightColorValues => new ValueData[]
+        {
+            values[(int)Index.RimLightColorR], 
+            values[(int)Index.RimLightColorG], 
+            values[(int)Index.RimLightColorB],
+            values[(int)Index.RimLightColorA],
         };
 
         public ValueData NormalValueValue => values[(int)Index.NormalValue];
@@ -568,10 +684,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => MatcapColorValues.FromColor(value);
         }
 
-        public Color ReflectionColor
+        public Color MatcapMaskColor
         {
-            get => ReflectionColorValues.ToColor();
-            set => ReflectionColorValues.FromColor(value);
+            get => MatcapMaskColorValues.ToColor();
+            set => MatcapMaskColorValues.FromColor(value);
+        }
+
+        public Color RimLightColor
+        {
+            get => RimLightColorValues.ToColor();
+            set => RimLightColorValues.FromColor(value);
         }
 
         public float NormalValue
