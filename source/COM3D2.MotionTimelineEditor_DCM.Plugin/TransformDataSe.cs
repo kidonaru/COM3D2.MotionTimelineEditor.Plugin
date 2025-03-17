@@ -1,4 +1,3 @@
-
 using System.Collections.Generic;
 using COM3D2.MotionTimelineEditor.Plugin;
 
@@ -6,10 +5,20 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
     public class TransformDataSe : TransformDataBase
     {
+        public enum Index
+        {
+            Interval = 0,
+            IsLoop = 1
+        }
+
+        public enum StrIndex
+        {
+            FileName = 0
+        }
+
         public override TransformType type => TransformType.Se;
 
         public override int valueCount => 2;
-
         public override int strValueCount => 1;
 
         public TransformDataSe()
@@ -22,7 +31,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 "interval",
                 new CustomValueInfo
                 {
-                    index = 0,
+                    index = (int)Index.Interval,
                     name = "間隔",
                     defaultValue = 0f,
                 }
@@ -31,7 +40,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 "isLoop",
                 new CustomValueInfo
                 {
-                    index = 1,
+                    index = (int)Index.IsLoop,
                     name = "Loop",
                     defaultValue = 0f,
                 }
@@ -49,7 +58,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 "fileName",
                 new StrValueInfo
                 {
-                    index = 0,
+                    index = (int)StrIndex.FileName,
                     name = "SE名",
                 }
             },
@@ -60,14 +69,14 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return StrValueInfoMap;
         }
 
-        public ValueData intervalValue => this["interval"];
+        public ValueData intervalValue => values[(int)Index.Interval];
 
-        public ValueData isLoopValue => this["isLoop"];
+        public ValueData isLoopValue => values[(int)Index.IsLoop];
 
         public string fileName
         {
-            get => GetStrValue("fileName");
-            set => SetStrValue("fileName", value);
+            get => strValues[(int)StrIndex.FileName];
+            set => strValues[(int)StrIndex.FileName] = value;
         }
 
         public float interval

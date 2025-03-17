@@ -12,6 +12,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _ShadowColor,
             _RimColor,
             _OutlineColor,
+
+            // NPR
+            _EmissionColor,
+            _MatcapColor,
+            _ReflectionColor,
         }
 
         public enum ValuePropertyType
@@ -20,6 +25,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _OutlineWidth,
             _RimPower,
             _RimShift,
+
+            // NPR
+            _NormalValue,
+            _ParallaxValue,
+            _MatcapValue,
+            _MatcapMaskValue,
+            _EmissionValue,
+            _EmissionHDRExposure,
+            _EmissionPower,
+            _RimLightValue,
+            _RimLightPower,
+            _MetallicValue,
+            _SmoothnessValue,
+            _OcclusionValue,
         }
 
         public static readonly List<ColorPropertyType> ColorPropertyTypes =
@@ -204,7 +223,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             materials.Clear();
 
-            if (renderer == null || renderer.materials == null)
+            if (renderer == null || renderer.sharedMaterials == null)
             {
                 return;
             }

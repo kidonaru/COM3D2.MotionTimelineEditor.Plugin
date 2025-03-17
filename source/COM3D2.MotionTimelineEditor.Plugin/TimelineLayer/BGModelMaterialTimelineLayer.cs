@@ -100,6 +100,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 material.SetColor(ColorPropertyType._ShadowColor, start.ShadowColor);
                 material.SetColor(ColorPropertyType._RimColor, start.RimColor);
                 material.SetColor(ColorPropertyType._OutlineColor, start.OutlineColor);
+                material.SetValue(ValuePropertyType._Shininess, start.Shininess);
+                material.SetValue(ValuePropertyType._OutlineWidth, start.OutlineWidth);
+                material.SetValue(ValuePropertyType._RimPower, start.RimPower);
+                material.SetValue(ValuePropertyType._RimShift, start.RimShift);
+
+                // NPR用プロパティ
+                material.SetColor(ColorPropertyType._EmissionColor, start.EmissionColor);
+                material.SetColor(ColorPropertyType._MatcapColor, start.MatcapColor);
+                material.SetColor(ColorPropertyType._ReflectionColor, start.ReflectionColor);
+                material.SetValue(ValuePropertyType._NormalValue, start.NormalValue);
+                material.SetValue(ValuePropertyType._ParallaxValue, start.ParallaxValue);
+                material.SetValue(ValuePropertyType._MatcapValue, start.MatcapValue);
+                material.SetValue(ValuePropertyType._MatcapMaskValue, start.MatcapMaskValue);
+                material.SetValue(ValuePropertyType._EmissionValue, start.EmissionValue);
+                material.SetValue(ValuePropertyType._EmissionHDRExposure, start.EmissionHDRExposure);
+                material.SetValue(ValuePropertyType._EmissionPower, start.EmissionPower);
+                material.SetValue(ValuePropertyType._RimLightValue, start.RimLightValue);
+                material.SetValue(ValuePropertyType._RimLightPower, start.RimLightPower);
+                material.SetValue(ValuePropertyType._MetallicValue, start.MetallicValue);
+                material.SetValue(ValuePropertyType._SmoothnessValue, start.SmoothnessValue);
+                material.SetValue(ValuePropertyType._OcclusionValue, start.OcclusionValue);
             }
 
             float easingTime = CalcEasingValue(t, motion.easing);
@@ -122,6 +143,102 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (start.OutlineColor != end.OutlineColor)
             {
                 material.SetColor(ColorPropertyType._OutlineColor, Color.Lerp(start.OutlineColor, end.OutlineColor, easingTime));
+            }
+
+            if (start.Shininess != end.Shininess)
+            {
+                material.SetValue(ValuePropertyType._Shininess, Mathf.Lerp(start.Shininess, end.Shininess, easingTime));
+            }
+
+            if (start.OutlineWidth != end.OutlineWidth)
+            {
+                material.SetValue(ValuePropertyType._OutlineWidth, Mathf.Lerp(start.OutlineWidth, end.OutlineWidth, easingTime));
+            }
+
+            if (start.RimPower != end.RimPower)
+            {
+                material.SetValue(ValuePropertyType._RimPower, Mathf.Lerp(start.RimPower, end.RimPower, easingTime));
+            }
+
+            if (start.RimShift != end.RimShift)
+            {
+                material.SetValue(ValuePropertyType._RimShift, Mathf.Lerp(start.RimShift, end.RimShift, easingTime));
+            }
+
+            // NPR用プロパティの補間処理
+            if (start.EmissionColor != end.EmissionColor)
+            {
+                material.SetColor(ColorPropertyType._EmissionColor, Color.Lerp(start.EmissionColor, end.EmissionColor, easingTime));
+            }
+
+            if (start.MatcapColor != end.MatcapColor)
+            {
+                material.SetColor(ColorPropertyType._MatcapColor, Color.Lerp(start.MatcapColor, end.MatcapColor, easingTime));
+            }
+
+            if (start.ReflectionColor != end.ReflectionColor)
+            {
+                material.SetColor(ColorPropertyType._ReflectionColor, Color.Lerp(start.ReflectionColor, end.ReflectionColor, easingTime));
+            }
+
+            if (start.NormalValue != end.NormalValue)
+            {
+                material.SetValue(ValuePropertyType._NormalValue, Mathf.Lerp(start.NormalValue, end.NormalValue, easingTime));
+            }
+
+            if (start.ParallaxValue != end.ParallaxValue)
+            {
+                material.SetValue(ValuePropertyType._ParallaxValue, Mathf.Lerp(start.ParallaxValue, end.ParallaxValue, easingTime));
+            }
+
+            if (start.MatcapValue != end.MatcapValue)
+            {
+                material.SetValue(ValuePropertyType._MatcapValue, Mathf.Lerp(start.MatcapValue, end.MatcapValue, easingTime));
+            }
+
+            if (start.MatcapMaskValue != end.MatcapMaskValue)
+            {
+                material.SetValue(ValuePropertyType._MatcapMaskValue, Mathf.Lerp(start.MatcapMaskValue, end.MatcapMaskValue, easingTime));
+            }
+
+            if (start.EmissionValue != end.EmissionValue)
+            {
+                material.SetValue(ValuePropertyType._EmissionValue, Mathf.Lerp(start.EmissionValue, end.EmissionValue, easingTime));
+            }
+
+            if (start.EmissionHDRExposure != end.EmissionHDRExposure)
+            {
+                material.SetValue(ValuePropertyType._EmissionHDRExposure, Mathf.Lerp(start.EmissionHDRExposure, end.EmissionHDRExposure, easingTime));
+            }
+
+            if (start.EmissionPower != end.EmissionPower)
+            {
+                material.SetValue(ValuePropertyType._EmissionPower, Mathf.Lerp(start.EmissionPower, end.EmissionPower, easingTime));
+            }
+
+            if (start.RimLightValue != end.RimLightValue)
+            {
+                material.SetValue(ValuePropertyType._RimLightValue, Mathf.Lerp(start.RimLightValue, end.RimLightValue, easingTime));
+            }
+
+            if (start.RimLightPower != end.RimLightPower)
+            {
+                material.SetValue(ValuePropertyType._RimLightPower, Mathf.Lerp(start.RimLightPower, end.RimLightPower, easingTime));
+            }
+
+            if (start.MetallicValue != end.MetallicValue)
+            {
+                material.SetValue(ValuePropertyType._MetallicValue, Mathf.Lerp(start.MetallicValue, end.MetallicValue, easingTime));
+            }
+
+            if (start.SmoothnessValue != end.SmoothnessValue)
+            {
+                material.SetValue(ValuePropertyType._SmoothnessValue, Mathf.Lerp(start.SmoothnessValue, end.SmoothnessValue, easingTime));
+            }
+
+            if (start.OcclusionValue != end.OcclusionValue)
+            {
+                material.SetValue(ValuePropertyType._OcclusionValue, Mathf.Lerp(start.OcclusionValue, end.OcclusionValue, easingTime));
             }
         }
 
@@ -163,6 +280,30 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 trans.ShadowColor = sourceMaterial.GetColor(ColorPropertyType._ShadowColor);
                 trans.RimColor = sourceMaterial.GetColor(ColorPropertyType._RimColor);
                 trans.OutlineColor = sourceMaterial.GetColor(ColorPropertyType._OutlineColor);
+                
+                trans.Shininess = sourceMaterial.GetValue(ValuePropertyType._Shininess);
+                trans.OutlineWidth = sourceMaterial.GetValue(ValuePropertyType._OutlineWidth);
+                trans.RimPower = sourceMaterial.GetValue(ValuePropertyType._RimPower);
+                trans.RimShift = sourceMaterial.GetValue(ValuePropertyType._RimShift);
+
+                // NPR用プロパティの追加
+                trans.EmissionColor = sourceMaterial.GetColor(ColorPropertyType._EmissionColor);
+                trans.MatcapColor = sourceMaterial.GetColor(ColorPropertyType._MatcapColor);
+                trans.ReflectionColor = sourceMaterial.GetColor(ColorPropertyType._ReflectionColor);
+                
+                trans.NormalValue = sourceMaterial.GetValue(ValuePropertyType._NormalValue);
+                trans.ParallaxValue = sourceMaterial.GetValue(ValuePropertyType._ParallaxValue);
+                trans.MatcapValue = sourceMaterial.GetValue(ValuePropertyType._MatcapValue);
+                trans.MatcapMaskValue = sourceMaterial.GetValue(ValuePropertyType._MatcapMaskValue);
+                trans.EmissionValue = sourceMaterial.GetValue(ValuePropertyType._EmissionValue);
+                trans.EmissionHDRExposure = sourceMaterial.GetValue(ValuePropertyType._EmissionHDRExposure);
+                trans.EmissionPower = sourceMaterial.GetValue(ValuePropertyType._EmissionPower);
+                trans.RimLightValue = sourceMaterial.GetValue(ValuePropertyType._RimLightValue);
+                trans.RimLightPower = sourceMaterial.GetValue(ValuePropertyType._RimLightPower);
+                trans.MetallicValue = sourceMaterial.GetValue(ValuePropertyType._MetallicValue);
+                trans.SmoothnessValue = sourceMaterial.GetValue(ValuePropertyType._SmoothnessValue);
+                trans.OcclusionValue = sourceMaterial.GetValue(ValuePropertyType._OcclusionValue);
+                
                 trans.easing = GetEasing(frame.frameNo, materialName);
             }
         }
@@ -245,6 +386,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
+            var defaultTrans = TransformDataModelMaterial.defaultTrans;
+
             view.DrawHorizontalLine(Color.gray);
 
             view.AddSpace(5);
@@ -268,6 +411,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     view.DrawColor(cache, color, initialColor, newColor =>
                     {
                         material.SetColor(propertyType, newColor);
+                    });
+                }
+
+                foreach (var propertyType in ModelMaterial.ValuePropertyTypes)
+                {
+                    if (!material.HasValue(propertyType)) continue;
+
+                    var value = material.GetValue(propertyType);
+                    var initialValue = material.GetInitialValue(propertyType);
+                    var info = defaultTrans.GetCustomValueInfo(propertyType);
+                    var fieldType = propertyType == ValuePropertyType._OutlineWidth ?
+                        FloatFieldType.F4 : FloatFieldType.Float;
+
+                    view.DrawLabel(info.name, 200, 20);
+
+                    view.DrawSliderValue(new GUIView.SliderOption
+                    {
+                        fieldType = fieldType,
+                        min = info.min,
+                        max = info.max,
+                        step = info.step,
+                        defaultValue = initialValue,
+                        value = value,
+                        onChanged = newValue =>
+                        {
+                            material.SetValue(propertyType, newValue);
+                        },
                     });
                 }
 

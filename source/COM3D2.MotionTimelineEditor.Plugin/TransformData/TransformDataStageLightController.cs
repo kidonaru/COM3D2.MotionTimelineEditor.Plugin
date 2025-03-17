@@ -5,6 +5,47 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataStageLightController : TransformDataBase
     {
+        public enum Index
+        {
+            PositionX = 0,
+            PositionY = 1,
+            PositionZ = 2,
+            SubPositionX = 3,
+            SubPositionY = 4,
+            SubPositionZ = 5,
+            EulerX = 6,
+            EulerY = 7,
+            EulerZ = 8,
+            SubEulerX = 9,
+            SubEulerY = 10,
+            SubEulerZ = 11,
+            ColorR = 12,
+            ColorG = 13,
+            ColorB = 14,
+            ColorA = 15,
+            SubColorR = 16,
+            SubColorG = 17,
+            SubColorB = 18,
+            SubColorA = 19,
+            Visible = 20,
+            SpotAngle = 21,
+            SpotRange = 22,
+            RangeMultiplier = 23,
+            FalloffExp = 24,
+            NoiseStrength = 25,
+            NoiseScale = 26,
+            CoreRadius = 27,
+            OffsetRange = 28,
+            SegmentAngle = 29,
+            SegmentRange = 30,
+            AutoPosition = 31,
+            AutoRotation = 32,
+            AutoColor = 33,
+            AutoLightInfo = 34,
+            AutoVisible = 35,
+            ZTest = 36
+        }
+
         public static TransformDataStageLightController defaultTrans = new TransformDataStageLightController();
 
         public override TransformType type => TransformType.StageLightController;
@@ -22,35 +63,61 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override ValueData[] positionValues
         {
-            get => new ValueData[] { values[0], values[1], values[2] };
+            get => new ValueData[] { 
+                values[(int)Index.PositionX], 
+                values[(int)Index.PositionY], 
+                values[(int)Index.PositionZ] 
+            };
         }
 
         public override ValueData[] subPositionValues
         {
-            get => new ValueData[] { values[3], values[4], values[5] };
+            get => new ValueData[] { 
+                values[(int)Index.SubPositionX], 
+                values[(int)Index.SubPositionY], 
+                values[(int)Index.SubPositionZ] 
+            };
         }
 
         public override ValueData[] eulerAnglesValues
         {
-            get => new ValueData[] { values[6], values[7], values[8] };
+            get => new ValueData[] { 
+                values[(int)Index.EulerX], 
+                values[(int)Index.EulerY], 
+                values[(int)Index.EulerZ] 
+            };
         }
 
         public override ValueData[] subEulerAnglesValues
         {
-            get => new ValueData[] { values[9], values[10], values[11] };
+            get => new ValueData[] { 
+                values[(int)Index.SubEulerX], 
+                values[(int)Index.SubEulerY], 
+                values[(int)Index.SubEulerZ] 
+            };
         }
 
         public override ValueData[] colorValues
         {
-            get => new ValueData[] { values[12], values[13], values[14], values[15] };
+            get => new ValueData[] { 
+                values[(int)Index.ColorR], 
+                values[(int)Index.ColorG], 
+                values[(int)Index.ColorB], 
+                values[(int)Index.ColorA] 
+            };
         }
 
         public override ValueData[] subColorValues
         {
-            get => new ValueData[] { values[16], values[17], values[18], values[19] };
+            get => new ValueData[] { 
+                values[(int)Index.SubColorR], 
+                values[(int)Index.SubColorG], 
+                values[(int)Index.SubColorB], 
+                values[(int)Index.SubColorA] 
+            };
         }
 
-        public override ValueData visibleValue => values[20];
+        public override ValueData visibleValue => values[(int)Index.Visible];
 
         private List<ValueData> _tangentValues = null;
         public override ValueData[] tangentValues
@@ -64,7 +131,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _tangentValues.AddRange(subPositionValues);
                     _tangentValues.AddRange(eulerAnglesValues);
                     _tangentValues.AddRange(subEulerAnglesValues);
-                    _tangentValues.AddRange(new ValueData[] { values[21], values[22] });
+                    _tangentValues.AddRange(new ValueData[] { 
+                        values[(int)Index.SpotAngle], 
+                        values[(int)Index.SpotRange] 
+                    });
                 }
                 return _tangentValues.ToArray();
             }
@@ -86,7 +156,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "spotAngle", new CustomValueInfo
                 {
-                    index = 21,
+                    index = (int)Index.SpotAngle,
                     name = "角度",
                     min = 1f,
                     max = 179f,
@@ -97,7 +167,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "spotRange", new CustomValueInfo
                 {
-                    index = 22,
+                    index = (int)Index.SpotRange,
                     name = "範囲",
                     min = 0f,
                     max = 100f,
@@ -108,7 +178,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "rangeMultiplier", new CustomValueInfo
                 {
-                    index = 23,
+                    index = (int)Index.RangeMultiplier,
                     name = "範囲補正",
                     min = 0f,
                     max = 1f,
@@ -119,7 +189,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "falloffExp", new CustomValueInfo
                 {
-                    index = 24,
+                    index = (int)Index.FalloffExp,
                     name = "減衰指数",
                     min = 0f,
                     max = 5f,
@@ -130,7 +200,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "noiseStrength", new CustomValueInfo
                 {
-                    index = 25,
+                    index = (int)Index.NoiseStrength,
                     name = "ﾉｲｽﾞ強度",
                     min = 0f,
                     max = 1f,
@@ -141,7 +211,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "noiseScale", new CustomValueInfo
                 {
-                    index = 26,
+                    index = (int)Index.NoiseScale,
                     name = "ﾉｲｽﾞｻｲｽﾞ",
                     min = 1f,
                     max = 100f,
@@ -152,7 +222,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "coreRadius", new CustomValueInfo
                 {
-                    index = 27,
+                    index = (int)Index.CoreRadius,
                     name = "中心半径",
                     min = 0f,
                     max = 1f,
@@ -163,7 +233,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "offsetRange", new CustomValueInfo
                 {
-                    index = 28,
+                    index = (int)Index.OffsetRange,
                     name = "ｵﾌｾｯﾄ範囲",
                     min = 0f,
                     max = 10f,
@@ -174,7 +244,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "segmentAngle", new CustomValueInfo
                 {
-                    index = 29,
+                    index = (int)Index.SegmentAngle,
                     name = "分割角度",
                     min = 1,
                     max = 64,
@@ -185,7 +255,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "segmentRange", new CustomValueInfo
                 {
-                    index = 30,
+                    index = (int)Index.SegmentRange,
                     name = "分割範囲",
                     min = 1,
                     max = 64,
@@ -196,7 +266,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "autoPosition", new CustomValueInfo
                 {
-                    index = 31,
+                    index = (int)Index.AutoPosition,
                     name = "一括位置",
                     min = 0,
                     max = 1,
@@ -207,7 +277,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "autoRotation", new CustomValueInfo
                 {
-                    index = 32,
+                    index = (int)Index.AutoRotation,
                     name = "一括回転",
                     min = 0,
                     max = 1,
@@ -218,7 +288,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "autoColor", new CustomValueInfo
                 {
-                    index = 33,
+                    index = (int)Index.AutoColor,
                     name = "一括色",
                     min = 0,
                     max = 1,
@@ -229,7 +299,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "autoLightInfo", new CustomValueInfo
                 {
-                    index = 34,
+                    index = (int)Index.AutoLightInfo,
                     name = "一括情報",
                     min = 0,
                     max = 1,
@@ -240,7 +310,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "autoVisible", new CustomValueInfo
                 {
-                    index = 35,
+                    index = (int)Index.AutoVisible,
                     name = "一括表示",
                     min = 0,
                     max = 1,
@@ -251,7 +321,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "zTest", new CustomValueInfo
                 {
-                    index = 36,
+                    index = (int)Index.ZTest,
                     name = "Zテスト",
                     min = 0,
                     max = 1,
@@ -266,23 +336,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData spotAngleValue => this["spotAngle"];
-        public ValueData spotRangeValue => this["spotRange"];
-        public ValueData rangeMultiplierValue => this["rangeMultiplier"];
-        public ValueData falloffExpValue => this["falloffExp"];
-        public ValueData noiseStrengthValue => this["noiseStrength"];
-        public ValueData noiseScaleValue => this["noiseScale"];
-        public ValueData coreRadiusValue => this["coreRadius"];
-        public ValueData offsetRangeValue => this["offsetRange"];
-        public ValueData segmentAngleValue => this["segmentAngle"];
-        public ValueData segmentRangeValue => this["segmentRange"];
-        public ValueData autoPositionValue => this["autoPosition"];
-        public ValueData autoRotationValue => this["autoRotation"];
-        public ValueData autoColorValue => this["autoColor"];
-        public ValueData autoLightInfoValue => this["autoLightInfo"];
-        public ValueData autoVisibleValue => this["autoVisible"];
-        public ValueData zTestValue => this["zTest"];
+        // 値アクセサ
+        public ValueData spotAngleValue => values[(int)Index.SpotAngle];
+        public ValueData spotRangeValue => values[(int)Index.SpotRange];
+        public ValueData rangeMultiplierValue => values[(int)Index.RangeMultiplier];
+        public ValueData falloffExpValue => values[(int)Index.FalloffExp];
+        public ValueData noiseStrengthValue => values[(int)Index.NoiseStrength];
+        public ValueData noiseScaleValue => values[(int)Index.NoiseScale];
+        public ValueData coreRadiusValue => values[(int)Index.CoreRadius];
+        public ValueData offsetRangeValue => values[(int)Index.OffsetRange];
+        public ValueData segmentAngleValue => values[(int)Index.SegmentAngle];
+        public ValueData segmentRangeValue => values[(int)Index.SegmentRange];
+        public ValueData autoPositionValue => values[(int)Index.AutoPosition];
+        public ValueData autoRotationValue => values[(int)Index.AutoRotation];
+        public ValueData autoColorValue => values[(int)Index.AutoColor];
+        public ValueData autoLightInfoValue => values[(int)Index.AutoLightInfo];
+        public ValueData autoVisibleValue => values[(int)Index.AutoVisible];
+        public ValueData zTestValue => values[(int)Index.ZTest];
 
+        // CustomValueInfoアクセサ
         public CustomValueInfo spotAngleInfo => CustomValueInfoMap["spotAngle"];
         public CustomValueInfo spotRangeInfo => CustomValueInfoMap["spotRange"];
         public CustomValueInfo rangeMultiplierInfo => CustomValueInfoMap["rangeMultiplier"];
@@ -300,6 +372,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public CustomValueInfo autoVisibleInfo => CustomValueInfoMap["autoVisible"];
         public CustomValueInfo zTestInfo => CustomValueInfoMap["zTest"];
 
+        // プロパティアクセサ
         public float spotAngle
         {
             get => spotAngleValue.value;

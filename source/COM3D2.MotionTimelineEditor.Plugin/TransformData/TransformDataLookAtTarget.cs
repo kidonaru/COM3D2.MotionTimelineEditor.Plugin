@@ -4,6 +4,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataLookAtTarget : TransformDataBase
     {
+        public enum Index
+        {
+            TargetType = 0,
+            TargetIndex = 1,
+            MaidPointType = 2
+        }
+
         public override TransformType type => TransformType.LookAtTarget;
 
         public override int valueCount => 3;
@@ -26,7 +33,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "targetType",
                 new CustomValueInfo
                 {
-                    index = 0,
+                    index = (int)Index.TargetType,
                     name = "注視先",
                     defaultValue = 0,
                 }
@@ -35,7 +42,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "targetIndex",
                 new CustomValueInfo
                 {
-                    index = 1,
+                    index = (int)Index.TargetIndex,
                     name = "対象番号",
                     defaultValue = 0,
                 }
@@ -44,7 +51,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "maidPointType",
                 new CustomValueInfo
                 {
-                    index = 2,
+                    index = (int)Index.MaidPointType,
                     name = "ポイント",
                     defaultValue = 0,
                 }
@@ -56,16 +63,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData targetTypeValue => this["targetType"];
+        // 値アクセサ
+        public ValueData targetTypeValue => values[(int)Index.TargetType];
+        public ValueData targetIndexValue => values[(int)Index.TargetIndex];
+        public ValueData maidPointTypeValue => values[(int)Index.MaidPointType];
 
-        public ValueData targetIndexValue => this["targetIndex"];
-
-        public ValueData maidPointTypeValue => this["maidPointType"];
-
+        // プロパティアクセサ
         public LookAtTargetType targetType
         {
-            get => (LookAtTargetType) targetTypeValue.intValue;
-            set => targetTypeValue.intValue = (int) value;
+            get => (LookAtTargetType)targetTypeValue.intValue;
+            set => targetTypeValue.intValue = (int)value;
         }
 
         public int targetIndex
@@ -76,8 +83,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public MaidPointType maidPointType
         {
-            get => (MaidPointType) maidPointTypeValue.intValue;
-            set => maidPointTypeValue.intValue = (int) value;
+            get => (MaidPointType)maidPointTypeValue.intValue;
+            set => maidPointTypeValue.intValue = (int)value;
         }
     }
 }

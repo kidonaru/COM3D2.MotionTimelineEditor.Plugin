@@ -4,17 +4,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataIKHold : TransformDataBase
     {
+        public enum Index
+        {
+            PositionX = 0,
+            PositionY = 1,
+            PositionZ = 2,
+            IsHold = 3,
+            IsAnime = 4
+        }
+
         public override TransformType type => TransformType.IKHold;
 
         public override int valueCount => 5;
 
         public override bool hasPosition => true;
-
         public override bool hasTangent => true;
 
         public override ValueData[] positionValues
         {
-            get => new ValueData[] { values[0], values[1], values[2] };
+            get => new ValueData[] { 
+                values[(int)Index.PositionX], 
+                values[(int)Index.PositionY], 
+                values[(int)Index.PositionZ] 
+            };
         }
 
         public override ValueData[] tangentValues => positionValues;
@@ -31,7 +43,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "isHold",
                 new CustomValueInfo
                 {
-                    index = 3,
+                    index = (int)Index.IsHold,
                     name = "IK固定",
                     defaultValue = 0,
                 }
@@ -40,7 +52,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "isAnime",
                 new CustomValueInfo
                 {
-                    index = 4,
+                    index = (int)Index.IsAnime,
                     name = "IKアニメ",
                     defaultValue = 0,
                 }
@@ -52,10 +64,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData isHoldValue => this["isHold"];
+        // 値アクセサ
+        public ValueData isHoldValue => values[(int)Index.IsHold];
+        public ValueData isAnimeValue => values[(int)Index.IsAnime];
 
-        public ValueData isAnimeValue => this["isAnime"];
-
+        // プロパティアクセサ
         public bool isHold
         {
             get => isHoldValue.boolValue;

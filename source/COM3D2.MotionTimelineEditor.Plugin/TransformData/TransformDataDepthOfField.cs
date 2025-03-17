@@ -4,6 +4,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataDepthOfField : TransformDataBase
     {
+        public enum Index
+        {
+            Easing = 0,
+            Visible = 1,
+            FocalLength = 2,
+            FocalSize = 3,
+            Aperture = 4,
+            MaxBlurSize = 5,
+            MaidSlotNo = 6
+        }
+
         public static TransformDataDepthOfField defaultTrans = new TransformDataDepthOfField();
 
         public override TransformType type => TransformType.DepthOfField;
@@ -11,12 +22,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override int valueCount => 7;
 
         public override bool hasVisible => true;
-
         public override bool hasEasing => true;
 
-        public override ValueData visibleValue => values[1];
+        public override ValueData visibleValue => values[(int)Index.Visible];
 
-        public override ValueData easingValue => values[0];
+        public override ValueData easingValue => values[(int)Index.Easing];
 
         public TransformDataDepthOfField()
         {
@@ -27,7 +37,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "focalLength", new CustomValueInfo
                 {
-                    index = 2,
+                    index = (int)Index.FocalLength,
                     name = "ﾋﾟﾝﾄ距離",
                     min = 0f,
                     max = config.positionRange,
@@ -38,7 +48,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "focalSize", new CustomValueInfo
                 {
-                    index = 3,
+                    index = (int)Index.FocalSize,
                     name = "焦点距離",
                     min = 0f,
                     max = 2f,
@@ -49,7 +59,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "aperture", new CustomValueInfo
                 {
-                    index = 4,
+                    index = (int)Index.Aperture,
                     name = "絞り値",
                     min = 0f,
                     max = 60f,
@@ -60,7 +70,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "maxBlurSize", new CustomValueInfo
                 {
-                    index = 5,
+                    index = (int)Index.MaxBlurSize,
                     name = "ﾌﾞﾗｰｻｲｽﾞ",
                     min = 0f,
                     max = 10f,
@@ -71,7 +81,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "maidSlotNo", new CustomValueInfo
                 {
-                    index = 6,
+                    index = (int)Index.MaidSlotNo,
                     name = "追従",
                     defaultValue = -1f,
                 }
@@ -83,11 +93,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData focalLengthValue => this["focalLength"];
-        public ValueData focalSizeValue => this["focalSize"];
-        public ValueData apertureValue => this["aperture"];
-        public ValueData maxBlurSizeValue => this["maxBlurSize"];
-        public ValueData maidSlotNoValue => this["maidSlotNo"];
+        public ValueData focalLengthValue => values[(int)Index.FocalLength];
+        public ValueData focalSizeValue => values[(int)Index.FocalSize];
+        public ValueData apertureValue => values[(int)Index.Aperture];
+        public ValueData maxBlurSizeValue => values[(int)Index.MaxBlurSize];
+        public ValueData maidSlotNoValue => values[(int)Index.MaidSlotNo];
 
         public CustomValueInfo focalLengthInfo => CustomValueInfoMap["focalLength"];
         public CustomValueInfo focalSizeInfo => CustomValueInfoMap["focalSize"];

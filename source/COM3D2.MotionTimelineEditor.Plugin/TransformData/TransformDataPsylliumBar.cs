@@ -5,6 +5,41 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataPsylliumBar : TransformDataBase
     {
+        public enum Index
+        {
+            Color1aR = 0,
+            Color1aG = 1,
+            Color1aB = 2,
+            Color1aA = 3,
+            Color1bR = 4,
+            Color1bG = 5,
+            Color1bB = 6,
+            Color1bA = 7,
+            Color1cR = 8,
+            Color1cG = 9,
+            Color1cB = 10,
+            Color1cA = 11,
+            Color2aR = 12,
+            Color2aG = 13,
+            Color2aB = 14,
+            Color2aA = 15,
+            Color2bR = 16,
+            Color2bG = 17,
+            Color2bB = 18,
+            Color2bA = 19,
+            Color2cR = 20,
+            Color2cG = 21,
+            Color2cB = 22,
+            Color2cA = 23,
+            BaseScale = 24,
+            Width = 25,
+            Height = 26,
+            PositionY = 27,
+            Radius = 28,
+            TopThreshold = 29,
+            CutoffAlpha = 30
+        }
+
         public static TransformDataPsylliumBar defaultTrans = new TransformDataPsylliumBar();
         public static PsylliumBarConfig defaultConfig = new PsylliumBarConfig();
 
@@ -21,7 +56,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color1aR", new CustomValueInfo
                 {
-                    index = 0,
+                    index = (int)Index.Color1aR,
                     name = "中心色1R",
                     min = 0f,
                     max = 1f,
@@ -32,7 +67,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color1aG", new CustomValueInfo
                 {
-                    index = 1,
+                    index = (int)Index.Color1aG,
                     name = "中心色1G",
                     min = 0f,
                     max = 1f,
@@ -43,7 +78,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color1aB", new CustomValueInfo
                 {
-                    index = 2,
+                    index = (int)Index.Color1aB,
                     name = "中心色1B",
                     min = 0f,
                     max = 1f,
@@ -54,7 +89,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color1aA", new CustomValueInfo
                 {
-                    index = 3,
+                    index = (int)Index.Color1aA,
                     name = "中心色1A",
                     min = 0f,
                     max = 1f,
@@ -65,7 +100,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color1bR", new CustomValueInfo
                 {
-                    index = 4,
+                    index = (int)Index.Color1bR,
                     name = "縁色1R",
                     min = 0f,
                     max = 1f,
@@ -76,7 +111,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color1bG", new CustomValueInfo
                 {
-                    index = 5,
+                    index = (int)Index.Color1bG,
                     name = "縁色1G",
                     min = 0f,
                     max = 1f,
@@ -87,7 +122,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color1bB", new CustomValueInfo
                 {
-                    index = 6,
+                    index = (int)Index.Color1bB,
                     name = "縁色1B",
                     min = 0f,
                     max = 1f,
@@ -98,7 +133,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color1bA", new CustomValueInfo
                 {
-                    index = 7,
+                    index = (int)Index.Color1bA,
                     name = "縁色1A",
                     min = 0f,
                     max = 1f,
@@ -109,7 +144,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color1cR", new CustomValueInfo
                 {
-                    index = 8,
+                    index = (int)Index.Color1cR,
                     name = "散乱色1R",
                     min = 0f,
                     max = 1f,
@@ -120,7 +155,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color1cG", new CustomValueInfo
                 {
-                    index = 9,
+                    index = (int)Index.Color1cG,
                     name = "散乱色1G",
                     min = 0f,
                     max = 1f,
@@ -131,7 +166,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color1cB", new CustomValueInfo
                 {
-                    index = 10,
+                    index = (int)Index.Color1cB,
                     name = "散乱色1B",
                     min = 0f,
                     max = 1f,
@@ -142,7 +177,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color1cA", new CustomValueInfo
                 {
-                    index = 11,
+                    index = (int)Index.Color1cA,
                     name = "散乱色1A",
                     min = 0f,
                     max = 1f,
@@ -153,7 +188,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color2aR", new CustomValueInfo
                 {
-                    index = 12,
+                    index = (int)Index.Color2aR,
                     name = "中心色2R",
                     min = 0f,
                     max = 1f,
@@ -164,7 +199,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color2aG", new CustomValueInfo
                 {
-                    index = 13,
+                    index = (int)Index.Color2aG,
                     name = "中心色2G",
                     min = 0f,
                     max = 1f,
@@ -175,7 +210,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color2aB", new CustomValueInfo
                 {
-                    index = 14,
+                    index = (int)Index.Color2aB,
                     name = "中心色2B",
                     min = 0f,
                     max = 1f,
@@ -186,7 +221,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color2aA", new CustomValueInfo
                 {
-                    index = 15,
+                    index = (int)Index.Color2aA,
                     name = "中心色2A",
                     min = 0f,
                     max = 1f,
@@ -197,7 +232,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color2bR", new CustomValueInfo
                 {
-                    index = 16,
+                    index = (int)Index.Color2bR,
                     name = "縁色2R",
                     min = 0f,
                     max = 1f,
@@ -208,7 +243,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color2bG", new CustomValueInfo
                 {
-                    index = 17,
+                    index = (int)Index.Color2bG,
                     name = "縁色2G",
                     min = 0f,
                     max = 1f,
@@ -219,7 +254,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color2bB", new CustomValueInfo
                 {
-                    index = 18,
+                    index = (int)Index.Color2bB,
                     name = "縁色2B",
                     min = 0f,
                     max = 1f,
@@ -230,7 +265,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color2bA", new CustomValueInfo
                 {
-                    index = 19,
+                    index = (int)Index.Color2bA,
                     name = "縁色2A",
                     min = 0f,
                     max = 1f,
@@ -241,7 +276,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color2cR", new CustomValueInfo
                 {
-                    index = 20,
+                    index = (int)Index.Color2cR,
                     name = "散乱色2R",
                     min = 0f,
                     max = 1f,
@@ -252,7 +287,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color2cG", new CustomValueInfo
                 {
-                    index = 21,
+                    index = (int)Index.Color2cG,
                     name = "散乱色2G",
                     min = 0f,
                     max = 1f,
@@ -263,7 +298,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color2cB", new CustomValueInfo
                 {
-                    index = 22,
+                    index = (int)Index.Color2cB,
                     name = "散乱色2B",
                     min = 0f,
                     max = 1f,
@@ -274,7 +309,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "color2cA", new CustomValueInfo
                 {
-                    index = 23,
+                    index = (int)Index.Color2cA,
                     name = "散乱色2A",
                     min = 0f,
                     max = 1f,
@@ -285,7 +320,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "baseScale", new CustomValueInfo
                 {
-                    index = 24,
+                    index = (int)Index.BaseScale,
                     name = "スケール",
                     min = 0f,
                     max = 5f,
@@ -296,7 +331,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "width", new CustomValueInfo
                 {
-                    index = 25,
+                    index = (int)Index.Width,
                     name = "幅",
                     min = 0f,
                     max = 5f,
@@ -307,7 +342,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "height", new CustomValueInfo
                 {
-                    index = 26,
+                    index = (int)Index.Height,
                     name = "高さ",
                     min = 0f,
                     max = 5f,
@@ -318,7 +353,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "positionY", new CustomValueInfo
                 {
-                    index = 27,
+                    index = (int)Index.PositionY,
                     name = "Y",
                     min = 0f,
                     max = 5f,
@@ -329,7 +364,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "radius", new CustomValueInfo
                 {
-                    index = 28,
+                    index = (int)Index.Radius,
                     name = "半径",
                     min = 0f,
                     max = 1f,
@@ -340,7 +375,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "topThreshold", new CustomValueInfo
                 {
-                    index = 29,
+                    index = (int)Index.TopThreshold,
                     name = "上部閾値",
                     min = 0f,
                     max = 1f,
@@ -351,7 +386,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "cutoffAlpha", new CustomValueInfo
                 {
-                    index = 30,
+                    index = (int)Index.CutoffAlpha,
                     name = "A閾値",
                     min = 0f,
                     max = 1f,
@@ -368,35 +403,65 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public ValueData[] color1aValues
         {
-            get => new ValueData[] { this["color1aR"], this["color1aG"], this["color1aB"], this["color1aA"] };
+            get => new ValueData[] { 
+                values[(int)Index.Color1aR], 
+                values[(int)Index.Color1aG], 
+                values[(int)Index.Color1aB], 
+                values[(int)Index.Color1aA] 
+            };
         }
         public ValueData[] color1bValues
         {
-            get => new ValueData[] { this["color1bR"], this["color1bG"], this["color1bB"], this["color1bA"] };
+            get => new ValueData[] { 
+                values[(int)Index.Color1bR], 
+                values[(int)Index.Color1bG], 
+                values[(int)Index.Color1bB], 
+                values[(int)Index.Color1bA] 
+            };
         }
         public ValueData[] color1cValues
         {
-            get => new ValueData[] { this["color1cR"], this["color1cG"], this["color1cB"], this["color1cA"] };
+            get => new ValueData[] { 
+                values[(int)Index.Color1cR], 
+                values[(int)Index.Color1cG], 
+                values[(int)Index.Color1cB], 
+                values[(int)Index.Color1cA] 
+            };
         }
         public ValueData[] color2aValues
         {
-            get => new ValueData[] { this["color2aR"], this["color2aG"], this["color2aB"], this["color2aA"] };
+            get => new ValueData[] { 
+                values[(int)Index.Color2aR], 
+                values[(int)Index.Color2aG], 
+                values[(int)Index.Color2aB], 
+                values[(int)Index.Color2aA] 
+            };
         }
         public ValueData[] color2bValues
         {
-            get => new ValueData[] { this["color2bR"], this["color2bG"], this["color2bB"], this["color2bA"] };
+            get => new ValueData[] { 
+                values[(int)Index.Color2bR], 
+                values[(int)Index.Color2bG], 
+                values[(int)Index.Color2bB], 
+                values[(int)Index.Color2bA] 
+            };
         }
         public ValueData[] color2cValues
         {
-            get => new ValueData[] { this["color2cR"], this["color2cG"], this["color2cB"], this["color2cA"] };
+            get => new ValueData[] { 
+                values[(int)Index.Color2cR], 
+                values[(int)Index.Color2cG], 
+                values[(int)Index.Color2cB], 
+                values[(int)Index.Color2cA] 
+            };
         }
-        public ValueData baseScaleValue => this["baseScale"];
-        public ValueData widthValue => this["width"];
-        public ValueData heightValue => this["height"];
-        public ValueData positionYValue => this["positionY"];
-        public ValueData radiusValue => this["radius"];
-        public ValueData topThresholdValue => this["topThreshold"];
-        public ValueData cutoffAlphaValue => this["cutoffAlpha"];
+        public ValueData baseScaleValue => values[(int)Index.BaseScale];
+        public ValueData widthValue => values[(int)Index.Width];
+        public ValueData heightValue => values[(int)Index.Height];
+        public ValueData positionYValue => values[(int)Index.PositionY];
+        public ValueData radiusValue => values[(int)Index.Radius];
+        public ValueData topThresholdValue => values[(int)Index.TopThreshold];
+        public ValueData cutoffAlphaValue => values[(int)Index.CutoffAlpha];
 
         public CustomValueInfo baseScaleInfo => CustomValueInfoMap["baseScale"];
         public CustomValueInfo widthInfo => CustomValueInfoMap["width"];

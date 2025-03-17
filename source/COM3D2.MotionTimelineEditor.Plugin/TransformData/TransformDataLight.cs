@@ -4,6 +4,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataLight : TransformDataBase
     {
+        public enum Index
+        {
+            PositionX = 0,
+            PositionY = 1,
+            PositionZ = 2,
+            RotationX = 3,
+            RotationY = 4,
+            RotationZ = 5,
+            RotationW = 6,
+            ColorR = 7,
+            ColorG = 8,
+            ColorB = 9,
+            Easing = 10,
+            Range = 11,
+            Intensity = 12,
+            SpotAngle = 13,
+            ShadowStrength = 14,
+            ShadowBias = 15,
+            MaidSlotNo = 16,
+            Visible = 17
+        }
+
         public override TransformType type => TransformType.Light;
 
         public override int valueCount => 18;
@@ -17,22 +39,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override ValueData[] positionValues
         {
-            get => new ValueData[] { values[0], values[1], values[2] };
+            get => new ValueData[] { 
+                values[(int)Index.PositionX], 
+                values[(int)Index.PositionY], 
+                values[(int)Index.PositionZ] 
+            };
         }
 
         public override ValueData[] rotationValues
         {
-            get => new ValueData[] { values[3], values[4], values[5], values[6] };
+            get => new ValueData[] { 
+                values[(int)Index.RotationX], 
+                values[(int)Index.RotationY], 
+                values[(int)Index.RotationZ], 
+                values[(int)Index.RotationW] 
+            };
         }
 
         public override ValueData[] colorValues
         {
-            get => new ValueData[] { values[7], values[8], values[9] };
+            get => new ValueData[] { 
+                values[(int)Index.ColorR], 
+                values[(int)Index.ColorG], 
+                values[(int)Index.ColorB] 
+            };
         }
 
-        public override ValueData visibleValue => values[17];
+        public override ValueData visibleValue => values[(int)Index.Visible];
 
-        public override ValueData easingValue => values[10];
+        public override ValueData easingValue => values[(int)Index.Easing];
 
         public override ValueData[] tangentValues => values;
 
@@ -45,7 +80,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "range", new CustomValueInfo
                 {
-                    index = 11,
+                    index = (int)Index.Range,
                     name = "範囲",
                     defaultValue = 3f,
                 }
@@ -53,7 +88,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "intensity", new CustomValueInfo
                 {
-                    index = 12,
+                    index = (int)Index.Intensity,
                     name = "強度",
                     defaultValue = 0.95f,
                 }
@@ -61,7 +96,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "spotAngle", new CustomValueInfo
                 {
-                    index = 13,
+                    index = (int)Index.SpotAngle,
                     name = "角度",
                     defaultValue = 50f,
                 }
@@ -69,7 +104,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "shadowStrength", new CustomValueInfo
                 {
-                    index = 14,
+                    index = (int)Index.ShadowStrength,
                     name = "影濃",
                     defaultValue = 0.1f,
                 }
@@ -77,7 +112,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "shadowBias", new CustomValueInfo
                 {
-                    index = 15,
+                    index = (int)Index.ShadowBias,
                     name = "影距",
                     defaultValue = 0.01f,
                 }
@@ -85,7 +120,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "maidSlotNo", new CustomValueInfo
                 {
-                    index = 16,
+                    index = (int)Index.MaidSlotNo,
                     name = "追従",
                     defaultValue = -1f,
                 }
@@ -97,13 +132,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData rangeValue => this["range"];
-        public ValueData intensityValue => this["intensity"];
-        public ValueData spotAngleValue => this["spotAngle"];
-        public ValueData shadowStrengthValue => this["shadowStrength"];
-        public ValueData shadowBiasValue => this["shadowBias"];
-        public ValueData maidSlotNoValue => this["maidSlotNo"];
+        // 値アクセサ
+        public ValueData rangeValue => values[(int)Index.Range];
+        public ValueData intensityValue => values[(int)Index.Intensity];
+        public ValueData spotAngleValue => values[(int)Index.SpotAngle];
+        public ValueData shadowStrengthValue => values[(int)Index.ShadowStrength];
+        public ValueData shadowBiasValue => values[(int)Index.ShadowBias];
+        public ValueData maidSlotNoValue => values[(int)Index.MaidSlotNo];
 
+        // プロパティアクセサ
         public float range
         {
             get => rangeValue.value;

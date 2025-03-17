@@ -5,6 +5,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataPsylliumPattern : TransformDataBase
     {
+        public enum Index
+        {
+            PositionX = 0,
+            PositionY = 1,
+            PositionZ = 2,
+            EulerX = 3,
+            EulerY = 4,
+            EulerZ = 5,
+            TimeCount = 6,
+            TimeRange = 7,
+            TimeShiftMin = 8,
+            TimeShiftMax = 9,
+            RandomSeed = 10
+        }
+
         public static TransformDataPsylliumPattern defaultTrans = new TransformDataPsylliumPattern();
         public static PsylliumPatternConfig defaultConfig = new PsylliumPatternConfig();
 
@@ -17,12 +32,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override ValueData[] positionValues
         {
-            get => new ValueData[] { values[0], values[1], values[2] };
+            get => new ValueData[] { 
+                values[(int)Index.PositionX], 
+                values[(int)Index.PositionY], 
+                values[(int)Index.PositionZ] 
+            };
         }
 
         public override ValueData[] eulerAnglesValues
         {
-            get => new ValueData[] { values[3], values[4], values[5] };
+            get => new ValueData[] { 
+                values[(int)Index.EulerX], 
+                values[(int)Index.EulerY], 
+                values[(int)Index.EulerZ] 
+            };
         }
 
         public override Vector3 initialPosition => defaultConfig.randomPositionRange;
@@ -37,7 +60,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "timeCount", new CustomValueInfo
                 {
-                    index = 6,
+                    index = (int)Index.TimeCount,
                     name = "T Count",
                     min = 1f,
                     max = 100f,
@@ -48,7 +71,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "timeRange", new CustomValueInfo
                 {
-                    index = 7,
+                    index = (int)Index.TimeRange,
                     name = "T Range",
                     min = 0f,
                     max = 1f,
@@ -59,7 +82,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "timeShiftMin", new CustomValueInfo
                 {
-                    index = 8,
+                    index = (int)Index.TimeShiftMin,
                     name = "ShiftMin",
                     min = 0f,
                     max = 10f,
@@ -70,7 +93,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "timeShiftMax", new CustomValueInfo
                 {
-                    index = 9,
+                    index = (int)Index.TimeShiftMax,
                     name = "ShiftMax",
                     min = 0f,
                     max = 10f,
@@ -81,7 +104,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "randomSeed", new CustomValueInfo
                 {
-                    index = 10,
+                    index = (int)Index.RandomSeed,
                     name = "乱数Seed",
                     min = 0f,
                     max = int.MaxValue,
@@ -96,11 +119,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData timeCountValue => this["timeCount"];
-        public ValueData timeRangeValue => this["timeRange"];
-        public ValueData timeShiftMinValue => this["timeShiftMin"];
-        public ValueData timeShiftMaxValue => this["timeShiftMax"];
-        public ValueData randomSeedValue => this["randomSeed"];
+        public ValueData timeCountValue => values[(int)Index.TimeCount];
+        public ValueData timeRangeValue => values[(int)Index.TimeRange];
+        public ValueData timeShiftMinValue => values[(int)Index.TimeShiftMin];
+        public ValueData timeShiftMaxValue => values[(int)Index.TimeShiftMax];
+        public ValueData randomSeedValue => values[(int)Index.RandomSeed];
 
         public CustomValueInfo timeCountInfo => CustomValueInfoMap["timeCount"];
         public CustomValueInfo timeRangeInfo => CustomValueInfoMap["timeRange"];

@@ -5,6 +5,34 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataParaffin : TransformDataBase
     {
+        public enum Index
+        {
+            ColorR = 0,
+            ColorG = 1,
+            ColorB = 2,
+            ColorA = 3,
+            SubColorR = 4,
+            SubColorG = 5,
+            SubColorB = 6,
+            SubColorA = 7,
+            Visible = 8,
+            Easing = 9,
+            CenterPositionX = 10,
+            CenterPositionY = 11,
+            RadiusFar = 12,
+            RadiusNear = 13,
+            RadiusScaleX = 14,
+            RadiusScaleY = 15,
+            UseNormal = 16,
+            UseAdd = 17,
+            UseMultiply = 18,
+            UseOverlay = 19,
+            UseSubstruct = 20,
+            DepthMin = 21,
+            DepthMax = 22,
+            DepthFade = 23
+        }
+
         public static TransformDataParaffin defaultTrans = new TransformDataParaffin();
 
         public override TransformType type => TransformType.Paraffin;
@@ -18,17 +46,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override ValueData[] colorValues
         {
-            get => new ValueData[] { values[0], values[1], values[2], values[3] };
+            get => new ValueData[] { 
+                values[(int)Index.ColorR], 
+                values[(int)Index.ColorG], 
+                values[(int)Index.ColorB], 
+                values[(int)Index.ColorA] 
+            };
         }
 
         public override ValueData[] subColorValues
         {
-            get => new ValueData[] { values[4], values[5], values[6], values[7] };
+            get => new ValueData[] { 
+                values[(int)Index.SubColorR], 
+                values[(int)Index.SubColorG], 
+                values[(int)Index.SubColorB], 
+                values[(int)Index.SubColorA] 
+            };
         }
 
-        public override ValueData visibleValue => values[8];
+        public override ValueData visibleValue => values[(int)Index.Visible];
 
-        public override ValueData easingValue => values[9];
+        public override ValueData easingValue => values[(int)Index.Easing];
 
         public override Color initialColor => new Color(1f, 1f, 1f, 1f);
 
@@ -49,7 +87,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "centerPositionX", new CustomValueInfo
                 {
-                    index = 10,
+                    index = (int)Index.CenterPositionX,
                     name = "X",
                     min = -1f,
                     max = 2f,
@@ -60,7 +98,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "centerPositionY", new CustomValueInfo
                 {
-                    index = 11,
+                    index = (int)Index.CenterPositionY,
                     name = "Y",
                     min = -1f,
                     max = 2f,
@@ -71,7 +109,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "radiusFar", new CustomValueInfo
                 {
-                    index = 12,
+                    index = (int)Index.RadiusFar,
                     name = "外半径",
                     min = 0f,
                     max = 1f,
@@ -82,7 +120,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "radiusNear", new CustomValueInfo
                 {
-                    index = 13,
+                    index = (int)Index.RadiusNear,
                     name = "内半径",
                     min = 0f,
                     max = 1f,
@@ -93,7 +131,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "radiusScaleX", new CustomValueInfo
                 {
-                    index = 14,
+                    index = (int)Index.RadiusScaleX,
                     name = "SX",
                     min = 0f,
                     max = 5f,
@@ -104,7 +142,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "radiusScaleY", new CustomValueInfo
                 {
-                    index = 15,
+                    index = (int)Index.RadiusScaleY,
                     name = "SY",
                     min = 0f,
                     max = 5f,
@@ -115,7 +153,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "useNormal", new CustomValueInfo
                 {
-                    index = 16,
+                    index = (int)Index.UseNormal,
                     name = "通常",
                     min = 0f,
                     max = 2f,
@@ -126,7 +164,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "useAdd", new CustomValueInfo
                 {
-                    index = 17,
+                    index = (int)Index.UseAdd,
                     name = "加算",
                     min = 0f,
                     max = 2f,
@@ -137,7 +175,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "useMultiply", new CustomValueInfo
                 {
-                    index = 18,
+                    index = (int)Index.UseMultiply,
                     name = "乗算",
                     min = 0f,
                     max = 2f,
@@ -148,7 +186,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "useOverlay", new CustomValueInfo
                 {
-                    index = 19,
+                    index = (int)Index.UseOverlay,
                     name = "オーバーレイ",
                     min = 0f,
                     max = 2f,
@@ -159,7 +197,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "useSubstruct", new CustomValueInfo
                 {
-                    index = 20,
+                    index = (int)Index.UseSubstruct,
                     name = "減算",
                     min = 0f,
                     max = 2f,
@@ -170,7 +208,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "depthMin", new CustomValueInfo
                 {
-                    index = 21,
+                    index = (int)Index.DepthMin,
                     name = "最小深度",
                     min = 0f,
                     max = 100f,
@@ -181,7 +219,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "depthMax", new CustomValueInfo
                 {
-                    index = 22,
+                    index = (int)Index.DepthMax,
                     name = "最大深度",
                     min = 0f,
                     max = 100f,
@@ -192,7 +230,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "depthFade", new CustomValueInfo
                 {
-                    index = 23,
+                    index = (int)Index.DepthFade,
                     name = "深度幅",
                     min = 0f,
                     max = 10f,
@@ -207,25 +245,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
+        // Vector2アクセス用の配列
         public ValueData[] centerPositionValues
         {
-            get => new ValueData[] { this["centerPositionX"], this["centerPositionY"] };
+            get => new ValueData[] { 
+                values[(int)Index.CenterPositionX], 
+                values[(int)Index.CenterPositionY] 
+            };
         }
-        public ValueData radiusFarValue => this["radiusFar"];
-        public ValueData radiusNearValue => this["radiusNear"];
+
+        // 値アクセサ
+        public ValueData radiusFarValue => values[(int)Index.RadiusFar];
+        public ValueData radiusNearValue => values[(int)Index.RadiusNear];
+        
+        // Vector2アクセス用の配列
         public ValueData[] radiusScaleValues
         {
-            get => new ValueData[] { this["radiusScaleX"], this["radiusScaleY"] };
+            get => new ValueData[] { 
+                values[(int)Index.RadiusScaleX], 
+                values[(int)Index.RadiusScaleY] 
+            };
         }
-        public ValueData useNormalValue => this["useNormal"];
-        public ValueData useAddValue => this["useAdd"];
-        public ValueData useMultiplyValue => this["useMultiply"];
-        public ValueData useOverlayValue => this["useOverlay"];
-        public ValueData useSubstructValue => this["useSubstruct"];
-        public ValueData depthMinValue => this["depthMin"];
-        public ValueData depthMaxValue => this["depthMax"];
-        public ValueData depthFadeValue => this["depthFade"];
+        
+        public ValueData useNormalValue => values[(int)Index.UseNormal];
+        public ValueData useAddValue => values[(int)Index.UseAdd];
+        public ValueData useMultiplyValue => values[(int)Index.UseMultiply];
+        public ValueData useOverlayValue => values[(int)Index.UseOverlay];
+        public ValueData useSubstructValue => values[(int)Index.UseSubstruct];
+        public ValueData depthMinValue => values[(int)Index.DepthMin];
+        public ValueData depthMaxValue => values[(int)Index.DepthMax];
+        public ValueData depthFadeValue => values[(int)Index.DepthFade];
 
+        // CustomValueInfoアクセサ
         public CustomValueInfo centerPositionXInfo => CustomValueInfoMap["centerPositionX"];
         public CustomValueInfo centerPositionYInfo => CustomValueInfoMap["centerPositionY"];
         public CustomValueInfo radiusFarInfo => CustomValueInfoMap["radiusFar"];
@@ -241,6 +292,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public CustomValueInfo depthMaxInfo => CustomValueInfoMap["depthMax"];
         public CustomValueInfo depthFadeInfo => CustomValueInfoMap["depthFade"];
 
+        // プロパティアクセサ
         public Vector2 centerPosition
         {
             get => centerPositionValues.ToVector2();

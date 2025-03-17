@@ -1067,6 +1067,35 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
+            if (version < 30)
+            {
+                // PostEffectTimelineLayerのTransformDataRimlightのindex:23に0を追加
+                foreach (var layer in layers)
+                {
+                    if (layer.className == "PostEffectTimelineLayer")
+                    {
+                        foreach (var keyFrame in layer.keyFrames)
+                        {
+                            foreach (var bone in keyFrame.bones)
+                            {
+                                var transform = bone.transform;
+                                if (transform.type == TransformType.Rimlight)
+                                {
+                                    var values = new List<float>(transform.values);
+                                    if (values.Count > 23)
+                                    {
+                                        MTEUtils.LogDebug("Add 0 to PostEffectTimelineLayer name={0}", transform.name);
+                                        values.Insert(23, 0f);
+                                        transform.values = values.ToArray();
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
             ConvertPlugin();
         }
 

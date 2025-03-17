@@ -1,4 +1,3 @@
-
 using System.Collections.Generic;
 using COM3D2.MotionTimelineEditor.Plugin;
 using UnityEngine;
@@ -7,79 +6,85 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
     public class TransformDataText : TransformDataBase
     {
-        public override TransformType type
+        public enum Index
         {
-            get
-            {
-                return TransformType.Text;
-            }
+            PositionX = 0,
+            PositionY = 1,
+            PositionZ = 2,
+            EulerX = 3,
+            EulerY = 4,
+            EulerZ = 5,
+            ScaleX = 6,
+            ScaleY = 7,
+            ScaleZ = 8,
+            ColorR = 9,
+            ColorG = 10,
+            ColorB = 11,
+            ColorA = 12,
+            Easing = 13,
+            TextIndex = 14,
+            FontSize = 15,
+            LineSpacing = 16,
+            Alignment = 17,
+            SizeDeltaX = 18,
+            SizeDeltaY = 19
         }
 
-        public override int valueCount
+        public enum StrIndex
         {
-            get
-            {
-                return 20;
-            }
+            Text = 0,
+            Font = 1
         }
 
-        public override int strValueCount
-        {
-            get
-            {
-                return 2;
-            }
-        }
+        public override TransformType type => TransformType.Text;
+
+        public override int valueCount => 20;
+        public override int strValueCount => 2;
 
         public override bool hasPosition => true;
-
         public override bool hasEulerAngles => true;
-
         public override bool hasScale => true;
-
         public override bool hasColor => true;
-
         public override bool hasEasing => true;
 
         public override ValueData[] positionValues
         {
-            get
-            {
-                return new ValueData[] { values[0], values[1], values[2] };
-            }
+            get => new ValueData[] { 
+                values[(int)Index.PositionX], 
+                values[(int)Index.PositionY], 
+                values[(int)Index.PositionZ] 
+            };
         }
 
         public override ValueData[] eulerAnglesValues
         {
-            get
-            {
-                return new ValueData[] { values[3], values[4], values[5] };
-            }
+            get => new ValueData[] { 
+                values[(int)Index.EulerX], 
+                values[(int)Index.EulerY], 
+                values[(int)Index.EulerZ] 
+            };
         }
 
         public override ValueData[] scaleValues
         {
-            get
-            {
-                return new ValueData[] { values[6], values[7], values[8] };
-            }
+            get => new ValueData[] { 
+                values[(int)Index.ScaleX], 
+                values[(int)Index.ScaleY], 
+                values[(int)Index.ScaleZ] 
+            };
         }
 
         public override ValueData[] colorValues
         {
-            get
-            {
-                return new ValueData[] { values[9], values[10], values[11], values[12] };
-            }
+            get => new ValueData[] { 
+                values[(int)Index.ColorR], 
+                values[(int)Index.ColorG], 
+                values[(int)Index.ColorB], 
+                values[(int)Index.ColorA] 
+            };
         }
 
-        public override ValueData easingValue
-        {
-            get
-            {
-                return values[13];
-            }
-        }
+        public override ValueData easingValue => values[(int)Index.Easing];
 
         public TransformDataText()
         {
@@ -91,7 +96,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 "index",
                 new CustomValueInfo
                 {
-                    index = 14,
+                    index = (int)Index.TextIndex,
                     name = "番号",
                     defaultValue = 0f,
                 }
@@ -100,7 +105,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 "fontSize",
                 new CustomValueInfo
                 {
-                    index = 15,
+                    index = (int)Index.FontSize,
                     name = "サイズ",
                     defaultValue = 50f,
                 }
@@ -109,7 +114,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 "lineSpacing",
                 new CustomValueInfo
                 {
-                    index = 16,
+                    index = (int)Index.LineSpacing,
                     name = "行間",
                     defaultValue = 50f,
                 }
@@ -118,7 +123,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 "alignment",
                 new CustomValueInfo
                 {
-                    index = 17,
+                    index = (int)Index.Alignment,
                     name = "整列",
                     defaultValue = 4f,
                 }
@@ -127,7 +132,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 "sizeDeltaX",
                 new CustomValueInfo
                 {
-                    index = 18,
+                    index = (int)Index.SizeDeltaX,
                     name = "幅",
                     defaultValue = 1000f,
                 }
@@ -136,7 +141,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 "sizeDeltaY",
                 new CustomValueInfo
                 {
-                    index = 19,
+                    index = (int)Index.SizeDeltaY,
                     name = "高さ",
                     defaultValue = 1000f,
                 }
@@ -154,7 +159,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 "text",
                 new StrValueInfo
                 {
-                    index = 0,
+                    index = (int)StrIndex.Text,
                     name = "テキスト",
                     defaultValue = "",
                 }
@@ -163,7 +168,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 "font",
                 new StrValueInfo
                 {
-                    index = 1,
+                    index = (int)StrIndex.Font,
                     name = "フォント",
                     defaultValue = "Yu Gothic Bold",
                 }
@@ -175,128 +180,62 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return StrValueInfoMap;
         }
 
-        public ValueData indexValue
-        {
-            get
-            {
-                return this["index"];
-            }
-        }
+        public ValueData indexValue => values[(int)Index.TextIndex];
 
-        public ValueData fontSizeValue
-        {
-            get
-            {
-                return this["fontSize"];
-            }
-        }
+        public ValueData fontSizeValue => values[(int)Index.FontSize];
 
-        public ValueData lineSpacingValue
-        {
-            get
-            {
-                return this["lineSpacing"];
-            }
-        }
+        public ValueData lineSpacingValue => values[(int)Index.LineSpacing];
 
-        public ValueData alignmentValue
-        {
-            get
-            {
-                return this["alignment"];
-            }
-        }
+        public ValueData alignmentValue => values[(int)Index.Alignment];
 
         public ValueData[] sizeDeltaValues
         {
-            get
-            {
-                return new ValueData[] { this["sizeDeltaX"], this["sizeDeltaY"] };
-            }
+            get => new ValueData[] { 
+                values[(int)Index.SizeDeltaX], 
+                values[(int)Index.SizeDeltaY] 
+            };
         }
 
         public int index
         {
-            get
-            {
-                return indexValue.intValue;
-            }
-            set
-            {
-                indexValue.intValue = value;
-            }
+            get => indexValue.intValue;
+            set => indexValue.intValue = value;
         }
 
         public string text
         {
-            get
-            {
-                return GetStrValue("text");
-            }
-            set
-            {
-                SetStrValue("text", value);
-            }
+            get => strValues[(int)StrIndex.Text];
+            set => strValues[(int)StrIndex.Text] = value;
         }
 
         public string font
         {
-            get
-            {
-                return GetStrValue("font");
-            }
-            set
-            {
-                SetStrValue("font", value);
-            }
+            get => strValues[(int)StrIndex.Font];
+            set => strValues[(int)StrIndex.Font] = value;
         }
 
         public int fontSize
         {
-            get
-            {
-                return fontSizeValue.intValue;
-            }
-            set
-            {
-                fontSizeValue.intValue = value;
-            }
+            get => fontSizeValue.intValue;
+            set => fontSizeValue.intValue = value;
         }
 
         public int lineSpacing
         {
-            get
-            {
-                return lineSpacingValue.intValue;
-            }
-            set
-            {
-                lineSpacingValue.intValue = value;
-            }
+            get => lineSpacingValue.intValue;
+            set => lineSpacingValue.intValue = value;
         }
 
         public TextAnchor alignment
         {
-            get
-            {
-                return (TextAnchor) alignmentValue.intValue;
-            }
-            set
-            {
-                alignmentValue.intValue = (int) value;
-            }
+            get => (TextAnchor) alignmentValue.intValue;
+            set => alignmentValue.intValue = (int) value;
         }
 
         public Vector2 sizeDelta
         {
-            get
-            {
-                return sizeDeltaValues.ToVector2();
-            }
-            set
-            {
-                sizeDeltaValues.FromVector2(value);
-            }
+            get => sizeDeltaValues.ToVector2();
+            set => sizeDeltaValues.FromVector2(value);
         }
     }
 }

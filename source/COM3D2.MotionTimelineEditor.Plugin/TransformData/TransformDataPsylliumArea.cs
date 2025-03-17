@@ -5,6 +5,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataPsylliumArea : TransformDataBase
     {
+        public enum Index
+        {
+            PositionX = 0,
+            PositionY = 1,
+            PositionZ = 2,
+            EulerX = 3,
+            EulerY = 4,
+            EulerZ = 5,
+            SizeX = 6,
+            SizeY = 7,
+            SeatDistanceX = 8,
+            SeatDistanceY = 9,
+            RandomPositionRangeX = 10,
+            RandomPositionRangeY = 11,
+            RandomPositionRangeZ = 12,
+            BarCountWeight0 = 13,
+            BarCountWeight1 = 14,
+            BarCountWeight2 = 15,
+            BarCountWeight3 = 16,
+            ColorWeight1 = 17,
+            ColorWeight2 = 18,
+            PatternWeight0 = 19,
+            PatternWeight1 = 20,
+            PatternWeight2 = 21,
+            PatternWeight3 = 22,
+            PatternWeight4 = 23,
+            PatternWeight5 = 24,
+            PatternWeight6 = 25,
+            PatternWeight7 = 26,
+            PatternWeight8 = 27,
+            PatternWeight9 = 28,
+            RandomSeed = 29
+        }
+
         public static TransformDataPsylliumArea defaultTrans = new TransformDataPsylliumArea();
         public static PsylliumAreaConfig defaultConfig = new PsylliumAreaConfig();
 
@@ -17,12 +51,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override ValueData[] positionValues
         {
-            get => new ValueData[] { values[0], values[1], values[2] };
+            get => new ValueData[] { 
+                values[(int)Index.PositionX], 
+                values[(int)Index.PositionY], 
+                values[(int)Index.PositionZ] 
+            };
         }
 
         public override ValueData[] eulerAnglesValues
         {
-            get => new ValueData[] { values[3], values[4], values[5] };
+            get => new ValueData[] { 
+                values[(int)Index.EulerX], 
+                values[(int)Index.EulerY], 
+                values[(int)Index.EulerZ] 
+            };
         }
 
         public override Vector3 initialPosition => defaultConfig.position;
@@ -37,7 +79,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "sizeX", new CustomValueInfo
                 {
-                    index = 6,
+                    index = (int)Index.SizeX,
                     name = "SX",
                     min = 0f,
                     max = 100f,
@@ -48,7 +90,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "sizeY", new CustomValueInfo
                 {
-                    index = 7,
+                    index = (int)Index.SizeY,
                     name = "SY",
                     min = 0f,
                     max = 100f,
@@ -59,7 +101,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "seatDistanceX", new CustomValueInfo
                 {
-                    index = 8,
+                    index = (int)Index.SeatDistanceX,
                     name = "席幅",
                     min = 0f,
                     max = 10f,
@@ -70,7 +112,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "seatDistanceY", new CustomValueInfo
                 {
-                    index = 9,
+                    index = (int)Index.SeatDistanceY,
                     name = "列幅",
                     min = 0f,
                     max = 10f,
@@ -81,7 +123,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "randomPositionRangeX", new CustomValueInfo
                 {
-                    index = 10,
+                    index = (int)Index.RandomPositionRangeX,
                     name = "X Random",
                     min = 0f,
                     max = 10f,
@@ -92,7 +134,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "randomPositionRangeY", new CustomValueInfo
                 {
-                    index = 11,
+                    index = (int)Index.RandomPositionRangeY,
                     name = "Y Random",
                     min = 0f,
                     max = 10f,
@@ -103,7 +145,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "randomPositionRangeZ", new CustomValueInfo
                 {
-                    index = 12,
+                    index = (int)Index.RandomPositionRangeZ,
                     name = "Z Random",
                     min = 0f,
                     max = 10f,
@@ -114,7 +156,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "barCountWeight0", new CustomValueInfo
                 {
-                    index = 13,
+                    index = (int)Index.BarCountWeight0,
                     name = "0個",
                     min = 0f,
                     max = 1f,
@@ -125,7 +167,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "barCountWeight1", new CustomValueInfo
                 {
-                    index = 14,
+                    index = (int)Index.BarCountWeight1,
                     name = "1個",
                     min = 0f,
                     max = 1f,
@@ -136,7 +178,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "barCountWeight2", new CustomValueInfo
                 {
-                    index = 15,
+                    index = (int)Index.BarCountWeight2,
                     name = "2個",
                     min = 0f,
                     max = 1f,
@@ -147,7 +189,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "barCountWeight3", new CustomValueInfo
                 {
-                    index = 16,
+                    index = (int)Index.BarCountWeight3,
                     name = "3個",
                     min = 0f,
                     max = 1f,
@@ -158,7 +200,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "colorWeight1", new CustomValueInfo
                 {
-                    index = 17,
+                    index = (int)Index.ColorWeight1,
                     name = "色1",
                     min = 0f,
                     max = 1f,
@@ -169,7 +211,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "colorWeight2", new CustomValueInfo
                 {
-                    index = 18,
+                    index = (int)Index.ColorWeight2,
                     name = "色2",
                     min = 0f,
                     max = 1f,
@@ -180,7 +222,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "patternWeight0", new CustomValueInfo
                 {
-                    index = 19,
+                    index = (int)Index.PatternWeight0,
                     name = "P0",
                     min = 0f,
                     max = 1f,
@@ -191,7 +233,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "patternWeight1", new CustomValueInfo
                 {
-                    index = 20,
+                    index = (int)Index.PatternWeight1,
                     name = "P1",
                     min = 0f,
                     max = 1f,
@@ -202,7 +244,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "patternWeight2", new CustomValueInfo
                 {
-                    index = 21,
+                    index = (int)Index.PatternWeight2,
                     name = "P2",
                     min = 0f,
                     max = 1f,
@@ -213,7 +255,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "patternWeight3", new CustomValueInfo
                 {
-                    index = 22,
+                    index = (int)Index.PatternWeight3,
                     name = "P3",
                     min = 0f,
                     max = 1f,
@@ -224,7 +266,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "patternWeight4", new CustomValueInfo
                 {
-                    index = 23,
+                    index = (int)Index.PatternWeight4,
                     name = "P4",
                     min = 0f,
                     max = 1f,
@@ -235,7 +277,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "patternWeight5", new CustomValueInfo
                 {
-                    index = 24,
+                    index = (int)Index.PatternWeight5,
                     name = "P5",
                     min = 0f,
                     max = 1f,
@@ -246,7 +288,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "patternWeight6", new CustomValueInfo
                 {
-                    index = 25,
+                    index = (int)Index.PatternWeight6,
                     name = "P6",
                     min = 0f,
                     max = 1f,
@@ -257,7 +299,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "patternWeight7", new CustomValueInfo
                 {
-                    index = 26,
+                    index = (int)Index.PatternWeight7,
                     name = "P7",
                     min = 0f,
                     max = 1f,
@@ -268,7 +310,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "patternWeight8", new CustomValueInfo
                 {
-                    index = 27,
+                    index = (int)Index.PatternWeight8,
                     name = "P8",
                     min = 0f,
                     max = 1f,
@@ -279,7 +321,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "patternWeight9", new CustomValueInfo
                 {
-                    index = 28,
+                    index = (int)Index.PatternWeight9,
                     name = "P9",
                     min = 0f,
                     max = 1f,
@@ -290,7 +332,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "randomSeed", new CustomValueInfo
                 {
-                    index = 29,
+                    index = (int)Index.RandomSeed,
                     name = "乱数Seed",
                     min = 0f,
                     max = int.MaxValue,
@@ -307,33 +349,43 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public ValueData[] sizeValues
         {
-            get => new ValueData[] { this["sizeX"], this["sizeY"] };
+            get => new ValueData[] { 
+                values[(int)Index.SizeX], 
+                values[(int)Index.SizeY] 
+            };
         }
         public ValueData[] seatDistanceValues
         {
-            get => new ValueData[] { this["seatDistanceX"], this["seatDistanceY"] };
+            get => new ValueData[] { 
+                values[(int)Index.SeatDistanceX], 
+                values[(int)Index.SeatDistanceY] 
+            };
         }
         public ValueData[] randomPositionRangeValues
         {
-            get => new ValueData[] { this["randomPositionRangeX"], this["randomPositionRangeY"], this["randomPositionRangeZ"] };
+            get => new ValueData[] { 
+                values[(int)Index.RandomPositionRangeX], 
+                values[(int)Index.RandomPositionRangeY], 
+                values[(int)Index.RandomPositionRangeZ] 
+            };
         }
-        public ValueData barCountWeight0Value => this["barCountWeight0"];
-        public ValueData barCountWeight1Value => this["barCountWeight1"];
-        public ValueData barCountWeight2Value => this["barCountWeight2"];
-        public ValueData barCountWeight3Value => this["barCountWeight3"];
-        public ValueData colorWeight1Value => this["colorWeight1"];
-        public ValueData colorWeight2Value => this["colorWeight2"];
-        public ValueData patternWeight0Value => this["patternWeight0"];
-        public ValueData patternWeight1Value => this["patternWeight1"];
-        public ValueData patternWeight2Value => this["patternWeight2"];
-        public ValueData patternWeight3Value => this["patternWeight3"];
-        public ValueData patternWeight4Value => this["patternWeight4"];
-        public ValueData patternWeight5Value => this["patternWeight5"];
-        public ValueData patternWeight6Value => this["patternWeight6"];
-        public ValueData patternWeight7Value => this["patternWeight7"];
-        public ValueData patternWeight8Value => this["patternWeight8"];
-        public ValueData patternWeight9Value => this["patternWeight9"];
-        public ValueData randomSeedValue => this["randomSeed"];
+        public ValueData barCountWeight0Value => values[(int)Index.BarCountWeight0];
+        public ValueData barCountWeight1Value => values[(int)Index.BarCountWeight1];
+        public ValueData barCountWeight2Value => values[(int)Index.BarCountWeight2];
+        public ValueData barCountWeight3Value => values[(int)Index.BarCountWeight3];
+        public ValueData colorWeight1Value => values[(int)Index.ColorWeight1];
+        public ValueData colorWeight2Value => values[(int)Index.ColorWeight2];
+        public ValueData patternWeight0Value => values[(int)Index.PatternWeight0];
+        public ValueData patternWeight1Value => values[(int)Index.PatternWeight1];
+        public ValueData patternWeight2Value => values[(int)Index.PatternWeight2];
+        public ValueData patternWeight3Value => values[(int)Index.PatternWeight3];
+        public ValueData patternWeight4Value => values[(int)Index.PatternWeight4];
+        public ValueData patternWeight5Value => values[(int)Index.PatternWeight5];
+        public ValueData patternWeight6Value => values[(int)Index.PatternWeight6];
+        public ValueData patternWeight7Value => values[(int)Index.PatternWeight7];
+        public ValueData patternWeight8Value => values[(int)Index.PatternWeight8];
+        public ValueData patternWeight9Value => values[(int)Index.PatternWeight9];
+        public ValueData randomSeedValue => values[(int)Index.RandomSeed];
 
         public CustomValueInfo sizeXInfo => CustomValueInfoMap["sizeX"];
         public CustomValueInfo sizeYInfo => CustomValueInfoMap["sizeY"];

@@ -4,6 +4,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataGrounding : TransformDataBase
     {
+        public enum Index
+        {
+            IsGroundingFootL = 0,
+            FloorHeight = 1,
+            FootBaseOffset = 2,
+            FootStretchHeight = 3,
+            FootStretchAngle = 4,
+            FootGroundAngle = 5,
+            IsGroundingFootR = 6
+        }
+
         public override TransformType type => TransformType.Grounding;
 
         public override int valueCount => 7;
@@ -18,7 +29,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "isGroundingFootL",
                 new CustomValueInfo
                 {
-                    index = 0,
+                    index = (int)Index.IsGroundingFootL,
                     name = "左足の接地",
                     defaultValue = 0,
                 }
@@ -27,7 +38,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "floorHeight",
                 new CustomValueInfo
                 {
-                    index = 1,
+                    index = (int)Index.FloorHeight,
                     name = "床の高さ",
                     defaultValue = 0f,
                 }
@@ -36,7 +47,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "footBaseOffset",
                 new CustomValueInfo
                 {
-                    index = 2,
+                    index = (int)Index.FootBaseOffset,
                     name = "足首の高さ",
                     defaultValue = 0.05f,
                 }
@@ -45,7 +56,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "footStretchHeight",
                 new CustomValueInfo
                 {
-                    index = 3,
+                    index = (int)Index.FootStretchHeight,
                     name = "伸ばす高さ",
                     defaultValue = 0.1f,
                 }
@@ -54,7 +65,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "footStretchAngle",
                 new CustomValueInfo
                 {
-                    index = 4,
+                    index = (int)Index.FootStretchAngle,
                     name = "伸ばす角度",
                     defaultValue = 45f,
                 }
@@ -63,7 +74,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "footGroundAngle",
                 new CustomValueInfo
                 {
-                    index = 5,
+                    index = (int)Index.FootGroundAngle,
                     name = "接地時角度",
                     defaultValue = 90f,
                 }
@@ -72,7 +83,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "isGroundingFootR",
                 new CustomValueInfo
                 {
-                    index = 6,
+                    index = (int)Index.IsGroundingFootR,
                     name = "右足の接地",
                     defaultValue = 0,
                 }
@@ -84,19 +95,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData isGroundingFootLValue => this["isGroundingFootL"];
-
-        public ValueData floorHeightValue => this["floorHeight"];
-
-        public ValueData footBaseOffsetValue => this["footBaseOffset"];
-
-        public ValueData footStretchHeightValue => this["footStretchHeight"];
-
-        public ValueData footStretchAngleValue => this["footStretchAngle"];
-
-        public ValueData footGroundAngleValue => this["footGroundAngle"];
-
-        public ValueData isGroundingFootRValue => this["isGroundingFootR"];
+        public ValueData isGroundingFootLValue => values[(int)Index.IsGroundingFootL];
+        public ValueData floorHeightValue => values[(int)Index.FloorHeight];
+        public ValueData footBaseOffsetValue => values[(int)Index.FootBaseOffset];
+        public ValueData footStretchHeightValue => values[(int)Index.FootStretchHeight];
+        public ValueData footStretchAngleValue => values[(int)Index.FootStretchAngle];
+        public ValueData footGroundAngleValue => values[(int)Index.FootGroundAngle];
+        public ValueData isGroundingFootRValue => values[(int)Index.IsGroundingFootR];
 
         public bool isGroundingFootL
         {

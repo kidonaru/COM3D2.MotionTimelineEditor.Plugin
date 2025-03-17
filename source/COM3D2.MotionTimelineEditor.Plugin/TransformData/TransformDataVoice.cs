@@ -1,10 +1,23 @@
-
 using System.Collections.Generic;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataVoice : TransformDataBase
     {
+        public enum Index
+        {
+            StartTime = 0,
+            Length = 1,
+            FadeTime = 2,
+            Pitch = 3
+        }
+
+        public enum StrIndex
+        {
+            VoiceName = 0,
+            LoopVoiceName = 1
+        }
+
         public override TransformType type => TransformType.Voice;
 
         public override int valueCount => 4;
@@ -21,7 +34,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "startTime",
                 new CustomValueInfo
                 {
-                    index = 0,
+                    index = (int)Index.StartTime,
                     name = "開始",
                     defaultValue = 0f,
                 }
@@ -30,7 +43,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "length",
                 new CustomValueInfo
                 {
-                    index = 1,
+                    index = (int)Index.Length,
                     name = "長さ",
                     defaultValue = 0f,
                 }
@@ -39,7 +52,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "fadeTime",
                 new CustomValueInfo
                 {
-                    index = 2,
+                    index = (int)Index.FadeTime,
                     name = "Fade",
                     defaultValue = 0.1f,
                 }
@@ -48,7 +61,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "pitch",
                 new CustomValueInfo
                 {
-                    index = 3,
+                    index = (int)Index.Pitch,
                     name = "音程",
                     defaultValue = 1f,
                 }
@@ -66,7 +79,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "voiceName",
                 new StrValueInfo
                 {
-                    index = 0,
+                    index = (int)StrIndex.VoiceName,
                     name = "ボイス名",
                 }
             },
@@ -74,7 +87,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "loopVoiceName",
                 new StrValueInfo
                 {
-                    index = 1,
+                    index = (int)StrIndex.LoopVoiceName,
                     name = "ループボイス",
                 }
             },
@@ -85,24 +98,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return StrValueInfoMap;
         }
 
-        public ValueData startTimeValue => this["startTime"];
+        public ValueData startTimeValue => values[(int)Index.StartTime];
 
-        public ValueData lengthValue => this["length"];
+        public ValueData lengthValue => values[(int)Index.Length];
 
-        public ValueData fadeTimeValue => this["fadeTime"];
+        public ValueData fadeTimeValue => values[(int)Index.FadeTime];
 
-        public ValueData pitchValue => this["pitch"];
+        public ValueData pitchValue => values[(int)Index.Pitch];
 
         public string voiceName
         {
-            get => GetStrValue("voiceName");
-            set => SetStrValue("voiceName", value);
+            get => strValues[(int)StrIndex.VoiceName];
+            set => strValues[(int)StrIndex.VoiceName] = value;
         }
 
         public string loopVoiceName
         {
-            get => GetStrValue("loopVoiceName");
-            set => SetStrValue("loopVoiceName", value);
+            get => strValues[(int)StrIndex.LoopVoiceName];
+            set => strValues[(int)StrIndex.LoopVoiceName] = value;
         }
 
         public float startTime

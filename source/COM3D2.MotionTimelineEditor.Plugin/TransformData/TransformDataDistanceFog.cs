@@ -5,6 +5,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataDistanceFog : TransformDataBase
     {
+        public enum Index
+        {
+            ColorR = 0,
+            ColorG = 1,
+            ColorB = 2,
+            ColorA = 3,
+            SubColorR = 4,
+            SubColorG = 5,
+            SubColorB = 6,
+            SubColorA = 7,
+            Visible = 8,
+            Easing = 9,
+            FogStart = 10,
+            FogEnd = 11,
+            FogExp = 12,
+            UseNormal = 13,
+            UseAdd = 14,
+            UseMultiply = 15,
+            UseOverlay = 16,
+            UseSubstruct = 17
+        }
+
         public static TransformDataDistanceFog defaultTrans = new TransformDataDistanceFog();
 
         public override TransformType type => TransformType.DistanceFog;
@@ -12,26 +34,33 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override int valueCount => 18;
 
         public override bool hasColor => true;
-
         public override bool hasSubColor => true;
-
         public override bool hasVisible => true;
-
         public override bool hasEasing => true;
 
         public override ValueData[] colorValues
         {
-            get => new ValueData[] { values[0], values[1], values[2], values[3] };
+            get => new ValueData[] { 
+                values[(int)Index.ColorR], 
+                values[(int)Index.ColorG], 
+                values[(int)Index.ColorB], 
+                values[(int)Index.ColorA] 
+            };
         }
 
         public override ValueData[] subColorValues
         {
-            get => new ValueData[] { values[4], values[5], values[6], values[7] };
+            get => new ValueData[] { 
+                values[(int)Index.SubColorR], 
+                values[(int)Index.SubColorG], 
+                values[(int)Index.SubColorB], 
+                values[(int)Index.SubColorA] 
+            };
         }
 
-        public override ValueData visibleValue => values[8];
+        public override ValueData visibleValue => values[(int)Index.Visible];
 
-        public override ValueData easingValue => values[9];
+        public override ValueData easingValue => values[(int)Index.Easing];
 
         public override Color initialColor => new Color(1f, 1f, 1f, 1f);
 
@@ -52,7 +81,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "fogStart", new CustomValueInfo
                 {
-                    index = 10,
+                    index = (int)Index.FogStart,
                     name = "開始深度",
                     min = 0f,
                     max = 100f,
@@ -63,7 +92,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "fogEnd", new CustomValueInfo
                 {
-                    index = 11,
+                    index = (int)Index.FogEnd,
                     name = "終了深度",
                     min = 0f,
                     max = 100f,
@@ -74,7 +103,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "fogExp", new CustomValueInfo
                 {
-                    index = 12,
+                    index = (int)Index.FogExp,
                     name = "指数",
                     min = 0f,
                     max = 5f,
@@ -85,7 +114,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "useNormal", new CustomValueInfo
                 {
-                    index = 13,
+                    index = (int)Index.UseNormal,
                     name = "通常",
                     min = 0f,
                     max = 2f,
@@ -96,7 +125,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "useAdd", new CustomValueInfo
                 {
-                    index = 14,
+                    index = (int)Index.UseAdd,
                     name = "加算",
                     min = 0f,
                     max = 2f,
@@ -107,7 +136,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "useMultiply", new CustomValueInfo
                 {
-                    index = 15,
+                    index = (int)Index.UseMultiply,
                     name = "乗算",
                     min = 0f,
                     max = 2f,
@@ -118,7 +147,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "useOverlay", new CustomValueInfo
                 {
-                    index = 16,
+                    index = (int)Index.UseOverlay,
                     name = "Overlay",
                     min = 0f,
                     max = 2f,
@@ -129,7 +158,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "useSubstruct", new CustomValueInfo
                 {
-                    index = 17,
+                    index = (int)Index.UseSubstruct,
                     name = "減算",
                     min = 0f,
                     max = 2f,
@@ -144,23 +173,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData fogStartValue => this["fogStart"];
-        public ValueData fogEndValue => this["fogEnd"];
-        public ValueData fogExpValue => this["fogExp"];
-        public ValueData useNormalValue => this["useNormal"];
-        public ValueData useAddValue => this["useAdd"];
-        public ValueData useMultiplyValue => this["useMultiply"];
-        public ValueData useOverlayValue => this["useOverlay"];
-        public ValueData useSubstructValue => this["useSubstruct"];
+        public ValueData fogStartValue => values[(int)Index.FogStart];
+        public ValueData fogEndValue => values[(int)Index.FogEnd];
+        public ValueData fogExpValue => values[(int)Index.FogExp];
+        public ValueData useNormalValue => values[(int)Index.UseNormal];
+        public ValueData useAddValue => values[(int)Index.UseAdd];
+        public ValueData useMultiplyValue => values[(int)Index.UseMultiply];
+        public ValueData useOverlayValue => values[(int)Index.UseOverlay];
+        public ValueData useSubstructValue => values[(int)Index.UseSubstruct];
 
-        public CustomValueInfo fogStartInfo => GetCustomValueInfo("fogStart");
-        public CustomValueInfo fogEndInfo => GetCustomValueInfo("fogEnd");
-        public CustomValueInfo fogExpInfo => GetCustomValueInfo("fogExp");
-        public CustomValueInfo useNormalInfo => GetCustomValueInfo("useNormal");
-        public CustomValueInfo useAddInfo => GetCustomValueInfo("useAdd");
-        public CustomValueInfo useMultiplyInfo => GetCustomValueInfo("useMultiply");
-        public CustomValueInfo useOverlayInfo => GetCustomValueInfo("useOverlay");
-        public CustomValueInfo useSubstructInfo => GetCustomValueInfo("useSubstruct");
+        public CustomValueInfo fogStartInfo => CustomValueInfoMap["fogStart"];
+        public CustomValueInfo fogEndInfo => CustomValueInfoMap["fogEnd"];
+        public CustomValueInfo fogExpInfo => CustomValueInfoMap["fogExp"];
+        public CustomValueInfo useNormalInfo => CustomValueInfoMap["useNormal"];
+        public CustomValueInfo useAddInfo => CustomValueInfoMap["useAdd"];
+        public CustomValueInfo useMultiplyInfo => CustomValueInfoMap["useMultiply"];
+        public CustomValueInfo useOverlayInfo => CustomValueInfoMap["useOverlay"];
+        public CustomValueInfo useSubstructInfo => CustomValueInfoMap["useSubstruct"];
 
         public float fogStart
         {

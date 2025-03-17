@@ -5,11 +5,43 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataRimlight : TransformDataBase
     {
+        public enum Index
+        {
+            EulerX = 0,
+            EulerY = 1,
+            EulerZ = 2,
+            ColorR = 3,
+            ColorG = 4,
+            ColorB = 5,
+            ColorA = 6,
+            SubColorR = 7,
+            SubColorG = 8,
+            SubColorB = 9,
+            SubColorA = 10,
+            Visible = 11,
+            Easing = 12,
+            LightArea = 13,
+            FadeRange = 14,
+            FadeExp = 15,
+            DepthMin = 16,
+            DepthMax = 17,
+            DepthFade = 18,
+            UseNormal = 19,
+            UseAdd = 20,
+            UseMultiply = 21,
+            UseOverlay = 22,
+            UseSubstruct = 23,
+            IsWorldSpace = 24,
+            EdgeDepth = 25,
+            EdgeRange = 26,
+            HeightMin = 27
+        }
+
         public static TransformDataRimlight defaultTrans = new TransformDataRimlight();
 
         public override TransformType type => TransformType.Rimlight;
 
-        public override int valueCount => 27;
+        public override int valueCount => 28;
 
         public override bool hasEulerAngles => true;
         public override bool hasColor => true;
@@ -19,18 +51,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override ValueData[] eulerAnglesValues
         {
-            get => new ValueData[] { values[0], values[1], values[2] };
+            get => new ValueData[] { 
+                values[(int)Index.EulerX], 
+                values[(int)Index.EulerY], 
+                values[(int)Index.EulerZ] 
+            };
         }
         public override ValueData[] colorValues
         {
-            get => new ValueData[] { values[3], values[4], values[5], values[6] };
+            get => new ValueData[] { 
+                values[(int)Index.ColorR], 
+                values[(int)Index.ColorG], 
+                values[(int)Index.ColorB], 
+                values[(int)Index.ColorA] 
+            };
         }
         public override ValueData[] subColorValues
         {
-            get => new ValueData[] { values[7], values[8], values[9], values[10] };
+            get => new ValueData[] { 
+                values[(int)Index.SubColorR], 
+                values[(int)Index.SubColorG], 
+                values[(int)Index.SubColorB], 
+                values[(int)Index.SubColorA] 
+            };
         }
-        public override ValueData visibleValue => values[11];
-        public override ValueData easingValue => values[12];
+        public override ValueData visibleValue => values[(int)Index.Visible];
+        public override ValueData easingValue => values[(int)Index.Easing];
 
         public override Color initialColor => new Color(1f, 1f, 1f, 1f);
         public override Color initialSubColor => new Color(1f, 1f, 1f, 0f);
@@ -50,7 +96,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "lightArea", new CustomValueInfo
                 {
-                    index = 13,
+                    index = (int)Index.LightArea,
                     name = "影響",
                     min = 0f,
                     max = 2f,
@@ -61,7 +107,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "fadeRange", new CustomValueInfo
                 {
-                    index = 14,
+                    index = (int)Index.FadeRange,
                     name = "幅",
                     min = 0f,
                     max = 2f,
@@ -72,7 +118,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "fadeExp", new CustomValueInfo
                 {
-                    index = 15,
+                    index = (int)Index.FadeExp,
                     name = "指数",
                     min = 0f,
                     max = 5f,
@@ -83,7 +129,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "depthMin", new CustomValueInfo
                 {
-                    index = 16,
+                    index = (int)Index.DepthMin,
                     name = "最小深度",
                     min = 0f,
                     max = 100f,
@@ -94,7 +140,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "depthMax", new CustomValueInfo
                 {
-                    index = 17,
+                    index = (int)Index.DepthMax,
                     name = "最大深度",
                     min = 0f,
                     max = 100f,
@@ -105,7 +151,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "depthFade", new CustomValueInfo
                 {
-                    index = 18,
+                    index = (int)Index.DepthFade,
                     name = "深度幅",
                     min = 0f,
                     max = 10f,
@@ -116,7 +162,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "useNormal", new CustomValueInfo
                 {
-                    index = 19,
+                    index = (int)Index.UseNormal,
                     name = "通常",
                     min = 0f,
                     max = 2f,
@@ -127,7 +173,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "useAdd", new CustomValueInfo
                 {
-                    index = 20,
+                    index = (int)Index.UseAdd,
                     name = "加算",
                     min = 0f,
                     max = 2f,
@@ -138,7 +184,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "useMultiply", new CustomValueInfo
                 {
-                    index = 21,
+                    index = (int)Index.UseMultiply,
                     name = "乗算",
                     min = 0f,
                     max = 2f,
@@ -149,7 +195,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "useOverlay", new CustomValueInfo
                 {
-                    index = 22,
+                    index = (int)Index.UseOverlay,
                     name = "Overlay",
                     min = 0f,
                     max = 2f,
@@ -160,7 +206,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "useSubstruct", new CustomValueInfo
                 {
-                    index = 23,
+                    index = (int)Index.UseSubstruct,
                     name = "減算",
                     min = 0f,
                     max = 2f,
@@ -171,7 +217,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "isWorldSpace", new CustomValueInfo
                 {
-                    index = 23,
+                    index = (int)Index.IsWorldSpace,
                     name = "ワールド空間",
                     min = 0f,
                     max = 1f,
@@ -182,7 +228,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "edgeDepth", new CustomValueInfo
                 {
-                    index = 24,
+                    index = (int)Index.EdgeDepth,
                     name = "Edge深度",
                     min = 0f,
                     max = 10f,
@@ -193,7 +239,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "edgeRange", new CustomValueInfo
                 {
-                    index = 25,
+                    index = (int)Index.EdgeRange,
                     name = "Edge幅",
                     min = 0f,
                     max = 10f,
@@ -204,7 +250,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "heightMin", new CustomValueInfo
                 {
-                    index = 26,
+                    index = (int)Index.HeightMin,
                     name = "最小高さ",
                     min = -10f,
                     max = 10f,
@@ -219,22 +265,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData lightAreaValue => this["lightArea"];
-        public ValueData fadeRangeValue => this["fadeRange"];
-        public ValueData fadeExpValue => this["fadeExp"];
-        public ValueData depthMinValue => this["depthMin"];
-        public ValueData depthMaxValue => this["depthMax"];
-        public ValueData depthFadeValue => this["depthFade"];
-        public ValueData useNormalValue => this["useNormal"];
-        public ValueData useAddValue => this["useAdd"];
-        public ValueData useMultiplyValue => this["useMultiply"];
-        public ValueData useOverlayValue => this["useOverlay"];
-        public ValueData useSubstructValue => this["useSubstruct"];
-        public ValueData isWorldSpaceValue => this["isWorldSpace"];
-        public ValueData edgeDepthValue => this["edgeDepth"];
-        public ValueData edgeRangeValue => this["edgeRange"];
-        public ValueData heightMinValue => this["heightMin"];
+        // 値アクセサ
+        public ValueData lightAreaValue => values[(int)Index.LightArea];
+        public ValueData fadeRangeValue => values[(int)Index.FadeRange];
+        public ValueData fadeExpValue => values[(int)Index.FadeExp];
+        public ValueData depthMinValue => values[(int)Index.DepthMin];
+        public ValueData depthMaxValue => values[(int)Index.DepthMax];
+        public ValueData depthFadeValue => values[(int)Index.DepthFade];
+        public ValueData useNormalValue => values[(int)Index.UseNormal];
+        public ValueData useAddValue => values[(int)Index.UseAdd];
+        public ValueData useMultiplyValue => values[(int)Index.UseMultiply];
+        public ValueData useOverlayValue => values[(int)Index.UseOverlay];
+        public ValueData useSubstructValue => values[(int)Index.UseSubstruct];
+        public ValueData isWorldSpaceValue => values[(int)Index.IsWorldSpace];
+        public ValueData edgeDepthValue => values[(int)Index.EdgeDepth];
+        public ValueData edgeRangeValue => values[(int)Index.EdgeRange];
+        public ValueData heightMinValue => values[(int)Index.HeightMin];
 
+        // CustomValueInfoアクセサ
         public CustomValueInfo lightAreaInfo => GetCustomValueInfo("lightArea");
         public CustomValueInfo fadeRangeInfo => GetCustomValueInfo("fadeRange");
         public CustomValueInfo fadeExpInfo => GetCustomValueInfo("fadeExp");
@@ -251,6 +299,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public CustomValueInfo edgeRangeInfo => GetCustomValueInfo("edgeRange");
         public CustomValueInfo heightMinInfo => GetCustomValueInfo("heightMin");
 
+        // プロパティアクセサ
         public float lightArea
         {
             get => lightAreaValue.value;
@@ -329,7 +378,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => edgeDepthValue.value = value;
         }
 
-		public float edgeRange
+        public float edgeRange
         {
             get => edgeRangeValue.value;
             set => edgeRangeValue.value = value;

@@ -5,6 +5,34 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataStageLaser : TransformDataBase
     {
+        public enum Index
+        {
+            PositionX = 0,
+            EulerX = 1,
+            EulerY = 2,
+            EulerZ = 3,
+            ColorR = 4,
+            ColorG = 5,
+            ColorB = 6,
+            ColorA = 7,
+            SubColorR = 8,
+            SubColorG = 9,
+            SubColorB = 10,
+            SubColorA = 11,
+            Visible = 12,
+            Intensity = 13,
+            LaserRange = 14,
+            LaserWidth = 15,
+            FalloffExp = 16,
+            NoiseStrength = 17,
+            NoiseScale = 18,
+            CoreRadius = 19,
+            OffsetRange = 20,
+            GlowWidth = 21,
+            SegmentRange = 22,
+            ZTest = 23
+        }
+
         public static TransformDataStageLaser defaultTrans = new TransformDataStageLaser();
 
         public override TransformType type => TransformType.StageLaser;
@@ -19,20 +47,34 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override ValueData[] eulerAnglesValues
         {
-            get => new ValueData[] { values[1], values[2], values[3] };
+            get => new ValueData[] { 
+                values[(int)Index.EulerX], 
+                values[(int)Index.EulerY], 
+                values[(int)Index.EulerZ] 
+            };
         }
 
         public override ValueData[] colorValues
         {
-            get => new ValueData[] { values[4], values[5], values[6], values[7] };
+            get => new ValueData[] { 
+                values[(int)Index.ColorR], 
+                values[(int)Index.ColorG], 
+                values[(int)Index.ColorB], 
+                values[(int)Index.ColorA] 
+            };
         }
 
         public override ValueData[] subColorValues
         {
-            get => new ValueData[] { values[8], values[9], values[10], values[11] };
+            get => new ValueData[] { 
+                values[(int)Index.SubColorR], 
+                values[(int)Index.SubColorG], 
+                values[(int)Index.SubColorB], 
+                values[(int)Index.SubColorA] 
+            };
         }
 
-        public override ValueData visibleValue => values[12];
+        public override ValueData visibleValue => values[(int)Index.Visible];
 
         private List<ValueData> _tangentValues = null;
         public override ValueData[] tangentValues
@@ -43,7 +85,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     _tangentValues = new List<ValueData>();
                     _tangentValues.AddRange(eulerAnglesValues);
-                    _tangentValues.AddRange(new ValueData[] { values[13], values[14], values[15] });
+                    _tangentValues.AddRange(new ValueData[] { 
+                        values[(int)Index.Intensity], 
+                        values[(int)Index.LaserRange], 
+                        values[(int)Index.LaserWidth] 
+                    });
                 }
                 return _tangentValues.ToArray();
             }
@@ -63,7 +109,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "intensity", new CustomValueInfo
                 {
-                    index = 13,
+                    index = (int)Index.Intensity,
                     name = "強度",
                     min = 0f,
                     max = 1f,
@@ -74,7 +120,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "laserRange", new CustomValueInfo
                 {
-                    index = 14,
+                    index = (int)Index.LaserRange,
                     name = "範囲",
                     min = 0f,
                     max = 100f,
@@ -85,7 +131,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "laserWidth", new CustomValueInfo
                 {
-                    index = 15,
+                    index = (int)Index.LaserWidth,
                     name = "幅",
                     min = 0f,
                     max = 2f,
@@ -96,7 +142,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "falloffExp", new CustomValueInfo
                 {
-                    index = 16,
+                    index = (int)Index.FalloffExp,
                     name = "減衰指数",
                     min = 0f,
                     max = 5f,
@@ -107,7 +153,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "noiseStrength", new CustomValueInfo
                 {
-                    index = 17,
+                    index = (int)Index.NoiseStrength,
                     name = "ﾉｲｽﾞ強度",
                     min = 0f,
                     max = 1f,
@@ -118,7 +164,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "noiseScale", new CustomValueInfo
                 {
-                    index = 18,
+                    index = (int)Index.NoiseScale,
                     name = "ﾉｲｽﾞｻｲｽﾞ",
                     min = 1f,
                     max = 100f,
@@ -129,7 +175,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "coreRadius", new CustomValueInfo
                 {
-                    index = 19,
+                    index = (int)Index.CoreRadius,
                     name = "中心半径",
                     min = 0f,
                     max = 1f,
@@ -140,7 +186,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "offsetRange", new CustomValueInfo
                 {
-                    index = 20,
+                    index = (int)Index.OffsetRange,
                     name = "ｵﾌｾｯﾄ範囲",
                     min = 0f,
                     max = 10f,
@@ -151,7 +197,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "glowWidth", new CustomValueInfo
                 {
-                    index = 21,
+                    index = (int)Index.GlowWidth,
                     name = "散乱幅",
                     min = 0f,
                     max = 5f,
@@ -162,7 +208,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "segmentRange", new CustomValueInfo
                 {
-                    index = 22,
+                    index = (int)Index.SegmentRange,
                     name = "分割範囲",
                     min = 1,
                     max = 64,
@@ -173,7 +219,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "zTest", new CustomValueInfo
                 {
-                    index = 23,
+                    index = (int)Index.ZTest,
                     name = "Zテスト",
                     min = 0,
                     max = 1,
@@ -188,18 +234,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData intensityValue => this["intensity"];
-        public ValueData laserRangeValue => this["laserRange"];
-        public ValueData laserWidthValue => this["laserWidth"];
-        public ValueData falloffExpValue => this["falloffExp"];
-        public ValueData noiseStrengthValue => this["noiseStrength"];
-        public ValueData noiseScaleValue => this["noiseScale"];
-        public ValueData coreRadiusValue => this["coreRadius"];
-        public ValueData offsetRangeValue => this["offsetRange"];
-        public ValueData glowWidthValue => this["glowWidth"];
-        public ValueData segmentRangeValue => this["segmentRange"];
-        public ValueData zTestValue => this["zTest"];
+        // 値アクセサ
+        public ValueData intensityValue => values[(int)Index.Intensity];
+        public ValueData laserRangeValue => values[(int)Index.LaserRange];
+        public ValueData laserWidthValue => values[(int)Index.LaserWidth];
+        public ValueData falloffExpValue => values[(int)Index.FalloffExp];
+        public ValueData noiseStrengthValue => values[(int)Index.NoiseStrength];
+        public ValueData noiseScaleValue => values[(int)Index.NoiseScale];
+        public ValueData coreRadiusValue => values[(int)Index.CoreRadius];
+        public ValueData offsetRangeValue => values[(int)Index.OffsetRange];
+        public ValueData glowWidthValue => values[(int)Index.GlowWidth];
+        public ValueData segmentRangeValue => values[(int)Index.SegmentRange];
+        public ValueData zTestValue => values[(int)Index.ZTest];
 
+        // CustomValueInfoアクセサ
         public CustomValueInfo intensityInfo => CustomValueInfoMap["intensity"];
         public CustomValueInfo laserRangeInfo => CustomValueInfoMap["laserRange"];
         public CustomValueInfo laserWidthInfo => CustomValueInfoMap["laserWidth"];
@@ -212,6 +260,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public CustomValueInfo segmentRangeInfo => CustomValueInfoMap["segmentRange"];
         public CustomValueInfo zTestInfo => CustomValueInfoMap["zTest"];
 
+        // プロパティアクセサ
         public float intensity
         {
             get => intensityValue.value;

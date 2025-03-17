@@ -4,13 +4,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataEyes : TransformDataBase
     {
+        public enum Index
+        {
+            Easing = 0,
+            Horizon = 1,
+            Vertical = 2
+        }
+
         public override TransformType type => TransformType.Eyes;
 
         public override int valueCount => 3;
 
         public override bool hasEasing => true;
 
-        public override ValueData easingValue => values[0];
+        public override ValueData easingValue => values[(int)Index.Easing];
 
         public TransformDataEyes()
         {
@@ -22,7 +29,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "horizon",
                 new CustomValueInfo
                 {
-                    index = 1,
+                    index = (int)Index.Horizon,
                     name = "水平",
                     defaultValue = 0f,
                 }
@@ -31,7 +38,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "vertical",
                 new CustomValueInfo
                 {
-                    index = 2,
+                    index = (int)Index.Vertical,
                     name = "垂直",
                     defaultValue = 0f,
                 }
@@ -43,9 +50,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData horizonValue => this["horizon"];
+        public ValueData horizonValue => values[(int)Index.Horizon];
 
-        public ValueData verticalValue => this["vertical"];
+        public ValueData verticalValue => values[(int)Index.Vertical];
 
         public float horizon
         {

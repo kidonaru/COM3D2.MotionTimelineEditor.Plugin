@@ -6,6 +6,11 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 {
     public class TransformDataMorph : TransformDataBase
     {
+        public enum Index
+        {
+            MorphValue = 0
+        }
+
         public override TransformType type => TransformType.Morph;
 
         public override int valueCount => 1;
@@ -20,7 +25,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
                 "morphValue",
                 new CustomValueInfo
                 {
-                    index = 0,
+                    index = (int)Index.MorphValue,
                     name = "値",
                     defaultValue = 0f,
                 }
@@ -32,7 +37,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData morphValueValue => this["morphValue"];
+        public ValueData morphValueValue => values[(int)Index.MorphValue];
 
         public float morphValue
         {

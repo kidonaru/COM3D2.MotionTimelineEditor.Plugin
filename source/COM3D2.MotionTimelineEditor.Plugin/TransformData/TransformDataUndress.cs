@@ -4,6 +4,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataUndress : TransformDataBase
     {
+        public enum Index
+        {
+            IsVisible = 0
+        }
+
         public override TransformType type => TransformType.Undress;
 
         public override int valueCount => 1;
@@ -18,7 +23,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 "isVisible",
                 new CustomValueInfo
                 {
-                    index = 0,
+                    index = (int)Index.IsVisible,
                     name = "表示",
                     defaultValue = 0f,
                 }
@@ -30,7 +35,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData isVisibleValue => this["isVisible"];
+        public ValueData isVisibleValue => values[(int)Index.IsVisible];
 
         public bool isVisible
         {

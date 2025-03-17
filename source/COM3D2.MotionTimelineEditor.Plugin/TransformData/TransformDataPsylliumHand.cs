@@ -5,12 +5,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 {
     public class TransformDataPsylliumHand : TransformDataBase
     {
+        public enum Index
+        {
+            HandSpacing = 0,
+            BarOffsetPositionX = 1,
+            BarOffsetPositionY = 2,
+            BarOffsetPositionZ = 3,
+            BarOffsetRotationX = 4,
+            BarOffsetRotationY = 5,
+            BarOffsetRotationZ = 6
+        }
+
         public static TransformDataPsylliumHand defaultTrans = new TransformDataPsylliumHand();
         public static PsylliumHandConfig defaultConfig = new PsylliumHandConfig();
 
         public override TransformType type => TransformType.PsylliumHand;
 
-        public override int valueCount => 9;
+        public override int valueCount => 7;
 
         public TransformDataPsylliumHand()
         {
@@ -21,7 +32,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "handSpacing", new CustomValueInfo
                 {
-                    index = 0,
+                    index = (int)Index.HandSpacing,
                     name = "両手間",
                     min = 0f,
                     max = 10f,
@@ -32,7 +43,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "barOffsetPositionX", new CustomValueInfo
                 {
-                    index = 1,
+                    index = (int)Index.BarOffsetPositionX,
                     name = "X",
                     min = -1f,
                     max = 1f,
@@ -43,7 +54,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "barOffsetPositionY", new CustomValueInfo
                 {
-                    index = 2,
+                    index = (int)Index.BarOffsetPositionY,
                     name = "Y",
                     min = -1f,
                     max = 1f,
@@ -54,7 +65,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "barOffsetPositionZ", new CustomValueInfo
                 {
-                    index = 3,
+                    index = (int)Index.BarOffsetPositionZ,
                     name = "Z",
                     min = -1f,
                     max = 1f,
@@ -65,7 +76,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "barOffsetRotationX", new CustomValueInfo
                 {
-                    index = 4,
+                    index = (int)Index.BarOffsetRotationX,
                     name = "RX",
                     min = -180f,
                     max = 180f,
@@ -76,7 +87,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "barOffsetRotationY", new CustomValueInfo
                 {
-                    index = 5,
+                    index = (int)Index.BarOffsetRotationY,
                     name = "RY",
                     min = -180f,
                     max = 180f,
@@ -87,7 +98,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 "barOffsetRotationZ", new CustomValueInfo
                 {
-                    index = 6,
+                    index = (int)Index.BarOffsetRotationZ,
                     name = "RZ",
                     min = -180f,
                     max = 180f,
@@ -102,14 +113,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return CustomValueInfoMap;
         }
 
-        public ValueData handSpacingValue => this["handSpacing"];
+        public ValueData handSpacingValue => values[(int)Index.HandSpacing];
         public ValueData[] barOffsetPositionValues
         {
-            get => new ValueData[] { this["barOffsetPositionX"], this["barOffsetPositionY"], this["barOffsetPositionZ"] };
+            get => new ValueData[] { 
+                values[(int)Index.BarOffsetPositionX], 
+                values[(int)Index.BarOffsetPositionY], 
+                values[(int)Index.BarOffsetPositionZ] 
+            };
         }
         public ValueData[] barOffsetRotationValues
         {
-            get => new ValueData[] { this["barOffsetRotationX"], this["barOffsetRotationY"], this["barOffsetRotationZ"] };
+            get => new ValueData[] { 
+                values[(int)Index.BarOffsetRotationX], 
+                values[(int)Index.BarOffsetRotationY], 
+                values[(int)Index.BarOffsetRotationZ] 
+            };
         }
 
         public CustomValueInfo handSpacingInfo => CustomValueInfoMap["handSpacing"];

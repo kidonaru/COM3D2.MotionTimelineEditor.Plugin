@@ -9,11 +9,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override int valueCount => 10;
 
         public override bool hasPosition => true;
-
         public override bool hasRotation => true;
-
         public override bool hasScale => true;
-
         public override bool hasTangent => true;
 
         public override ValueData[] positionValues
@@ -47,10 +44,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override Quaternion initialRotation
         {
-            get
-            {
-                return Quaternion.Euler(initialEulerAngles);
-            }
+            get => Quaternion.Euler(initialEulerAngles);
         }
 
         public override Vector3 initialEulerAngles
