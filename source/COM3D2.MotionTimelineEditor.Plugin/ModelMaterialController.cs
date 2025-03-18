@@ -208,50 +208,36 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public IModelStat model;
 
-        private Renderer _renderer = null;
-        public Renderer renderer
+        private List<ModelMaterial> _materials = null;
+        public List<ModelMaterial> materials
         {
             get
             {
-                if (_renderer == null)
+                if (_materials == null)
                 {
-                    _renderer = GetComponentInChildren<Renderer>();
+                    _materials = new List<ModelMaterial>();
+
+                    var renderer = GetComponentInChildren<Renderer>();
+                    if (renderer != null && renderer.sharedMaterials != null)
+                    {
+                        foreach (var material in renderer.sharedMaterials)
+                        {
+                            materials.Add(new ModelMaterial(this, material));
+                        }
+                    }
                 }
-                return _renderer;
+                return _materials;
             }
         }
-
-        public List<ModelMaterial> materials = new List<ModelMaterial>();
 
         public static ModelMaterialController GetOrCreate(IModelStat model)
         {
             var transform = model.transform;
             var go = transform.gameObject;
 
-            var controller = go.GetComponent<ModelMaterialController>();
-            if (controller == null)
-            {
-                controller = go.AddComponent<ModelMaterialController>();
-                controller.Init();
-            }
-
+            var controller = go.GetOrAddComponent<ModelMaterialController>();
             controller.model = model;
             return controller;
-        }
-
-        public void Init()
-        {
-            materials.Clear();
-
-            if (renderer == null || renderer.sharedMaterials == null)
-            {
-                return;
-            }
-
-            foreach (var material in renderer.sharedMaterials)
-            {
-                materials.Add(new ModelMaterial(this, material));
-            }
         }
 
         public ModelMaterial GetMaterial(int index)

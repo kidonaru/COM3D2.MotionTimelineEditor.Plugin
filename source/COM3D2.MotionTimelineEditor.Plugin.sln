@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COM3D2.MotionTimelineEditor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COM3D2.MotionTimelineEditor_PngPlacement.Plugin", "COM3D2.MotionTimelineEditor_PngPlacement.Plugin\COM3D2.MotionTimelineEditor_PngPlacement.Plugin.csproj", "{730CF16F-AE60-44A4-9F3D-6D5C55486D2D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COM3D2.MotionTimelineEditor_NPRShader.Plugin", "COM3D2.MotionTimelineEditor_NPRShader.Plugin\COM3D2.MotionTimelineEditor_NPRShader.Plugin.csproj", "{8E074A6B-6C43-4034-BCB8-1C4C391D5906}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{730CF16F-AE60-44A4-9F3D-6D5C55486D2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{730CF16F-AE60-44A4-9F3D-6D5C55486D2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{730CF16F-AE60-44A4-9F3D-6D5C55486D2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E074A6B-6C43-4034-BCB8-1C4C391D5906}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E074A6B-6C43-4034-BCB8-1C4C391D5906}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E074A6B-6C43-4034-BCB8-1C4C391D5906}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E074A6B-6C43-4034-BCB8-1C4C391D5906}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

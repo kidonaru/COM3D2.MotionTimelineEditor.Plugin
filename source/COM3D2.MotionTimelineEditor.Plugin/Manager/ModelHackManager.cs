@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
@@ -70,6 +71,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return _instance;
             }
         }
+
+        public static event UnityAction<StudioModelStat> onCreateModel;
 
         private ModelHackManager()
         {
@@ -148,6 +151,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (modelHack != null)
                 {
                     modelHack.CreateModel(model);
+                    onCreateModel?.Invoke(model);
                 }
             }
             catch (System.Exception e)

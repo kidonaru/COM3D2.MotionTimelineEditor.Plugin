@@ -64,6 +64,7 @@
     <Compile Include="Hack\BackgroundCustomField.cs" />
     <Compile Include="Hack\BackgroundCustomWrapper.cs" />
     <Compile Include="Hack\BgObjectField.cs" />
+    <Compile Include="Hack\INPRShaderHack.cs" />
     <Compile Include="Hack\ModelHackBase.cs" />
     <Compile Include="Hack\PartsEditHackBase.cs" />
     <Compile Include="Hack\StudioExBackgroundCorrectorManagerField.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="Manager\ManagerBase.cs" />
     <Compile Include="Manager\ModelHackManager.cs" />
     <Compile Include="Manager\MovieManager.cs" />
+    <Compile Include="Manager\NPRShaderHackManager.cs" />
     <Compile Include="Manager\PartsEditHackManager.cs" />
     <Compile Include="Manager\PostEffectManager.cs" />
     <Compile Include="Manager\PsylliumManager.cs" />
