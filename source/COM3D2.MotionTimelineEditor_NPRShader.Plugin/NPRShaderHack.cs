@@ -13,32 +13,55 @@ namespace COM3D2.MotionTimelineEditor_NPRShader.Plugin
 {
     public class NPRShaderHack : INPRShaderHack
     {
+        public NPRShaderWrapper wrapper = new NPRShaderWrapper();
+
         public bool Init()
         {
+            if (!wrapper.Init())
+            {
+                return false;
+            }
+
             return true;
         }
 
-        public void UpdateMaterial(GameObject gameObject)
+        public void Reload()
         {
-            if (gameObject == null)
-            {
-                return;
-            }
+            wrapper.Reload();
+        }
 
-            if (!(gameObject.name.Length >= 6 && gameObject.name.ToLower().EndsWith(".menu")))
+        public void UpdateMaterial(GameObject gameObject, string menuFileName)
+        {
+            try
             {
-                return;
-            }
+                if (gameObject == null || string.IsNullOrEmpty(menuFileName))
+                {
+                    return;
+                }
 
-            string menuFileName = gameObject.name.Replace("[SC] ", "");
-            PBRModelInfo pbrModelInfo = AssetLoader.LoadMenuPBR(menuFileName);
-            
-            if (string.IsNullOrEmpty(pbrModelInfo.modelName))
+                if (!menuFileName.EndsWith(".menu", StringComparison.OrdinalIgnoreCase))
+                {
+                    menuFileName += ".menu";
+                }
+
+                if (!GameUty.IsExistFile(menuFileName))
+                {
+                    return;
+                }
+
+                PBRModelInfo pbrModelInfo = AssetLoader.LoadMenuPBR(menuFileName);
+
+                if (string.IsNullOrEmpty(pbrModelInfo.modelName))
+                {
+                    return;
+                }
+
+                ApplyPBRModelToGameObject(gameObject, pbrModelInfo);
+            }
+            catch (Exception ex)
             {
-                return;
+                MTEUtils.LogException(ex);
             }
-
-            ApplyPBRModelToGameObject(gameObject, pbrModelInfo);
         }
 
         private void ApplyPBRModelToGameObject(GameObject gameObject, PBRModelInfo pbrModelInfo)
@@ -57,12 +80,13 @@ namespace COM3D2.MotionTimelineEditor_NPRShader.Plugin
                         try
                         {
                             // 新しいマテリアル配列を作成
-                            Material[] newMaterials = new Material[renderer.materials.Length];
+                            Material[] baseMaterials = renderer.sharedMaterials;
+                            Material[] newMaterials = new Material[baseMaterials.Length];
                             for (int i = 0; i < newMaterials.Length; i++)
                             {
-                                newMaterials[i] = new Material(renderer.materials[i]);
+                                newMaterials[i] = new Material(baseMaterials[i]);
                             }
-                            
+
                             // マテリアル変更を適用
                             ApplyMaterialChanges(newMaterials, pbrModelInfo);
                             
@@ -75,7 +99,7 @@ namespace COM3D2.MotionTimelineEditor_NPRShader.Plugin
                                 );
                             }
                             
-                            renderer.materials = newMaterials;
+                            renderer.sharedMaterials = newMaterials;
                             renderer.sharedMesh.RecalculateTangents();
                         }
                         catch (Exception ex)

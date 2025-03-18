@@ -541,8 +541,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             OfficialObjectInfo objectInfo;
 
-            MTEUtils.LogDebug("FindOfficialObject: label={0} fileName={1} myRoomId={2} bgObjectId={3}",
-                label, fileName, myRoomId, bgObjectId);
+            //MTEUtils.LogDebug("FindOfficialObject: label={0} fileName={1} myRoomId={2} bgObjectId={3}",
+            //    label, fileName, myRoomId, bgObjectId);
 
             if (!string.IsNullOrEmpty(fileName))
             {

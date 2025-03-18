@@ -35,6 +35,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _nprShaderHack = nprShaderHack;
         }
 
+        public override void OnLoad()
+        {
+            if (nprShaderHack == null)
+            {
+                return;
+            }
+
+            nprShaderHack.Reload();
+        }
+
         private void OnCreateModel(StudioModelStat model)
         {
             if (nprShaderHack == null)
@@ -42,12 +52,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            if (model == null || model.transform == null)
+            if (model == null || model.transform == null || model.info?.fileName == null)
             {
                 return;
             }
 
-            nprShaderHack.UpdateMaterial(model.transform.gameObject);
+            nprShaderHack.UpdateMaterial(model.transform.gameObject, model.info?.fileName);
         }
     }
 }

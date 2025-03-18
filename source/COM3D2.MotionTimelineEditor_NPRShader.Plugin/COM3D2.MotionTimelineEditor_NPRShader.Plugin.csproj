@@ -65,7 +65,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="COM3D2.MotionTimelineEditor_NPRShader.Plugin.cs" />
     <Compile Include="PluginInfo.cs" />
+    <Compile Include="NPRShaderField.cs" />
     <Compile Include="NPRShaderHack.cs" />
+    <Compile Include="NPRShaderWrapper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -29,6 +29,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override void Init()
         {
             base.Init();
+            AddFirstBones(allBoneNames);
 
             StudioModelManager.onModelAdded += OnModelAdded;
             StudioModelManager.onModelRemoved += OnModelRemoved;

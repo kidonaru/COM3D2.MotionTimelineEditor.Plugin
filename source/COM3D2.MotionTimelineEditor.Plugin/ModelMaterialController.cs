@@ -54,8 +54,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static readonly List<int> ValuePropertyNameIds =
             ValuePropertyTypes.Select(x => Shader.PropertyToID(x.ToString())).ToList();
 
-        public ModelMaterialController controller;
-        public Material material;
+        public ModelMaterialController controller { get; private set; }
+        public Material material { get; private set; }
 
         public IModelStat model => controller.model;
 
@@ -122,6 +122,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     initialValues.Add(0f);
                 }
             }
+
+            material.name = material.name.Replace(" (Instance)", "");
+        }
+
+        public void UpdateMaterial(Material material)
+        {
+            this.material = material;
+            Init();
         }
 
         public bool HasColor(ColorPropertyType type)
@@ -221,37 +229,46 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public List<ModelMaterial> materials = new List<ModelMaterial>();
+        private List<ModelMaterial> _materials = new List<ModelMaterial>();
+        public List<ModelMaterial> materials
+        {
+            get
+            {
+                if (renderer != null && renderer.sharedMaterials != null)
+                {
+                    var baseMaterials = renderer.sharedMaterials;
+                    for (int i = 0; i < baseMaterials.Length; i++)
+                    {
+                        var baseMaterial = baseMaterials[i];
+                        if (baseMaterial == null)
+                        {
+                            continue;
+                        }
+
+                        var material = i < _materials.Count ? _materials[i] : null;
+                        if (material == null)
+                        {
+                            _materials.Add(new ModelMaterial(this, baseMaterial));
+                        }
+                        else if (material.material != baseMaterial)
+                        {
+                            material.UpdateMaterial(baseMaterial);
+                        }
+                    }
+                }
+
+                return _materials;
+            }
+        }
 
         public static ModelMaterialController GetOrCreate(IModelStat model)
         {
             var transform = model.transform;
             var go = transform.gameObject;
 
-            var controller = go.GetComponent<ModelMaterialController>();
-            if (controller == null)
-            {
-                controller = go.AddComponent<ModelMaterialController>();
-                controller.Init();
-            }
-
+            var controller = go.GetOrAddComponent<ModelMaterialController>();
             controller.model = model;
             return controller;
-        }
-
-        public void Init()
-        {
-            materials.Clear();
-
-            if (renderer == null || renderer.sharedMaterials == null)
-            {
-                return;
-            }
-
-            foreach (var material in renderer.sharedMaterials)
-            {
-                materials.Add(new ModelMaterial(this, material));
-            }
         }
 
         public ModelMaterial GetMaterial(int index)
