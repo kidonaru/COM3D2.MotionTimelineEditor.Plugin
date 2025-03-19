@@ -1,6 +1,6 @@
 # COM3D2.MotionTimelineEditor.Plugin
 
-v4.7.0.1
+v4.7.0.2
 
 
 - [COM3D2.MotionTimelineEditor.Plugin](#com3d2motiontimelineeditorplugin)
@@ -90,6 +90,7 @@ v4.7.0.1
     - [DCM出力](#dcm出力)
     - [連番画像出力](#連番画像出力)
   - [変更履歴](#変更履歴)
+    - [2025/03/19 v4.7.0.2](#20250319-v4702)
     - [2025/03/18 v4.7.0.1](#20250318-v4701)
     - [2025/03/17 v4.7.0.0](#20250317-v4700)
     - [2025/03/02 v4.6.0.0](#20250302-v4600)
@@ -167,6 +168,8 @@ zip解凍後、`UnityInjector`フォルダの中身を、`Sybaris\UnityInjector`
   - PartsEditプラグインで動作するようになります。任意で配置してください
 - `COM3D2.MotionTimelineEditor_PngPlacement.Plugin.dll`
   - PngPlacementプラグインで動作するようになります。任意で配置してください
+- `COM3D2.MotionTimelineEditor_NPRShader.Plugin.dll`
+  - NPRShaderプラグインで動作するようになります。任意で配置してください
 - `Config/MotionTimelineEditor_ExtraModel.csv`
   - 公式で対応していないモデルを追加するための設定ファイル
 
@@ -213,6 +216,15 @@ BackgroundCustomプラグインでスタジオモードでのMod配置が可能�
 
 - **BackgroundCustom1.1.1**
   - https://ux.getuploader.com/galleBlizzg/download/37
+
+
+NPRShaderプラグインかShaderServantが導入済みの場合、配置したモデルにNPRシェーダーを適用できます。
+
+- **COM3D2.NPRShader.Plugin 0.9.3.0**
+  - 現在未公開
+
+- **COM3D2.ShaderServant 1.3**
+  - https://github.com/krypto5863/COM3D2.ShaderServant/releases/tag/1.3
 
 
 ## タイムライン制作の流れ
@@ -1226,6 +1238,13 @@ DCMで再生するときは処理が干渉することがあるので、MTEを�
 
 
 ## 変更履歴
+
+
+### 2025/03/19 v4.7.0.2
+
+- NPRShader対応
+  - ModItemExplorerでの配置か、タイムラインのロードで配置したモデルにNPRShaderを適用するようにしました
+  - モデルマテリアルレイヤーでも動作するようになります
 
 
 ### 2025/03/18 v4.7.0.1
