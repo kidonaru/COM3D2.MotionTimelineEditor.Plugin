@@ -18,8 +18,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         string name { get; }
         string displayName { get; }
-        bool visible { get; }
-        Transform transform { get; set; }
+        Transform transform { get; }
     }
 
     public class StudioModelStat : IModelStat

@@ -6,61 +6,57 @@ using static COM3D2.MotionTimelineEditor.Plugin.ModelMaterial;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    [TimelineLayerDesc("背景モデルマテリアル", 34)]
-    public class BGModelMaterialTimelineLayer : BGModelTimelineLayerBase
+    [TimelineLayerDesc("メイドマテリアル", 16)]
+    public class MaidMaterialTimelineLayer : TimelineLayerBase
     {
-        public override Type layerType => typeof(BGModelMaterialTimelineLayer);
-        public override string layerName => nameof(BGModelMaterialTimelineLayer);
+        public override Type layerType => typeof(MaidMaterialTimelineLayer);
+        public override string layerName => nameof(MaidMaterialTimelineLayer);
 
-        public override List<string> allBoneNames => bgModelManager.materialNames;
+        public override List<string> allBoneNames =>
+            maidCache == null ? maidCache.materialNames : new List<string>();
 
-        private BGModelMaterialTimelineLayer(int slotNo) : base(slotNo)
+        private MaidMaterialTimelineLayer(int slotNo) : base(slotNo)
         {
         }
 
-        public static BGModelMaterialTimelineLayer Create(int slotNo)
+        public static MaidMaterialTimelineLayer Create(int slotNo)
         {
-            return new BGModelMaterialTimelineLayer(0);
+            return new MaidMaterialTimelineLayer(slotNo);
         }
 
         public override void Init()
         {
             base.Init();
 
-            BGModelManager.onSetup += OnBGModelSetup;
-            BGModelManager.onModelAdded += OnBGModelAdded;
-            BGModelManager.onModelRemoved += OnBGModelRemoved;
+            var materialNames = maidCache.materialNames;
+            AddFirstBones(materialNames);
         }
 
         protected override void InitMenuItems()
         {
             allMenuItems.Clear();
 
-            foreach (var model in bgModelManager.models)
+            if (maidCache == null)
             {
-                if (model.materials.Count == 0)
+                return;
+            }
+
+            foreach (var stat in maidCache.slotStats)
+            {
+                if (stat == null || stat.materials.Count == 0)
                 {
                     continue;
                 }
 
-                var setMenuItem = new BoneSetMenuItem(model.name, model.displayName);
+                var setMenuItem = new BoneSetMenuItem(stat.name, stat.displayName);
                 allMenuItems.Add(setMenuItem);
 
-                foreach (var material in model.materials)
+                foreach (var material in stat.materials)
                 {
                     var menuItem = new BoneMenuItem(material.name, material.displayName);
                     setMenuItem.AddChild(menuItem);
                 }
             }
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-
-            BGModelManager.onSetup -= OnBGModelSetup;
-            BGModelManager.onModelAdded -= OnBGModelAdded;
-            BGModelManager.onModelRemoved -= OnBGModelRemoved;
         }
 
         public override bool IsValidData()
@@ -86,7 +82,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
         {
-            var material = bgModelManager.GetMaterial(motion.name);
+            var material = maidCache.GetMaterial(motion.name);
             if (material == null)
             {
                 return;
@@ -104,36 +100,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             material.Lerp(start, end, easingTime);
         }
 
-        public void OnBGModelSetup()
+        public override void OnMaidChanged(Maid maid)
         {
             InitMenuItems();
 
-            var materialNames = bgModelManager.materialNames;
+            var materialNames = maidCache.materialNames;
             AddFirstBones(materialNames);
-            ApplyCurrentFrame(true);
-        }
-
-        public void OnBGModelAdded(BGModelStat model)
-        {
-            InitMenuItems();
-
-            var materialNames = model.materials.Select(x => x.name).ToList();
-            AddFirstBones(materialNames);
-            ApplyCurrentFrame(true);
-        }
-
-        public void OnBGModelRemoved(BGModelStat model)
-        {
-            InitMenuItems();
-
-            var materialNames = model.materials.Select(x => x.name).ToList();
-            RemoveAllBones(materialNames);
             ApplyCurrentFrame(true);
         }
 
         public override void UpdateFrame(FrameData frame)
         {
-            foreach (var sourceMaterial in bgModelManager.materialMap.Values)
+            foreach (var sourceMaterial in maidCache.materialMap.Values)
             {
                 var materialName = sourceMaterial.name;
 
@@ -143,7 +121,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        private GUIComboBox<BGModelStat> _modelComboBox = new GUIComboBox<BGModelStat>
+        private GUIComboBox<MaidSlotStat> _slotComboBox = new GUIComboBox<MaidSlotStat>
         {
             getName = (model, index) => model.displayName,
             buttonSize = new Vector2(200, 20),
@@ -160,7 +138,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private enum TabType
         {
             操作,
-            管理,
         }
 
         private TabType _tabType = TabType.操作;
@@ -174,9 +151,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 case TabType.操作:
                     DrawMaterial(view);
                     break;
-                case TabType.管理:
-                    DrawModelManage(view);
-                    break;
             }
 
             view.DrawComboBox();
@@ -184,27 +158,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void DrawMaterial(GUIView view)
         {
-            _modelComboBox.items = bgModelManager.models;
+            _slotComboBox.items = maidCache.slotStats;
 
-            if (_modelComboBox.items.Count == 0)
+            if (_slotComboBox.items.Count == 0)
             {
-                view.DrawLabel("モデルが存在しません", 200, 20);
+                view.DrawLabel("スロットが存在しません", 200, 20);
                 return;
             }
 
             view.SetEnabled(!view.IsComboBoxFocused());
 
-            view.DrawLabel("モデル選択", 200, 20);
-            _modelComboBox.DrawButton(view);
-
-            var model = _modelComboBox.currentItem;
-            if (model == null || model.transform == null)
+            view.BeginHorizontal();
             {
-                view.DrawLabel("モデルが見つかりません", 200, 20);
+                view.DrawLabel("スロット選択", 200, 20);
+
+                if (view.DrawButton("更新", 50, 20))
+                {
+                    maidCache.UpdateSlotStats();
+                    OnMaidChanged(maidCache.maid);
+                }
+            }
+            view.EndLayout();
+
+            _slotComboBox.DrawButton(view);
+
+            var slot = _slotComboBox.currentItem;
+            if (slot == null)
+            {
+                view.DrawLabel("スロットが見つかりません", 200, 20);
                 return;
             }
 
-            _materialComboBox.items = model.materials;
+            _materialComboBox.items = slot.materials;
 
             if (_materialComboBox.items.Count == 0)
             {

@@ -138,6 +138,7 @@
     <Compile Include="TimelineLayer\ITimelineLayer.cs" />
     <Compile Include="TimelineLayer\LightTimelineLayer.cs" />
     <Compile Include="TimelineLayer\LightTimelineLayerBase.cs" />
+    <Compile Include="TimelineLayer\MaidMaterialTimelineLayer.cs" />
     <Compile Include="TimelineLayer\ModelBoneTimelineLayer.cs" />
     <Compile Include="TimelineLayer\ModelMaterialTimelineLayer.cs" />
     <Compile Include="TimelineLayer\ModelShapeKeyTimelineLayer.cs" />
@@ -241,6 +242,7 @@
     <Compile Include="MaidBlendShape.cs" />
     <Compile Include="MaidCache.cs" />
     <Compile Include="MaidInfo.cs" />
+    <Compile Include="MaidSlotStat.cs" />
     <Compile Include="MainWindow.cs" />
     <Compile Include="ModelBoneController.cs" />
     <Compile Include="ModelMaterialController.cs" />

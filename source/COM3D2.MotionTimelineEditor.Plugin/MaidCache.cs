@@ -41,6 +41,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public IKManager ikManager = null;
         public ExtendBoneCache extendBoneCache = null;
         public Dictionary<IKHoldType, IKHoldEntity> ikHoldEntities = new Dictionary<IKHoldType, IKHoldEntity>(6);
+        public List<MaidSlotStat> slotStats = new List<MaidSlotStat>(32);
+        public Dictionary<TBody.SlotID, MaidSlotStat> slotStatMap = new Dictionary<TBody.SlotID, MaidSlotStat>(32);
+        public Dictionary<string, ModelMaterial> materialMap = new Dictionary<string, ModelMaterial>(32);
+        public List<string> materialNames = new List<string>(32);
 
         public bool isGroundingFootL = false; // 左足の接地を有効
         public bool isGroundingFootR = false; // 右足の接地を有効
@@ -429,6 +433,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             extendBoneCache = null;
             ikHoldEntities.Clear();
             _blendShapeCache.Clear();
+            slotStats.Clear();
+            slotStatMap.Clear();
+            materialMap.Clear();
+            materialNames.Clear();
             lookAtTargetType = LookAtTargetType.None;
             lookAtTargetIndex = 0;
             lookAtMaidPointType = MaidPointType.Head;
@@ -701,6 +709,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public MaidSlotStat GetSlotStat(TBody.SlotID slotId)
+        {
+            return slotStatMap.GetOrDefault(slotId);
+        }
+
+        public ModelMaterial GetMaterial(string name)
+        {
+            ModelMaterial material;
+            if (materialMap.TryGetValue(name, out material))
+            {
+                return material;
+            }
+            return null;
+        }
+
         public string GetBonePath(string boneName)
         {
             var bonePath = BoneUtils.ConvertToBonePath(boneName);
@@ -880,6 +903,31 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return null;
         }
 
+        public TBodySkin GetSlot(TBody.SlotID slotId)
+        {
+            return maid != null ? maid.body0.goSlot[(int)slotId] : null;
+        }
+
+        public TBodySkin GetSlot(DressSlotID slotId)
+        {
+            if (DressUtils.IsShiftSlotId(slotId))
+            {
+                return null;
+            }
+            var bodySlotId = DressUtils.GetBodySlotId(slotId);
+            return GetSlot(bodySlotId);
+        }
+
+        public MaidSlotStat GetSlotStat(DressSlotID slotId)
+        {
+            if (DressUtils.IsShiftSlotId(slotId))
+            {
+                return null;
+            }
+            var bodySlotId = DressUtils.GetBodySlotId(slotId);
+            return GetSlotStat(bodySlotId);
+        }
+
         public void PlayOneShotVoice()
         {
             PlayVoice(
@@ -995,7 +1043,49 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 extendBoneCache.Init(maid, anmRoot);
             }
 
+            UpdateSlotStats();
+
             onMaidChanged?.Invoke(slotNo, maid);
+        }
+
+        public void UpdateSlotStats()
+        {
+            slotStats.Clear();
+            slotStatMap.Clear();
+            materialMap.Clear();
+            materialNames.Clear();
+
+            foreach (var pair in DressUtils.DressSlotJpNameMap)
+            {
+                var dressSlotId = pair.Key;
+                var slotJpName = pair.Value;
+                if (DressUtils.IsShiftSlotId(dressSlotId))
+                {
+                    continue;
+                }
+
+                var slotId = DressUtils.GetBodySlotId(dressSlotId);
+                var slot = GetSlot(dressSlotId);
+                if (slot == null)
+                {
+                    continue;
+                }
+
+                var stat = new MaidSlotStat(slot, slotJpName);
+                if (stat.materials.Count == 0)
+                {
+                    continue;
+                }
+
+                slotStats.Add(stat);
+                slotStatMap[slotId] = stat;
+
+                foreach (var material in stat.materials)
+                {
+                    materialMap[material.name] = material;
+                    materialNames.Add(material.name);
+                }
+            }
         }
 
         private void OnAnmChanged(string anmName)

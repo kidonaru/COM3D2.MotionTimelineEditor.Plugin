@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using static COM3D2.MotionTimelineEditor.Plugin.ModelMaterial;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
@@ -809,6 +810,38 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 default:
                     return null;
             }
+        }
+
+        public void Apply(ModelMaterial material)
+        {
+            color = material.GetColor(ColorPropertyType._Color);
+            ShadowColor = material.GetColor(ColorPropertyType._ShadowColor);
+            RimColor = material.GetColor(ColorPropertyType._RimColor);
+            OutlineColor = material.GetColor(ColorPropertyType._OutlineColor);
+
+            Shininess = material.GetValue(ValuePropertyType._Shininess);
+            OutlineWidth = material.GetValue(ValuePropertyType._OutlineWidth);
+            RimPower = material.GetValue(ValuePropertyType._RimPower);
+            RimShift = material.GetValue(ValuePropertyType._RimShift);
+
+            // NPR用プロパティの追加
+            EmissionColor = material.GetColor(ColorPropertyType._EmissionColor);
+            MatcapColor = material.GetColor(ColorPropertyType._MatcapColor);
+            MatcapMaskColor = material.GetColor(ColorPropertyType._MatcapMaskColor);
+            RimLightColor = material.GetColor(ColorPropertyType._RimLightColor);
+
+            NormalValue = material.GetValue(ValuePropertyType._NormalValue);
+            ParallaxValue = material.GetValue(ValuePropertyType._ParallaxValue);
+            MatcapValue = material.GetValue(ValuePropertyType._MatcapValue);
+            MatcapMaskValue = material.GetValue(ValuePropertyType._MatcapMaskValue);
+            EmissionValue = material.GetValue(ValuePropertyType._EmissionValue);
+            EmissionHDRExposure = material.GetValue(ValuePropertyType._EmissionHDRExposure);
+            EmissionPower = material.GetValue(ValuePropertyType._EmissionPower);
+            RimLightValue = material.GetValue(ValuePropertyType._RimLightValue);
+            RimLightPower = material.GetValue(ValuePropertyType._RimLightPower);
+            MetallicValue = material.GetValue(ValuePropertyType._MetallicValue);
+            SmoothnessValue = material.GetValue(ValuePropertyType._SmoothnessValue);
+            OcclusionValue = material.GetValue(ValuePropertyType._OcclusionValue);
         }
     }
 }

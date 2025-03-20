@@ -99,156 +99,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (indexUpdated)
             {
-                material.SetColor(ColorPropertyType._Color, start.color);
-                material.SetColor(ColorPropertyType._ShadowColor, start.ShadowColor);
-                material.SetColor(ColorPropertyType._RimColor, start.RimColor);
-                material.SetColor(ColorPropertyType._OutlineColor, start.OutlineColor);
-                material.SetValue(ValuePropertyType._Shininess, start.Shininess);
-                material.SetValue(ValuePropertyType._OutlineWidth, start.OutlineWidth);
-                material.SetValue(ValuePropertyType._RimPower, start.RimPower);
-                material.SetValue(ValuePropertyType._RimShift, start.RimShift);
-
-                // NPR用プロパティ
-                material.SetColor(ColorPropertyType._EmissionColor, start.EmissionColor);
-                material.SetColor(ColorPropertyType._MatcapColor, start.MatcapColor);
-                material.SetColor(ColorPropertyType._MatcapMaskColor, start.MatcapMaskColor);
-                material.SetColor(ColorPropertyType._RimLightColor, start.RimLightColor);
-                material.SetValue(ValuePropertyType._NormalValue, start.NormalValue);
-                material.SetValue(ValuePropertyType._ParallaxValue, start.ParallaxValue);
-                material.SetValue(ValuePropertyType._MatcapValue, start.MatcapValue);
-                material.SetValue(ValuePropertyType._MatcapMaskValue, start.MatcapMaskValue);
-                material.SetValue(ValuePropertyType._EmissionValue, start.EmissionValue);
-                material.SetValue(ValuePropertyType._EmissionHDRExposure, start.EmissionHDRExposure);
-                material.SetValue(ValuePropertyType._EmissionPower, start.EmissionPower);
-                material.SetValue(ValuePropertyType._RimLightValue, start.RimLightValue);
-                material.SetValue(ValuePropertyType._RimLightPower, start.RimLightPower);
-                material.SetValue(ValuePropertyType._MetallicValue, start.MetallicValue);
-                material.SetValue(ValuePropertyType._SmoothnessValue, start.SmoothnessValue);
-                material.SetValue(ValuePropertyType._OcclusionValue, start.OcclusionValue);
+                material.Apply(start);
             }
 
             float easingTime = CalcEasingValue(t, motion.easing);
-
-            if (start.color != end.color)
-            {
-                material.SetColor(ColorPropertyType._Color, Color.Lerp(start.color, end.color, easingTime));
-            }
-
-            if (start.ShadowColor != end.ShadowColor)
-            {
-                material.SetColor(ColorPropertyType._ShadowColor, Color.Lerp(start.ShadowColor, end.ShadowColor, easingTime));
-            }
-
-            if (start.RimColor != end.RimColor)
-            {
-                material.SetColor(ColorPropertyType._RimColor, Color.Lerp(start.RimColor, end.RimColor, easingTime));
-            }
-
-            if (start.OutlineColor != end.OutlineColor)
-            {
-                material.SetColor(ColorPropertyType._OutlineColor, Color.Lerp(start.OutlineColor, end.OutlineColor, easingTime));
-            }
-
-            if (start.Shininess != end.Shininess)
-            {
-                material.SetValue(ValuePropertyType._Shininess, Mathf.Lerp(start.Shininess, end.Shininess, easingTime));
-            }
-
-            if (start.OutlineWidth != end.OutlineWidth)
-            {
-                material.SetValue(ValuePropertyType._OutlineWidth, Mathf.Lerp(start.OutlineWidth, end.OutlineWidth, easingTime));
-            }
-
-            if (start.RimPower != end.RimPower)
-            {
-                material.SetValue(ValuePropertyType._RimPower, Mathf.Lerp(start.RimPower, end.RimPower, easingTime));
-            }
-
-            if (start.RimShift != end.RimShift)
-            {
-                material.SetValue(ValuePropertyType._RimShift, Mathf.Lerp(start.RimShift, end.RimShift, easingTime));
-            }
-
-            // NPR用プロパティの補間処理
-            if (start.EmissionColor != end.EmissionColor)
-            {
-                material.SetColor(ColorPropertyType._EmissionColor, Color.Lerp(start.EmissionColor, end.EmissionColor, easingTime));
-            }
-
-            if (start.MatcapColor != end.MatcapColor)
-            {
-                material.SetColor(ColorPropertyType._MatcapColor, Color.Lerp(start.MatcapColor, end.MatcapColor, easingTime));
-            }
-
-            if (start.MatcapMaskColor != end.MatcapMaskColor)
-            {
-                material.SetColor(ColorPropertyType._MatcapMaskColor, Color.Lerp(start.MatcapMaskColor, end.MatcapMaskColor, easingTime));
-            }
-
-            if (start.RimLightColor != end.RimLightColor)
-            {
-                material.SetColor(ColorPropertyType._RimLightColor, Color.Lerp(start.RimLightColor, end.RimLightColor, easingTime));
-            }
-
-            if (start.NormalValue != end.NormalValue)
-            {
-                material.SetValue(ValuePropertyType._NormalValue, Mathf.Lerp(start.NormalValue, end.NormalValue, easingTime));
-            }
-
-            if (start.ParallaxValue != end.ParallaxValue)
-            {
-                material.SetValue(ValuePropertyType._ParallaxValue, Mathf.Lerp(start.ParallaxValue, end.ParallaxValue, easingTime));
-            }
-
-            if (start.MatcapValue != end.MatcapValue)
-            {
-                material.SetValue(ValuePropertyType._MatcapValue, Mathf.Lerp(start.MatcapValue, end.MatcapValue, easingTime));
-            }
-
-            if (start.MatcapMaskValue != end.MatcapMaskValue)
-            {
-                material.SetValue(ValuePropertyType._MatcapMaskValue, Mathf.Lerp(start.MatcapMaskValue, end.MatcapMaskValue, easingTime));
-            }
-
-            if (start.EmissionValue != end.EmissionValue)
-            {
-                material.SetValue(ValuePropertyType._EmissionValue, Mathf.Lerp(start.EmissionValue, end.EmissionValue, easingTime));
-            }
-
-            if (start.EmissionHDRExposure != end.EmissionHDRExposure)
-            {
-                material.SetValue(ValuePropertyType._EmissionHDRExposure, Mathf.Lerp(start.EmissionHDRExposure, end.EmissionHDRExposure, easingTime));
-            }
-
-            if (start.EmissionPower != end.EmissionPower)
-            {
-                material.SetValue(ValuePropertyType._EmissionPower, Mathf.Lerp(start.EmissionPower, end.EmissionPower, easingTime));
-            }
-
-            if (start.RimLightValue != end.RimLightValue)
-            {
-                material.SetValue(ValuePropertyType._RimLightValue, Mathf.Lerp(start.RimLightValue, end.RimLightValue, easingTime));
-            }
-
-            if (start.RimLightPower != end.RimLightPower)
-            {
-                material.SetValue(ValuePropertyType._RimLightPower, Mathf.Lerp(start.RimLightPower, end.RimLightPower, easingTime));
-            }
-
-            if (start.MetallicValue != end.MetallicValue)
-            {
-                material.SetValue(ValuePropertyType._MetallicValue, Mathf.Lerp(start.MetallicValue, end.MetallicValue, easingTime));
-            }
-
-            if (start.SmoothnessValue != end.SmoothnessValue)
-            {
-                material.SetValue(ValuePropertyType._SmoothnessValue, Mathf.Lerp(start.SmoothnessValue, end.SmoothnessValue, easingTime));
-            }
-
-            if (start.OcclusionValue != end.OcclusionValue)
-            {
-                material.SetValue(ValuePropertyType._OcclusionValue, Mathf.Lerp(start.OcclusionValue, end.OcclusionValue, easingTime));
-            }
+            material.Lerp(start, end, easingTime);
         }
 
         public void OnModelAdded(StudioModelStat model)
@@ -299,35 +154,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var materialName = sourceMaterial.name;
 
                 var trans = frame.GetOrCreateTransformData<TransformDataModelMaterial>(materialName);
-                trans.color = sourceMaterial.GetColor(ColorPropertyType._Color);
-                trans.ShadowColor = sourceMaterial.GetColor(ColorPropertyType._ShadowColor);
-                trans.RimColor = sourceMaterial.GetColor(ColorPropertyType._RimColor);
-                trans.OutlineColor = sourceMaterial.GetColor(ColorPropertyType._OutlineColor);
-
-                trans.Shininess = sourceMaterial.GetValue(ValuePropertyType._Shininess);
-                trans.OutlineWidth = sourceMaterial.GetValue(ValuePropertyType._OutlineWidth);
-                trans.RimPower = sourceMaterial.GetValue(ValuePropertyType._RimPower);
-                trans.RimShift = sourceMaterial.GetValue(ValuePropertyType._RimShift);
-
-                // NPR用プロパティの追加
-                trans.EmissionColor = sourceMaterial.GetColor(ColorPropertyType._EmissionColor);
-                trans.MatcapColor = sourceMaterial.GetColor(ColorPropertyType._MatcapColor);
-                trans.MatcapMaskColor = sourceMaterial.GetColor(ColorPropertyType._MatcapMaskColor);
-                trans.RimLightColor = sourceMaterial.GetColor(ColorPropertyType._RimLightColor);
-
-                trans.NormalValue = sourceMaterial.GetValue(ValuePropertyType._NormalValue);
-                trans.ParallaxValue = sourceMaterial.GetValue(ValuePropertyType._ParallaxValue);
-                trans.MatcapValue = sourceMaterial.GetValue(ValuePropertyType._MatcapValue);
-                trans.MatcapMaskValue = sourceMaterial.GetValue(ValuePropertyType._MatcapMaskValue);
-                trans.EmissionValue = sourceMaterial.GetValue(ValuePropertyType._EmissionValue);
-                trans.EmissionHDRExposure = sourceMaterial.GetValue(ValuePropertyType._EmissionHDRExposure);
-                trans.EmissionPower = sourceMaterial.GetValue(ValuePropertyType._EmissionPower);
-                trans.RimLightValue = sourceMaterial.GetValue(ValuePropertyType._RimLightValue);
-                trans.RimLightPower = sourceMaterial.GetValue(ValuePropertyType._RimLightPower);
-                trans.MetallicValue = sourceMaterial.GetValue(ValuePropertyType._MetallicValue);
-                trans.SmoothnessValue = sourceMaterial.GetValue(ValuePropertyType._SmoothnessValue);
-                trans.OcclusionValue = sourceMaterial.GetValue(ValuePropertyType._OcclusionValue);
-
+                trans.Apply(sourceMaterial);
                 trans.easing = GetEasing(frame.frameNo, materialName);
             }
         }

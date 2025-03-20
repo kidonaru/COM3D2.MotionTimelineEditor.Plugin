@@ -361,6 +361,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     typeof(LightTimelineLayer), LightTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
+                    typeof(MaidMaterialTimelineLayer), MaidMaterialTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
                     typeof(ModelBoneTimelineLayer), ModelBoneTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(

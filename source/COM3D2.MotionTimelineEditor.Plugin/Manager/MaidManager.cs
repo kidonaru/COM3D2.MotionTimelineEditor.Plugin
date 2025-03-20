@@ -214,6 +214,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             if (maidCaches.Count > maids.Count)
             {
+                for (int i = maids.Count; i < maidCaches.Count; i++)
+                {
+                    maidCaches[i].Reset();
+                }
                 maidCaches.RemoveRange(maids.Count, maidCaches.Count - maids.Count);
             }
 
