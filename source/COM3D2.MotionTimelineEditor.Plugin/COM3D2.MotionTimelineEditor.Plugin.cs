@@ -355,6 +355,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     typeof(CameraTimelineLayer), CameraTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
+                    typeof(DressTimelineLayer), DressTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
                     typeof(EyesTimelineLayer), EyesTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
@@ -423,6 +426,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 );
                 timelineManager.RegisterTransform(
                     TransformType.DistanceFog, TimelineManager.CreateTransform<TransformDataDistanceFog>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.Dress, TimelineManager.CreateTransform<TransformDataDress>
                 );
                 timelineManager.RegisterTransform(
                     TransformType.ExtendBone, TimelineManager.CreateTransform<TransformDataExtendBone>

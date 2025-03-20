@@ -260,7 +260,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return Vector2.zero;
         }
 
-        public override void UpdateFrame(FrameData frame)
+        public override void UpdateFrame(FrameData frame, bool initialEdit)
         {
             foreach (var eyesName in allBoneNames)
             {

@@ -150,7 +150,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyPlayData();
         }
 
-        public override void UpdateFrame(FrameData frame)
+        public override void UpdateFrame(FrameData frame, bool initialEdit)
         {
             var maid = this.maid;
             if (maid == null)

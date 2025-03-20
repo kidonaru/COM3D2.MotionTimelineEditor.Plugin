@@ -177,7 +177,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void UpdateFrame(FrameData frame)
+        public override void UpdateFrame(FrameData frame, bool initialEdit)
         {
             foreach (var sourceBone in modelManager.boneMap.Values)
             {

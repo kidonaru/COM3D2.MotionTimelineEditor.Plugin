@@ -6,7 +6,7 @@ using static COM3D2.MotionTimelineEditor.Plugin.ModelMaterial;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    [TimelineLayerDesc("メイドマテリアル", 16)]
+    [TimelineLayerDesc("メイドマテリアル", 17)]
     public class MaidMaterialTimelineLayer : TimelineLayerBase
     {
         public override Type layerType => typeof(MaidMaterialTimelineLayer);
@@ -109,7 +109,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyCurrentFrame(true);
         }
 
-        public override void UpdateFrame(FrameData frame)
+        public override void UpdateFrame(FrameData frame, bool initialEdit)
         {
             foreach (var sourceMaterial in maidCache.materialMap.Values)
             {

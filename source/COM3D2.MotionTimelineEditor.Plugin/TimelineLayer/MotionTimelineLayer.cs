@@ -390,7 +390,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyCurrentFrame(true);
         }
 
-        public override void UpdateFrame(FrameData frame)
+        public override void UpdateFrame(FrameData frame, bool initialEdit)
         {
             var cacheBoneData = maidManager.cacheBoneData;
             if (cacheBoneData == null)

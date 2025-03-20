@@ -159,7 +159,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return camera.GetComponent<UltimateOrbitCamera>();
         }
 
-        public override void UpdateFrame(FrameData frame)
+        public override void UpdateFrame(FrameData frame, bool initialEdit)
         {
             var uoCamera = GetUOCamera();
             var target = uoCamera.target;

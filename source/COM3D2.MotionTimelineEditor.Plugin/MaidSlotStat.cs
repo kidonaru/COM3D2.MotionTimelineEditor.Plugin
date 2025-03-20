@@ -9,8 +9,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string displayName { get; private set; }
 
         public TBodySkin bodySkin { get; private set; }
-        public GameObject obj => bodySkin?.obj;
-        public Transform transform => bodySkin?.obj_tr;
+        public GameObject obj => bodySkin.obj;
+        public Transform transform => bodySkin.obj_tr;
+
+        public MPN mpn => bodySkin.m_ParentMPN;
+        public MaidProp prop => bodySkin.m_mp;
 
         public ModelMaterialController modelMaterialController { get; private set; }
 

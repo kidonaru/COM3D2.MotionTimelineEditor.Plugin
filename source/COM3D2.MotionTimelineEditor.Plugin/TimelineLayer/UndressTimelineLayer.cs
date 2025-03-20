@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
 {
-    [TimelineLayerDesc("メイド脱衣", 15)]
+    [TimelineLayerDesc("メイド脱衣", 16)]
     public class UndressTimelineLayer : TimelineLayerBase
     {
         public override Type layerType => typeof(UndressTimelineLayer);
@@ -89,7 +89,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void UpdateFrame(FrameData frame)
+        public override void UpdateFrame(FrameData frame, bool initialEdit)
         {
             var maidCache = this.maidCache;
             if (maidCache == null) return;
@@ -97,11 +97,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             foreach (var slotName in allBoneNames)
             {
                 var slotId = DressUtils.GetDressSlotId(slotName);
-                var trans = CreateTransformData<TransformDataUndress>(slotName);
+                var trans = frame.GetOrCreateTransformData<TransformDataUndress>(slotName);
                 trans.isVisible = maidCache.IsSlotVisible(slotId);
-
-                var bone = frame.CreateBone(trans);
-                frame.UpdateBone(bone);
             }
         }
 

@@ -40,6 +40,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public CacheBoneDataArray cacheBoneData;
         public IKManager ikManager = null;
         public ExtendBoneCache extendBoneCache = null;
+        public MaidPropCache maidPropCache = null;
         public Dictionary<IKHoldType, IKHoldEntity> ikHoldEntities = new Dictionary<IKHoldType, IKHoldEntity>(6);
         public List<MaidSlotStat> slotStats = new List<MaidSlotStat>(32);
         public Dictionary<TBody.SlotID, MaidSlotStat> slotStatMap = new Dictionary<TBody.SlotID, MaidSlotStat>(32);
@@ -431,6 +432,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             cacheBoneData = null;
             ikManager = null;
             extendBoneCache = null;
+            maidPropCache = null;
             ikHoldEntities.Clear();
             _blendShapeCache.Clear();
             slotStats.Clear();
@@ -1041,6 +1043,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var anmRoot = cacheBoneData.GetBoneData("Bip01").transform.parent;
                 extendBoneCache = maid.gameObject.AddComponent<ExtendBoneCache>();
                 extendBoneCache.Init(maid, anmRoot);
+            }
+
+            maidPropCache = maid.gameObject.GetComponent<MaidPropCache>();
+            if (maidPropCache == null)
+            {
+                maidPropCache = maid.gameObject.AddComponent<MaidPropCache>();
+                maidPropCache.Init(maid);
             }
 
             UpdateSlotStats();

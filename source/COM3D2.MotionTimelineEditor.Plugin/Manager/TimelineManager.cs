@@ -1895,7 +1895,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             OnPoseEditEnd();
 
             var frame = currentLayer.CreateFrame(currentFrameNo);
-            currentLayer.UpdateFrame(frame);
+            currentLayer.UpdateFrame(frame, initialEdit: true);
             initialEditFrame = frame;
 
             if (maid != null)

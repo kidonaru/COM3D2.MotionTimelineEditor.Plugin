@@ -76,7 +76,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void UpdateFrame(FrameData frame)
+        public override void UpdateFrame(FrameData frame, bool initialEdit)
         {
             var maid = this.maid;
             if (maid == null)
@@ -85,16 +85,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var trans = CreateTransformData<TransformDataVoice>(VoiceBoneName);
+            var trans = frame.GetOrCreateTransformData<TransformDataVoice>(VoiceBoneName);
             trans.voiceName = maidCache.oneShotVoiceName;
             trans.startTime = maidCache.oneShotVoiceStartTime;
             trans.length = maidCache.oneShotVoiceLength;
             trans.fadeTime = maidCache.voiceFadeTime;
             trans.pitch = maidCache.voicePitch;
             trans.loopVoiceName = maidCache.loopVoiceName;
-
-            var bone = frame.CreateBone(trans);
-            frame.UpdateBone(bone);
         }
 
         public List<MotionData> GetVoiceMotionData()

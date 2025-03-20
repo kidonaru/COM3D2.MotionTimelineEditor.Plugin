@@ -297,7 +297,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // do nothing
         }
 
-        public abstract void UpdateFrame(FrameData frame);
+        public abstract void UpdateFrame(FrameData frame, bool initialEdit = false);
 
         public virtual void ApplyAnm(long id, byte[] anmData)
         {

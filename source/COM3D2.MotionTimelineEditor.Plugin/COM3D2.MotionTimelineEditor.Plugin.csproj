@@ -134,6 +134,7 @@
     <Compile Include="TimelineLayer\BGModelTimelineLayerBase.cs" />
     <Compile Include="TimelineLayer\BGTimelineLayer.cs" />
     <Compile Include="TimelineLayer\CameraTimelineLayer.cs" />
+    <Compile Include="TimelineLayer\DressTimelineLayer.cs" />
     <Compile Include="TimelineLayer\EyesTimelineLayer.cs" />
     <Compile Include="TimelineLayer\ITimelineLayer.cs" />
     <Compile Include="TimelineLayer\LightTimelineLayer.cs" />
@@ -167,6 +168,7 @@
     <Compile Include="TransformData\TransformDataCamera.cs" />
     <Compile Include="TransformData\TransformDataDepthOfField.cs" />
     <Compile Include="TransformData\TransformDataDistanceFog.cs" />
+    <Compile Include="TransformData\TransformDataDress.cs" />
     <Compile Include="TransformData\TransformDataExtendBone.cs" />
     <Compile Include="TransformData\TransformDataEyes.cs" />
     <Compile Include="TransformData\TransformDataFingerBlend.cs" />
@@ -242,6 +244,7 @@
     <Compile Include="MaidBlendShape.cs" />
     <Compile Include="MaidCache.cs" />
     <Compile Include="MaidInfo.cs" />
+    <Compile Include="MaidPropCache.cs" />
     <Compile Include="MaidSlotStat.cs" />
     <Compile Include="MainWindow.cs" />
     <Compile Include="ModelBoneController.cs" />

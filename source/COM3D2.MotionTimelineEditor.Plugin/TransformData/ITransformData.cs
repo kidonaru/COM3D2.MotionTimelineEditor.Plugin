@@ -13,6 +13,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Camera,
         DepthOfField,
         DistanceFog,
+        Dress,
         ExtendBone,
         Eyes,
         FingerBlend,
