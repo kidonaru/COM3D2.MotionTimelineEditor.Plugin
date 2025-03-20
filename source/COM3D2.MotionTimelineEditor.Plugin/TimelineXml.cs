@@ -152,6 +152,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         [XmlElement("IsBackgroundVisible")]
         public bool isBackgroundVisible = true;
 
+        [XmlElement("IsGroundLinkedToBackground")]
+        public bool isGroundLinkedToBackground = false;
+
         [XmlElement("StartOffsetTime")]
         public float startOffsetTime = 0.5f;
 

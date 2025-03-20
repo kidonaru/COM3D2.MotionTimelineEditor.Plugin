@@ -230,6 +230,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 timeline.usePostEffectExtraBlend = newValue;
             });
 
+            view.DrawToggle("地面色表示を背景表示と連動", timeline.isGroundLinkedToBackground, -1, 20, newValue =>
+            {
+                timeline.isGroundLinkedToBackground = newValue;
+            });
+
             view.BeginHorizontal();
             {
                 view.DrawLabel("オフセット時間", 70, 20);

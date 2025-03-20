@@ -423,8 +423,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             for (int i = 0; i < currentValues.Length; i++)
             {
-                var inTangent = values[i].inTangent;
-                var outTangent = values[i].outTangent;
+                var inTangent = currentValues[i].inTangent;
+                var outTangent = currentValues[i].outTangent;
 
                 float x0 = prevValues[i].value;
                 float x1 = currentValues[i].value;

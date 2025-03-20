@@ -367,11 +367,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _isBackgroundVisible = value;
                 studioHack.SetBackgroundVisible(value);
 
-                var bgColorLayer = timelineManager.GetLayer<BGColorTimelineLayer>();
-                if (bgColorLayer != null)
+                if (isGroundLinkedToBackground)
                 {
-                    bgColorLayer.ApplyCurrentFrame(true);
+                    var bgColorLayer = timelineManager.GetLayer<BGColorTimelineLayer>();
+                    bgColorLayer?.ApplyCurrentFrame(true);
                 }
+            }
+        }
+
+        private bool _isGroundLinkedToBackground = false;
+        public bool isGroundLinkedToBackground
+        {
+            get => _isGroundLinkedToBackground;
+            set
+            {
+                if (_isGroundLinkedToBackground == value)
+                {
+                    return;
+                }
+
+                _isGroundLinkedToBackground = value;
+
+                var bgColorLayer = timelineManager.GetLayer<BGColorTimelineLayer>();
+                bgColorLayer?.ApplyCurrentFrame(true);
             }
         }
 
@@ -655,6 +673,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             useMuneKeyR = DefaultTimeline.useMuneKeyR;
             isLoopAnm = DefaultTimeline.isLoopAnm;
             isBackgroundVisible = DefaultTimeline.isBackgroundVisible;
+            isGroundLinkedToBackground = DefaultTimeline.isGroundLinkedToBackground;
             startOffsetTime = DefaultTimeline.startOffsetTime;
             endOffsetTime = DefaultTimeline.endOffsetTime;
             startFadeTime = DefaultTimeline.startFadeTime;
@@ -858,6 +877,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             useHeadKey = xml.useHeadKey;
             isLoopAnm = xml.isLoopAnm;
             isBackgroundVisible = xml.isBackgroundVisible;
+            isGroundLinkedToBackground = xml.isGroundLinkedToBackground;
             startOffsetTime = xml.startOffsetTime;
             endOffsetTime = xml.endOffsetTime;
             startFadeTime = xml.startFadeTime;
@@ -1017,6 +1037,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             xml.useHeadKey = useHeadKey;
             xml.isLoopAnm = isLoopAnm;
             xml.isBackgroundVisible = isBackgroundVisible;
+            xml.isGroundLinkedToBackground = isGroundLinkedToBackground;
             xml.startOffsetTime = startOffsetTime;
             xml.endOffsetTime = endOffsetTime;
             xml.startFadeTime = startFadeTime;

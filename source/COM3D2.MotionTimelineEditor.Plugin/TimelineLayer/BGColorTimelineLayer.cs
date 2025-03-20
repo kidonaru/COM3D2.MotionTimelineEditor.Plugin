@@ -54,6 +54,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             AddFirstBones(allBoneNames);
         }
 
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            if (bgGround != null)
+            {
+                GameObject.Destroy(bgGround.gameObject);
+                bgGround = null;
+            }
+        }
+
         protected override void InitMenuItems()
         {
             allMenuItems.Clear();
@@ -131,7 +142,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (bgGround != null)
                 {
                     var visible = start.visible;
-                    if (!isCurrent && !timeline.isBackgroundVisible)
+                    if (timeline.isGroundLinkedToBackground && !timeline.isBackgroundVisible)
                     {
                         visible = false;
                     }

@@ -41,10 +41,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public bool shouldSerialize
         {
-            get
-            {
-                return !isSmooth && normalizedValue != 0.0f;
-            }
+            get => !isSmooth && normalizedValue != 0.0f;
         }
 
         public TangentData()
