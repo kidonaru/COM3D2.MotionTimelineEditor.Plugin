@@ -129,6 +129,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public static string ToName(this DressSlotID slotId)
+        {
+            return DressSlotNames.GetOrDefault((int)slotId);
+        }
+
         public static readonly Dictionary<DressSlotID, string> DressSlotJpNameMap = new Dictionary<DressSlotID, string>()
         {
             { DressSlotID.wear, "トップス" },
@@ -206,25 +211,50 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return GetDressSlotJpName(GetDressSlotId(slotName));
         }
 
-        public static bool IsShiftSlotId(DressSlotID slotId)
+        public static bool IsShiftSlotId(this DressSlotID slotId)
         {
             return slotId == DressSlotID.undressfront
                 || slotId == DressSlotID.undressback
                 || slotId == DressSlotID.undressshift;
         }
 
+        private static Dictionary<DressSlotID, TBody.SlotID> _bodySlotIdMap = null;
+        public static Dictionary<DressSlotID, TBody.SlotID> BodySlotIdMap
+        {
+            get
+            {
+                if (_bodySlotIdMap == null)
+                {
+                    _bodySlotIdMap = new Dictionary<DressSlotID, TBody.SlotID>(DressSlotNames.Count);
+
+                    for (var i = 0; i < DressSlotNames.Count; i++)
+                    {
+                        var slotId = (DressSlotID)i;
+                        if (slotId.IsShiftSlotId())
+                        {
+                            continue;
+                        }
+
+                        var slotName = DressSlotNames[i];
+                        try
+                        {
+                            var bodySlotId = (TBody.SlotID)Enum.Parse(typeof(TBody.SlotID), slotName);
+                            _bodySlotIdMap[slotId] = bodySlotId;
+                        }
+                        catch (Exception e)
+                        {
+                            MTEUtils.LogException(e);
+                            _bodySlotIdMap[slotId] = TBody.SlotID.body;
+                        }
+                    }
+                }
+                return _bodySlotIdMap;
+            }
+        }
+
         public static TBody.SlotID GetBodySlotId(DressSlotID slotId)
         {
-            var slotName = slotId.ToString();
-            try
-            {
-                return (TBody.SlotID)Enum.Parse(typeof(TBody.SlotID), slotName);
-            }
-            catch (Exception e)
-            {
-                MTEUtils.LogException(e);
-                return TBody.SlotID.body;
-            }
+            return BodySlotIdMap.GetOrDefault(slotId, TBody.SlotID.body);
         }
 
         public static void SetMask(this MaidCache maidCache, TBody.SlotID slotId, bool visible)

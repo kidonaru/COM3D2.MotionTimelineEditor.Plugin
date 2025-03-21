@@ -248,6 +248,7 @@
     <Compile Include="MaidSlotStat.cs" />
     <Compile Include="MainWindow.cs" />
     <Compile Include="ModelBoneController.cs" />
+    <Compile Include="ModelMaterial.cs" />
     <Compile Include="ModelMaterialController.cs" />
     <Compile Include="MotionData.cs" />
     <Compile Include="MotionPlayData.cs" />

@@ -146,6 +146,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public virtual bool isDragging => false;
 
+        public virtual bool isInitialized => _dummyLastFrame != null;
+
         public abstract List<string> allBoneNames { get; }
 
         public string errorMessage { get; protected set; }
@@ -248,6 +250,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         public virtual void LateUpdate()
+        {
+            // do nothing
+        }
+
+        public virtual void OnCurrentLayer()
         {
             // do nothing
         }

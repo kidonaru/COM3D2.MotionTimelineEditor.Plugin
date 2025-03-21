@@ -31,6 +31,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         bool isAnmSyncing { get; }
         bool isAnmPlaying { get; }
         bool isDragging { get; }
+        bool isInitialized { get; }
 
         List<IBoneMenuItem> allMenuItems { get; }
 
@@ -39,6 +40,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         void Update();
         void LateUpdate();
         bool IsValidData();
+        void OnCurrentLayer();
         void OnPoseEditEnd();
         void OnPluginDisable();
         void OnMaidChanged(Maid maid);

@@ -1052,18 +1052,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 maidPropCache.Init(maid);
             }
 
-            UpdateSlotStats();
-
-            onMaidChanged?.Invoke(slotNo, maid);
-        }
-
-        public void UpdateSlotStats()
-        {
-            slotStats.Clear();
-            slotStatMap.Clear();
-            materialMap.Clear();
-            materialNames.Clear();
-
             foreach (var pair in DressUtils.DressSlotJpNameMap)
             {
                 var dressSlotId = pair.Key;
@@ -1081,14 +1069,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 var stat = new MaidSlotStat(slot, slotJpName);
-                if (stat.materials.Count == 0)
-                {
-                    continue;
-                }
 
                 slotStats.Add(stat);
                 slotStatMap[slotId] = stat;
+            }
 
+            UpdateMaterials();
+
+            onMaidChanged?.Invoke(slotNo, maid);
+        }
+
+        public void UpdateMaterials()
+        {
+            materialMap.Clear();
+            materialNames.Clear();
+
+            foreach (var stat in slotStats)
+            {
                 foreach (var material in stat.materials)
                 {
                     materialMap[material.name] = material;

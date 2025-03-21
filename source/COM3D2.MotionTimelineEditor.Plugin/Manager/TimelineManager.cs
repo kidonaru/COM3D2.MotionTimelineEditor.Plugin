@@ -1532,7 +1532,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             if (layer != null)
             {
-                SetActiveLayer(layer);
+                SetCurrentLayer(layer);
                 return;
             }
 
@@ -1546,7 +1546,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _usingLayerInfoList = null;
             _unusingLayerInfoList = null;
 
-            SetActiveLayer(newLayer);
+            SetCurrentLayer(newLayer);
             newLayer.Init();
             newLayer.CreateAndApplyAnm();
 
@@ -1583,7 +1583,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (currentLayer == layer)
             {
-                SetActiveLayer(GetLayer(typeof(MotionTimelineLayer)));
+                SetCurrentLayer(GetLayer(typeof(MotionTimelineLayer)));
             }
 
             var current = currentLayer;
@@ -1598,7 +1598,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             RequestHistory("「" + layer.layerName + "」レイヤー削除");
         }
 
-        public void SetActiveLayer(ITimelineLayer layer)
+        public void SetCurrentLayer(ITimelineLayer layer)
         {
             UnselectAll();
 
@@ -1610,6 +1610,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             currentLayerIndex = layers.IndexOf(layer);
             //Refresh();
+
+            if (currentLayer.isInitialized)
+            {
+                currentLayer.OnCurrentLayer();
+            }
 
             if (isPoseEditing)
             {

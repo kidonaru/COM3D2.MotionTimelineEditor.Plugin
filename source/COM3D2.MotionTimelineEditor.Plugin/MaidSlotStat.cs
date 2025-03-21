@@ -12,7 +12,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public GameObject obj => bodySkin.obj;
         public Transform transform => bodySkin.obj_tr;
 
-        public MPN mpn => bodySkin.m_ParentMPN;
+        public MPN mpn => bodySkin?.m_ParentMPN ?? MPN.null_mpn;
         public MaidProp prop => bodySkin.m_mp;
 
         public ModelMaterialController modelMaterialController { get; private set; }
@@ -35,37 +35,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public MaidSlotStat(TBodySkin bodySkin, string displayName)
         {
-            Init(bodySkin, displayName);
-        }
-
-        public void Init(TBodySkin bodySkin, string displayName)
-        {
             this.bodySkin = bodySkin;
             this.name = bodySkin.Category;
             this.displayName = displayName;
 
             CreateControllers();
-
-            if (obj == null)
-            {
-                MTEUtils.LogDebug($"オブジェクトが見つかりません: {name}");
-                return;
-            }
         }
 
         private void CreateControllers()
         {
-            if (transform == null)
-            {
-                return;
-            }
-
             modelMaterialController = ModelMaterialController.GetOrCreate(this);
         }
 
         public ModelMaterial GetMaterial(int index)
         {
-            return modelMaterialController.GetMaterial(index);
+            if (modelMaterialController != null)
+            {
+                return modelMaterialController.GetMaterial(index);
+            }
+            return null;
         }
     }
 }

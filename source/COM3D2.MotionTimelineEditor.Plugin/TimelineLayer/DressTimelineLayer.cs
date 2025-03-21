@@ -21,7 +21,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     _allBoneNames = new List<string>(MaidPartUtils.equippableMaidPartTypes.Count);
                     foreach (var maidPartType in MaidPartUtils.equippableMaidPartTypes)
                     {
-                        _allBoneNames.Add(MaidPartUtils.GetMaidPartName(maidPartType));
+                        _allBoneNames.Add(maidPartType.ToName());
                     }
                 }
 
@@ -42,22 +42,41 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             _allMenuItems.Clear();
 
-            Action<string, string, List<DressSlotID>> addCategory = (setName, setJpName, slotIds) =>
+            var categoryMenuItems = new Dictionary<MaidPartCategory, BoneSetMenuItem>();
+
+            foreach (var pair in MaidPartUtils.maidPartCategoryJpNameMap)
             {
-                var setMenuItem = new BoneSetMenuItem(setName, setJpName);
-                _allMenuItems.Add(setMenuItem);
+                var category = pair.Key;
+                var categoryName = category.ToName();
+                var categoryJpName = pair.Value;
 
-                foreach (var slotId in slotIds)
+                if (category == MaidPartCategory.None || category == MaidPartCategory.Set)
                 {
-                    var displayName = DressUtils.GetDressSlotJpName(slotId);
-                    var menuItem = new BoneMenuItem(slotId.ToString(), displayName);
-                    setMenuItem.AddChild(menuItem);
+                    continue;
                 }
-            };
 
-            addCategory("clothing", "衣装", DressUtils.ClothingSlotIds);
-            addCategory("headwear", "頭部衣装", DressUtils.HeadwearSlotIds);
-            addCategory("accessory", "アクセ", DressUtils.AccessorySlotIds);
+                var categoryMenuItem = new BoneSetMenuItem(categoryName, categoryJpName);
+                _allMenuItems.Add(categoryMenuItem);
+
+                categoryMenuItems.Add(category, categoryMenuItem);
+            }
+
+            foreach (var pair in MaidPartUtils.maidPartNameMap)
+            {
+                var maidPartType = pair.Key;
+                var boneName = pair.Value;
+                var displayName = maidPartType.ToJpName();
+                var category = maidPartType.ToCategory();
+
+                if (category == MaidPartCategory.None || category == MaidPartCategory.Set)
+                {
+                    continue;
+                }
+
+                var categoryMenuItem = categoryMenuItems[category];
+                var menuItem = new BoneMenuItem(boneName, displayName);
+                categoryMenuItem.AddChild(menuItem);
+            }
         }
 
         public override bool IsValidData()
@@ -111,7 +130,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             if (indexUpdated)
             {
-                var maidPartType = MaidPartUtils.ToMaidPartType(motion.name);
+                var maidPartType = motion.name.ToMaidPartType();
                 var mpn = maidPartType.ToMPN();
                 var prop = maid.GetProp(mpn);
 
@@ -145,7 +164,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             foreach (var maidPartType in MaidPartUtils.equippableMaidPartTypes)
             {
                 var mpn = maidPartType.ToMPN();
-                var name = MaidPartUtils.GetMaidPartName(maidPartType);
+                var boneName = maidPartType.ToName();
+                var prevBone = GetPrevBone(playingFrameNo + 1, boneName);
                 var prop = maid.GetProp(mpn);
                 if (prop == null)
                 {
@@ -153,35 +173,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
 
                 var initialPropName = maidCache.maidPropCache.GetInitialPropName(maidPartType);
-                if (prop.strFileName == initialPropName)
+                if (prevBone == null && prop.strFileName == initialPropName)
                 {
                     continue;
                 }
 
-                var trans = frame.GetOrCreateTransformData<TransformDataDress>(name);
+                var trans = frame.GetOrCreateTransformData<TransformDataDress>(boneName);
                 trans.propName = prop.strFileName;
                 trans.rid = prop.nFileNameRID;
             }
         }
 
-        private enum TabType
-        {
-            操作,
-        }
-
-        private TabType _tabType = TabType.操作;
-
         public override void DrawWindow(GUIView view)
         {
-            _tabType = view.DrawTabs(_tabType, 50, 20);
-
-            switch (_tabType)
-            {
-                case TabType.操作:
-                    DrawDress(view);
-                    break;
-            }
-
+            DrawDress(view);
             view.DrawComboBox();
         }
 
@@ -189,35 +194,44 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             view.SetEnabled(!view.IsComboBoxFocused());
 
+            view.BeginHorizontal();
+            {
+                if (view.DrawButton("初期化", 60, 20))
+                {
+                    maidCache.maidPropCache.ApplyInitialProp();
+                }
+
+                if (view.DrawButton("初期値更新", 100, 20))
+                {
+                    maidCache.maidPropCache.UpdateInitialProp();
+                }
+            }
+            view.EndLayout();
+
+            view.DrawHorizontalLine();
+            view.AddSpace(5);
+
             view.BeginScrollView();
             {
-                view.BeginHorizontal();
-                {
-                    if (view.DrawButton("初期化", 60, 20))
-                    {
-                        maidCache.maidPropCache.ApplyInitialProp();
-                    }
+                var prevCategory = MaidPartCategory.None;
 
-                    view.AddSpace(10);
-
-                    if (view.DrawButton("初期値更新", 100, 20))
-                    {
-                        maidCache.maidPropCache.UpdateInitialProp();
-                    }
-                }
-                view.EndLayout();
-
-                view.DrawHorizontalLine();
-
-                foreach (var pair in MaidPartUtils.maidPartJpNameMap)
+                foreach (var pair in MaidPartUtils.maidPartCategoryMap)
                 {
                     var maidPartType = pair.Key;
-                    if (!MaidPartUtils.IsEquippableType(maidPartType))
+                    var category = pair.Value;
+                    if (category == MaidPartCategory.None || category == MaidPartCategory.Set)
                     {
                         continue;
                     }
 
-                    var displayName = pair.Value;
+                    if (category != prevCategory)
+                    {
+                        view.DrawHorizontalLine();
+                        view.DrawLabel(category.ToJpName(), -1, 20);
+
+                        prevCategory = category;
+                    }
+
                     var mpn = maidPartType.ToMPN();
                     var prop = maid.GetProp(mpn);
                     if (prop == null)
@@ -228,7 +242,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     var initialPropName = maidCache.maidPropCache.GetInitialPropName(maidPartType);
                     var color = prop.strFileName == initialPropName ? Color.white : Color.green;
 
-                    view.DrawLabel($"{displayName}: {prop.strFileName}", -1, 20, color);
+                    view.DrawLabel($"{maidPartType.ToJpName()}: {prop.strFileName}", -1, 20, color);
                 }
 
                 view.DrawHorizontalLine();

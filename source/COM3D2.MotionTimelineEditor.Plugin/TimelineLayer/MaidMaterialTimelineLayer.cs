@@ -27,9 +27,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override void Init()
         {
             base.Init();
-
-            var materialNames = maidCache.materialNames;
-            AddFirstBones(materialNames);
+            UpdateMaterials();
         }
 
         protected override void InitMenuItems()
@@ -100,8 +98,25 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             material.Lerp(start, end, easingTime);
         }
 
+        public override void OnCurrentLayer()
+        {
+            UpdateMaterials();
+        }
+
         public override void OnMaidChanged(Maid maid)
         {
+            UpdateMaterials();
+        }
+
+        private void UpdateMaterials()
+        {
+            if (maidCache == null)
+            {
+                return;
+            }
+
+            maidCache.UpdateMaterials();
+
             InitMenuItems();
 
             var materialNames = maidCache.materialNames;
@@ -135,24 +150,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             contentSize = new Vector2(200, 300),
         };
 
-        private enum TabType
-        {
-            操作,
-        }
-
-        private TabType _tabType = TabType.操作;
-
         public override void DrawWindow(GUIView view)
         {
-            _tabType = view.DrawTabs(_tabType, 50, 20);
-
-            switch (_tabType)
-            {
-                case TabType.操作:
-                    DrawMaterial(view);
-                    break;
-            }
-
+            DrawMaterial(view);
             view.DrawComboBox();
         }
 
@@ -174,8 +174,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (view.DrawButton("更新", 50, 20))
                 {
-                    maidCache.UpdateSlotStats();
-                    OnMaidChanged(maidCache.maid);
+                    UpdateMaterials();
                 }
             }
             view.EndLayout();
