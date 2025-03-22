@@ -192,7 +192,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             _faceManager.SetMorphValue(maid, tmpMorphMap);
         }
 
-        public override void UpdateFrame(FrameData frame, bool initialEdit)
+        public override void UpdateFrame(FrameData frame, bool initialEdit, bool force)
         {
             foreach (var name in allBoneNames)
             {

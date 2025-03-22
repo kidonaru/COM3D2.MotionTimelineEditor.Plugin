@@ -142,21 +142,31 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void UpdateFrame(FrameData frame, bool initialEdit)
+        public override void UpdateFrame(FrameData frame, bool initialEdit, bool force)
         {
             if (initialEdit)
             {
-                var playingFrameNo = this.playingFrameNo;
-                foreach (var boneName in allBoneNames)
+                foreach (var maidPartType in MaidPartUtils.equippableMaidPartTypes)
                 {
+                    var boneName = maidPartType.ToName();
                     var prevBone = GetPrevBone(playingFrameNo + 1, boneName);
-                    if (prevBone == null)
-                    {
-                        continue;
-                    }
+                    var initialPropInfo = maidCache.maidPropCache.GetInitialPropInfo(maidPartType);
 
-                    var trans = frame.GetOrCreateTransformData<TransformDataDress>(boneName);
-                    trans.FromTransformData(prevBone.transform);
+                    // 前のフレームが存在する場合登録
+                    if (prevBone != null)
+                    {
+                        var prevTrans = prevBone.transform as TransformDataDress;
+                        var trans = frame.GetOrCreateTransformData<TransformDataDress>(boneName);
+                        trans.propName = prevTrans.propName;
+                        trans.rid = prevTrans.rid;
+                    }
+                    // 存在しない場合、初期状態を登録
+                    else
+                    {
+                        var trans = frame.GetOrCreateTransformData<TransformDataDress>(boneName);
+                        trans.propName = initialPropInfo.propName;
+                        trans.rid = initialPropInfo.rid;
+                    }
                 }
                 return;
             }
@@ -164,23 +174,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             foreach (var maidPartType in MaidPartUtils.equippableMaidPartTypes)
             {
                 var mpn = maidPartType.ToMPN();
-                var boneName = maidPartType.ToName();
-                var prevBone = GetPrevBone(playingFrameNo + 1, boneName);
                 var prop = maid.GetProp(mpn);
                 if (prop == null)
                 {
                     continue;
                 }
 
-                var initialPropName = maidCache.maidPropCache.GetInitialPropName(maidPartType);
-                if (prevBone == null && prop.strFileName == initialPropName)
-                {
-                    continue;
-                }
+                var boneName = maidPartType.ToName();
+                var prevBone = GetPrevBone(playingFrameNo + 1, boneName);
+                var initialPropInfo = maidCache.maidPropCache.GetInitialPropInfo(maidPartType);
 
-                var trans = frame.GetOrCreateTransformData<TransformDataDress>(boneName);
-                trans.propName = prop.strFileName;
-                trans.rid = prop.nFileNameRID;
+                // 前のフレームが存在する場合か、初期状態からの差分があれば登録
+                if (force || prevBone != null || prop.strFileName != initialPropInfo.propName)
+                {
+                    var trans = frame.GetOrCreateTransformData<TransformDataDress>(boneName);
+                    trans.propName = prop.strFileName;
+                    trans.rid = prop.nFileNameRID;
+                }
             }
         }
 
@@ -239,8 +249,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         continue;
                     }
 
-                    var initialPropName = maidCache.maidPropCache.GetInitialPropName(maidPartType);
-                    var color = prop.strFileName == initialPropName ? Color.white : Color.green;
+                    var initialPropInfo = maidCache.maidPropCache.GetInitialPropInfo(maidPartType);
+                    var color = prop.strFileName == initialPropInfo.propName ? Color.white : Color.green;
 
                     view.DrawLabel($"{maidPartType.ToJpName()}: {prop.strFileName}", -1, 20, color);
                 }

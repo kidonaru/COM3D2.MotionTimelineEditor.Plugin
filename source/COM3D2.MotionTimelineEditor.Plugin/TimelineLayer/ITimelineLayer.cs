@@ -50,7 +50,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         void OnShapeKeyRemoved(string shapeKey);
         void OnBoneNameAdded(string extendBoneName);
         void OnBoneNameRemoved(string extendBoneName);
-        void UpdateFrame(FrameData frame, bool initialEdit = false);
+        void UpdateFrame(FrameData frame, bool initialEdit = false, bool force = false);
         byte[] GetAnmBinary(bool forOutput);
         void ApplyAnm(long id, byte[] anmData);
         void CreateAndApplyAnm();

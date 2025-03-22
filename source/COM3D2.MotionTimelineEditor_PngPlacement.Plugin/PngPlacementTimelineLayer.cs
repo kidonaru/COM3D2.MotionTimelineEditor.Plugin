@@ -198,7 +198,7 @@ namespace COM3D2.MotionTimelineEditor_PngPlacement.Plugin
             ApplyCurrentFrame(true);
         }
 
-        public override void UpdateFrame(FrameData frame, bool initialEdit)
+        public override void UpdateFrame(FrameData frame, bool initialEdit, bool force)
         {
             foreach (var pngObject in pngPlacementManager.pngObjects)
             {

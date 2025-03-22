@@ -194,7 +194,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override void UpdateFrame(FrameData frame, bool initialEdit)
+        public override void UpdateFrame(FrameData frame, bool initialEdit, bool force)
         {
             foreach (var model in modelManager.models)
             {

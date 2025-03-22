@@ -130,7 +130,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        public override void UpdateFrame(FrameData frame, bool initialEdit)
+        public override void UpdateFrame(FrameData frame, bool initialEdit, bool force)
         {
             var trans = CreateTransformData<TransformDataSe>(SeBoneName);
             trans.fileName = _currentSeName;

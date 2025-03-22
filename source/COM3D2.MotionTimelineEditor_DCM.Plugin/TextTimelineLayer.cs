@@ -163,7 +163,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
 			_textManager.UpdateFreeTextSet(start.index, freeTextSet);
 		}
 
-        public override void UpdateFrame(FrameData frame, bool initialEdit)
+        public override void UpdateFrame(FrameData frame, bool initialEdit, bool force)
         {
             for (var index = 0; index < timeline.textCount; index++)
             {

@@ -304,7 +304,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // do nothing
         }
 
-        public abstract void UpdateFrame(FrameData frame, bool initialEdit = false);
+        public abstract void UpdateFrame(FrameData frame, bool initialEdit = false, bool force = false);
 
         public virtual void ApplyAnm(long id, byte[] anmData)
         {
@@ -481,7 +481,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var frame = GetOrCreateFrame(timelineManager.currentFrameNo);
-            UpdateFrame(frame);
+            UpdateFrame(frame, force: true);
 
             ApplyCurrentFrame(true);
 
@@ -536,7 +536,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             var tmpFrame = CreateFrame(timelineManager.currentFrameNo);
-            UpdateFrame(tmpFrame);
+            UpdateFrame(tmpFrame, force: true);
 
             var filterBones = tmpFrame.GetFilterBones(boneNames);
             if (filterBones.Count == 0)
