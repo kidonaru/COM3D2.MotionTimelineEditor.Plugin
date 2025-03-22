@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
@@ -67,10 +68,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private int _windowWidth = 640;
         private int _windowHeight = 240;
         private bool initializedGUI = false;
-        private bool isFrameDragging = false;
-        private Vector2 frameDragDelta = Vector2.zero;
-        private bool isAreaDragging = false;
-        private Vector2 areaDragPos = Vector2.zero;
+        private GUIView.DragInfo frameDragInfo = new GUIView.DragInfo();
+        private BoneData frameDragBoneData = null;
+        private GUIView.DragInfo areaDragInfo = new GUIView.DragInfo();
         private Rect areaDragRect = new Rect();
         private int selectStartFrameNo = 0;
         private int selectEndFrameNo = 0;
@@ -198,8 +198,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private Texture2D texTimelineBG = null;
         private Texture2D texKeyFrame = null;
 
-        private GUIView.DraggableInfo _windowSizeDraggableInfo = new GUIView.DraggableInfo();
-        private GUIView.DraggableInfo _menuWidthDraggableInfo = new GUIView.DraggableInfo();
+        private GUIView.DragInfo _windowSizeDraggableInfo = new GUIView.DragInfo();
+        private GUIView.DragInfo _menuWidthDraggableInfo = new GUIView.DragInfo();
 
         public MainWindow()
         {
@@ -385,7 +385,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             contentView.DrawComboBox();
 
-            if (!isFrameDragging && !isAreaDragging)
+            if (!frameDragInfo.isDragging && !areaDragInfo.isDragging)
             {
                 GUI.DragWindow();
             }
@@ -1043,13 +1043,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     bool isSelected = menuItem.IsSelectedFrame(frame);
 
-                    if (isAreaDragging)
-                    {
-                        var keyFrameRect = new Rect(
+                    var keyFrameRect = new Rect(
                             view.currentPos.x,
                             view.currentPos.y,
                             frameWidth,
                             frameWidth);
+
+                    // エリア選択範囲内のキーフレームを選択
+                    if (areaDragInfo.isDragging)
+                    {
                         if (areaDragRect.Overlaps(keyFrameRect))
                         {
                             if (!isSelected)
@@ -1066,6 +1068,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         }
                     }
 
+                    // フレームのドラッグ開始
+                    if (!areaDragInfo.isDragging && !frameDragInfo.isDragging)
+                    {
+                        view.InvokeActionOnDragStart(
+                            keyFrameRect,
+                            frameDragInfo,
+                            view.currentPos,
+                            newPos =>
+                            {
+                                menuItem.SelectFrame(frame, isMultiSelect);
+                                frameDragBoneData = timelineManager.selectedBones
+                                    .Where(bone => bone.frameNo == frameNo)
+                                    .FirstOrDefault();
+                            }
+                        );
+                    }
+
                     var keyFrameColor = isSelected ? Color.red : Color.white;
 
                     if (!menuItem.IsFullBones(frame))
@@ -1077,71 +1096,71 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         texKeyFrame,
                         frameWidth,
                         frameWidth,
-                        keyFrameColor,
-                        EventType.MouseDown,
-                        _ =>
+                        keyFrameColor);
+                }
+            }
+
+            // フレームのドラッグ中処理
+            if (frameDragInfo.isDragging)
+            {
+                view.InvokeActionOnDragging(
+                    frameDragInfo,
+                    newPos =>
+                    {
+                        newPos.x = Mathf.Clamp(newPos.x, scrollPosition.x, scrollPosition.x + viewWidth - 20);
+                        newPos.y = Mathf.Clamp(newPos.y, scrollPosition.y, scrollPosition.y + viewHeight - 20);
+
+                        if (frameDragBoneData != null)
                         {
-                            if (isAreaDragging) return;
-                            isFrameDragging = true;
-                            frameDragDelta = Vector2.zero;
-                            menuItem.SelectFrame(frame, isMultiSelect);
-                        });
-                }
+                            var targetFrameNo = (int)((newPos.x + halfFrameWidth) / frameWidth);
+                            timelineManager.MoveSelectedBones(targetFrameNo - frameDragBoneData.frameNo);
+                        }
+                    });
             }
 
-            // キーフレームドラッグ処理
-            if (isFrameDragging && Event.current.type == EventType.MouseDrag)
-            {
-                frameDragDelta += Event.current.delta;
-                if (Mathf.Abs(frameDragDelta.x) > frameWidth)
-                {
-                    var deltaFrameNo = (int)(frameDragDelta.x / frameWidth);
-                    timelineManager.MoveSelectedBones(deltaFrameNo);
-                    frameDragDelta.x -= deltaFrameNo * frameWidth;
-                }
-                //Extensions.LogInfo(String.Format("Mouse Drag: {0}, {1}", Event.current.delta.x, Event.current.delta.y));
-            }
-
-            if (isFrameDragging && !Input.GetMouseButton(0))
-            {
-                isFrameDragging = false;
-            }
-
-            // エリア選択
             view.currentPos = scrollPosition;
 
-            if (!isFrameDragging && !isAreaDragging)
+            // エリア選択のドラッグ開始
+            if (!areaDragInfo.isDragging && !frameDragInfo.isDragging)
             {
-                view.InvokeActionOnEvent(
-                    viewWidth - 20,
-                    viewHeight - 20,
-                    EventType.MouseDown,
-                    (pos) =>
+                var drawRect = view.GetDrawRect(viewWidth - 20, viewHeight - 20);
+
+                var pos = Event.current.mousePosition;
+                pos.x -= drawRect.x;
+                pos.y -= drawRect.y;
+                pos += scrollPosition;
+
+                view.InvokeActionOnDragStart(
+                    drawRect,
+                    areaDragInfo,
+                    pos,
+                    newPos =>
                     {
-                        isAreaDragging = true;
-                        areaDragPos = scrollPosition + pos;
                         areaDragRect = new Rect(
-                            areaDragPos.x,
-                            areaDragPos.y,
+                            areaDragInfo.startPos.x,
+                            areaDragInfo.startPos.y,
                             0,
                             0);
                         if (!isMultiSelect)
                         {
                             timelineManager.UnselectAll();
                         }
-                    });
+                    }
+                );
             }
 
-            if (isAreaDragging)
+            // エリア選択のドラッグ中処理
+            if (areaDragInfo.isDragging)
             {
-                view.InvokeActionOnEvent(
-                    viewWidth - 20,
-                    viewHeight - 20,
-                    EventType.MouseDrag,
-                    (pos) =>
+                view.InvokeActionOnDragging(
+                    areaDragInfo,
+                    newPos =>
                     {
-                        areaDragRect.position = areaDragPos;
-                        areaDragRect.size = scrollPosition + pos - areaDragPos;
+                        newPos.x = Mathf.Clamp(newPos.x, scrollPosition.x, scrollPosition.x + viewWidth - 20);
+                        newPos.y = Mathf.Clamp(newPos.y, scrollPosition.y, scrollPosition.y + viewHeight - 20);
+
+                        areaDragRect.position = areaDragInfo.startPos;
+                        areaDragRect.size = newPos - areaDragRect.position;
 
                         // エリア選択の座標を正規化
                         if (areaDragRect.width < 0)
@@ -1154,7 +1173,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                             areaDragRect.y += areaDragRect.height;
                             areaDragRect.height = -areaDragRect.height;
                         }
-                    });
+                    }
+                );
 
                 view.currentPos = areaDragRect.position;
                 view.DrawRect(
@@ -1162,11 +1182,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     areaDragRect.height,
                     new Color(1, 1, 1, 0.5f),
                     2);
-
-                if (!Input.GetMouseButton(0))
-                {
-                    isAreaDragging = false;
-                }
             }
 
             view.EndScrollView();
@@ -1216,7 +1231,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             view.DrawDraggableButton("□", 20, 20,
                 _windowSizeDraggableInfo,
                 new Vector2(_windowWidth, _windowHeight),
-                (delta, value) =>
+                null,
+                value =>
             {
                 config.windowWidth = (int)value.x;
                 config.windowWidth = Mathf.Clamp(config.windowWidth, MIN_WINDOW_WIDTH, Screen.width);
@@ -1361,7 +1377,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 view.DrawDraggableButton("□", 20, 20,
                     _menuWidthDraggableInfo,
                     new Vector2(config.menuWidth, 0f),
-                    (delta, value) =>
+                    null,
+                    value =>
                 {
                     config.menuWidth = (int)value.x;
                     config.menuWidth = Mathf.Clamp(config.menuWidth, MIN_MENU_WIDTH, MAX_MENU_WIDTH);

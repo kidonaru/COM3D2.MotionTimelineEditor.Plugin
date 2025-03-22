@@ -776,6 +776,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
+            if (delta == 0)
+            {
+                return;
+            }
+
             foreach (var selectedBone in selectedBones)
             {
                 var selectedFrame = selectedBone.parentFrame;
