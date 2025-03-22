@@ -148,6 +148,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public void RemoveBone(string boneName)
+        {
+            if (_boneMap.TryGetValue(boneName, out var bone))
+            {
+                RemoveBone(bone);
+            }
+        }
+
         public void RemoveBones(IEnumerable<BoneData> bones)
         {
             foreach (var bone in bones)

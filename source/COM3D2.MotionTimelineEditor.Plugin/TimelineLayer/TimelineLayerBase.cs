@@ -445,6 +445,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 AppendTimelineRow(keyFrame);
             }
 
+            var removeBoneNames = new List<string>();
+
+            foreach (var pair in _timelineBonesMap)
+            {
+                var boneName = pair.Key;
+                var bones = pair.Value;
+                if (bones.Count == 0)
+                {
+                    removeBoneNames.Add(boneName);
+                }
+            }
+
+            foreach (var boneName in removeBoneNames)
+            {
+                _timelineBonesMap.Remove(boneName);
+                _dummyLastFrame.RemoveBone(boneName);
+            }
+
             UpdateDummyLastFrame();
 
             AppendTimelineRow(_dummyLastFrame);
