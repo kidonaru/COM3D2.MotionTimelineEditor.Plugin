@@ -24,7 +24,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                 }
                 return false;
             }
-            set => maidManager.SetMotionPlayingAll(!value);
+            set => maidManager.SetAnmEnabledAll(!value);
         }
 
         public override string pluginName => "MeidoPhotoStudio";
@@ -161,9 +161,9 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             get => mps.isReleaseIK;
             set
             {
-                if (value && isMotionPlaying)
+                if (value && isAnmPlaying)
                 {
-                    isMotionPlaying = false;
+                    isAnmPlaying = false;
                 }
 
                 mps.isIK = value;
@@ -172,18 +172,10 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
         }
 
-        public override bool isMotionPlaying
+        public override bool isAnmEnabled
         {
             get => !isStop;
-            set
-            {
-                if (value && isPoseEditing)
-                {
-                    isPoseEditing = false;
-                }
-
-                isStop = !value;
-            }
+            set => isStop = !value;
         }
 
         public override float motionSliderRate

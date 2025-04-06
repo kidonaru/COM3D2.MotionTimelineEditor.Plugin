@@ -91,7 +91,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
                     isStopArray[i] = value;
                 }
 
-                maidManager.SetMotionPlayingAll(!value);
+                maidManager.SetAnmEnabledAll(!value);
             }
         }
 
@@ -272,9 +272,9 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             get => isLock;
             set
             {
-                if (value && isMotionPlaying)
+                if (value && isAnmPlaying)
                 {
-                    isMotionPlaying = false;
+                    isAnmPlaying = false;
                 }
 
                 isLock = value;
@@ -284,18 +284,10 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
         }
 
-        public override bool isMotionPlaying
+        public override bool isAnmEnabled
         {
             get => !isStop;
-            set
-            {
-                if (value && isPoseEditing)
-                {
-                    isPoseEditing = false;
-                }
-
-                isStop = !value;
-            }
+            set => isStop = !value;
         }
 
         public override float motionSliderRate

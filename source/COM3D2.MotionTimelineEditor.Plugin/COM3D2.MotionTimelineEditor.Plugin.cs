@@ -200,7 +200,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         if (currentLayer.isAnmPlaying)
                         {
-                            timelineManager.Stop();
+                            timelineManager.Pause();
                         }
                         else
                         {
@@ -340,6 +340,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 studioHackManager.Register(new StudioHack());
 
                 timelineManager.RegisterLayer(
+                    typeof(AnimationTimelineLayer), AnimationTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
                     typeof(BGColorTimelineLayer), BGColorTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
@@ -406,6 +409,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     typeof(PsylliumTimelineLayer), PsylliumTimelineLayer.Create
                 );
 
+                timelineManager.RegisterTransform(
+                    TransformType.Animation, TimelineManager.CreateTransform<TransformDataAnimation>
+                );
                 timelineManager.RegisterTransform(
                     TransformType.BG, TimelineManager.CreateTransform<TransformDataBG>
                 );

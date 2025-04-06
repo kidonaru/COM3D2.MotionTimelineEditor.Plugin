@@ -6,6 +6,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     public enum TransformType
     {
         None = 0,
+        Animation,
         BG,
         BGColor,
         BGGroundColor,

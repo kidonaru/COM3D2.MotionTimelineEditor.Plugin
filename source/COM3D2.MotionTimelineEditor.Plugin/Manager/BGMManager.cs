@@ -136,13 +136,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var isMotionPlaying = defaultLayer.isMotionPlaying;
+            var isAnmPlaying = defaultLayer.isAnmPlaying;
             var isAudioPlaying = _audioMgr.audiosource.isPlaying;
-            if (isMotionPlaying && !isAudioPlaying)
+            if (isAnmPlaying && !isAudioPlaying)
             {
                 Play();
             }
-            else if (!isMotionPlaying && isAudioPlaying)
+            else if (!isAnmPlaying && isAudioPlaying)
             {
                 Pause();
             }

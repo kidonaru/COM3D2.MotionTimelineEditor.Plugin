@@ -78,7 +78,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             base.ApplyPlayData();
         }
 
-        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated, MotionPlayData playData)
         {
             Vector3 position, eulerAngles;
             float distance, viewAngle;

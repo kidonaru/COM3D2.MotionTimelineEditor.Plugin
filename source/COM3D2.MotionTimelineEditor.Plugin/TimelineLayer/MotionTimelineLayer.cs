@@ -231,7 +231,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyPlayDataByType(TransformType.FingerBlend);
         }
 
-        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated, MotionPlayData playData)
         {
             switch (motion.start.type)
             {
@@ -560,8 +560,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             float playingFrameNoFloat = defaultLayer.playingFrameNoFloat;
-            var isMotionPlaying = this.isMotionPlaying;
-            if (isMotionPlaying)
+            var isAnmPlaying = this.isAnmPlaying;
+            if (isAnmPlaying)
             {
                 playingFrameNoFloat += 0.01f; // モーション再生中は再生位置に差分がないと反映されない
             }
@@ -572,7 +572,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             studioHack.OnMotionUpdated(maid);
             maidManager.OnMotionUpdated(maid);
 
-            this.isMotionPlaying = isMotionPlaying;
+            this.isAnmPlaying = isAnmPlaying;
             maidCache.playingFrameNoFloat = playingFrameNoFloat;
 
             if (config.isAutoYureBone)

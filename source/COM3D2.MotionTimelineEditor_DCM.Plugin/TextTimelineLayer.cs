@@ -86,7 +86,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             }
         }
 
-        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated, MotionPlayData playData)
 		{
             if (indexUpdated)
             {

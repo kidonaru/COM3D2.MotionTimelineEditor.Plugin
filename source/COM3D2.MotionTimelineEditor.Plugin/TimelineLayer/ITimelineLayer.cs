@@ -20,7 +20,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         int playingFrameNo { get; }
         float playingFrameNoFloat { get; }
         float playingTime { get; }
-        bool isMotionPlaying { get; set; }
+        bool isAnmPlaying { get; set; }
         float anmSpeed { get; }
         long anmId { get; }
         List<string> allBoneNames { get; }
@@ -29,7 +29,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         int maxExistFrameNo { get; }
         FrameData firstFrame { get; }
         bool isAnmSyncing { get; }
-        bool isAnmPlaying { get; }
         bool isDragging { get; }
         bool isInitialized { get; }
 

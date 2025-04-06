@@ -616,7 +616,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     if (view.DrawButton("■", 20, 20))
                     {
-                        timelineManager.Stop();
+                        timelineManager.Pause();
                     }
                 }
                 else
@@ -639,7 +639,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         step = 0.01f,
                         defaultValue = 1f,
                         value = timelineManager.anmSpeed,
-                        onChanged = value => timelineManager.SetAnmSpeedAll(value),
+                        onChanged = value => timelineManager.anmSpeed = value,
                     });
             }
             view.EndLayout();
@@ -894,7 +894,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             // 自動スクロール
             if (config.isAutoScroll &&
                 currentLayer.isAnmSyncing &&
-                studioHack.isMotionPlaying &&
+                studioHack.isAnmPlaying &&
                 !(view.IsMouseOverRect(viewWidth, viewHeight) && Input.GetMouseButton(0)))
             {
                 timelineView.scrollPosition.x = Mathf.Clamp(

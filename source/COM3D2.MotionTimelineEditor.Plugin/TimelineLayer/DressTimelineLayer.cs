@@ -120,7 +120,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated, MotionPlayData playData)
         {
             var start = motion.start as TransformDataDress;
             if (string.IsNullOrEmpty(start.propName))

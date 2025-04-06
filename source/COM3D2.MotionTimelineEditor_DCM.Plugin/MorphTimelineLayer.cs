@@ -117,7 +117,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             //MTEUtils.LogDebug("ApplyCamera: lerpFrame={0}, listIndex={1}", playData.lerpFrame, playData.listIndex);
         }
 
-        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated, MotionPlayData playData)
         {
             var start = motion.start as TransformDataMorph;
             var end = motion.end as TransformDataMorph;

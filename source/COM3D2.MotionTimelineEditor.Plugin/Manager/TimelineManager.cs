@@ -37,6 +37,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public static event UnityAction onPlay;
         public static event UnityAction onStop;
+        public static event UnityAction onPause;
         public static event UnityAction onRefresh;
         public static event UnityAction onPoseEditUpdated;
         public static event UnityAction onAnmSpeedChanged;
@@ -55,7 +56,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         private float _anmSpeed = 1.0f;
-        public float anmSpeed => _anmSpeed;
+        public float anmSpeed
+        {
+            get => _anmSpeed;
+            set => _anmSpeed = Mathf.Clamp(value, 0.01f, 2.0f);
+        }
 
         public List<ITimelineLayer> layers
         {
@@ -89,6 +94,26 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool hasPostEffectLayer
         {
             get => FindLayers(typeof(PostEffectTimelineLayer)).Count > 0;
+        }
+
+        private bool _isMotionEditing = false;
+        public bool isMotionEditing
+        {
+            get => _isMotionEditing;
+            set
+            {
+                MTEUtils.LogDebug("isMotionEditing: {0} -> {1}", _isMotionEditing, value);
+                _isMotionEditing = value;
+
+                if (value)
+                {
+                    studioHack.isAnmEnabled = false;
+                }
+                else
+                {
+                    studioHack.isAnmEnabled = true;
+                }
+            }
         }
 
         private static TimelineManager _instance;
@@ -147,6 +172,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     SetPlayingFrameNoAll(0);
                 }
 
+                var anmSpeed = this.anmSpeed;
                 if (!Mathf.Approximately(anmSpeed, maidManager.anmSpeed))
                 {
                     SetAnmSpeedAll(anmSpeed);
@@ -844,15 +870,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void Refresh()
         {
-            if (onRefresh != null)
-            {
-                onRefresh();
-            }
+            onRefresh?.Invoke();
         }
 
         public void SeekCurrentFrame(int frameNo)
         {
-            studioHack.isMotionPlaying = false;
+            studioHack.isAnmPlaying = false;
 
             int startFrameNo = 0;
             int endFrameNo = timeline.maxFrameNo;
@@ -1104,7 +1127,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var frameNo = 0;
             var frameTime = minFrameTime;
 
-            Stop();
+            Pause();
             studioHackManager.isPoseEditing = false;
 
             MTEUtils.UIHide();
@@ -1650,13 +1673,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void SetAnmSpeedAll(float speed)
         {
-            _anmSpeed = speed;
             maidManager.SetAnmSpeedAll(speed);
-
-            if (onAnmSpeedChanged != null)
-            {
-                onAnmSpeedChanged();
-            }
+            onAnmSpeedChanged?.Invoke();
         }
 
         public bool IsValidData()
@@ -1691,16 +1709,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             ApplyCurrentFrame(false);
-            studioHack.isMotionPlaying = true;
+            studioHack.isAnmPlaying = true;
 
             onPlay?.Invoke();
         }
 
         public void Stop()
         {
-            studioHack.isMotionPlaying = false;
+            studioHack.isAnmPlaying = false;
 
             onStop?.Invoke();
+        }
+
+        public void Pause()
+        {
+            SetAnmSpeedAll(0f);
+
+            onPause?.Invoke();
         }
 
         private string requestedHistoryDesc = "";
@@ -1938,10 +1963,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 //    maid.name, initialEditPosition, initialEditRotation);
             }
 
+            UpdateMotionEditing();
+
             foreach (var layer in layers)
             {
                 layer.OnPoseEditEnd();
             }
+        }
+
+        private void UpdateMotionEditing()
+        {
+            if (studioHackManager.isPoseEditing)
+            {
+                if (currentLayer.layerType == typeof(MotionTimelineLayer) ||
+                    currentLayer.layerType == typeof(MoveTimelineLayer))
+                {
+                    isMotionEditing = true;
+                    return;
+                }
+            }
+
+            isMotionEditing = false;
         }
 
         private void OnMaidSlotNoChanged(int maidSlotNo)

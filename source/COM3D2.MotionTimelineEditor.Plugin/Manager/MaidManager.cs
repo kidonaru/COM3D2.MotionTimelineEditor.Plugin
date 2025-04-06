@@ -130,6 +130,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public bool isAnmPlaying
+        {
+            get => maidCache?.isAnmPlaying ?? false;
+            set
+            {
+                foreach (var cache in maidCaches)
+                {
+                    cache.isAnmPlaying = value;
+                }
+            }
+        }
+
         private MaidManager()
         {
             TimelineManager.onRefresh += OnRefresh;
@@ -295,7 +307,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             return null;
         }
 
-        public void SetMotionPlayingAll(bool isPlaying)
+        public void SetAnmEnabledAll(bool isPlaying)
         {
             foreach (var cache in maidCaches)
             {
@@ -356,10 +368,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             MTEUtils.LogDebug("ChangeMaid: " + maid.name);
 
-            var isMotionPlaying = studioHack.isMotionPlaying;
+            var isAnmPlaying = studioHack.isAnmPlaying;
             studioHackManager.isPoseEditing = false;
             studioHack.ChangeMaid(maid);
-            studioHack.isMotionPlaying = isMotionPlaying;
+            studioHack.isAnmPlaying = isAnmPlaying;
         }
 
         public void OnMotionUpdated(Maid maid)

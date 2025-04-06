@@ -20,7 +20,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public abstract bool isIkBoxVisibleRoot { get; set; }
         public abstract bool isIkBoxVisibleBody { get; set; }
         public abstract bool isPoseEditing { get; set; }
-        public abstract bool isMotionPlaying { get; set; }
         public abstract float motionSliderRate { set; }
         public abstract bool useMuneKeyL { set; }
         public abstract bool useMuneKeyR { set; }
@@ -61,6 +60,22 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
         }
+
+        public virtual bool isAnmPlaying
+        {
+            get => maidManager.isAnmPlaying;
+            set
+            {
+                if (value && isPoseEditing)
+                {
+                    isPoseEditing = false;
+                }
+
+                maidManager.isAnmPlaying = value;
+            }
+        }
+
+        public abstract bool isAnmEnabled { get; set; }
 
         public virtual DepthOfFieldScatter depthOfField
         {

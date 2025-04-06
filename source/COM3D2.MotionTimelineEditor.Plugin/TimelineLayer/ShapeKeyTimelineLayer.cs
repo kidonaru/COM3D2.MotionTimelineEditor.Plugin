@@ -85,7 +85,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             maidCache.FixBlendValues(_playDataMap.Keys);
         }
 
-        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated, MotionPlayData playData)
         {
             var start = motion.start as TransformDataShapeKey;
             var end = motion.end as TransformDataShapeKey;

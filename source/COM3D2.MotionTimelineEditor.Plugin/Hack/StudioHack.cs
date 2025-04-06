@@ -171,9 +171,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get => studio.poseEditWindow.CheckbtnUse.check;
             set
             {
-                if (value && isMotionPlaying)
+                MTEUtils.LogDebug("isPoseEditing: {0} -> {1}", isPoseEditing, value);
+
+                if (value && isAnmPlaying)
                 {
-                    isMotionPlaying = false;
+                    isAnmPlaying = false;
                 }
 
                 var savedUseMuneKeyL = _useMuneKeyL;
@@ -188,21 +190,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public override bool isMotionPlaying
+        public override bool isAnmEnabled
         {
             get => !studio.motionWindow.CheckbtnStop.check;
             set
             {
-                if (value && isPoseEditing)
-                {
-                    isPoseEditing = false;
-                }
+                MTEUtils.LogDebug("isAnmEnabled: {0} -> {1}", isAnmEnabled, value);
 
                 studio.motionWindow.CheckbtnStop.check = !value;
                 studio.motionWindow.OnClickStopCheckRun(!value);
 
                 SetMaidStoreDataAll("is_stop", value.ToString());
-                maidManager.SetMotionPlayingAll(value);
+                maidManager.SetAnmEnabledAll(value);
             }
         }
 

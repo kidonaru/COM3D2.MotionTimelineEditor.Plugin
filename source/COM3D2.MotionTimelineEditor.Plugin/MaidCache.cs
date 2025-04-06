@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using RootMotion.FinalIK;
@@ -46,6 +47,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public Dictionary<TBody.SlotID, MaidSlotStat> slotStatMap = new Dictionary<TBody.SlotID, MaidSlotStat>(32);
         public Dictionary<string, ModelMaterial> materialMap = new Dictionary<string, ModelMaterial>(32);
         public List<string> materialNames = new List<string>(32);
+        public List<AnimationLayerInfo> animationLayerInfos = new List<AnimationLayerInfo>(10);
+
+        public static readonly int MinLayerIndex = 2;
+        public static readonly int MaxLayerIndex = 8;
 
         public bool isGroundingFootL = false; // 左足の接地を有効
         public bool isGroundingFootR = false; // 右足の接地を有効
@@ -80,25 +85,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public bool isMotionPlaying
-        {
-            get
-            {
-                if (animationState != null)
-                {
-                    return animationState.enabled;
-                }
-                return false;
-            }
-            set
-            {
-                if (animationState != null)
-                {
-                    animationState.enabled = value;
-                }
-            }
-        }
-
         public float _motionSliderRate = 0f;
         public float motionSliderRate
         {
@@ -110,14 +96,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (animationState != null)
                 {
-                    var isPlaying = this.isMotionPlaying;
+                    var isAnmEnabled = animationState.enabled;
                     var maxNum = animationState.length;
                     var current = Mathf.Clamp01(value) * maxNum;
                     animationState.time = current;
-                    animationState.enabled = true;
-                    animation.Sample();
-                    if (!isPlaying)
+
+                    if (!isAnmEnabled)
                     {
+                        animationState.enabled = true;
+                        animation.Sample();
                         animationState.enabled = false;
                     }
                 }
@@ -160,10 +147,42 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             get => timelineManager.IsValidData() && anmId == TimelineLayerBase.TimelineAnmId;
         }
 
+        // アニメーションが有効か
+        public bool isAnmEnabled
+        {
+            get
+            {
+                if (animationState != null)
+                {
+                    return animationState.enabled;
+                }
+                return false;
+            }
+            set
+            {
+                if (animationState != null)
+                {
+                    animationState.enabled = value;
+                }
+            }
+        }
+
         // タイムラインアニメーションを再生中か
         public bool isAnmPlaying
         {
-            get => studioHack.isMotionPlaying && isAnmSyncing;
+            get => isAnmEnabled && isAnmSyncing && anmSpeed > 0f;
+            set
+            {
+                if (value)
+                {
+                    anmSpeed = timelineManager.anmSpeed;
+                    isAnmEnabled = true;
+                }
+                else
+                {
+                    anmSpeed = 0f;
+                }
+            }
         }
 
         public bool useHeadKey
@@ -342,6 +361,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public MaidCache(int slotNo)
         {
             this.slotNo = slotNo;
+
+            for (int i = 0; i <= MaxLayerIndex; i++)
+            {
+                animationLayerInfos.Add(new AnimationLayerInfo(i));
+            }
         }
 
         public void ResetIkHoldEntities()
@@ -426,9 +450,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             maid = null;
             info = null;
-            annName = "";
-            anmId = 0;
-            animationState = null;
             cacheBoneData = null;
             ikManager = null;
             extendBoneCache = null;
@@ -449,6 +470,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             voiceFadeTime = 0.1f;
             voicePitch = 1f;
             loopVoiceName = string.Empty;
+
+            ResetAnm();
         }
 
         public void ResetAnm()
@@ -456,6 +479,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             annName = "";
             anmId = 0;
             animationState = null;
+
+            foreach (var info in animationLayerInfos)
+            {
+                info.Reset();
+            }
         }
 
         public void ResetEyes()
@@ -1092,6 +1120,72 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     materialNames.Add(material.name);
                 }
             }
+        }
+
+        public AnimationLayerInfo GetAnimationLayerInfo(int layer)
+        {
+            return animationLayerInfos.GetOrDefault(layer);
+        }
+
+        public void ApplyAnimationLayerInfo(AnimationLayerInfo info, float t)
+        {
+            animationLayerInfos[info.layer] = info;
+
+            if (animation == null)
+            {
+                return;
+            }
+
+            if (info.state == null || info.state.name != info.anmTag)
+            {
+                if (string.IsNullOrEmpty(info.anmName))
+                {
+                    if (info.state != null)
+                    {
+                        info.state.enabled = false;
+                        info.state = null;
+                    }
+                }
+                else if (GameUty.IsExistFile(info.anmName))
+                {
+                    info.state = maid.body0.CrossFadeLayer(
+                        info.anmName,
+                        GameUty.FileSystem,
+                        info.layer,
+                        false,
+                        info.loop,
+                        false,
+                        0f,
+                        info.weight);
+                }
+                else
+                {
+                    // マイポーズを検索
+                    var path = MTEUtils.CombinePaths(PhotoModePoseSave.folder_path, info.anmName);
+                    if (File.Exists(path))
+                    {
+                        info.state = maid.body0.CrossFadeLayerByFullPath(
+                            path,
+                            info.layer,
+                            false,
+                            info.loop,
+                            false,
+                            0f,
+                            info.weight);
+                    }
+                }
+            }
+
+            if (info.state == null)
+            {
+                return;
+            }
+
+            info.state.wrapMode = info.loop ? WrapMode.Loop : WrapMode.Once;
+            info.state.weight = info.weight;
+
+            info.state.time = t;
+            info.state.speed = 0f;
         }
 
         private void OnAnmChanged(string anmName)

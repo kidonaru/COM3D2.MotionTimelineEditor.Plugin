@@ -64,14 +64,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public float playingTime => playingFrameNoFloat * timeline.frameDuration;
 
-        public bool isMotionPlaying
+        public bool isAnmPlaying
         {
             get
             {
                 var cache = maidCache;
                 if (cache != null)
                 {
-                    return cache.isMotionPlaying;
+                    return cache.isAnmPlaying;
                 }
                 return false;
             }
@@ -80,12 +80,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var cache = maidCache;
                 if (cache != null)
                 {
-                    cache.isMotionPlaying = value;
+                    cache.isAnmPlaying = value;
                 }
 
                 if (isCurrent)
                 {
-                    studioHack.isMotionPlaying = value;
+                    studioHack.isAnmPlaying = value;
                 }
             }
         }
@@ -125,20 +125,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (cache != null)
                 {
                     return cache.isAnmSyncing;
-                }
-                return false;
-            }
-        }
-
-        // タイムラインアニメーションを再生中か
-        public bool isAnmPlaying
-        {
-            get
-            {
-                var cache = maidCache;
-                if (cache != null)
-                {
-                    return cache.isAnmPlaying;
                 }
                 return false;
             }
@@ -344,7 +330,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var current = playData.current;
                 if (current != null)
                 {
-                    ApplyMotion(current, playData.lerpFrame, indexUpdated);
+                    ApplyMotion(current, playData.lerpFrame, indexUpdated, playData);
                 }
             }
         }
@@ -371,7 +357,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 var current = playData.current;
                 if (current != null)
                 {
-                    ApplyMotion(current, playData.lerpFrame, indexUpdated);
+                    ApplyMotion(current, playData.lerpFrame, indexUpdated, playData);
                 }
             }
         }
@@ -381,7 +367,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ApplyPlayDataByType(transformType, this.playingFrameNoFloat);
         }
 
-        protected abstract void ApplyMotion(MotionData motion, float t, bool indexUpdated);
+        protected abstract void ApplyMotion(
+            MotionData motion,
+            float t,
+            bool indexUpdated,
+            MotionPlayData playData);
 
         protected virtual void BuildPlayData()
         {
@@ -490,7 +480,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void AddKeyFrameAll()
         {
-            studioHack.isMotionPlaying = false;
+            studioHack.isAnmPlaying = false;
 
             var maid = this.maid;
             if (maid == null)

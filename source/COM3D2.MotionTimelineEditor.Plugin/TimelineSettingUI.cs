@@ -656,6 +656,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 config.dirty = true;
             });
 
+            view.DrawToggle("メモリ使用量出力", MTEUtils.showMemoryUsage, 120, 20, newValue =>
+            {
+                MTEUtils.showMemoryUsage = newValue;
+            });
+
             if (view.DrawButton("初期化", 100, 20))
             {
                 MTEUtils.ShowConfirmDialog("共通設定を初期化しますか？", () =>

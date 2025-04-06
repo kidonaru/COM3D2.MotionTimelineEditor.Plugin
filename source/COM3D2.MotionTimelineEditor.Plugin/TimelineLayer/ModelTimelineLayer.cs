@@ -73,7 +73,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated, MotionPlayData playData)
         {
             var model = modelManager.GetModel(motion.name);
             if (model == null || model.transform == null)

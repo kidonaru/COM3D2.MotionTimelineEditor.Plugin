@@ -84,7 +84,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated)
+        protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated, MotionPlayData playData)
         {
             var material = bgModelManager.GetMaterial(motion.name);
             if (material == null)
