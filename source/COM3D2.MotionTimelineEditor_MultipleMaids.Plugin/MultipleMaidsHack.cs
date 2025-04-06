@@ -272,6 +272,7 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             get => isLock;
             set
             {
+                MTEUtils.LogDebug("isPoseEditing: {0} -> {1}", isPoseEditing, value);
                 if (value && isAnmPlaying)
                 {
                     isAnmPlaying = false;
@@ -287,7 +288,11 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
         public override bool isAnmEnabled
         {
             get => !isStop;
-            set => isStop = !value;
+            set
+            {
+                MTEUtils.LogDebug("isAnmEnabled: {0} -> {1}", isAnmEnabled, value);
+                isStop = !value;
+            }
         }
 
         public override float motionSliderRate

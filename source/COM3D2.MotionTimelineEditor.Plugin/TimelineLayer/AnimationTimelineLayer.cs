@@ -189,6 +189,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     if (info.state != null && info.state.enabled && info.layer > 0)
                     {
                         info.state.enabled = false;
+                        info.state = null;
                         stateUpdated = true;
                     }
                 }
@@ -201,26 +202,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     maidCache.animationState.enabled = false;
                 }
             }
-            else
+
+            // モーション編集終了後は強制反映
+            if (!studioHack.isPoseEditing)
             {
-                // モーション編集終了後は有効化
-                foreach (var info in maidCache.animationLayerInfos)
+                foreach (var playData in _playDataMap.Values)
                 {
-                    var layer = info.layer;
-                    var state = info.state;
-                    if (state == null || state.enabled || layer <= 0)
-                    {
-                        continue;
-                    }
-
-                    info.state.enabled = true;
-
-                    var playData = _playDataMap.GetOrDefault(AnimationBoneName + layer);
-                    if (playData != null)
-                    {
-                        var dt = CalcAnimationTime(playData, info);
-                        maidCache.ApplyAnimationLayerInfo(info, dt);
-                    }
+                    playData.ResetIndex();
                 }
             }
         }

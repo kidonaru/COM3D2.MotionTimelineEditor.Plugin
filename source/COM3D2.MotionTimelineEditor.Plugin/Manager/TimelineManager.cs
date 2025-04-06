@@ -112,6 +112,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 else
                 {
                     studioHack.isAnmEnabled = true;
+                    maidCache.playingFrameNo = currentFrameNo;
                 }
             }
         }
