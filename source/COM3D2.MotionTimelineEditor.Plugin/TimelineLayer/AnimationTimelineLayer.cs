@@ -136,7 +136,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             maidCache.ApplyAnimationLayerInfo(info, dt);
         }
 
-        private float CalcAnimationTime(MotionPlayData playData, AnimationLayerInfo info)
+        private float CalcAnimationTime(
+            MotionPlayData playData,
+            AnimationLayerInfo info,
+            bool isNew = false)
         {
             if (playData == null || playData.current == null)
             {
@@ -144,11 +147,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return info.startTime;
             }
 
+            if (string.IsNullOrEmpty(info.anmName))
+            {
+                return 0f;
+            }
+
+            var playingFrameNo = this.playingFrameNo;
             var baseFrame = playData.current.stFrame;
             var baseStartTime = info.startTime;
 
+            // 新規作成中は現在フレームを基準にする
+            if (info.overrideTime && isNew)
+            {
+                baseFrame = playingFrameNo;
+            }
+
             // 時間上書きではない場合、前のフレーム基準に再生時間を計算する
-            if (!string.IsNullOrEmpty(info.anmName) && !info.overrideTime)
+            if (!info.overrideTime)
             {
                 for (var i = playData.listIndex; i >= 0; i--)
                 {
@@ -160,6 +175,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                     var prevTrans = prevMotion.start as TransformDataAnimation;
                     if (prevTrans == null)
+                    {
+                        continue;
+                    }
+
+                    if (prevMotion.stFrame == playingFrameNo)
                     {
                         continue;
                     }
@@ -337,7 +357,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             if (updateTransform)
             {
                 var playData = _playDataMap.GetOrDefault(AnimationBoneName + layer);
-                var dt = CalcAnimationTime(playData, info);
+                var dt = CalcAnimationTime(playData, info, isNew: true);
                 maidCache.ApplyAnimationLayerInfo(info, dt);
                 maidCache.animation.Sample();
             }
