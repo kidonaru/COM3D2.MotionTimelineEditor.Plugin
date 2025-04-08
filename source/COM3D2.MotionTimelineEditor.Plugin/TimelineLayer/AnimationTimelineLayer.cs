@@ -180,6 +180,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void OnPoseEditEnd()
         {
+            if (maidCache == null)
+            {
+                return;
+            }
+
             // モーション編集中はアニメーションレイヤー無効化
             if (timelineManager.isMotionEditing)
             {

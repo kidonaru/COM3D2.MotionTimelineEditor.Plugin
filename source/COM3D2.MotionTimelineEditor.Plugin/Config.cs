@@ -27,6 +27,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         MultiSelect,
         Undo,
         Redo,
+        GC,
     }
 
     public class Config
@@ -137,6 +138,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             { KeyBindType.MultiSelect, new KeyBind("Shift") },
             { KeyBindType.Undo, new KeyBind("Ctrl+Z") },
             { KeyBindType.Redo, new KeyBind("Ctrl+X") },
+            { KeyBindType.GC, new KeyBind("Shift+F12") },
         };
 
         public struct KeyBindPair

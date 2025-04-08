@@ -239,6 +239,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     {
                         historyManager.Redo();
                     }
+                    if (config.GetKeyDown(KeyBindType.GC))
+                    {
+                        GC.Collect();
+                        long totalMemory = GC.GetTotalMemory(false);
+                        MTEUtils.Log("Memory: {0:F2} MB", totalMemory / 1024.0 / 1024.0);
+                    }
 
                     mainWindow.isMultiSelect = config.GetKey(KeyBindType.MultiSelect);
 
