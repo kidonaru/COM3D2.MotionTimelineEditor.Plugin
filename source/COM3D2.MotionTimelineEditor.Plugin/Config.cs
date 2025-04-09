@@ -30,6 +30,21 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         GC,
     }
 
+    // 簡易設定の種類
+    public enum EasySettingType
+    {
+        簡易表示,
+        編集モード,
+        メイド表示,
+        背景表示,
+        カメラ同期,
+        視野角固定,
+        フォーカス固定,
+        ポスプロ同期,
+        中心点IK表示,
+        関節IK表示,
+    }
+
     public class Config
     {
         public static readonly int CurrentVersion = 2;
@@ -175,6 +190,40 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         [XmlIgnore]
+        public Dictionary<EasySettingType, bool> _easySettingVisibleMap = new Dictionary<EasySettingType, bool>();
+
+        public struct EasyMenuPair
+        {
+            public EasySettingType type;
+            public bool visible;
+        }
+
+        [XmlElement("easySetting")]
+        public EasyMenuPair[] easySettingList
+        {
+            get
+            {
+                var result = new List<EasyMenuPair>(_easySettingVisibleMap.Count);
+                foreach (var pair in _easySettingVisibleMap)
+                {
+                    result.Add(new EasyMenuPair { type = pair.Key, visible = pair.Value });
+                }
+                return result.ToArray();
+            }
+            set
+            {
+                if (value == null)
+                {
+                    return;
+                }
+                foreach (var pair in value)
+                {
+                    _easySettingVisibleMap[pair.type] = pair.visible;
+                }
+            }
+        }
+
+        [XmlIgnore]
         private Dictionary<string, bool> _boneSetMenuOpenMap = new Dictionary<string, bool>();
 
         public struct SetMenuOpenPair
@@ -276,6 +325,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public string GetKeyName(KeyBindType keyBindType)
         {
             return keyBinds[keyBindType].ToString();
+        }
+
+        public bool IsEasySettingVisible(EasySettingType type)
+        {
+            bool value;
+            if (_easySettingVisibleMap.TryGetValue(type, out value))
+            {
+                return value;
+            }
+
+            // デフォルトは表示
+            _easySettingVisibleMap[type] = true;
+            return true;
+        }
+
+        public void SetEasySettingVisible(EasySettingType type, bool value)
+        {
+            _easySettingVisibleMap[type] = value;
         }
 
         public bool IsBoneSetMenuOpen(string name)

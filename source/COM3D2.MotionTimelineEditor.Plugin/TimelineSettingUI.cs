@@ -542,6 +542,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             view.EndLayout();
 
+            view.DrawToggle("自動でBackgroundCustomに登録", config.autoResisterBackgroundCustom, -1, 20, newValue =>
+            {
+                config.autoResisterBackgroundCustom = newValue;
+                config.dirty = true;
+            });
+
             view.DrawSliderValue(new GUIView.SliderOption
             {
                 label = "動画先読み秒数",
@@ -644,11 +650,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 },
             });
 
-            view.DrawToggle("自動でBackgroundCustomに登録", config.autoResisterBackgroundCustom, -1, 20, newValue =>
+            view.DrawHorizontalLine();
+
+            view.DrawLabel("簡易設定の表示切り替え", -1, 20);
+
+            view.BeginHorizontal();
+
+            var settingTypes = Extensions.easySettingTypes;
+            for (var i = 0; i < settingTypes.Count; i++)
             {
-                config.autoResisterBackgroundCustom = newValue;
-                config.dirty = true;
-            });
+                var type = settingTypes[i];
+
+                if (i > 0 && i % 2 == 0)
+                {
+                    view.EndLayout();
+                    view.BeginHorizontal();
+                }
+
+                view.DrawToggle(type.ToName(), config.IsEasySettingVisible(type), 120, 20, newValue =>
+                {
+                    config.SetEasySettingVisible(type, newValue);
+                    config.dirty = true;
+                });
+            }
+            view.EndLayout();
+
+            view.DrawHorizontalLine();
 
             view.DrawToggle("処理時間出力", config.outputElapsedTime, 120, 20, newValue =>
             {

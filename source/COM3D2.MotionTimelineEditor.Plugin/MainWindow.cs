@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -781,25 +782,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             view.BeginHorizontal();
             {
-                view.DrawToggle("簡易表示", config.isEasyEdit, 80, 20, newValue =>
+                DrawEasySetting(view, EasySettingType.簡易表示, config.isEasyEdit, 80, 20, newValue =>
                 {
                     config.isEasyEdit = newValue;
                     config.dirty = true;
                     timelineManager.Refresh();
                 });
 
-                view.DrawToggle("編集モード", studioHackManager.isPoseEditing, 80, 20, newValue =>
+                DrawEasySetting(view, EasySettingType.編集モード, studioHackManager.isPoseEditing, 80, 20, newValue =>
                 {
                     studioHackManager.isPoseEditing = newValue;
                 });
 
-                var isMaidVidible = maidManager.maid.Visible;
-                view.DrawToggle("メイド表示", isMaidVidible, 80, 20, newValue =>
+                DrawEasySetting(view, EasySettingType.メイド表示, maidManager.maid.Visible, 80, 20, newValue =>
                 {
                     maidManager.maid.Visible = newValue;
                 });
 
-                view.DrawToggle("背景表示", timeline.isBackgroundVisible, 80, 20, newValue =>
+                DrawEasySetting(view, EasySettingType.背景表示, timeline.isBackgroundVisible, 80, 20, newValue =>
                 {
                     timeline.isBackgroundVisible = newValue;
                 });
@@ -807,19 +807,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (timelineManager.hasCameraLayer)
                 {
                     var cameraUpdated = false;
-                    cameraUpdated |= view.DrawToggle("カメラ同期", config.isCameraSync, 80, 20, !currentLayer.isCameraLayer, newValue =>
+                    cameraUpdated |= DrawEasySetting(view, EasySettingType.カメラ同期, config.isCameraSync, 80, 20, !currentLayer.isCameraLayer, newValue =>
                     {
                         config.isCameraSync = newValue;
                         config.dirty = true;
                     });
 
-                    cameraUpdated |= view.DrawToggle("視野角固定", config.isFixedFoV, 80, 20, !currentLayer.isCameraLayer && studioHackManager.isPoseEditing, newValue =>
+                    cameraUpdated |= DrawEasySetting(view, EasySettingType.視野角固定, config.isFixedFoV, 80, 20, !currentLayer.isCameraLayer && studioHackManager.isPoseEditing, newValue =>
                     {
                         config.isFixedFoV = newValue;
                         config.dirty = true;
                     });
 
-                    cameraUpdated |= view.DrawToggle("フォーカス固定", config.isFixedFocus, 100, 20, !currentLayer.isCameraLayer && studioHackManager.isPoseEditing, newValue =>
+                    cameraUpdated |= DrawEasySetting(view, EasySettingType.フォーカス固定, config.isFixedFocus, 100, 20, !currentLayer.isCameraLayer && studioHackManager.isPoseEditing, newValue =>
                     {
                         config.isFixedFocus = newValue;
                         config.dirty = true;
@@ -837,7 +837,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (timelineManager.hasPostEffectLayer)
                 {
-                    view.DrawToggle("ポスプロ同期", config.isPostEffectSync, 100, 20, !currentLayer.isPostEffectLayer, newValue =>
+                    DrawEasySetting(view, EasySettingType.ポスプロ同期, config.isPostEffectSync, 100, 20, !currentLayer.isPostEffectLayer, newValue =>
                     {
                         config.isPostEffectSync = newValue;
                         config.dirty = true;
@@ -846,18 +846,53 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (studioHack.hasIkBoxVisible)
                 {
-                    view.DrawToggle("中心点IK表示", studioHack.isIkBoxVisibleRoot, 100, 20, newValue =>
+                    DrawEasySetting(view, EasySettingType.中心点IK表示, studioHack.isIkBoxVisibleRoot, 100, 20, newValue =>
                     {
                         studioHack.isIkBoxVisibleRoot = newValue;
                     });
 
-                    view.DrawToggle("関節IK表示", studioHack.isIkBoxVisibleBody, 100, 20, newValue =>
+                    DrawEasySetting(view, EasySettingType.関節IK表示, studioHack.isIkBoxVisibleBody, 100, 20, newValue =>
                     {
                         studioHack.isIkBoxVisibleBody = newValue;
                     });
                 }
             }
             view.EndLayout();
+        }
+
+        private bool DrawEasySetting(
+            GUIView view,
+            EasySettingType type,
+            bool value,
+            float width,
+            float height,
+            bool enabled,
+            Action<bool> onChanged)
+        {
+            if (!config.IsEasySettingVisible(type))
+            {
+                return false;
+            }
+
+            return view.DrawToggle(
+                type.ToName(),
+                value,
+                width,
+                height,
+                enabled,
+                newValue => onChanged(newValue)
+            );
+        }
+
+        private bool DrawEasySetting(
+            GUIView view,
+            EasySettingType type,
+            bool value,
+            float width,
+            float height,
+            Action<bool> onChanged)
+        {
+            return DrawEasySetting(view, type, value, width, height, true, onChanged);
         }
 
         private void DrawTimeline(bool editEnabled, bool guiEnabled)

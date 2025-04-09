@@ -314,5 +314,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 type = StudioModelType.Mod;
             }
         }
+
+        public static List<EasySettingType> easySettingTypes =
+            MTEUtils.GetEnumValues<EasySettingType>();
+
+        public static List<string> easySettingNames =
+            easySettingTypes.ConvertAll(type => type.ToString());
+
+        public static string ToName(this EasySettingType type)
+        {
+            return easySettingNames[(int) type];
+        }
     }
 }
