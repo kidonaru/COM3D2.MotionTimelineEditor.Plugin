@@ -74,9 +74,24 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private GTToneMapController _gTToneMappingController = null;
+        public GTToneMapController gtToneMapController
+        {
+            get
+            {
+                if (_gTToneMappingController == null)
+                {
+                    _gTToneMappingController = mainCamera.GetOrAddComponent<GTToneMapController>();
+                    _gTToneMappingController.enabled = false; // Disable by default
+                }
+                return _gTToneMappingController;
+            }
+        }
+
         public ColorParaffinEffectSettings paraffin => controller.context.paraffinSettings;
         public DistanceFogEffectSettings distanceFog => controller.context.fogSettings;
         public RimlightEffectSettings rimlight => controller.context.rimlightSettings;
+        public GTToneMapData gtToneMap => gtToneMapController.data;
 
         private static Camera mainCamera => PluginUtils.MainCamera;
 
@@ -164,6 +179,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             paraffin.enabled = false;
             distanceFog.enabled = false;
             rimlight.enabled = false;
+            gtToneMapController.SetEnable(false);
         }
 
         public DepthOfFieldData GetDepthOfFieldData()
@@ -208,7 +224,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             return paraffin.GetDataCount();
         }
-        
+
         public void AddParaffinData()
         {
             paraffin.AddData(new ColorParaffinData());
@@ -238,7 +254,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             return distanceFog.GetDataCount();
         }
-        
+
         public void AddDistanceFogData()
         {
             distanceFog.AddData(new DistanceFogData());
@@ -268,7 +284,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             return rimlight.GetDataCount();
         }
-        
+
         public void AddRimlightData()
         {
             rimlight.AddData(new RimlightData());
@@ -292,6 +308,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             rimlight.SetData(index, data);
             rimlight.isDebugView = config.rimlightDebug;
+        }
+
+        public GTToneMapData GetGTToneMapData()
+        {
+            return gtToneMapController.data;
+        }
+
+        public void ApplyGTToneMap(GTToneMapData data)
+        {
+            gtToneMapController.ApplyData(data);
         }
     }
 }

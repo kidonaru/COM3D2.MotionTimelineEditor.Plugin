@@ -21,8 +21,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (_allBoneNames == null)
                 {
                     _allBoneNames = new List<string>(
-                        1 + timeline.paraffinCount + timeline.distanceFogCount + timeline.rimlightCount);
+                        2 + timeline.paraffinCount + timeline.distanceFogCount + timeline.rimlightCount);
                     _allBoneNames.Add("DepthOfField");
+                    _allBoneNames.Add("GTToneMap");
                     _allBoneNames.AddRange(paraffinNames);
                     _allBoneNames.AddRange(distanceFogNames);
                     _allBoneNames.AddRange(rimlightNames);
@@ -70,7 +71,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.Update();
 
-            var boneCount = 1
+            var boneCount = 2
                 + timeline.paraffinCount
                 + timeline.distanceFogCount
                 + timeline.rimlightCount;
@@ -120,6 +121,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             ApplyPlayDataByType(TransformType.Rimlight);
             //stopwatch.ProcessEnd("  Rimlight");
+
+            ApplyPlayDataByType(TransformType.GTToneMap);
+            //stopwatch.ProcessEnd("  GTToneMap");
         }
 
         protected override void ApplyMotion(MotionData motion, float t, bool indexUpdated, MotionPlayData playData)
@@ -137,6 +141,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     break;
                 case TransformType.Rimlight:
                     ApplyRimlight(motion, t);
+                    break;
+                case TransformType.GTToneMap:
+                    ApplyGTToneMap(motion, t);
                     break;
             }
         }
@@ -189,6 +196,16 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         frame.UpdateBone(bone);
                         break;
                     }
+                    case PostEffectType.GTToneMap:
+                    {
+                        var trans = CreateTransformData<TransformDataGTToneMap>(effectName);
+                        trans.data = postEffectManager.GetGTToneMapData();
+                        trans.easing = GetEasing(frame.frameNo, effectName);
+
+                        var bone = frame.CreateBone(trans);
+                        frame.UpdateBone(bone);
+                        break;
+                    }
                 }
             }
         }
@@ -209,6 +226,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             パラフィン,
             距離フォグ,
             リムライト,
+            GTトーン,
         }
 
         private TabType _tabType = TabType.被写界深度;
@@ -231,6 +249,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 case TabType.リムライト:
                     DrawRimlight(view);
                     break;
+                case TabType.GTトーン:
+                    DrawGTToneMap(view);
+                    break;
             }
 
             view.DrawComboBox();
@@ -249,6 +270,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     return TransformType.DistanceFog;
                 case PostEffectType.Rimlight:
                     return TransformType.Rimlight;
+                case PostEffectType.GTToneMap:
+                    return TransformType.GTToneMap;
             }
 
             return TransformType.None;

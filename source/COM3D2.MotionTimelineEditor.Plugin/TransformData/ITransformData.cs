@@ -19,6 +19,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Eyes,
         FingerBlend,
         Grounding,
+        GTToneMap,
         IKHold,
         Light,
         LookAtTarget,

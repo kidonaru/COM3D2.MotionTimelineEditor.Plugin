@@ -21,6 +21,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private Camera _frontCamera = null;
         private LetterBoxView _letterBoxView = null;
 
+        public Camera mainCamera => PluginUtils.MainCamera;
+
         public Camera frontCamera
         {
             get

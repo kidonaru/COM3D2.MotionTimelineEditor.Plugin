@@ -455,6 +455,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     TransformType.Grounding, TimelineManager.CreateTransform<TransformDataGrounding>
                 );
                 timelineManager.RegisterTransform(
+                    TransformType.GTToneMap, TimelineManager.CreateTransform<TransformDataGTToneMap>
+                );
+                timelineManager.RegisterTransform(
                     TransformType.IKHold, TimelineManager.CreateTransform<TransformDataIKHold>
                 );
                 timelineManager.RegisterTransform(
@@ -724,6 +727,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 MTEUtils.Log("  レンダリングパス: " + cam.renderingPath);
                 MTEUtils.Log("  クリアフラグ: " + cam.clearFlags);
                 MTEUtils.Log("  描画レイヤー: " + GetLayerNames(cam.cullingMask));
+                MTEUtils.Log("  HDR: " + cam.allowHDR);
+                MTEUtils.Log("  MSAA: " + cam.allowMSAA);
                 MTEUtils.Log("  ---");
             }
         }

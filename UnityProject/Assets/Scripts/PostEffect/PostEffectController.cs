@@ -17,13 +17,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 		private Dictionary<CameraEvent, CommandBuffer> _commandBuffers = new Dictionary<CameraEvent, CommandBuffer>();
 
 #if COM3D2
-		private static TimelineBundleManager bundleManager
-		{
-			get
-			{
-				return TimelineBundleManager.instance;
-			}
-		}
+		private static TimelineBundleManager bundleManager => TimelineBundleManager.instance;
 #endif
 
 		void Awake()

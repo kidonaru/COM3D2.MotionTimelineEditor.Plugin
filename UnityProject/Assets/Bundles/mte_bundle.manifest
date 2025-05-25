@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 1520330347
+CRC: 731215519
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 139a270e7d42b7123ca8505029360f90
+    Hash: ccad1518b98b624bb6473b4021f21af7
   TypeTreeHash:
     serializedVersion: 2
     Hash: 57f902138519c9049cf811191ff1db9c
@@ -30,7 +30,9 @@ Assets:
 - Assets/Resources/icon.png.bytes
 - Assets/Shaders/PsylliumAdd.shader
 - Assets/Resources/song.ogg.bytes
+- Assets/Shaders/GTToneMap.mat
 - Assets/Shaders/PostEffect.mat
+- Assets/Shaders/GTToneMap.shader
 - Assets/Shaders/StageLaser.mat
 - Assets/Shaders/PsylliumAdd.mat
 - Assets/Resources/noise_texture.png

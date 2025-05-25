@@ -152,6 +152,7 @@
     <Compile Include="TimelineLayer\PostEffectTimelineLayer.cs" />
     <Compile Include="TimelineLayer\PostEffectTimelineLayer_DepthOfField.cs" />
     <Compile Include="TimelineLayer\PostEffectTimelineLayer_DistanceFog.cs" />
+    <Compile Include="TimelineLayer\PostEffectTimelineLayer_GTToneMap.cs" />
     <Compile Include="TimelineLayer\PostEffectTimelineLayer_Parrifin.cs" />
     <Compile Include="TimelineLayer\PostEffectTimelineLayer_Rimlight.cs" />
     <Compile Include="TimelineLayer\PsylliumTimelineLayer.cs" />
@@ -176,6 +177,7 @@
     <Compile Include="TransformData\TransformDataEyes.cs" />
     <Compile Include="TransformData\TransformDataFingerBlend.cs" />
     <Compile Include="TransformData\TransformDataGrounding.cs" />
+    <Compile Include="TransformData\TransformDataGTToneMap.cs" />
     <Compile Include="TransformData\TransformDataIKHold.cs" />
     <Compile Include="TransformData\TransformDataLight.cs" />
     <Compile Include="TransformData\TransformDataLookAtTarget.cs" />
@@ -220,6 +222,7 @@
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\ColorParaffinEffectSettings.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\DistanceFogEffectModel.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\DistanceFogEffectSettings.cs" />
+    <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\GTToneMapController.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\PostEffectContext.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\PostEffectController.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\PostEffect\PostEffectModelBase.cs" />
