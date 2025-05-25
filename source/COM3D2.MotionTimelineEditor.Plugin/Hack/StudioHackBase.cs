@@ -16,10 +16,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public abstract List<StudioLightStat> lightList { get; }
         public abstract int selectedMaidSlotNo { get; }
         public abstract string outputAnmPath { get; }
-        public abstract bool hasIkBoxVisible { get; }
-        public abstract bool isIkBoxVisibleRoot { get; set; }
-        public abstract bool isIkBoxVisibleBody { get; set; }
         public abstract bool isPoseEditing { get; set; }
+        public abstract bool isIKVisible { get; set; }
         public abstract float motionSliderRate { set; }
         public abstract bool useMuneKeyL { set; }
         public abstract bool useMuneKeyR { set; }

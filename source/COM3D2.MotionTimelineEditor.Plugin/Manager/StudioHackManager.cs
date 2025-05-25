@@ -21,6 +21,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (_studioHack != null)
                 {
                     _studioHack.isPoseEditing = value;
+                    _studioHack.isIKVisible = value && (currentLayer.isMotionLayer || currentLayer.isMoveLayer || config.alwaysShowIK);
                 }
             }
         }

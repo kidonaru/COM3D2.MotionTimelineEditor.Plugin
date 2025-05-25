@@ -17,6 +17,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public virtual bool hasSlotNo => false;
         public virtual bool isCameraLayer => false;
         public virtual bool isPostEffectLayer => false;
+        public virtual bool isMotionLayer => false;
+        public virtual bool isMoveLayer => false;
 
         protected List<FrameData> _keyFrames = new List<FrameData>();
         public List<FrameData> keyFrames => _keyFrames.ToList();

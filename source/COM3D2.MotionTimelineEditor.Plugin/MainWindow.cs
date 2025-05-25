@@ -843,19 +843,6 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                         config.dirty = true;
                     });
                 }
-
-                if (studioHack.hasIkBoxVisible)
-                {
-                    DrawEasySetting(view, EasySettingType.中心点IK表示, studioHack.isIkBoxVisibleRoot, 100, 20, newValue =>
-                    {
-                        studioHack.isIkBoxVisibleRoot = newValue;
-                    });
-
-                    DrawEasySetting(view, EasySettingType.関節IK表示, studioHack.isIkBoxVisibleBody, 100, 20, newValue =>
-                    {
-                        studioHack.isIkBoxVisibleBody = newValue;
-                    });
-                }
             }
             view.EndLayout();
         }

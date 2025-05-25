@@ -85,6 +85,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool useHSVColor = false;
         public bool autoResisterBackgroundCustom = true;
         public string backgroundCustomCategoryName = "MotionTimelineEditor";
+        public bool alwaysShowIK = false;
 
         // 表示設定
         public int frameWidth = 11;

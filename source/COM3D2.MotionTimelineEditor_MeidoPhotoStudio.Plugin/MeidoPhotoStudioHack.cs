@@ -142,20 +142,6 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
         }
 
-        public override bool hasIkBoxVisible => false;
-
-        public override bool isIkBoxVisibleRoot
-        {
-            get => false;
-            set { } // do nothing
-        }
-
-        public override bool isIkBoxVisibleBody
-        {
-            get => false;
-            set { } // do nothing
-        }
-
         public override bool isPoseEditing
         {
             get => mps.isReleaseIK;
@@ -166,10 +152,15 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                     isAnmPlaying = false;
                 }
 
-                mps.isIK = value;
                 mps.isBoneIK = value;
                 mps.isReleaseIK = value;
             }
+        }
+
+        public override bool isIKVisible
+        {
+            get => mps.isIK;
+            set => mps.isIK = value;
         }
 
         public override bool isAnmEnabled

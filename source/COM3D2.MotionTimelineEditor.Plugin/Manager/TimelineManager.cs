@@ -1649,8 +1649,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 OnPoseEditStart();
             }
+
+            // IK表示反映のために再設定
+            studioHackManager.isPoseEditing = isPoseEditing;
         }
-        
+
         public void SetPlayingFrameNoAll(int frameNo)
         {
             prevPlayingFrameNo = frameNo;

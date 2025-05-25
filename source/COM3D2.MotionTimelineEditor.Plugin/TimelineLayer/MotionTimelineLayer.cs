@@ -28,6 +28,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override string layerName => nameof(MotionTimelineLayer);
 
         public override bool hasSlotNo => true;
+        public override bool isMotionLayer => true;
 
         public static string GroundingBoneName = "Grounding";
         public static string GroundingDisplayName = "接地";

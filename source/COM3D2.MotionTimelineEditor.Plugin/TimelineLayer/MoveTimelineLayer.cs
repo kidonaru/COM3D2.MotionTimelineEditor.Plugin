@@ -15,6 +15,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override string layerName => nameof(MoveTimelineLayer);
 
         public override bool hasSlotNo => true;
+        public override bool isMoveLayer => true;
 
         public static string MoveBoneName = "move";
         public static string MoveDisplayName = "移動";

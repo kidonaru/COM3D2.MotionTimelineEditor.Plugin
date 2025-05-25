@@ -548,6 +548,12 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 config.dirty = true;
             });
 
+            view.DrawToggle("編集モード中、常にIKを表示", config.alwaysShowIK, -1, 20, newValue =>
+            {
+                config.alwaysShowIK = newValue;
+                config.dirty = true;
+            });
+
             view.DrawSliderValue(new GUIView.SliderOption
             {
                 label = "動画先読み秒数",

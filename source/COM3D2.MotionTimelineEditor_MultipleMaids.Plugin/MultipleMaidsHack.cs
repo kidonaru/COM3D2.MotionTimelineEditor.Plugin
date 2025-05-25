@@ -253,20 +253,6 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
             }
         }
 
-        public override bool hasIkBoxVisible => false;
-
-        public override bool isIkBoxVisibleRoot
-        {
-            get => false;
-            set { } // do nothing
-        }
-
-        public override bool isIkBoxVisibleBody
-        {
-            get => false;
-            set { } // do nothing
-        }
-
         public override bool isPoseEditing
         {
             get => isLock;
@@ -280,9 +266,14 @@ namespace COM3D2.MotionTimelineEditor_MultipleMaids.Plugin
 
                 isLock = value;
                 isBone = value;
-                isIK = value;
                 multipleMaids.unLockFlg = value;
             }
+        }
+
+        public override bool isIKVisible
+        {
+            get => isIK;
+            set => isIK = value;
         }
 
         public override bool isAnmEnabled
