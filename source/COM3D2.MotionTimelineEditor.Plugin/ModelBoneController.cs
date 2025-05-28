@@ -71,6 +71,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             foreach (var bone in meshRenderer.bones)
             {
+                if (bone == null || bone.name.EndsWith("_nub", System.StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
                 bones.Add(new ModelBone
                 {
                     controller = this,
