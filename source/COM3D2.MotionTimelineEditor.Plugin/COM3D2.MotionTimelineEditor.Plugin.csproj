@@ -104,6 +104,7 @@
     <Compile Include="Manager\TimelineHistoryManager.cs" />
     <Compile Include="Manager\TimelineLoadManager.cs" />
     <Compile Include="Manager\TimelineManager.cs" />
+    <Compile Include="Manager\TimelineTemplateManager.cs" />
     <Compile Include="Manager\WindowManager.cs" />
     <Compile Include="MTEUtils\AnimationLayerInfo.cs" />
     <Compile Include="MTEUtils\BinaryExtensions.cs" />
@@ -124,6 +125,7 @@
     <Compile Include="MTEUtils\ModMenuLoader.cs" />
     <Compile Include="MTEUtils\MPNUtils.cs" />
     <Compile Include="MTEUtils\MTEUtils.cs" />
+    <Compile Include="MTEUtils\NaturalStringComparer.cs" />
     <Compile Include="MTEUtils\ParallelHelper.cs" />
     <Compile Include="MTEUtils\TextureLoader.cs" />
     <Compile Include="MTEUtils\TextureUtils.cs" />
@@ -277,6 +279,7 @@
     <Compile Include="TimelineLayerXml.cs" />
     <Compile Include="TimelineLoadUI.cs" />
     <Compile Include="TimelineSettingUI.cs" />
+    <Compile Include="TimelineTemplateUI.cs" />
     <Compile Include="TimelineTrackUI.cs" />
     <Compile Include="TimelineXml.cs" />
     <Compile Include="TrackData.cs" />

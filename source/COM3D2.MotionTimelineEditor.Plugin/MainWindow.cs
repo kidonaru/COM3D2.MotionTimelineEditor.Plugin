@@ -506,6 +506,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     subWindow.SetSubWindowType(SubWindowType.Track);
                 }
 
+                if (view.DrawButton("テンプレ", 60, 20, editEnabled))
+                {
+                    subWindow.SetSubWindowType(SubWindowType.Template);
+                }
+
                 if (view.DrawButton("履歴", 60, 20, editEnabled))
                 {
                     subWindow.SetSubWindowType(SubWindowType.History);

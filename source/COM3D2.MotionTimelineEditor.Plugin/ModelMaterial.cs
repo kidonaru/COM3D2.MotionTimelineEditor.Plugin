@@ -151,6 +151,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             if (!hasColorProperties.Contains(type))
             {
+                MTEUtils.LogDebug($"Material '{material.name}' does not have color property '{type}'.");
                 return;
             }
 

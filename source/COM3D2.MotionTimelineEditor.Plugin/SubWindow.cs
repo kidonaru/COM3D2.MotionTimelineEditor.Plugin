@@ -14,6 +14,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         Track,
         History,
         TimelineSetting,
+        Template,
         Max,
 
         MediaPlayer = TimelineSetting, // dummy
@@ -122,6 +123,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 new TimelineTrackUI(this),
                 new TimelineHistoryUI(this),
                 new TimelineSettingUI(this),
+                new TimelineTemplateUI(this),
             };
         }
 

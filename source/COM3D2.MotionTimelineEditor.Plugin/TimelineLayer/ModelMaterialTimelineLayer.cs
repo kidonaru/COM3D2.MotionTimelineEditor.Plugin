@@ -91,6 +91,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             var material = modelManager.GetMaterial(motion.name);
             if (material == null)
             {
+                MTEUtils.LogDebug($"Material not found: {motion.name}");
                 return;
             }
 

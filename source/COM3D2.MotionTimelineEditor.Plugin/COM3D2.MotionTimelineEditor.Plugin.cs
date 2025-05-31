@@ -552,6 +552,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 managerRegistry.RegisterManager(TimelineManager.instance);
                 managerRegistry.RegisterManager(TimelineLoadManager.instance);
                 managerRegistry.RegisterManager(TimelineHistoryManager.instance);
+                managerRegistry.RegisterManager(TimelineTemplateManager.instance);
 
                 managerRegistry.RegisterManager(TimelineBundleManager.instance);
                 managerRegistry.RegisterManager(BoneMenuManager.Instance);

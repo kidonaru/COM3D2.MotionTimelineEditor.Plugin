@@ -92,6 +92,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        public static string TemplateDirPath
+        {
+            get
+            {
+                var path = MTEUtils.CombinePaths(PluginConfigDirPath, "Template");
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+
+                return path;
+            }
+        }
+
         public static Camera MainCamera
         {
             get => GameMain.Instance.MainCamera.camera;
@@ -158,6 +172,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             var path = MTEUtils.CombinePaths(ImageOutputDirPath, anmName);
             return Directory.Exists(path);
+        }
+
+        public static string GetTemplatePath(string layerName)
+        {
+            return MTEUtils.CombinePaths(TemplateDirPath, layerName + ".xml");
         }
 
         private static readonly Regex _regexGroup = new Regex(@"\(\d+\)$", RegexOptions.Compiled);
