@@ -269,7 +269,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            if (refresh)
+            if (refresh || force)
             {
                 models.Clear();
                 modelNames.Clear();
@@ -412,6 +412,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
 
             LateUpdate(true);
+
+            MTEUtils.ExecuteNextFrame(() =>
+            {
+                LateUpdate(true);
+            });
         }
 
         public override void OnLoad()
