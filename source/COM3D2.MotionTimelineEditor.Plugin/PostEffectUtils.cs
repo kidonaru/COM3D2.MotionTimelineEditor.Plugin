@@ -19,7 +19,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public static readonly Dictionary<PostEffectType, string> PostEffectTypeToJpNameMap = new Dictionary<PostEffectType, string>
         {
             { PostEffectType.DepthOfField, "被写界深度" },
-            { PostEffectType.GTToneMap, "GTトーンマップ" },
+            { PostEffectType.GTToneMap, "GTToneMap" },
             { PostEffectType.Paraffin, "パラフィン" },
             { PostEffectType.DistanceFog, "距離フォグ" },
             { PostEffectType.Rimlight, "リムライト" },

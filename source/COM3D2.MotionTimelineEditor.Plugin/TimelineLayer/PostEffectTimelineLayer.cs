@@ -226,7 +226,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             パラフィン,
             距離フォグ,
             リムライト,
-            GTトーン,
+            GTToneMap,
         }
 
         private TabType _tabType = TabType.被写界深度;
@@ -249,7 +249,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 case TabType.リムライト:
                     DrawRimlight(view);
                     break;
-                case TabType.GTトーン:
+                case TabType.GTToneMap:
                     DrawGTToneMap(view);
                     break;
             }
