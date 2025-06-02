@@ -36,6 +36,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         簡易表示,
         編集モード,
         メイド表示,
+        モデル表示,
         背景表示,
         カメラ同期,
         視野角固定,

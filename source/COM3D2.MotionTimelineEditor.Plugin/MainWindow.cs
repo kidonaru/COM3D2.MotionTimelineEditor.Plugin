@@ -29,6 +29,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private static StudioHackManager studioHackManager => StudioHackManager.instance;
         private static StudioHackBase studioHack => StudioHackManager.instance.studioHack;
         private static MaidManager maidManager => MaidManager.instance;
+        private static StudioModelManager modelManager => StudioModelManager.instance;
         private static TimelineManager timelineManager => TimelineManager.instance;
         private static TimelineData timeline => timelineManager.timeline;
         private static ITimelineLayer currentLayer => timelineManager.currentLayer;
@@ -802,6 +803,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 DrawEasySetting(view, EasySettingType.メイド表示, maidManager.maid.Visible, 80, 20, newValue =>
                 {
                     maidManager.maid.Visible = newValue;
+                });
+
+                DrawEasySetting(view, EasySettingType.モデル表示, modelManager.Visible, 80, 20, newValue =>
+                {
+                    modelManager.Visible = newValue;
                 });
 
                 DrawEasySetting(view, EasySettingType.背景表示, timeline.isBackgroundVisible, 80, 20, newValue =>

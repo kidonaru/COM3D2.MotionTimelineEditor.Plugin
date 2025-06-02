@@ -110,6 +110,23 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private bool _Visible = true;
+        public bool Visible
+        {
+            get { return _Visible; }
+            set
+            {
+                if (_Visible != value)
+                {
+                    _Visible = value;
+                    foreach (var model in models)
+                    {
+                        SetModelVisible(model, value);
+                    }
+                }
+            }
+        }
+
         private StudioModelManager()
         {
         }
