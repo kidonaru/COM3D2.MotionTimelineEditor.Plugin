@@ -473,7 +473,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             管理,
         }
 
-        private TabType _tabType = TabType.操作;
+        private static TabType _tabType = TabType.操作;
 
         public override void DrawWindow(GUIView view)
         {

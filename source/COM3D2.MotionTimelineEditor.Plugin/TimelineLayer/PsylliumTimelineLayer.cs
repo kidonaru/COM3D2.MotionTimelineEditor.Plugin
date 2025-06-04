@@ -815,7 +815,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             右手,
         }
 
-        private TabType _tabType = TabType.基本;
+        private static TabType _tabType = TabType.基本;
         private HandTabType _handTabType = HandTabType.両手;
 
         public override void DrawWindow(GUIView view)

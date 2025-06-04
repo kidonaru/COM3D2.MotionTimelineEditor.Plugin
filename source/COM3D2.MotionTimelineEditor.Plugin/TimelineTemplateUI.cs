@@ -12,8 +12,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         private enum TabType
         {
             操作,
-            カテゴリ,
-            テンプレ,
+            ｶﾃｺﾞﾘ編集,
+            ﾃﾝﾌﾟﾚ編集,
         }
 
         private TabType _tabType = TabType.操作;
@@ -50,10 +50,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 case TabType.操作:
                     DrawControl(view);
                     break;
-                case TabType.カテゴリ:
+                case TabType.ｶﾃｺﾞﾘ編集:
                     DrawCategory(view);
                     break;
-                case TabType.テンプレ:
+                case TabType.ﾃﾝﾌﾟﾚ編集:
                     DrawTemplate(view);
                     break;
             }

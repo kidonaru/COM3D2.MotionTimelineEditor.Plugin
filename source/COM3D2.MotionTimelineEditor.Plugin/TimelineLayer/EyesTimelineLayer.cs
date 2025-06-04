@@ -436,7 +436,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             位置,
         }
 
-        private TabType _tabType = TabType.視線;
+        private static TabType _tabType = TabType.視線;
 
         private GUIComboBox<LookAtTargetType> _targetTypeComboBox = new GUIComboBox<LookAtTargetType>
         {

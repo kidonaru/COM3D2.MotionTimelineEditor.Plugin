@@ -229,7 +229,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             GTToneMap,
         }
 
-        private TabType _tabType = TabType.被写界深度;
+        private static TabType _tabType = TabType.被写界深度;
 
         public override void DrawWindow(GUIView view)
         {

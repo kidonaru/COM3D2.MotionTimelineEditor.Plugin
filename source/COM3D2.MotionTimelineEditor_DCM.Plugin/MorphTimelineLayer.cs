@@ -288,7 +288,7 @@ namespace COM3D2.MotionTimelineEditor_DCM.Plugin
             他,
         }
 
-        private TabType _tabType = TabType.目;
+        private static TabType _tabType = TabType.目;
 
         public override void DrawWindow(GUIView view)
         {
