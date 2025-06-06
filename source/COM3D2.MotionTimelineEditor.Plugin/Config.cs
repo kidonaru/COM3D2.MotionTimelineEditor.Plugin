@@ -60,6 +60,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public bool isFixedFoV = false;
         public bool isFixedFocus = false;
         public bool isPostEffectSync = true;
+        public bool isIkBoxVisibleRoot = true;
+        public bool isIkBoxVisibleBody = true;
         public bool isAutoScroll = false;
         public TangentType defaultTangentType = TangentType.Smooth;
         public MoveEasingType defaultEasingType = MoveEasingType.SineInOut;

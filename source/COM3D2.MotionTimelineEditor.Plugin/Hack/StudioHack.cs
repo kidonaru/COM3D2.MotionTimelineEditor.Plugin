@@ -140,7 +140,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public bool isIkBoxVisibleRoot
+        public override bool hasIkBoxVisible => true;
+
+        public override bool isIkBoxVisibleRoot
         {
             get => studio.ikBoxVisibleRoot.check;
             set
@@ -152,7 +154,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
-        public bool isIkBoxVisibleBody
+        public override bool isIkBoxVisibleBody
         {
             get => studio.ikBoxVisibleBody.check;
             set

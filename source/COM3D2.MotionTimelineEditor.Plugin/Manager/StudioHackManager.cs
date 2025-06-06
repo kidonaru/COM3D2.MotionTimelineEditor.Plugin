@@ -21,10 +21,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 if (_studioHack != null)
                 {
                     _studioHack.isPoseEditing = value;
-                    _studioHack.isIKVisible = value && (currentLayer.isMotionLayer || currentLayer.isMoveLayer || config.alwaysShowIK);
+                    if (_studioHack.hasIkBoxVisible)
+                    {
+                        _studioHack.isIkBoxVisibleRoot = value && config.isIkBoxVisibleRoot && canIKVisible;
+                        _studioHack.isIkBoxVisibleBody = value && config.isIkBoxVisibleBody && canIKVisible;
+                    }
+                    else
+                    {
+                        _studioHack.isIKVisible = value && canIKVisible;
+                    }
                 }
             }
         }
+
+        public bool canIKVisible => currentLayer.isMotionLayer || currentLayer.isMoveLayer || config.alwaysShowIK;
 
         public static event UnityAction<bool> onPoseEditingChanged;
 
