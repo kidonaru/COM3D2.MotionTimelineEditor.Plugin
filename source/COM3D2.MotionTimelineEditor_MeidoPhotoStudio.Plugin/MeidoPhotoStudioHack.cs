@@ -160,7 +160,11 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
         public override bool isIKVisible
         {
             get => mps.isIK;
-            set => mps.isIK = value;
+            set
+            {
+                mps.isIK = !value;
+                mps.isIK = value;
+            }
         }
 
         public override bool isAnmEnabled
