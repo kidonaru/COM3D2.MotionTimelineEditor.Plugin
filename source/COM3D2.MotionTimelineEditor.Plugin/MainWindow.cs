@@ -857,14 +857,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
                 if (studioHack.hasIkBoxVisible)
                 {
-                    DrawEasySetting(view, EasySettingType.中心点IK表示, config.isIkBoxVisibleRoot, 100, 20, studioHackManager.isPoseEditing, newValue =>
+                    DrawEasySetting(view, EasySettingType.中心点IK表示, config.isIkBoxVisibleRoot, 100, 20, studioHackManager.isPoseEditing && studioHackManager.canIKVisible, newValue =>
                     {
                         config.isIkBoxVisibleRoot = newValue;
                         config.dirty = true;
                         studioHack.isIkBoxVisibleRoot = newValue;
                     });
 
-                    DrawEasySetting(view, EasySettingType.関節IK表示, config.isIkBoxVisibleBody, 100, 20, studioHackManager.isPoseEditing, newValue =>
+                    DrawEasySetting(view, EasySettingType.関節IK表示, config.isIkBoxVisibleBody, 100, 20, studioHackManager.isPoseEditing && studioHackManager.canIKVisible, newValue =>
                     {
                         config.isIkBoxVisibleBody = newValue;
                         config.dirty = true;
