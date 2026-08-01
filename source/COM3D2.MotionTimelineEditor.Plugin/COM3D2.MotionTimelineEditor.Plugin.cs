@@ -364,6 +364,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     typeof(CameraTimelineLayer), CameraTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
+                    typeof(SubCameraTimelineLayer), SubCameraTimelineLayer.Create
+                );
+                timelineManager.RegisterLayer(
                     typeof(DressTimelineLayer), DressTimelineLayer.Create
                 );
                 timelineManager.RegisterLayer(
@@ -513,6 +516,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 );
                 timelineManager.RegisterTransform(
                     TransformType.ShapeKey, TimelineManager.CreateTransform<TransformDataShapeKey>
+                );
+                timelineManager.RegisterTransform(
+                    TransformType.SubCamera, TimelineManager.CreateTransform<TransformDataSubCamera>
                 );
                 timelineManager.RegisterTransform(
                     TransformType.StageLaser, TimelineManager.CreateTransform<TransformDataStageLaser>

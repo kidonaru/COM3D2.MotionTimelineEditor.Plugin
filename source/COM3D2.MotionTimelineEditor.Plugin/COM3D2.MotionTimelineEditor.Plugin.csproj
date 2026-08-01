@@ -100,6 +100,7 @@
     <Compile Include="Manager\StudioHackManager.cs" />
     <Compile Include="Manager\StudioLightManager.cs" />
     <Compile Include="Manager\StudioModelManager.cs" />
+    <Compile Include="Manager\SubCameraManager.cs" />
     <Compile Include="Manager\TimelineBundleManager.cs" />
     <Compile Include="Manager\TimelineHistoryManager.cs" />
     <Compile Include="Manager\TimelineLoadManager.cs" />
@@ -161,6 +162,7 @@
     <Compile Include="TimelineLayer\ShapeKeyTimelineLayer.cs" />
     <Compile Include="TimelineLayer\StageLaserTimelineLayer.cs" />
     <Compile Include="TimelineLayer\StageLightTimelineLayer.cs" />
+    <Compile Include="TimelineLayer\SubCameraTimelineLayer.cs" />
     <Compile Include="TimelineLayer\TimelineLayerBase.cs" />
     <Compile Include="TimelineLayer\UndressTimelineLayer.cs" />
     <Compile Include="TimelineLayer\VoiceTimelineLayer.cs" />
@@ -203,6 +205,7 @@
     <Compile Include="TransformData\TransformDataStageLaserController.cs" />
     <Compile Include="TransformData\TransformDataStageLight.cs" />
     <Compile Include="TransformData\TransformDataStageLightController.cs" />
+    <Compile Include="TransformData\TransformDataSubCamera.cs" />
     <Compile Include="TransformData\TransformDataUndress.cs" />
     <Compile Include="TransformData\TransformDataVoice.cs" />
     <Compile Include="..\..\UnityProject\Assets\Scripts\BGGround.cs" />
