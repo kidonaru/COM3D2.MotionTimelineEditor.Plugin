@@ -705,7 +705,10 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     prevBone = bone;
                 }
 
-                for (int i = 0; i < firstBone.transform.valueCount; i++)
+                // anmフォーマットのチャンネル107以降はマテリアルUV(_MainTex_ST等)に割り当てられているため、
+                // スケール値は書き出さない (回転4 + 位置3 の最大7チャンネルまで)
+                var channelCount = Mathf.Min(firstBone.transform.valueCount, 7);
+                for (int i = 0; i < channelCount; i++)
                 {
                     w.Write((byte)(100 + i));
                     w.Write(_timesCache.Count);
