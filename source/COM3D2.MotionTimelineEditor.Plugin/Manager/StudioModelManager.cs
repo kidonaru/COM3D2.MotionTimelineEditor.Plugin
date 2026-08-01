@@ -356,7 +356,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 }
             }
 
-            if (addedModels.Count > 0 || removedModels.Count > 0 || updatedModels.Count > 0)
+            if (addedModels.Count > 0 || removedModels.Count > 0 || updatedModels.Count > 0 || force)
             {
                 UpdateTimelineModels();
             }
