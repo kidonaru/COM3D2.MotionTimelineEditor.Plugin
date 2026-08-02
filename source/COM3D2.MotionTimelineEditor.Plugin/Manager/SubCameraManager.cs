@@ -53,7 +53,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            var maid = this.maid;
+            var maidCache = this.maidCache;
+            if (maidCache == null)
+            {
+                return;
+            }
+
+            var maid = maidCache.maid;
             if (maid == null || maid.body0 == null || !maid.body0.isLoadedBody)
             {
                 return;
@@ -84,6 +90,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
             else
             {
+                // 向き反映オフ時は基準となる向きが定まらないため、オフセットはワールド軸基準のまま加算する
                 targetTransform.position = targetPoint.position + offset;
             }
         }
@@ -147,6 +154,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         }
 
         // 向き反映中はオフセット、それ以外はワールド回転として扱う
+        // (位置は常に追従点基準になるのに対し、回転は向き反映時のみ追従点基準になるため
+        //  position とは条件が非対称になる)
         public Quaternion rotation
         {
             get
