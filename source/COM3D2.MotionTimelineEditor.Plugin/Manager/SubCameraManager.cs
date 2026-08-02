@@ -188,6 +188,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             DestroyAllCameras();
         }
 
+        public override void OnLoad()
+        {
+            base.OnLoad();
+
+            // プラグイン再有効化時はカメラ破棄済みのため再セットアップする
+            SetupCameras();
+        }
+
         public void SetupCameras()
         {
             while (_subCameras.Count < InitialSubCameraCount)
@@ -325,8 +333,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             newCamera.allowMSAA = mainCam.allowMSAA;
             newCamera.rect = viewportRect;
 
-            // 有効化はキーフレームのEnableで制御する
-            newCamera.enabled = false;
+            // 初期状態は有効。以降はキーフレームのEnableで制御する
+            newCamera.enabled = true;
 
             var cameraData = new SubCameraData(name, displayName, newCamera, viewportRect);
 

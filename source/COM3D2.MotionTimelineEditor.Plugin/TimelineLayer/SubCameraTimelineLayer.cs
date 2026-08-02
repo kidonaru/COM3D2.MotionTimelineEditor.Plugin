@@ -219,34 +219,36 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             view.SetEnabled(!view.IsComboBoxFocused() && studioHackManager.isPoseEditing);
 
-            if (currentCamera == null && subCameraManager.subCameras.Count > 0)
+            var subCameras = subCameraManager.subCameras;
+
+            // カメラ破棄後の参照が残っている場合もリセットする
+            if (currentCamera == null || currentCamera.camera == null)
             {
-                currentCamera = subCameraManager.subCameras[0];
+                currentCamera = subCameras.Count > 0 ? subCameras[0] : null;
             }
 
             view.BeginHorizontal();
             {
-                view.DrawLabel("サブカメラ", 70, 20);
-
-                _cameraComboBox.items = subCameraManager.subCameras;
+                _cameraComboBox.items = subCameras;
+                _cameraComboBox.currentIndex = Mathf.Max(0, subCameras.IndexOf(currentCamera));
                 _cameraComboBox.onSelected = (subCamera, index) =>
                 {
                     currentCamera = subCamera;
                 };
                 _cameraComboBox.DrawButton(view);
-            }
-            view.EndLayout();
 
-            view.BeginHorizontal();
-            {
                 if (view.DrawButton("追加", 60, 20,
-                        subCameraManager.subCameras.Count < SubCameraManager.MaxSubCameraCount))
+                        subCameras.Count < SubCameraManager.MaxSubCameraCount))
                 {
-                    subCameraManager.AddNewCamera();
+                    var newCamera = subCameraManager.AddNewCamera();
+                    if (newCamera != null)
+                    {
+                        currentCamera = newCamera;
+                    }
                 }
 
                 if (view.DrawButton("削除", 60, 20,
-                        subCameraManager.subCameras.Count > SubCameraManager.MinSubCameraCount))
+                        subCameras.Count > SubCameraManager.MinSubCameraCount))
                 {
                     subCameraManager.RemoveLastCamera();
                 }

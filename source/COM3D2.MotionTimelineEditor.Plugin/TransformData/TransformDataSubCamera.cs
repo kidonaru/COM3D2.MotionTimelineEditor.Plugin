@@ -34,7 +34,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override bool hasTangent => timeline.isTangentCamera;
 
         // カメラはキーフレームのEnableで明示的に有効化する
-        public override bool initialVisible => false;
+        public override bool initialVisible => true;
 
         public override ValueData[] positionValues
         {
