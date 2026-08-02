@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -41,11 +42,58 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             _field.SetSelectMaid.Invoke(placementWindow, new object[] { maid });
         }
 
+        // ObjectManagerWindowが非アクティブだとUIGrid.GetChildListが空になり
+        // AddTransTargetObject内でNREとなるため、実行中のみ一時的にアクティブ化する
+        private T InvokeWithObjectManagerWindowActive<T>(Func<T> action)
+        {
+            var windowGo = objectManagerWindow.gameObject;
+            var wasActive = windowGo.activeSelf;
+            if (!wasActive)
+            {
+                windowGo.SetActive(true);
+                if (!windowGo.activeInHierarchy)
+                {
+                    MTEUtils.LogWarning("ObjectManagerWindowの親が非アクティブのためアクティブ化できません");
+                }
+            }
+            try
+            {
+                return action();
+            }
+            finally
+            {
+                if (!wasActive)
+                {
+                    windowGo.SetActive(false);
+                }
+            }
+        }
+
+        private void InvokeWithObjectManagerWindowActive(Action action)
+        {
+            InvokeWithObjectManagerWindowActive<object>(() =>
+            {
+                action();
+                return null;
+            });
+        }
+
         public BgObjectWrapper AddObject(PhotoBGObjectData add_bg_data, string create_time)
         {
-            var obj = _field.AddObject.Invoke(createBgObjectWindow, new object[] { add_bg_data, create_time });
-            var wrapper = _bgObjectfield.ConvertToWrapper(obj);
-            return wrapper;
+            return InvokeWithObjectManagerWindowActive(() =>
+            {
+                var obj = _field.AddObject.Invoke(createBgObjectWindow, new object[] { add_bg_data, create_time });
+                var wrapper = _bgObjectfield.ConvertToWrapper(obj);
+                return wrapper;
+            });
+        }
+
+        public void RemoveObject(GameObject removeObject)
+        {
+            InvokeWithObjectManagerWindowActive(() =>
+            {
+                createBgObjectWindow.RemoveObject(removeObject);
+            });
         }
 
         public GameObject InstantiateLight()

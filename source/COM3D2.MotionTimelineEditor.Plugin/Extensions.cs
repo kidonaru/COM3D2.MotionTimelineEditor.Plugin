@@ -75,6 +75,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             values[3].value = quaternion.w;
         }
 
+        public static Rect ToRect(this ValueData[] values)
+        {
+            if (values.Length != 4)
+            {
+                MTEUtils.LogError("ToRect: 不正なValueData配列です length={0}", values.Length);
+                return Rect.zero;
+            }
+            return new Rect(values[0].value, values[1].value, values[2].value, values[3].value);
+        }
+
+        public static void FromRect(this ValueData[] values, Rect rect)
+        {
+            if (values.Length != 4)
+            {
+                MTEUtils.LogError("FromRect: 不正なValueData配列です length={0}", values.Length);
+                return;
+            }
+            values[0].value = rect.x;
+            values[1].value = rect.y;
+            values[2].value = rect.width;
+            values[3].value = rect.height;
+        }
+
         public static Color ToColor(this ValueData[] values)
         {
             if (values.Length == 3)

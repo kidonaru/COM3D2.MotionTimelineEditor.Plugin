@@ -33,6 +33,7 @@ namespace COM3D2.MotionTimelineEditor_NPRShader.Plugin
 
         private void Initialize()
         {
+            MaterialMgrPatch.Apply();
             NPRShaderHackManager.instance.Register(new NPRShaderHack());
         }
     }

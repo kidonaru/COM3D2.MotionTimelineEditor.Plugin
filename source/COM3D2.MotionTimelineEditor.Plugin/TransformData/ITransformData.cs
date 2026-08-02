@@ -43,6 +43,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         StageLaserController,
         StageLight,
         StageLightController,
+        SubCamera,
         Undress,
         Voice,
 
