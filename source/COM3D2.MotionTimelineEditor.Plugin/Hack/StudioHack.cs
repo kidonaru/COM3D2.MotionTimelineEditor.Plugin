@@ -420,7 +420,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public override void DeleteModel(StudioModelStat model)
         {
-            studio.createBgObjectWindow.RemoveObject(model.transform.gameObject);
+            studio.RemoveObject(model.transform.gameObject);
         }
 
         public override void CreateModel(StudioModelStat model)
