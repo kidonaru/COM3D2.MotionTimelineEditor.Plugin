@@ -85,7 +85,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 ApplyMotionInit(motion, t, model);
             }
 
-            ApplyMotionUpdate(motion, t, model);
+            ApplyMotionUpdateTangent(motion, t, model);
         }
 
         protected void ApplyMotionInit(MotionData motion, float t, BGModelStat model)
@@ -99,28 +99,36 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             model.visible = start.visible;
         }
 
-        protected void ApplyMotionUpdate(MotionData motion, float t, BGModelStat model)
+        // TransformDataBGModelはhasEasingが常にfalseのためイージング補間は到達不能。
+        // 他レイヤーのようなisTangentXxxによる分岐は設けず、常にタンジェント補間を適用する
+        private void ApplyMotionUpdateTangent(MotionData motion, float t, BGModelStat model)
         {
             var transform = model.transform;
             var start = motion.start;
             var end = motion.end;
+            var t0 = motion.stFrame * timeline.frameDuration;
+            var t1 = motion.edFrame * timeline.frameDuration;
 
-            float easingTime = CalcEasingValue(t, motion.easing);
+            transform.localPosition = PluginUtils.HermiteVector3(
+                t0,
+                t1,
+                start.positionValues,
+                end.positionValues,
+                t);
 
-            if (start.position != end.position)
-            {
-                transform.localPosition = Vector3.Lerp(start.position, end.position, easingTime);
-            }
+            transform.localRotation = PluginUtils.HermiteQuaternion(
+                t0,
+                t1,
+                start.rotationValues,
+                end.rotationValues,
+                t);
 
-            if (start.rotation != end.rotation)
-            {
-                transform.localRotation = Quaternion.Lerp(start.rotation, end.rotation, easingTime);
-            }
-
-            if (start.scale != end.scale)
-            {
-                transform.localScale = Vector3.Lerp(start.scale, end.scale, easingTime);
-            }
+            transform.localScale = PluginUtils.HermiteVector3(
+                t0,
+                t1,
+                start.scaleValues,
+                end.scaleValues,
+                t);
         }
 
         public void OnBGModelSetup()
