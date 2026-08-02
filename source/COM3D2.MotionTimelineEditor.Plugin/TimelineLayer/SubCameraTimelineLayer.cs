@@ -46,6 +46,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
             SubCameraManager.onCameraAdded -= OnCameraAdded;
             SubCameraManager.onCameraRemoved -= OnCameraRemoved;
+
+            // レイヤー削除後もカメラが残らないよう破棄する
+            subCameraManager.DestroyAllCameras();
         }
 
         public void OnCameraAdded(SubCameraData cameraData)

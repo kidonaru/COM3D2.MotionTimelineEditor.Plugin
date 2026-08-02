@@ -145,11 +145,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
     public class SubCameraManager : ManagerBase
     {
-        public const int InitialSubCameraCount = 1;
         public const int MinSubCameraCount = 1;
         public const int MaxSubCameraCount = 8;
         private const string CameraNamePrefix = "SubCamera";
         public static readonly Rect DefaultViewport = new Rect(0f, 0.1f, 0.35f, 0.35f);
+
+        // プラグイン無効化時のカメラ数。レイヤー未作成なら0のため再有効化時も生成しない
+        private int _restoreCameraCount = 0;
 
         private List<SubCameraData> _subCameras = new List<SubCameraData>();
         private Dictionary<string, SubCameraData> _subCameraMap = new Dictionary<string, SubCameraData>();
@@ -191,6 +193,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public override void OnPluginDisable()
         {
             base.OnPluginDisable();
+
+            _restoreCameraCount = _subCameras.Count;
             DestroyAllCameras();
         }
 
@@ -198,13 +202,19 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         {
             base.OnLoad();
 
-            // プラグイン再有効化時はカメラ破棄済みのため再セットアップする
-            SetupCameras();
+            // プラグイン再有効化時はカメラ破棄済みのため、無効化前と同数を復元する
+            EnsureCameraCount(_restoreCameraCount);
         }
 
+        // サブカメラレイヤーの作成時に最低数を確保する
         public void SetupCameras()
         {
-            while (_subCameras.Count < InitialSubCameraCount)
+            EnsureCameraCount(MinSubCameraCount);
+        }
+
+        private void EnsureCameraCount(int count)
+        {
+            while (_subCameras.Count < count)
             {
                 if (AddNewCamera() == null)
                 {
