@@ -7,20 +7,20 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public enum Index
         {
-            PositionX = 0,
-            PositionY = 1,
-            PositionZ = 2,
-            RotationX = 3,
-            RotationY = 4,
-            RotationZ = 5,
-            Easing = 6,
-            FoV = 7,
-            ViewportX = 8,
-            ViewportY = 9,
-            ViewportW = 10,
-            ViewportH = 11,
-            MaidSlotNo = 12,
-            Visible = 13
+            Visible = 0,
+            Easing = 1,
+            PositionX = 2,
+            PositionY = 3,
+            PositionZ = 4,
+            RotationX = 5,
+            RotationY = 6,
+            RotationZ = 7,
+            FoV = 8,
+            ViewportX = 9,
+            ViewportY = 10,
+            ViewportW = 11,
+            ViewportH = 12,
+            MaidSlotNo = 13
         }
 
         public override TransformType type => TransformType.SubCamera;
@@ -77,7 +77,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = (int)Index.ViewportX,
                     name = "VP X",
-                    defaultValue = 0.75f,
+                    defaultValue = SubCameraManager.DefaultViewport.x,
                 }
             },
             {
@@ -85,7 +85,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = (int)Index.ViewportY,
                     name = "VP Y",
-                    defaultValue = 0f,
+                    defaultValue = SubCameraManager.DefaultViewport.y,
                 }
             },
             {
@@ -93,7 +93,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = (int)Index.ViewportW,
                     name = "VP 幅",
-                    defaultValue = 0.25f,
+                    defaultValue = SubCameraManager.DefaultViewport.width,
                 }
             },
             {
@@ -101,7 +101,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 {
                     index = (int)Index.ViewportH,
                     name = "VP 高",
-                    defaultValue = 0.25f,
+                    defaultValue = SubCameraManager.DefaultViewport.height,
                 }
             },
             {

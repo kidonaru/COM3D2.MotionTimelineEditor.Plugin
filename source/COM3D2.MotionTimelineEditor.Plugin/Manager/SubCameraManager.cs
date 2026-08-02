@@ -149,7 +149,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         public const int MinSubCameraCount = 1;
         public const int MaxSubCameraCount = 8;
         private const string CameraNamePrefix = "SubCamera";
-        public static readonly Rect DefaultViewport = new Rect(0.75f, 0f, 0.25f, 0.25f);
+        public static readonly Rect DefaultViewport = new Rect(0f, 0.1f, 0.35f, 0.35f);
 
         private List<SubCameraData> _subCameras = new List<SubCameraData>();
         private Dictionary<string, SubCameraData> _subCameraMap = new Dictionary<string, SubCameraData>();
