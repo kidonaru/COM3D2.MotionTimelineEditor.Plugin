@@ -8,7 +8,11 @@ namespace COM3D2.MotionTimelineEditor.Plugin
     {
         public Transform targetTransform;
         public int maidSlotNo = -1;
+        // 既存データ互換のため、旧仕様の追従先(股)をデフォルトとする
+        public MaidPointType maidPointType = MaidPointType.Crotch;
+        public bool followRotation = false;
         public Vector3 offset = Vector3.zero;
+        public Vector3 eulerAnglesOffset = Vector3.zero;
 
         protected static MaidManager maidManager => MaidManager.instance;
 
@@ -55,9 +59,32 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            if (targetTransform != null)
+            var targetPoint = maidCache.GetPointTransform(maidPointType);
+            if (targetTransform == null || targetPoint == null)
             {
-                targetTransform.position = maid.body0.Pelvis.position + offset;
+                return;
+            }
+
+            if (followRotation)
+            {
+                // ボーン回転はバインドポーズ基底を含むため直接使わず、
+                // 水平方向の向き(ヨー)のみを抽出して基準にする
+                var forward = targetPoint.rotation * Vector3.forward;
+                forward.y = 0f;
+
+                var faceRotation = Quaternion.identity;
+                if (forward.sqrMagnitude > 0.0001f)
+                {
+                    faceRotation = Quaternion.LookRotation(forward.normalized, Vector3.up);
+                }
+
+                // 向き反映時はオフセットも向き基準の回転で扱う
+                targetTransform.position = targetPoint.position + faceRotation * offset;
+                targetTransform.rotation = faceRotation * Quaternion.Euler(eulerAnglesOffset);
+            }
+            else
+            {
+                targetTransform.position = targetPoint.position + offset;
             }
         }
     }
@@ -119,10 +146,28 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        // 向き反映中はオフセット、それ以外はワールド回転として扱う
         public Quaternion rotation
         {
-            get => camera.transform.rotation;
-            set => camera.transform.rotation = value;
+            get
+            {
+                if (follow.isFollow && follow.followRotation)
+                {
+                    return Quaternion.Euler(follow.eulerAnglesOffset);
+                }
+                return camera.transform.rotation;
+            }
+            set
+            {
+                if (follow.isFollow && follow.followRotation)
+                {
+                    follow.eulerAnglesOffset = value.eulerAngles;
+                }
+                else
+                {
+                    camera.transform.rotation = value;
+                }
+            }
         }
 
         public SubCameraData(string name, string displayName, Camera camera, Rect viewportRect)

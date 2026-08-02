@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace COM3D2.MotionTimelineEditor.Plugin
@@ -121,6 +122,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             {
                 cameraData.visible = start.visible;
                 cameraData.follow.maidSlotNo = start.maidSlotNo;
+                cameraData.follow.maidPointType = start.maidPointType;
+                cameraData.follow.followRotation = start.followRotation;
             }
 
             Vector3 position, eulerAngles;
@@ -194,6 +197,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 trans.fov = cameraData.camera.fieldOfView;
                 trans.viewport = cameraData.viewportRect;
                 trans.maidSlotNo = cameraData.follow.maidSlotNo;
+                trans.maidPointType = cameraData.follow.maidPointType;
+                trans.followRotation = cameraData.follow.followRotation;
                 trans.visible = cameraData.visible;
 
                 var bone = frame.CreateBone(trans);
@@ -217,6 +222,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         // 先頭に「なし」(null)を含む追従メイド選択肢
         private List<MaidCache> _followMaidItems = new List<MaidCache>();
+
+        private GUIComboBox<MaidPointType> _maidPointComboBox = new GUIComboBox<MaidPointType>
+        {
+            items = Enum.GetValues(typeof(MaidPointType)).Cast<MaidPointType>().ToList(),
+            getName = (type, index) => MaidCache.GetMaidPointTypeName(type),
+            buttonSize = new Vector2(100, 20),
+            contentSize = new Vector2(150, 300),
+        };
 
         public override void DrawWindow(GUIView view)
         {
@@ -290,6 +303,27 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 _maidComboBox.DrawButton(view);
             }
             view.EndLayout();
+
+            if (follow.isFollow)
+            {
+                view.BeginHorizontal();
+                {
+                    view.DrawLabel("追従ポイント", 70, 20);
+
+                    _maidPointComboBox.currentIndex = (int)follow.maidPointType;
+                    _maidPointComboBox.onSelected = (type, index) =>
+                    {
+                        follow.maidPointType = type;
+                    };
+                    _maidPointComboBox.DrawButton(view);
+                }
+                view.EndLayout();
+
+                view.DrawToggle("向き反映", follow.followRotation, 100, 20, newValue =>
+                {
+                    follow.followRotation = newValue;
+                });
+            }
 
             var position = cameraData.position;
             var angles = cameraData.rotation.eulerAngles;

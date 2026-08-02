@@ -20,12 +20,14 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             ViewportY = 10,
             ViewportW = 11,
             ViewportH = 12,
-            MaidSlotNo = 13
+            MaidSlotNo = 13,
+            MaidPointType = 14,
+            FollowRotation = 15
         }
 
         public override TransformType type => TransformType.SubCamera;
 
-        public override int valueCount => 14;
+        public override int valueCount => 16;
 
         public override bool hasPosition => true;
         public override bool hasEulerAngles => true;
@@ -112,6 +114,29 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                     defaultValue = -1f,
                 }
             },
+            {
+                "maidPointType", new CustomValueInfo
+                {
+                    index = (int)Index.MaidPointType,
+                    name = "追従点",
+                    min = 0f,
+                    max = (float)MaidPointType.Bip01,
+                    step = 1f,
+                    // 既存データ互換のため、旧仕様の追従先(股)をデフォルトとする
+                    defaultValue = (float)MaidPointType.Crotch,
+                }
+            },
+            {
+                "followRotation", new CustomValueInfo
+                {
+                    index = (int)Index.FollowRotation,
+                    name = "向き反映",
+                    min = 0f,
+                    max = 1f,
+                    step = 1f,
+                    defaultValue = 0f,
+                }
+            },
         };
 
         public override Dictionary<string, CustomValueInfo> GetCustomValueInfoMap()
@@ -122,6 +147,8 @@ namespace COM3D2.MotionTimelineEditor.Plugin
         // 値アクセサ
         public ValueData fovValue => values[(int)Index.FoV];
         public ValueData maidSlotNoValue => values[(int)Index.MaidSlotNo];
+        public ValueData maidPointTypeValue => values[(int)Index.MaidPointType];
+        public ValueData followRotationValue => values[(int)Index.FollowRotation];
 
         public ValueData[] viewportValues
         {
@@ -147,6 +174,18 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             set => maidSlotNoValue.intValue = value;
         }
 
+        public MaidPointType maidPointType
+        {
+            get => (MaidPointType)maidPointTypeValue.intValue;
+            set => maidPointTypeValue.intValue = (int)value;
+        }
+
+        public bool followRotation
+        {
+            get => followRotationValue.boolValue;
+            set => followRotationValue.boolValue = value;
+        }
+
         public Rect viewport
         {
             get => viewportValues.ToRect();
@@ -155,6 +194,17 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public TransformDataSubCamera()
         {
+        }
+
+        public override void FromXml(TransformXml xml)
+        {
+            base.FromXml(xml);
+
+            // 追従点を持たない旧データは従来の追従先(股)として読み込む
+            if (xml.values != null && xml.values.Length <= (int)Index.MaidPointType)
+            {
+                maidPointType = MaidPointType.Crotch;
+            }
         }
     }
 }
