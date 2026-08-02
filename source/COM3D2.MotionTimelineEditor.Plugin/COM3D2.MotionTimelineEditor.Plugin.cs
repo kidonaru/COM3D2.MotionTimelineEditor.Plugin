@@ -569,6 +569,7 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 managerRegistry.RegisterManager(ConfigManager.instance);
                 managerRegistry.RegisterManager(BGMManager.instance);
                 managerRegistry.RegisterManager(CameraManager.instance);
+                managerRegistry.RegisterManager(SubCameraManager.instance);
                 managerRegistry.RegisterManager(NPRShaderHackManager.instance);
 
                 AddGearMenu();

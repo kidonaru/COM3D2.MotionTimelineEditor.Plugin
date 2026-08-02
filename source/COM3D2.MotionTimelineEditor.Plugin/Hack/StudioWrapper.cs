@@ -69,6 +69,15 @@ namespace COM3D2.MotionTimelineEditor.Plugin
             }
         }
 
+        private void InvokeWithObjectManagerWindowActive(Action action)
+        {
+            InvokeWithObjectManagerWindowActive<object>(() =>
+            {
+                action();
+                return null;
+            });
+        }
+
         public BgObjectWrapper AddObject(PhotoBGObjectData add_bg_data, string create_time)
         {
             return InvokeWithObjectManagerWindowActive(() =>
@@ -81,10 +90,9 @@ namespace COM3D2.MotionTimelineEditor.Plugin
 
         public void RemoveObject(GameObject removeObject)
         {
-            InvokeWithObjectManagerWindowActive<object>(() =>
+            InvokeWithObjectManagerWindowActive(() =>
             {
                 createBgObjectWindow.RemoveObject(removeObject);
-                return null;
             });
         }
 

@@ -49,7 +49,13 @@ namespace COM3D2.MotionTimelineEditor.Plugin
                 return;
             }
 
-            if (isFollow && maid != null && targetTransform != null)
+            var maid = this.maid;
+            if (maid == null || maid.body0 == null || !maid.body0.isLoadedBody)
+            {
+                return;
+            }
+
+            if (targetTransform != null)
             {
                 targetTransform.position = maid.body0.Pelvis.position + offset;
             }
