@@ -1,30 +1,43 @@
 using System;
-using System.IO;
-using UnityEngine.SceneManagement;
-using COM3D2.MotionTimelineEditor.Plugin;
-using MeidoPhotoStudio.Plugin;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using UnityEngine;
 using COM3D2.MotionTimelineEditor;
+using COM3D2.MotionTimelineEditor.Plugin;
+using MeidoPhotoStudio.Plugin.Core.Character.Pose;
+using MeidoPhotoStudio.Plugin.Core.Database.Props;
+using MeidoPhotoStudio.Plugin.Core.Database.Props.Menu;
+using MeidoPhotoStudio.Plugin.Core.Lighting;
+using MeidoPhotoStudio.Plugin.Core.Props;
+using MeidoPhotoStudio.Plugin.Framework.Extensions;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using CharacterController = MeidoPhotoStudio.Plugin.Core.Character.CharacterController;
 
 namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 {
     public class MeidoPhotoStudioHack : StudioHackBase
     {
-        private MeidoPhotoStudioWrapper mps = new MeidoPhotoStudioWrapper();
+        private readonly Dictionary<CharacterController, bool> editingCharacters = new Dictionary<CharacterController, bool>();
 
-        private bool isStop
+        private MeidoPhotoStudio.Plugin.Api.Api api;
+
+        private CharacterController ActiveCharacter
         {
             get
             {
-                if (animationState != null)
+                if (!api.Active)
                 {
-                    return !animationState.enabled;
+                    return null;
                 }
-                return false;
+
+                if (api.Character.Busy)
+                {
+                    return null;
+                }
+
+                return api.Character.SelectedCharacter;
             }
-            set => maidManager.SetAnmEnabledAll(!value);
         }
 
         public override string pluginName => "MeidoPhotoStudio";
@@ -35,7 +48,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
         {
             get
             {
-                var activeMeido = mps.activeMeido;
+                var activeMeido = ActiveCharacter;
                 if (activeMeido == null)
                 {
                     return null;
@@ -51,13 +64,8 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             get
             {
                 _allMaids.Clear();
-                foreach (var meido in mps.activeMeidoList)
-                {
-                    if (meido != null)
-                    {
-                        _allMaids.Add(meido.Maid);
-                    }
-                }
+                _allMaids.AddRange(api.Character.ActiveCharacters.Select(character => character.Maid));
+
                 return _allMaids;
             }
         }
@@ -69,15 +77,23 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             {
                 _modelList.Clear();
 
-                foreach (var prop in mps.propList)
+                foreach (var prop in api.Prop.Props)
                 {
-                    var displayName = prop.Name;
-                    var fileName = prop.Info.Filename;
-                    var myRoomId = prop.Info.MyRoomID;
-                    var bgObjectId = 0;
-                    var transform = prop.MyObject;
-                    var attachPoint = ConvertAttachPoint(prop.AttachPointInfo.AttachPoint);
-                    var attachMaidSlotNo = GetMaidSlotNo(prop.AttachPointInfo.MaidGuid);
+                    var displayName = prop.PropModel.Name;
+                    var fileName = GetPropFileName(prop.PropModel);
+                    var myRoomId = prop.PropModel is MyRoomPropModel myRoomModel ? myRoomModel.ID : 0;
+                    var bgObjectId = prop.PropModel is PhotoBgPropModel photoBgProp ? photoBgProp.ID : 0;
+                    var transform = prop.Transform;
+
+                    var attachPoint = PhotoTransTargetObject.AttachPoint.Null;
+                    var attachMaidSlotNo = -1;
+
+                    if (api.Prop.TryGetAttachmentInfo(prop, out var attachPointInfo))
+                    {
+                        attachPoint = ConvertAttachPoint(attachPointInfo.AttachPoint);
+                        attachMaidSlotNo = attachPointInfo.MaidIndex;
+                    }
+
                     var visible = prop.Visible;
 
                     //MTEUtils.LogDebug("modelList name:{0} attachPoint:{1} attachMaidSlotNo:{2}", displayName, attachPoint, attachMaidSlotNo);
@@ -109,17 +125,17 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                 _lightList.Clear();
 
                 int index = 0;
-                foreach (var dragPointLight in mps.lightList)
+                foreach (var lightController in api.Light.Lights)
                 {
-                    if (dragPointLight == null)
+                    if (lightController == null)
                     {
                         continue;
                     }
 
-                    var light = dragPointLight.GetLight();
+                    var light = lightController.Light;
                     var transform = light.transform;
 
-                    var stat = new StudioLightStat(light, transform, dragPointLight, index++);
+                    var stat = new StudioLightStat(light, transform, lightController, index++);
                     _lightList.Add(stat);
                 }
 
@@ -127,7 +143,18 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             }
         }
 
-        public override int selectedMaidSlotNo => allMaids.IndexOf(selectedMaid);
+        public override int selectedMaidSlotNo
+        {
+            get
+            {
+                if (api.Character.Busy)
+                {
+                    return -1;
+                }
+
+                return api.Character.SelectedCharacterIndex;
+            }
+        }
 
         public override string outputAnmPath
         {
@@ -144,33 +171,109 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 
         public override bool isPoseEditing
         {
-            get => mps.isReleaseIK;
+            get
+            {
+                if (!api.Active || api.Character.Busy)
+                {
+                    return false;
+                }
+
+                if (!(ActiveCharacter is CharacterController character))
+                {
+                    return false;
+                }
+
+                return (editingCharacters.TryGetValue(character, out var poseEditing) && poseEditing)
+                    || api.Character.GetIKDragHandleController(character).IKEnabled;
+            }
+
             set
             {
+                if (!api.Active || api.Character.Busy)
+                {
+                    return;
+                }
+
+                if (!(ActiveCharacter is CharacterController character))
+                {
+                    return;
+                }
+
                 if (value && isAnmPlaying)
                 {
                     isAnmPlaying = false;
                 }
 
-                mps.isBoneIK = value;
-                mps.isReleaseIK = value;
+                editingCharacters[character] = value;
+                api.Character.GetIKDragHandleController(character).IKEnabled = value;
             }
         }
 
         public override bool isIKVisible
         {
-            get => mps.isIK;
+            get
+            {
+                if (!api.Active || api.Character.Busy)
+                {
+                    return false;
+                }
+
+                if (!(api.Character.SelectedCharacter is CharacterController character))
+                {
+                    return false;
+                }
+
+                return api.Character.GetIKDragHandleController(character).IKEnabled;
+            }
+
             set
             {
-                mps.isIK = !value;
-                mps.isIK = value;
+                if (!api.Active || api.Character.Busy)
+                {
+                    return;
+                }
+
+                if (!(api.Character.SelectedCharacter is CharacterController character))
+                {
+                    return;
+                }
+
+                api.Character.GetIKDragHandleController(character).IKEnabled = value;
             }
         }
 
         public override bool isAnmEnabled
         {
-            get => !isStop;
-            set => isStop = !value;
+            get
+            {
+                if (!api.Active || api.Character.Busy)
+                {
+                    return false;
+                }
+
+                if (!(ActiveCharacter is CharacterController character))
+                {
+                    return false;
+                }
+
+                return character.Animation.Playing;
+            }
+
+            set
+            {
+                if (!api.Active || api.Character.Busy)
+                {
+                    return;
+                }
+
+                if (!(ActiveCharacter is CharacterController character))
+                {
+                    return;
+                }
+
+                character.Animation.Playing = value;
+                maidManager.SetAnmEnabledAll(value);
+            }
         }
 
         public override float motionSliderRate
@@ -188,21 +291,12 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             set { } // do nothing
         }
 
-        public override Camera subCamera
-        {
-            get => mps.subCamera;
-        }
+        public override Camera subCamera => null;
 
         public override bool isUIVisible
         {
-            get => mps.mainWindow?.Visible ?? false;
-            set
-            {
-                if (mps.mainWindow != null)
-                {
-                    mps.mainWindow.Visible = value;
-                }
-            }
+            get => api.UI.Visible;
+            set => api.UI.Visible = value;
         }
 
         public MeidoPhotoStudioHack()
@@ -236,6 +330,41 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
         private static readonly Dictionary<PhotoTransTargetObject.AttachPoint, AttachPoint> PhotoAttachPointMap
             = MeidoAttachPointMap.ToDictionary(kv => kv.Value, kv => kv.Key);
 
+        private static string GetPropFileName(IPropModel propModel)
+        {
+            var fileName = string.Empty;
+            if (propModel is DeskPropModel deskProp)
+            {
+                fileName = string.IsNullOrEmpty(deskProp.AssetName)
+                    ? deskProp.PrefabName
+                    : deskProp.AssetName;
+            }
+            else if (propModel is MenuFilePropModel menuFilePropModel)
+            {
+                fileName = menuFilePropModel.Filename;
+            }
+            else if (propModel is MyRoomPropModel myRoomPropModel)
+            {
+                fileName = myRoomPropModel.AssetName;
+            }
+            else if (propModel is PhotoBgPropModel photoBgPropModel)
+            {
+                fileName = string.IsNullOrEmpty(photoBgPropModel.AssetName)
+                    ? photoBgPropModel.PrefabName
+                    : photoBgPropModel.AssetName;
+            }
+            else if (propModel is BackgroundPropModel backgroundPropModel)
+            {
+                fileName = backgroundPropModel.AssetName;
+            }
+            else if (propModel is OtherPropModel otherPropModel)
+            {
+                fileName = otherPropModel.AssetName;
+            }
+
+            return fileName;
+        }
+
         public static PhotoTransTargetObject.AttachPoint ConvertAttachPoint(AttachPoint attachPoint)
         {
             PhotoTransTargetObject.AttachPoint result;
@@ -265,19 +394,37 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                 return false;
             }
 
-            if (!mps.Init())
+            if (!BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(MeidoPhotoStudio.Plugin.Plugin.PluginGuid))
             {
+                MTEUtils.LogError("MeidoPhotoStudio is not installed");
                 return false;
             }
+
+            api = MeidoPhotoStudio.Plugin.Plugin.Api;
+            MTEUtils.AssertNull(api != null, "MeidoPhotoStudio's API is null");
+
+            if (api == null)
+            {
+                MTEUtils.LogError("MeidoPhotoStudioのAPIが見つかりませんでした");
+                return false;
+            }
+
+            api.Activating += OnMeidoPhotoStudioActivating;
+            api.Character.CalledCharacters += OnCharactersCalled;
 
             return true;
         }
 
         public override void ChangeMaid(Maid maid)
         {
-            var targetMaidSlotNo = allMaids.IndexOf(maid);
-            MTEUtils.LogDebug("ChangeMaid: " + targetMaidSlotNo);
-            mps.meidoManager.ChangeMaid(targetMaidSlotNo);
+            var characterIndex = api.Character.ActiveCharacters.FindIndex(character => maid.ValueEquals(character.Maid));
+            MTEUtils.LogDebug("ChangeMaid: " + characterIndex);
+            if (characterIndex == -1)
+            {
+                return;
+            }
+
+            api.Character.SelectedCharacterIndex = characterIndex;
         }
 
         public override void OnChangedSceneLevel(Scene scene, LoadSceneMode sceneMode)
@@ -293,7 +440,7 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                 return false;
             }
 
-            if (!mps.active)
+            if (!api.Active)
             {
                 _errorMessage = "MeidoPhotoStudioを有効化してください";
                 return false;
@@ -302,72 +449,114 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             return true;
         }
 
-        private readonly static Dictionary<StudioModelType, PropInfo.PropType> propTypeMap =
-            new Dictionary<StudioModelType, PropInfo.PropType>
-        {
-            { StudioModelType.Asset, PropInfo.PropType.Odogu },
-            { StudioModelType.Prefab, PropInfo.PropType.Odogu },
-            { StudioModelType.Mod, PropInfo.PropType.Mod },
-            { StudioModelType.MyRoom, PropInfo.PropType.MyRoom },
-        };
-
         public override void DeleteAllModels()
         {
-            mps.propManager.DeleteAllProps();
+            api.Prop.RemoveAllProps();
         }
 
         public override void DeleteModel(StudioModelStat model)
         {
-            var index = mps.propList.FindIndex(p => p.MyObject == model.transform);
-            if (index >= 0)
+            var prop = model.obj as PropController;
+            if (prop == null)
             {
-                mps.propManager.RemoveProp(index);
+
+                return;
             }
+
+            api.Prop.RemoveProp(prop);
         }
 
         public override void CreateModel(StudioModelStat model)
         {
-            var propType = propTypeMap[model.info.type];
-            var isMyRoom = model.info.type == StudioModelType.MyRoom;
-            var propInfo = new PropInfo(propType)
-            {
-                Filename = isMyRoom ? model.info.prefabName : model.info.fileName,
-                MyRoomID = model.info.myRoomId,
-            };
+            IPropModel propModel;
 
-            if (!mps.propManager.AddFromPropInfo(propInfo))
+            if (model.info.type == StudioModelType.MyRoom)
             {
-                MTEUtils.LogError("CreateModel: モデルの追加に失敗しました" + model.name);
-                return;
+                propModel = new MyRoomPropModel(MyRoomCustom.PlacementData.GetData(model.info.myRoomId));
+            }
+            else if (model.info.bgObjectId != 0)
+            {
+                propModel = new PhotoBgPropModel(PhotoBGObjectData.Get(model.info.bgObjectId));
+            }
+            else if (model.info.type == StudioModelType.Mod)
+            {
+                propModel = new MenuFileParser().ParseMenuFile(model.info.fileName, false);
+            }
+            else
+            {
+                propModel = new OtherPropModel(model.info.fileName);
             }
 
-            var propList = mps.propList;
-            var prop = propList.Last();
+            try
+            {
+                var prop = api.Prop.AddProp(propModel);
+                model.transform = prop.Transform;
+                model.obj = prop;
 
-            model.transform = prop.MyObject;
-            model.obj = prop;
+                UpdateAttachPoint(model);
+            }
+            catch (Exception e)
+            {
+                MTEUtils.LogException(e);
+                MTEUtils.LogError("CreateModel: モデルの追加に失敗しました" + model.name);
+            }
+        }
 
-            UpdateAttachPoint(model);
+        private void OnMeidoPhotoStudioActivating(object sender, EventArgs e)
+        {
+            editingCharacters.Clear();
+        }
+
+        private void OnCharactersCalled(object sender, MeidoPhotoStudio.Plugin.Core.Character.CharacterServiceEventArgs e)
+        {
+            var oldCharacters = editingCharacters.Keys.ToArray();
+
+            foreach (var character in oldCharacters.Except(e.LoadedCharacters))
+            {
+                editingCharacters.Remove(character);
+            }
+        }
+
+        private CharacterController GetCharacter(int slotNo)
+        {
+            if (slotNo < 0 || slotNo >= api.Character.CharacterCount)
+            {
+                return null;
+            }
+
+            return api.Character[slotNo];
         }
 
         public override void UpdateAttachPoint(StudioModelStat model)
         {
-            var prop = model.obj as DragPointProp;
+            var prop = model.obj as PropController;
             if (prop == null)
             {
                 MTEUtils.LogError("UpdateAttachPoint: モデルが見つかりません" + model.name);
                 return;
             }
 
+            if (model.attachMaidSlotNo == -1)
+            {
+                return;
+            }
+
             var attachPoint = ConvertAttachPoint(model.attachPoint);
             var attachMaidSlotNo = model.attachMaidSlotNo;
-            var attachMeido = mps.GetMeido(attachMaidSlotNo);
-            prop.AttachTo(attachMeido, attachPoint, false);
+            var attachCharacter = GetCharacter(attachMaidSlotNo);
+
+            if (attachCharacter == null)
+            {
+                MTEUtils.LogError("UpdateAttachPoint: Could not get character at index " + attachMaidSlotNo);
+                return;
+            }
+
+            api.Prop.AttachPropTo(prop, attachCharacter, attachPoint, false);
         }
 
         public override void SetModelVisible(StudioModelStat model, bool visible)
         {
-            var prop = model.obj as DragPointProp;
+            var prop = model.obj as PropController;
             if (prop == null)
             {
                 MTEUtils.LogError("SetModelVisible: モデルが見つかりません" + model.name);
@@ -387,77 +576,61 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
 
         public override void DeleteAllLights()
         {
-            mps.lightManager.ClearLights();
+            api.Light.RemoveAllLights();
         }
 
         public override void DeleteLight(StudioLightStat light)
         {
-            var dragPointLight = light.obj as DragPointLight;
-            if (dragPointLight == null)
+            var lightController = light.obj as LightController;
+            if (lightController == null)
             {
                 MTEUtils.LogError("DeleteLight: ライトが見つかりません" + light.name);
                 return;
             }
 
-            var lightList = mps.lightList;
-			for (int i = 1; i < lightList.Count; i++)
-			{
-				if (lightList[i] == dragPointLight)
-				{
-					mps.lightManager.DeleteLight(i, false);
-					return;
-				}
-			}
-        }
-
-        private DragPointLight.MPSLightType ConvertLightType(LightType lightType)
-        {
-            switch (lightType)
-            {
-                case LightType.Directional:
-                    return DragPointLight.MPSLightType.Normal;
-                case LightType.Point:
-                    return DragPointLight.MPSLightType.Point;
-                case LightType.Spot:
-                    return DragPointLight.MPSLightType.Spot;
-                default:
-                    return DragPointLight.MPSLightType.Normal;
-            }
+            api.Light.RemoveLight(lightController);
         }
 
         public override void CreateLight(StudioLightStat stat)
         {
-            mps.lightManager.AddLight(null, false);
+            try
+            {
+                var light = api.Light.AddLight();
 
-            var dragPointLight = mps.lightManager.CurrentLight;
-            stat.light = dragPointLight.GetLight();
-            stat.transform = stat.light.transform;
-            stat.obj = dragPointLight;
+                stat.light = light.Light;
+                stat.transform = stat.light.transform;
+                stat.obj = light;
 
-            ChangeLight(stat);
-            ApplyLight(stat);
+                ChangeLight(stat);
+                ApplyLight(stat);
+            }
+            catch (Exception e)
+            {
+                MTEUtils.LogException(e);
+                MTEUtils.LogError("CreateLight: Light could not be created");
+            }
         }
 
         public override void ChangeLight(StudioLightStat stat)
         {
-            var dragPointLight = stat.obj as DragPointLight;
-            if (dragPointLight == null || stat.light == null || stat.transform == null)
+            var lightController = stat.obj as LightController;
+            if (lightController == null || stat.light == null || stat.transform == null)
             {
                 MTEUtils.LogError("ChangeLight: ライトが見つかりません" + stat.name);
                 return;
             }
 
-            var lightType = ConvertLightType(stat.type);
-            if (lightType != dragPointLight.SelectedLightType)
+            var lightType = stat.type;
+            if (lightType != lightController.Type)
             {
-                dragPointLight.SetLightType(lightType);
+                lightController.Type = lightType;
             }
         }
 
         public override void ApplyLight(StudioLightStat stat)
         {
-            var dragPointLight = stat.obj as DragPointLight;
-            if (dragPointLight == null || stat.light == null || stat.transform == null)
+            var lightController = stat.obj as LightController;
+            if (lightController == null || stat.light == null || stat.transform == null)
             {
                 MTEUtils.LogError("ApplyLight: ライトが見つかりません" + stat.name);
                 return;
@@ -466,12 +639,12 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
             var light = stat.light;
             var transform = stat.transform;
 
-            dragPointLight.Rotation = transform.rotation;
-            dragPointLight.LightColour = light.color;
-            dragPointLight.Range = light.range;
-            dragPointLight.Intensity = light.intensity;
-            dragPointLight.SpotAngle = light.spotAngle;
-            dragPointLight.ShadowStrength = light.shadowStrength;
+            lightController.Rotation = transform.rotation;
+            lightController.Colour = light.color;
+            lightController.Range = light.range;
+            lightController.Intensity = light.intensity;
+            lightController.SpotAngle = light.spotAngle;
+            lightController.ShadowStrength = light.shadowStrength;
             //light.shadowBias = light.shadowBias;
             light.enabled = stat.visible;
         }
@@ -483,50 +656,40 @@ namespace COM3D2.MotionTimelineEditor_MeidoPhotoStudio.Plugin
                 return;
             }
 
-            mps.maidDressingPane.UpdatePane();
+            ActiveCharacter.Clothing[DressUtils.GetBodySlotId(slotId)] = isVisible;
         }
 
-        public override void Update()
-        {
-            base.Update();
-        }
-
-        private MeidoBoneType ConvertMeidoBoneType(IKHoldType iKHoldType)
+        private IKDragHandleController.HandleType ConvertMeidoBoneType(IKHoldType iKHoldType)
         {
             switch (iKHoldType)
             {
                 case IKHoldType.Arm_L_Tip:
-                    return MeidoBoneType.HandL;
+                    return IKDragHandleController.HandleType.HandL;
                 case IKHoldType.Arm_R_Tip:
-                    return MeidoBoneType.HandR;
+                    return IKDragHandleController.HandleType.HandR;
                 case IKHoldType.Arm_L_Joint:
-                    return MeidoBoneType.ForearmL;
+                    return IKDragHandleController.HandleType.ForearmL;
                 case IKHoldType.Arm_R_Joint:
-                    return MeidoBoneType.ForearmR;
+                    return IKDragHandleController.HandleType.ForearmR;
                 case IKHoldType.Foot_L_Tip:
-                    return MeidoBoneType.FootL;
+                    return IKDragHandleController.HandleType.FootL;
                 case IKHoldType.Foot_R_Tip:
-                    return MeidoBoneType.FootR;
+                    return IKDragHandleController.HandleType.FootR;
                 case IKHoldType.Foot_L_Joint:
-                    return MeidoBoneType.CalfL;
+                    return IKDragHandleController.HandleType.CalfL;
                 case IKHoldType.Foot_R_Joint:
-                    return MeidoBoneType.CalfR;
+                    return IKDragHandleController.HandleType.CalfR;
             }
 
-            return MeidoBoneType.Body;
+            return IKDragHandleController.HandleType.Body;
         }
 
         public override bool IsIKDragging(IKHoldType iKHoldType)
         {
-            var activeMeido = mps.activeMeido;
-            var dragPoint = mps.GetDragPoint(activeMeido, ConvertMeidoBoneType(iKHoldType));
-            if (dragPoint == null)
-            {
-                MTEUtils.LogError("dragPoint is null");
-                return false;
-            }
+            var handleType = ConvertMeidoBoneType(iKHoldType);
+            var controller = api.Character.GetIKDragHandleController(ActiveCharacter)[handleType];
 
-            return dragPoint.IsDragging();
+            return controller.DragHandleDragging || controller.GizmoDragging;
         }
     }
 }
